@@ -1,0 +1,432 @@
+---
+// Premium Footer Component
+// Features: Responsive grid layout, premium styling, newsletter signup, social links
+---
+
+<footer class="footer">
+  <div class="footer__top">
+    <div class="container">
+      <div class="footer__grid">
+        <!-- Brand Section -->
+        <div class="footer__column footer__column--brand">
+          <div class="footer__logo">
+            <svg class="footer__logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 2L4 10V30H28V10L16 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M16 2V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="16" cy="23" r="1.5" fill="currentColor"/>
+            </svg>
+            <span class="footer__logo-text">Camping Clepardia</span>
+          </div>
+          <p class="footer__description">
+            Experience luxury camping in the heart of Europe. Premium accommodations and unforgettable adventures awaits.
+          </p>
+          
+          <!-- Newsletter Signup -->
+          <div class="footer__newsletter">
+            <label class="footer__newsletter-label">Subscribe to our newsletter</label>
+            <form class="footer__newsletter-form">
+              <input 
+                type="email" 
+                placeholder="Your email" 
+                class="footer__newsletter-input"
+                required
+                aria-label="Email address"
+              />
+              <button type="submit" class="footer__newsletter-button" title="Subscribe">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Company Links -->
+        <div class="footer__column">
+          <h3 class="footer__column-title">Company</h3>
+          <ul class="footer__list">
+            <li><a href="#about" class="footer__link">About Us</a></li>
+            <li><a href="#team" class="footer__link">Our Team</a></li>
+            <li><a href="#careers" class="footer__link">Careers</a></li>
+            <li><a href="#press" class="footer__link">Press Kit</a></li>
+          </ul>
+        </div>
+
+        <!-- Services -->
+        <div class="footer__column">
+          <h3 class="footer__column-title">Services</h3>
+          <ul class="footer__list">
+            <li><a href="#accommodations" class="footer__link">Accommodations</a></li>
+            <li><a href="#experiences" class="footer__link">Experiences</a></li>
+            <li><a href="#dining" class="footer__link">Dining</a></li>
+            <li><a href="#wellness" class="footer__link">Wellness</a></li>
+          </ul>
+        </div>
+
+        <!-- Support -->
+        <div class="footer__column">
+          <h3 class="footer__column-title">Support</h3>
+          <ul class="footer__list">
+            <li><a href="#faq" class="footer__link">FAQ</a></li>
+            <li><a href="#contact" class="footer__link">Contact</a></li>
+            <li><a href="#booking" class="footer__link">Booking Help</a></li>
+            <li><a href="#feedback" class="footer__link">Feedback</a></li>
+          </ul>
+        </div>
+
+        <!-- Legal -->
+        <div class="footer__column">
+          <h3 class="footer__column-title">Legal</h3>
+          <ul class="footer__list">
+            <li><a href="#privacy" class="footer__link">Privacy Policy</a></li>
+            <li><a href="#terms" class="footer__link">Terms of Service</a></li>
+            <li><a href="#cookies" class="footer__link">Cookie Policy</a></li>
+            <li><a href="#sitemap" class="footer__link">Sitemap</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Bottom -->
+  <div class="footer__bottom">
+    <div class="container">
+      <div class="footer__bottom-content">
+        <!-- Copyright -->
+        <p class="footer__copyright">
+          © <span id="year"></span> Camping Clepardia. All rights reserved.
+        </p>
+
+        <!-- Social Links -->
+        <div class="footer__socials">
+          <a href="#facebook" class="footer__social" title="Follow on Facebook" aria-label="Facebook">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 2h-3a6 6 0 0 0-6 6v3H7v4h2v8h4v-8h3l1-4h-4V8a2 2 0 0 1 2-2h1z"></path>
+            </svg>
+          </a>
+          <a href="#instagram" class="footer__social" title="Follow on Instagram" aria-label="Instagram">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <circle cx="17.5" cy="6.5" r="1.5"></circle>
+            </svg>
+          </a>
+          <a href="#twitter" class="footer__social" title="Follow on Twitter" aria-label="Twitter">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2s9 5 20 5a9.5 9.5 0 0 0-9-5.5c4.75 2.25 7-7 7-7"></path>
+            </svg>
+          </a>
+          <a href="#linkedin" class="footer__social" title="Follow on LinkedIn" aria-label="LinkedIn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+              <rect x="2" y="9" width="4" height="12"></rect>
+              <circle cx="4" cy="4" r="2"></circle>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="footer__payments">
+          <span class="footer__payments-label">We accept:</span>
+          <div class="footer__payment-icons">
+            <span class="footer__payment-icon" title="Visa">
+              <svg width="24" height="16" viewBox="0 0 24 16" fill="currentColor">
+                <rect width="24" height="16" rx="2" fill="white" stroke="currentColor" stroke-width="0.5"/>
+                <text x="12" y="11" font-size="8" text-anchor="middle" fill="currentColor">VISA</text>
+              </svg>
+            </span>
+            <span class="footer__payment-icon" title="Mastercard">
+              <svg width="24" height="16" viewBox="0 0 24 16" fill="currentColor">
+                <rect width="24" height="16" rx="2" fill="white" stroke="currentColor" stroke-width="0.5"/>
+                <text x="12" y="11" font-size="8" text-anchor="middle" fill="currentColor">MC</text>
+              </svg>
+            </span>
+            <span class="footer__payment-icon" title="PayPal">
+              <svg width="24" height="16" viewBox="0 0 24 16" fill="currentColor">
+                <rect width="24" height="16" rx="2" fill="white" stroke="currentColor" stroke-width="0.5"/>
+                <text x="12" y="11" font-size="8" text-anchor="middle" fill="currentColor">PP</text>
+              </svg>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Set current year
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+<style is:global>
+/* ==================== */
+/* FOOTER STYLES */
+/* ==================== */
+.footer {
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-gray-100);
+  margin-top: auto;
+}
+
+.footer__top {
+  padding: var(--spacing-xl) 0 var(--spacing-lg);
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 640px) {
+  .footer__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .footer__grid {
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: var(--spacing-lg);
+  }
+}
+
+/* Brand Column */
+.footer__column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.footer__column--brand {
+  gap: var(--space-8);
+}
+
+.footer__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-h6);
+  margin-bottom: var(--space-4);
+}
+
+.footer__logo-icon {
+  width: 24px;
+  height: 24px;
+  color: inherit;
+}
+
+.footer__logo-text {
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.footer__description {
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-copy);
+  margin: 0;
+  font-size: var(--font-size-body-sm);
+}
+
+/* Newsletter */
+.footer__newsletter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.footer__newsletter-label {
+  display: block;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.footer__newsletter-form {
+  display: flex;
+  gap: var(--space-2);
+  background-color: var(--color-white);
+  padding: var(--space-2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-gray-200);
+  transition: border-color var(--transition-base) var(--ease-smooth);
+}
+
+.footer__newsletter-form:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(60, 179, 113, 0.1);
+}
+
+.footer__newsletter-input {
+  flex: 1;
+  border: none;
+  background: none;
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-primary);
+  outline: none;
+  padding: 0 var(--space-2);
+}
+
+.footer__newsletter-input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.footer__newsletter-button {
+  padding: 0 var(--space-3);
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-base) var(--ease-smooth),
+              transform var(--transition-base) var(--ease-smooth);
+}
+
+.footer__newsletter-button:hover {
+  color: var(--color-primary-dark);
+  transform: translateX(2px);
+}
+
+/* Column Title */
+.footer__column-title {
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  padding: 0;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+/* Lists */
+.footer__list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+}
+
+.footer__link {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-secondary);
+  transition: color var(--transition-base) var(--ease-smooth),
+              padding-left var(--transition-base) var(--ease-smooth);
+  display: inline-block;
+}
+
+.footer__link:hover {
+  color: var(--color-primary);
+  padding-left: var(--space-2);
+}
+
+/* Footer Bottom */
+.footer__bottom {
+  background-color: var(--color-bg-primary);
+  border-top: 1px solid var(--color-gray-100);
+  padding: var(--spacing-md) 0;
+}
+
+.footer__bottom-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (min-width: 768px) {
+  .footer__bottom-content {
+    flex-direction: row;
+    gap: var(--spacing-lg);
+  }
+}
+
+.footer__copyright {
+  font-size: var(--font-size-body-xs);
+  color: var(--color-text-tertiary);
+  margin: 0;
+  padding: 0;
+}
+
+/* Social Links */
+.footer__socials {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.footer__social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--color-text-secondary);
+  background-color: var(--color-gray-50);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base) var(--ease-smooth);
+}
+
+.footer__social:hover {
+  color: var(--color-white);
+  background-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+/* Payment Methods */
+.footer__payments {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .footer__payments {
+    justify-content: flex-end;
+  }
+}
+
+.footer__payments-label {
+  font-size: var(--font-size-body-xs);
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-medium);
+}
+
+.footer__payment-icons {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.footer__payment-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 24px;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-700);
+  transition: all var(--transition-base) var(--ease-smooth);
+}
+
+.footer__payment-icon:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(60, 179, 113, 0.15);
+}
+</style>

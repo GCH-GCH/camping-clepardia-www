@@ -1,11 +1,233 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
-<Layout>
-	<Welcome />
+<Layout 
+  title="Camping Clepardia | Premium Luxury Camping Experience"
+  description="Experience luxury camping in the heart of Europe. Premium accommodations, wellness, and unforgettable adventures await at Camping Clepardia."
+>
+  <!-- Hero Section - Foundation Placeholder -->
+  <section class="hero">
+    <div class="hero__container">
+      <div class="hero__content">
+        <h1 class="hero__title">Welcome to Premium Camping Foundation</h1>
+        <p class="hero__subtitle">The luxury camping experience awaits</p>
+        <div class="hero__cta">
+          <button class="hero__button hero__button--primary">Explore Now</button>
+          <button class="hero__button hero__button--secondary">Learn More</button>
+        </div>
+      </div>
+      <div class="hero__visual"></div>
+    </div>
+  </section>
+
+  <!-- Foundation Status - Removable after sections added -->
+  <section class="foundation-status">
+    <div class="container">
+      <div class="foundation-status__content">
+        <h2>Premium Foundation Ready</h2>
+        <p>
+          This is the foundation of Camping Clepardia's premium website. The following components are now available:
+        </p>
+        <ul class="foundation-status__list">
+          <li>✓ Professional Navbar with mobile menu</li>
+          <li>✓ Premium Footer with newsletter</li>
+          <li>✓ Color system (Primary Green: #3CB371)</li>
+          <li>✓ Typography system</li>
+          <li>✓ Spacing system</li>
+          <li>✓ Container widths & responsive grid</li>
+          <li>✓ Smooth scrolling & transitions</li>
+          <li>✓ Mobile-first approach</li>
+          <li>✓ Premium shadow & radius system</li>
+          <li>✓ Accessibility features</li>
+        </ul>
+        <p class="foundation-status__note">
+          The next sections (Hero, About, Services, Accommodations, Experiences, Gallery, Contact) will be built on this foundation.
+        </p>
+      </div>
+    </div>
+  </section>
 </Layout>
+
+<style>
+  /* Hero Section */
+  .hero {
+    position: relative;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    overflow: hidden;
+  }
+
+  .hero__container {
+    container: responsive / inline-size;
+    width: 100%;
+    max-width: var(--container-2xl);
+    margin: 0 auto;
+    padding: var(--spacing-lg) var(--container-padding-mobile);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+    align-items: center;
+  }
+
+  @media (min-width: 768px) {
+    .hero__container {
+      grid-template-columns: 1fr 1fr;
+      padding: var(--spacing-xl) var(--container-padding-tablet);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero__container {
+      padding: var(--spacing-xl) var(--container-padding-desktop);
+    }
+  }
+
+  .hero__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    z-index: 10;
+  }
+
+  .hero__title {
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    line-height: var(--line-height-heading);
+  }
+
+  .hero__subtitle {
+    font-size: var(--font-size-body-lg);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  .hero__button {
+    padding: var(--space-4) var(--space-8);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-lg);
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+    transition: all var(--transition-base) var(--ease-smooth);
+    cursor: pointer;
+    border: none;
+  }
+
+  .hero__button--primary {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    box-shadow: var(--shadow-md);
+  }
+
+  .hero__button--primary:hover {
+    background-color: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .hero__button--secondary {
+    background-color: transparent;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+  }
+
+  .hero__button--secondary:hover {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    transform: translateY(-2px);
+  }
+
+  .hero__visual {
+    display: none;
+    min-height: 400px;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+    border-radius: var(--radius-3xl);
+    box-shadow: var(--shadow-hero);
+  }
+
+  @media (min-width: 768px) {
+    .hero__visual {
+      display: block;
+    }
+  }
+
+  /* Foundation Status Section */
+  .foundation-status {
+    padding: var(--spacing-xl) 0;
+    background-color: var(--color-white);
+    border-top: 1px solid var(--color-gray-100);
+    border-bottom: 1px solid var(--color-gray-100);
+  }
+
+  .foundation-status__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .foundation-status__content h2 {
+    font-size: var(--font-size-h2);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .foundation-status__content p {
+    font-size: var(--font-size-body);
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-copy);
+    margin: 0;
+  }
+
+  .foundation-status__list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+    margin: var(--space-4) 0 0 0;
+  }
+
+  @media (min-width: 768px) {
+    .foundation-status__list {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .foundation-status__list li {
+    font-size: var(--font-size-body-sm);
+    color: var(--color-text-secondary);
+    padding-left: var(--space-6);
+    position: relative;
+  }
+
+  .foundation-status__list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-primary);
+    font-weight: bold;
+  }
+
+  .foundation-status__note {
+    margin-top: var(--space-8) !important;
+    padding: var(--space-4);
+    background-color: var(--color-gray-50);
+    border-left: 4px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-body-sm);
+    color: var(--color-text-secondary);
+  }
+</style>

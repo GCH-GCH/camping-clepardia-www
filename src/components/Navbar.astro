@@ -1,0 +1,429 @@
+---
+// Premium Navbar Component
+// Features: Responsive, mobile-first, premium styling with smooth interactions
+---
+
+<nav class="navbar" id="navbar">
+  <div class="container navbar__container">
+    <!-- Logo -->
+    <div class="navbar__logo">
+      <a href="/" class="logo" title="Camping Clepardia">
+        <svg class="logo__icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 2L4 10V30H28V10L16 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M16 2V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="16" cy="23" r="1.5" fill="currentColor"/>
+        </svg>
+        <span class="logo__text">Clepardia</span>
+      </a>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <div class="navbar__menu navbar__menu--desktop" id="desktopMenu">
+      <ul class="navbar__list">
+        <li class="navbar__item">
+          <a href="#about" class="navbar__link">About</a>
+        </li>
+        <li class="navbar__item">
+          <a href="#services" class="navbar__link">Services</a>
+        </li>
+        <li class="navbar__item">
+          <a href="#accommodations" class="navbar__link">Accommodations</a>
+        </li>
+        <li class="navbar__item">
+          <a href="#experiences" class="navbar__link">Experiences</a>
+        </li>
+        <li class="navbar__item">
+          <a href="#contact" class="navbar__link">Contact</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CTA Button -->
+    <div class="navbar__actions">
+      <button class="navbar__cta" title="Book Now">
+        Book Now
+      </button>
+      
+      <!-- Mobile Menu Toggle -->
+      <button class="navbar__mobile-toggle" id="mobileMenuToggle" title="Toggle menu">
+        <span class="hamburger">
+          <span class="hamburger__line"></span>
+          <span class="hamburger__line"></span>
+          <span class="hamburger__line"></span>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Navigation Menu -->
+  <div class="navbar__mobile-menu" id="mobileMenu">
+    <ul class="navbar__mobile-list">
+      <li class="navbar__mobile-item">
+        <a href="#about" class="navbar__mobile-link">About</a>
+      </li>
+      <li class="navbar__mobile-item">
+        <a href="#services" class="navbar__mobile-link">Services</a>
+      </li>
+      <li class="navbar__mobile-item">
+        <a href="#accommodations" class="navbar__mobile-link">Accommodations</a>
+      </li>
+      <li class="navbar__mobile-item">
+        <a href="#experiences" class="navbar__mobile-link">Experiences</a>
+      </li>
+      <li class="navbar__mobile-item">
+        <a href="#contact" class="navbar__mobile-link">Contact</a>
+      </li>
+      <li class="navbar__mobile-item navbar__mobile-item--cta">
+        <button class="navbar__mobile-cta">Book Now</button>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<script>
+  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const navbar = document.getElementById('navbar');
+  
+  if (mobileMenuToggle) {
+    mobileMenuToggle.addEventListener('click', () => {
+      mobileMenu?.classList.toggle('is-open');
+      mobileMenuToggle.classList.toggle('is-open');
+      document.body.style.overflow = mobileMenu?.classList.contains('is-open') ? 'hidden' : 'auto';
+    });
+  }
+  
+  // Close mobile menu when clicking on a link
+  const mobileLinks = document.querySelectorAll('.navbar__mobile-link');
+  mobileLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      mobileMenu?.classList.remove('is-open');
+      mobileMenuToggle?.classList.remove('is-open');
+      document.body.style.overflow = 'auto';
+    });
+  });
+  
+  // Add scroll shadow to navbar
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 0) {
+      navbar?.classList.add('is-scrolled');
+    } else {
+      navbar?.classList.remove('is-scrolled');
+    }
+  });
+</script>
+
+<style is:global>
+/* ==================== */
+/* NAVBAR STYLES */
+/* ==================== */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  transition: all var(--transition-base) var(--ease-smooth);
+  border-bottom: 1px solid transparent;
+}
+
+.navbar.is-scrolled {
+  border-bottom-color: var(--color-gray-100);
+  box-shadow: var(--shadow-xs);
+}
+
+.navbar__container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4.5rem;
+  gap: var(--space-8);
+}
+
+/* Logo */
+.navbar__logo {
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-primary);
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  transition: color var(--transition-base) var(--ease-smooth),
+              transform var(--transition-base) var(--ease-smooth);
+}
+
+.logo:hover {
+  color: var(--color-primary-dark);
+  transform: translateY(-2px);
+}
+
+.logo__icon {
+  width: 24px;
+  height: 24px;
+  color: inherit;
+}
+
+.logo__text {
+  display: none;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+@media (min-width: 640px) {
+  .logo__text {
+    display: inline;
+  }
+}
+
+/* Desktop Menu */
+.navbar__menu--desktop {
+  display: none;
+  flex: 1;
+  justify-content: center;
+  margin: 0 var(--space-12);
+}
+
+@media (min-width: 1024px) {
+  .navbar__menu--desktop {
+    display: flex;
+  }
+}
+
+.navbar__list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar__item {
+  margin: 0;
+  padding: 0;
+}
+
+.navbar__link {
+  position: relative;
+  display: block;
+  padding: var(--space-2) 0;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  transition: color var(--transition-base) var(--ease-smooth);
+}
+
+.navbar__link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--color-primary);
+  transition: width var(--transition-base) var(--ease-smooth);
+}
+
+.navbar__link:hover,
+.navbar__link:focus {
+  color: var(--color-primary);
+}
+
+.navbar__link:hover::after,
+.navbar__link:focus::after {
+  width: 100%;
+}
+
+/* Actions */
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+.navbar__cta {
+  display: none;
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-white);
+  background-color: var(--color-primary);
+  border-radius: var(--radius-lg);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  transition: all var(--transition-base) var(--ease-smooth);
+  box-shadow: var(--shadow-md);
+}
+
+.navbar__cta:hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.navbar__cta:active {
+  transform: translateY(0);
+}
+
+@media (min-width: 1024px) {
+  .navbar__cta {
+    display: block;
+  }
+}
+
+/* Mobile Menu Toggle */
+.navbar__mobile-toggle {
+  display: block;
+  padding: var(--space-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform var(--transition-base) var(--ease-smooth);
+}
+
+.navbar__mobile-toggle:active {
+  transform: scale(0.95);
+}
+
+@media (min-width: 1024px) {
+  .navbar__mobile-toggle {
+    display: none;
+  }
+}
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 24px;
+  height: 20px;
+}
+
+.hamburger__line {
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-text-primary);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-base) var(--ease-smooth);
+  transform-origin: center;
+}
+
+.navbar__mobile-toggle.is-open .hamburger__line:nth-child(1) {
+  transform: rotate(45deg) translateY(8px);
+}
+
+.navbar__mobile-toggle.is-open .hamburger__line:nth-child(2) {
+  opacity: 0;
+}
+
+.navbar__mobile-toggle.is-open .hamburger__line:nth-child(3) {
+  transform: rotate(-45deg) translateY(-8px);
+}
+
+/* Mobile Menu */
+.navbar__mobile-menu {
+  position: fixed;
+  top: 4.5rem;
+  left: 0;
+  right: 0;
+  background-color: var(--color-bg-primary);
+  max-height: calc(100vh - 4.5rem);
+  overflow-y: auto;
+  transform: translateY(-100%);
+  transition: transform var(--transition-base) var(--ease-smooth);
+  z-index: 999;
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.navbar__mobile-menu.is-open {
+  transform: translateY(0);
+  box-shadow: var(--shadow-md);
+}
+
+.navbar__mobile-list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: var(--space-4);
+  gap: 0;
+}
+
+.navbar__mobile-item {
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.navbar__mobile-item:last-child {
+  border-bottom: none;
+}
+
+.navbar__mobile-item--cta {
+  padding-top: var(--space-4);
+  border-bottom: none;
+}
+
+.navbar__mobile-link,
+.navbar__mobile-cta {
+  display: block;
+  padding: var(--space-4);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  transition: all var(--transition-base) var(--ease-smooth);
+}
+
+.navbar__mobile-link:hover,
+.navbar__mobile-link:focus {
+  color: var(--color-primary);
+  background-color: var(--color-gray-50);
+}
+
+.navbar__mobile-cta {
+  width: 100%;
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-white);
+  background-color: var(--color-primary);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base) var(--ease-smooth);
+  box-shadow: var(--shadow-md);
+}
+
+.navbar__mobile-cta:active {
+  transform: scale(0.98);
+}
+
+/* Body offset for navbar */
+body {
+  padding-top: 4.5rem;
+}
+
+@media (max-width: 1023px) {
+  body {
+    padding-top: 4.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    padding-top: 4.5rem;
+  }
+}
+</style>
