@@ -1,19 +1,22 @@
 ---
-// Premium Navbar Component
-// Features: Responsive, mobile-first, premium styling with smooth interactions
+// Camping Clepardia Navbar Component
+// Professional camping website navigation with Kraków identity
 ---
 
 <nav class="navbar" id="navbar">
   <div class="container navbar__container">
     <!-- Logo -->
     <div class="navbar__logo">
-      <a href="/" class="logo" title="Camping Clepardia">
+      <a href="/" class="logo" title="Camping Clepardia Kraków">
         <svg class="logo__icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M16 2L4 10V30H28V10L16 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
           <path d="M16 2V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           <circle cx="16" cy="23" r="1.5" fill="currentColor"/>
         </svg>
-        <span class="logo__text">Clepardia</span>
+        <div class="logo__text">
+          <span class="logo__brand">Camping Clepardia</span>
+          <span class="logo__location">Kraków</span>
+        </div>
       </a>
     </div>
 
@@ -21,60 +24,63 @@
     <div class="navbar__menu navbar__menu--desktop" id="desktopMenu">
       <ul class="navbar__list">
         <li class="navbar__item">
-          <a href="#about" class="navbar__link">About</a>
+          <a href="#camping" class="navbar__link">Camping</a>
         </li>
         <li class="navbar__item">
-          <a href="#services" class="navbar__link">Services</a>
+          <a href="#domki" class="navbar__link">Domki</a>
         </li>
         <li class="navbar__item">
-          <a href="#accommodations" class="navbar__link">Accommodations</a>
+          <a href="#cennik" class="navbar__link">Cennik</a>
         </li>
         <li class="navbar__item">
-          <a href="#experiences" class="navbar__link">Experiences</a>
+          <a href="#dojazd" class="navbar__link">Dojazd</a>
         </li>
         <li class="navbar__item">
-          <a href="#contact" class="navbar__link">Contact</a>
+          <a href="#atrakcje" class="navbar__link">Atrakcje</a>
+        </li>
+        <li class="navbar__item">
+          <a href="#kontakt" class="navbar__link">Kontakt</a>
         </li>
       </ul>
     </div>
 
-    <!-- CTA Button -->
+    <!-- Desktop CTA Button -->
     <div class="navbar__actions">
-      <button class="navbar__cta" title="Book Now">
-        Book Now
-      </button>
-      
-      <!-- Mobile Menu Toggle -->
-      <button class="navbar__mobile-toggle" id="mobileMenuToggle" title="Toggle menu">
-        <span class="hamburger">
-          <span class="hamburger__line"></span>
-          <span class="hamburger__line"></span>
-          <span class="hamburger__line"></span>
-        </span>
+      <button class="navbar__cta" onclick="window.scrollBy({top: window.innerHeight * 0.7, behavior: 'smooth'})">
+        <span class="navbar__cta-text">Sprawdź dostępność</span>
       </button>
     </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="navbar__mobile-toggle" id="mobileMenuToggle" title="Toggle menu">
+      <span class="hamburger">
+        <span class="hamburger__line"></span>
+        <span class="hamburger__line"></span>
+        <span class="hamburger__line"></span>
+      </span>
+    </button>
   </div>
 
   <!-- Mobile Navigation Menu -->
   <div class="navbar__mobile-menu" id="mobileMenu">
     <ul class="navbar__mobile-list">
       <li class="navbar__mobile-item">
-        <a href="#about" class="navbar__mobile-link">About</a>
+        <a href="#camping" class="navbar__mobile-link">Camping</a>
       </li>
       <li class="navbar__mobile-item">
-        <a href="#services" class="navbar__mobile-link">Services</a>
+        <a href="#domki" class="navbar__mobile-link">Domki</a>
       </li>
       <li class="navbar__mobile-item">
-        <a href="#accommodations" class="navbar__mobile-link">Accommodations</a>
+        <a href="#cennik" class="navbar__mobile-link">Cennik</a>
       </li>
       <li class="navbar__mobile-item">
-        <a href="#experiences" class="navbar__mobile-link">Experiences</a>
+        <a href="#dojazd" class="navbar__mobile-link">Dojazd</a>
       </li>
       <li class="navbar__mobile-item">
-        <a href="#contact" class="navbar__mobile-link">Contact</a>
+        <a href="#atrakcje" class="navbar__mobile-link">Atrakcje</a>
       </li>
-      <li class="navbar__mobile-item navbar__mobile-item--cta">
-        <button class="navbar__mobile-cta">Book Now</button>
+      <li class="navbar__mobile-item">
+        <a href="#kontakt" class="navbar__mobile-link">Kontakt</a>
       </li>
     </ul>
   </div>
@@ -152,35 +158,51 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
   color: var(--color-primary);
-  font-size: var(--font-size-h6);
+  font-size: var(--font-size-body);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--letter-spacing-wide);
+  letter-spacing: var(--letter-spacing-normal);
   transition: color var(--transition-base) var(--ease-smooth),
               transform var(--transition-base) var(--ease-smooth);
 }
 
 .logo:hover {
   color: var(--color-primary-dark);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .logo__icon {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   color: inherit;
+  flex-shrink: 0;
 }
 
 .logo__text {
-  display: none;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
 }
 
-@media (min-width: 640px) {
+.logo__brand {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  text-transform: uppercase;
+}
+
+.logo__location {
+  font-size: var(--font-size-body-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
   .logo__text {
-    display: inline;
+    display: none;
   }
 }
 
@@ -245,24 +267,23 @@
   width: 100%;
 }
 
-/* Actions */
+/* Desktop Actions */
 .navbar__actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
+  display: none;
   flex-shrink: 0;
 }
 
 .navbar__cta {
-  display: none;
   padding: var(--space-3) var(--space-6);
   font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--color-white);
   background-color: var(--color-primary);
+  border: none;
   border-radius: var(--radius-lg);
   letter-spacing: var(--letter-spacing-wide);
   text-transform: uppercase;
+  cursor: pointer;
   transition: all var(--transition-base) var(--ease-smooth);
   box-shadow: var(--shadow-md);
 }
@@ -278,7 +299,7 @@
 }
 
 @media (min-width: 1024px) {
-  .navbar__cta {
+  .navbar__actions {
     display: block;
   }
 }
@@ -371,13 +392,7 @@
   border-bottom: none;
 }
 
-.navbar__mobile-item--cta {
-  padding-top: var(--space-4);
-  border-bottom: none;
-}
-
-.navbar__mobile-link,
-.navbar__mobile-cta {
+.navbar__mobile-link {
   display: block;
   padding: var(--space-4);
   font-size: var(--font-size-body);
@@ -392,22 +407,6 @@
 .navbar__mobile-link:focus {
   color: var(--color-primary);
   background-color: var(--color-gray-50);
-}
-
-.navbar__mobile-cta {
-  width: 100%;
-  padding: var(--space-4) var(--space-6);
-  font-size: var(--font-size-body-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-white);
-  background-color: var(--color-primary);
-  border-radius: var(--radius-lg);
-  transition: all var(--transition-base) var(--ease-smooth);
-  box-shadow: var(--shadow-md);
-}
-
-.navbar__mobile-cta:active {
-  transform: scale(0.98);
 }
 
 /* Body offset for navbar */

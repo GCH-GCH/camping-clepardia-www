@@ -1,0 +1,19 @@
+# Camping Clepardia Hero Image Placeholder
+
+This file should be replaced with a high-quality hero image for Camping Clepardia.
+
+## Image Requirements:
+- **Dimensions**: 1920x1080px (16:9 aspect ratio)
+- **Format**: JPG or WebP for optimal performance
+- **Content**:
+  - Camping Clepardia entrance/facility
+  - Kraków skyline in background
+  - Clean, premium aesthetic
+  - Natural lighting (golden hour preferred)
+  - High contrast for text overlay readability
+
+## File Location:
+Replace this file with: `public/images/hero/clepardia-hero.jpg`
+
+## Usage:
+Currently referenced in `src/components/Hero.astro` as background image.
