@@ -1,0 +1,539 @@
+---
+// Cinematic Luxury Hero Component
+// Ultra premium camping experience showcase
+---
+
+<section class="hero" id="hero">
+  <!-- Background with cinematic atmosphere -->
+  <div class="hero__background">
+    <div class="hero__gradient"></div>
+    <div class="hero__overlay hero__overlay--dark"></div>
+  </div>
+
+  <!-- Animated content -->
+  <div class="hero__container">
+    <div class="hero__content">
+      <!-- Subtitle with animation -->
+      <div class="hero__subtitle-wrapper">
+        <span class="hero__subtitle">Luxury Camping in the Heart of Europe</span>
+      </div>
+
+      <!-- Main title with reveal animation -->
+      <div class="hero__title-wrapper">
+        <h1 class="hero__title">
+          Escape to Your <span class="hero__title-highlight">Sanctuary</span>
+        </h1>
+      </div>
+
+      <!-- Description with premium feel -->
+      <div class="hero__description-wrapper">
+        <p class="hero__description">
+          Discover the perfect blend of sophisticated comfort and authentic nature. 
+          Nestled near Kraków, our premium camping experience redefines luxury outdoors. 
+          Where refined European hospitality meets untamed wilderness.
+        </p>
+      </div>
+
+      <!-- Premium CTA Buttons -->
+      <div class="hero__actions">
+        <button class="hero__button hero__button--primary" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})">
+          <span class="hero__button-text">Discover Your Escape</span>
+          <span class="hero__button-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <polyline points="19 12 12 19 5 12"></polyline>
+            </svg>
+          </span>
+        </button>
+        <button class="hero__button hero__button--secondary">
+          <span class="hero__button-text">Plan Your Adventure</span>
+          <span class="hero__button-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </span>
+        </button>
+      </div>
+
+      <!-- Trust indicators -->
+      <div class="hero__trust">
+        <div class="hero__trust-item">
+          <span class="hero__trust-value">500+</span>
+          <span class="hero__trust-label">Happy Guests</span>
+        </div>
+        <div class="hero__trust-item">
+          <span class="hero__trust-value">4.9★</span>
+          <span class="hero__trust-label">Rating</span>
+        </div>
+        <div class="hero__trust-item">
+          <span class="hero__trust-value">24/7</span>
+          <span class="hero__trust-label">Support</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="hero__scroll-indicator">
+      <span class="hero__scroll-text">Scroll to explore</span>
+      <div class="hero__scroll-line"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Parallax and glassmorphism effect on scroll
+  const hero = document.getElementById('hero');
+  const navbar = document.querySelector('.navbar');
+  const heroContent = document.querySelector('.hero__content');
+
+  window.addEventListener('scroll', () => {
+    if (!hero || !navbar) return;
+
+    const scrollY = window.scrollY;
+    const heroHeight = hero.offsetHeight;
+    const progress = Math.min(scrollY / heroHeight, 1);
+
+    // Parallax background
+    if (scrollY < heroHeight) {
+      hero.style.transform = `translateY(${scrollY * 0.3}px)`;
+    }
+
+    // Content fade out
+    if (heroContent) {
+      heroContent.style.opacity = 1 - progress * 1.5;
+    }
+
+    // Glassmorphism navbar effect
+    if (scrollY > 50) {
+      navbar?.classList.add('is-glassmorphism');
+    } else {
+      navbar?.classList.remove('is-glassmorphism');
+    }
+  });
+
+  // Animate elements on load
+  const animateElements = () => {
+    const elements = document.querySelectorAll('[class*="wrapper"]');
+    elements.forEach((el, index) => {
+      el.style.animation = `slideIn ${0.6}s ${index * 0.15}s both var(--ease-smooth)`;
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', animateElements);
+  } else {
+    animateElements();
+  }
+</script>
+
+<style is:global>
+/* ==================== */
+/* HERO SECTION */
+/* ==================== */
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: var(--color-black);
+}
+
+/* Background layers */
+.hero__background {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.hero__gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(60, 179, 113, 0.15) 0%,
+    rgba(60, 179, 113, 0.05) 25%,
+    rgba(15, 15, 15, 0.2) 50%,
+    rgba(30, 30, 30, 0.4) 100%
+  );
+  z-index: 1;
+  animation: gradientShift 8s ease-in-out infinite alternate;
+}
+
+@keyframes gradientShift {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center bottom,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.6) 50%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  z-index: 2;
+}
+
+.hero__overlay--dark {
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(60, 179, 113, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(60, 179, 113, 0.05) 0%, transparent 50%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7));
+  z-index: 2;
+}
+
+/* Container and content */
+.hero__container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: var(--container-padding-mobile);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .hero__container {
+    padding: var(--container-padding-tablet);
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero__container {
+    padding: var(--container-padding-desktop);
+  }
+}
+
+.hero__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  transition: opacity var(--transition-slow) var(--ease-smooth);
+}
+
+/* Subtitle */
+.hero__subtitle-wrapper {
+  animation: slideIn 0.6s var(--ease-smooth);
+}
+
+.hero__subtitle {
+  display: inline-block;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  color: var(--color-primary);
+  background: rgba(60, 179, 113, 0.1);
+  border: 1px solid rgba(60, 179, 113, 0.3);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(60, 179, 113, 0.1);
+}
+
+/* Title */
+.hero__title-wrapper {
+  animation: slideIn 0.6s 0.15s var(--ease-smooth) both;
+}
+
+.hero__title {
+  font-size: clamp(2rem, 10vw, 4rem);
+  font-weight: var(--font-weight-extra-bold);
+  line-height: 1.1;
+  color: var(--color-white);
+  margin: 0;
+  padding: 0;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.hero__title-highlight {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  display: inline-block;
+}
+
+.hero__title-highlight::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), transparent);
+  border-radius: var(--radius-full);
+}
+
+/* Description */
+.hero__description-wrapper {
+  animation: slideIn 0.6s 0.3s var(--ease-smooth) both;
+}
+
+.hero__description {
+  font-size: var(--font-size-body-lg);
+  line-height: var(--line-height-relaxed);
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  padding: 0;
+  max-width: 600px;
+  font-weight: var(--font-weight-light);
+  letter-spacing: 0.3px;
+}
+
+/* Actions */
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  justify-content: center;
+  align-items: center;
+  animation: slideIn 0.6s 0.45s var(--ease-smooth) both;
+  margin-top: var(--space-4);
+}
+
+@media (max-width: 480px) {
+  .hero__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+.hero__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-base) var(--ease-smooth);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+@media (max-width: 480px) {
+  .hero__button {
+    width: 100%;
+    padding: var(--space-4) var(--space-6);
+    font-size: var(--font-size-body-sm);
+  }
+}
+
+/* Primary Button */
+.hero__button--primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-white);
+  box-shadow: 0 8px 32px rgba(60, 179, 113, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hero__button--primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.2) 100%);
+  opacity: 0;
+  transition: opacity var(--transition-base) var(--ease-smooth);
+}
+
+.hero__button--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(60, 179, 113, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.hero__button--primary:hover::before {
+  opacity: 1;
+}
+
+.hero__button--primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary Button */
+.hero__button--secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-white);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.hero__button--secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.hero__button--secondary:active {
+  transform: translateY(0);
+}
+
+.hero__button-text {
+  display: block;
+}
+
+.hero__button-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  transition: transform var(--transition-base) var(--ease-smooth);
+}
+
+.hero__button:hover .hero__button-icon {
+  transform: translateY(2px);
+}
+
+/* Trust indicators */
+.hero__trust {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+  width: 100%;
+  padding-top: var(--space-8);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  animation: slideIn 0.6s 0.6s var(--ease-smooth) both;
+}
+
+@media (max-width: 640px) {
+  .hero__trust {
+    gap: var(--space-6);
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+  }
+}
+
+.hero__trust-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hero__trust-value {
+  font-size: var(--font-size-h5);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  display: block;
+}
+
+.hero__trust-label {
+  font-size: var(--font-size-body-xs);
+  font-weight: var(--font-weight-medium);
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+/* Scroll indicator */
+.hero__scroll-indicator {
+  position: absolute;
+  bottom: var(--space-12);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  animation: slideIn 0.6s 0.75s var(--ease-smooth) both;
+  opacity: 0;
+}
+
+@media (max-height: 600px) {
+  .hero__scroll-indicator {
+    display: none;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-8px);
+  }
+}
+
+.hero__scroll-indicator {
+  animation: slideIn 0.6s 0.75s var(--ease-smooth) both, float 2s ease-in-out 2s infinite;
+}
+
+.hero__scroll-text {
+  font-size: var(--font-size-body-xs);
+  font-weight: var(--font-weight-medium);
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.hero__scroll-line {
+  width: 1px;
+  height: 32px;
+  background: linear-gradient(to bottom, var(--color-primary), transparent);
+  animation: scaleY 1.5s ease-in-out infinite;
+}
+
+@keyframes scaleY {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
+
+/* ==================== */
+/* GLASSMORPHISM NAVBAR ON SCROLL */
+/* ==================== */
+.navbar.is-glassmorphism {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+.navbar.is-glassmorphism .navbar__link {
+  color: var(--color-text-primary);
+}
+
+.navbar.is-glassmorphism .navbar__link:hover {
+  color: var(--color-primary);
+}
+</style>
