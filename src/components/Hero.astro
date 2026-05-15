@@ -1,624 +1,176 @@
 ---
-// Cinematic Fullscreen Hero Component
-// Premium camping experience showcase with background image
+// Camping Clepardia hero section
 ---
 
 <section class="hero" id="hero">
-  <!-- Cinematic dark overlay with green glow -->
-  <div class="hero__overlay"></div>
-  
-  <!-- Animated content -->
-  <div class="hero__container">
-    <div class="hero__content">
-      <!-- Subtitle with animation -->
-      <div class="hero__subtitle-wrapper">
-        <span class="hero__subtitle">Camping w Krakowie blisko centrum miasta</span>
-      </div>
-
-      <!-- Main title with reveal animation -->
-      <div class="hero__title-wrapper">
-        <h1 class="hero__title">
-          Camping <span class="hero__title-highlight">Clepardia</span>
-        </h1>
-      </div>
-
-      <!-- Description with premium feel -->
-      <div class="hero__description-wrapper">
-        <p class="hero__description">
-          Miejsca dla kamperÃ³w, namiotÃ³w i przyczep, komfortowe domki oraz szybki dojazd tramwajem do Starego Miasta.
-        </p>
-      </div>
-
-      <!-- Premium CTA Buttons -->
-      <div class="hero__actions">
-        <button class="hero__button hero__button--primary" onclick="window.scrollBy({top: window.innerHeight * 0.8, behavior: 'smooth'})">
-          <span class="hero__button-text">SprawdÅº dostÄ™pnoÅ›Ä‡</span>
-          <span class="hero__button-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-          </span>
-        </button>
-        <button class="hero__button hero__button--secondary">
-          <span class="hero__button-text">Zobacz cennik</span>
-          <span class="hero__button-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="1" x2="12" y2="23"></line>
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-            </svg>
-          </span>
-        </button>
-      </div>
-
-      <!-- Scroll indicator -->
-      <div class="hero__scroll-indicator">
-        <span class="hero__scroll-text">Poznaj wiÄ™cej</span>
-        <div class="hero__scroll-chevron">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </div>
-      </div>
+  <div class="hero__content">
+    <span class="hero__badge">Camping w Krakowie blisko centrum</span>
+    <h1 class="hero__title">Camping Clepardia</h1>
+    <p class="hero__description">Miejsca dla kamperów, namiotów i przyczep, komfortowe domki oraz szybki dojazd tramwajem do Starego Miasta.</p>
+    <div class="hero__actions">
+      <button type="button" class="hero__button hero__button--primary" onclick="window.scrollBy({top: window.innerHeight * 0.78, behavior: 'smooth'})">SprawdŸ dostêpnoœæ</button>
+      <button type="button" class="hero__button hero__button--secondary">Zobacz cennik</button>
     </div>
   </div>
 
-  <!-- Benefits strip at bottom -->
   <div class="hero__benefits">
-    <div class="hero__benefits-wrapper">
-      <div class="hero__benefit-item">
-        <div class="hero__benefit-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="9"></circle>
-            <polyline points="12 7 12 12 16 14"></polyline>
-          </svg>
-        </div>
-        <div class="hero__benefit-text">
-          <p class="hero__benefit-label">5 min do tramwaju</p>
-        </div>
-      </div>
-      <div class="hero__benefit-item">
-        <div class="hero__benefit-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-            <circle cx="12" cy="10" r="3"></circle>
-          </svg>
-        </div>
-        <div class="hero__benefit-text">
-          <p class="hero__benefit-label">Blisko centrum Krakowa</p>
-        </div>
-      </div>
-      <div class="hero__benefit-item">
-        <div class="hero__benefit-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-          </svg>
-        </div>
-        <div class="hero__benefit-text">
-          <p class="hero__benefit-label">Domki i camping</p>
-        </div>
-      </div>
-      <div class="hero__benefit-item">
-        <div class="hero__benefit-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          </svg>
-        </div>
-        <div class="hero__benefit-text">
-          <p class="hero__benefit-label">24/7 ochrona</p>
-        </div>
-      </div>
-    </div>
+    <div class="hero__benefit"><span>5 min do tramwaju</span></div>
+    <div class="hero__benefit"><span>Blisko centrum</span></div>
+    <div class="hero__benefit"><span>Domki i camping</span></div>
+    <div class="hero__benefit"><span>24/7 ochrona</span></div>
   </div>
 </section>
 
-
-<script>
-  // Parallax and glassmorphism effect on scroll
-  const hero = document.getElementById('hero');
-  const navbar = document.querySelector('.navbar');
-  const heroContent = document.querySelector('.hero__content');
-  const scrollIndicator = document.querySelector('.hero__scroll-indicator');
-
-  window.addEventListener('scroll', () => {
-    if (!hero || !navbar) return;
-
-    const scrollY = window.scrollY;
-    const heroHeight = hero.offsetHeight;
-    const progress = Math.min(scrollY / (heroHeight * 0.5), 1);
-
-    // Subtle parallax background
-    if (scrollY < heroHeight) {
-      hero.style.backgroundPosition = `center ${scrollY * 0.4}px`;
-    }
-
-    // Content fade out
-    if (heroContent) {
-      heroContent.style.opacity = Math.max(1 - progress, 0);
-    }
-
-    // Hide scroll indicator when scrolling
-    if (scrollIndicator) {
-      scrollIndicator.style.opacity = Math.max(1 - progress * 1.5, 0);
-    }
-
-    // Premium glassmorphism navbar effect on scroll
-    if (scrollY > 50) {
-      navbar?.classList.add('is-hero-scroll');
-    } else {
-      navbar?.classList.remove('is-hero-scroll');
-    }
-  });
-
-  // Animate elements on load
-  const animateElements = () => {
-    const elements = document.querySelectorAll('[class*="wrapper"]');
-    elements.forEach((el, index) => {
-      el.style.animation = `slideIn ${0.7}s ${index * 0.15}s both var(--ease-smooth)`;
-    });
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', animateElements);
-  } else {
-    animateElements();
-  }
-</script>
-
 <style is:global>
-/* ==================== */
-/* HERO SECTION - CINEMATIC FULLSCREEN */
-/* ==================== */
 .hero {
   position: relative;
   width: 100%;
-  height: 100vh;
   min-height: 100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  overflow: hidden;
-  background-image: url('/images/hero/clepardia-hero.jpg.png');
+  background-image: linear-gradient(180deg, rgba(5, 7, 10, 0.58), rgba(5, 7, 10, 0.82)), url('/images/hero/clepardia-hero.jpg');
   background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-color: #0f0f0f;
+  background-position: center center;
+  background-repeat: no-repeat;
+  color: #ffffff;
 }
 
-@media (max-width: 768px) {
-  .hero {
-    background-attachment: scroll;
-  }
-}
-
-/* Cinematic dark overlay with green glow */
-.hero__overlay {
+.hero::before {
+  content: '';
   position: absolute;
   inset: 0;
-  background: 
-    linear-gradient(135deg, rgba(15, 15, 15, 0.65) 0%, rgba(0, 0, 0, 0.5) 50%, rgba(15, 15, 15, 0.6) 100%),
-    radial-gradient(
-      ellipse at 30% 50%,
-      rgba(60, 179, 113, 0.15) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse at 70% 80%,
-      rgba(60, 179, 113, 0.08) 0%,
-      transparent 40%
-    );
-  z-index: 2;
-  backdrop-filter: blur(1px);
-  -webkit-backdrop-filter: blur(1px);
-}
-
-/* Container and content */
-.hero__container {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  height: 100%;
-  max-width: var(--container-xl);
-  margin: 0 auto;
-  padding: var(--space-16) var(--container-padding-mobile);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  gap: var(--space-12);
-  padding-top: calc(4.5rem + var(--space-16));
-}
-
-@media (min-width: 768px) {
-  .hero__container {
-    padding: calc(4.5rem + var(--space-20)) var(--container-padding-tablet) var(--space-20) var(--container-padding-tablet);
-  }
-}
-
-@media (min-width: 1024px) {
-  .hero__container {
-    padding: calc(4.5rem + var(--space-24)) var(--container-padding-desktop) var(--space-24) var(--container-padding-desktop);
-    max-width: 600px;
-  }
+  background: radial-gradient(circle at 20% 30%, rgba(60, 179, 113, 0.14), transparent 28%);
+  z-index: 1;
+  pointer-events: none;
 }
 
 .hero__content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-  width: 100%;
-  transition: opacity var(--transition-slow) var(--ease-smooth);
-  max-width: 650px;
+  position: relative;
+  z-index: 2;
+  width: min(720px, 100% - 48px);
+  padding: 120px 24px 0;
 }
 
-/* Subtitle */
-.hero__subtitle-wrapper {
-  animation: slideIn 0.7s var(--ease-smooth);
-}
-
-.hero__subtitle {
-  display: block;
-  font-size: clamp(0.875rem, 2vw, 1.125rem);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--letter-spacing-wide);
-  color: rgba(255, 255, 255, 0.9);
+.hero__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  margin: 0;
-  padding: 0;
-}
-
-/* Title */
-.hero__title-wrapper {
-  animation: slideIn 0.7s 0.15s var(--ease-smooth) both;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  margin-bottom: 24px;
 }
 
 .hero__title {
-  font-size: clamp(2.5rem, 8vw, 5rem);
-  font-weight: var(--font-weight-extra-bold);
-  line-height: 1.1;
-  color: rgba(255, 255, 255, 0.98);
-  margin: 0;
-  padding: 0;
-  letter-spacing: var(--letter-spacing-tight);
-  text-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.hero__title-highlight {
-  background: linear-gradient(135deg, #3CB371 0%, #63BE7B 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  position: relative;
-  display: inline;
-  filter: drop-shadow(0 2px 8px rgba(60, 179, 113, 0.4));
-}
-
-/* Description */
-.hero__description-wrapper {
-  animation: slideIn 0.7s 0.3s var(--ease-smooth) both;
+  font-size: clamp(3rem, 8vw, 5.4rem);
+  line-height: 0.96;
+  margin: 0 0 24px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  max-width: 12ch;
 }
 
 .hero__description {
-  font-size: clamp(0.875rem, 2vw, 1.125rem);
-  line-height: var(--line-height-relaxed);
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0;
-  padding: 0;
-  max-width: 600px;
-  font-weight: var(--font-weight-normal);
-  letter-spacing: 0.3px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  line-height: 1.75;
+  max-width: 680px;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 0 0 32px;
 }
 
-/* Actions */
 .hero__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
-  align-items: center;
-  animation: slideIn 0.7s 0.45s var(--ease-smooth) both;
-  margin-top: var(--space-4);
-}
-
-@media (max-width: 480px) {
-  .hero__actions {
-    flex-direction: column;
-    width: 100%;
-  }
+  gap: 16px;
 }
 
 .hero__button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  padding: var(--space-4) var(--space-8);
-  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--letter-spacing-wide);
-  text-transform: uppercase;
   border: none;
-  border-radius: var(--radius-lg);
+  border-radius: 999px;
   cursor: pointer;
-  transition: all var(--transition-base) var(--ease-smooth);
-  position: relative;
-  overflow: hidden;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  min-width: 170px;
+  padding: 14px 22px;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
-@media (max-width: 480px) {
-  .hero__button {
-    width: 100%;
-    padding: var(--space-4) var(--space-6);
-  }
-}
-
-/* Primary Button */
 .hero__button--primary {
-  background: linear-gradient(135deg, #3CB371 0%, #2E8B57 100%);
-  color: var(--color-white);
-  box-shadow: 0 12px 40px rgba(60, 179, 113, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, #3cb371 0%, #2c7b58 100%);
+  color: #ffffff;
+  box-shadow: 0 16px 42px rgba(60, 179, 113, 0.22);
 }
 
-.hero__button--primary:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(60, 179, 113, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.hero__button--primary:active {
+.hero__button--primary:hover,
+.hero__button--primary:focus {
   transform: translateY(-2px);
 }
 
-/* Secondary Button */
 .hero__button--secondary {
   background: rgba(255, 255, 255, 0.12);
-  color: var(--color-white);
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
-.hero__button--secondary:hover {
-  background: rgba(60, 179, 113, 0.2);
-  border-color: rgba(60, 179, 113, 0.6);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(60, 179, 113, 0.25);
+.hero__button--secondary:hover,
+.hero__button--secondary:focus {
+  background: rgba(255, 255, 255, 0.18);
 }
 
-.hero__button--secondary:active {
-  transform: translateY(-2px);
+.hero__benefits {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  width: min(1080px, 100% - 48px);
+  margin: auto 24px 32px;
+  padding: 18px 22px;
+  background: rgba(4, 6, 10, 0.67);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
 }
 
-.hero__button-text {
-  display: block;
-}
-
-.hero__button-icon {
+.hero__benefit {
+  padding: 0;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  transition: transform var(--transition-base) var(--ease-smooth);
-}
-
-.hero__button:hover .hero__button-icon {
-  transform: translateY(2px);
-}
-
-/* Scroll indicator */
-.hero__scroll-indicator {
-  position: absolute;
-  bottom: 120px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
-  opacity: 1;
-  transition: opacity var(--transition-slow) var(--ease-smooth);
-  z-index: 15;
-}
-
-@media (max-height: 600px) {
-  .hero__scroll-indicator {
-    display: none;
-  }
-}
-
-.hero__scroll-text {
-  font-size: var(--font-size-body-xs);
-  font-weight: var(--font-weight-medium);
-  color: rgba(255, 255, 255, 0.7);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wide);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-}
-
-.hero__scroll-chevron {
-  width: 24px;
-  height: 24px;
-  color: rgba(60, 179, 113, 0.8);
-  animation: bounce 2s ease-in-out infinite;
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  50% {
-    transform: translateY(8px);
-    opacity: 0.7;
-  }
-}
-
-/* Benefits Strip */
-.hero__benefits {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 15;
-  background: linear-gradient(
-    to top,
-    rgba(15, 15, 15, 0.95) 0%,
-    rgba(15, 15, 15, 0.85) 30%,
-    rgba(15, 15, 15, 0.4) 100%
-  );
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(60, 179, 113, 0.2);
-}
-
-.hero__benefits-wrapper {
-  width: 100%;
-  max-width: var(--container-xl);
-  margin: 0 auto;
-  padding: var(--space-8) var(--container-padding-mobile);
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--space-8);
-}
-
-@media (min-width: 768px) {
-  .hero__benefits-wrapper {
-    padding: var(--space-10) var(--container-padding-tablet);
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-12);
-  }
-}
-
-@media (min-width: 1024px) {
-  .hero__benefits-wrapper {
-    padding: var(--space-12) var(--container-padding-desktop);
-  }
-}
-
-.hero__benefit-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
   text-align: center;
 }
 
-.hero__benefit-icon {
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(60, 179, 113, 0.96);
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-xl);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+@media (max-width: 920px) {
+  .hero__benefits {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.hero__benefit-text {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+@media (max-width: 640px) {
+  .hero {
+    background-attachment: scroll;
+    min-height: calc(100vh - 84px);
+  }
 
-.hero__benefit-label {
-  font-size: var(--font-size-body-sm);
-  font-weight: var(--font-weight-semibold);
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0;
-  padding: 0;
-  letter-spacing: 0.3px;
-}
+  .hero__content {
+    padding-top: 100px;
+  }
 
-/* ==================== */
-/* NAVBAR MODIFICATIONS FOR HERO */
-/* ==================== */
-
-/* Transparent navbar over hero */
-.navbar {
-  background-color: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border-bottom: transparent;
-}
-
-.navbar__link,
-.navbar__link:hover {
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.navbar__link::after {
-  background-color: rgba(60, 179, 113, 0.6);
-}
-
-.navbar__link:hover::after {
-  background-color: rgba(60, 179, 113, 0.9);
-}
-
-.navbar__cta {
-  background-color: rgba(60, 179, 113, 0.2);
-  color: var(--color-white);
-  border: 1.5px solid rgba(60, 179, 113, 0.5);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 12px rgba(60, 179, 113, 0.15);
-}
-
-.navbar__cta:hover {
-  background-color: rgba(60, 179, 113, 0.35);
-  border-color: rgba(60, 179, 113, 0.8);
-  box-shadow: 0 8px 20px rgba(60, 179, 113, 0.25);
-}
-
-.navbar__logo .logo {
-  color: rgba(255, 255, 255, 0.95);
-}
-
-.navbar__logo .logo:hover {
-  color: rgba(60, 179, 113, 0.9);
-}
-
-.navbar__logo .logo__location {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.hamburger__line {
-  background-color: rgba(255, 255, 255, 0.85);
-}
-
-/* Enhanced navbar on scroll in hero */
-.navbar.is-hero-scroll {
-  background-color: rgba(15, 15, 15, 0.98);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom-color: rgba(60, 179, 113, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-.navbar.is-hero-scroll .navbar__link {
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.navbar.is-hero-scroll .navbar__link:hover {
-  color: rgba(60, 179, 113, 0.95);
-}
-
-.navbar.is-hero-scroll .hamburger__line {
-  background-color: rgba(255, 255, 255, 0.85);
-}
-
-.navbar.is-hero-scroll .logo {
-  color: rgba(255, 255, 255, 0.95);
-}
-
-.navbar.is-hero-scroll .logo__location {
-  color: rgba(255, 255, 255, 0.6);
+  .hero__benefits {
+    grid-template-columns: 1fr;
+    padding: 18px;
+    margin: 24px 16px 24px;
+  }
 }
 </style>
-
-
