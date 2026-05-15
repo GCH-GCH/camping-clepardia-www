@@ -1,24 +1,18 @@
 ---
-// Cinematic Luxury Hero Component
-// Ultra premium camping experience showcase - FIXED VERSION
+// Cinematic Fullscreen Hero Component
+// Premium camping experience showcase with background image
 ---
 
 <section class="hero" id="hero">
-  <!-- Background with realistic camping atmosphere -->
-  <div class="hero__background">
-    <!-- Realistic textured background (simulates camping/nature) -->
-    <div class="hero__texture"></div>
-    
-    <!-- Subtle gradient overlay -->
-    <div class="hero__overlay"></div>
-  </div>
-
+  <!-- Cinematic dark overlay with green glow -->
+  <div class="hero__overlay"></div>
+  
   <!-- Animated content -->
   <div class="hero__container">
     <div class="hero__content">
       <!-- Subtitle with animation -->
       <div class="hero__subtitle-wrapper">
-        <span class="hero__subtitle">Camping w Krakowie</span>
+        <span class="hero__subtitle">Camping w Krakowie blisko centrum miasta</span>
       </div>
 
       <!-- Main title with reveal animation -->
@@ -31,15 +25,13 @@
       <!-- Description with premium feel -->
       <div class="hero__description-wrapper">
         <p class="hero__description">
-          Blisko centrum Krakowa, z bezpośrednim tramwajem do Starego Miasta.
-          Idealne miejsce dla kamperów, namiotów i turystów. Komfortowe domki i miejsca campingowe
-          w sercu polskiej stolicy.
+          Miejsca dla kamperów, namiotów i przyczep, komfortowe domki oraz szybki dojazd tramwajem do Starego Miasta.
         </p>
       </div>
 
       <!-- Premium CTA Buttons -->
       <div class="hero__actions">
-        <button class="hero__button hero__button--primary" onclick="window.scrollBy({top: window.innerHeight * 0.7, behavior: 'smooth'})">
+        <button class="hero__button hero__button--primary" onclick="window.scrollBy({top: window.innerHeight * 0.8, behavior: 'smooth'})">
           <span class="hero__button-text">Sprawdź dostępność</span>
           <span class="hero__button-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -61,102 +53,103 @@
         </button>
       </div>
 
-      <!-- Trust indicators -->
-      <div class="hero__trust">
-        <div class="hero__trust-item">
-          <span class="hero__trust-value">5 min</span>
-          <span class="hero__trust-label">do Starego Miasta</span>
+      <!-- Scroll indicator -->
+      <div class="hero__scroll-indicator">
+        <span class="hero__scroll-text">Poznaj więcej</span>
+        <div class="hero__scroll-chevron">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
         </div>
-        <div class="hero__trust-item">
-          <span class="hero__trust-value">4.8★</span>
-          <span class="hero__trust-label">Średnia ocen</span>
-        </div>
-        <div class="hero__trust-item">
-          <span class="hero__trust-value">24/7</span>
-          <span class="hero__trust-label">Ochrona</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Hero Visual/Image Frame -->
-    <div class="hero__visual">
-      <div class="hero__image-frame">
-        <img
-          src="/images/hero/clepardia-hero.jpg"
-          alt="Camping Clepardia Kraków - widok na camping i Stare Miasto"
-          class="hero__image"
-          loading="eager"
-          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-        />
-        <div class="hero__image-placeholder" style="display: none;">
-          <div class="hero__placeholder-content">
-            <svg class="hero__placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-              <circle cx="9" cy="9" r="2"></circle>
-              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
-            </svg>
-            <p class="hero__placeholder-text">Tu dodamy zdjęcie<br/>Camping Clepardia</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Scroll indicator -->
-    <div class="hero__scroll-indicator">
-      <span class="hero__scroll-text">Explore more</span>
-      <div class="hero__scroll-chevron">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
       </div>
     </div>
   </div>
 
-  <!-- Next section teaser -->
-  <div class="hero__teaser">
-    <div class="hero__teaser-content">
-      <p class="hero__teaser-text">Discover Our Accommodations</p>
-      <svg class="hero__teaser-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="6 9 12 15 18 9"></polyline>
-      </svg>
+  <!-- Benefits strip at bottom -->
+  <div class="hero__benefits">
+    <div class="hero__benefits-wrapper">
+      <div class="hero__benefit-item">
+        <div class="hero__benefit-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="9"></circle>
+            <polyline points="12 7 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="hero__benefit-text">
+          <p class="hero__benefit-label">5 min do tramwaju</p>
+        </div>
+      </div>
+      <div class="hero__benefit-item">
+        <div class="hero__benefit-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+        </div>
+        <div class="hero__benefit-text">
+          <p class="hero__benefit-label">Blisko centrum Krakowa</p>
+        </div>
+      </div>
+      <div class="hero__benefit-item">
+        <div class="hero__benefit-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <div class="hero__benefit-text">
+          <p class="hero__benefit-label">Domki i camping</p>
+        </div>
+      </div>
+      <div class="hero__benefit-item">
+        <div class="hero__benefit-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </div>
+        <div class="hero__benefit-text">
+          <p class="hero__benefit-label">24/7 ochrona</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
+
 
 <script>
   // Parallax and glassmorphism effect on scroll
   const hero = document.getElementById('hero');
   const navbar = document.querySelector('.navbar');
   const heroContent = document.querySelector('.hero__content');
-  const teaserIndicator = document.querySelector('.hero__scroll-indicator');
+  const scrollIndicator = document.querySelector('.hero__scroll-indicator');
 
   window.addEventListener('scroll', () => {
     if (!hero || !navbar) return;
 
     const scrollY = window.scrollY;
     const heroHeight = hero.offsetHeight;
-    const progress = Math.min(scrollY / (heroHeight * 0.6), 1);
+    const progress = Math.min(scrollY / (heroHeight * 0.5), 1);
 
     // Subtle parallax background
     if (scrollY < heroHeight) {
-      hero.style.transform = `translateY(${scrollY * 0.2}px)`;
+      hero.style.backgroundPosition = `center ${scrollY * 0.4}px`;
     }
 
-    // Content fade out - more gradual
+    // Content fade out
     if (heroContent) {
-      heroContent.style.opacity = Math.max(1 - progress * 1.2, 0);
+      heroContent.style.opacity = Math.max(1 - progress, 0);
     }
 
     // Hide scroll indicator when scrolling
-    if (teaserIndicator) {
-      teaserIndicator.style.opacity = Math.max(1 - progress, 0);
+    if (scrollIndicator) {
+      scrollIndicator.style.opacity = Math.max(1 - progress * 1.5, 0);
     }
 
-    // Glassmorphism navbar effect
-    if (scrollY > 100) {
-      navbar?.classList.add('is-glassmorphism');
+    // Premium glassmorphism navbar effect on scroll
+    if (scrollY > 50) {
+      navbar?.classList.add('is-hero-scroll');
     } else {
-      navbar?.classList.remove('is-glassmorphism');
+      navbar?.classList.remove('is-hero-scroll');
     }
   });
 
@@ -164,7 +157,7 @@
   const animateElements = () => {
     const elements = document.querySelectorAll('[class*="wrapper"]');
     elements.forEach((el, index) => {
-      el.style.animation = `slideIn ${0.6}s ${index * 0.12}s both var(--ease-smooth)`;
+      el.style.animation = `slideIn ${0.7}s ${index * 0.15}s both var(--ease-smooth)`;
     });
   };
 
@@ -177,78 +170,49 @@
 
 <style is:global>
 /* ==================== */
-/* HERO SECTION */
+/* HERO SECTION - CINEMATIC FULLSCREEN */
 /* ==================== */
 .hero {
   position: relative;
   width: 100%;
-  min-height: 100vh;
   height: 100vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   overflow: hidden;
-  background-color: #f5f5f5;
+  background-image: url('/images/hero/clepardia-hero.jpg.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-color: #0f0f0f;
 }
 
-/* Background layers */
-.hero__background {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-
-.hero__texture {
-  position: absolute;
-  inset: 0;
-  background: 
-    linear-gradient(135deg, rgba(245, 245, 245, 0.9) 0%, rgba(240, 240, 240, 0.95) 50%, rgba(235, 235, 235, 0.9) 100%),
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 2px,
-      rgba(200, 200, 200, 0.02) 2px,
-      rgba(200, 200, 200, 0.02) 4px
-    ),
-    radial-gradient(
-      ellipse at 20% 50%,
-      rgba(60, 179, 113, 0.08) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse at 80% 80%,
-      rgba(60, 179, 113, 0.05) 0%,
-      transparent 50%
-    );
-  z-index: 1;
-  animation: textureShift 20s ease-in-out infinite;
-}
-
-@keyframes textureShift {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 1.02;
-  }
-  100% {
-    opacity: 1;
+@media (max-width: 768px) {
+  .hero {
+    background-attachment: scroll;
   }
 }
 
+/* Cinematic dark overlay with green glow */
 .hero__overlay {
   position: absolute;
   inset: 0;
   background: 
+    linear-gradient(135deg, rgba(15, 15, 15, 0.65) 0%, rgba(0, 0, 0, 0.5) 50%, rgba(15, 15, 15, 0.6) 100%),
     radial-gradient(
-      ellipse at center,
-      rgba(255, 255, 255, 0.2) 0%,
-      rgba(255, 255, 255, 0) 60%,
-      rgba(60, 179, 113, 0.03) 100%
+      ellipse at 30% 50%,
+      rgba(60, 179, 113, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 70% 80%,
+      rgba(60, 179, 113, 0.08) 0%,
+      transparent 40%
     );
   z-index: 2;
-  backdrop-filter: blur(0.5px);
-  -webkit-backdrop-filter: blur(0.5px);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
 }
 
 /* Container and content */
@@ -256,31 +220,28 @@
   position: relative;
   z-index: 10;
   width: 100%;
+  height: 100%;
   max-width: var(--container-xl);
   margin: 0 auto;
-  padding: var(--container-padding-mobile);
+  padding: var(--space-16) var(--container-padding-mobile);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  text-align: center;
+  align-items: flex-start;
+  gap: var(--space-12);
+  padding-top: calc(4.5rem + var(--space-16));
 }
 
 @media (min-width: 768px) {
   .hero__container {
-    padding: var(--container-padding-tablet);
+    padding: calc(4.5rem + var(--space-20)) var(--container-padding-tablet) var(--space-20) var(--container-padding-tablet);
   }
 }
 
 @media (min-width: 1024px) {
   .hero__container {
-    padding: var(--container-padding-desktop);
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-16);
-    text-align: left;
+    padding: calc(4.5rem + var(--space-24)) var(--container-padding-desktop) var(--space-24) var(--container-padding-desktop);
+    max-width: 600px;
   }
 }
 
@@ -288,160 +249,68 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
-  align-items: center;
   width: 100%;
-  max-width: 900px;
   transition: opacity var(--transition-slow) var(--ease-smooth);
-}
-
-@media (min-width: 1024px) {
-  .hero__content {
-    align-items: flex-start;
-    max-width: 500px;
-    flex: 1;
-  }
-}
-
-/* Hero Visual */
-.hero__visual {
-  display: none;
-}
-
-@media (min-width: 1024px) {
-  .hero__visual {
-    display: block;
-    flex: 1;
-    max-width: 600px;
-  }
-}
-
-.hero__image-frame {
-  position: relative;
-  width: 100%;
-  height: 400px;
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  box-shadow: var(--shadow-xl);
-  background: linear-gradient(135deg, var(--color-gray-100) 0%, var(--color-gray-200) 100%);
-}
-
-.hero__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform var(--transition-base) var(--ease-smooth);
-}
-
-.hero__image:hover {
-  transform: scale(1.02);
-}
-
-.hero__image-placeholder {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
-  color: var(--color-white);
-}
-
-.hero__placeholder-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-4);
-  text-align: center;
-  padding: var(--space-8);
-}
-
-.hero__placeholder-icon {
-  width: 64px;
-  height: 64px;
-  opacity: 0.8;
-}
-
-.hero__placeholder-text {
-  font-size: var(--font-size-h4);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.4;
-  margin: 0;
+  max-width: 650px;
 }
 
 /* Subtitle */
 .hero__subtitle-wrapper {
-  animation: slideIn 0.6s var(--ease-smooth);
+  animation: slideIn 0.7s var(--ease-smooth);
 }
 
 .hero__subtitle {
-  display: inline-block;
-  font-size: var(--font-size-body-sm);
+  display: block;
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--letter-spacing-wider);
+  letter-spacing: var(--letter-spacing-wide);
+  color: rgba(255, 255, 255, 0.9);
   text-transform: uppercase;
-  color: var(--color-primary);
-  background: rgba(60, 179, 113, 0.12);
-  border: 1.5px solid rgba(60, 179, 113, 0.4);
-  padding: var(--space-3) var(--space-6);
-  border-radius: var(--radius-full);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 15px rgba(60, 179, 113, 0.12);
+  margin: 0;
+  padding: 0;
 }
 
 /* Title */
 .hero__title-wrapper {
-  animation: slideIn 0.6s 0.15s var(--ease-smooth) both;
+  animation: slideIn 0.7s 0.15s var(--ease-smooth) both;
 }
 
 .hero__title {
-  font-size: clamp(2.25rem, 10vw, 4.5rem);
+  font-size: clamp(2.5rem, 8vw, 5rem);
   font-weight: var(--font-weight-extra-bold);
   line-height: 1.1;
-  color: var(--color-black);
+  color: rgba(255, 255, 255, 0.98);
   margin: 0;
   padding: 0;
   letter-spacing: var(--letter-spacing-tight);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  text-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .hero__title-highlight {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  background: linear-gradient(135deg, #3CB371 0%, #63BE7B 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   position: relative;
-  display: inline-block;
-}
-
-.hero__title-highlight::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light), transparent);
-  border-radius: var(--radius-full);
+  display: inline;
+  filter: drop-shadow(0 2px 8px rgba(60, 179, 113, 0.4));
 }
 
 /* Description */
 .hero__description-wrapper {
-  animation: slideIn 0.6s 0.3s var(--ease-smooth) both;
+  animation: slideIn 0.7s 0.3s var(--ease-smooth) both;
 }
 
 .hero__description {
-  font-size: var(--font-size-body);
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
   line-height: var(--line-height-relaxed);
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.85);
   margin: 0;
   padding: 0;
-  max-width: 650px;
+  max-width: 600px;
   font-weight: var(--font-weight-normal);
-  letter-spacing: 0.2px;
+  letter-spacing: 0.3px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Actions */
@@ -449,10 +318,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
-  justify-content: center;
   align-items: center;
-  animation: slideIn 0.6s 0.45s var(--ease-smooth) both;
-  margin-top: var(--space-6);
+  animation: slideIn 0.7s 0.45s var(--ease-smooth) both;
+  margin-top: var(--space-4);
 }
 
 @media (max-width: 480px) {
@@ -468,7 +336,7 @@
   justify-content: center;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-8);
-  font-size: var(--font-size-body-sm);
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--letter-spacing-wide);
   text-transform: uppercase;
@@ -489,38 +357,40 @@
 
 /* Primary Button */
 .hero__button--primary {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  background: linear-gradient(135deg, #3CB371 0%, #2E8B57 100%);
   color: var(--color-white);
-  box-shadow: 0 8px 24px rgba(60, 179, 113, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 40px rgba(60, 179, 113, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .hero__button--primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(60, 179, 113, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(60, 179, 113, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .hero__button--primary:active {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 /* Secondary Button */
 .hero__button--secondary {
-  background: rgba(60, 179, 113, 0.08);
-  color: var(--color-primary);
-  border: 1.5px solid var(--color-primary);
-  box-shadow: 0 2px 8px rgba(60, 179, 113, 0.08);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--color-white);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .hero__button--secondary:hover {
-  background: var(--color-primary);
-  color: var(--color-white);
-  transform: translateY(-3px);
+  background: rgba(60, 179, 113, 0.2);
+  border-color: rgba(60, 179, 113, 0.6);
+  transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(60, 179, 113, 0.25);
 }
 
 .hero__button--secondary:active {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .hero__button-text {
@@ -540,52 +410,10 @@
   transform: translateY(2px);
 }
 
-/* Trust indicators */
-.hero__trust {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-8);
-  margin-top: var(--space-8);
-  width: 100%;
-  padding-top: var(--space-8);
-  border-top: 1px solid rgba(60, 179, 113, 0.2);
-  animation: slideIn 0.6s 0.6s var(--ease-smooth) both;
-}
-
-@media (max-width: 640px) {
-  .hero__trust {
-    gap: var(--space-6);
-    margin-top: var(--space-6);
-    padding-top: var(--space-6);
-  }
-}
-
-.hero__trust-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.hero__trust-value {
-  font-size: var(--font-size-h5);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
-  display: block;
-}
-
-.hero__trust-label {
-  font-size: var(--font-size-body-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wide);
-}
-
 /* Scroll indicator */
 .hero__scroll-indicator {
   position: absolute;
-  bottom: var(--space-16);
+  bottom: 120px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -594,6 +422,7 @@
   gap: var(--space-3);
   opacity: 1;
   transition: opacity var(--transition-slow) var(--ease-smooth);
+  z-index: 15;
 }
 
 @media (max-height: 600px) {
@@ -605,15 +434,16 @@
 .hero__scroll-text {
   font-size: var(--font-size-body-xs);
   font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wide);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 .hero__scroll-chevron {
   width: 24px;
   height: 24px;
-  color: var(--color-primary);
+  color: rgba(60, 179, 113, 0.8);
   animation: bounce 2s ease-in-out infinite;
 }
 
@@ -624,69 +454,171 @@
   }
   50% {
     transform: translateY(8px);
+    opacity: 0.7;
   }
 }
 
-/* Section teaser */
-.hero__teaser {
+/* Benefits Strip */
+.hero__benefits {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 80px;
+  z-index: 15;
+  background: linear-gradient(
+    to top,
+    rgba(15, 15, 15, 0.95) 0%,
+    rgba(15, 15, 15, 0.85) 30%,
+    rgba(15, 15, 15, 0.4) 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(60, 179, 113, 0.2);
+}
+
+.hero__benefits-wrapper {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: var(--space-8) var(--container-padding-mobile);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-8);
+}
+
+@media (min-width: 768px) {
+  .hero__benefits-wrapper {
+    padding: var(--space-10) var(--container-padding-tablet);
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-12);
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero__benefits-wrapper {
+    padding: var(--space-12) var(--container-padding-desktop);
+  }
+}
+
+.hero__benefit-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.hero__benefit-icon {
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(to top, var(--color-bg-primary) 0%, rgba(255, 255, 255, 0.8) 100%);
-  border-top: 1px solid var(--color-gray-100);
-  z-index: 5;
+  color: rgba(60, 179, 113, 0.96);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.hero__teaser-content {
+.hero__benefit-text {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
-  cursor: pointer;
-  transition: transform var(--transition-base) var(--ease-smooth);
 }
 
-.hero__teaser-content:hover {
-  transform: translateY(-2px);
-}
-
-.hero__teaser-text {
+.hero__benefit-label {
   font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
-  letter-spacing: var(--letter-spacing-wide);
-  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
-}
-
-.hero__teaser-arrow {
-  width: 20px;
-  height: 20px;
-  color: var(--color-primary);
-  animation: bounce 2s ease-in-out infinite;
+  padding: 0;
+  letter-spacing: 0.3px;
 }
 
 /* ==================== */
-/* GLASSMORPHISM NAVBAR ON SCROLL */
+/* NAVBAR MODIFICATIONS FOR HERO */
 /* ==================== */
-.navbar.is-glassmorphism {
-  background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border-bottom-color: rgba(60, 179, 113, 0.1);
+
+/* Transparent navbar over hero */
+.navbar {
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: transparent;
 }
 
-.navbar.is-glassmorphism .navbar__link {
-  color: var(--color-text-primary);
+.navbar__link,
+.navbar__link:hover {
+  color: rgba(255, 255, 255, 0.85);
 }
 
-.navbar.is-glassmorphism .navbar__link:hover {
-  color: var(--color-primary);
+.navbar__link::after {
+  background-color: rgba(60, 179, 113, 0.6);
+}
+
+.navbar__link:hover::after {
+  background-color: rgba(60, 179, 113, 0.9);
+}
+
+.navbar__cta {
+  background-color: rgba(60, 179, 113, 0.2);
+  color: var(--color-white);
+  border: 1.5px solid rgba(60, 179, 113, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(60, 179, 113, 0.15);
+}
+
+.navbar__cta:hover {
+  background-color: rgba(60, 179, 113, 0.35);
+  border-color: rgba(60, 179, 113, 0.8);
+  box-shadow: 0 8px 20px rgba(60, 179, 113, 0.25);
+}
+
+.navbar__logo .logo {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.navbar__logo .logo:hover {
+  color: rgba(60, 179, 113, 0.9);
+}
+
+.navbar__logo .logo__location {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.hamburger__line {
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+/* Enhanced navbar on scroll in hero */
+.navbar.is-hero-scroll {
+  background-color: rgba(15, 15, 15, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom-color: rgba(60, 179, 113, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.navbar.is-hero-scroll .navbar__link {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.navbar.is-hero-scroll .navbar__link:hover {
+  color: rgba(60, 179, 113, 0.95);
+}
+
+.navbar.is-hero-scroll .hamburger__line {
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+.navbar.is-hero-scroll .logo {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.navbar.is-hero-scroll .logo__location {
+  color: rgba(255, 255, 255, 0.6);
 }
 </style>
+
 
