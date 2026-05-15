@@ -209,24 +209,42 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: 2px;
+  gap: 4px;
 }
 
 .navbar__link {
   display: inline-block;
-  padding: 8px 14px;
+  padding: 8px 16px;
   font-size: 0.9rem;
   font-weight: 500;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
-  border-radius: 6px;
-  transition: all 200ms ease;
+  border-radius: 8px;
+  position: relative;
+  transition: color 240ms ease;
+}
+
+.navbar__link::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: #3cb371;
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .navbar__link:hover {
-  background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
+}
+
+.navbar__link:hover::after {
+  transform: scaleX(1);
 }
 
 /* Right: Languages & CTA */
@@ -242,46 +260,49 @@
 }
 
 .navbar__lang {
-  padding: 6px 10px;
+  padding: 7px 12px;
   font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.6);
-  border-radius: 4px;
+  letter-spacing: 0.09em;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.65);
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 200ms ease;
+  transition: all 240ms ease;
 }
 
 .navbar__lang:hover {
-  border-color: rgba(255, 255, 255, 0.4);
-  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.32);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .navbar__lang--active {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, rgba(60, 179, 113, 0.2) 0%, rgba(60, 179, 113, 0.12) 100%);
+  border-color: rgba(60, 179, 113, 0.4);
   color: #ffffff;
 }
 
 .navbar__cta {
-  padding: 10px 20px;
+  padding: 11px 24px;
   font-size: 0.85rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  background: linear-gradient(135deg, rgba(60, 179, 113, 0.9) 0%, rgba(44, 123, 88, 0.9) 100%);
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, #48d998 0%, #2e8b57 100%);
   border: none;
   color: #ffffff;
   border-radius: 999px;
   cursor: pointer;
-  transition: all 200ms ease;
+  transition: all 280ms ease;
   white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(60, 179, 113, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .navbar__cta:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(60, 179, 113, 0.3);
+  box-shadow: 0 12px 36px rgba(60, 179, 113, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, #52e5a3 0%, #328c5c 100%);
 }
 
 /* Mobile Toggle */
