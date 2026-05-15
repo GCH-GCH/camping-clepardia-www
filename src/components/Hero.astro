@@ -1,176 +1,396 @@
 ---
-// Camping Clepardia hero section
+// Camping Clepardia Hero Section - Hard Reset
 ---
 
 <section class="hero" id="hero">
-  <div class="hero__content">
-    <span class="hero__badge">Camping w Krakowie blisko centrum</span>
-    <h1 class="hero__title">Camping Clepardia</h1>
-    <p class="hero__description">Miejsca dla kamper�w, namiot�w i przyczep, komfortowe domki oraz szybki dojazd tramwajem do Starego Miasta.</p>
-    <div class="hero__actions">
-      <button type="button" class="hero__button hero__button--primary" onclick="window.scrollBy({top: window.innerHeight * 0.78, behavior: 'smooth'})">Sprawd� dost�pno��</button>
-      <button type="button" class="hero__button hero__button--secondary">Zobacz cennik</button>
+  {/* Overlays */}
+  <div class="hero__overlay hero__overlay--gradient"></div>
+  <div class="hero__overlay hero__overlay--bottom"></div>
+  <div class="hero__overlay hero__overlay--glow"></div>
+
+  {/* Main Content */}
+  <div class="hero__wrapper">
+    <div class="hero__content">
+      <span class="hero__badge">Camping w Krakowie • Blisko centrum</span>
+
+      <h1 class="hero__headline">Camping Clepardia</h1>
+
+      <p class="hero__subheadline">Komfortowy camping w Krakowie dla kamperów, namiotów, przyczep i gości domków.</p>
+
+      <p class="hero__description">Zatrzymaj się w spokojnej, zielonej części miasta i dojedź tramwajem do Starego Miasta w kilkanaście minut. Idealna baza na zwiedzanie Krakowa i okolic.</p>
+
+      <div class="hero__cta">
+        <button type="button" class="hero__button hero__button--primary">Sprawdź dostępność</button>
+        <button type="button" class="hero__button hero__button--secondary">Zobacz cennik</button>
+      </div>
     </div>
   </div>
 
-  <div class="hero__benefits">
-    <div class="hero__benefit"><span>5 min do tramwaju</span></div>
-    <div class="hero__benefit"><span>Blisko centrum</span></div>
-    <div class="hero__benefit"><span>Domki i camping</span></div>
-    <div class="hero__benefit"><span>24/7 ochrona</span></div>
+  {/* Benefits Bar */}
+  <div class="hero__benefits-bar">
+    <div class="benefits-wrapper">
+      <div class="hero__benefit">
+        <div class="benefit__icon">🚊</div>
+        <div class="benefit__text">5 min do tramwaju</div>
+      </div>
+      <div class="hero__benefit">
+        <div class="benefit__icon">🏙️</div>
+        <div class="benefit__text">Blisko centrum Krakowa</div>
+      </div>
+      <div class="hero__benefit">
+        <div class="benefit__icon">🏠</div>
+        <div class="benefit__text">Domki i camping</div>
+      </div>
+      <div class="hero__benefit">
+        <div class="benefit__icon">🛡️</div>
+        <div class="benefit__text">24/7 ochrona</div>
+      </div>
+    </div>
   </div>
 </section>
 
+<script>
+  // CTA Button Handlers
+  const primaryBtn = document.querySelector('.hero__button--primary');
+  const secondaryBtn = document.querySelector('.hero__button--secondary');
+
+  if (primaryBtn) {
+    primaryBtn.addEventListener('click', () => {
+      const heroHeight = window.innerHeight;
+      window.scrollBy({ top: heroHeight * 0.75, behavior: 'smooth' });
+    });
+  }
+
+  if (secondaryBtn) {
+    secondaryBtn.addEventListener('click', () => {
+      // Scroll to pricing section (if exists)
+      const pricingSection = document.getElementById('cennik');
+      if (pricingSection) {
+        pricingSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }
+</script>
+
 <style is:global>
+/* ==================== */
+/* HERO FULLSCREEN SECTION */
+/* ==================== */
+
 .hero {
   position: relative;
   width: 100%;
   min-height: 100vh;
   height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  background-image: linear-gradient(180deg, rgba(5, 7, 10, 0.58), rgba(5, 7, 10, 0.82)), url('/images/hero/clepardia-hero.jpg');
+  justify-content: center;
+  background-image: url('/images/hero/clepardia-hero.jpg');
   background-size: cover;
-  background-position: center center;
+  background-position: center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
+  overflow: hidden;
   color: #ffffff;
+  padding-top: 82px;
 }
 
-.hero::before {
-  content: '';
+/* Overlays */
+.hero__overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 20% 30%, rgba(60, 179, 113, 0.14), transparent 28%);
   z-index: 1;
   pointer-events: none;
 }
 
-.hero__content {
-  position: relative;
-  z-index: 2;
-  width: min(720px, 100% - 48px);
-  padding: 120px 24px 0;
+.hero__overlay--gradient {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.78) 0%,
+    rgba(0, 0, 0, 0.58) 38%,
+    rgba(0, 0, 0, 0.18) 72%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
 }
 
+.hero__overlay--bottom {
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.55), transparent 45%);
+}
+
+.hero__overlay--glow {
+  background: radial-gradient(
+    circle at 15% 25%,
+    rgba(60, 179, 113, 0.08) 0%,
+    transparent 35%
+  );
+}
+
+/* Wrapper & Content */
+.hero__wrapper {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  min-height: calc(100vh - 82px);
+}
+
+.hero__content {
+  width: 100%;
+  max-width: 720px;
+}
+
+/* Badge */
 .hero__badge {
   display: inline-flex;
   align-items: center;
-  padding: 10px 16px;
-  font-size: 0.82rem;
+  padding: 12px 18px;
+  font-size: clamp(0.7rem, 2vw, 0.85rem);
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.92);
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-.hero__title {
-  font-size: clamp(3rem, 8vw, 5.4rem);
-  line-height: 0.96;
+/* Headline */
+.hero__headline {
+  font-size: clamp(3rem, 9vw, 8.5rem);
+  font-weight: 900;
+  line-height: 0.88;
+  letter-spacing: -0.03em;
   margin: 0 0 24px;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  max-width: 12ch;
+  color: #ffffff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
+/* Subheadline */
+.hero__subheadline {
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  font-weight: 600;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 20px;
+  max-width: 620px;
+}
+
+/* Description */
 .hero__description {
-  font-size: clamp(1rem, 2vw, 1.15rem);
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  font-weight: 400;
   line-height: 1.75;
-  max-width: 680px;
-  color: rgba(255, 255, 255, 0.88);
-  margin: 0 0 32px;
+  color: rgba(255, 255, 255, 0.84);
+  margin: 0 0 40px;
+  max-width: 620px;
 }
 
-.hero__actions {
+/* CTA Buttons */
+.hero__cta {
   display: flex;
-  flex-wrap: wrap;
   gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 60px;
 }
 
 .hero__button {
+  padding: 14px 28px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   border: none;
   border-radius: 999px;
   cursor: pointer;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  min-width: 170px;
-  padding: 14px 22px;
-  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  transition: all 280ms ease;
+  white-space: nowrap;
 }
 
 .hero__button--primary {
-  background: linear-gradient(135deg, #3cb371 0%, #2c7b58 100%);
+  background: linear-gradient(135deg, #3cb371 0%, #2c8b57 100%);
   color: #ffffff;
-  box-shadow: 0 16px 42px rgba(60, 179, 113, 0.22);
+  box-shadow: 0 12px 40px rgba(60, 179, 113, 0.28);
 }
 
-.hero__button--primary:hover,
-.hero__button--primary:focus {
-  transform: translateY(-2px);
+.hero__button--primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(60, 179, 113, 0.36);
+}
+
+.hero__button--primary:active {
+  transform: translateY(-1px);
 }
 
 .hero__button--secondary {
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1.5px solid rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-.hero__button--secondary:hover,
-.hero__button--secondary:focus {
+.hero__button--secondary:hover {
   background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.36);
+  transform: translateY(-3px);
 }
 
-.hero__benefits {
-  position: relative;
-  z-index: 2;
+.hero__button--secondary:active {
+  transform: translateY(-1px);
+}
+
+/* Benefits Bar - Sticky at Bottom */
+.hero__benefits-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 3;
+  background: linear-gradient(
+    180deg,
+    rgba(5, 15, 10, 0) 0%,
+    rgba(5, 15, 10, 0.35) 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 32px 0;
+}
+
+.benefits-wrapper {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 32px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  width: min(1080px, 100% - 48px);
-  margin: auto 24px 32px;
-  padding: 18px 22px;
-  background: rgba(4, 6, 10, 0.67);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 22px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
 }
 
 .hero__benefit {
-  padding: 0;
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 0.95rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   text-align: center;
+  gap: 12px;
 }
 
-@media (max-width: 920px) {
-  .hero__benefits {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.benefit__icon {
+  font-size: 2rem;
+  line-height: 1;
+  display: block;
+}
+
+.benefit__text {
+  font-size: clamp(0.85rem, 1.5vw, 0.95rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.3;
+}
+
+/* ==================== */
+/* RESPONSIVE */
+/* ==================== */
+
+@media (max-width: 1024px) {
+  .hero {
+    padding-top: 76px;
+    min-height: calc(100vh - 76px);
+  }
+
+  .hero__wrapper {
+    min-height: calc(100vh - 76px - 160px);
+    padding: 0 24px;
+  }
+
+  .hero__headline {
+    font-size: clamp(2.5rem, 8vw, 6rem);
+  }
+
+  .benefits-wrapper {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    padding: 0 24px;
+  }
+
+  .hero__benefits-bar {
+    padding: 24px 0;
   }
 }
 
 @media (max-width: 640px) {
   .hero {
+    padding-top: 76px;
     background-attachment: scroll;
-    min-height: calc(100vh - 84px);
+  }
+
+  .hero__wrapper {
+    min-height: auto;
+    padding: 40px 16px;
   }
 
   .hero__content {
-    padding-top: 100px;
+    max-width: 100%;
   }
 
-  .hero__benefits {
+  .hero__headline {
+    font-size: clamp(2rem, 12vw, 4rem);
+    margin-bottom: 16px;
+  }
+
+  .hero__subheadline {
+    font-size: 1rem;
+    margin-bottom: 16px;
+  }
+
+  .hero__description {
+    font-size: 0.95rem;
+    margin-bottom: 28px;
+  }
+
+  .hero__badge {
+    font-size: 0.75rem;
+    margin-bottom: 24px;
+  }
+
+  .hero__cta {
+    flex-direction: column;
+    margin-bottom: 40px;
+  }
+
+  .hero__button {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+
+  .benefits-wrapper {
     grid-template-columns: 1fr;
-    padding: 18px;
-    margin: 24px 16px 24px;
+    gap: 16px;
+    padding: 0 16px;
+  }
+
+  .benefit__icon {
+    font-size: 1.75rem;
+  }
+
+  .benefit__text {
+    font-size: 0.8rem;
+  }
+
+  .hero__benefits-bar {
+    padding: 20px 0;
   }
 }
 </style>
