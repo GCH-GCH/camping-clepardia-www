@@ -1,5 +1,6 @@
 ---
 import { logoMain, logoMainPng } from '../data/assets';
+import { defaultLanguage, languages } from '../data/languages';
 
 const links = [
   ['#camping', 'Camping'],
@@ -9,42 +10,96 @@ const links = [
   ['#atrakcje', 'Atrakcje'],
   ['#kontakt', 'Kontakt'],
 ];
+
+const currentCode = Astro.url.pathname.split('/').filter(Boolean)[0] ?? defaultLanguage.code;
+const currentLanguage = languages.find((language) => language.code === currentCode) ?? defaultLanguage;
 ---
 
-<nav class="navbar" id="navbar">
+<nav class="navbar" id="navbar" aria-label="Główna nawigacja">
   <div class="navbar__container">
     <a href="/" class="navbar__brand" aria-label="Camping Clepardia Kraków">
       <img class="navbar__logo navbar__logo--desktop" src={logoMain} alt="Camping Clepardia" width="180" height="48" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
       <img class="navbar__logo navbar__logo--mobile" src={logoMain} alt="Camping Clepardia" width="158" height="42" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
     </a>
 
-    <ul class="navbar__menu">
-      {links.map(([href, label]) => <li><a href={href} class="navbar__link">{label}</a></li>)}
+    <ul class="navbar__menu" id="desktopNavigation">
+      {links.map(([href, label]) => (
+        <li><a href={href} class="navbar__link">{label}</a></li>
+      ))}
     </ul>
 
     <div class="navbar__right">
-      <div class="navbar__languages" aria-label="Wybór języka">
-        {['PL', 'EN', 'DE', 'IT'].map((lang) => <button type="button" class:list={['navbar__lang', lang === 'PL' && 'navbar__lang--active']}>{lang}</button>)}
+      <div class="language-dropdown" id="languageDropdown">
+        <button
+          class="language-dropdown__toggle"
+          id="languageToggle"
+          type="button"
+          aria-label="Zmień język"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-controls="languageMenu"
+        >
+          <img src={currentLanguage.flag} alt="" width="22" height="22" loading="eager" decoding="async" />
+          <span>{currentLanguage.code.toUpperCase()}</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+        </button>
+
+        <div class="language-dropdown__menu" id="languageMenu" role="menu" aria-label="Lista języków">
+          {languages.map((language) => (
+            <a
+              href={language.href}
+              class:list={['language-dropdown__item', language.code === currentLanguage.code && 'is-active']}
+              role="menuitem"
+            >
+              <img src={language.flag} alt="" width="24" height="24" loading="lazy" decoding="async" />
+              <span>{language.name}</span>
+              <strong>{language.code.toUpperCase()}</strong>
+            </a>
+          ))}
+        </div>
       </div>
+
       <a href="#rezerwacja" class="navbar__cta">Sprawdź dostępność</a>
     </div>
 
-    <button class="navbar__toggle" id="navbarToggle" aria-label="Otwórz menu" type="button">
+    <button
+      class="navbar__toggle"
+      id="navbarToggle"
+      aria-label="Otwórz menu"
+      aria-expanded="false"
+      aria-controls="navbarMobileMenu"
+      type="button"
+    >
       <span></span><span></span><span></span>
     </button>
   </div>
 
   <div class="navbar__mobile-menu" id="navbarMobileMenu" aria-hidden="true">
     <div class="mobile-menu__content">
-      <button class="mobile-menu__close" id="navbarClose" aria-label="Zamknij menu" type="button"><span></span><span></span></button>
       <div class="mobile-menu__brand">
         <img src={logoMain} alt="Camping Clepardia" width="178" height="42" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
       </div>
-      <ul class="mobile-menu__list">
-        {links.map(([href, label]) => <li><a href={href} class="mobile-menu__link">{label}</a></li>)}
+
+      <ul class="mobile-menu__list" aria-label="Menu mobilne">
+        {links.map(([href, label]) => (
+          <li><a href={href} class="mobile-menu__link">{label}</a></li>
+        ))}
       </ul>
+
       <div class="mobile-menu__footer">
-        <div class="mobile-menu__languages">{['PL', 'EN', 'DE', 'IT'].map((lang) => <button type="button" class:list={['navbar__lang', lang === 'PL' && 'navbar__lang--active']}>{lang}</button>)}</div>
+        <div class="mobile-menu__languages" aria-label="Wybór języka">
+          {languages.map((language) => (
+            <a
+              href={language.href}
+              class:list={['mobile-menu__lang', language.code === currentLanguage.code && 'is-active']}
+              aria-label={`${language.name} ${language.code.toUpperCase()}`}
+            >
+              <img src={language.flag} alt="" width="26" height="26" loading="lazy" decoding="async" />
+              <span>{language.code.toUpperCase()}</span>
+            </a>
+          ))}
+        </div>
+
         <a href="#rezerwacja" class="navbar__cta navbar__cta--mobile">Sprawdź dostępność</a>
       </div>
     </div>
@@ -52,59 +107,117 @@ const links = [
 </nav>
 
 <script>
-  const navbar = document.getElementById('navbar');
-  const toggle = document.getElementById('navbarToggle');
-  const close = document.getElementById('navbarClose');
-  const menu = document.getElementById('navbarMobileMenu');
-  const mobileLinks = document.querySelectorAll('.mobile-menu__link, .navbar__cta--mobile');
-  const navLinks = document.querySelectorAll('.navbar__link');
+  (() => {
+    const navbar = document.getElementById('navbar');
+    const toggle = document.getElementById('navbarToggle');
+    const menu = document.getElementById('navbarMobileMenu');
+    const languageDropdown = document.getElementById('languageDropdown');
+    const languageToggle = document.getElementById('languageToggle');
+    const languageMenu = document.getElementById('languageMenu');
+    const navLinks = document.querySelectorAll('.navbar__link, .mobile-menu__link');
+    const menuLinks = document.querySelectorAll('.mobile-menu__link, .navbar__cta--mobile, .mobile-menu__lang');
 
-  const openMenu = () => {
-    menu?.classList.add('is-open');
-    menu?.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-  };
-  const closeMenu = () => {
-    menu?.classList.remove('is-open');
-    menu?.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-  };
+    let isMenuOpen = false;
+    let isLanguageOpen = false;
 
-  toggle?.addEventListener('click', openMenu);
-  close?.addEventListener('click', closeMenu);
-  mobileLinks.forEach((link) => link.addEventListener('click', closeMenu));
-  window.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeMenu(); });
+    const setLanguageOpen = (open) => {
+      isLanguageOpen = open;
+      languageDropdown?.classList.toggle('is-open', open);
+      languageToggle?.setAttribute('aria-expanded', String(open));
+    };
 
-  const updateNav = () => {
-    navbar?.classList.toggle('is-scrolled', window.scrollY > 28);
-    let activeId = '';
-    document.querySelectorAll('section[id]').forEach((section) => {
-      const rect = section.getBoundingClientRect();
-      if (rect.top <= 130 && rect.bottom >= 130) activeId = `#${section.id}`;
+    const setMenuOpen = (open) => {
+      isMenuOpen = open;
+      menu?.classList.toggle('is-open', open);
+      toggle?.classList.toggle('is-open', open);
+      menu?.setAttribute('aria-hidden', String(!open));
+      toggle?.setAttribute('aria-expanded', String(open));
+      toggle?.setAttribute('aria-label', open ? 'Zamknij menu' : 'Otwórz menu');
+      document.body.classList.toggle('has-mobile-menu-open', open);
+
+      if (open) {
+        setLanguageOpen(false);
+        window.setTimeout(() => {
+          const firstLink = menu?.querySelector('a');
+          if (firstLink instanceof HTMLElement) firstLink.focus({ preventScroll: true });
+        }, 120);
+      } else {
+        toggle instanceof HTMLElement && toggle.focus({ preventScroll: true });
+      }
+    };
+
+    toggle?.addEventListener('click', () => setMenuOpen(!isMenuOpen));
+
+    menuLinks.forEach((link) => {
+      link.addEventListener('click', () => setMenuOpen(false));
     });
-    navLinks.forEach((link) => link.classList.toggle('is-active', link.getAttribute('href') === activeId));
-  };
-  updateNav();
-  window.addEventListener('scroll', updateNav, { passive: true });
+
+    languageToggle?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setLanguageOpen(!isLanguageOpen);
+    });
+
+    languageMenu?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setLanguageOpen(false);
+    });
+
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof Node) || !languageDropdown?.contains(target)) setLanguageOpen(false);
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      setLanguageOpen(false);
+      if (isMenuOpen) setMenuOpen(false);
+    });
+
+    const updateNav = () => {
+      navbar?.classList.toggle('is-scrolled', window.scrollY > 24);
+      let activeId = '';
+
+      document.querySelectorAll('section[id], footer[id]').forEach((section) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= 140 && rect.bottom >= 140) activeId = `#${section.id}`;
+      });
+
+      navLinks.forEach((link) => {
+        link.classList.toggle('is-active', link.getAttribute('href') === activeId);
+      });
+    };
+
+    updateNav();
+    window.addEventListener('scroll', updateNav, { passive: true });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 900 && isMenuOpen) setMenuOpen(false);
+    });
+  })();
 </script>
 
 <style is:global>
+body.has-mobile-menu-open {
+  overflow: hidden;
+  touch-action: none;
+}
+
 .navbar {
   position: fixed;
   inset: 0 0 auto;
   z-index: 1000;
-  height: 82px;
-  background: rgba(5, 15, 10, .32);
-  border-bottom: 1px solid rgba(255,255,255,.07);
-  backdrop-filter: blur(16px);
+  height: 76px;
+  background: rgba(5, 15, 10, .38);
+  border-bottom: 1px solid rgba(255,255,255,.11);
+  backdrop-filter: blur(18px) saturate(145%);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
   transition: height .28s ease, background .28s ease, box-shadow .28s ease, border-color .28s ease;
 }
 
 .navbar.is-scrolled {
-  height: 70px;
+  height: 64px;
   background: rgba(5, 15, 10, .84);
-  border-bottom-color: rgba(255,255,255,.12);
-  box-shadow: 0 14px 42px rgba(0,0,0,.18);
+  border-bottom-color: rgba(255,255,255,.16);
+  box-shadow: 0 18px 54px rgba(0,0,0,.26);
 }
 
 .navbar__container {
@@ -113,7 +226,7 @@ const links = [
   margin: 0 auto;
   padding: 0 32px;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 30px;
 }
@@ -122,6 +235,7 @@ const links = [
   display: flex;
   align-items: center;
   color: #fff;
+  min-width: 0;
 }
 
 .navbar__logo {
@@ -129,10 +243,15 @@ const links = [
   width: auto;
   object-fit: contain;
   image-rendering: auto;
+  filter: drop-shadow(0 12px 26px rgba(0,0,0,.18));
 }
 
 .navbar__logo--desktop {
   height: 48px;
+}
+
+.navbar.is-scrolled .navbar__logo--desktop {
+  height: 42px;
 }
 
 .navbar__logo--mobile {
@@ -145,7 +264,7 @@ const links = [
   justify-self: center;
   display: none;
   align-items: center;
-  gap: 12px;
+  gap: clamp(10px, 1.4vw, 20px);
   margin: 0;
   padding: 0;
 }
@@ -153,22 +272,24 @@ const links = [
 .navbar__link {
   position: relative;
   display: inline-flex;
-  padding: 10px 8px;
+  padding: 12px 4px;
   color: rgba(255,255,255,.78);
-  font-size: .88rem;
-  font-weight: 800;
+  font-size: .86rem;
+  font-weight: 850;
   letter-spacing: .06em;
+  transition: color .24s ease, transform .24s ease;
 }
 
 .navbar__link::after {
   content: '';
   position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 6px;
   height: 2px;
   border-radius: 999px;
   background: linear-gradient(90deg, #3CB371, #9ee7bd);
+  box-shadow: 0 0 18px rgba(60,179,113,.38);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform .28s ease;
@@ -179,6 +300,10 @@ const links = [
   color: #fff;
 }
 
+.navbar__link:hover {
+  transform: translateY(-1px);
+}
+
 .navbar__link:hover::after,
 .navbar__link.is-active::after {
   transform: scaleX(1);
@@ -187,34 +312,116 @@ const links = [
 .navbar__right {
   display: none;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
 }
 
-.navbar__languages {
-  display: flex;
-  gap: 7px;
+.language-dropdown {
+  position: relative;
 }
 
-.navbar__lang {
-  min-width: 38px;
-  min-height: 34px;
-  padding: 7px 10px;
-  border: 1px solid rgba(255,255,255,.14);
+.language-dropdown__toggle {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 11px;
+  border: 1px solid rgba(255,255,255,.16);
   border-radius: 999px;
-  background: rgba(255,255,255,.06);
-  color: rgba(255,255,255,.7);
-  font-size: .72rem;
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  font-size: .76rem;
   font-weight: 900;
+  letter-spacing: .08em;
+  transition: border-color .24s ease, background .24s ease, transform .24s ease;
 }
 
-.navbar__lang:hover,
-.navbar__lang--active {
-  border-color: rgba(60,179,113,.55);
+.language-dropdown__toggle:hover,
+.language-dropdown.is-open .language-dropdown__toggle {
+  border-color: rgba(143,224,180,.52);
+  background: rgba(255,255,255,.13);
+  transform: translateY(-1px);
+}
+
+.language-dropdown__toggle img,
+.language-dropdown__item img,
+.mobile-menu__lang img {
+  display: block;
+  border-radius: 999px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0,0,0,.18);
+}
+
+.language-dropdown__toggle svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .72;
+  transition: transform .24s ease;
+}
+
+.language-dropdown.is-open .language-dropdown__toggle svg {
+  transform: rotate(180deg);
+}
+
+.language-dropdown__menu {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: 0;
+  width: 250px;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 22px;
+  background: rgba(8, 20, 15, .92);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 28px 74px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.08);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scale(.98);
+  transform-origin: top right;
+  transition: opacity .22s ease, visibility .22s ease, transform .22s ease;
+}
+
+.language-dropdown.is-open .language-dropdown__menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.language-dropdown__item {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  border-radius: 15px;
+  color: rgba(255,255,255,.82);
+  font-size: .86rem;
+  font-weight: 800;
+  transition: background .22s ease, color .22s ease, transform .22s ease;
+}
+
+.language-dropdown__item strong {
+  color: rgba(143,224,180,.92);
+  font-size: .72rem;
+  letter-spacing: .08em;
+}
+
+.language-dropdown__item:hover,
+.language-dropdown__item.is-active {
   color: #fff;
-  background: rgba(60,179,113,.22);
+  background: rgba(60,179,113,.16);
+  transform: translateX(2px);
 }
 
 .navbar__cta {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -224,10 +431,21 @@ const links = [
   color: #fff;
   background: linear-gradient(135deg, #67dea2 0%, #3CB371 48%, #24794e 100%);
   box-shadow: 0 14px 34px rgba(60,179,113,.28), inset 0 1px 0 rgba(255,255,255,.22);
-  font-size: .82rem;
+  font-size: .8rem;
   font-weight: 900;
   letter-spacing: .08em;
   text-transform: uppercase;
+  transition: transform .24s ease, box-shadow .24s ease;
+}
+
+.navbar__cta::before {
+  content: '';
+  position: absolute;
+  inset: -60% auto -60% -30%;
+  width: 34%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.42), transparent);
+  transform: translateX(-140%) rotate(18deg);
+  transition: transform .7s ease;
 }
 
 .navbar__cta:hover {
@@ -236,24 +454,50 @@ const links = [
   box-shadow: 0 18px 46px rgba(60,179,113,.42);
 }
 
+.navbar__cta:hover::before {
+  transform: translateX(420%) rotate(18deg);
+}
+
 .navbar__toggle {
+  position: relative;
   justify-self: end;
-  width: 46px;
-  height: 46px;
+  width: 48px;
+  height: 48px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.09);
   display: grid;
   place-content: center;
   gap: 5px;
+  z-index: 1002;
+  transition: background .24s ease, border-color .24s ease, transform .24s ease;
+}
+
+.navbar__toggle:hover,
+.navbar__toggle.is-open {
+  border-color: rgba(143,224,180,.42);
+  background: rgba(255,255,255,.14);
 }
 
 .navbar__toggle span {
   display: block;
-  width: 22px;
+  width: 23px;
   height: 2px;
   border-radius: 99px;
   background: #fff;
+  transition: transform .28s ease, opacity .22s ease;
+}
+
+.navbar__toggle.is-open span:first-child {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.navbar__toggle.is-open span:nth-child(2) {
+  opacity: 0;
+}
+
+.navbar__toggle.is-open span:last-child {
+  transform: translateY(-7px) rotate(-45deg);
 }
 
 .navbar__mobile-menu {
@@ -262,8 +506,12 @@ const links = [
   z-index: 999;
   opacity: 0;
   visibility: hidden;
-  background: rgba(4, 14, 10, .96);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(60,179,113,.20), transparent 34%),
+    radial-gradient(circle at 82% 72%, rgba(239,174,99,.14), transparent 36%),
+    rgba(4, 14, 10, .96);
   backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px);
   transition: opacity .28s ease, visibility .28s ease;
 }
 
@@ -276,13 +524,21 @@ const links = [
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  padding: 96px 24px 28px;
+  padding: 104px 24px max(28px, env(safe-area-inset-bottom));
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .34s ease .05s, transform .34s ease .05s;
+}
+
+.navbar__mobile-menu.is-open .mobile-menu__content {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .mobile-menu__brand {
   display: flex;
   justify-content: center;
-  margin-bottom: 24px;
+  margin-bottom: 26px;
 }
 
 .mobile-menu__brand img {
@@ -293,27 +549,6 @@ const links = [
   filter: drop-shadow(0 18px 38px rgba(60,179,113,.25));
 }
 
-.mobile-menu__close {
-  position: absolute;
-  top: 24px;
-  right: 22px;
-  width: 46px;
-  height: 46px;
-  border-radius: 16px;
-  background: rgba(255,255,255,.08);
-}
-
-.mobile-menu__close span {
-  position: absolute;
-  left: 13px;
-  top: 22px;
-  width: 20px;
-  height: 2px;
-  background: #fff;
-}
-.mobile-menu__close span:first-child { transform: rotate(45deg); }
-.mobile-menu__close span:last-child { transform: rotate(-45deg); }
-
 .mobile-menu__list {
   display: grid;
   gap: 2px;
@@ -323,40 +558,110 @@ const links = [
 }
 
 .mobile-menu__link {
+  position: relative;
   display: flex;
-  padding: 18px 0;
+  align-items: center;
+  min-height: 58px;
+  padding: 16px 0;
   border-bottom: 1px solid rgba(255,255,255,.09);
   color: #fff;
-  font-size: 1.15rem;
-  font-weight: 850;
+  font-size: clamp(1.28rem, 7vw, 2.4rem);
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.mobile-menu__link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3CB371, transparent);
+  transition: width .28s ease;
+}
+
+.mobile-menu__link:hover::after,
+.mobile-menu__link.is-active::after {
+  width: 100%;
 }
 
 .mobile-menu__footer {
   margin-top: auto;
   display: grid;
-  gap: 18px;
+  gap: 20px;
   padding-top: 28px;
 }
 
 .mobile-menu__languages {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 9px;
 }
 
-.navbar__cta--mobile { width: 100%; }
+.mobile-menu__lang {
+  min-height: 54px;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.07);
+  color: rgba(255,255,255,.82);
+  font-size: .7rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  transition: background .22s ease, border-color .22s ease, transform .22s ease;
+}
 
-@media (min-width: 1080px) {
+.mobile-menu__lang:hover,
+.mobile-menu__lang.is-active {
+  color: #fff;
+  border-color: rgba(143,224,180,.42);
+  background: rgba(60,179,113,.18);
+  transform: translateY(-2px);
+}
+
+.navbar__cta--mobile {
+  width: 100%;
+  min-height: 54px;
+}
+
+.navbar a:focus-visible,
+.navbar button:focus-visible {
+  outline: 2px solid #8fe0b4;
+  outline-offset: 4px;
+}
+
+@media (min-width: 901px) {
   .navbar__menu,
   .navbar__right { display: flex; }
   .navbar__toggle { display: none; }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .navbar,
   .navbar.is-scrolled { height: 74px; }
-  .navbar__container { padding: 0 18px; }
+  .navbar__container { padding: 0 max(18px, env(safe-area-inset-left)); grid-template-columns: auto 1fr auto; }
   .navbar__logo--desktop { display: none; }
   .navbar__logo--mobile { display: block; }
+}
+
+@media (max-width: 420px) {
+  .mobile-menu__content { padding-left: 18px; padding-right: 18px; }
+  .mobile-menu__languages { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar,
+  .navbar *,
+  .navbar *::before,
+  .navbar *::after {
+    animation: none !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 </style>
