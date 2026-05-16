@@ -36,7 +36,15 @@ const bungalowCards = pricingConfig.stayTypes
     note: 'note' in type ? type.note : undefined,
     requiresConfirmation: 'requiresConfirmation' in type ? type.requiresConfirmation : false,
   }));
-const highSeasonRange = `${formatSeasonDate(pricingConfig.seasons.high.start)}-${formatSeasonDate(pricingConfig.seasons.high.end)}`;
+const highSeasonRange = `${formatSeasonDate(pricingConfig.seasons.high.start)}–${formatSeasonDate(pricingConfig.seasons.high.end)}`;
+const dogAddon = pricingConfig.addons.find((addon) => addon.id === 'dog');
+const electricityAddon = pricingConfig.addons.find((addon) => addon.id === 'electricity');
+const pricingInfoBarItems = [
+  { label: 'Wysoki sezon', value: highSeasonRange },
+  { label: 'Niski sezon', value: 'pozostałe terminy' },
+  { label: 'Pies', value: dogAddon?.price === 0 ? 'bezpłatnie' : dogAddon ? `${formatPrice(dogAddon.price)} / noc` : 'do potwierdzenia' },
+  { label: 'Prąd', value: electricityAddon ? `${formatPrice(electricityAddon.price)} / noc` : 'do potwierdzenia' },
+];
 ---
 
 <section class="page-mini-hero reveal-section">
@@ -53,6 +61,7 @@ const highSeasonRange = `${formatSeasonDate(pricingConfig.seasons.high.start)}-$
   </div>
 </section>
 
+{page.slug !== 'cennik' && (
 <section class="site-section page-detail reveal-section">
   <div class="container page-detail__grid">
     <div class="page-detail__intro">
@@ -72,6 +81,20 @@ const highSeasonRange = `${formatSeasonDate(pricingConfig.seasons.high.start)}-$
     </div>
   </div>
 </section>
+)}
+
+{page.slug === 'cennik' && (
+  <section class="pricing-quick-info reveal-section" aria-label="Najważniejsze informacje o cenniku">
+    <div class="container pricing-quick-info__grid">
+      {pricingInfoBarItems.map((item) => (
+        <div class="pricing-quick-info__item">
+          <span>{item.label}</span>
+          <strong>{item.value}</strong>
+        </div>
+      ))}
+    </div>
+  </section>
+)}
 
 {page.slug === 'domki' && (
   <section class="site-section bungalow-types reveal-section">
@@ -113,6 +136,28 @@ const highSeasonRange = `${formatSeasonDate(pricingConfig.seasons.high.start)}-$
 )}
 
 {page.slug === 'cennik' && <PricingCalculator />}
+
+{page.slug === 'cennik' && (
+  <section class="site-section page-detail pricing-guidance reveal-section">
+    <div class="container page-detail__grid">
+      <div class="page-detail__intro">
+        <span class="section-kicker">Ważne przed rezerwacją</span>
+        <h2 class="section-title">Najważniejsze informacje</h2>
+        <p class="section-copy">{page.seoDescription}</p>
+      </div>
+
+      <div class="page-detail__cards pricing-guidance__cards">
+        {page.highlights.map((item, index) => (
+          <article class="premium-card reveal-section page-detail__card" style={`--reveal-delay: ${index * 80}ms`}>
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <h3>{item.title}</h3>
+            <p>{item.copy}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
 
 <section class="site-section page-cta reveal-section">
   <div class="container">
@@ -197,6 +242,58 @@ const highSeasonRange = `${formatSeasonDate(pricingConfig.seasons.high.start)}-$
   background:
     radial-gradient(circle at 88% 8%, rgba(60,179,113,.12), transparent 30%),
     linear-gradient(180deg, #fbfbf7, #f2f7f0);
+}
+
+.pricing-quick-info {
+  padding: 0 0 clamp(36px, 6vw, 70px);
+  margin-top: -34px;
+  position: relative;
+  z-index: 2;
+}
+
+.pricing-quick-info__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: clamp(14px, 2vw, 18px);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 28px;
+  background: rgba(8, 25, 16, .82);
+  box-shadow: 0 24px 70px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.10);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+}
+
+.pricing-quick-info__item {
+  min-height: 86px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255,255,255,.075);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.pricing-quick-info__item span {
+  color: #8fe0b4;
+  font-size: .74rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.pricing-quick-info__item strong {
+  color: #fff;
+  font-size: clamp(1.08rem, 2vw, 1.35rem);
+  line-height: 1.15;
+  font-weight: 950;
+}
+
+.pricing-guidance {
+  background:
+    radial-gradient(circle at 14% 12%, rgba(60,179,113,.16), transparent 34%),
+    linear-gradient(180deg, #fbfbf7, #edf6ef);
 }
 
 .page-detail__grid {
@@ -396,6 +493,10 @@ const highSeasonRange = `${formatSeasonDate(pricingConfig.seasons.high.start)}-$
     grid-template-columns: repeat(3, 1fr);
   }
 
+  .pricing-quick-info__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
   .bungalow-types__grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -408,6 +509,10 @@ const highSeasonRange = `${formatSeasonDate(pricingConfig.seasons.high.start)}-$
 
 @media (min-width: 1120px) {
   .bungalow-types__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .pricing-guidance__cards {
     grid-template-columns: repeat(4, 1fr);
   }
 }

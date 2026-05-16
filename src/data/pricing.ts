@@ -59,7 +59,7 @@ export const pricingConfig = {
     { id: 'motorcycle', label: 'Motocykl', price: 25 },
     { id: 'cargo-trailer', label: 'Przyczepa bagażowa', price: 20 },
     { id: 'bus', label: 'Autobus', price: 160 },
-    { id: 'parking', label: 'Parking', price: 35 },
+    { id: 'parking', label: 'Samochód', price: 35 },
     { id: 'extra-car', label: 'Dodatkowe auto', price: 35 },
   ],
 } as const;

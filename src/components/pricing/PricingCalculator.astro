@@ -115,19 +115,42 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
 
       <aside class="premium-card pricing-summary" aria-label="Podsumowanie kalkulacji" aria-live="polite">
         <div class="pricing-summary__head">
-          <span>Podsumowanie</span>
+          <div>
+            <span>Podsumowanie</span>
+            <small>Suma końcowa</small>
+          </div>
           <strong data-total data-value="0">0 PLN</strong>
         </div>
-        <div class="pricing-summary__meta">
+        <dl class="pricing-summary__details">
           <div>
-            <span>Noce</span>
-            <strong data-summary-nights>1</strong>
+            <dt>Termin</dt>
+            <dd data-summary-dates>Do uzupełnienia</dd>
           </div>
           <div>
-            <span>Średnio / noc</span>
-            <strong data-nightly data-value="0">0 PLN</strong>
+            <dt>Liczba nocy</dt>
+            <dd data-summary-nights>1 noc</dd>
           </div>
-        </div>
+          <div>
+            <dt>Typ pobytu</dt>
+            <dd data-summary-stay>Kamper</dd>
+          </div>
+          <div>
+            <dt>Sezon</dt>
+            <dd data-summary-season>Niski sezon</dd>
+          </div>
+          <div>
+            <dt>Osoby</dt>
+            <dd data-summary-people>2 dorosłych</dd>
+          </div>
+          <div>
+            <dt>Dodatki</dt>
+            <dd data-summary-addons>Brak</dd>
+          </div>
+          <div>
+            <dt>Cena za noc</dt>
+            <dd data-nightly-rate>0 PLN / noc</dd>
+          </div>
+        </dl>
         <div class="pricing-summary__breakdown" data-breakdown></div>
         <p class="pricing-summary__footnote" data-summary-footnote>
           To orientacyjna kalkulacja. Recepcja potwierdza dostępność, sezon i szczegóły pobytu.
@@ -143,12 +166,32 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
     </button>
     <div id="pricingMobilePanel" class="pricing-mobile-summary__panel" data-mobile-panel hidden>
       <div class="pricing-mobile-summary__row">
-        <span>Noce</span>
-        <strong data-mobile-nights>1</strong>
+        <span>Termin</span>
+        <strong data-mobile-dates>Do uzupełnienia</strong>
       </div>
       <div class="pricing-mobile-summary__row">
-        <span>Średnio / noc</span>
-        <strong data-mobile-nightly data-value="0">0 PLN</strong>
+        <span>Noce</span>
+        <strong data-mobile-nights>1 noc</strong>
+      </div>
+      <div class="pricing-mobile-summary__row">
+        <span>Typ pobytu</span>
+        <strong data-mobile-stay>Kamper</strong>
+      </div>
+      <div class="pricing-mobile-summary__row">
+        <span>Sezon</span>
+        <strong data-mobile-season>Niski sezon</strong>
+      </div>
+      <div class="pricing-mobile-summary__row">
+        <span>Osoby</span>
+        <strong data-mobile-people>2 dorosłych</strong>
+      </div>
+      <div class="pricing-mobile-summary__row">
+        <span>Dodatki</span>
+        <strong data-mobile-addons>Brak</strong>
+      </div>
+      <div class="pricing-mobile-summary__row">
+        <span>Cena za noc</span>
+        <strong data-mobile-rate>0 PLN / noc</strong>
       </div>
       <div class="pricing-mobile-summary__breakdown" data-mobile-breakdown></div>
     </div>
@@ -169,20 +212,47 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
     const notice = root.querySelector('[data-summer-notice]');
     const familyNotice = root.querySelector('[data-family-notice]');
     const totalEl = root.querySelector('[data-total]');
-    const nightlyEl = root.querySelector('[data-nightly]');
+    const summaryDates = root.querySelector('[data-summary-dates]');
     const summaryNights = root.querySelector('[data-summary-nights]');
+    const summaryStay = root.querySelector('[data-summary-stay]');
+    const summarySeason = root.querySelector('[data-summary-season]');
+    const summaryPeople = root.querySelector('[data-summary-people]');
+    const summaryAddons = root.querySelector('[data-summary-addons]');
+    const nightlyRate = root.querySelector('[data-nightly-rate]');
     const breakdownEl = root.querySelector('[data-breakdown]');
     const summaryFootnote = root.querySelector('[data-summary-footnote]');
     const mobileSummary = document.querySelector('[data-mobile-summary]');
     const mobileToggle = document.querySelector('[data-mobile-toggle]');
     const mobilePanel = document.querySelector('[data-mobile-panel]');
     const mobileTotal = document.querySelector('[data-mobile-total]');
+    const mobileDates = document.querySelector('[data-mobile-dates]');
     const mobileNights = document.querySelector('[data-mobile-nights]');
-    const mobileNightly = document.querySelector('[data-mobile-nightly]');
+    const mobileStay = document.querySelector('[data-mobile-stay]');
+    const mobileSeason = document.querySelector('[data-mobile-season]');
+    const mobilePeople = document.querySelector('[data-mobile-people]');
+    const mobileAddons = document.querySelector('[data-mobile-addons]');
+    const mobileRate = document.querySelector('[data-mobile-rate]');
     const mobileBreakdown = document.querySelector('[data-mobile-breakdown]');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const formatMoney = (value) => `${Math.round(value).toLocaleString('pl-PL')} ${currency}`;
     const formatDisplayMoney = (value, approximate = false) => `${approximate ? 'od ' : ''}${formatMoney(value)}`;
+    const setText = (element, value) => {
+      if (element) element.textContent = value;
+    };
+    const formatDateDisplay = (date) => {
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const year = date.getUTCFullYear();
+      return `${day}.${month}.${year}`;
+    };
+    const formatNightsText = (nights) => {
+      const mod10 = nights % 10;
+      const mod100 = nights % 100;
+      if (nights === 1) return '1 noc';
+      if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return `${nights} noce`;
+      return `${nights} nocy`;
+    };
     const toDateValue = (date) => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -192,7 +262,7 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
     const parseDate = (value) => {
       if (!value) return null;
       const parts = value.split('-').map(Number);
-      if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+      if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) return null;
       return new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
     };
     const addDays = (date, days) => new Date(date.getTime() + days * DAY);
@@ -211,10 +281,13 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
       const selectedId = selected?.value ?? config.stayTypes[0].id;
       return config.stayTypes.find((type) => type.id === selectedId) ?? config.stayTypes[0];
     };
+    const normalizeCounterValue = (value) => {
+      const numericValue = Number(value);
+      return Number.isFinite(numericValue) ? Math.max(0, numericValue) : 0;
+    };
     const getCounterValue = (name) => {
       const input = root.querySelector(`[data-counter-input="${name}"]`);
-      const value = Number(input?.value ?? 0);
-      return Number.isFinite(value) ? Math.max(0, value) : 0;
+      return normalizeCounterValue(input?.value ?? 0);
     };
     const getNights = () => {
       const arrival = parseDate(arrivalInput?.value);
@@ -237,18 +310,52 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
       }
       return type.price;
     };
+    const getSeasonSummary = (nightDates) => {
+      if (!nightDates.length) return 'Niski sezon';
+      const highSeasonNights = nightDates.filter(isHighSeason).length;
+      if (highSeasonNights === 0) return 'Niski sezon';
+      if (highSeasonNights === nightDates.length) return 'Wysoki sezon';
+      return 'Sezon mieszany';
+    };
+    const getRateSummary = (type, nightDates) => {
+      if ('startingPrice' in type) return `od ${formatMoney(type.startingPrice)} / noc`;
+
+      const rates = nightDates.map((date) => getStayRate(type, date));
+      const uniqueRates = Array.from(new Set(rates)).sort((a, b) => a - b);
+      if (!uniqueRates.length) return `${formatMoney(getStayRate(type, new Date()))} / noc`;
+      if (uniqueRates.length === 1) return `${formatMoney(uniqueRates[0])} / noc`;
+      return `${formatMoney(uniqueRates[0])}-${formatMoney(uniqueRates[uniqueRates.length - 1])} / noc`;
+    };
+    const getPeopleSummary = ({ adults, children, toddlers }) => {
+      const parts = [];
+      if (adults > 0) parts.push(`${adults} dor.`);
+      if (children > 0) parts.push(`${children} dzieci 4-14`);
+      if (toddlers > 0) parts.push(`${toddlers} dzieci do 4`);
+      return parts.length ? parts.join(', ') : 'Brak osób';
+    };
+    const getAddonsSummary = (addons) => addons.length ? addons.map((addon) => addon.label).join(', ') : 'Brak';
     const isConfirmationStay = (type) => Boolean(type.requiresConfirmation);
     const animateMoney = (element, nextValue, approximate = false) => {
       if (!element) return;
+      if (reduceMotion) {
+        element.textContent = formatDisplayMoney(nextValue, approximate);
+        element.dataset.value = String(nextValue);
+        return;
+      }
       const previousValue = Number(element.dataset.value ?? 0);
       const start = performance.now();
       const duration = 420;
+      element.classList.add('is-updating');
       const tick = (now) => {
         const progress = Math.min(1, (now - start) / duration);
         const eased = 1 - Math.pow(1 - progress, 3);
         const value = previousValue + (nextValue - previousValue) * eased;
         element.textContent = formatDisplayMoney(value, approximate);
-        if (progress < 1) requestAnimationFrame(tick);
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          element.classList.remove('is-updating');
+        }
       };
       element.dataset.value = String(nextValue);
       requestAnimationFrame(tick);
@@ -288,6 +395,8 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
       const type = getSelectedStayType();
       const nights = getNights();
       const nightDates = getNightDates();
+      const arrival = parseDate(arrivalInput?.value);
+      const departure = parseDate(departureInput?.value);
       const adults = getCounterValue('adults');
       const children = getCounterValue('children');
       const toddlers = getCounterValue('toddlers');
@@ -302,27 +411,44 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
       const peopleTotal = peoplePerNight * nights;
       const addonsTotal = addonsPerNight * nights;
       const total = accommodationTotal + peopleTotal + addonsTotal;
-      const averageNightly = nights > 0 ? total / nights : total;
       const hasSummerCamping = type.category === 'camping' && nightDates.some(isSummerNoticeMonth);
       const requiresConfirmation = isConfirmationStay(type);
+      const datesSummary = arrival && departure ? `${formatDateDisplay(arrival)} - ${formatDateDisplay(departure)}` : 'Do uzupełnienia';
+      const nightsSummary = formatNightsText(nights);
+      const seasonSummary = getSeasonSummary(nightDates);
+      const peopleSummary = getPeopleSummary({ adults, children, toddlers });
+      const addonsSummary = getAddonsSummary(selectedAddonItems);
+      const rateSummary = getRateSummary(type, nightDates);
 
       const breakdown = [
         {
-          label: `${type.label} x ${nights} noc${nights === 1 ? '' : 'e'}`,
+          label: `${type.label} x ${nightsSummary}`,
           amount: accommodationTotal,
           approximate: requiresConfirmation,
           note: requiresConfirmation ? 'Cena od 300 PLN / noc, finalnie potwierdzana przez recepcję.' : '',
         },
       ];
 
-      if (adults > 0) breakdown.push({ label: `${config.people.adults.label} x ${adults} x ${nights}`, amount: adults * config.people.adults.price * nights });
-      if (children > 0) breakdown.push({ label: `${config.people.children.label} x ${children} x ${nights}`, amount: children * config.people.children.price * nights });
-      if (toddlers > 0) breakdown.push({ label: `${config.people.toddlers.label} x ${toddlers} x ${nights}`, amount: 0 });
-      selectedAddonItems.forEach((addon) => breakdown.push({ label: `${addon.label} x ${nights}`, amount: addon.price * nights }));
+      if (adults > 0) breakdown.push({ label: `${config.people.adults.label} x ${adults} x ${nightsSummary}`, amount: adults * config.people.adults.price * nights });
+      if (children > 0) breakdown.push({ label: `${config.people.children.label} x ${children} x ${nightsSummary}`, amount: children * config.people.children.price * nights });
+      if (toddlers > 0) breakdown.push({ label: `${config.people.toddlers.label} x ${toddlers} x ${nightsSummary}`, amount: 0 });
+      selectedAddonItems.forEach((addon) => breakdown.push({ label: `${addon.label} x ${nightsSummary}`, amount: addon.price * nights }));
 
-      if (nightsLabel) nightsLabel.textContent = String(nights);
-      if (summaryNights) summaryNights.textContent = String(nights);
-      if (mobileNights) mobileNights.textContent = String(nights);
+      setText(nightsLabel, nightsSummary);
+      setText(summaryDates, datesSummary);
+      setText(summaryNights, nightsSummary);
+      setText(summaryStay, type.label);
+      setText(summarySeason, seasonSummary);
+      setText(summaryPeople, peopleSummary);
+      setText(summaryAddons, addonsSummary);
+      setText(nightlyRate, rateSummary);
+      setText(mobileDates, datesSummary);
+      setText(mobileNights, nightsSummary);
+      setText(mobileStay, type.label);
+      setText(mobileSeason, seasonSummary);
+      setText(mobilePeople, peopleSummary);
+      setText(mobileAddons, addonsSummary);
+      setText(mobileRate, rateSummary);
       if (notice) notice.hidden = !hasSummerCamping;
       if (familyNotice) familyNotice.hidden = !requiresConfirmation;
       if (summaryFootnote) {
@@ -331,26 +457,26 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
           : 'To orientacyjna kalkulacja. Recepcja potwierdza dostępność, sezon i szczegóły pobytu.';
       }
       animateMoney(totalEl, total, requiresConfirmation);
-      animateMoney(nightlyEl, averageNightly, requiresConfirmation);
       animateMoney(mobileTotal, total, requiresConfirmation);
-      animateMoney(mobileNightly, averageNightly, requiresConfirmation);
       renderBreakdown(breakdown);
     };
 
     root.querySelectorAll('input').forEach((input) => input.addEventListener('change', update));
+    arrivalInput?.addEventListener('input', update);
+    departureInput?.addEventListener('input', update);
     root.querySelectorAll('[data-counter]').forEach((button) => {
       button.addEventListener('click', () => {
         const name = button.dataset.counter;
         const delta = Number(button.dataset.delta ?? 0);
         const input = root.querySelector(`[data-counter-input="${name}"]`);
-        const value = Math.max(0, Number(input?.value ?? 0) + delta);
+        const value = Math.max(0, normalizeCounterValue(input?.value ?? 0) + delta);
         if (input) input.value = String(value);
         update();
       });
     });
     root.querySelectorAll('[data-counter-input]').forEach((input) => {
       input.addEventListener('input', () => {
-        input.value = String(Math.max(0, Number(input.value || 0)));
+        input.value = String(normalizeCounterValue(input.value || 0));
         update();
       });
     });
@@ -371,6 +497,7 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
   background:
     radial-gradient(circle at 12% 10%, rgba(60,179,113,.14), transparent 32%),
     linear-gradient(180deg, #f2f7f0, #fbfbf7);
+  padding-top: clamp(58px, 7vw, 92px);
 }
 
 .pricing-calculator__header {
@@ -381,7 +508,7 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
 .pricing-calculator__layout {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 22px;
+  gap: clamp(18px, 3vw, 30px);
   align-items: start;
 }
 
@@ -582,7 +709,7 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
 
 .pricing-summary {
   position: sticky;
-  top: 92px;
+  top: 104px;
   padding: 28px;
   border-radius: 28px;
   color: #fff;
@@ -601,6 +728,11 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
   border-bottom: 1px solid rgba(255,255,255,.12);
 }
 
+.pricing-summary__head span,
+.pricing-summary__head small {
+  display: block;
+}
+
 .pricing-summary__head span {
   color: #8fe0b4;
   font-size: .78rem;
@@ -609,28 +741,43 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
   text-transform: uppercase;
 }
 
+.pricing-summary__head small {
+  margin-top: 7px;
+  color: rgba(255,255,255,.62);
+  font-size: .76rem;
+  font-weight: 850;
+}
+
 .pricing-summary__head strong {
   color: #fff;
   font-size: clamp(2rem, 4vw, 3.1rem);
   line-height: .95;
   font-weight: 950;
   text-align: right;
+  transition: color .22s ease, text-shadow .22s ease, transform .22s ease;
 }
 
-.pricing-summary__meta {
+.pricing-summary__head strong.is-updating,
+.pricing-mobile-summary button strong.is-updating {
+  color: #8fe0b4;
+  text-shadow: 0 0 24px rgba(143,224,180,.34);
+  transform: translateY(-1px);
+}
+
+.pricing-summary__details {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap: 10px;
   margin-top: 18px;
 }
 
-.pricing-summary__meta div {
+.pricing-summary__details div {
   padding: 14px;
   border-radius: 18px;
   background: rgba(255,255,255,.08);
 }
 
-.pricing-summary__meta span,
+.pricing-summary__details dt,
 .pricing-summary__line span,
 .pricing-mobile-summary__row span {
   color: rgba(255,255,255,.68);
@@ -638,10 +785,16 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
   font-weight: 850;
 }
 
-.pricing-summary__meta strong {
-  display: block;
+.pricing-summary__details dt {
+  margin: 0 0 5px;
+}
+
+.pricing-summary__details dd {
+  margin: 0;
   margin-top: 4px;
   color: #fff;
+  font-weight: 900;
+  line-height: 1.35;
 }
 
 .pricing-summary__breakdown,
@@ -655,6 +808,7 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
   display: flex;
   justify-content: space-between;
   gap: 14px;
+  align-items: start;
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(255,255,255,.09);
 }
@@ -674,6 +828,7 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
 .pricing-summary__line strong {
   color: #fff;
   white-space: nowrap;
+  text-align: right;
 }
 
 .pricing-summary__footnote {
@@ -730,8 +885,15 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
 .pricing-mobile-summary__row {
   display: flex;
   justify-content: space-between;
+  gap: 16px;
   padding: 10px 0;
   border-top: 1px solid rgba(255,255,255,.10);
+}
+
+.pricing-mobile-summary__row strong {
+  max-width: 58%;
+  text-align: right;
+  line-height: 1.35;
 }
 
 @media (min-width: 760px) {
@@ -748,7 +910,7 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
 
 @media (min-width: 1080px) {
   .pricing-calculator__layout {
-    grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+    grid-template-columns: minmax(0, 1.85fr) minmax(360px, 1fr);
   }
 }
 
