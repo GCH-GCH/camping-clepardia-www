@@ -22,6 +22,7 @@ const formatSeasonDate = (value: string) => {
 const bungalowNames = {
   'bungalow-2': 'Domek 2-osobowy',
   'bungalow-3': 'Domek 3-osobowy',
+  'bungalow-4': 'Domek 4-osobowy',
   'bungalow-family': 'Domek rodzinny',
 } as const;
 const bungalowCards = pricingConfig.stayTypes
@@ -402,6 +403,12 @@ const highSeasonRange = `${formatSeasonDate(pricingConfig.seasons.high.start)}-$
   .page-cta__panel {
     grid-template-columns: 1fr auto;
     align-items: end;
+  }
+}
+
+@media (min-width: 1120px) {
+  .bungalow-types__grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 

@@ -39,6 +39,12 @@ export const pricingConfig = {
       seasonalPrices: { low: 250, high: 300 },
     },
     {
+      id: 'bungalow-4',
+      label: 'Domek 4-os.',
+      category: 'bungalow',
+      seasonalPrices: { low: 400, high: 450 },
+    },
+    {
       id: 'bungalow-family',
       label: 'Domek rodzinny',
       category: 'bungalow',

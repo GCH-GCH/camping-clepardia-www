@@ -86,7 +86,7 @@ export const sitePages: Record<PageSlug, SitePage> = {
     seoDescription: 'Cennik Camping Clepardia z kalkulatorem kosztu pobytu dla campingu i domków.',
     highlights: [
       { title: 'Szybka kalkulacja', copy: 'Automatyczne liczenie liczby nocy, osób i dodatków bez arkuszy i notatek.' },
-      { title: 'Sezonowość domków', copy: 'Domki 2-osobowe i 3-osobowe mają osobne stawki dla niskiego i wysokiego sezonu.' },
+      { title: 'Sezonowość domków', copy: 'Domki 2-, 3- i 4-osobowe mają osobne stawki dla niskiego i wysokiego sezonu.' },
       { title: 'Breakdown pozycji', copy: 'Podsumowanie pokazuje każdą linię kosztów i sumę końcową.' },
     ],
     cta: {
