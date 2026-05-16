@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import MotionFoundation from '../components/MotionFoundation.astro';
+import { logoMain, logoMainPng } from '../data/assets';
 
 interface Props {
   title?: string;
@@ -45,9 +46,11 @@ const {
 		<link rel="canonical" href={canonical} />
 		
 		<!-- Favicon -->
+		<link rel="preload" as="image" href={logoMain} type="image/svg+xml" />
+		<link rel="icon" type="image/svg+xml" href={logoMain} />
+		<link rel="apple-touch-icon" href={logoMainPng} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
-		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		
 		<!-- Preconnect -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />

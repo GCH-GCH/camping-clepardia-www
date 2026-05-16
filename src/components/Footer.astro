@@ -1,6 +1,11 @@
+---
+import { logoMain, logoMainPng } from '../data/assets';
+---
+
 <footer class="footer" id="kontakt">
   <div class="container footer__grid">
     <div class="footer__brand">
+      <img class="footer__logo" src={logoMain} alt="Camping Clepardia" width="196" height="52" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
       <h2>Camping Clepardia</h2>
       <p>Camping w Krakowie blisko centrum miasta. Strona przygotowana pod przyszłe rezerwacje online i integrację z CC SYSTEM.</p>
       <div class="footer__langs"><span>PL</span><span>EN</span><span>DE</span><span>IT</span></div>
@@ -39,6 +44,7 @@
 <style>
 .footer { background: #0d1812; color: #fff; padding: 72px 0 28px; }
 .footer__grid { display: grid; gap: 34px; grid-template-columns: 1fr; }
+.footer__logo { display: block; height: 52px; width: auto; object-fit: contain; image-rendering: auto; margin-bottom: 22px; filter: drop-shadow(0 16px 34px rgba(60,179,113,.20)); }
 .footer h2 { color: #fff; font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin-bottom: 18px; }
 .footer h3 { color: #8fe0b4; font-size: .86rem; text-transform: uppercase; letter-spacing: .14em; margin-bottom: 18px; }
 .footer p, .footer a { color: rgba(255,255,255,.72); line-height: 1.75; }

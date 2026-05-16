@@ -1,11 +1,12 @@
 ---
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { heroDesktop } from '../data/assets';
 
-const heroImageExists = existsSync(join(process.cwd(), 'public/images/hero/clepardia-hero.jpg'));
+const heroImageExists = existsSync(join(process.cwd(), 'public', heroDesktop.replace(/^\//, '')));
 ---
 
-<section class:list={['hero', heroImageExists ? 'hero--image' : 'hero--fallback']} id="hero" style={heroImageExists ? "background-image: url('/images/hero/clepardia-hero.jpg')" : undefined}>
+<section class:list={['hero', heroImageExists ? 'hero--image' : 'hero--fallback']} id="hero" style={heroImageExists ? `background-image: url('${heroDesktop}')` : undefined}>
   <div class="hero__overlay hero__overlay--cinematic"></div>
   <div class="hero__overlay hero__overlay--warm"></div>
   <div class="hero__overlay hero__overlay--green"></div>

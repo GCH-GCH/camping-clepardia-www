@@ -1,9 +1,28 @@
+---
+import { loaderLogo, logoMainPng } from '../data/assets';
+---
+
 <script is:inline>
-  document.documentElement.classList.add('motion-ready', 'motion-loading');
+  (() => {
+    const root = document.documentElement;
+    const finishLoading = () => {
+      root.classList.add('motion-loaded');
+      root.classList.remove('motion-loading');
+    };
+
+    root.classList.add('motion-ready', 'motion-loading');
+    window.__ccMotionFinishLoading = finishLoading;
+    window.setTimeout(finishLoading, 1800);
+  })();
 </script>
 
 <div class="page-loader" aria-hidden="true">
-  <div class="page-loader__mark">CC</div>
+  <div class="page-loader__stage">
+    <div class="page-loader__radar"></div>
+    <div class="page-loader__glow"></div>
+    <img class="page-loader__logo" src={loaderLogo} alt="" width="240" height="240" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
+  </div>
+  <p class="page-loader__status" id="pageLoaderStatus">Ładujemy Camping Clepardia</p>
   <div class="page-loader__line"></div>
 </div>
 
@@ -12,13 +31,27 @@
 
   const root = document.documentElement;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const desktopScroll = window.matchMedia('(min-width: 768px) and (pointer: fine)');
+  const loaderStatus = document.getElementById('pageLoaderStatus');
+  const loaderMessages = ['Ładujemy Camping Clepardia', 'Przygotowujemy zieloną bazę', 'Otwieramy bramę campingu'];
   let lenis: Lenis | undefined;
   let rafId = 0;
+  let loaderMessageIndex = 0;
+
+  const loaderMessageTimer = window.setInterval(() => {
+    if (!loaderStatus || reduceMotion.matches) return;
+    loaderMessageIndex = (loaderMessageIndex + 1) % loaderMessages.length;
+    loaderStatus.textContent = loaderMessages[loaderMessageIndex];
+  }, 520);
 
   const finishLoading = () => {
+    window.clearInterval(loaderMessageTimer);
+    const safetyFinish = (window as Window & { __ccMotionFinishLoading?: () => void }).__ccMotionFinishLoading;
+    if (safetyFinish) {
+      safetyFinish();
+      return;
+    }
     root.classList.add('motion-loaded');
-    window.setTimeout(() => root.classList.remove('motion-loading'), 620);
+    root.classList.remove('motion-loading');
   };
 
   const revealElements = () => {
@@ -56,7 +89,7 @@
   };
 
   const startLenis = () => {
-    if (lenis || reduceMotion.matches || !desktopScroll.matches) return;
+    if (lenis || reduceMotion.matches || window.innerWidth < 768) return;
     lenis = new Lenis({
       duration: 1.08,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -76,7 +109,7 @@
   };
 
   const syncLenis = () => {
-    if (reduceMotion.matches || !desktopScroll.matches) {
+    if (reduceMotion.matches || window.innerWidth < 768) {
       stopLenis();
       return;
     }
@@ -109,7 +142,7 @@
   revealElements();
   syncLenis();
   reduceMotion.addEventListener('change', syncLenis);
-  desktopScroll.addEventListener('change', syncLenis);
+  window.addEventListener('resize', syncLenis, { passive: true });
 
   if (document.readyState === 'complete') {
     window.setTimeout(finishLoading, reduceMotion.matches ? 0 : 260);
@@ -123,17 +156,20 @@
   position: fixed;
   inset: 0;
   z-index: 3000;
-  display: grid;
-  place-items: center;
-  gap: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
   background:
-    radial-gradient(circle at 72% 30%, rgba(231, 157, 84, .20), transparent 34%),
-    radial-gradient(circle at 22% 64%, rgba(60, 179, 113, .20), transparent 34%),
-    linear-gradient(135deg, #06110c 0%, #10241a 48%, #050806 100%);
+    radial-gradient(circle at 50% 42%, rgba(60, 179, 113, .22), transparent 22%),
+    radial-gradient(circle at 72% 30%, rgba(231, 157, 84, .18), transparent 34%),
+    radial-gradient(circle at 22% 64%, rgba(60, 179, 113, .18), transparent 34%),
+    linear-gradient(135deg, #030705 0%, #0b1711 46%, #050806 100%);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity .62s ease, visibility .62s ease;
+  transition: opacity .62s ease, visibility .62s ease, transform .62s ease;
 }
 
 .motion-ready.motion-loading body {
@@ -149,23 +185,70 @@
 .motion-ready.motion-loaded .page-loader {
   opacity: 0;
   visibility: hidden;
+  transform: translateY(-14px) scale(1.015);
 }
 
-.page-loader__mark {
-  width: 78px;
-  height: 78px;
-  border-radius: 28px;
+.page-loader__stage {
+  position: relative;
+  width: 220px;
+  height: 220px;
   display: grid;
   place-items: center;
-  color: #fff;
-  background: linear-gradient(135deg, #69dca3, #3CB371 48%, #21784c);
-  box-shadow: 0 24px 80px rgba(60, 179, 113, .32), inset 0 1px 0 rgba(255,255,255,.24);
-  font-weight: 950;
-  letter-spacing: .08em;
+}
+
+.page-loader__glow {
+  position: absolute;
+  inset: 35px;
+  border-radius: 999px;
+  background: rgba(60, 179, 113, .22);
+  filter: blur(34px);
+  animation: loaderGlow 1.8s ease-in-out infinite;
+}
+
+.page-loader__radar {
+  position: absolute;
+  inset: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(143, 224, 180, .24);
+}
+
+.page-loader__radar::before,
+.page-loader__radar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(143, 224, 180, .28);
+  animation: loaderRadar 1.9s ease-out infinite;
+}
+
+.page-loader__radar::after {
+  animation-delay: .55s;
+}
+
+.page-loader__logo {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: auto;
+  height: 120px;
+  object-fit: contain;
+  image-rendering: auto;
+  filter: drop-shadow(0 26px 56px rgba(60,179,113,.30)) drop-shadow(0 4px 22px rgba(0,0,0,.34));
+  animation: loaderBreath 2.2s ease-in-out infinite;
+}
+
+.page-loader__status {
+  min-height: 22px;
+  color: rgba(255,255,255,.78);
+  font-size: .78rem;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
 }
 
 .page-loader__line {
-  width: 138px;
+  width: min(260px, calc(100vw - 84px));
   height: 2px;
   border-radius: 99px;
   overflow: hidden;
@@ -223,6 +306,38 @@
   100% { transform: translateX(260%); }
 }
 
+@keyframes loaderRadar {
+  0% { transform: scale(.62); opacity: .78; }
+  100% { transform: scale(1.18); opacity: 0; }
+}
+
+@keyframes loaderGlow {
+  0%, 100% { opacity: .62; transform: scale(.96); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+
+@keyframes loaderBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.035); }
+}
+
+@media (max-width: 720px) {
+  .page-loader__stage {
+    width: 176px;
+    height: 176px;
+  }
+
+  .page-loader__logo {
+    height: 88px;
+  }
+
+  .page-loader__status {
+    max-width: 280px;
+    text-align: center;
+    line-height: 1.5;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page-loader {
     display: none;
@@ -230,9 +345,15 @@
 
   .motion-ready .motion-reveal,
   .motion-ready .photo-frame.motion-reveal,
-  .motion-ready .premium-card.motion-reveal {
+  .motion-ready .premium-card.motion-reveal,
+  .page-loader__logo,
+  .page-loader__glow,
+  .page-loader__radar::before,
+  .page-loader__radar::after,
+  .page-loader__line::after {
     opacity: 1;
     transform: none;
+    animation: none;
     transition: none;
   }
 }

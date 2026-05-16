@@ -1,4 +1,6 @@
 ---
+import { logoMain, logoMainPng } from '../data/assets';
+
 const links = [
   ['#camping', 'Camping'],
   ['#domki', 'Domki'],
@@ -12,8 +14,8 @@ const links = [
 <nav class="navbar" id="navbar">
   <div class="navbar__container">
     <a href="/" class="navbar__brand" aria-label="Camping Clepardia Kraków">
-      <span class="brand__name">Camping Clepardia</span>
-      <span class="brand__location">Kraków</span>
+      <img class="navbar__logo navbar__logo--desktop" src={logoMain} alt="Camping Clepardia" width="180" height="48" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
+      <img class="navbar__logo navbar__logo--mobile" src={logoMain} alt="Camping Clepardia" width="158" height="42" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
     </a>
 
     <ul class="navbar__menu">
@@ -35,6 +37,9 @@ const links = [
   <div class="navbar__mobile-menu" id="navbarMobileMenu" aria-hidden="true">
     <div class="mobile-menu__content">
       <button class="mobile-menu__close" id="navbarClose" aria-label="Zamknij menu" type="button"><span></span><span></span></button>
+      <div class="mobile-menu__brand">
+        <img src={logoMain} alt="Camping Clepardia" width="178" height="42" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
+      </div>
       <ul class="mobile-menu__list">
         {links.map(([href, label]) => <li><a href={href} class="mobile-menu__link">{label}</a></li>)}
       </ul>
@@ -115,25 +120,24 @@ const links = [
 
 .navbar__brand {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   color: #fff;
-  line-height: 1.05;
 }
 
-.brand__name {
-  font-size: .98rem;
-  font-weight: 900;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+.navbar__logo {
+  display: block;
+  width: auto;
+  object-fit: contain;
+  image-rendering: auto;
 }
 
-.brand__location {
-  margin-top: 4px;
-  color: rgba(255,255,255,.68);
-  font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+.navbar__logo--desktop {
+  height: 48px;
+}
+
+.navbar__logo--mobile {
+  display: none;
+  height: 42px;
 }
 
 .navbar__menu {
@@ -275,6 +279,20 @@ const links = [
   padding: 96px 24px 28px;
 }
 
+.mobile-menu__brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.mobile-menu__brand img {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+  image-rendering: auto;
+  filter: drop-shadow(0 18px 38px rgba(60,179,113,.25));
+}
+
 .mobile-menu__close {
   position: absolute;
   top: 24px;
@@ -338,7 +356,7 @@ const links = [
   .navbar,
   .navbar.is-scrolled { height: 74px; }
   .navbar__container { padding: 0 18px; }
-  .brand__name { font-size: .82rem; }
-  .brand__location { font-size: .62rem; }
+  .navbar__logo--desktop { display: none; }
+  .navbar__logo--mobile { display: block; }
 }
 </style>
