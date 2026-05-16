@@ -166,11 +166,11 @@ export const sitePages: Record<PageSlug, SitePage> = {
   },
   faq: {
     slug: 'faq',
-    overline: 'Najczęstsze pytania',
-    title: 'Praktyczne odpowiedzi przed przyjazdem',
-    lead: 'Zebraliśmy tematy, które najczęściej pojawiają się przy planowaniu pobytu na campingu.',
+    overline: 'FAQ',
+    title: 'Najczęściej zadawane pytania',
+    lead: 'Zebraliśmy najważniejsze informacje o pobycie, rezerwacjach, cenach, dojeździe i zasadach na Camping Clepardia.',
     seoTitle: 'FAQ | Camping Clepardia',
-    seoDescription: 'Najczęstsze pytania o pobyt, dojazd, camping i domki w Camping Clepardia.',
+    seoDescription: 'FAQ Camping Clepardia: odpowiedzi o rezerwacjach, cenniku, przyjeździe, campingu, domkach, dojeździe, psach i udogodnieniach.',
     highlights: [
       { title: 'Dostępność miejsc', copy: 'W sezonie warto potwierdzić dostępność pola campingowego z recepcją.' },
       { title: 'Dojazd do centrum', copy: 'Najwygodniej korzystać z tramwaju i zostawić auto na campingu.' },
@@ -178,11 +178,11 @@ export const sitePages: Record<PageSlug, SitePage> = {
     ],
     cta: {
       title: 'Masz inne pytanie?',
-      copy: 'Skontaktuj się z recepcją i opisz plan pobytu.',
-      primaryLabel: 'Kontakt',
-      primaryHref: '/kontakt',
-      secondaryLabel: 'Cennik',
-      secondaryHref: '/cennik',
+      copy: 'Sprawdź cennik albo skontaktuj się z recepcją i opisz plan pobytu.',
+      primaryLabel: 'Sprawdź cennik',
+      primaryHref: '/cennik',
+      secondaryLabel: 'Zapytaj recepcję',
+      secondaryHref: '/kontakt',
     },
   },
   galeria: {

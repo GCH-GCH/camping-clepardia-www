@@ -1,0 +1,712 @@
+---
+import { pricingConfig } from '../../data/pricing';
+import { getLocalizedPath } from '../../utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+type FaqCategoryId = 'reservations' | 'pricing' | 'arrival' | 'camping' | 'bungalows' | 'transport' | 'pets' | 'facilities';
+
+interface FaqItem {
+  category: FaqCategoryId;
+  question: string;
+  answer: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pricingHref = getLocalizedPath(languageCode, 'cennik');
+const contactHref = getLocalizedPath(languageCode, 'kontakt');
+const currency = pricingConfig.currency;
+const formatPrice = (price: number) => `${price} ${currency}`;
+const findStayType = (id: string) => pricingConfig.stayTypes.find((item) => item.id === id);
+const findAddon = (id: string) => pricingConfig.addons.find((item) => item.id === id);
+
+const bungalow2 = findStayType('bungalow-2');
+const bungalow3 = findStayType('bungalow-3');
+const bungalow4 = findStayType('bungalow-4');
+const dog = findAddon('dog');
+const electricity = findAddon('electricity');
+
+const getSeasonalAnswer = (stayType: typeof pricingConfig.stayTypes[number] | undefined) => {
+  if (!stayType || !('seasonalPrices' in stayType)) return 'do potwierdzenia';
+  return `${formatPrice(stayType.seasonalPrices.low)} w niskim sezonie i ${formatPrice(stayType.seasonalPrices.high)} w wysokim sezonie`;
+};
+
+const categories: Array<{ id: 'all' | FaqCategoryId; label: string }> = [
+  { id: 'all', label: 'Wszystkie' },
+  { id: 'reservations', label: 'Rezerwacje' },
+  { id: 'pricing', label: 'Cennik' },
+  { id: 'arrival', label: 'Przyjazd i wyjazd' },
+  { id: 'camping', label: 'Camping' },
+  { id: 'bungalows', label: 'Domki' },
+  { id: 'transport', label: 'Dojazd' },
+  { id: 'pets', label: 'Psy i zwierzęta' },
+  { id: 'facilities', label: 'Udogodnienia' },
+];
+
+const categoryLabels = Object.fromEntries(categories.map((category) => [category.id, category.label])) as Record<string, string>;
+
+const faqItems: FaqItem[] = [
+  {
+    category: 'reservations',
+    question: 'Czy trzeba rezerwować miejsce na polu campingowym?',
+    answer: 'W sezonie letnim rezerwacje pola campingowego mogą być ograniczone. Najlepiej skontaktować się z recepcją, aby potwierdzić aktualną dostępność.',
+  },
+  {
+    category: 'reservations',
+    question: 'Czy można rezerwować domki?',
+    answer: 'Tak, domki można rezerwować zgodnie z aktualną dostępnością. Finalną cenę i termin potwierdza recepcja.',
+  },
+  {
+    category: 'pricing',
+    question: 'Czy kalkulator pokazuje finalną cenę?',
+    answer: 'Kalkulator pokazuje cenę orientacyjną na podstawie wybranego terminu, liczby osób, typu pobytu i dodatków. Finalna cena i dostępność są potwierdzane przez recepcję.',
+  },
+  {
+    category: 'pricing',
+    question: 'Czy pies jest płatny?',
+    answer: dog?.price === 0 ? 'Nie, pobyt psa jest bezpłatny.' : `Pobyt psa kosztuje ${dog ? formatPrice(dog.price) : 'do potwierdzenia'}.`,
+  },
+  {
+    category: 'pricing',
+    question: 'Ile kosztuje prąd?',
+    answer: `Prąd kosztuje ${electricity ? formatPrice(electricity.price) : '25 PLN'} za noc.`,
+  },
+  {
+    category: 'arrival',
+    question: 'O której jest check-in i check-out na campingu?',
+    answer: 'Na polu campingowym standardowo doba trwa od 12:00 do 12:00.',
+  },
+  {
+    category: 'arrival',
+    question: 'O której jest check-in i check-out w domkach?',
+    answer: 'W domkach check-in jest od 16:00, a check-out do 11:00.',
+  },
+  {
+    category: 'camping',
+    question: 'Czy są miejsca dla kamperów?',
+    answer: 'Tak, Camping Clepardia przyjmuje kampery, vany, przyczepy, namioty oraz auta z namiotem dachowym.',
+  },
+  {
+    category: 'camping',
+    question: 'Czy można podłączyć prąd?',
+    answer: 'Tak, dostępne jest podłączenie do prądu. Skrzynki elektryczne na campingu mają ograniczenia, dlatego nie należy podłączać urządzeń o bardzo dużym poborze mocy.',
+  },
+  {
+    category: 'bungalows',
+    question: 'Jakie są ceny domków?',
+    answer: `Domek 2-osobowy kosztuje ${getSeasonalAnswer(bungalow2)}. Domek 3-osobowy kosztuje ${getSeasonalAnswer(bungalow3)}. Domek 4-osobowy kosztuje ${getSeasonalAnswer(bungalow4)}.`,
+  },
+  {
+    category: 'transport',
+    question: 'Czy łatwo dojechać do centrum Krakowa?',
+    answer: 'Tak, najwygodniej zostawić auto lub kampera na campingu i dojechać do centrum tramwajem.',
+  },
+  {
+    category: 'transport',
+    question: 'Jaki adres wpisać w nawigację?',
+    answer: 'Henryka Pachońskiego 28A, 31-322 Kraków.',
+  },
+  {
+    category: 'pets',
+    question: 'Czy można przyjechać z psem?',
+    answer: 'Tak, psy są mile widziane, a ich pobyt jest bezpłatny. Prosimy tylko o zachowanie zasad bezpieczeństwa i sprzątanie po zwierzętach.',
+  },
+  {
+    category: 'facilities',
+    question: 'Czy na campingu są sanitariaty?',
+    answer: 'Tak, na miejscu dostępne są sanitariaty i podstawowe zaplecze dla gości.',
+  },
+  {
+    category: 'facilities',
+    question: 'Czy jest pralnia?',
+    answer: 'Tak, dostępne są podstawowe udogodnienia przydatne podczas dłuższego pobytu.',
+  },
+];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqItems.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+};
+---
+
+<section class="site-section faq-page reveal-section" data-faq-page>
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+  <div class="container">
+    <div class="faq-page__head">
+      <span class="section-kicker">Baza odpowiedzi</span>
+      <h2 class="section-title">Znajdź odpowiedź przed przyjazdem</h2>
+      <p class="section-copy">
+        Wybierz kategorię albo wpisz hasło. FAQ działa jako szybka pomoc przed wysłaniem zapytania do recepcji.
+      </p>
+    </div>
+
+    <div class="premium-card faq-page__controls">
+      <label class="faq-page__search">
+        <span>Szukaj w FAQ</span>
+        <input type="search" placeholder="Np. pies, prąd, check-in, dojazd" data-faq-search autocomplete="off" />
+      </label>
+
+      <div class="faq-page__categories" role="list" aria-label="Kategorie FAQ">
+        {categories.map((category) => (
+          <button
+            type="button"
+            class:list={['faq-page__category', category.id === 'all' && 'is-active']}
+            data-faq-category={category.id}
+            aria-pressed={category.id === 'all' ? 'true' : 'false'}
+          >
+            {category.label}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <div class="faq-page__layout">
+      <aside class="faq-page__aside" aria-label="Kategorie FAQ">
+        <div class="premium-card faq-page__aside-panel">
+          <span class="section-kicker">Kategorie FAQ</span>
+          <ul>
+            {categories.filter((category) => category.id !== 'all').map((category) => (
+              <li>
+                <button type="button" data-faq-category={category.id} aria-pressed="false">
+                  {category.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </aside>
+
+      <div class="faq-page__list" data-faq-list>
+        {faqItems.map((item, index) => {
+          const panelId = `faq-answer-${index + 1}`;
+          const buttonId = `faq-question-${index + 1}`;
+          const searchable = `${categoryLabels[item.category]} ${item.question} ${item.answer}`;
+
+          return (
+            <article
+              class="premium-card reveal-section faq-item"
+              data-faq-item
+              data-category={item.category}
+              data-search={searchable}
+              style={`--reveal-delay: ${Math.min(index, 7) * 55}ms`}
+            >
+              <button
+                id={buttonId}
+                class="faq-item__question"
+                type="button"
+                data-faq-toggle
+                aria-expanded="false"
+                aria-controls={panelId}
+              >
+                <span class="faq-item__meta">{categoryLabels[item.category]}</span>
+                <strong>{item.question}</strong>
+                <i aria-hidden="true"></i>
+              </button>
+              <div
+                id={panelId}
+                class="faq-item__answer"
+                data-faq-panel
+                role="region"
+                aria-labelledby={buttonId}
+                aria-hidden="true"
+              >
+                <div>
+                  <p>{item.answer}</p>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+
+        <div class="premium-card faq-page__empty" data-faq-empty hidden>
+          <h3>Nie znaleziono odpowiedzi.</h3>
+          <p>Skontaktuj się z recepcją, a pomożemy doprecyzować pobyt.</p>
+          <a class="premium-button" href={contactHref}>Zapytaj recepcję</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="site-section faq-final-cta reveal-section">
+  <div class="container">
+    <div class="premium-card faq-final-cta__panel">
+      <div>
+        <span class="section-kicker">Masz inne pytanie?</span>
+        <h2>Recepcja pomoże doprecyzować pobyt</h2>
+        <p>
+          Jeśli nie widzisz odpowiedzi w FAQ, sprawdź orientacyjny koszt pobytu albo wyślij zapytanie do recepcji Camping Clepardia.
+        </p>
+      </div>
+      <div class="faq-final-cta__actions">
+        <a class="premium-button" href={pricingHref}>Sprawdź cennik</a>
+        <a class="faq-final-cta__secondary" href={contactHref}>Zapytaj recepcję</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const faqRoot = document.querySelector('[data-faq-page]');
+
+  if (faqRoot instanceof HTMLElement) {
+    const searchInput = faqRoot.querySelector('[data-faq-search]') as HTMLInputElement | null;
+    const categoryButtons = Array.from(faqRoot.querySelectorAll('[data-faq-category]')) as HTMLButtonElement[];
+    const items = Array.from(faqRoot.querySelectorAll('[data-faq-item]')) as HTMLElement[];
+    const emptyState = faqRoot.querySelector('[data-faq-empty]') as HTMLElement | null;
+    let activeCategory = 'all';
+
+    const normalize = (value: string) => value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '');
+
+    const closeItem = (item: HTMLElement) => {
+      const button = item.querySelector('[data-faq-toggle]') as HTMLButtonElement | null;
+      const panel = item.querySelector('[data-faq-panel]') as HTMLElement | null;
+
+      if (!button || !panel) return;
+      item.classList.remove('is-open');
+      button.setAttribute('aria-expanded', 'false');
+      panel.setAttribute('aria-hidden', 'true');
+      panel.style.maxHeight = '0px';
+    };
+
+    const openItem = (item: HTMLElement) => {
+      const button = item.querySelector('[data-faq-toggle]') as HTMLButtonElement | null;
+      const panel = item.querySelector('[data-faq-panel]') as HTMLElement | null;
+
+      if (!button || !panel) return;
+      item.classList.add('is-open');
+      button.setAttribute('aria-expanded', 'true');
+      panel.setAttribute('aria-hidden', 'false');
+      panel.style.maxHeight = `${panel.scrollHeight}px`;
+    };
+
+    const filterItems = () => {
+      const query = normalize(searchInput?.value ?? '').trim();
+      let visibleCount = 0;
+
+      items.forEach((item) => {
+        const categoryMatch = activeCategory === 'all' || item.dataset.category === activeCategory;
+        const searchMatch = !query || normalize(item.dataset.search ?? '').includes(query);
+        const isVisible = categoryMatch && searchMatch;
+
+        item.hidden = !isVisible;
+        if (isVisible) {
+          visibleCount += 1;
+          const panel = item.querySelector('[data-faq-panel]') as HTMLElement | null;
+          if (item.classList.contains('is-open') && panel) {
+            panel.style.maxHeight = `${panel.scrollHeight}px`;
+          }
+        } else {
+          closeItem(item);
+        }
+      });
+
+      if (emptyState) emptyState.hidden = visibleCount > 0;
+    };
+
+    const setCategory = (category: string) => {
+      activeCategory = category;
+      categoryButtons.forEach((button) => {
+        const active = button.dataset.faqCategory === category;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+      filterItems();
+    };
+
+    items.forEach((item) => {
+      const button = item.querySelector('[data-faq-toggle]') as HTMLButtonElement | null;
+      if (!button) return;
+
+      button.addEventListener('click', () => {
+        if (item.classList.contains('is-open')) closeItem(item);
+        else openItem(item);
+      });
+    });
+
+    categoryButtons.forEach((button) => {
+      button.addEventListener('click', () => setCategory(button.dataset.faqCategory ?? 'all'));
+    });
+
+    searchInput?.addEventListener('input', filterItems);
+    window.addEventListener('resize', () => {
+      items.forEach((item) => {
+        if (!item.classList.contains('is-open')) return;
+        const panel = item.querySelector('[data-faq-panel]') as HTMLElement | null;
+        if (panel) panel.style.maxHeight = `${panel.scrollHeight}px`;
+      });
+    }, { passive: true });
+
+    filterItems();
+  }
+</script>
+
+<style>
+.faq-page {
+  background:
+    radial-gradient(circle at 88% 10%, rgba(60,179,113,.14), transparent 30%),
+    linear-gradient(180deg, #fbfbf7, #f2f7f0);
+}
+
+.faq-page__head {
+  max-width: 880px;
+  margin-bottom: clamp(28px, 5vw, 50px);
+}
+
+.faq-page__controls {
+  display: grid;
+  gap: 20px;
+  padding: clamp(20px, 3vw, 28px);
+  margin-bottom: clamp(28px, 5vw, 54px);
+  border-radius: 28px;
+}
+
+.faq-page__search {
+  display: grid;
+  gap: 10px;
+}
+
+.faq-page__search span {
+  color: #2f9d63;
+  font-size: .78rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.faq-page__search input {
+  width: 100%;
+  min-height: 58px;
+  border: 1px solid rgba(22,50,36,.14);
+  border-radius: 999px;
+  padding: 0 20px;
+  color: #102018;
+  background: rgba(255,255,255,.82);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.86);
+  outline: 0;
+}
+
+.faq-page__search input:focus {
+  border-color: rgba(60,179,113,.46);
+  box-shadow: 0 0 0 4px rgba(60,179,113,.12);
+}
+
+.faq-page__categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.faq-page__category,
+.faq-page__aside button {
+  min-height: 42px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(22,50,36,.12);
+  color: #425448;
+  background: rgba(255,255,255,.66);
+  font-size: .88rem;
+  font-weight: 900;
+  transition: transform .22s ease, background .22s ease, border-color .22s ease, color .22s ease, box-shadow .22s ease;
+}
+
+.faq-page__category:hover,
+.faq-page__aside button:hover,
+.faq-page__category.is-active,
+.faq-page__aside button.is-active {
+  color: #fff;
+  border-color: rgba(60,179,113,.30);
+  background: linear-gradient(135deg, #3CB371, #2f9d63);
+  box-shadow: 0 14px 32px rgba(60,179,113,.22);
+  transform: translateY(-1px);
+}
+
+.faq-page__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(22px, 4vw, 44px);
+}
+
+.faq-page__aside {
+  display: none;
+}
+
+.faq-page__aside-panel {
+  padding: 24px;
+  border-radius: 24px;
+}
+
+.faq-page__aside-panel ul {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.faq-page__aside button {
+  width: 100%;
+  justify-content: start;
+  text-align: left;
+}
+
+.faq-page__list {
+  display: grid;
+  gap: 14px;
+}
+
+.faq-item {
+  border-radius: 24px;
+  overflow: hidden;
+  transition: transform .26s cubic-bezier(.22, 1, .36, 1), box-shadow .26s cubic-bezier(.22, 1, .36, 1), border-color .26s cubic-bezier(.22, 1, .36, 1);
+}
+
+.faq-item[hidden] {
+  display: none;
+}
+
+.faq-item:hover,
+.faq-item.is-open {
+  border-color: rgba(60,179,113,.34);
+  box-shadow: 0 28px 78px rgba(17,40,28,.13), 0 0 30px rgba(60,179,113,.10);
+}
+
+.faq-item__question {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 38px;
+  gap: 14px;
+  align-items: center;
+  padding: clamp(20px, 3vw, 28px);
+  text-align: left;
+}
+
+.faq-item__meta {
+  grid-column: 1 / -1;
+  color: #3CB371;
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.faq-item__question strong {
+  color: #102018;
+  font-size: clamp(1.08rem, 2vw, 1.36rem);
+  line-height: 1.25;
+  font-weight: 950;
+}
+
+.faq-item__question i {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(60,179,113,.12);
+  border: 1px solid rgba(60,179,113,.18);
+}
+
+.faq-item__question i::before,
+.faq-item__question i::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 2px;
+  border-radius: 99px;
+  background: #2f9d63;
+  transform: translate(-50%, -50%);
+  transition: transform .22s ease, opacity .22s ease;
+}
+
+.faq-item__question i::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.faq-item.is-open .faq-item__question i::after {
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+
+.faq-item__answer {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height .34s cubic-bezier(.22, 1, .36, 1), opacity .26s ease;
+}
+
+.faq-item.is-open .faq-item__answer {
+  opacity: 1;
+}
+
+.faq-item__answer > div {
+  padding: 0 clamp(20px, 3vw, 28px) clamp(22px, 3vw, 30px);
+}
+
+.faq-item__answer p {
+  max-width: 850px;
+  margin: 0;
+  color: #536359;
+  line-height: 1.75;
+}
+
+.faq-page__empty {
+  padding: clamp(24px, 4vw, 38px);
+  border-radius: 24px;
+  text-align: center;
+}
+
+.faq-page__empty h3 {
+  margin: 0 0 10px;
+  color: #102018;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 950;
+}
+
+.faq-page__empty p {
+  margin: 0 auto 22px;
+  max-width: 520px;
+  color: #536359;
+  line-height: 1.7;
+}
+
+.faq-final-cta {
+  padding-top: 0;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(60,179,113,.18), transparent 34%),
+    linear-gradient(180deg, #f2f7f0, #101b14);
+}
+
+.faq-final-cta__panel {
+  display: grid;
+  gap: 28px;
+  padding: clamp(28px, 5vw, 54px);
+  border-radius: 28px;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(10,28,18,.92), rgba(17,39,27,.82)),
+    radial-gradient(circle at 86% 18%, rgba(239,174,99,.18), transparent 36%);
+  border-color: rgba(255,255,255,.14);
+}
+
+.faq-final-cta__panel .section-kicker {
+  color: #8fe0b4;
+}
+
+.faq-final-cta__panel h2 {
+  max-width: 780px;
+  margin: 10px 0 16px;
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: .98;
+  font-weight: 950;
+}
+
+.faq-final-cta__panel p {
+  max-width: 740px;
+  margin: 0;
+  color: rgba(255,255,255,.76);
+  line-height: 1.75;
+}
+
+.faq-final-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.faq-final-cta__secondary {
+  display: inline-flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff;
+  background: rgba(255,255,255,.08);
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+
+.faq-final-cta__secondary:hover {
+  color: #fff;
+  border-color: rgba(143,224,180,.42);
+  background: rgba(255,255,255,.14);
+}
+
+@media (min-width: 920px) {
+  .faq-page__layout {
+    grid-template-columns: minmax(220px, .34fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .faq-page__aside {
+    display: block;
+    position: sticky;
+    top: 104px;
+  }
+
+  .faq-final-cta__panel {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+}
+
+@media (max-width: 640px) {
+  .faq-page__controls {
+    border-radius: 24px;
+  }
+
+  .faq-page__search input {
+    min-height: 54px;
+    border-radius: 22px;
+  }
+
+  .faq-page__categories {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .faq-page__category {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .faq-item__question {
+    grid-template-columns: 1fr 34px;
+  }
+
+  .faq-final-cta__actions {
+    display: grid;
+  }
+
+  .faq-final-cta__actions a {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-page *,
+  .faq-final-cta * {
+    transition-duration: .01ms !important;
+    animation: none !important;
+  }
+}
+</style>
