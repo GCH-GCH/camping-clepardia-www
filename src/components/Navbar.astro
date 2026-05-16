@@ -2,29 +2,68 @@
 import { logoMain, logoMainPng } from '../data/assets';
 import { defaultLanguage, languages } from '../data/languages';
 
-const links = [
-  ['#camping', 'Camping'],
-  ['#domki', 'Domki'],
-  ['#cennik', 'Cennik'],
-  ['#dojazd', 'Dojazd'],
-  ['#atrakcje', 'Atrakcje'],
-  ['#kontakt', 'Kontakt'],
+const navItems = [
+  { slug: '', label: 'Start' },
+  { slug: 'camping', label: 'Camping' },
+  { slug: 'domki', label: 'Domki' },
+  { slug: 'cennik', label: 'Cennik' },
+  { slug: 'dojazd', label: 'Dojazd' },
+  { slug: 'atrakcje', label: 'Atrakcje' },
+  { slug: 'kontakt', label: 'Kontakt' },
 ];
 
-const currentCode = Astro.url.pathname.split('/').filter(Boolean)[0] ?? defaultLanguage.code;
-const currentLanguage = languages.find((language) => language.code === currentCode) ?? defaultLanguage;
+const languageCodes = languages.map((language) => language.code);
+const currentPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const segments = currentPath.split('/').filter(Boolean);
+const languageFromPath = languageCodes.includes(segments[0] as typeof languageCodes[number])
+  ? segments[0]
+  : undefined;
+const currentLanguage = languages.find((language) => language.code === languageFromPath) ?? defaultLanguage;
+const currentSlug = languageFromPath ? (segments[1] ?? '') : (segments[0] ?? '');
+
+const getLocalizedPath = (lang: string | undefined, slug = '') => {
+  const normalizedSlug = slug.replace(/^\/+|\/+$/g, '');
+
+  if (!lang) {
+    return normalizedSlug ? `/${normalizedSlug}` : '/';
+  }
+
+  return normalizedSlug ? `/${lang}/${normalizedSlug}` : `/${lang}/`;
+};
+
+const isActive = (slug: string) => slug === currentSlug;
+const localizedNavItems = navItems.map((item) => ({
+  ...item,
+  href: getLocalizedPath(languageFromPath, item.slug),
+  active: isActive(item.slug),
+}));
+const languageLinks = languages.map((language) => ({
+  ...language,
+  href: getLocalizedPath(language.code, currentSlug),
+  active: language.code === currentLanguage.code,
+}));
+const homeHref = getLocalizedPath(languageFromPath, '');
+const contactHref = getLocalizedPath(languageFromPath, 'kontakt');
 ---
 
 <nav class="navbar" id="navbar" aria-label="Główna nawigacja">
   <div class="navbar__container">
-    <a href="/" class="navbar__brand" aria-label="Camping Clepardia Kraków">
+    <a href={homeHref} class="navbar__brand" aria-label="Camping Clepardia Kraków">
       <img class="navbar__logo navbar__logo--desktop" src={logoMain} alt="Camping Clepardia" width="180" height="48" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
       <img class="navbar__logo navbar__logo--mobile" src={logoMain} alt="Camping Clepardia" width="158" height="42" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
     </a>
 
     <ul class="navbar__menu" id="desktopNavigation">
-      {links.map(([href, label]) => (
-        <li><a href={href} class="navbar__link">{label}</a></li>
+      {localizedNavItems.map((item) => (
+        <li>
+          <a
+            href={item.href}
+            class:list={['navbar__link', item.active && 'is-active']}
+            aria-current={item.active ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        </li>
       ))}
     </ul>
 
@@ -45,11 +84,12 @@ const currentLanguage = languages.find((language) => language.code === currentCo
         </button>
 
         <div class="language-dropdown__menu" id="languageMenu" role="menu" aria-label="Lista języków">
-          {languages.map((language) => (
+          {languageLinks.map((language) => (
             <a
               href={language.href}
-              class:list={['language-dropdown__item', language.code === currentLanguage.code && 'is-active']}
+              class:list={['language-dropdown__item', language.active && 'is-active']}
               role="menuitem"
+              aria-current={language.active ? 'page' : undefined}
             >
               <img src={language.flag} alt="" width="24" height="24" loading="lazy" decoding="async" />
               <span>{language.name}</span>
@@ -59,7 +99,7 @@ const currentLanguage = languages.find((language) => language.code === currentCo
         </div>
       </div>
 
-      <a href="#rezerwacja" class="navbar__cta">Sprawdź dostępność</a>
+      <a href={contactHref} class="navbar__cta">Sprawdź dostępność</a>
     </div>
 
     <button
@@ -75,24 +115,33 @@ const currentLanguage = languages.find((language) => language.code === currentCo
   </div>
 
   <div class="navbar__mobile-menu" id="navbarMobileMenu" aria-hidden="true">
-    <div class="mobile-menu__content">
+    <div class="mobile-menu__content" role="dialog" aria-modal="true" aria-label="Menu mobilne">
       <div class="mobile-menu__brand">
         <img src={logoMain} alt="Camping Clepardia" width="178" height="42" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
       </div>
 
       <ul class="mobile-menu__list" aria-label="Menu mobilne">
-        {links.map(([href, label]) => (
-          <li><a href={href} class="mobile-menu__link">{label}</a></li>
+        {localizedNavItems.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              class:list={['mobile-menu__link', item.active && 'is-active']}
+              aria-current={item.active ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          </li>
         ))}
       </ul>
 
       <div class="mobile-menu__footer">
         <div class="mobile-menu__languages" aria-label="Wybór języka">
-          {languages.map((language) => (
+          {languageLinks.map((language) => (
             <a
               href={language.href}
-              class:list={['mobile-menu__lang', language.code === currentLanguage.code && 'is-active']}
+              class:list={['mobile-menu__lang', language.active && 'is-active']}
               aria-label={`${language.name} ${language.code.toUpperCase()}`}
+              aria-current={language.active ? 'page' : undefined}
             >
               <img src={language.flag} alt="" width="26" height="26" loading="lazy" decoding="async" />
               <span>{language.code.toUpperCase()}</span>
@@ -100,7 +149,7 @@ const currentLanguage = languages.find((language) => language.code === currentCo
           ))}
         </div>
 
-        <a href="#rezerwacja" class="navbar__cta navbar__cta--mobile">Sprawdź dostępność</a>
+        <a href={contactHref} class="navbar__cta navbar__cta--mobile">Sprawdź dostępność</a>
       </div>
     </div>
   </div>
@@ -108,13 +157,14 @@ const currentLanguage = languages.find((language) => language.code === currentCo
 
 <script>
   (() => {
+    console.log('NAVBAR CLEPARDIA 2026 DZIAŁA');
+
     const navbar = document.getElementById('navbar');
     const toggle = document.getElementById('navbarToggle');
     const menu = document.getElementById('navbarMobileMenu');
     const languageDropdown = document.getElementById('languageDropdown');
     const languageToggle = document.getElementById('languageToggle');
     const languageMenu = document.getElementById('languageMenu');
-    const navLinks = document.querySelectorAll('.navbar__link, .mobile-menu__link');
     const menuLinks = document.querySelectorAll('.mobile-menu__link, .navbar__cta--mobile, .mobile-menu__lang');
 
     let isMenuOpen = false;
@@ -141,12 +191,14 @@ const currentLanguage = languages.find((language) => language.code === currentCo
           const firstLink = menu?.querySelector('a');
           if (firstLink instanceof HTMLElement) firstLink.focus({ preventScroll: true });
         }, 120);
-      } else {
-        toggle instanceof HTMLElement && toggle.focus({ preventScroll: true });
       }
     };
 
     toggle?.addEventListener('click', () => setMenuOpen(!isMenuOpen));
+
+    menu?.addEventListener('click', (event) => {
+      if (event.target === menu) setMenuOpen(false);
+    });
 
     menuLinks.forEach((link) => {
       link.addEventListener('click', () => setMenuOpen(false));
@@ -175,16 +227,6 @@ const currentLanguage = languages.find((language) => language.code === currentCo
 
     const updateNav = () => {
       navbar?.classList.toggle('is-scrolled', window.scrollY > 24);
-      let activeId = '';
-
-      document.querySelectorAll('section[id], footer[id]').forEach((section) => {
-        const rect = section.getBoundingClientRect();
-        if (rect.top <= 140 && rect.bottom >= 140) activeId = `#${section.id}`;
-      });
-
-      navLinks.forEach((link) => {
-        link.classList.toggle('is-active', link.getAttribute('href') === activeId);
-      });
     };
 
     updateNav();
@@ -206,8 +248,8 @@ body.has-mobile-menu-open {
   inset: 0 0 auto;
   z-index: 1000;
   height: 76px;
-  background: rgba(5, 15, 10, .38);
-  border-bottom: 1px solid rgba(255,255,255,.11);
+  background: rgba(8, 20, 14, .68);
+  border-bottom: 1px solid rgba(255,255,255,.10);
   backdrop-filter: blur(18px) saturate(145%);
   -webkit-backdrop-filter: blur(18px) saturate(145%);
   transition: height .28s ease, background .28s ease, box-shadow .28s ease, border-color .28s ease;
@@ -215,9 +257,9 @@ body.has-mobile-menu-open {
 
 .navbar.is-scrolled {
   height: 64px;
-  background: rgba(5, 15, 10, .84);
-  border-bottom-color: rgba(255,255,255,.16);
-  box-shadow: 0 18px 54px rgba(0,0,0,.26);
+  background: rgba(6, 18, 12, .88);
+  border-bottom-color: rgba(255,255,255,.14);
+  box-shadow: 0 18px 54px rgba(0,0,0,.28);
 }
 
 .navbar__container {
@@ -228,7 +270,7 @@ body.has-mobile-menu-open {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 30px;
+  gap: 26px;
 }
 
 .navbar__brand {
@@ -243,7 +285,8 @@ body.has-mobile-menu-open {
   width: auto;
   object-fit: contain;
   image-rendering: auto;
-  filter: drop-shadow(0 12px 26px rgba(0,0,0,.18));
+  filter: drop-shadow(0 12px 26px rgba(0,0,0,.22));
+  transition: height .28s ease, filter .28s ease;
 }
 
 .navbar__logo--desktop {
@@ -264,32 +307,39 @@ body.has-mobile-menu-open {
   justify-self: center;
   display: none;
   align-items: center;
-  gap: clamp(10px, 1.4vw, 20px);
+  gap: 6px;
   margin: 0;
-  padding: 0;
+  padding: 5px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  background: rgba(255,255,255,.055);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
 }
 
 .navbar__link {
   position: relative;
   display: inline-flex;
-  padding: 12px 4px;
+  min-height: 38px;
+  align-items: center;
+  padding: 9px 13px;
+  border-radius: 999px;
   color: rgba(255,255,255,.78);
-  font-size: .86rem;
-  font-weight: 850;
-  letter-spacing: .06em;
-  transition: color .24s ease, transform .24s ease;
+  font-size: .82rem;
+  font-weight: 880;
+  letter-spacing: .045em;
+  transition: color .24s ease, transform .24s ease, background .24s ease, box-shadow .24s ease;
 }
 
 .navbar__link::after {
   content: '';
   position: absolute;
-  left: 4px;
-  right: 4px;
-  bottom: 6px;
+  left: 14px;
+  right: 14px;
+  bottom: 5px;
   height: 2px;
   border-radius: 999px;
   background: linear-gradient(90deg, #3CB371, #9ee7bd);
-  box-shadow: 0 0 18px rgba(60,179,113,.38);
+  box-shadow: 0 0 18px rgba(60,179,113,.40);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform .28s ease;
@@ -298,6 +348,8 @@ body.has-mobile-menu-open {
 .navbar__link:hover,
 .navbar__link.is-active {
   color: #fff;
+  background: rgba(60,179,113,.14);
+  box-shadow: 0 10px 26px rgba(60,179,113,.12);
 }
 
 .navbar__link:hover {
@@ -307,6 +359,10 @@ body.has-mobile-menu-open {
 .navbar__link:hover::after,
 .navbar__link.is-active::after {
   transform: scaleX(1);
+}
+
+.navbar__link.is-active {
+  border: 1px solid rgba(60,179,113,.24);
 }
 
 .navbar__right {
@@ -429,10 +485,10 @@ body.has-mobile-menu-open {
   padding: 12px 22px;
   border-radius: 999px;
   color: #fff;
-  background: linear-gradient(135deg, #67dea2 0%, #3CB371 48%, #24794e 100%);
-  box-shadow: 0 14px 34px rgba(60,179,113,.28), inset 0 1px 0 rgba(255,255,255,.22);
+  background: linear-gradient(135deg, #70e3a9 0%, #3CB371 45%, #1f744b 100%);
+  box-shadow: 0 16px 40px rgba(60,179,113,.34), inset 0 1px 0 rgba(255,255,255,.24);
   font-size: .8rem;
-  font-weight: 900;
+  font-weight: 950;
   letter-spacing: .08em;
   text-transform: uppercase;
   transition: transform .24s ease, box-shadow .24s ease;
@@ -443,7 +499,7 @@ body.has-mobile-menu-open {
   position: absolute;
   inset: -60% auto -60% -30%;
   width: 34%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.42), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.46), transparent);
   transform: translateX(-140%) rotate(18deg);
   transition: transform .7s ease;
 }
@@ -451,7 +507,7 @@ body.has-mobile-menu-open {
 .navbar__cta:hover {
   color: #fff;
   transform: translateY(-2px);
-  box-shadow: 0 18px 46px rgba(60,179,113,.42);
+  box-shadow: 0 20px 54px rgba(60,179,113,.48);
 }
 
 .navbar__cta:hover::before {
@@ -509,7 +565,7 @@ body.has-mobile-menu-open {
   background:
     radial-gradient(circle at 18% 16%, rgba(60,179,113,.20), transparent 34%),
     radial-gradient(circle at 82% 72%, rgba(239,174,99,.14), transparent 36%),
-    rgba(4, 14, 10, .96);
+    rgba(4, 14, 10, .74);
   backdrop-filter: blur(26px);
   -webkit-backdrop-filter: blur(26px);
   transition: opacity .28s ease, visibility .28s ease;
@@ -521,18 +577,22 @@ body.has-mobile-menu-open {
 }
 
 .mobile-menu__content {
+  width: min(100%, 560px);
   min-height: 100svh;
+  margin-left: auto;
   display: flex;
   flex-direction: column;
   padding: 104px 24px max(28px, env(safe-area-inset-bottom));
+  background: rgba(5, 17, 11, .88);
+  border-left: 1px solid rgba(255,255,255,.10);
   opacity: 0;
-  transform: translateY(18px);
+  transform: translateX(24px);
   transition: opacity .34s ease .05s, transform .34s ease .05s;
 }
 
 .navbar__mobile-menu.is-open .mobile-menu__content {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(0);
 }
 
 .mobile-menu__brand {
@@ -565,7 +625,7 @@ body.has-mobile-menu-open {
   padding: 16px 0;
   border-bottom: 1px solid rgba(255,255,255,.09);
   color: #fff;
-  font-size: clamp(1.28rem, 7vw, 2.4rem);
+  font-size: clamp(1.25rem, 6.6vw, 2.2rem);
   line-height: 1;
   font-weight: 900;
   letter-spacing: 0;
@@ -585,6 +645,10 @@ body.has-mobile-menu-open {
 .mobile-menu__link:hover::after,
 .mobile-menu__link.is-active::after {
   width: 100%;
+}
+
+.mobile-menu__link.is-active {
+  color: #8fe0b4;
 }
 
 .mobile-menu__footer {
@@ -639,6 +703,12 @@ body.has-mobile-menu-open {
   .navbar__menu,
   .navbar__right { display: flex; }
   .navbar__toggle { display: none; }
+}
+
+@media (max-width: 1120px) and (min-width: 901px) {
+  .navbar__container { gap: 16px; padding: 0 20px; }
+  .navbar__link { padding-inline: 9px; font-size: .76rem; }
+  .navbar__cta { padding-inline: 16px; }
 }
 
 @media (max-width: 900px) {
