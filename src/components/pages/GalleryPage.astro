@@ -1,0 +1,885 @@
+---
+import { publicAssetExists, siteAssets } from '../../data/assets';
+import { getLocalizedPath } from '../../utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+type GalleryCategory = 'camping' | 'bungalows' | 'sanitary' | 'transport' | 'krakow';
+
+interface GalleryItem {
+  title: string;
+  category: GalleryCategory;
+  image: string;
+  alt: string;
+  size: 'standard' | 'wide' | 'tall' | 'feature';
+}
+
+const { languageCode } = Astro.props as Props;
+const pricingHref = getLocalizedPath(languageCode, 'cennik');
+const contactHref = getLocalizedPath(languageCode, 'kontakt');
+
+const categories: Array<{ id: 'all' | GalleryCategory; label: string }> = [
+  { id: 'all', label: 'Wszystkie' },
+  { id: 'camping', label: 'Camping' },
+  { id: 'bungalows', label: 'Domki' },
+  { id: 'sanitary', label: 'Sanitariaty' },
+  { id: 'transport', label: 'Dojazd' },
+  { id: 'krakow', label: 'Kraków' },
+];
+
+const categoryLabels = Object.fromEntries(categories.map((category) => [category.id, category.label])) as Record<string, string>;
+
+const galleryItems: GalleryItem[] = [
+  {
+    title: 'Miejsca campingowe',
+    category: 'camping',
+    image: siteAssets.camping.pitches,
+    alt: 'Miejsca campingowe Camping Clepardia',
+    size: 'feature',
+  },
+  {
+    title: 'Strefa dla kamperów',
+    category: 'camping',
+    image: siteAssets.camping.camperArea,
+    alt: 'Strefa dla kamperów na Camping Clepardia',
+    size: 'wide',
+  },
+  {
+    title: 'Strefa namiotowa',
+    category: 'camping',
+    image: siteAssets.camping.tents,
+    alt: 'Strefa namiotowa Camping Clepardia',
+    size: 'standard',
+  },
+  {
+    title: 'Prąd i zaplecze',
+    category: 'camping',
+    image: siteAssets.camping.electricity,
+    alt: 'Przyłącza prądu na campingu',
+    size: 'tall',
+  },
+  {
+    title: 'Domek z zewnątrz',
+    category: 'bungalows',
+    image: siteAssets.bungalows.exterior,
+    alt: 'Domek Camping Clepardia z zewnątrz',
+    size: 'wide',
+  },
+  {
+    title: 'Wnętrze domku',
+    category: 'bungalows',
+    image: siteAssets.bungalows.room,
+    alt: 'Wnętrze domku Camping Clepardia',
+    size: 'standard',
+  },
+  {
+    title: 'Taras przy domku',
+    category: 'bungalows',
+    image: siteAssets.bungalows.terrace,
+    alt: 'Taras przy domku Camping Clepardia',
+    size: 'tall',
+  },
+  {
+    title: 'Domki dla rodzin',
+    category: 'bungalows',
+    image: siteAssets.bungalows.family,
+    alt: 'Domek dla rodzin i grup',
+    size: 'standard',
+  },
+  {
+    title: 'Budynek sanitarny',
+    category: 'sanitary',
+    image: siteAssets.sanitary.building,
+    alt: 'Budynek sanitarny na campingu',
+    size: 'wide',
+  },
+  {
+    title: 'Prysznice',
+    category: 'sanitary',
+    image: siteAssets.sanitary.showers,
+    alt: 'Prysznice dla gości Camping Clepardia',
+    size: 'standard',
+  },
+  {
+    title: 'Kuchnia turystyczna',
+    category: 'sanitary',
+    image: siteAssets.sanitary.kitchen,
+    alt: 'Kuchnia turystyczna dla gości',
+    size: 'tall',
+  },
+  {
+    title: 'Pralnia',
+    category: 'sanitary',
+    image: siteAssets.sanitary.laundry,
+    alt: 'Pralnia na campingu',
+    size: 'standard',
+  },
+  {
+    title: 'Tramwaj do centrum',
+    category: 'transport',
+    image: siteAssets.transport.tramToCenter,
+    alt: 'Dojazd tramwajem do centrum Krakowa',
+    size: 'wide',
+  },
+  {
+    title: 'Bilety tramwajowe',
+    category: 'transport',
+    image: siteAssets.transport.ticketMachine,
+    alt: 'Automat biletowy w tramwaju',
+    size: 'standard',
+  },
+  {
+    title: 'Stare Miasto',
+    category: 'krakow',
+    image: siteAssets.attractions.oldTown,
+    alt: 'Stare Miasto w Krakowie',
+    size: 'feature',
+  },
+  {
+    title: 'Kopalnia Soli Wieliczka',
+    category: 'krakow',
+    image: siteAssets.attractions.wieliczka,
+    alt: 'Kopalnia Soli Wieliczka',
+    size: 'standard',
+  },
+  {
+    title: 'Energylandia',
+    category: 'krakow',
+    image: siteAssets.attractions.energylandia,
+    alt: 'Energylandia',
+    size: 'wide',
+  },
+];
+
+const resolvedGalleryItems = galleryItems.map((item) => ({
+  ...item,
+  imageExists: publicAssetExists(item.image),
+  categoryLabel: categoryLabels[item.category],
+}));
+---
+
+<section class="site-section gallery-page reveal-section" data-gallery-page>
+  <div class="container">
+    <div class="gallery-page__head">
+      <span class="section-kicker">Zdjęcia i miejsca</span>
+      <h2 class="section-title">Camping, domki i okolica w jednym miejscu</h2>
+      <p class="section-copy">
+        Przeglądaj kategorie i otwieraj zdjęcia w lightboxie. Brakujące materiały są pokazane jako eleganckie miejsca pod zdjęcia.
+      </p>
+    </div>
+
+    <div class="premium-card gallery-page__filters" aria-label="Filtry galerii">
+      {categories.map((category) => (
+        <button
+          type="button"
+          class:list={['gallery-page__filter', category.id === 'all' && 'is-active']}
+          data-gallery-filter={category.id}
+          aria-pressed={category.id === 'all' ? 'true' : 'false'}
+        >
+          {category.label}
+        </button>
+      ))}
+    </div>
+
+    <div class="gallery-page__grid" data-gallery-grid>
+      {resolvedGalleryItems.map((item, index) => (
+        <button
+          type="button"
+          class:list={['photo-frame', 'premium-card', 'reveal-section', 'gallery-card', `gallery-card--${item.size}`, !item.imageExists && 'gallery-card--fallback']}
+          data-gallery-item
+          data-category={item.category}
+          data-index={index}
+          data-title={item.title}
+          data-category-label={item.categoryLabel}
+          data-image={item.imageExists ? item.image : ''}
+          data-alt={item.alt}
+          style={`--reveal-delay: ${Math.min(index, 8) * 45}ms`}
+          aria-label={`Otwórz zdjęcie: ${item.title}`}
+        >
+          {item.imageExists ? (
+            <img src={item.image} alt={item.alt} loading="lazy" decoding="async" />
+          ) : (
+            <span class="gallery-card__fallback-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14" />
+                <path d="M4 15l4-4 4 4 3-3 5 5" />
+                <path d="M9 8h.01" />
+              </svg>
+            </span>
+          )}
+          <span class="gallery-card__shade" aria-hidden="true"></span>
+          <span class="gallery-card__body">
+            <small>{item.categoryLabel}</small>
+            <strong>{item.title}</strong>
+          </span>
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <div class="gallery-lightbox" data-gallery-lightbox hidden aria-hidden="true">
+    <div class="gallery-lightbox__backdrop" data-gallery-close></div>
+    <div class="gallery-lightbox__dialog" role="dialog" aria-modal="true" aria-label="Podgląd zdjęcia">
+      <button class="gallery-lightbox__close" type="button" data-gallery-close aria-label="Zamknij galerię">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+
+      <button class="gallery-lightbox__nav gallery-lightbox__nav--prev" type="button" data-gallery-prev aria-label="Poprzednie zdjęcie">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
+
+      <figure class="gallery-lightbox__figure">
+        <div class="gallery-lightbox__media" data-gallery-media></div>
+        <figcaption>
+          <span data-gallery-lightbox-category>Galeria</span>
+          <strong data-gallery-lightbox-title>Camping Clepardia</strong>
+        </figcaption>
+      </figure>
+
+      <button class="gallery-lightbox__nav gallery-lightbox__nav--next" type="button" data-gallery-next aria-label="Następne zdjęcie">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 18l6-6-6-6" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="site-section gallery-final-cta reveal-section">
+  <div class="container">
+    <div class="premium-card gallery-final-cta__panel">
+      <div>
+        <span class="section-kicker">Zaplanuj pobyt</span>
+        <h2>Zobacz miejsce i zapytaj o dostępność</h2>
+        <p>
+          Galeria jest przygotowana pod realne zdjęcia campingu, domków i zaplecza. Kolejne materiały można dodawać w systemie assetów bez przebudowy układu.
+        </p>
+      </div>
+      <div class="gallery-final-cta__actions">
+        <a class="premium-button" href={pricingHref}>Sprawdź cennik</a>
+        <a class="gallery-final-cta__secondary" href={contactHref}>Zapytaj o dostępność</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const galleryRoot = document.querySelector('[data-gallery-page]');
+
+  if (galleryRoot instanceof HTMLElement) {
+    const filters = Array.from(galleryRoot.querySelectorAll('[data-gallery-filter]')) as HTMLButtonElement[];
+    const grid = galleryRoot.querySelector('[data-gallery-grid]') as HTMLElement | null;
+    const items = Array.from(galleryRoot.querySelectorAll('[data-gallery-item]')) as HTMLButtonElement[];
+    const lightbox = galleryRoot.querySelector('[data-gallery-lightbox]') as HTMLElement | null;
+    const media = galleryRoot.querySelector('[data-gallery-media]') as HTMLElement | null;
+    const title = galleryRoot.querySelector('[data-gallery-lightbox-title]') as HTMLElement | null;
+    const category = galleryRoot.querySelector('[data-gallery-lightbox-category]') as HTMLElement | null;
+    const closeButtons = Array.from(galleryRoot.querySelectorAll('[data-gallery-close]')) as HTMLElement[];
+    const prevButton = galleryRoot.querySelector('[data-gallery-prev]') as HTMLButtonElement | null;
+    const nextButton = galleryRoot.querySelector('[data-gallery-next]') as HTMLButtonElement | null;
+    let activeFilter = 'all';
+    let activeIndex = 0;
+    let lastFocused: HTMLElement | null = null;
+    let previousBodyOverflow = '';
+
+    const getVisibleItems = () => items.filter((item) => !item.hidden);
+
+    const setFilter = (filter: string) => {
+      activeFilter = filter;
+      filters.forEach((button) => {
+        const isActive = button.dataset.galleryFilter === filter;
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+
+      grid?.classList.add('is-filtering');
+      window.setTimeout(() => {
+        items.forEach((item) => {
+          const isVisible = filter === 'all' || item.dataset.category === filter;
+          item.hidden = !isVisible;
+          item.classList.toggle('is-filtered-out', !isVisible);
+        });
+        window.setTimeout(() => grid?.classList.remove('is-filtering'), 80);
+      }, 120);
+    };
+
+    const renderLightbox = () => {
+      const visibleItems = getVisibleItems();
+      const item = visibleItems[activeIndex];
+      if (!item || !media) return;
+
+      const image = item.dataset.image ?? '';
+      const imageTitle = item.dataset.title ?? 'Camping Clepardia';
+      const imageCategory = item.dataset.categoryLabel ?? 'Galeria';
+      const imageAlt = item.dataset.alt ?? imageTitle;
+
+      if (title) title.textContent = imageTitle;
+      if (category) category.textContent = imageCategory;
+
+      media.innerHTML = '';
+      if (image) {
+        const img = document.createElement('img');
+        img.src = image;
+        img.alt = imageAlt;
+        img.decoding = 'async';
+        media.append(img);
+      } else {
+        const fallback = document.createElement('div');
+        fallback.className = 'gallery-lightbox__fallback';
+        fallback.innerHTML = `<span>${imageCategory}</span><strong>${imageTitle}</strong>`;
+        media.append(fallback);
+      }
+    };
+
+    const openLightbox = (item: HTMLButtonElement) => {
+      const visibleItems = getVisibleItems();
+      const nextIndex = visibleItems.indexOf(item);
+      if (!lightbox || nextIndex < 0) return;
+
+      lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      activeIndex = nextIndex;
+      previousBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      lightbox.hidden = false;
+      lightbox.setAttribute('aria-hidden', 'false');
+      lightbox.classList.add('is-open');
+      renderLightbox();
+      window.setTimeout(() => (galleryRoot.querySelector('[data-gallery-close]') as HTMLButtonElement | null)?.focus(), 40);
+    };
+
+    const closeLightbox = () => {
+      if (!lightbox || lightbox.hidden) return;
+      lightbox.classList.remove('is-open');
+      lightbox.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = previousBodyOverflow;
+      window.setTimeout(() => {
+        lightbox.hidden = true;
+        media?.replaceChildren();
+        lastFocused?.focus();
+      }, 220);
+    };
+
+    const moveLightbox = (direction: 1 | -1) => {
+      const visibleItems = getVisibleItems();
+      if (!visibleItems.length) return;
+
+      activeIndex = (activeIndex + direction + visibleItems.length) % visibleItems.length;
+      renderLightbox();
+    };
+
+    filters.forEach((button) => {
+      button.addEventListener('click', () => setFilter(button.dataset.galleryFilter ?? 'all'));
+    });
+
+    items.forEach((item) => {
+      item.addEventListener('click', () => openLightbox(item));
+    });
+
+    closeButtons.forEach((button) => {
+      button.addEventListener('click', closeLightbox);
+    });
+
+    prevButton?.addEventListener('click', () => moveLightbox(-1));
+    nextButton?.addEventListener('click', () => moveLightbox(1));
+
+    document.addEventListener('keydown', (event) => {
+      if (!lightbox || lightbox.hidden) return;
+      if (event.key === 'Escape') closeLightbox();
+      if (event.key === 'ArrowLeft') moveLightbox(-1);
+      if (event.key === 'ArrowRight') moveLightbox(1);
+    });
+  }
+</script>
+
+<style>
+.gallery-page {
+  background:
+    radial-gradient(circle at 88% 10%, rgba(60,179,113,.14), transparent 30%),
+    linear-gradient(180deg, #fbfbf7, #f2f7f0);
+}
+
+.gallery-page__head {
+  max-width: 880px;
+  margin-bottom: clamp(28px, 5vw, 50px);
+}
+
+.gallery-page__filters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: clamp(28px, 5vw, 54px);
+  padding: 12px;
+  border-radius: 999px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.gallery-page__filters::-webkit-scrollbar {
+  display: none;
+}
+
+.gallery-page__filter {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(22,50,36,.12);
+  color: #425448;
+  background: rgba(255,255,255,.70);
+  font-size: .88rem;
+  font-weight: 900;
+  transition: transform .22s ease, background .22s ease, border-color .22s ease, color .22s ease, box-shadow .22s ease;
+}
+
+.gallery-page__filter:hover,
+.gallery-page__filter.is-active {
+  color: #fff;
+  border-color: rgba(60,179,113,.34);
+  background: linear-gradient(135deg, #3CB371, #2f9d63);
+  box-shadow: 0 14px 32px rgba(60,179,113,.22);
+  transform: translateY(-1px);
+}
+
+.gallery-page__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.gallery-page__grid.is-filtering {
+  opacity: .66;
+  transform: scale(.995);
+}
+
+.gallery-card {
+  position: relative;
+  min-height: 280px;
+  width: 100%;
+  display: grid;
+  align-items: end;
+  padding: 0;
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,.34);
+  overflow: hidden;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 26px 76px rgba(17, 40, 28, .16);
+}
+
+.gallery-card[hidden] {
+  display: none;
+}
+
+:global(.gallery-card.photo-frame) {
+  min-height: 280px;
+  border-radius: 28px;
+  padding: 0;
+}
+
+.gallery-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.01);
+  transition: transform .78s cubic-bezier(.22, 1, .36, 1), filter .78s ease;
+}
+
+.gallery-card:hover img {
+  transform: scale(1.075);
+  filter: saturate(1.08) contrast(1.04);
+}
+
+.gallery-card--fallback {
+  background:
+    linear-gradient(135deg, rgba(7, 22, 15, .22), rgba(7, 22, 15, .78)),
+    radial-gradient(circle at 74% 24%, rgba(232, 158, 84, .28), transparent 36%),
+    radial-gradient(circle at 16% 78%, rgba(60,179,113,.22), transparent 34%),
+    linear-gradient(135deg, #25412f, #0c1912);
+}
+
+.gallery-card__fallback-icon {
+  position: absolute;
+  left: 26px;
+  top: 26px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.08);
+  backdrop-filter: blur(12px);
+}
+
+.gallery-card__fallback-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #8fe0b4;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.gallery-card__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, transparent 32%, rgba(3,13,9,.74) 100%),
+    radial-gradient(circle at 80% 18%, rgba(255,196,121,.18), transparent 34%);
+  pointer-events: none;
+}
+
+.gallery-card__body {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 8px;
+  padding: clamp(22px, 3vw, 30px);
+}
+
+.gallery-card__body small {
+  color: #8fe0b4;
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.gallery-card__body strong {
+  color: #fff;
+  font-size: clamp(1.25rem, 2.4vw, 1.85rem);
+  line-height: 1.08;
+  font-weight: 950;
+  text-shadow: 0 8px 24px rgba(0,0,0,.32);
+}
+
+.gallery-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2600;
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 4vw, 42px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .26s ease, visibility .26s ease;
+}
+
+.gallery-lightbox.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.gallery-lightbox__backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 72% 18%, rgba(60,179,113,.16), transparent 34%),
+    rgba(4, 11, 8, .88);
+  backdrop-filter: blur(18px);
+}
+
+.gallery-lightbox__dialog {
+  position: relative;
+  z-index: 1;
+  width: min(1120px, 100%);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: clamp(10px, 2vw, 18px);
+  align-items: center;
+}
+
+.gallery-lightbox__figure {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.08);
+  box-shadow: 0 34px 100px rgba(0,0,0,.42);
+}
+
+.gallery-lightbox__media {
+  width: 100%;
+  min-height: min(70vh, 680px);
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(135deg, rgba(7,22,15,.22), rgba(7,22,15,.72)),
+    radial-gradient(circle at 72% 20%, rgba(232,158,84,.22), transparent 36%),
+    linear-gradient(135deg, #25412f, #0c1912);
+}
+
+.gallery-lightbox__media img {
+  width: 100%;
+  height: 100%;
+  max-height: 70vh;
+  display: block;
+  object-fit: contain;
+}
+
+.gallery-lightbox__fallback {
+  min-height: min(70vh, 680px);
+  width: 100%;
+  display: grid;
+  place-items: center;
+  gap: 12px;
+  align-content: center;
+  padding: 34px;
+  color: #fff;
+  text-align: center;
+}
+
+.gallery-lightbox__fallback span {
+  color: #8fe0b4;
+  font-size: .78rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.gallery-lightbox__fallback strong {
+  max-width: 680px;
+  font-size: clamp(2rem, 6vw, 4.4rem);
+  line-height: .98;
+  font-weight: 950;
+}
+
+.gallery-lightbox figcaption {
+  display: grid;
+  gap: 8px;
+  padding: 20px clamp(20px, 3vw, 30px);
+  color: #fff;
+  background: rgba(8,18,14,.88);
+}
+
+.gallery-lightbox figcaption span {
+  color: #8fe0b4;
+  font-size: .74rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.gallery-lightbox figcaption strong {
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  line-height: 1.16;
+  font-weight: 950;
+}
+
+.gallery-lightbox__close,
+.gallery-lightbox__nav {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  color: #fff;
+  background: rgba(8,18,14,.78);
+  box-shadow: 0 20px 54px rgba(0,0,0,.30);
+  backdrop-filter: blur(16px);
+}
+
+.gallery-lightbox__close {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  z-index: 3;
+}
+
+.gallery-lightbox__close svg,
+.gallery-lightbox__nav svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.gallery-lightbox__close:hover,
+.gallery-lightbox__nav:hover {
+  border-color: rgba(143,224,180,.42);
+  box-shadow: 0 24px 64px rgba(0,0,0,.34), 0 0 28px rgba(60,179,113,.22);
+  transform: translateY(-1px);
+}
+
+.gallery-final-cta {
+  padding-top: 0;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(60,179,113,.18), transparent 34%),
+    linear-gradient(180deg, #f2f7f0, #101b14);
+}
+
+.gallery-final-cta__panel {
+  display: grid;
+  gap: 28px;
+  padding: clamp(28px, 5vw, 54px);
+  border-radius: 28px;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(10,28,18,.92), rgba(17,39,27,.82)),
+    radial-gradient(circle at 86% 18%, rgba(239,174,99,.18), transparent 36%);
+  border-color: rgba(255,255,255,.14);
+}
+
+.gallery-final-cta__panel .section-kicker {
+  color: #8fe0b4;
+}
+
+.gallery-final-cta__panel h2 {
+  max-width: 760px;
+  margin: 10px 0 16px;
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: .98;
+  font-weight: 950;
+}
+
+.gallery-final-cta__panel p {
+  max-width: 720px;
+  margin: 0;
+  color: rgba(255,255,255,.76);
+  line-height: 1.75;
+}
+
+.gallery-final-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.gallery-final-cta__secondary {
+  display: inline-flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff;
+  background: rgba(255,255,255,.08);
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+
+.gallery-final-cta__secondary:hover {
+  color: #fff;
+  border-color: rgba(143,224,180,.42);
+  background: rgba(255,255,255,.14);
+}
+
+@media (min-width: 720px) {
+  .gallery-page__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: dense;
+  }
+
+  .gallery-card--wide,
+  .gallery-card--feature {
+    grid-column: span 2;
+  }
+
+  .gallery-card--tall {
+    min-height: 420px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .gallery-page__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .gallery-card--feature {
+    grid-column: span 2;
+    grid-row: span 2;
+    min-height: 560px;
+  }
+
+  .gallery-card--wide {
+    grid-column: span 2;
+  }
+
+  .gallery-final-cta__panel {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+}
+
+@media (max-width: 680px) {
+  .gallery-page__filters {
+    margin-left: calc(var(--container-padding-mobile) * -1);
+    margin-right: calc(var(--container-padding-mobile) * -1);
+    padding-left: var(--container-padding-mobile);
+    padding-right: var(--container-padding-mobile);
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .gallery-card {
+    min-height: 310px;
+  }
+
+  .gallery-lightbox {
+    padding: 12px;
+  }
+
+  .gallery-lightbox__dialog {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-lightbox__figure {
+    border-radius: 24px;
+  }
+
+  .gallery-lightbox__media,
+  .gallery-lightbox__fallback {
+    min-height: 56vh;
+  }
+
+  .gallery-lightbox__nav {
+    position: absolute;
+    z-index: 3;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .gallery-lightbox__nav--prev {
+    left: 10px;
+  }
+
+  .gallery-lightbox__nav--next {
+    right: 10px;
+  }
+
+  .gallery-final-cta__actions {
+    display: grid;
+  }
+
+  .gallery-final-cta__actions a {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-page *,
+  .gallery-lightbox *,
+  .gallery-final-cta * {
+    transition-duration: .01ms !important;
+    animation: none !important;
+  }
+}
+</style>

@@ -23,6 +23,12 @@ export const siteAssets = {
     terrace: '/images/bungalows/bungalow-terrace.webp',
     family: '/images/bungalows/bungalow-family.webp',
   },
+  sanitary: {
+    building: '/images/sanitary/sanitary-building.webp',
+    showers: '/images/sanitary/showers.webp',
+    kitchen: '/images/sanitary/kitchen.webp',
+    laundry: '/images/sanitary/laundry.webp',
+  },
   transport: {
     tramToCenter: '/images/transport/tram-to-center.webp',
     ticketMachine: '/images/transport/tram-ticket-machine.webp',
