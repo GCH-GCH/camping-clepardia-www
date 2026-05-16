@@ -1,0 +1,247 @@
+---
+import ImageFrame from '../ImageFrame.astro';
+import { siteAssets } from '../../data/assets';
+
+const bungalowCards = [
+  {
+    title: 'Dla par i rodzin',
+    copy: 'Praktyczne domki dla osób, które chcą wygodnie odpocząć po zwiedzaniu Krakowa.',
+    label: 'Stay',
+    delay: 0,
+  },
+  {
+    title: 'Blisko centrum',
+    copy: 'Szybki dojazd tramwajem do Starego Miasta bez konieczności szukania parkingu.',
+    label: 'City',
+    delay: 80,
+  },
+  {
+    title: 'Campingowy klimat',
+    copy: 'Więcej swobody niż w typowym hotelu i zielona przestrzeń wokół.',
+    label: 'Green',
+    delay: 160,
+  },
+  {
+    title: 'Rezerwacje sezonowe',
+    copy: 'Domki można rezerwować w sezonie zgodnie z aktualną dostępnością.',
+    label: 'Season',
+    delay: 240,
+  },
+];
+---
+
+<section class="site-section bungalows-section reveal-section" id="domki">
+  <div class="container bungalows-section__grid">
+    <div class="bungalows-section__content">
+      <span class="section-kicker">Domki Camping Clepardia</span>
+      <h2 class="section-title">Wygodny nocleg w Krakowie bez własnego sprzętu</h2>
+      <p class="section-copy">
+        Domki to dobra opcja dla gości, którzy chcą zostać blisko centrum Krakowa, ale wolą spokojniejsze miejsce z campingowym klimatem.
+      </p>
+
+      <div class="bungalows-section__cards">
+        {bungalowCards.map((card) => (
+          <article class="premium-card reveal-section bungalows-section__card" style={`--reveal-delay: ${card.delay}ms`}>
+            <span>{card.label}</span>
+            <h3>{card.title}</h3>
+            <p>{card.copy}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="bungalows-section__cta">
+        <a class="premium-button" href="#rezerwacja">Zapytaj o domek</a>
+        <a class="bungalows-section__button-secondary" href="#cennik">Zobacz cennik</a>
+      </div>
+    </div>
+
+    <div class="bungalows-section__media" aria-label="Zdjęcia sekcji domki">
+      <ImageFrame
+        src={siteAssets.bungalows.exterior}
+        alt="Domki Camping Clepardia w Krakowie"
+        label="Domki Camping Clepardia"
+        className="bungalows-section__main-photo"
+      />
+      <div class="bungalows-section__floating bungalows-section__floating--one">
+        <ImageFrame src={siteAssets.bungalows.room} alt="Wnętrze domku Camping Clepardia" label="Wnętrze domku" />
+      </div>
+      <div class="bungalows-section__floating bungalows-section__floating--two">
+        <ImageFrame src={siteAssets.bungalows.terrace} alt="Taras przy domku Camping Clepardia" label="Taras" />
+      </div>
+      <div class="bungalows-section__floating bungalows-section__floating--three">
+        <ImageFrame src={siteAssets.bungalows.family} alt="Domek dla par, rodzin i grup" label="Dla rodzin" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.bungalows-section {
+  background:
+    radial-gradient(circle at 86% 8%, rgba(239,174,99,.16), transparent 32%),
+    radial-gradient(circle at 14% 68%, rgba(60,179,113,.11), transparent 30%),
+    linear-gradient(180deg, #fbfbf7 0%, #fff8ed 100%);
+}
+
+.bungalows-section__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(42px, 6vw, 78px);
+  align-items: center;
+}
+
+.bungalows-section__content {
+  min-width: 0;
+}
+
+.bungalows-section__cards {
+  margin-top: clamp(30px, 4vw, 42px);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+:global(.bungalows-section__card) {
+  padding: 22px;
+  border-radius: 24px;
+  border-color: rgba(60,179,113,.14);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.88), rgba(255,255,255,.66)),
+    radial-gradient(circle at 92% 12%, rgba(239,174,99,.12), transparent 34%);
+}
+
+:global(.bungalows-section__card span) {
+  display: inline-flex;
+  margin-bottom: 18px;
+  color: #2d9a60;
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+:global(.bungalows-section__card h3) {
+  margin: 0 0 10px;
+  color: #14261b;
+  font-size: 1.08rem;
+  line-height: 1.2;
+  font-weight: 900;
+}
+
+:global(.bungalows-section__card p) {
+  margin: 0;
+  color: #56655c;
+  line-height: 1.66;
+}
+
+.bungalows-section__cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.bungalows-section__button-secondary {
+  display: inline-flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(32, 74, 50, .16);
+  color: #173624;
+  background: rgba(255,255,255,.74);
+  box-shadow: 0 16px 42px rgba(17,40,28,.08);
+  font-size: .86rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+.bungalows-section__button-secondary:hover {
+  color: #173624;
+  transform: translateY(-2px);
+  border-color: rgba(60,179,113,.30);
+  box-shadow: 0 22px 58px rgba(17,40,28,.12);
+}
+
+.bungalows-section__media {
+  position: relative;
+  min-height: clamp(520px, 52vw, 680px);
+}
+
+:global(.bungalows-section__main-photo) {
+  min-height: clamp(440px, 46vw, 610px);
+  border-radius: 28px;
+}
+
+.bungalows-section__floating {
+  position: absolute;
+  width: min(42%, 250px);
+  filter: drop-shadow(0 22px 38px rgba(17,40,28,.18));
+}
+
+.bungalows-section__floating :global(.asset-frame) {
+  min-height: 150px;
+  border-radius: 22px;
+}
+
+.bungalows-section__floating--one {
+  right: -12px;
+  top: 42px;
+}
+
+.bungalows-section__floating--two {
+  left: -18px;
+  bottom: 72px;
+}
+
+.bungalows-section__floating--three {
+  right: 32px;
+  bottom: 8px;
+  width: min(38%, 224px);
+}
+
+@media (min-width: 760px) {
+  .bungalows-section__cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1080px) {
+  .bungalows-section__grid {
+    grid-template-columns: minmax(460px, 1fr) minmax(0, .92fr);
+  }
+
+  .bungalows-section__media {
+    order: -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .bungalows-section__cta {
+    display: grid;
+  }
+
+  .bungalows-section__button-secondary,
+  .bungalows-section__cta :global(.premium-button) {
+    width: 100%;
+  }
+
+  .bungalows-section__media {
+    min-height: auto;
+    display: grid;
+    gap: 14px;
+  }
+
+  .bungalows-section__floating {
+    position: static;
+    width: 100%;
+  }
+
+  :global(.bungalows-section__main-photo),
+  .bungalows-section__floating :global(.asset-frame) {
+    min-height: 240px;
+  }
+}
+</style>

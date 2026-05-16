@@ -1,0 +1,242 @@
+---
+import ImageFrame from '../ImageFrame.astro';
+import { siteAssets } from '../../data/assets';
+
+const campingCards = [
+  {
+    title: 'Kampery i vany',
+    copy: 'Wygodne miejsce dla podróżujących kamperem, vanem lub autem z zabudową turystyczną.',
+    label: 'Camper',
+    delay: 0,
+  },
+  {
+    title: 'Przyczepy campingowe',
+    copy: 'Przestrzeń dla przyczep z możliwością podłączenia prądu.',
+    label: 'Caravan',
+    delay: 80,
+  },
+  {
+    title: 'Namioty',
+    copy: 'Opcja dla osób podróżujących klasycznie — z namiotem i podstawowym zapleczem na miejscu.',
+    label: 'Tent',
+    delay: 160,
+  },
+  {
+    title: 'Prąd i zaplecze',
+    copy: 'Dostęp do prądu, sanitariatów, kuchni turystycznych i podstawowych udogodnień.',
+    label: 'Power',
+    delay: 240,
+  },
+];
+---
+
+<section class="site-section camping-section reveal-section" id="camping">
+  <div class="container camping-section__grid">
+    <div class="camping-section__content">
+      <span class="section-kicker">Camping w Krakowie</span>
+      <h2 class="section-title">Miejsce dla kamperów, przyczep i namiotów</h2>
+      <p class="section-copy">
+        Zatrzymaj się w zielonej części Krakowa i korzystaj z wygodnej bazy do zwiedzania miasta bez stresu z parkowaniem w centrum.
+      </p>
+
+      <div class="camping-section__cards">
+        {campingCards.map((card) => (
+          <article class="premium-card reveal-section camping-section__card" style={`--reveal-delay: ${card.delay}ms`}>
+            <span>{card.label}</span>
+            <h3>{card.title}</h3>
+            <p>{card.copy}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="camping-section__cta">
+        <a class="premium-button" href="#cennik">Zobacz cennik</a>
+        <a class="camping-section__button-secondary" href="#rezerwacja">Sprawdź dostępność</a>
+      </div>
+    </div>
+
+    <div class="camping-section__media" aria-label="Zdjęcia sekcji camping">
+      <ImageFrame
+        src={siteAssets.camping.camperArea}
+        alt="Strefa dla kamperów i vanów Camping Clepardia"
+        label="Kampery i vany"
+        className="camping-section__main-photo"
+      />
+      <div class="camping-section__floating camping-section__floating--one">
+        <ImageFrame src={siteAssets.camping.pitches} alt="Miejsca campingowe Camping Clepardia" label="Miejsca campingowe" />
+      </div>
+      <div class="camping-section__floating camping-section__floating--two">
+        <ImageFrame src={siteAssets.camping.tents} alt="Strefa namiotowa Camping Clepardia" label="Namioty" />
+      </div>
+      <div class="camping-section__floating camping-section__floating--three">
+        <ImageFrame src={siteAssets.camping.electricity} alt="Przyłącza prądu na campingu" label="Prąd i zaplecze" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.camping-section {
+  background:
+    radial-gradient(circle at 10% 18%, rgba(60,179,113,.14), transparent 32%),
+    linear-gradient(180deg, #f1f7f0 0%, #fbfbf7 100%);
+}
+
+.camping-section__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(42px, 6vw, 78px);
+  align-items: center;
+}
+
+.camping-section__content {
+  min-width: 0;
+}
+
+.camping-section__cards {
+  margin-top: clamp(30px, 4vw, 42px);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+:global(.camping-section__card) {
+  padding: 22px;
+  border-radius: 24px;
+  border-color: rgba(60,179,113,.16);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.86), rgba(255,255,255,.64)),
+    radial-gradient(circle at 92% 12%, rgba(60,179,113,.10), transparent 34%);
+}
+
+:global(.camping-section__card span) {
+  display: inline-flex;
+  margin-bottom: 18px;
+  color: #2d9a60;
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+:global(.camping-section__card h3) {
+  margin: 0 0 10px;
+  color: #14261b;
+  font-size: 1.08rem;
+  line-height: 1.2;
+  font-weight: 900;
+}
+
+:global(.camping-section__card p) {
+  margin: 0;
+  color: #56655c;
+  line-height: 1.66;
+}
+
+.camping-section__cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.camping-section__button-secondary {
+  display: inline-flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(32, 74, 50, .16);
+  color: #173624;
+  background: rgba(255,255,255,.74);
+  box-shadow: 0 16px 42px rgba(17,40,28,.08);
+  font-size: .86rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+.camping-section__button-secondary:hover {
+  color: #173624;
+  transform: translateY(-2px);
+  border-color: rgba(60,179,113,.30);
+  box-shadow: 0 22px 58px rgba(17,40,28,.12);
+}
+
+.camping-section__media {
+  position: relative;
+  min-height: clamp(520px, 52vw, 680px);
+}
+
+:global(.camping-section__main-photo) {
+  min-height: clamp(440px, 46vw, 610px);
+  border-radius: 28px;
+}
+
+.camping-section__floating {
+  position: absolute;
+  width: min(42%, 250px);
+  filter: drop-shadow(0 22px 38px rgba(17,40,28,.18));
+}
+
+.camping-section__floating :global(.asset-frame) {
+  min-height: 150px;
+  border-radius: 22px;
+}
+
+.camping-section__floating--one {
+  left: -18px;
+  bottom: 64px;
+}
+
+.camping-section__floating--two {
+  right: -12px;
+  top: 36px;
+}
+
+.camping-section__floating--three {
+  right: 26px;
+  bottom: 10px;
+  width: min(38%, 224px);
+}
+
+@media (min-width: 760px) {
+  .camping-section__cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1080px) {
+  .camping-section__grid {
+    grid-template-columns: minmax(0, .92fr) minmax(460px, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .camping-section__cta {
+    display: grid;
+  }
+
+  .camping-section__button-secondary,
+  .camping-section__cta :global(.premium-button) {
+    width: 100%;
+  }
+
+  .camping-section__media {
+    min-height: auto;
+    display: grid;
+    gap: 14px;
+  }
+
+  .camping-section__floating {
+    position: static;
+    width: 100%;
+  }
+
+  :global(.camping-section__main-photo),
+  .camping-section__floating :global(.asset-frame) {
+    min-height: 240px;
+  }
+}
+</style>
