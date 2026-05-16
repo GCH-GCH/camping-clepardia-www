@@ -101,15 +101,16 @@ export const sitePages: Record<PageSlug, SitePage> = {
   },
   dojazd: {
     slug: 'dojazd',
-    overline: 'Dojazd do centrum',
-    title: 'Zostaw auto na campingu i jedź tramwajem do Krakowa',
-    lead: 'Clepardia jest wygodną bazą dla gości, którzy chcą zwiedzać miasto bez parkowania w ścisłym centrum.',
+    overline: 'Dojazd do Camping Clepardia',
+    title: 'Zostaw auto lub kampera i jedź tramwajem do centrum',
+    lead: 'Camping Clepardia znajduje się w Krakowie przy ul. Henryka Pachońskiego 28A. Do centrum miasta najwygodniej dojechać tramwajem.',
     seoTitle: 'Dojazd do Camping Clepardia | Kraków',
-    seoDescription: 'Informacje o dojeździe do Camping Clepardia i komunikacji miejskiej do centrum Krakowa.',
+    seoDescription: 'Dojazd do Camping Clepardia w Krakowie, trasa tramwajem do centrum, bilety i wskazówki dla kierowców.',
     highlights: [
-      { title: 'Tramwaj do centrum', copy: 'Szybki przejazd do Starego Miasta i najważniejszych punktów miasta.' },
-      { title: 'Mniej stresu z autem', copy: 'Auto zostaje na campingu, a zwiedzanie odbywa się komunikacją miejską.' },
-      { title: 'Aplikacje i bilety', copy: 'Trasę możesz sprawdzić w mapach lub aplikacji JakDojade.' },
+      { title: 'Adres', copy: 'Henryka Pachońskiego 28A, 31-322 Kraków.' },
+      { title: 'Tramwaj blisko campingu', copy: 'Najwygodniejszy sposób dojazdu do centrum miasta.' },
+      { title: 'Stare Miasto', copy: 'Szybki dojazd w okolice Starego Kleparza i centrum.' },
+      { title: 'Baza w Krakowie', copy: 'Wygodna baza do zwiedzania Krakowa bez parkowania w ścisłym centrum.' },
     ],
     cta: {
       title: 'Przyjedź wygodnie',

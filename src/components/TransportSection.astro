@@ -9,16 +9,17 @@ import { siteAssets } from '../data/assets';
       <span class="section-kicker">Dojazd do centrum</span>
       <h2 class="section-title">Zostaw auto na campingu i jedź tramwajem do Starego Miasta.</h2>
       <p class="section-copy">
-        Przystanek tramwajowy znajduje się blisko campingu, więc zwiedzanie Krakowa jest wygodne także bez auta w centrum. Bilety kupisz w tramwaju lub przez aplikację JakDojade.
+        Przystanek tramwajowy znajduje się blisko campingu, więc zwiedzanie Krakowa jest wygodne także bez auta w centrum. Trasę sprawdzisz w mapach lub aplikacji Jakdojade, a bilet zwykle kupisz w tramwaju albo aplikacji.
       </p>
       <div class="transport__timeline">
         <span>Camping</span><i></i><span>Tramwaj</span><i></i><span>Stare Miasto</span>
       </div>
+      <a class="transport__link" href="/dojazd">Zobacz szczegóły dojazdu</a>
     </div>
     <div class="premium-card transport__panel">
       <h3>Idealne dla turystów</h3>
       <p>Spokojny nocleg, szybka komunikacja miejska i mniej stresu z parkowaniem w centrum Krakowa.</p>
-      <div class="transport__note">JakDojade • tramwaj • centrum miasta</div>
+      <div class="transport__note">Jakdojade • tramwaj • centrum miasta</div>
       <div class="transport__media">
         <ImageFrame src={siteAssets.transport.tramToCenter} alt="Tramwaj z Camping Clepardia do centrum Krakowa" label="Tramwaj do centrum" />
         <ImageFrame src={siteAssets.transport.ticketMachine} alt="Biletomat tramwajowy w Krakowie" label="Bilety w tramwaju" />
@@ -37,6 +38,8 @@ import { siteAssets } from '../data/assets';
 .transport__timeline { margin-top: 34px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; color: #fff; font-weight: 900; }
 .transport__timeline span { padding: 13px 16px; border-radius: 999px; background: rgba(255,255,255,.11); border: 1px solid rgba(255,255,255,.14); }
 .transport__timeline i { width: 34px; height: 2px; background: rgba(143,224,180,.7); }
+.transport__link { display: inline-flex; margin-top: 24px; color: #8fe0b4; font-weight: 950; }
+.transport__link:hover { color: #fff; }
 .transport__panel { padding: 34px; background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.14); color: #fff; }
 .transport__panel h3 { color: #fff; font-size: 1.7rem; font-weight: 900; margin-bottom: 16px; }
 .transport__panel p { color: rgba(255,255,255,.78); line-height: 1.75; }

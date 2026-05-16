@@ -1,0 +1,506 @@
+---
+import ImageFrame from '../ImageFrame.astro';
+import { siteAssets } from '../../data/assets';
+import { getLocalizedPath } from '../../utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const contactHref = getLocalizedPath(languageCode, 'kontakt');
+const googleMapsHref = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
+
+const quickInfo = [
+  { icon: 'M12 21s7-4.6 7-11a7 7 0 1 0-14 0c0 6.4 7 11 7 11Z M12 10.5h.01', label: 'Adres', value: 'Henryka Pachońskiego 28A, 31-322 Kraków' },
+  { icon: 'M4 6h16M6 6v9a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V6M8 18l-2 3M16 18l2 3M9 10h6', label: 'Tramwaj', value: 'Tramwaj blisko campingu' },
+  { icon: 'M5 12h14M13 6l6 6-6 6', label: 'Centrum', value: 'Szybki dojazd do Starego Miasta' },
+  { icon: 'M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14M8 7h8M8 11h8M8 15h5', label: 'Baza', value: 'Wygodna baza do zwiedzania Krakowa' },
+];
+
+const centerSteps = [
+  'Wyjdź z campingu w stronę przystanku.',
+  'Wsiądź w tramwaj w kierunku centrum.',
+  'Wysiądź w okolicy Starego Kleparza / centrum.',
+  'Dalej dojdziesz pieszo w stronę Starego Miasta.',
+];
+
+const ticketCards = [
+  { title: 'Automat w tramwaju', copy: 'Bilet można kupić w automacie w tramwaju.' },
+  { title: 'Płatność kartą', copy: 'W wielu tramwajach płatność działa kartą.' },
+  { title: 'Jakdojade', copy: 'Warto użyć aplikacji Jakdojade do sprawdzania trasy i kupowania biletów.' },
+  { title: 'Google Maps', copy: 'Google Maps pomaga szybko sprawdzić trasę pieszo + tramwajem.' },
+];
+---
+
+<section class="site-section transport-page-quick reveal-section" aria-label="Szybkie informacje o dojeździe">
+  <div class="container transport-page-quick__grid">
+    {quickInfo.map((item, index) => (
+      <article class="premium-card reveal-section transport-page-quick__card" style={`--reveal-delay: ${index * 80}ms`}>
+        <span aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            {item.icon.split(' M').map((path, pathIndex) => (
+              <path d={pathIndex === 0 ? path : `M${path}`} />
+            ))}
+          </svg>
+        </span>
+        <div>
+          <small>{item.label}</small>
+          <strong>{item.value}</strong>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<section class="site-section transport-center reveal-section">
+  <div class="container transport-center__grid">
+    <div class="transport-center__content">
+      <span class="section-kicker">Dojazd do centrum</span>
+      <h2 class="section-title">Najwygodniej tramwajem</h2>
+      <p class="section-copy">
+        Zostaw samochód, kampera lub przyczepę na campingu i dojedź do centrum Krakowa komunikacją miejską.
+        To wygodniejsze niż szukanie parkingu w okolicy Starego Miasta.
+      </p>
+
+      <ol class="transport-center__steps">
+        {centerSteps.map((step, index) => (
+          <li class="reveal-section" style={`--reveal-delay: ${index * 70}ms`}>
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <p>{step}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <div class="transport-center__media">
+      <ImageFrame
+        src={siteAssets.transport.tramToCenter}
+        alt="Tramwaj z okolicy Camping Clepardia do centrum Krakowa"
+        label="Tramwaj do centrum"
+      />
+      <div class="transport-center__route premium-card">
+        <span>Camping</span><i></i><span>Tramwaj</span><i></i><span>Stare Miasto</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="site-section transport-tickets reveal-section">
+  <div class="container">
+    <div class="transport-tickets__head">
+      <span class="section-kicker">Bilety tramwajowe</span>
+      <h2 class="section-title">Bilety i aplikacje</h2>
+      <p class="section-copy">
+        Przed przejazdem sprawdź aktualną trasę i wybierz najwygodniejszą opcję zakupu biletu.
+      </p>
+    </div>
+
+    <div class="transport-tickets__grid">
+      <div class="transport-tickets__cards">
+        {ticketCards.map((item, index) => (
+          <article class="premium-card reveal-section transport-tickets__card" style={`--reveal-delay: ${index * 80}ms`}>
+            <span class="transport-tickets__icon" aria-hidden="true"></span>
+            <h3>{item.title}</h3>
+            <p>{item.copy}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="transport-tickets__media">
+        <ImageFrame src={siteAssets.transport.ticketMachine} alt="Automat biletowy w krakowskim tramwaju" label="Bilety w tramwaju" />
+        <ImageFrame src={siteAssets.transport.jakdojade} alt="Podgląd trasy w aplikacji Jakdojade" label="Jakdojade" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="site-section transport-car reveal-section">
+  <div class="container transport-car__grid">
+    <div class="premium-card transport-car__panel">
+      <span class="section-kicker">Dojazd samochodem</span>
+      <h2>Dojazd samochodem lub kamperem</h2>
+      <p>
+        W nawigacji wpisz Camping Clepardia albo adres: Henryka Pachońskiego 28A, Kraków.
+        Po przyjeździe kieruj się do recepcji lub zgodnie z instrukcjami otrzymanymi od obsługi.
+      </p>
+
+      <div class="transport-car__actions">
+        <a class="premium-button" href={googleMapsHref} target="_blank" rel="noopener noreferrer">Otwórz w Google Maps</a>
+        <a class="transport-car__secondary" href={contactHref}>Skontaktuj się z recepcją</a>
+      </div>
+    </div>
+
+    <div class="transport-car__media">
+      <ImageFrame src={siteAssets.transport.googleMaps} alt="Podgląd trasy do Camping Clepardia w Google Maps" label="Mapa dojazdu" />
+    </div>
+  </div>
+</section>
+
+<section class="site-section transport-final-cta reveal-section">
+  <div class="container">
+    <div class="premium-card transport-final-cta__panel">
+      <div>
+        <span class="section-kicker">Wygodny plan przyjazdu</span>
+        <h2>Zaplanuj trasę i potwierdź pobyt z recepcją</h2>
+        <p>
+          Jeśli przyjeżdżasz kamperem, przyczepą lub większym autem, skontaktuj się z recepcją przed przyjazdem i potwierdź szczegóły.
+        </p>
+      </div>
+      <div class="transport-final-cta__actions">
+        <a class="premium-button" href={contactHref}>Skontaktuj się z recepcją</a>
+        <a class="transport-car__secondary" href={googleMapsHref} target="_blank" rel="noopener noreferrer">Google Maps</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.transport-page-quick {
+  padding: clamp(44px, 7vw, 86px) 0;
+  background:
+    radial-gradient(circle at 86% 12%, rgba(60,179,113,.14), transparent 30%),
+    linear-gradient(180deg, #fbfbf7, #f2f7f0);
+}
+
+.transport-page-quick__grid,
+.transport-tickets__cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+:global(.transport-page-quick__card) {
+  min-height: 170px;
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  padding: clamp(24px, 3vw, 32px);
+  border-radius: 24px;
+  transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease;
+}
+
+:global(.transport-page-quick__card:hover),
+:global(.transport-tickets__card:hover) {
+  transform: translateY(-4px);
+  border-color: rgba(60,179,113,.34);
+  box-shadow: 0 24px 64px rgba(17,40,28,.14);
+}
+
+:global(.transport-page-quick__card > span) {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(60,179,113,.12);
+  border: 1px solid rgba(60,179,113,.20);
+}
+
+:global(.transport-page-quick__card svg) {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: #2f9d63;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:global(.transport-page-quick__card small) {
+  display: block;
+  margin-bottom: 10px;
+  color: #3CB371;
+  font-size: .74rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+:global(.transport-page-quick__card strong) {
+  color: #102018;
+  font-size: clamp(1.1rem, 2vw, 1.42rem);
+  line-height: 1.25;
+  font-weight: 950;
+}
+
+.transport-center {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(60,179,113,.14), transparent 32%),
+    linear-gradient(180deg, #f2f7f0, #101b14);
+}
+
+.transport-center .section-title,
+.transport-center .section-copy,
+.transport-car__panel h2,
+.transport-car__panel p,
+.transport-final-cta__panel h2,
+.transport-final-cta__panel p {
+  color: #fff;
+}
+
+.transport-center .section-copy,
+.transport-car__panel p,
+.transport-final-cta__panel p {
+  color: rgba(255,255,255,.76);
+}
+
+.transport-center .section-kicker,
+.transport-car__panel .section-kicker,
+.transport-final-cta__panel .section-kicker {
+  color: #8fe0b4;
+}
+
+.transport-center__grid,
+.transport-tickets__grid,
+.transport-car__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(26px, 5vw, 58px);
+  align-items: center;
+}
+
+.transport-center__steps {
+  display: grid;
+  gap: 14px;
+  margin: clamp(28px, 4vw, 42px) 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.transport-center__steps li {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.13);
+  background: rgba(255,255,255,.09);
+  backdrop-filter: blur(16px);
+}
+
+.transport-center__steps span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #07120d;
+  background: #8fe0b4;
+  font-size: .8rem;
+  font-weight: 950;
+}
+
+.transport-center__steps p {
+  margin: 0;
+  color: rgba(255,255,255,.84);
+  font-weight: 850;
+  line-height: 1.5;
+}
+
+.transport-center__media,
+.transport-car__media,
+.transport-tickets__media {
+  display: grid;
+  gap: 14px;
+}
+
+.transport-center__route {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 24px;
+  color: #fff;
+  background: rgba(255,255,255,.10);
+  border-color: rgba(255,255,255,.14);
+}
+
+.transport-center__route span {
+  padding: 12px 15px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.13);
+  font-weight: 900;
+}
+
+.transport-center__route i {
+  width: 28px;
+  height: 2px;
+  background: rgba(143,224,180,.72);
+}
+
+.transport-tickets {
+  background:
+    radial-gradient(circle at 88% 14%, rgba(60,179,113,.12), transparent 30%),
+    linear-gradient(180deg, #f7fbf4, #eef6ef);
+}
+
+.transport-tickets__head {
+  max-width: 860px;
+  margin-bottom: clamp(30px, 5vw, 52px);
+}
+
+:global(.transport-tickets__card) {
+  min-height: 170px;
+  padding: clamp(24px, 3vw, 32px);
+  border-radius: 24px;
+  transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease;
+}
+
+:global(.transport-tickets__icon) {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  margin-bottom: 22px;
+  border-radius: 999px;
+  color: #fff;
+  background: #3CB371;
+  box-shadow: 0 10px 28px rgba(60,179,113,.22);
+}
+
+:global(.transport-tickets__icon)::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 0 0 6px rgba(255,255,255,.18);
+}
+
+:global(.transport-tickets__card h3) {
+  margin: 0 0 10px;
+  color: #102018;
+  font-size: 1.16rem;
+  font-weight: 950;
+}
+
+:global(.transport-tickets__card p) {
+  margin: 0;
+  color: #536359;
+  line-height: 1.7;
+}
+
+.transport-car,
+.transport-final-cta {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(60,179,113,.18), transparent 34%),
+    linear-gradient(180deg, #eef6ef, #101b14);
+}
+
+.transport-car__panel,
+.transport-final-cta__panel {
+  padding: clamp(28px, 5vw, 54px);
+  border-radius: 28px;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(10,28,18,.92), rgba(17,39,27,.82)),
+    radial-gradient(circle at 86% 18%, rgba(239,174,99,.18), transparent 36%);
+  border-color: rgba(255,255,255,.14);
+}
+
+.transport-car__panel h2,
+.transport-final-cta__panel h2 {
+  max-width: 780px;
+  margin: 12px 0 16px;
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  line-height: 1;
+  font-weight: 950;
+}
+
+.transport-car__panel p,
+.transport-final-cta__panel p {
+  max-width: 740px;
+  margin: 0;
+  line-height: 1.75;
+}
+
+.transport-car__actions,
+.transport-final-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.transport-car__secondary {
+  display: inline-flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff;
+  background: rgba(255,255,255,.08);
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+
+.transport-car__secondary:hover {
+  color: #fff;
+  border-color: rgba(143,224,180,.42);
+  background: rgba(255,255,255,.14);
+}
+
+.transport-final-cta {
+  padding-top: 0;
+}
+
+.transport-final-cta__panel {
+  display: grid;
+  gap: 28px;
+}
+
+@media (min-width: 760px) {
+  .transport-page-quick__grid,
+  .transport-tickets__cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .transport-tickets__media {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 980px) {
+  .transport-page-quick__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .transport-center__grid,
+  .transport-car__grid {
+    grid-template-columns: .95fr 1.05fr;
+  }
+
+  .transport-tickets__grid {
+    grid-template-columns: 1.1fr .9fr;
+  }
+
+  .transport-final-cta__panel {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+}
+
+@media (max-width: 640px) {
+  .transport-car__actions,
+  .transport-final-cta__actions {
+    display: grid;
+  }
+
+  .transport-car__actions a,
+  .transport-final-cta__actions a {
+    width: 100%;
+  }
+
+  .transport-center__route {
+    justify-content: start;
+  }
+}
+</style>
