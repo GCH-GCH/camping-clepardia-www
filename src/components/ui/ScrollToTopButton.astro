@@ -1,0 +1,171 @@
+<button
+  class="scroll-to-top"
+  type="button"
+  data-scroll-to-top
+  aria-label="Wróć na początek strony"
+  aria-hidden="true"
+  tabindex="-1"
+>
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M12 19V5" />
+    <path d="M6 11l6-6 6 6" />
+  </svg>
+</button>
+
+<script>
+  const button = document.querySelector('[data-scroll-to-top]');
+
+  if (button instanceof HTMLButtonElement) {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let ticking = false;
+
+    const updateStickyOffset = () => {
+      const mobileSummary = document.querySelector('[data-mobile-summary]');
+      const hasMobileSummary = mobileSummary instanceof HTMLElement
+        && window.innerWidth <= 1079
+        && window.getComputedStyle(mobileSummary).display !== 'none';
+
+      button.classList.toggle('is-raised', hasMobileSummary);
+    };
+
+    const updateVisibility = () => {
+      ticking = false;
+      const isVisible = window.scrollY > 500;
+
+      button.classList.toggle('is-visible', isVisible);
+      button.setAttribute('aria-hidden', String(!isVisible));
+      button.tabIndex = isVisible ? 0 : -1;
+      updateStickyOffset();
+    };
+
+    const requestUpdate = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(updateVisibility);
+    };
+
+    const scrollToTop = () => {
+      const motionWindow = window as Window & { __ccScrollToTop?: () => void };
+
+      if (typeof motionWindow.__ccScrollToTop === 'function') {
+        motionWindow.__ccScrollToTop();
+      } else {
+        window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+      }
+
+      button.blur();
+    };
+
+    button.addEventListener('click', scrollToTop);
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate, { passive: true });
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest('[data-mobile-toggle]')) {
+        window.setTimeout(requestUpdate, 40);
+      }
+    });
+
+    updateVisibility();
+  }
+</script>
+
+<style>
+.scroll-to-top {
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  z-index: 900;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  color: #fff;
+  background:
+    radial-gradient(circle at 50% 22%, rgba(143,224,180,.20), transparent 34%),
+    rgba(8,18,14,.78);
+  box-shadow:
+    0 22px 58px rgba(0,0,0,.26),
+    0 0 0 1px rgba(60,179,113,.06),
+    inset 0 1px 0 rgba(255,255,255,.12);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate3d(0, 14px, 0) scale(.92);
+  transition:
+    opacity .28s cubic-bezier(.22, 1, .36, 1),
+    visibility .28s cubic-bezier(.22, 1, .36, 1),
+    transform .28s cubic-bezier(.22, 1, .36, 1),
+    box-shadow .28s cubic-bezier(.22, 1, .36, 1),
+    border-color .28s cubic-bezier(.22, 1, .36, 1),
+    background .28s cubic-bezier(.22, 1, .36, 1);
+}
+
+.scroll-to-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.scroll-to-top svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 12px rgba(143,224,180,.22));
+}
+
+.scroll-to-top:hover {
+  border-color: rgba(143,224,180,.44);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(143,224,180,.30), transparent 36%),
+    rgba(8,18,14,.86);
+  box-shadow:
+    0 26px 68px rgba(0,0,0,.30),
+    0 0 34px rgba(60,179,113,.26),
+    inset 0 1px 0 rgba(255,255,255,.14);
+  transform: translate3d(0, -3px, 0) scale(1.04);
+}
+
+.scroll-to-top:active {
+  transform: translate3d(0, 0, 0) scale(.96);
+}
+
+.scroll-to-top:focus-visible {
+  outline: 2px solid #8fe0b4;
+  outline-offset: 4px;
+}
+
+@media (max-width: 640px) {
+  .scroll-to-top {
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(16px, env(safe-area-inset-bottom));
+    width: 52px;
+    height: 52px;
+  }
+
+  .scroll-to-top.is-raised {
+    bottom: calc(94px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-to-top {
+    transition: opacity .01ms linear, visibility .01ms linear;
+  }
+
+  .scroll-to-top,
+  .scroll-to-top:hover,
+  .scroll-to-top:active {
+    transform: none;
+  }
+}
+</style>

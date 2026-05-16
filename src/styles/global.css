@@ -183,6 +183,7 @@
   
   --shadow-premium: 0 4px 16px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.04);
   --shadow-hero: 0 20px 60px rgba(0, 0, 0, 0.15);
+  --shadow-premium-hover: 0 32px 96px rgba(17, 40, 28, 0.16), 0 0 34px rgba(60, 179, 113, 0.12);
 }
 
 /* ==================== */
@@ -276,12 +277,37 @@ p {
 a {
   color: var(--color-primary);
   text-decoration: none;
-  transition: color var(--transition-fast) var(--ease-smooth),
-              opacity var(--transition-fast) var(--ease-smooth);
+  transition:
+    color 260ms cubic-bezier(.22, 1, .36, 1),
+    opacity 260ms cubic-bezier(.22, 1, .36, 1),
+    text-shadow 260ms cubic-bezier(.22, 1, .36, 1);
 }
 
 a:hover {
   color: var(--color-primary-dark);
+}
+
+main a:not(.premium-button):not([class*="button"]):not([class*="cta"]):not([class*="secondary"]):not([class*="option"]):not([class*="addon"]) {
+  position: relative;
+}
+
+main a:not(.premium-button):not([class*="button"]):not([class*="cta"]):not([class*="secondary"]):not([class*="option"]):not([class*="addon"])::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.18em;
+  height: 1px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, currentColor, rgba(60,179,113,.25));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 320ms cubic-bezier(.22, 1, .36, 1);
+}
+
+main a:not(.premium-button):not([class*="button"]):not([class*="cta"]):not([class*="secondary"]):not([class*="option"]):not([class*="addon"]):hover::after,
+main a:not(.premium-button):not([class*="button"]):not([class*="cta"]):not([class*="secondary"]):not([class*="option"]):not([class*="addon"]):focus-visible::after {
+  transform: scaleX(1);
 }
 
 /* ==================== */
@@ -508,13 +534,17 @@ input, textarea, select {
   background: rgba(255,255,255,.78);
   box-shadow: 0 24px 70px rgba(17, 40, 28, .08);
   backdrop-filter: blur(18px);
-  transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+  transition:
+    transform .32s cubic-bezier(.22, 1, .36, 1),
+    box-shadow .32s cubic-bezier(.22, 1, .36, 1),
+    border-color .32s cubic-bezier(.22, 1, .36, 1),
+    background-color .32s cubic-bezier(.22, 1, .36, 1);
 }
 
 .premium-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(60,179,113,.28);
-  box-shadow: 0 30px 90px rgba(17, 40, 28, .12);
+  transform: translate3d(0, -5px, 0);
+  border-color: rgba(60,179,113,.34);
+  box-shadow: var(--shadow-premium-hover);
 }
 
 .photo-frame {
@@ -541,6 +571,7 @@ input, textarea, select {
 }
 
 .premium-button {
+  position: relative;
   display: inline-flex;
   min-height: 50px;
   align-items: center;
@@ -552,12 +583,39 @@ input, textarea, select {
   box-shadow: 0 16px 42px rgba(60,179,113,.28);
   font-weight: 900;
   letter-spacing: .06em;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform .26s cubic-bezier(.22, 1, .36, 1),
+    box-shadow .26s cubic-bezier(.22, 1, .36, 1),
+    filter .26s cubic-bezier(.22, 1, .36, 1);
+}
+
+.premium-button::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  z-index: 1;
+  background:
+    linear-gradient(115deg, transparent 0%, transparent 34%, rgba(255,255,255,.42) 46%, transparent 58%, transparent 100%);
+  transform: translateX(-130%) skewX(-18deg);
+  transition: transform .72s cubic-bezier(.22, 1, .36, 1);
+  pointer-events: none;
 }
 
 .premium-button:hover {
   color: #fff;
   transform: translateY(-2px);
   box-shadow: 0 22px 58px rgba(60,179,113,.38);
+  filter: saturate(1.08);
+}
+
+.premium-button:hover::before {
+  transform: translateX(130%) skewX(-18deg);
+}
+
+.premium-button:active {
+  transform: translateY(0) scale(.98);
 }
 
 html:not(.motion-ready) .reveal-section {
