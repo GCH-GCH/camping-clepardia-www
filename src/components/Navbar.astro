@@ -1,75 +1,46 @@
 ---
-// Camping Clepardia Navigation - Hard Reset
+const links = [
+  ['#camping', 'Camping'],
+  ['#domki', 'Domki'],
+  ['#cennik', 'Cennik'],
+  ['#dojazd', 'Dojazd'],
+  ['#atrakcje', 'Atrakcje'],
+  ['#kontakt', 'Kontakt'],
+];
 ---
 
 <nav class="navbar" id="navbar">
   <div class="navbar__container">
-    {/* Left: Logo & Location */}
-    <div class="navbar__left">
-      <a href="/" class="navbar__brand" aria-label="Camping Clepardia Kraków">
-        <div class="brand__text">
-          <span class="brand__name">Camping Clepardia</span>
-          <span class="brand__location">Kraków</span>
-        </div>
-      </a>
-    </div>
+    <a href="/" class="navbar__brand" aria-label="Camping Clepardia Kraków">
+      <span class="brand__name">Camping Clepardia</span>
+      <span class="brand__location">Kraków</span>
+    </a>
 
-    {/* Center: Menu */}
-    <div class="navbar__center">
-      <ul class="navbar__menu">
-        <li><a href="#camping" class="navbar__link">Camping</a></li>
-        <li><a href="#domki" class="navbar__link">Domki</a></li>
-        <li><a href="#cennik" class="navbar__link">Cennik</a></li>
-        <li><a href="#dojazd" class="navbar__link">Dojazd</a></li>
-        <li><a href="#atrakcje" class="navbar__link">Atrakcje</a></li>
-        <li><a href="#kontakt" class="navbar__link">Kontakt</a></li>
-      </ul>
-    </div>
+    <ul class="navbar__menu">
+      {links.map(([href, label]) => <li><a href={href} class="navbar__link">{label}</a></li>)}
+    </ul>
 
-    {/* Right: Languages & CTA */}
     <div class="navbar__right">
-      <div class="navbar__languages">
-        <button type="button" class="navbar__lang navbar__lang--active" data-lang="pl">PL</button>
-        <button type="button" class="navbar__lang" data-lang="en">EN</button>
-        <button type="button" class="navbar__lang" data-lang="de">DE</button>
-        <button type="button" class="navbar__lang" data-lang="it">IT</button>
+      <div class="navbar__languages" aria-label="Wybór języka">
+        {['PL', 'EN', 'DE', 'IT'].map((lang) => <button type="button" class:list={['navbar__lang', lang === 'PL' && 'navbar__lang--active']}>{lang}</button>)}
       </div>
-      <button type="button" class="navbar__cta">Sprawdź dostępność</button>
+      <a href="#rezerwacja" class="navbar__cta">Sprawdź dostępność</a>
     </div>
 
-    {/* Mobile Toggle */}
     <button class="navbar__toggle" id="navbarToggle" aria-label="Otwórz menu" type="button">
-      <span class="toggle__line"></span>
-      <span class="toggle__line"></span>
-      <span class="toggle__line"></span>
+      <span></span><span></span><span></span>
     </button>
   </div>
 
-  {/* Mobile Menu */}
   <div class="navbar__mobile-menu" id="navbarMobileMenu" aria-hidden="true">
     <div class="mobile-menu__content">
-      <button class="mobile-menu__close" id="navbarClose" aria-label="Zamknij menu" type="button">
-        <span></span>
-        <span></span>
-      </button>
-
+      <button class="mobile-menu__close" id="navbarClose" aria-label="Zamknij menu" type="button"><span></span><span></span></button>
       <ul class="mobile-menu__list">
-        <li><a href="#camping" class="mobile-menu__link">Camping</a></li>
-        <li><a href="#domki" class="mobile-menu__link">Domki</a></li>
-        <li><a href="#cennik" class="mobile-menu__link">Cennik</a></li>
-        <li><a href="#dojazd" class="mobile-menu__link">Dojazd</a></li>
-        <li><a href="#atrakcje" class="mobile-menu__link">Atrakcje</a></li>
-        <li><a href="#kontakt" class="mobile-menu__link">Kontakt</a></li>
+        {links.map(([href, label]) => <li><a href={href} class="mobile-menu__link">{label}</a></li>)}
       </ul>
-
       <div class="mobile-menu__footer">
-        <div class="mobile-menu__languages">
-          <button type="button" class="navbar__lang navbar__lang--active" data-lang="pl">PL</button>
-          <button type="button" class="navbar__lang" data-lang="en">EN</button>
-          <button type="button" class="navbar__lang" data-lang="de">DE</button>
-          <button type="button" class="navbar__lang" data-lang="it">IT</button>
-        </div>
-        <button type="button" class="navbar__cta navbar__cta--mobile">Sprawdź dostępność</button>
+        <div class="mobile-menu__languages">{['PL', 'EN', 'DE', 'IT'].map((lang) => <button type="button" class:list={['navbar__lang', lang === 'PL' && 'navbar__lang--active']}>{lang}</button>)}</div>
+        <a href="#rezerwacja" class="navbar__cta navbar__cta--mobile">Sprawdź dostępność</a>
       </div>
     </div>
   </div>
@@ -77,279 +48,219 @@
 
 <script>
   const navbar = document.getElementById('navbar');
-  const navbarToggle = document.getElementById('navbarToggle');
-  const navbarClose = document.getElementById('navbarClose');
-  const mobileMenu = document.getElementById('navbarMobileMenu');
-  const mobileLinks = document.querySelectorAll('.mobile-menu__link');
-  const body = document.body;
+  const toggle = document.getElementById('navbarToggle');
+  const close = document.getElementById('navbarClose');
+  const menu = document.getElementById('navbarMobileMenu');
+  const mobileLinks = document.querySelectorAll('.mobile-menu__link, .navbar__cta--mobile');
+  const navLinks = document.querySelectorAll('.navbar__link');
 
-  // Mobile menu toggle
-  const openMobileMenu = () => {
-    mobileMenu?.classList.add('is-open');
-    body.style.overflow = 'hidden';
+  const openMenu = () => {
+    menu?.classList.add('is-open');
+    menu?.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  };
+  const closeMenu = () => {
+    menu?.classList.remove('is-open');
+    menu?.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
   };
 
-  const closeMobileMenu = () => {
-    mobileMenu?.classList.remove('is-open');
-    body.style.overflow = 'auto';
-  };
+  toggle?.addEventListener('click', openMenu);
+  close?.addEventListener('click', closeMenu);
+  mobileLinks.forEach((link) => link.addEventListener('click', closeMenu));
+  window.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeMenu(); });
 
-  navbarToggle?.addEventListener('click', openMobileMenu);
-  navbarClose?.addEventListener('click', closeMobileMenu);
-
-  mobileLinks.forEach((link) => {
-    link.addEventListener('click', closeMobileMenu);
-  });
-
-  // Close menu on Escape
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeMobileMenu();
-  });
-
-  // Scroll effect
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 30) {
-      navbar?.classList.add('is-scrolled');
-    } else {
-      navbar?.classList.remove('is-scrolled');
-    }
-  });
-
-  // CTA button scroll
-  document.querySelectorAll('.navbar__cta').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      closeMobileMenu();
-      const heroHeight = window.innerHeight;
-      window.scrollBy({ top: heroHeight * 0.75, behavior: 'smooth' });
+  const updateNav = () => {
+    navbar?.classList.toggle('is-scrolled', window.scrollY > 28);
+    let activeId = '';
+    document.querySelectorAll('section[id]').forEach((section) => {
+      const rect = section.getBoundingClientRect();
+      if (rect.top <= 130 && rect.bottom >= 130) activeId = `#${section.id}`;
     });
-  });
+    navLinks.forEach((link) => link.classList.toggle('is-active', link.getAttribute('href') === activeId));
+  };
+  updateNav();
+  window.addEventListener('scroll', updateNav, { passive: true });
 </script>
 
 <style is:global>
 .navbar {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 82px;
+  inset: 0 0 auto;
   z-index: 1000;
-  background: rgba(5, 15, 10, 0.35);
+  height: 82px;
+  background: rgba(5, 15, 10, .32);
+  border-bottom: 1px solid rgba(255,255,255,.07);
   backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  transition: background-color 300ms ease, backdrop-filter 300ms ease, border-color 300ms ease;
+  transition: height .28s ease, background .28s ease, box-shadow .28s ease, border-color .28s ease;
 }
 
 .navbar.is-scrolled {
-  background: rgba(5, 15, 10, 0.82);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.16);
+  height: 70px;
+  background: rgba(5, 15, 10, .84);
+  border-bottom-color: rgba(255,255,255,.12);
+  box-shadow: 0 14px 42px rgba(0,0,0,.18);
 }
 
 .navbar__container {
-  display: grid;
-  grid-template-columns: auto 1fr auto auto;
-  align-items: center;
-  gap: 32px;
   height: 100%;
   max-width: 1440px;
   margin: 0 auto;
   padding: 0 32px;
-}
-
-/* Left: Brand */
-.navbar__left {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
+  gap: 30px;
 }
 
 .navbar__brand {
   display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: #ffffff;
-  transition: opacity 200ms ease;
-}
-
-.navbar__brand:hover {
-  opacity: 0.8;
-}
-
-.brand__text {
-  display: flex;
   flex-direction: column;
-  line-height: 1.1;
+  color: #fff;
+  line-height: 1.05;
 }
 
 .brand__name {
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #ffffff;
-}
-
-.brand__location {
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: .98rem;
+  font-weight: 900;
+  letter-spacing: .08em;
   text-transform: uppercase;
 }
 
-/* Center: Menu */
-.navbar__center {
-  display: none;
-  justify-content: center;
+.brand__location {
+  margin-top: 4px;
+  color: rgba(255,255,255,.68);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
 }
 
 .navbar__menu {
-  display: flex;
   list-style: none;
+  justify-self: center;
+  display: none;
+  align-items: center;
+  gap: 12px;
   margin: 0;
   padding: 0;
-  gap: 4px;
 }
 
 .navbar__link {
-  display: inline-block;
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: none;
-  border-radius: 8px;
   position: relative;
-  transition: color 240ms ease;
+  display: inline-flex;
+  padding: 10px 8px;
+  color: rgba(255,255,255,.78);
+  font-size: .88rem;
+  font-weight: 800;
+  letter-spacing: .06em;
 }
 
 .navbar__link::after {
   content: '';
   position: absolute;
+  left: 8px;
+  right: 8px;
   bottom: 4px;
-  left: 16px;
-  right: 16px;
   height: 2px;
-  background: #3cb371;
-  border-radius: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3CB371, #9ee7bd);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform .28s ease;
 }
 
-.navbar__link:hover {
-  color: #ffffff;
+.navbar__link:hover,
+.navbar__link.is-active {
+  color: #fff;
 }
 
-.navbar__link:hover::after {
+.navbar__link:hover::after,
+.navbar__link.is-active::after {
   transform: scaleX(1);
 }
 
-/* Right: Languages & CTA */
 .navbar__right {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 18px;
 }
 
 .navbar__languages {
-  display: none;
-  gap: 8px;
+  display: flex;
+  gap: 7px;
 }
 
 .navbar__lang {
-  padding: 7px 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.09em;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: rgba(255, 255, 255, 0.65);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 240ms ease;
+  min-width: 38px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.7);
+  font-size: .72rem;
+  font-weight: 900;
 }
 
-.navbar__lang:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.32);
-  color: rgba(255, 255, 255, 0.85);
-}
-
+.navbar__lang:hover,
 .navbar__lang--active {
-  background: linear-gradient(135deg, rgba(60, 179, 113, 0.2) 0%, rgba(60, 179, 113, 0.12) 100%);
-  border-color: rgba(60, 179, 113, 0.4);
-  color: #ffffff;
+  border-color: rgba(60,179,113,.55);
+  color: #fff;
+  background: rgba(60,179,113,.22);
 }
 
 .navbar__cta {
-  padding: 11px 24px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  background: linear-gradient(135deg, #48d998 0%, #2e8b57 100%);
-  border: none;
-  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 22px;
   border-radius: 999px;
-  cursor: pointer;
-  transition: all 280ms ease;
-  white-space: nowrap;
-  box-shadow: 0 4px 20px rgba(60, 179, 113, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  color: #fff;
+  background: linear-gradient(135deg, #67dea2 0%, #3CB371 48%, #24794e 100%);
+  box-shadow: 0 14px 34px rgba(60,179,113,.28), inset 0 1px 0 rgba(255,255,255,.22);
+  font-size: .82rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
 
 .navbar__cta:hover {
+  color: #fff;
   transform: translateY(-2px);
-  box-shadow: 0 12px 36px rgba(60, 179, 113, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  background: linear-gradient(135deg, #52e5a3 0%, #328c5c 100%);
+  box-shadow: 0 18px 46px rgba(60,179,113,.42);
 }
 
-/* Mobile Toggle */
 .navbar__toggle {
-  display: none;
-  flex-direction: column;
+  justify-self: end;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.08);
+  display: grid;
+  place-content: center;
   gap: 5px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 6px;
 }
 
-.toggle__line {
-  width: 24px;
+.navbar__toggle span {
+  display: block;
+  width: 22px;
   height: 2px;
-  background: #ffffff;
-  border-radius: 2px;
-  transition: all 200ms ease;
+  border-radius: 99px;
+  background: #fff;
 }
 
-.navbar__toggle.is-open .toggle__line:nth-child(1) {
-  transform: rotate(45deg) translate(10px, 10px);
-}
-
-.navbar__toggle.is-open .toggle__line:nth-child(2) {
-  opacity: 0;
-}
-
-.navbar__toggle.is-open .toggle__line:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -7px);
-}
-
-/* Mobile Menu */
 .navbar__mobile-menu {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(5, 15, 10, 0.95);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  inset: 0;
   z-index: 999;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 300ms ease, visibility 300ms ease;
+  background: rgba(4, 14, 10, .96);
+  backdrop-filter: blur(26px);
+  transition: opacity .28s ease, visibility .28s ease;
 }
 
 .navbar__mobile-menu.is-open {
@@ -358,158 +269,76 @@
 }
 
 .mobile-menu__content {
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding-top: 82px;
-  overflow-y: auto;
+  padding: 96px 24px 28px;
 }
 
 .mobile-menu__close {
   position: absolute;
   top: 24px;
-  right: 20px;
-  width: 32px;
-  height: 32px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  z-index: 1001;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
+  right: 22px;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.08);
 }
 
 .mobile-menu__close span {
+  position: absolute;
+  left: 13px;
+  top: 22px;
   width: 20px;
   height: 2px;
-  background: #ffffff;
-  border-radius: 2px;
-  transition: all 200ms ease;
+  background: #fff;
 }
-
-.mobile-menu__close span:nth-child(1) {
-  transform: rotate(45deg) translate(6px, 6px);
-}
-
-.mobile-menu__close span:nth-child(2) {
-  transform: rotate(-45deg) translate(6px, -6px);
-}
+.mobile-menu__close span:first-child { transform: rotate(45deg); }
+.mobile-menu__close span:last-child { transform: rotate(-45deg); }
 
 .mobile-menu__list {
+  display: grid;
+  gap: 2px;
   list-style: none;
   margin: 0;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+  padding: 0;
 }
 
 .mobile-menu__link {
-  padding: 16px 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: #ffffff;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  transition: color 200ms ease;
-}
-
-.mobile-menu__link:hover {
-  color: rgba(60, 179, 113, 0.9);
+  display: flex;
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(255,255,255,.09);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 850;
 }
 
 .mobile-menu__footer {
   margin-top: auto;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  gap: 18px;
+  padding-top: 28px;
 }
 
 .mobile-menu__languages {
   display: flex;
-  gap: 8px;
   justify-content: center;
+  gap: 8px;
 }
 
-.navbar__cta--mobile {
-  width: 100%;
+.navbar__cta--mobile { width: 100%; }
+
+@media (min-width: 1080px) {
+  .navbar__menu,
+  .navbar__right { display: flex; }
+  .navbar__toggle { display: none; }
 }
 
-@media (min-width: 1024px) {
-  .navbar__center {
-    display: flex;
-  }
-
-  .navbar__right {
-    gap: 24px;
-  }
-
-  .navbar__languages {
-    display: flex;
-  }
-
-  .navbar__toggle {
-    display: none;
-  }
-
-  .navbar__mobile-menu {
-    display: none;
-  }
+@media (max-width: 720px) {
+  .navbar,
+  .navbar.is-scrolled { height: 74px; }
+  .navbar__container { padding: 0 18px; }
+  .brand__name { font-size: .82rem; }
+  .brand__location { font-size: .62rem; }
 }
-
-@media (max-width: 1023px) {
-  .navbar__container {
-    grid-template-columns: 1fr auto;
-    gap: 16px;
-    padding: 0 20px;
-  }
-
-  .navbar__center {
-    display: none;
-  }
-
-  .navbar__right {
-    display: none;
-  }
-
-  .navbar__toggle {
-    display: flex;
-  }
-
-  .navbar__cta {
-    display: none;
-  }
-}
-
-@media (max-width: 640px) {
-  .navbar {
-    height: 76px;
-  }
-
-  .navbar__container {
-    padding: 0 16px;
-  }
-
-  .brand__name {
-    font-size: 0.85rem;
-  }
-
-  .brand__location {
-    font-size: 0.65rem;
-  }
-
-  .mobile-menu__content {
-    padding-top: 76px;
-  }
-
-  .mobile-menu__link {
-    font-size: 1rem;
-    padding: 14px 0;
-  }
-}
+</style>

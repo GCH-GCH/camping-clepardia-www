@@ -1,0 +1,27 @@
+---
+const features = ['Kampery', 'Przyczepy', 'Namioty', 'Prąd', 'Sanitariaty', 'Parking', 'Szybka rejestracja'];
+---
+
+<section class="site-section camping reveal-section" id="camping">
+  <div class="container section-grid section-grid--2">
+    <div>
+      <span class="section-kicker">Camping</span>
+      <h2 class="section-title">Miejsca campingowe dla podróżujących po Krakowie i Europie.</h2>
+      <p class="section-copy">
+        Przyjedź kamperem, z przyczepą albo namiotem. Clepardia daje wygodną bazę blisko komunikacji miejskiej, z praktyczną infrastrukturą potrzebną do spokojnego pobytu.
+      </p>
+      <div class="camping__features">
+        {features.map((feature) => <span>{feature}</span>)}
+      </div>
+      <a class="premium-button" href="#rezerwacja">Zobacz ofertę campingu</a>
+    </div>
+    <div class="photo-frame camping__photo"><span>Miejsce na zdjęcie: pole campingowe i kampery</span></div>
+  </div>
+</section>
+
+<style>
+.camping { background: #f7faf4; }
+.camping__features { display: flex; flex-wrap: wrap; gap: 10px; margin: 30px 0 32px; }
+.camping__features span { padding: 10px 14px; border-radius: 999px; background: rgba(60,179,113,.10); color: #246947; font-weight: 850; }
+.camping__photo { min-height: 460px; background: linear-gradient(135deg, rgba(10,25,17,.18), rgba(6,18,12,.78)), radial-gradient(circle at 72% 22%, rgba(246,177,96,.25), transparent 32%), linear-gradient(135deg, #31543b, #0b1a12); }
+</style>

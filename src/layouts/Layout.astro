@@ -11,15 +11,15 @@ interface Props {
 }
 
 const { 
-  title = 'Camping Clepardia | Premium Luxury Camping Experience',
-  description = 'Experience luxury camping in the heart of Europe. Premium accommodations, wellness, and unforgettable adventures await.',
+  title = 'Camping Clepardia | Camping w Krakowie blisko centrum',
+  description = 'Camping Clepardia w Krakowie: camping, domki i szybki dojazd do centrum miasta.',
   ogImage = '/og-image.jpg',
   canonical = Astro.url.pathname
 } = Astro.props as Props;
 ---
 
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="pl" dir="ltr">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -32,7 +32,7 @@ const {
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:image" content={ogImage} />
-		<meta property="og:locale" content="en_US" />
+		<meta property="og:locale" content="pl_PL" />
 		
 		<!-- Twitter Card -->
 		<meta name="twitter:card" content="summary_large_image" />
@@ -72,8 +72,7 @@ const {
 				console.log('Smooth scroll not supported, using polyfill');
 			}
 			
-			// Add analytics and tracking setup here
-			console.log('Camping Clepardia Premium Foundation Loaded');
+			console.log('Camping Clepardia homepage loaded');
 		</script>
 	</body>
 </html>

@@ -1,0 +1,27 @@
+---
+const attractions = ['Stare Miasto', 'Wieliczka', 'Auschwitz', 'Schindler’s Factory', 'Energylandia', 'Kazimierz'];
+---
+
+<section class="site-section attractions reveal-section" id="atrakcje">
+  <div class="container">
+    <span class="section-kicker">Atrakcje</span>
+    <h2 class="section-title">Kraków i Małopolska w zasięgu jednego pobytu.</h2>
+    <div class="attractions__grid">
+      {attractions.map((name) => (
+        <article class="photo-frame attractions__card"><span>{name}</span></article>
+      ))}
+    </div>
+    <a class="premium-button attractions__cta" href="#rezerwacja">Zobacz atrakcje</a>
+  </div>
+</section>
+
+<style>
+.attractions { background: #f6f8f2; }
+.attractions__grid { margin-top: 42px; display: grid; grid-template-columns: 1fr; gap: 16px; }
+.attractions__card { min-height: 240px; align-items: end; transition: transform .28s ease, box-shadow .28s ease; }
+.attractions__card:hover { transform: translateY(-5px); }
+.attractions__card span { color: #fff; font-size: 1rem; }
+.attractions__cta { margin-top: 30px; }
+@media (min-width: 700px) { .attractions__grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1080px) { .attractions__grid { grid-template-columns: repeat(3, 1fr); } }
+</style>

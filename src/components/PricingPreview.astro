@@ -1,0 +1,44 @@
+---
+const prices = [
+  ['Osoba dorosła', '35 PLN'],
+  ['Kamper', '60 PLN'],
+  ['Namiot', '35 PLN'],
+  ['Przyczepa', '45 PLN'],
+  ['Pies', '15 PLN'],
+  ['Prąd', '25 PLN'],
+  ['Domek 2-osobowy', 'od 200 PLN'],
+];
+---
+
+<section class="site-section pricing reveal-section" id="cennik">
+  <div class="container">
+    <div class="pricing__head">
+      <div>
+        <span class="section-kicker">Cennik</span>
+        <h2 class="section-title">Najważniejsze ceny w szybkim podglądzie.</h2>
+      </div>
+      <a class="premium-button" href="#rezerwacja">Pełny cennik</a>
+    </div>
+    <div class="pricing__grid">
+      {prices.map(([label, price]) => (
+        <div class="premium-card pricing__item">
+          <span>{label}</span>
+          <strong>{price}</strong>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+.pricing { background: #101b14; color: #fff; }
+.pricing .section-title { color: #fff; }
+.pricing .section-kicker { color: #8fe0b4; }
+.pricing__head { display: flex; flex-direction: column; gap: 24px; justify-content: space-between; }
+.pricing__grid { margin-top: 42px; display: grid; grid-template-columns: 1fr; gap: 14px; }
+.pricing__item { padding: 22px; background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.pricing__item span { color: rgba(255,255,255,.76); font-weight: 800; }
+.pricing__item strong { font-size: 1.15rem; }
+@media (min-width: 760px) { .pricing__head { flex-direction: row; align-items: end; } .pricing__grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1120px) { .pricing__grid { grid-template-columns: repeat(4, 1fr); } .pricing__item:last-child { grid-column: span 2; } }
+</style>

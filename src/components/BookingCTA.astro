@@ -1,0 +1,32 @@
+<section class="site-section booking reveal-section" id="rezerwacja">
+  <div class="container">
+    <div class="booking__panel">
+      <div>
+        <span class="section-kicker">Rezerwacja</span>
+        <h2 class="section-title">Zaplanuj pobyt w Krakowie</h2>
+        <p class="section-copy">Formularz jest gotowy jako UI mockup pod późniejsze podłączenie z CC SYSTEM i obsługę zapytań online.</p>
+      </div>
+      <form class="booking__form">
+        <label>Data przyjazdu<input type="date" /></label>
+        <label>Data wyjazdu<input type="date" /></label>
+        <label>Typ pobytu<select><option>Kamper</option><option>Namiot</option><option>Przyczepa</option><option>Domek</option></select></label>
+        <label>Liczba osób<input type="number" min="1" value="2" /></label>
+        <button type="button">Wyślij zapytanie</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<style>
+.booking { background: #fffaf2; }
+.booking__panel { display: grid; gap: 34px; padding: clamp(28px, 5vw, 56px); border-radius: 36px; background: linear-gradient(135deg, rgba(14,34,23,.96), rgba(30,70,47,.94)), radial-gradient(circle at 80% 10%, rgba(244,176,97,.24), transparent 34%); color: #fff; box-shadow: 0 34px 100px rgba(13,34,23,.24); }
+.booking .section-title { color: #fff; }
+.booking .section-copy { color: rgba(255,255,255,.78); }
+.booking .section-kicker { color: #8fe0b4; }
+.booking__form { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.booking__form label { display: grid; gap: 8px; color: rgba(255,255,255,.76); font-size: .82rem; font-weight: 850; text-transform: uppercase; letter-spacing: .08em; }
+.booking__form input, .booking__form select { min-height: 52px; border: 1px solid rgba(255,255,255,.16); border-radius: 18px; background: rgba(255,255,255,.10); color: #fff; padding: 0 14px; }
+.booking__form option { color: #102018; }
+.booking__form button { min-height: 54px; border-radius: 999px; background: linear-gradient(135deg, #63d99c, #3CB371 48%, #24794e); color: #fff; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 18px 48px rgba(60,179,113,.32); }
+@media (min-width: 900px) { .booking__panel { grid-template-columns: .9fr 1.1fr; align-items: center; } .booking__form { grid-template-columns: repeat(2, 1fr); } .booking__form button { grid-column: span 2; } }
+</style>
