@@ -1,0 +1,273 @@
+---
+import PricingCalculator from '../pricing/PricingCalculator.astro';
+import type { SitePage } from '../../data/sitePages';
+
+interface Props {
+  page: SitePage;
+  languageCode?: string;
+  languageName?: string;
+}
+
+const { page, languageCode, languageName } = Astro.props as Props;
+const prefix = languageCode ? `/${languageCode}` : '';
+const localizeHref = (href: string) => href.startsWith('/') ? `${prefix}${href}` : href;
+const homeHref = languageCode ? `/${languageCode}/` : '/';
+const breadcrumbHome = languageName ? `Camping Clepardia ${languageName}` : 'Camping Clepardia';
+---
+
+<section class="page-mini-hero reveal-section">
+  <div class="container page-mini-hero__inner">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href={homeHref}>{breadcrumbHome}</a>
+      <span aria-hidden="true">/</span>
+      <span>{page.title}</span>
+    </nav>
+
+    <span class="section-kicker">{page.overline}</span>
+    <h1>{page.title}</h1>
+    <p>{page.lead}</p>
+  </div>
+</section>
+
+<section class="site-section page-detail reveal-section">
+  <div class="container page-detail__grid">
+    <div class="page-detail__intro">
+      <span class="section-kicker">Informacje</span>
+      <h2 class="section-title">Najważniejsze informacje przed przyjazdem</h2>
+      <p class="section-copy">{page.seoDescription}</p>
+    </div>
+
+    <div class="page-detail__cards">
+      {page.highlights.map((item, index) => (
+        <article class="premium-card reveal-section page-detail__card" style={`--reveal-delay: ${index * 80}ms`}>
+          <span>{String(index + 1).padStart(2, '0')}</span>
+          <h3>{item.title}</h3>
+          <p>{item.copy}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+{page.slug === 'cennik' && <PricingCalculator />}
+
+<section class="site-section page-cta reveal-section">
+  <div class="container">
+    <div class="page-cta__panel premium-card">
+      <div>
+        <span class="section-kicker">Następny krok</span>
+        <h2>{page.cta.title}</h2>
+        <p>{page.cta.copy}</p>
+      </div>
+      <div class="page-cta__actions">
+        <a class="premium-button" href={localizeHref(page.cta.primaryHref)}>{page.cta.primaryLabel}</a>
+        {page.cta.secondaryHref && page.cta.secondaryLabel && (
+          <a class="page-cta__secondary" href={localizeHref(page.cta.secondaryHref)}>{page.cta.secondaryLabel}</a>
+        )}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.page-mini-hero {
+  min-height: 58svh;
+  display: grid;
+  align-items: end;
+  padding: 128px 0 78px;
+  color: #fff;
+  background:
+    linear-gradient(90deg, rgba(3,13,9,.88), rgba(8,28,18,.68) 52%, rgba(11,24,17,.36)),
+    radial-gradient(circle at 78% 24%, rgba(239,174,99,.20), transparent 34%),
+    radial-gradient(circle at 14% 68%, rgba(60,179,113,.20), transparent 32%),
+    linear-gradient(135deg, #07120d, #10281b 54%, #26190c);
+  overflow: hidden;
+}
+
+.page-mini-hero__inner {
+  display: grid;
+  gap: 20px;
+}
+
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  color: rgba(255,255,255,.68);
+  font-size: .84rem;
+  font-weight: 800;
+}
+
+.breadcrumbs a {
+  color: rgba(255,255,255,.86);
+}
+
+.breadcrumbs a:hover {
+  color: #8fe0b4;
+}
+
+.page-mini-hero .section-kicker {
+  color: #8fe0b4;
+}
+
+.page-mini-hero h1 {
+  max-width: 960px;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.7rem, 7vw, 6.2rem);
+  line-height: .92;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-shadow: 0 8px 34px rgba(0,0,0,.36);
+}
+
+.page-mini-hero p {
+  max-width: 760px;
+  margin: 0;
+  color: rgba(255,255,255,.84);
+  font-size: clamp(1.02rem, 2vw, 1.24rem);
+  line-height: 1.72;
+}
+
+.page-detail {
+  background:
+    radial-gradient(circle at 88% 8%, rgba(60,179,113,.12), transparent 30%),
+    linear-gradient(180deg, #fbfbf7, #f2f7f0);
+}
+
+.page-detail__grid {
+  display: grid;
+  gap: clamp(30px, 5vw, 62px);
+}
+
+.page-detail__cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+:global(.page-detail__card) {
+  padding: clamp(24px, 3vw, 32px);
+  border-radius: 24px;
+}
+
+:global(.page-detail__card span) {
+  display: inline-flex;
+  margin-bottom: 28px;
+  color: #3CB371;
+  font-size: .74rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+}
+
+:global(.page-detail__card h3) {
+  margin: 0 0 12px;
+  color: #102018;
+  font-size: 1.2rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+:global(.page-detail__card p) {
+  margin: 0;
+  color: #536359;
+  line-height: 1.7;
+}
+
+.page-cta {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(60,179,113,.18), transparent 34%),
+    linear-gradient(180deg, #f2f7f0, #101b14);
+}
+
+.page-cta__panel {
+  display: grid;
+  gap: 28px;
+  padding: clamp(28px, 5vw, 54px);
+  border-radius: 28px;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(10,28,18,.92), rgba(17,39,27,.82)),
+    radial-gradient(circle at 86% 18%, rgba(239,174,99,.18), transparent 36%);
+  border-color: rgba(255,255,255,.14);
+}
+
+.page-cta__panel h2 {
+  max-width: 780px;
+  margin: 0 0 14px;
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: .98;
+  font-weight: 950;
+}
+
+.page-cta__panel p {
+  max-width: 720px;
+  margin: 0;
+  color: rgba(255,255,255,.76);
+  line-height: 1.75;
+}
+
+.page-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-cta__secondary {
+  display: inline-flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff;
+  background: rgba(255,255,255,.08);
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+
+.page-cta__secondary:hover {
+  color: #fff;
+  border-color: rgba(143,224,180,.42);
+  background: rgba(255,255,255,.14);
+}
+
+@media (min-width: 900px) {
+  .page-detail__grid {
+    grid-template-columns: .75fr 1.25fr;
+  }
+
+  .page-detail__intro {
+    position: sticky;
+    top: 104px;
+    align-self: start;
+  }
+
+  .page-detail__cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .page-cta__panel {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-mini-hero {
+    min-height: 62svh;
+    padding: 116px 0 58px;
+  }
+
+  .page-cta__actions {
+    display: grid;
+  }
+
+  .page-cta__actions a {
+    width: 100%;
+  }
+}
+</style>

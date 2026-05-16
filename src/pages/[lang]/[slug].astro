@@ -1,0 +1,21 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ContentPage from '../../components/pages/ContentPage.astro';
+import { languages } from '../../data/languages';
+import { pageSlugs, sitePages } from '../../data/sitePages';
+
+export function getStaticPaths() {
+  return languages.flatMap((language) =>
+    pageSlugs.map((slug) => ({
+      params: { lang: language.code, slug },
+      props: { language, page: sitePages[slug] },
+    }))
+  );
+}
+
+const { language, page } = Astro.props;
+---
+
+<Layout title={`${page.seoTitle} | ${language.name}`} description={page.seoDescription}>
+  <ContentPage page={page} languageCode={language.code} languageName={language.name} />
+</Layout>

@@ -1,0 +1,18 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ContentPage from '../components/pages/ContentPage.astro';
+import { pageSlugs, sitePages } from '../data/sitePages';
+
+export function getStaticPaths() {
+  return pageSlugs.map((slug) => ({
+    params: { slug },
+    props: { page: sitePages[slug] },
+  }));
+}
+
+const { page } = Astro.props;
+---
+
+<Layout title={page.seoTitle} description={page.seoDescription}>
+  <ContentPage page={page} />
+</Layout>

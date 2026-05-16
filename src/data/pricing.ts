@@ -1,0 +1,59 @@
+export const LOW_SEASON = 'low';
+export const HIGH_SEASON = 'high';
+
+export const pricingConfig = {
+  currency: 'PLN',
+  seasons: {
+    high: {
+      label: 'Wysoki sezon',
+      start: '07-01',
+      end: '08-31',
+    },
+    low: {
+      label: 'Niski sezon',
+    },
+    summerNoticeMonths: [6, 7, 8],
+  },
+  people: {
+    adults: { label: 'Osoba dorosła', price: 35 },
+    children: { label: 'Dziecko 4-14', price: 20 },
+    toddlers: { label: 'Dziecko do 4', price: 0 },
+  },
+  stayTypes: [
+    { id: 'camper', label: 'Kamper', category: 'camping', price: 80 },
+    { id: 'caravan', label: 'Przyczepa', category: 'camping', price: 60 },
+    { id: 'tent-small', label: 'Namiot 1-2 os.', category: 'camping', price: 30 },
+    { id: 'tent-large', label: 'Namiot 3-4 os.', category: 'camping', price: 40 },
+    { id: 'van', label: 'Van', category: 'camping', price: 75 },
+    { id: 'rooftop-tent', label: 'Auto + namiot dachowy', category: 'camping', price: 50 },
+    {
+      id: 'bungalow-2',
+      label: 'Domek 2-os.',
+      category: 'bungalow',
+      seasonalPrices: { low: 200, high: 220 },
+    },
+    {
+      id: 'bungalow-3',
+      label: 'Domek 3-os.',
+      category: 'bungalow',
+      seasonalPrices: { low: 200, high: 220 },
+      note: 'Cena od stawki domku 2-os. Potwierdź szczegóły w recepcji.',
+    },
+    {
+      id: 'bungalow-family',
+      label: 'Domek rodzinny',
+      category: 'bungalow',
+      seasonalPrices: { low: 200, high: 220 },
+      note: 'Cena od stawki domku 2-os. Potwierdź szczegóły w recepcji.',
+    },
+  ],
+  addons: [
+    { id: 'electricity', label: 'Prąd', price: 25 },
+    { id: 'dog', label: 'Pies', price: 0 },
+    { id: 'motorcycle', label: 'Motocykl', price: 25 },
+    { id: 'cargo-trailer', label: 'Przyczepa bagażowa', price: 20 },
+    { id: 'bus', label: 'Autobus', price: 160 },
+    { id: 'parking', label: 'Parking', price: 35 },
+    { id: 'extra-car', label: 'Dodatkowe auto', price: 35 },
+  ],
+} as const;

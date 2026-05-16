@@ -1,0 +1,36 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ContentPage from '../../components/pages/ContentPage.astro';
+import { languages } from '../../data/languages';
+import { sitePages } from '../../data/sitePages';
+
+export function getStaticPaths() {
+  return languages.map((language) => ({
+    params: { lang: language.code },
+    props: { language },
+  }));
+}
+
+const { language } = Astro.props;
+const page = {
+  ...sitePages.camping,
+  slug: 'camping',
+  overline: `Camping Clepardia / ${language.name}`,
+  title: 'Camping Clepardia',
+  lead: 'Routing językowy jest przygotowany pod przyszłe tłumaczenia strony. Aktualnie treści pozostają w wersji bazowej.',
+  seoTitle: `Camping Clepardia | ${language.name}`,
+  seoDescription: `Camping Clepardia - wersja językowa ${language.name} przygotowana pod przyszłe tłumaczenia.`,
+  cta: {
+    title: 'Wybierz sekcję strony',
+    copy: 'Podstrony w tej wersji językowej są gotowe technicznie i mogą zostać uzupełnione tłumaczeniami.',
+    primaryLabel: 'Cennik',
+    primaryHref: '/cennik',
+    secondaryLabel: 'Kontakt',
+    secondaryHref: '/kontakt',
+  },
+};
+---
+
+<Layout title={page.seoTitle} description={page.seoDescription}>
+  <ContentPage page={page} languageCode={language.code} languageName={language.name} />
+</Layout>

@@ -1,0 +1,739 @@
+---
+import { pricingConfig } from '../../data/pricing';
+
+const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
+---
+
+<section class="site-section pricing-calculator reveal-section" id="kalkulator">
+  <div class="container">
+    <div class="pricing-calculator__header">
+      <span class="section-kicker">Kalkulator pobytu</span>
+      <h2 class="section-title">Sprawdź orientacyjny koszt rezerwacji</h2>
+      <p class="section-copy">
+        Kalkulator liczy noce, typ pobytu, osoby i dodatki. Finalną dostępność oraz warunki rezerwacji potwierdza recepcja.
+      </p>
+    </div>
+
+    <div class="pricing-calculator__layout" data-pricing-calculator>
+      <form class="premium-card pricing-calculator__form" aria-label="Kalkulator cennika Camping Clepardia">
+        <fieldset class="pricing-calculator__group reveal-section" style="--reveal-delay: 0ms">
+          <legend>Daty pobytu</legend>
+          <div class="pricing-calculator__fields">
+            <label>
+              <span>Data przyjazdu</span>
+              <input type="date" name="arrival" data-arrival aria-label="Data przyjazdu" />
+            </label>
+            <label>
+              <span>Data wyjazdu</span>
+              <input type="date" name="departure" data-departure aria-label="Data wyjazdu" />
+            </label>
+          </div>
+          <p class="pricing-calculator__hint">
+            Liczba nocy: <strong data-nights-label>1</strong>
+          </p>
+        </fieldset>
+
+        <fieldset class="pricing-calculator__group reveal-section" style="--reveal-delay: 80ms">
+          <legend>Typ pobytu</legend>
+          <div class="pricing-calculator__options">
+            {pricingConfig.stayTypes.map((type, index) => {
+              const price = 'seasonalPrices' in type ? `od ${type.seasonalPrices.low} PLN` : formatPrice(type.price);
+              return (
+                <label class="pricing-calculator__option">
+                  <input type="radio" name="stayType" value={type.id} checked={index === 0} />
+                  <span>
+                    <strong>{type.label}</strong>
+                    <small>{price} / noc</small>
+                    {'note' in type && <em>{type.note}</em>}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+          <div class="pricing-calculator__notice" data-summer-notice hidden>
+            W sezonie letnim rezerwacje pola campingowego mogą być ograniczone. Skontaktuj się z recepcją w sprawie dostępności.
+          </div>
+        </fieldset>
+
+        <fieldset class="pricing-calculator__group reveal-section" style="--reveal-delay: 160ms">
+          <legend>Osoby</legend>
+          <div class="pricing-calculator__counters">
+            <div class="pricing-counter">
+              <label for="adults">Dorośli</label>
+              <div>
+                <button type="button" data-counter="adults" data-delta="-1" aria-label="Zmniejsz liczbę dorosłych">-</button>
+                <input id="adults" type="number" min="0" value="2" inputmode="numeric" data-counter-input="adults" />
+                <button type="button" data-counter="adults" data-delta="1" aria-label="Zwiększ liczbę dorosłych">+</button>
+              </div>
+              <small>{formatPrice(pricingConfig.people.adults.price)} / noc</small>
+            </div>
+
+            <div class="pricing-counter">
+              <label for="children">Dzieci 4-14</label>
+              <div>
+                <button type="button" data-counter="children" data-delta="-1" aria-label="Zmniejsz liczbę dzieci 4-14">-</button>
+                <input id="children" type="number" min="0" value="0" inputmode="numeric" data-counter-input="children" />
+                <button type="button" data-counter="children" data-delta="1" aria-label="Zwiększ liczbę dzieci 4-14">+</button>
+              </div>
+              <small>{formatPrice(pricingConfig.people.children.price)} / noc</small>
+            </div>
+
+            <div class="pricing-counter">
+              <label for="toddlers">Dzieci do 4</label>
+              <div>
+                <button type="button" data-counter="toddlers" data-delta="-1" aria-label="Zmniejsz liczbę dzieci do 4 lat">-</button>
+                <input id="toddlers" type="number" min="0" value="0" inputmode="numeric" data-counter-input="toddlers" />
+                <button type="button" data-counter="toddlers" data-delta="1" aria-label="Zwiększ liczbę dzieci do 4 lat">+</button>
+              </div>
+              <small>{formatPrice(pricingConfig.people.toddlers.price)} / noc</small>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="pricing-calculator__group reveal-section" style="--reveal-delay: 240ms">
+          <legend>Dodatki</legend>
+          <div class="pricing-calculator__addons">
+            {pricingConfig.addons.map((addon) => (
+              <label class="pricing-calculator__addon">
+                <input type="checkbox" name="addons" value={addon.id} />
+                <span>
+                  <strong>{addon.label}</strong>
+                  <small>{formatPrice(addon.price)} / noc</small>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </form>
+
+      <aside class="premium-card pricing-summary" aria-label="Podsumowanie kalkulacji" aria-live="polite">
+        <div class="pricing-summary__head">
+          <span>Podsumowanie</span>
+          <strong data-total data-value="0">0 PLN</strong>
+        </div>
+        <div class="pricing-summary__meta">
+          <div>
+            <span>Noce</span>
+            <strong data-summary-nights>1</strong>
+          </div>
+          <div>
+            <span>Średnio / noc</span>
+            <strong data-nightly data-value="0">0 PLN</strong>
+          </div>
+        </div>
+        <div class="pricing-summary__breakdown" data-breakdown></div>
+        <p class="pricing-summary__footnote">
+          To orientacyjna kalkulacja. Recepcja potwierdza dostępność, sezon i szczegóły pobytu.
+        </p>
+      </aside>
+    </div>
+  </div>
+
+  <div class="pricing-mobile-summary" data-mobile-summary>
+    <button type="button" data-mobile-toggle aria-expanded="false" aria-controls="pricingMobilePanel">
+      <span>Suma pobytu</span>
+      <strong data-mobile-total data-value="0">0 PLN</strong>
+    </button>
+    <div id="pricingMobilePanel" class="pricing-mobile-summary__panel" data-mobile-panel hidden>
+      <div class="pricing-mobile-summary__row">
+        <span>Noce</span>
+        <strong data-mobile-nights>1</strong>
+      </div>
+      <div class="pricing-mobile-summary__row">
+        <span>Średnio / noc</span>
+        <strong data-mobile-nightly data-value="0">0 PLN</strong>
+      </div>
+      <div class="pricing-mobile-summary__breakdown" data-mobile-breakdown></div>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ pricingConfig }}>
+  (() => {
+    const root = document.querySelector('[data-pricing-calculator]');
+    if (!root) return;
+
+    const config = pricingConfig;
+    const DAY = 24 * 60 * 60 * 1000;
+    const currency = config.currency;
+    const arrivalInput = root.querySelector('[data-arrival]');
+    const departureInput = root.querySelector('[data-departure]');
+    const nightsLabel = root.querySelector('[data-nights-label]');
+    const notice = root.querySelector('[data-summer-notice]');
+    const totalEl = root.querySelector('[data-total]');
+    const nightlyEl = root.querySelector('[data-nightly]');
+    const summaryNights = root.querySelector('[data-summary-nights]');
+    const breakdownEl = root.querySelector('[data-breakdown]');
+    const mobileSummary = document.querySelector('[data-mobile-summary]');
+    const mobileToggle = document.querySelector('[data-mobile-toggle]');
+    const mobilePanel = document.querySelector('[data-mobile-panel]');
+    const mobileTotal = document.querySelector('[data-mobile-total]');
+    const mobileNights = document.querySelector('[data-mobile-nights]');
+    const mobileNightly = document.querySelector('[data-mobile-nightly]');
+    const mobileBreakdown = document.querySelector('[data-mobile-breakdown]');
+
+    const formatMoney = (value) => `${Math.round(value).toLocaleString('pl-PL')} ${currency}`;
+    const toDateValue = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    const parseDate = (value) => {
+      if (!value) return null;
+      const parts = value.split('-').map(Number);
+      if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+      return new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+    };
+    const addDays = (date, days) => new Date(date.getTime() + days * DAY);
+    const getMonthDay = (date) => {
+      const month = date.getUTCMonth() + 1;
+      const day = date.getUTCDate();
+      return { month, day };
+    };
+    const isHighSeason = (date) => {
+      const { month, day } = getMonthDay(date);
+      return (month === 7 && day >= 1) || month === 8;
+    };
+    const isSummerNoticeMonth = (date) => config.seasons.summerNoticeMonths.includes(date.getUTCMonth() + 1);
+    const getSelectedStayType = () => {
+      const selected = root.querySelector('input[name="stayType"]:checked');
+      const selectedId = selected?.value ?? config.stayTypes[0].id;
+      return config.stayTypes.find((type) => type.id === selectedId) ?? config.stayTypes[0];
+    };
+    const getCounterValue = (name) => {
+      const input = root.querySelector(`[data-counter-input="${name}"]`);
+      const value = Number(input?.value ?? 0);
+      return Number.isFinite(value) ? Math.max(0, value) : 0;
+    };
+    const getNights = () => {
+      const arrival = parseDate(arrivalInput?.value);
+      const departure = parseDate(departureInput?.value);
+      if (!arrival || !departure) return 1;
+      return Math.max(1, Math.round((departure.getTime() - arrival.getTime()) / DAY));
+    };
+    const getNightDates = () => {
+      const arrival = parseDate(arrivalInput?.value);
+      const nights = getNights();
+      if (!arrival) return [];
+      return Array.from({ length: nights }, (_, index) => addDays(arrival, index));
+    };
+    const getStayRate = (type, date) => {
+      if ('seasonalPrices' in type) {
+        return isHighSeason(date) ? type.seasonalPrices.high : type.seasonalPrices.low;
+      }
+      return type.price;
+    };
+    const animateMoney = (element, nextValue) => {
+      if (!element) return;
+      const previousValue = Number(element.dataset.value ?? 0);
+      const start = performance.now();
+      const duration = 420;
+      const tick = (now) => {
+        const progress = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const value = previousValue + (nextValue - previousValue) * eased;
+        element.textContent = formatMoney(value);
+        if (progress < 1) requestAnimationFrame(tick);
+      };
+      element.dataset.value = String(nextValue);
+      requestAnimationFrame(tick);
+    };
+    const renderBreakdown = (items) => {
+      const html = items.map((item) => `
+        <div class="pricing-summary__line">
+          <span>${item.label}</span>
+          <strong>${formatMoney(item.amount)}</strong>
+        </div>
+      `).join('');
+      if (breakdownEl) breakdownEl.innerHTML = html;
+      if (mobileBreakdown) mobileBreakdown.innerHTML = html;
+    };
+    const syncDates = () => {
+      const today = new Date();
+      const tomorrow = new Date(today.getTime() + DAY);
+
+      if (!arrivalInput.value) arrivalInput.value = toDateValue(today);
+      if (!departureInput.value) departureInput.value = toDateValue(tomorrow);
+
+      const arrival = parseDate(arrivalInput.value);
+      const departure = parseDate(departureInput.value);
+      if (arrival && departure && departure <= arrival) {
+        departureInput.value = toDateValue(new Date(arrival.getTime() + DAY));
+      }
+
+      if (arrivalInput && departureInput) {
+        arrivalInput.min = toDateValue(today);
+        const minDeparture = parseDate(arrivalInput.value);
+        departureInput.min = minDeparture ? toDateValue(new Date(minDeparture.getTime() + DAY)) : toDateValue(tomorrow);
+      }
+    };
+    const update = () => {
+      syncDates();
+
+      const type = getSelectedStayType();
+      const nights = getNights();
+      const nightDates = getNightDates();
+      const adults = getCounterValue('adults');
+      const children = getCounterValue('children');
+      const toddlers = getCounterValue('toddlers');
+      const selectedAddons = Array.from(root.querySelectorAll('input[name="addons"]:checked')).map((input) => input.value);
+      const accommodationTotal = nightDates.reduce((sum, date) => sum + getStayRate(type, date), 0);
+      const peoplePerNight =
+        adults * config.people.adults.price +
+        children * config.people.children.price +
+        toddlers * config.people.toddlers.price;
+      const selectedAddonItems = config.addons.filter((addon) => selectedAddons.includes(addon.id));
+      const addonsPerNight = selectedAddonItems.reduce((sum, addon) => sum + addon.price, 0);
+      const peopleTotal = peoplePerNight * nights;
+      const addonsTotal = addonsPerNight * nights;
+      const total = accommodationTotal + peopleTotal + addonsTotal;
+      const averageNightly = nights > 0 ? total / nights : total;
+      const hasSummerCamping = type.category === 'camping' && nightDates.some(isSummerNoticeMonth);
+
+      const breakdown = [
+        { label: `${type.label} x ${nights} noc${nights === 1 ? '' : 'e'}`, amount: accommodationTotal },
+      ];
+
+      if (adults > 0) breakdown.push({ label: `${config.people.adults.label} x ${adults} x ${nights}`, amount: adults * config.people.adults.price * nights });
+      if (children > 0) breakdown.push({ label: `${config.people.children.label} x ${children} x ${nights}`, amount: children * config.people.children.price * nights });
+      if (toddlers > 0) breakdown.push({ label: `${config.people.toddlers.label} x ${toddlers} x ${nights}`, amount: 0 });
+      selectedAddonItems.forEach((addon) => breakdown.push({ label: `${addon.label} x ${nights}`, amount: addon.price * nights }));
+
+      if (nightsLabel) nightsLabel.textContent = String(nights);
+      if (summaryNights) summaryNights.textContent = String(nights);
+      if (mobileNights) mobileNights.textContent = String(nights);
+      if (notice) notice.hidden = !hasSummerCamping;
+      animateMoney(totalEl, total);
+      animateMoney(nightlyEl, averageNightly);
+      animateMoney(mobileTotal, total);
+      animateMoney(mobileNightly, averageNightly);
+      renderBreakdown(breakdown);
+    };
+
+    root.querySelectorAll('input').forEach((input) => input.addEventListener('change', update));
+    root.querySelectorAll('[data-counter]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const name = button.dataset.counter;
+        const delta = Number(button.dataset.delta ?? 0);
+        const input = root.querySelector(`[data-counter-input="${name}"]`);
+        const value = Math.max(0, Number(input?.value ?? 0) + delta);
+        if (input) input.value = String(value);
+        update();
+      });
+    });
+    root.querySelectorAll('[data-counter-input]').forEach((input) => {
+      input.addEventListener('input', () => {
+        input.value = String(Math.max(0, Number(input.value || 0)));
+        update();
+      });
+    });
+    mobileToggle?.addEventListener('click', () => {
+      const expanded = mobileToggle.getAttribute('aria-expanded') === 'true';
+      mobileToggle.setAttribute('aria-expanded', String(!expanded));
+      if (mobilePanel) mobilePanel.hidden = expanded;
+      mobileSummary?.classList.toggle('is-open', !expanded);
+    });
+
+    syncDates();
+    update();
+  })();
+</script>
+
+<style is:global>
+.pricing-calculator {
+  background:
+    radial-gradient(circle at 12% 10%, rgba(60,179,113,.14), transparent 32%),
+    linear-gradient(180deg, #f2f7f0, #fbfbf7);
+}
+
+.pricing-calculator__header {
+  max-width: 860px;
+  margin-bottom: clamp(34px, 5vw, 56px);
+}
+
+.pricing-calculator__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.pricing-calculator__form {
+  display: grid;
+  gap: 18px;
+  padding: clamp(20px, 3vw, 32px);
+  border-radius: 28px;
+}
+
+.pricing-calculator__group {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.pricing-calculator__group legend {
+  margin-bottom: 16px;
+  color: #11251a;
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.pricing-calculator__fields,
+.pricing-calculator__counters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.pricing-calculator label span,
+.pricing-counter label {
+  display: block;
+  color: #273f31;
+  font-size: .84rem;
+  font-weight: 900;
+}
+
+.pricing-calculator input[type="date"],
+.pricing-counter input {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 8px;
+  padding: 0 14px;
+  border: 1px solid rgba(25, 70, 44, .14);
+  border-radius: 16px;
+  background: rgba(255,255,255,.82);
+  color: #102018;
+  font: inherit;
+  font-weight: 800;
+  transition: border-color .22s ease, box-shadow .22s ease, background .22s ease;
+}
+
+.pricing-calculator input:focus-visible,
+.pricing-calculator button:focus-visible {
+  outline: 0;
+  border-color: rgba(60,179,113,.64);
+  box-shadow: 0 0 0 4px rgba(60,179,113,.16);
+}
+
+.pricing-calculator__hint {
+  margin: 14px 0 0;
+  color: #536359;
+  font-weight: 800;
+}
+
+.pricing-calculator__options,
+.pricing-calculator__addons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.pricing-calculator__option,
+.pricing-calculator__addon {
+  position: relative;
+  cursor: pointer;
+}
+
+.pricing-calculator__option input,
+.pricing-calculator__addon input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pricing-calculator__option > span,
+.pricing-calculator__addon > span {
+  min-height: 74px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(25, 70, 44, .12);
+  background: rgba(255,255,255,.68);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.62);
+  transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
+}
+
+.pricing-calculator__option strong,
+.pricing-calculator__addon strong {
+  color: #13291d;
+  font-size: .95rem;
+}
+
+.pricing-calculator__option small,
+.pricing-calculator__addon small,
+.pricing-calculator__option em {
+  color: #607067;
+  font-size: .78rem;
+  font-style: normal;
+  line-height: 1.4;
+}
+
+.pricing-calculator__option:hover > span,
+.pricing-calculator__addon:hover > span,
+.pricing-calculator__option input:checked + span,
+.pricing-calculator__addon input:checked + span {
+  transform: translateY(-2px);
+  border-color: rgba(60,179,113,.36);
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 16px 42px rgba(17,40,28,.10);
+}
+
+.pricing-calculator__option input:checked + span::before,
+.pricing-calculator__addon input:checked + span::before {
+  content: '';
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #3CB371;
+  box-shadow: 0 0 0 6px rgba(60,179,113,.14);
+}
+
+.pricing-calculator__notice {
+  margin-top: 14px;
+  padding: 15px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(238,174,99,.36);
+  background: rgba(255,247,232,.92);
+  color: #775321;
+  line-height: 1.55;
+  font-weight: 800;
+}
+
+.pricing-counter {
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.62);
+  border: 1px solid rgba(25,70,44,.10);
+}
+
+.pricing-counter > div {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  gap: 8px;
+  align-items: center;
+}
+
+.pricing-counter button {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(60,179,113,.20);
+  background: rgba(60,179,113,.12);
+  color: #1f7048;
+  font-size: 1.2rem;
+  font-weight: 950;
+  transition: transform .22s ease, background .22s ease;
+}
+
+.pricing-counter button:hover {
+  transform: translateY(-1px);
+  background: rgba(60,179,113,.20);
+}
+
+.pricing-counter input {
+  margin-top: 0;
+  text-align: center;
+}
+
+.pricing-counter small {
+  display: block;
+  margin-top: 9px;
+  color: #607067;
+  font-weight: 800;
+}
+
+.pricing-summary {
+  position: sticky;
+  top: 92px;
+  padding: 28px;
+  border-radius: 28px;
+  color: #fff;
+  background:
+    linear-gradient(145deg, rgba(9,27,17,.94), rgba(16,38,26,.86)),
+    radial-gradient(circle at 82% 18%, rgba(60,179,113,.24), transparent 36%);
+  border-color: rgba(255,255,255,.14);
+}
+
+.pricing-summary__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: start;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+
+.pricing-summary__head span {
+  color: #8fe0b4;
+  font-size: .78rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.pricing-summary__head strong {
+  color: #fff;
+  font-size: clamp(2rem, 4vw, 3.1rem);
+  line-height: .95;
+  font-weight: 950;
+  text-align: right;
+}
+
+.pricing-summary__meta {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.pricing-summary__meta div {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.08);
+}
+
+.pricing-summary__meta span,
+.pricing-summary__line span,
+.pricing-mobile-summary__row span {
+  color: rgba(255,255,255,.68);
+  font-size: .76rem;
+  font-weight: 850;
+}
+
+.pricing-summary__meta strong {
+  display: block;
+  margin-top: 4px;
+  color: #fff;
+}
+
+.pricing-summary__breakdown,
+.pricing-mobile-summary__breakdown {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.pricing-summary__line {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.09);
+}
+
+.pricing-summary__line strong {
+  color: #fff;
+  white-space: nowrap;
+}
+
+.pricing-summary__footnote {
+  margin: 22px 0 0;
+  color: rgba(255,255,255,.60);
+  line-height: 1.6;
+  font-size: .86rem;
+}
+
+.pricing-mobile-summary {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 800;
+  display: none;
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgba(8, 22, 15, .94);
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: 0 18px 54px rgba(0,0,0,.30);
+  backdrop-filter: blur(18px);
+}
+
+.pricing-mobile-summary button {
+  width: 100%;
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  color: #fff;
+}
+
+.pricing-mobile-summary button span {
+  color: #8fe0b4;
+  font-size: .76rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.pricing-mobile-summary button strong {
+  font-size: 1.35rem;
+  font-weight: 950;
+}
+
+.pricing-mobile-summary__panel {
+  padding: 0 18px 18px;
+  color: #fff;
+}
+
+.pricing-mobile-summary__row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255,255,255,.10);
+}
+
+@media (min-width: 760px) {
+  .pricing-calculator__fields,
+  .pricing-calculator__counters,
+  .pricing-calculator__addons {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .pricing-calculator__options {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1080px) {
+  .pricing-calculator__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+  }
+}
+
+@media (max-width: 1079px) {
+  .pricing-summary {
+    display: none;
+  }
+
+  .pricing-mobile-summary {
+    display: block;
+  }
+
+  .pricing-calculator {
+    padding-bottom: 120px;
+  }
+}
+
+@media (max-width: 560px) {
+  .pricing-calculator__option > span,
+  .pricing-calculator__addon > span {
+    min-height: 68px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pricing-calculator *,
+  .pricing-mobile-summary * {
+    transition-duration: .01ms !important;
+    animation: none !important;
+  }
+}
+</style>
