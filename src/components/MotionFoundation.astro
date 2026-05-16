@@ -1,0 +1,239 @@
+<script is:inline>
+  document.documentElement.classList.add('motion-ready', 'motion-loading');
+</script>
+
+<div class="page-loader" aria-hidden="true">
+  <div class="page-loader__mark">CC</div>
+  <div class="page-loader__line"></div>
+</div>
+
+<script>
+  import Lenis from 'lenis';
+
+  const root = document.documentElement;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const desktopScroll = window.matchMedia('(min-width: 768px) and (pointer: fine)');
+  let lenis: Lenis | undefined;
+  let rafId = 0;
+
+  const finishLoading = () => {
+    root.classList.add('motion-loaded');
+    window.setTimeout(() => root.classList.remove('motion-loading'), 620);
+  };
+
+  const revealElements = () => {
+    const nodes = Array.from(document.querySelectorAll('.reveal-section, .premium-card, .photo-frame, .section-title, .section-copy'));
+
+    nodes.forEach((node, index) => {
+      if (!(node instanceof HTMLElement)) return;
+      node.classList.add('motion-reveal');
+      node.style.setProperty('--reveal-delay', `${Math.min(index % 7, 6) * 55}ms`);
+    });
+
+    if (reduceMotion.matches || !('IntersectionObserver' in window)) {
+      nodes.forEach((node) => node.classList.add('is-visible'));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        });
+      },
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.12 },
+    );
+
+    nodes.forEach((node) => observer.observe(node));
+  };
+
+  const animate = (time: number) => {
+    if (!lenis) return;
+    lenis.raf(time);
+    rafId = requestAnimationFrame(animate);
+  };
+
+  const startLenis = () => {
+    if (lenis || reduceMotion.matches || !desktopScroll.matches) return;
+    lenis = new Lenis({
+      duration: 1.08,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 0.85,
+      touchMultiplier: 1,
+      anchors: false,
+    });
+    rafId = requestAnimationFrame(animate);
+  };
+
+  const stopLenis = () => {
+    if (!lenis) return;
+    cancelAnimationFrame(rafId);
+    lenis.destroy();
+    lenis = undefined;
+  };
+
+  const syncLenis = () => {
+    if (reduceMotion.matches || !desktopScroll.matches) {
+      stopLenis();
+      return;
+    }
+    startLenis();
+  };
+
+  document.addEventListener('click', (event) => {
+    const anchor = (event.target as Element | null)?.closest?.('a[href^="#"]') as HTMLAnchorElement | null;
+    if (!anchor) return;
+
+    const href = anchor.getAttribute('href');
+    if (!href || href === '#') return;
+
+    const target = document.querySelector(href);
+    if (!(target instanceof HTMLElement)) return;
+
+    event.preventDefault();
+    const offset = window.innerWidth >= 1080 ? -78 : -84;
+
+    if (lenis) {
+      lenis.scrollTo(target, { offset });
+    } else {
+      const top = target.getBoundingClientRect().top + window.scrollY + offset;
+      window.scrollTo({ top, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    }
+
+    history.pushState(null, '', href);
+  });
+
+  revealElements();
+  syncLenis();
+  reduceMotion.addEventListener('change', syncLenis);
+  desktopScroll.addEventListener('change', syncLenis);
+
+  if (document.readyState === 'complete') {
+    window.setTimeout(finishLoading, reduceMotion.matches ? 0 : 260);
+  } else {
+    window.addEventListener('load', () => window.setTimeout(finishLoading, reduceMotion.matches ? 0 : 260), { once: true });
+  }
+</script>
+
+<style is:global>
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  gap: 18px;
+  background:
+    radial-gradient(circle at 72% 30%, rgba(231, 157, 84, .20), transparent 34%),
+    radial-gradient(circle at 22% 64%, rgba(60, 179, 113, .20), transparent 34%),
+    linear-gradient(135deg, #06110c 0%, #10241a 48%, #050806 100%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .62s ease, visibility .62s ease;
+}
+
+.motion-ready.motion-loading body {
+  overflow: hidden;
+}
+
+.motion-ready.motion-loading .page-loader {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.motion-ready.motion-loaded .page-loader {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.page-loader__mark {
+  width: 78px;
+  height: 78px;
+  border-radius: 28px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, #69dca3, #3CB371 48%, #21784c);
+  box-shadow: 0 24px 80px rgba(60, 179, 113, .32), inset 0 1px 0 rgba(255,255,255,.24);
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+
+.page-loader__line {
+  width: 138px;
+  height: 2px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: rgba(255,255,255,.14);
+}
+
+.page-loader__line::after {
+  content: '';
+  display: block;
+  width: 45%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, #8fe0b4, transparent);
+  animation: loaderLine 1.15s ease-in-out infinite;
+}
+
+.motion-ready .motion-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity .78s cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms),
+    transform .78s cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.motion-ready .motion-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.motion-ready .photo-frame.motion-reveal,
+.motion-ready .premium-card.motion-reveal {
+  transform: translateY(34px) scale(.985);
+}
+
+.motion-ready .photo-frame.motion-reveal.is-visible,
+.motion-ready .premium-card.motion-reveal.is-visible {
+  transform: translateY(0) scale(1);
+}
+
+.site-section::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: min(1180px, calc(100% - 40px));
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, rgba(60,179,113,.18), transparent);
+  pointer-events: none;
+}
+
+@keyframes loaderLine {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(260%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loader {
+    display: none;
+  }
+
+  .motion-ready .motion-reveal,
+  .motion-ready .photo-frame.motion-reveal,
+  .motion-ready .premium-card.motion-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+</style>

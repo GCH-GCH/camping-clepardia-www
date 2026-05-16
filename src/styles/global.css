@@ -560,7 +560,7 @@ input, textarea, select {
   box-shadow: 0 22px 58px rgba(60,179,113,.38);
 }
 
-.reveal-section {
+html:not(.motion-ready) .reveal-section {
   animation: sectionRise .75s ease both;
 }
 
