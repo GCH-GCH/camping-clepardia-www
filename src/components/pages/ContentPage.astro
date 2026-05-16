@@ -1,5 +1,6 @@
 ---
 import PricingCalculator from '../pricing/PricingCalculator.astro';
+import ReservationInquiryForm from '../forms/ReservationInquiryForm.astro';
 import { pricingConfig } from '../../data/pricing';
 import type { SitePage } from '../../data/sitePages';
 import { getLocalizedPath } from '../../utils/localizedLinks';
@@ -45,6 +46,12 @@ const pricingInfoBarItems = [
   { label: 'Pies', value: dogAddon?.price === 0 ? 'bezpłatnie' : dogAddon ? `${formatPrice(dogAddon.price)} / noc` : 'do potwierdzenia' },
   { label: 'Prąd', value: electricityAddon ? `${formatPrice(electricityAddon.price)} / noc` : 'do potwierdzenia' },
 ];
+const contactCards = [
+  { label: 'Telefon', value: '+48 795 294 486', href: 'tel:+48795294486' },
+  { label: 'Email', value: 'clepardia@gmail.com', href: 'mailto:clepardia@gmail.com' },
+  { label: 'Adres', value: 'Henryka Pachońskiego 28A, 31-322 Kraków' },
+  { label: 'Godziny recepcji', value: '9:00–20:00' },
+];
 ---
 
 <section class="page-mini-hero reveal-section">
@@ -61,7 +68,7 @@ const pricingInfoBarItems = [
   </div>
 </section>
 
-{page.slug !== 'cennik' && (
+{page.slug !== 'cennik' && page.slug !== 'kontakt' && (
 <section class="site-section page-detail reveal-section">
   <div class="container page-detail__grid">
     <div class="page-detail__intro">
@@ -91,6 +98,23 @@ const pricingInfoBarItems = [
           <span>{item.label}</span>
           <strong>{item.value}</strong>
         </div>
+      ))}
+    </div>
+  </section>
+)}
+
+{page.slug === 'kontakt' && (
+  <section class="site-section contact-cards reveal-section" aria-label="Dane kontaktowe Camping Clepardia">
+    <div class="container contact-cards__grid">
+      {contactCards.map((item, index) => (
+        <article class="premium-card reveal-section contact-cards__card" style={`--reveal-delay: ${index * 80}ms`}>
+          <span>{item.label}</span>
+          {item.href ? (
+            <a href={item.href}>{item.value}</a>
+          ) : (
+            <strong>{item.value}</strong>
+          )}
+        </article>
       ))}
     </div>
   </section>
@@ -137,6 +161,8 @@ const pricingInfoBarItems = [
 
 {page.slug === 'cennik' && <PricingCalculator />}
 
+{page.slug === 'kontakt' && <ReservationInquiryForm languageCode={languageCode} />}
+
 {page.slug === 'cennik' && (
   <section class="site-section page-detail pricing-guidance reveal-section">
     <div class="container page-detail__grid">
@@ -159,6 +185,29 @@ const pricingInfoBarItems = [
   </section>
 )}
 
+{page.slug === 'kontakt' && (
+  <section class="site-section page-detail contact-guidance reveal-section">
+    <div class="container page-detail__grid">
+      <div class="page-detail__intro">
+        <span class="section-kicker">Przed wysłaniem zapytania</span>
+        <h2 class="section-title">Co warto wiedzieć?</h2>
+        <p class="section-copy">{page.seoDescription}</p>
+      </div>
+
+      <div class="page-detail__cards contact-guidance__cards">
+        {page.highlights.map((item, index) => (
+          <article class="premium-card reveal-section page-detail__card" style={`--reveal-delay: ${index * 80}ms`}>
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <h3>{item.title}</h3>
+            <p>{item.copy}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+{page.slug !== 'kontakt' && (
 <section class="site-section page-cta reveal-section">
   <div class="container">
     <div class="page-cta__panel premium-card">
@@ -176,6 +225,7 @@ const pricingInfoBarItems = [
     </div>
   </div>
 </section>
+)}
 
 <style>
 .page-mini-hero {
@@ -294,6 +344,53 @@ const pricingInfoBarItems = [
   background:
     radial-gradient(circle at 14% 12%, rgba(60,179,113,.16), transparent 34%),
     linear-gradient(180deg, #fbfbf7, #edf6ef);
+}
+
+.contact-cards {
+  padding: clamp(44px, 7vw, 86px) 0;
+  background:
+    radial-gradient(circle at 86% 12%, rgba(60,179,113,.14), transparent 30%),
+    linear-gradient(180deg, #fbfbf7, #f2f7f0);
+}
+
+.contact-cards__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+:global(.contact-cards__card) {
+  display: grid;
+  gap: 12px;
+  min-height: 154px;
+  padding: clamp(24px, 3vw, 32px);
+  border-radius: 24px;
+}
+
+:global(.contact-cards__card span) {
+  color: #3CB371;
+  font-size: .74rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+:global(.contact-cards__card a),
+:global(.contact-cards__card strong) {
+  color: #102018;
+  font-size: clamp(1.12rem, 2vw, 1.42rem);
+  line-height: 1.25;
+  font-weight: 950;
+}
+
+:global(.contact-cards__card a:hover) {
+  color: #2f9d63;
+}
+
+.contact-guidance {
+  background:
+    radial-gradient(circle at 14% 12%, rgba(60,179,113,.15), transparent 34%),
+    linear-gradient(180deg, #eef6ef, #fbfbf7);
 }
 
 .page-detail__grid {
@@ -497,6 +594,10 @@ const pricingInfoBarItems = [
     grid-template-columns: repeat(4, 1fr);
   }
 
+  .contact-cards__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
   .bungalow-types__grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -513,6 +614,10 @@ const pricingInfoBarItems = [
   }
 
   .pricing-guidance__cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .contact-guidance__cards {
     grid-template-columns: repeat(4, 1fr);
   }
 }

@@ -1,0 +1,924 @@
+---
+import { languages } from '../../data/languages';
+import { pricingConfig } from '../../data/pricing';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const activeLanguageCode = languages.some((language) => language.code === languageCode) ? languageCode : 'pl';
+
+const stayOptions = [
+  { id: 'camper', label: 'Kamper', category: 'camping' },
+  { id: 'caravan', label: 'Przyczepa', category: 'camping' },
+  { id: 'tent', label: 'Namiot', category: 'camping' },
+  { id: 'van', label: 'Van', category: 'camping' },
+  { id: 'rooftop-tent', label: 'Auto + namiot dachowy', category: 'camping' },
+  { id: 'bungalow-2', label: 'Domek 2-os.', category: 'bungalow' },
+  { id: 'bungalow-3', label: 'Domek 3-os.', category: 'bungalow' },
+  { id: 'bungalow-4', label: 'Domek 4-os.', category: 'bungalow' },
+  { id: 'bungalow-family', label: 'Domek rodzinny', category: 'bungalow' },
+] as const;
+
+const inquiryAddonIds = ['electricity', 'dog', 'extra-car', 'motorcycle', 'cargo-trailer'] as const;
+const addonOptions = inquiryAddonIds
+  .map((id) => pricingConfig.addons.find((addon) => addon.id === id))
+  .filter((addon): addon is (typeof pricingConfig.addons)[number] => Boolean(addon));
+---
+
+<section class="site-section reservation-inquiry reveal-section" data-reservation-inquiry>
+  <div class="container">
+    <div class="reservation-inquiry__head">
+      <span class="section-kicker">Formularz zapytania rezerwacyjnego</span>
+      <h2 class="section-title">Wyślij szczegóły planowanego pobytu</h2>
+      <p class="section-copy">
+        Im więcej informacji podasz od razu, tym szybciej recepcja może potwierdzić dostępność terminu i najlepszą opcję pobytu.
+      </p>
+    </div>
+
+    <div class="reservation-inquiry__layout">
+      <form class="premium-card reservation-inquiry__form" data-reservation-form novalidate>
+        <div class="reservation-inquiry__errors" data-form-errors role="alert" hidden></div>
+
+        <fieldset class="reservation-inquiry__group reveal-section" style="--reveal-delay: 0ms">
+          <legend>Dane</legend>
+          <div class="reservation-inquiry__fields">
+            <label class="reservation-inquiry__field" data-field="fullName">
+              <span>Imię i nazwisko *</span>
+              <input id="fullName" name="fullName" type="text" autocomplete="name" required data-required aria-describedby="fullNameError">
+              <small id="fullNameError" data-field-error="fullName"></small>
+            </label>
+
+            <label class="reservation-inquiry__field" data-field="email">
+              <span>Email *</span>
+              <input id="email" name="email" type="email" autocomplete="email" required data-required aria-describedby="emailError">
+              <small id="emailError" data-field-error="email"></small>
+            </label>
+
+            <label class="reservation-inquiry__field" data-field="phone">
+              <span>Telefon</span>
+              <input id="phone" name="phone" type="tel" autocomplete="tel">
+            </label>
+
+            <label class="reservation-inquiry__field" data-field="country">
+              <span>Kraj</span>
+              <input id="country" name="country" type="text" autocomplete="country-name">
+            </label>
+
+            <label class="reservation-inquiry__field" data-field="contactLanguage">
+              <span>Język kontaktu</span>
+              <select id="contactLanguage" name="contactLanguage">
+                {languages.map((language) => (
+                  <option value={language.code} selected={language.code === activeLanguageCode}>
+                    {language.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="reservation-inquiry__group reveal-section" style="--reveal-delay: 80ms">
+          <legend>Termin</legend>
+          <div class="reservation-inquiry__fields">
+            <label class="reservation-inquiry__field" data-field="arrival">
+              <span>Data przyjazdu *</span>
+              <input id="arrival" name="arrival" type="date" required data-arrival data-required aria-describedby="arrivalError">
+              <small id="arrivalError" data-field-error="arrival"></small>
+            </label>
+
+            <label class="reservation-inquiry__field" data-field="departure">
+              <span>Data wyjazdu *</span>
+              <input id="departure" name="departure" type="date" required data-departure data-required aria-describedby="departureError">
+              <small id="departureError" data-field-error="departure"></small>
+            </label>
+          </div>
+          <p class="reservation-inquiry__nights">Liczba nocy: <strong data-nights-label>Uzupełnij termin</strong></p>
+        </fieldset>
+
+        <fieldset class="reservation-inquiry__group reveal-section" data-stay-group style="--reveal-delay: 160ms">
+          <legend>Typ pobytu *</legend>
+          <div class="reservation-inquiry__options">
+            {stayOptions.map((option) => (
+              <label class="reservation-inquiry__option">
+                <input type="radio" name="stayType" value={option.id} required data-category={option.category} data-label={option.label} aria-describedby="stayTypeError">
+                <span>{option.label}</span>
+              </label>
+            ))}
+          </div>
+          <small class="reservation-inquiry__field-error" id="stayTypeError" data-field-error="stayType"></small>
+        </fieldset>
+
+        <fieldset class="reservation-inquiry__group reveal-section" style="--reveal-delay: 240ms">
+          <legend>Osoby</legend>
+          <div class="reservation-inquiry__counters">
+            <div class="reservation-counter">
+              <label for="adults">Dorośli</label>
+              <div>
+                <button type="button" data-counter="adults" data-delta="-1" aria-label="Zmniejsz liczbę dorosłych">-</button>
+                <input id="adults" name="adults" type="number" min="0" value="2" inputmode="numeric" data-counter-input="adults">
+                <button type="button" data-counter="adults" data-delta="1" aria-label="Zwiększ liczbę dorosłych">+</button>
+              </div>
+            </div>
+
+            <div class="reservation-counter">
+              <label for="children">Dzieci 4-14</label>
+              <div>
+                <button type="button" data-counter="children" data-delta="-1" aria-label="Zmniejsz liczbę dzieci 4-14">-</button>
+                <input id="children" name="children" type="number" min="0" value="0" inputmode="numeric" data-counter-input="children">
+                <button type="button" data-counter="children" data-delta="1" aria-label="Zwiększ liczbę dzieci 4-14">+</button>
+              </div>
+            </div>
+
+            <div class="reservation-counter">
+              <label for="toddlers">Dzieci do 4</label>
+              <div>
+                <button type="button" data-counter="toddlers" data-delta="-1" aria-label="Zmniejsz liczbę dzieci do 4 lat">-</button>
+                <input id="toddlers" name="toddlers" type="number" min="0" value="0" inputmode="numeric" data-counter-input="toddlers">
+                <button type="button" data-counter="toddlers" data-delta="1" aria-label="Zwiększ liczbę dzieci do 4 lat">+</button>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="reservation-inquiry__group reveal-section" style="--reveal-delay: 320ms">
+          <legend>Dodatki</legend>
+          <div class="reservation-inquiry__addons">
+            {addonOptions.map((addon) => (
+              <label class="reservation-inquiry__addon">
+                <input type="checkbox" name="addons" value={addon.id} data-label={addon.label}>
+                <span>{addon.label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <label class="reservation-inquiry__field reservation-inquiry__field--textarea reveal-section" data-field="message" style="--reveal-delay: 400ms">
+          <span>Wiadomość</span>
+          <textarea id="message" name="message" rows="5" placeholder="Napisz, czego potrzebujesz: godzina przyjazdu, typ sprzętu, pytania o domek lub dodatkowe informacje."></textarea>
+        </label>
+
+        <div class="reservation-inquiry__season-notice" data-season-banner hidden>
+          W sezonie letnim rezerwacje pola campingowego mogą być ograniczone. Recepcja potwierdzi dostępność w odpowiedzi na zapytanie.
+        </div>
+
+        <label class="reservation-inquiry__consent" data-field="consent">
+          <input id="consent" name="consent" type="checkbox" required data-required aria-describedby="consentError">
+          <span>Akceptuję kontakt zwrotny w sprawie mojego zapytania.</span>
+        </label>
+        <small class="reservation-inquiry__field-error" id="consentError" data-field-error="consent"></small>
+
+        <button class="reservation-inquiry__submit" type="submit">Wyślij zapytanie</button>
+
+        <div class="reservation-inquiry__success" data-success role="status" tabindex="-1" hidden>
+          Zapytanie zostało przygotowane. W kolejnym etapie podłączymy wysyłkę do recepcji Camping Clepardia.
+        </div>
+      </form>
+
+      <aside class="premium-card reservation-inquiry__summary" aria-live="polite">
+        <span class="section-kicker">Podsumowanie zapytania</span>
+        <h3>Podsumowanie zapytania</h3>
+        <p data-summary-empty>
+          Uzupełnij formularz, a tutaj pojawi się podsumowanie zapytania.
+        </p>
+
+        <div class="reservation-inquiry__summary-details" data-summary-details hidden>
+          <div><span>Termin</span><strong data-summary-dates>Do uzupełnienia</strong></div>
+          <div><span>Liczba nocy</span><strong data-summary-nights>Do uzupełnienia</strong></div>
+          <div><span>Typ pobytu</span><strong data-summary-stay>Do uzupełnienia</strong></div>
+          <div><span>Osoby</span><strong data-summary-people>2 dorosłych</strong></div>
+          <div><span>Dodatki</span><strong data-summary-addons>Brak</strong></div>
+          <div><span>Kraj</span><strong data-summary-country>Do uzupełnienia</strong></div>
+          <div><span>Język</span><strong data-summary-language>Polski</strong></div>
+          <div><span>Sezon</span><strong data-summary-season>Do uzupełnienia</strong></div>
+        </div>
+
+        <p class="reservation-inquiry__summary-notice" data-summary-notice hidden>
+          W sezonie letnim rezerwacje pola campingowego mogą być ograniczone. Recepcja potwierdzi dostępność w odpowiedzi na zapytanie.
+        </p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const root = document.querySelector('[data-reservation-inquiry]');
+    if (!root) return;
+
+    const form = root.querySelector('[data-reservation-form]');
+    const errorBox = root.querySelector('[data-form-errors]');
+    const successBox = root.querySelector('[data-success]');
+    const arrivalInput = root.querySelector('[data-arrival]');
+    const departureInput = root.querySelector('[data-departure]');
+    const nightsLabel = root.querySelector('[data-nights-label]');
+    const seasonBanner = root.querySelector('[data-season-banner]');
+    const summaryEmpty = root.querySelector('[data-summary-empty]');
+    const summaryDetails = root.querySelector('[data-summary-details]');
+    const summaryNotice = root.querySelector('[data-summary-notice]');
+    const DAY = 24 * 60 * 60 * 1000;
+    const summerNotice = 'W sezonie letnim rezerwacje pola campingowego mogą być ograniczone. Recepcja potwierdzi dostępność w odpowiedzi na zapytanie.';
+
+    const summary = {
+      dates: root.querySelector('[data-summary-dates]'),
+      nights: root.querySelector('[data-summary-nights]'),
+      stay: root.querySelector('[data-summary-stay]'),
+      people: root.querySelector('[data-summary-people]'),
+      addons: root.querySelector('[data-summary-addons]'),
+      country: root.querySelector('[data-summary-country]'),
+      language: root.querySelector('[data-summary-language]'),
+      season: root.querySelector('[data-summary-season]'),
+    };
+
+    const setText = (element, value) => {
+      if (element) element.textContent = value;
+    };
+    const getField = (name) => form?.elements.namedItem(name);
+    const getInput = (name) => {
+      const field = getField(name);
+      return field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement ? field : null;
+    };
+    const getErrorElement = (name) => root.querySelector(`[data-field-error="${name}"]`);
+    const setFieldError = (name, message = '') => {
+      const field = getInput(name);
+      const errorElement = getErrorElement(name);
+      const wrapper = root.querySelector(`[data-field="${name}"]`);
+      if (field) field.setAttribute('aria-invalid', message ? 'true' : 'false');
+      if (wrapper) wrapper.classList.toggle('is-invalid', Boolean(message));
+      setText(errorElement, message);
+    };
+    const setStayError = (message = '') => {
+      const stayGroup = root.querySelector('[data-stay-group]');
+      root.querySelectorAll('input[name="stayType"]').forEach((input) => input.setAttribute('aria-invalid', message ? 'true' : 'false'));
+      stayGroup?.classList.toggle('is-invalid', Boolean(message));
+      setText(getErrorElement('stayType'), message);
+    };
+    const parseDate = (value) => {
+      if (!value) return null;
+      const parts = value.split('-').map(Number);
+      if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) return null;
+      const date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+      if (date.getUTCFullYear() !== parts[0] || date.getUTCMonth() !== parts[1] - 1 || date.getUTCDate() !== parts[2]) return null;
+      return date;
+    };
+    const addDays = (date, days) => new Date(date.getTime() + days * DAY);
+    const toDateValue = (date) => {
+      const year = date.getUTCFullYear();
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    const formatDate = (date) => {
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      return `${day}.${month}.${date.getUTCFullYear()}`;
+    };
+    const formatNights = (nights) => {
+      const mod10 = nights % 10;
+      const mod100 = nights % 100;
+      if (nights === 1) return '1 noc';
+      if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return `${nights} noce`;
+      return `${nights} nocy`;
+    };
+    const normalizeCounterValue = (value) => {
+      const numericValue = Number(value);
+      return Number.isFinite(numericValue) ? Math.max(0, numericValue) : 0;
+    };
+    const getNights = () => {
+      const arrival = parseDate(arrivalInput?.value);
+      const departure = parseDate(departureInput?.value);
+      if (!arrival || !departure || departure <= arrival) return 0;
+      return Math.max(1, Math.round((departure.getTime() - arrival.getTime()) / DAY));
+    };
+    const getRangeDates = (arrival, departure) => {
+      if (!arrival || !departure || departure < arrival) return [];
+      const dates = [];
+      let cursor = arrival;
+      while (cursor <= departure) {
+        dates.push(cursor);
+        cursor = addDays(cursor, 1);
+      }
+      return dates;
+    };
+    const isSummerDate = (date) => [6, 7, 8].includes(date.getUTCMonth() + 1);
+    const getSelectedStay = () => {
+      const selected = root.querySelector('input[name="stayType"]:checked');
+      if (!(selected instanceof HTMLInputElement)) return null;
+      return {
+        id: selected.value,
+        label: selected.dataset.label || selected.value,
+        category: selected.dataset.category || 'camping',
+      };
+    };
+    const getSelectedAddons = () =>
+      Array.from(root.querySelectorAll('input[name="addons"]:checked')).map((input) => ({
+        id: input.value,
+        label: input.dataset.label || input.value,
+      }));
+    const getPeople = () => ({
+      adults: normalizeCounterValue(getInput('adults')?.value ?? 0),
+      children: normalizeCounterValue(getInput('children')?.value ?? 0),
+      toddlers: normalizeCounterValue(getInput('toddlers')?.value ?? 0),
+    });
+    const getPeopleSummary = (people) => {
+      const parts = [];
+      if (people.adults > 0) parts.push(`${people.adults} dor.`);
+      if (people.children > 0) parts.push(`${people.children} dzieci 4-14`);
+      if (people.toddlers > 0) parts.push(`${people.toddlers} dzieci do 4`);
+      return parts.length ? parts.join(', ') : 'Brak osób';
+    };
+    const hasSummerCampingNotice = () => {
+      const stay = getSelectedStay();
+      const arrival = parseDate(arrivalInput?.value);
+      const departure = parseDate(departureInput?.value);
+      if (!stay || stay.category !== 'camping') return false;
+      return getRangeDates(arrival, departure).some(isSummerDate);
+    };
+    const getLanguageLabel = () => {
+      const language = getInput('contactLanguage');
+      if (!(language instanceof HTMLSelectElement)) return 'Polski';
+      return language.selectedOptions[0]?.textContent?.trim() || language.value;
+    };
+    const hasAnySummaryData = () => {
+      const fields = ['fullName', 'email', 'phone', 'country', 'arrival', 'departure', 'message'];
+      return fields.some((name) => Boolean(getInput(name)?.value.trim())) || Boolean(getSelectedStay()) || getSelectedAddons().length > 0;
+    };
+    const updateSummary = () => {
+      const arrival = parseDate(arrivalInput?.value);
+      const departure = parseDate(departureInput?.value);
+      const nights = getNights();
+      const stay = getSelectedStay();
+      const people = getPeople();
+      const addons = getSelectedAddons();
+      const country = getInput('country')?.value.trim();
+      const hasNotice = hasSummerCampingNotice();
+
+      if (arrivalInput) {
+        const today = new Date();
+        const todayUtc = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+        arrivalInput.min = toDateValue(todayUtc);
+      }
+      if (departureInput && arrival) departureInput.min = toDateValue(addDays(arrival, 1));
+
+      setText(nightsLabel, nights > 0 ? formatNights(nights) : 'Uzupełnij termin');
+      seasonBanner.hidden = !hasNotice;
+      summaryNotice.hidden = !hasNotice;
+      if (!summaryNotice.hidden) setText(summaryNotice, summerNotice);
+
+      const hasData = hasAnySummaryData();
+      summaryEmpty.hidden = hasData;
+      summaryDetails.hidden = !hasData;
+      if (!hasData) return;
+
+      setText(summary.dates, arrival && departure && nights > 0 ? `${formatDate(arrival)} - ${formatDate(departure)}` : 'Do uzupełnienia');
+      setText(summary.nights, nights > 0 ? formatNights(nights) : 'Do uzupełnienia');
+      setText(summary.stay, stay?.label ?? 'Do uzupełnienia');
+      setText(summary.people, getPeopleSummary(people));
+      setText(summary.addons, addons.length ? addons.map((addon) => addon.label).join(', ') : 'Brak');
+      setText(summary.country, country || 'Do uzupełnienia');
+      setText(summary.language, getLanguageLabel());
+      setText(summary.season, hasNotice ? 'Sezon letni' : arrival && departure ? 'Poza głównym sezonem letnim' : 'Do uzupełnienia');
+    };
+    const validate = () => {
+      const errors = [];
+      const fullName = getInput('fullName')?.value.trim() ?? '';
+      const email = getInput('email')?.value.trim() ?? '';
+      const arrival = parseDate(arrivalInput?.value);
+      const departure = parseDate(departureInput?.value);
+      const stay = getSelectedStay();
+      const consent = getInput('consent');
+
+      ['fullName', 'email', 'arrival', 'departure', 'consent'].forEach((name) => setFieldError(name));
+      setStayError();
+
+      if (!fullName) {
+        errors.push('Podaj imię i nazwisko.');
+        setFieldError('fullName', 'Podaj imię i nazwisko.');
+      }
+      if (!email) {
+        errors.push('Podaj adres email.');
+        setFieldError('email', 'Podaj adres email.');
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errors.push('Podaj poprawny adres email.');
+        setFieldError('email', 'Podaj poprawny adres email.');
+      }
+      if (!arrival) {
+        errors.push('Podaj datę przyjazdu.');
+        setFieldError('arrival', 'Podaj datę przyjazdu.');
+      }
+      if (!departure) {
+        errors.push('Podaj datę wyjazdu.');
+        setFieldError('departure', 'Podaj datę wyjazdu.');
+      } else if (arrival && departure <= arrival) {
+        errors.push('Data wyjazdu musi być po dacie przyjazdu.');
+        setFieldError('departure', 'Data wyjazdu musi być po dacie przyjazdu.');
+      }
+      if (!stay) {
+        errors.push('Wybierz typ pobytu.');
+        setStayError('Wybierz typ pobytu.');
+      }
+      if (!(consent instanceof HTMLInputElement) || !consent.checked) {
+        errors.push('Zaakceptuj kontakt zwrotny w sprawie zapytania.');
+        setFieldError('consent', 'Zaakceptuj kontakt zwrotny w sprawie zapytania.');
+      }
+
+      if (errorBox) {
+        errorBox.hidden = errors.length === 0;
+        errorBox.innerHTML = errors.length
+          ? `<strong>Popraw formularz:</strong><ul>${errors.map((error) => `<li>${error}</li>`).join('')}</ul>`
+          : '';
+      }
+
+      return errors.length === 0;
+    };
+    const collectPayload = () => {
+      const people = getPeople();
+      const arrival = parseDate(arrivalInput?.value);
+      const departure = parseDate(departureInput?.value);
+      const stay = getSelectedStay();
+      const addons = getSelectedAddons();
+
+      return {
+        fullName: getInput('fullName')?.value.trim() ?? '',
+        email: getInput('email')?.value.trim() ?? '',
+        phone: getInput('phone')?.value.trim() ?? '',
+        country: getInput('country')?.value.trim() ?? '',
+        contactLanguage: getLanguageLabel(),
+        arrival: arrival ? formatDate(arrival) : '',
+        departure: departure ? formatDate(departure) : '',
+        nights: getNights(),
+        stayType: stay?.label ?? '',
+        people,
+        addons: addons.map((addon) => addon.label),
+        message: getInput('message')?.value.trim() ?? '',
+        summerNotice: hasSummerCampingNotice(),
+        consent: Boolean(getInput('consent')?.checked),
+      };
+    };
+    const buildMailBody = (payload) => [
+      'Zapytanie rezerwacyjne Camping Clepardia',
+      '',
+      `Imię i nazwisko: ${payload.fullName}`,
+      `Email: ${payload.email}`,
+      `Telefon: ${payload.phone || 'nie podano'}`,
+      `Kraj: ${payload.country || 'nie podano'}`,
+      `Język kontaktu: ${payload.contactLanguage}`,
+      '',
+      `Termin: ${payload.arrival} - ${payload.departure}`,
+      `Liczba nocy: ${payload.nights}`,
+      `Typ pobytu: ${payload.stayType}`,
+      `Dorośli: ${payload.people.adults}`,
+      `Dzieci 4-14: ${payload.people.children}`,
+      `Dzieci do 4: ${payload.people.toddlers}`,
+      `Dodatki: ${payload.addons.length ? payload.addons.join(', ') : 'brak'}`,
+      '',
+      `Komunikat sezonowy: ${payload.summerNotice ? summerNotice : 'nie dotyczy'}`,
+      '',
+      `Wiadomość: ${payload.message || 'brak'}`,
+    ].join('\n');
+
+    form?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      updateSummary();
+      if (!validate()) {
+        const firstInvalid = form.querySelector('[aria-invalid="true"]');
+        if (firstInvalid instanceof HTMLElement) firstInvalid.focus({ preventScroll: true });
+        errorBox?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const payload = collectPayload();
+      const mailBody = buildMailBody(payload);
+      console.log('Gotowa treść maila do recepcji Camping Clepardia:\n' + mailBody);
+      console.log('Dane formularza zapytania Camping Clepardia:', payload);
+      if (successBox) {
+        successBox.hidden = false;
+        successBox.focus({ preventScroll: true });
+        successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+
+    form?.addEventListener('input', () => {
+      root.querySelectorAll('[data-counter-input]').forEach((input) => {
+        if (input instanceof HTMLInputElement) input.value = String(normalizeCounterValue(input.value || 0));
+      });
+      updateSummary();
+      if (errorBox && !errorBox.hidden) validate();
+    });
+    form?.addEventListener('change', () => {
+      updateSummary();
+      if (errorBox && !errorBox.hidden) validate();
+    });
+    root.querySelectorAll('[data-counter]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const name = button.dataset.counter;
+        const delta = Number(button.dataset.delta ?? 0);
+        const input = root.querySelector(`[data-counter-input="${name}"]`);
+        if (input instanceof HTMLInputElement) {
+          input.value = String(Math.max(0, normalizeCounterValue(input.value || 0) + delta));
+        }
+        updateSummary();
+        if (errorBox && !errorBox.hidden) validate();
+      });
+    });
+
+    updateSummary();
+  })();
+</script>
+
+<style>
+.reservation-inquiry {
+  background:
+    radial-gradient(circle at 14% 10%, rgba(60,179,113,.14), transparent 32%),
+    linear-gradient(180deg, #f7fbf4, #eef6ef);
+}
+
+.reservation-inquiry__head {
+  max-width: 880px;
+  margin-bottom: clamp(34px, 5vw, 56px);
+}
+
+.reservation-inquiry__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(18px, 3vw, 30px);
+  align-items: start;
+}
+
+.reservation-inquiry__form,
+.reservation-inquiry__summary {
+  border-radius: 28px;
+}
+
+.reservation-inquiry__form {
+  display: grid;
+  gap: 20px;
+  padding: clamp(20px, 3vw, 34px);
+}
+
+.reservation-inquiry__group {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.reservation-inquiry__group legend,
+.reservation-inquiry__field > span,
+.reservation-counter label {
+  color: #13291d;
+  font-weight: 950;
+}
+
+.reservation-inquiry__group legend {
+  margin-bottom: 16px;
+  font-size: 1rem;
+}
+
+.reservation-inquiry__fields,
+.reservation-inquiry__counters,
+.reservation-inquiry__addons,
+.reservation-inquiry__options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.reservation-inquiry__field {
+  display: grid;
+  gap: 8px;
+}
+
+.reservation-inquiry__field > span,
+.reservation-counter label {
+  font-size: .84rem;
+}
+
+.reservation-inquiry input[type="text"],
+.reservation-inquiry input[type="email"],
+.reservation-inquiry input[type="tel"],
+.reservation-inquiry input[type="date"],
+.reservation-inquiry input[type="number"],
+.reservation-inquiry select,
+.reservation-inquiry textarea {
+  width: 100%;
+  min-height: 54px;
+  border: 1px solid rgba(25,70,44,.14);
+  border-radius: 17px;
+  background: rgba(255,255,255,.82);
+  color: #102018;
+  font: inherit;
+  font-weight: 800;
+  transition: border-color .22s ease, box-shadow .22s ease, background .22s ease;
+}
+
+.reservation-inquiry input,
+.reservation-inquiry select {
+  padding: 0 14px;
+}
+
+.reservation-inquiry textarea {
+  min-height: 150px;
+  padding: 16px 14px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.reservation-inquiry input:focus-visible,
+.reservation-inquiry select:focus-visible,
+.reservation-inquiry textarea:focus-visible,
+.reservation-inquiry button:focus-visible {
+  outline: 0;
+  border-color: rgba(60,179,113,.66);
+  box-shadow: 0 0 0 4px rgba(60,179,113,.16);
+}
+
+.reservation-inquiry__field.is-invalid input,
+.reservation-inquiry__field.is-invalid select,
+.reservation-inquiry__field.is-invalid textarea {
+  border-color: rgba(197, 67, 67, .64);
+  box-shadow: 0 0 0 4px rgba(197,67,67,.10);
+}
+
+.reservation-inquiry__field small,
+.reservation-inquiry__field-error {
+  min-height: 18px;
+  color: #a43e34;
+  font-size: .78rem;
+  font-weight: 850;
+}
+
+.reservation-inquiry__nights {
+  margin: 14px 0 0;
+  color: #536359;
+  font-weight: 850;
+}
+
+.reservation-inquiry__nights strong {
+  color: #143321;
+}
+
+.reservation-inquiry__option,
+.reservation-inquiry__addon {
+  position: relative;
+  cursor: pointer;
+}
+
+.reservation-inquiry__option input,
+.reservation-inquiry__addon input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reservation-inquiry__option span,
+.reservation-inquiry__addon span {
+  min-height: 62px;
+  display: grid;
+  place-items: center start;
+  padding: 15px 17px;
+  border-radius: 18px;
+  border: 1px solid rgba(25,70,44,.12);
+  background: rgba(255,255,255,.68);
+  color: #163121;
+  font-weight: 900;
+  line-height: 1.3;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.62);
+  transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
+}
+
+.reservation-inquiry__option:hover span,
+.reservation-inquiry__addon:hover span,
+.reservation-inquiry__option input:checked + span,
+.reservation-inquiry__addon input:checked + span {
+  transform: translateY(-2px);
+  border-color: rgba(60,179,113,.38);
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 16px 42px rgba(17,40,28,.10);
+}
+
+.reservation-inquiry__option input:checked + span::after,
+.reservation-inquiry__addon input:checked + span::after {
+  content: '';
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #3CB371;
+  box-shadow: 0 0 0 6px rgba(60,179,113,.14);
+}
+
+.reservation-counter {
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.62);
+  border: 1px solid rgba(25,70,44,.10);
+}
+
+.reservation-counter > div {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.reservation-counter button {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(60,179,113,.20);
+  background: rgba(60,179,113,.12);
+  color: #1f7048;
+  font-size: 1.2rem;
+  font-weight: 950;
+  transition: transform .22s ease, background .22s ease;
+}
+
+.reservation-counter button:hover {
+  transform: translateY(-1px);
+  background: rgba(60,179,113,.20);
+}
+
+.reservation-counter input {
+  text-align: center;
+}
+
+.reservation-inquiry__consent {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(25,70,44,.10);
+  background: rgba(255,255,255,.68);
+  color: #314739;
+  font-weight: 850;
+  line-height: 1.55;
+}
+
+.reservation-inquiry__consent input {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: #3CB371;
+}
+
+.reservation-inquiry__season-notice,
+.reservation-inquiry__success,
+.reservation-inquiry__errors {
+  padding: 16px 18px;
+  border-radius: 20px;
+  line-height: 1.6;
+  font-weight: 850;
+}
+
+.reservation-inquiry__season-notice {
+  border: 1px solid rgba(238,174,99,.36);
+  background: rgba(255,247,232,.92);
+  color: #775321;
+}
+
+.reservation-inquiry__success {
+  border: 1px solid rgba(60,179,113,.32);
+  background: rgba(232,249,240,.94);
+  color: #24553a;
+}
+
+.reservation-inquiry__errors {
+  border: 1px solid rgba(197,67,67,.28);
+  background: rgba(255,238,235,.96);
+  color: #8f2d24;
+}
+
+.reservation-inquiry__errors strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.reservation-inquiry__errors ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.reservation-inquiry__submit {
+  min-height: 56px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #63d99c, #3CB371 48%, #24794e);
+  color: #fff;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  box-shadow: 0 18px 48px rgba(60,179,113,.32);
+  transition: transform .22s ease, box-shadow .22s ease, filter .22s ease;
+}
+
+.reservation-inquiry__submit:hover {
+  transform: translateY(-2px);
+  filter: saturate(112%);
+  box-shadow: 0 22px 58px rgba(60,179,113,.40);
+}
+
+.reservation-inquiry__summary {
+  position: sticky;
+  top: 104px;
+  padding: clamp(24px, 3vw, 32px);
+  color: #fff;
+  background:
+    linear-gradient(145deg, rgba(9,27,17,.94), rgba(16,38,26,.88)),
+    radial-gradient(circle at 82% 18%, rgba(60,179,113,.24), transparent 36%);
+  border-color: rgba(255,255,255,.14);
+}
+
+.reservation-inquiry__summary .section-kicker {
+  color: #8fe0b4;
+}
+
+.reservation-inquiry__summary h3 {
+  margin: 12px 0 16px;
+  color: #fff;
+  font-size: clamp(1.7rem, 3vw, 2.35rem);
+  line-height: 1;
+  font-weight: 950;
+}
+
+.reservation-inquiry__summary p {
+  color: rgba(255,255,255,.70);
+  line-height: 1.7;
+}
+
+.reservation-inquiry__summary-details {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.reservation-inquiry__summary-details div {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.08);
+}
+
+.reservation-inquiry__summary-details span {
+  display: block;
+  margin-bottom: 5px;
+  color: rgba(255,255,255,.66);
+  font-size: .76rem;
+  font-weight: 850;
+}
+
+.reservation-inquiry__summary-details strong {
+  color: #fff;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.reservation-inquiry__summary-notice {
+  margin-top: 18px;
+  padding: 15px;
+  border-radius: 18px;
+  border: 1px solid rgba(238,174,99,.32);
+  background: rgba(255,247,232,.10);
+  color: #ffdca9 !important;
+  font-weight: 850;
+}
+
+@media (min-width: 760px) {
+  .reservation-inquiry__fields,
+  .reservation-inquiry__counters,
+  .reservation-inquiry__addons {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .reservation-inquiry__options {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1080px) {
+  .reservation-inquiry__layout {
+    grid-template-columns: minmax(0, 1.85fr) minmax(360px, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .reservation-inquiry__submit {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reservation-inquiry *,
+  .reservation-inquiry__summary * {
+    transition-duration: .01ms !important;
+    animation: none !important;
+  }
+}
+</style>
