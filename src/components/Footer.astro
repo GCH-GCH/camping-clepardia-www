@@ -1,5 +1,23 @@
 ---
 import { logoMain, logoMainPng } from '../data/assets';
+import { getLanguageSwitchLinks, getLocalizedPath, getPathContext } from '../utils/localizedLinks';
+
+const footerNavItems = [
+  { slug: '', label: 'Start' },
+  { slug: 'camping', label: 'Camping' },
+  { slug: 'domki', label: 'Domki' },
+  { slug: 'cennik', label: 'Cennik' },
+  { slug: 'dojazd', label: 'Dojazd' },
+  { slug: 'atrakcje', label: 'Atrakcje' },
+  { slug: 'kontakt', label: 'Kontakt' },
+];
+
+const pathContext = getPathContext(Astro.url.pathname);
+const footerNavLinks = footerNavItems.map((item) => ({
+  ...item,
+  href: getLocalizedPath(pathContext.explicitLanguage, item.slug),
+}));
+const footerLanguageLinks = getLanguageSwitchLinks(Astro.url.pathname);
 ---
 
 <footer class="footer" id="kontakt">
@@ -8,15 +26,24 @@ import { logoMain, logoMainPng } from '../data/assets';
       <img class="footer__logo" src={logoMain} alt="Camping Clepardia" width="196" height="52" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
       <h2>Camping Clepardia</h2>
       <p>Camping w Krakowie blisko centrum miasta. Strona przygotowana pod przyszłe rezerwacje online i integrację z CC SYSTEM.</p>
-      <div class="footer__langs"><span>PL</span><span>EN</span><span>DE</span><span>IT</span></div>
+      <div class="footer__langs" aria-label="Wersje językowe">
+        {footerLanguageLinks.map((language) => (
+          <a
+            href={language.href}
+            class:list={[language.active && 'is-active']}
+            aria-label={`${language.name} ${language.code.toUpperCase()}`}
+            aria-current={language.active ? 'page' : undefined}
+          >
+            {language.code.toUpperCase()}
+          </a>
+        ))}
+      </div>
     </div>
     <div>
       <h3>Szybkie linki</h3>
-      <a href="#camping">Camping</a>
-      <a href="#domki">Domki</a>
-      <a href="#cennik">Cennik</a>
-      <a href="#dojazd">Dojazd</a>
-      <a href="#atrakcje">Atrakcje</a>
+      {footerNavLinks.map((link) => (
+        <a href={link.href}>{link.label}</a>
+      ))}
     </div>
     <div>
       <h3>Kontakt</h3>
@@ -52,7 +79,8 @@ import { logoMain, logoMainPng } from '../data/assets';
 .footer a:hover { color: #8fe0b4; }
 .footer__brand p { max-width: 520px; }
 .footer__langs { display: flex; gap: 8px; margin-top: 24px; }
-.footer__langs span { padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); color: #fff; font-weight: 900; }
+.footer__langs a { padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); color: #fff; font-weight: 900; }
+.footer__langs a:hover, .footer__langs a.is-active { border-color: rgba(143,224,180,.48); color: #8fe0b4; }
 .footer__bottom { margin-top: 46px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.10); display: flex; flex-direction: column; gap: 8px; justify-content: space-between; }
 @media (min-width: 800px) { .footer__grid { grid-template-columns: 1.6fr .8fr .8fr .6fr; } .footer__bottom { flex-direction: row; } }
 </style>

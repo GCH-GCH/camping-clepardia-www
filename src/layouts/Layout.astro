@@ -4,6 +4,7 @@ import MainNavbar from '../components/layout/MainNavbar.astro';
 import Footer from '../components/Footer.astro';
 import MotionFoundation from '../components/MotionFoundation.astro';
 import { logoMain, logoMainPng, publicAssetExists, siteAssets } from '../data/assets';
+import { getSeoLanguageMeta, withOrigin } from '../utils/localizedLinks';
 
 interface Props {
   title?: string;
@@ -16,14 +17,17 @@ const {
   title = 'Camping Clepardia | Camping w Krakowie blisko centrum',
   description = 'Camping Clepardia w Krakowie: camping, domki i szybki dojazd do centrum miasta.',
   ogImage = '/og-image.jpg',
-  canonical = Astro.url.pathname
+  canonical
 } = Astro.props as Props;
 
 const shouldPreloadHero = publicAssetExists(siteAssets.hero.desktop);
+const siteOrigin = Astro.site?.origin;
+const seoLanguageMeta = getSeoLanguageMeta(Astro.url.pathname, siteOrigin, canonical);
+const ogUrl = withOrigin(seoLanguageMeta.canonicalHref, siteOrigin ?? Astro.url.origin);
 ---
 
 <!doctype html>
-<html lang="pl" dir="ltr">
+<html lang={seoLanguageMeta.lang} dir="ltr">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -32,11 +36,11 @@ const shouldPreloadHero = publicAssetExists(siteAssets.hero.desktop);
 		
 		<!-- Open Graph / Social Media -->
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content={Astro.url} />
+		<meta property="og:url" content={ogUrl} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:image" content={ogImage} />
-		<meta property="og:locale" content="pl_PL" />
+		<meta property="og:locale" content={seoLanguageMeta.ogLocale} />
 		
 		<!-- Twitter Card -->
 		<meta name="twitter:card" content="summary_large_image" />
@@ -45,7 +49,10 @@ const shouldPreloadHero = publicAssetExists(siteAssets.hero.desktop);
 		<meta name="twitter:image" content={ogImage} />
 		
 		<!-- Canonical -->
-		<link rel="canonical" href={canonical} />
+		<link rel="canonical" href={seoLanguageMeta.canonicalHref} />
+		{seoLanguageMeta.alternateLinks.map((alternate) => (
+			<link rel="alternate" hreflang={alternate.hrefLang} href={alternate.href} />
+		))}
 		
 		<!-- Favicon -->
 		<link rel="preload" as="image" href={logoMain} type="image/svg+xml" />

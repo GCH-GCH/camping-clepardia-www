@@ -1,6 +1,6 @@
 ---
 import { logoMain, logoMainPng } from '../../data/assets';
-import { defaultLanguage, languages } from '../../data/languages';
+import { getLanguageSwitchLinks, getLocalizedPath, getPathContext } from '../../utils/localizedLinks';
 
 const navItems = [
   { slug: '', label: 'Start' },
@@ -12,37 +12,19 @@ const navItems = [
   { slug: 'kontakt', label: 'Kontakt' },
 ];
 
-const languageCodes = languages.map((language) => language.code);
-const currentPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
-const segments = currentPath.split('/').filter(Boolean);
-const languageFromPath = languageCodes.includes(segments[0] as typeof languageCodes[number])
-  ? segments[0]
-  : undefined;
-const currentLanguage = languages.find((language) => language.code === languageFromPath) ?? defaultLanguage;
-const currentSlug = languageFromPath ? (segments[1] ?? '') : (segments[0] ?? '');
+const pathContext = getPathContext(Astro.url.pathname);
+const currentLanguage = pathContext.currentLanguage;
+const currentSlug = pathContext.slug;
+const activeLanguagePrefix = pathContext.explicitLanguage;
 
-const getLocalizedPath = (lang: string | undefined, slug = '') => {
-  const normalizedSlug = slug.replace(/^\/+|\/+$/g, '');
-
-  if (!lang) {
-    return normalizedSlug ? `/${normalizedSlug}` : '/';
-  }
-
-  return normalizedSlug ? `/${lang}/${normalizedSlug}` : `/${lang}/`;
-};
-
-const homeHref = getLocalizedPath(languageFromPath, '');
-const contactHref = getLocalizedPath(languageFromPath, 'kontakt');
+const homeHref = getLocalizedPath(activeLanguagePrefix, '');
+const contactHref = getLocalizedPath(activeLanguagePrefix, 'kontakt');
 const localizedNavItems = navItems.map((item) => ({
   ...item,
-  href: getLocalizedPath(languageFromPath, item.slug),
+  href: getLocalizedPath(activeLanguagePrefix, item.slug),
   active: item.slug === currentSlug,
 }));
-const languageLinks = languages.map((language) => ({
-  ...language,
-  href: getLocalizedPath(language.code, currentSlug),
-  active: language.code === currentLanguage.code,
-}));
+const languageLinks = getLanguageSwitchLinks(Astro.url.pathname);
 ---
 
 <header class="main-navbar-shell" id="mainNavbarShell">

@@ -1,6 +1,7 @@
 ---
 import PricingCalculator from '../pricing/PricingCalculator.astro';
 import type { SitePage } from '../../data/sitePages';
+import { getLocalizedPath } from '../../utils/localizedLinks';
 
 interface Props {
   page: SitePage;
@@ -9,9 +10,8 @@ interface Props {
 }
 
 const { page, languageCode, languageName } = Astro.props as Props;
-const prefix = languageCode ? `/${languageCode}` : '';
-const localizeHref = (href: string) => href.startsWith('/') ? `${prefix}${href}` : href;
-const homeHref = languageCode ? `/${languageCode}/` : '/';
+const localizeHref = (href: string) => href.startsWith('/') ? getLocalizedPath(languageCode, href) : href;
+const homeHref = getLocalizedPath(languageCode, '');
 const breadcrumbHome = languageName ? `Camping Clepardia ${languageName}` : 'Camping Clepardia';
 ---
 
