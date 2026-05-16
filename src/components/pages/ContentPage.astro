@@ -1,5 +1,6 @@
 ---
 import PricingCalculator from '../pricing/PricingCalculator.astro';
+import { pricingConfig } from '../../data/pricing';
 import type { SitePage } from '../../data/sitePages';
 import { getLocalizedPath } from '../../utils/localizedLinks';
 
@@ -13,6 +14,28 @@ const { page, languageCode, languageName } = Astro.props as Props;
 const localizeHref = (href: string) => href.startsWith('/') ? getLocalizedPath(languageCode, href) : href;
 const homeHref = getLocalizedPath(languageCode, '');
 const breadcrumbHome = languageName ? `Camping Clepardia ${languageName}` : 'Camping Clepardia';
+const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
+const formatSeasonDate = (value: string) => {
+  const [month, day] = value.split('-');
+  return `${day}.${month}`;
+};
+const bungalowNames = {
+  'bungalow-2': 'Domek 2-osobowy',
+  'bungalow-3': 'Domek 3-osobowy',
+  'bungalow-family': 'Domek rodzinny',
+} as const;
+const bungalowCards = pricingConfig.stayTypes
+  .filter((type) => type.category === 'bungalow')
+  .map((type) => ({
+    id: type.id,
+    title: bungalowNames[type.id as keyof typeof bungalowNames] ?? type.label,
+    lowSeasonPrice: 'seasonalPrices' in type ? formatPrice(type.seasonalPrices.low) : undefined,
+    highSeasonPrice: 'seasonalPrices' in type ? formatPrice(type.seasonalPrices.high) : undefined,
+    startingPrice: 'startingPrice' in type ? formatPrice(type.startingPrice) : undefined,
+    note: 'note' in type ? type.note : undefined,
+    requiresConfirmation: 'requiresConfirmation' in type ? type.requiresConfirmation : false,
+  }));
+const highSeasonRange = `${formatSeasonDate(pricingConfig.seasons.high.start)}-${formatSeasonDate(pricingConfig.seasons.high.end)}`;
 ---
 
 <section class="page-mini-hero reveal-section">
@@ -48,6 +71,45 @@ const breadcrumbHome = languageName ? `Camping Clepardia ${languageName}` : 'Cam
     </div>
   </div>
 </section>
+
+{page.slug === 'domki' && (
+  <section class="site-section bungalow-types reveal-section">
+    <div class="container">
+      <div class="bungalow-types__head">
+        <span class="section-kicker">Cennik domków</span>
+        <h2 class="section-title">Rodzaje domków</h2>
+        <p class="section-copy">
+          Ceny domków zależą od sezonu i konfiguracji pobytu. Domek rodzinny wymaga potwierdzenia dostępności oraz finalnej ceny przez recepcję.
+        </p>
+      </div>
+
+      <div class="bungalow-types__grid">
+        {bungalowCards.map((bungalow, index) => (
+          <article class="premium-card reveal-section bungalow-types__card" style={`--reveal-delay: ${index * 90}ms`}>
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <h3>{bungalow.title}</h3>
+            {bungalow.lowSeasonPrice && bungalow.highSeasonPrice ? (
+              <div class="bungalow-types__prices">
+                <p><strong>niski sezon</strong>{bungalow.lowSeasonPrice} / noc</p>
+                <p><strong>wysoki sezon</strong>{bungalow.highSeasonPrice} / noc</p>
+              </div>
+            ) : (
+              <div class="bungalow-types__prices">
+                <p><strong>cena od</strong>{bungalow.startingPrice} / noc</p>
+              </div>
+            )}
+            {bungalow.note && <p class="bungalow-types__note">{bungalow.note}</p>}
+            {bungalow.requiresConfirmation && <small>Dostępność i finalna cena potwierdzana przez recepcję.</small>}
+          </article>
+        ))}
+      </div>
+
+      <p class="bungalow-types__season-note">
+        Wysoki sezon: {highSeasonRange}. Niski sezon: pozostałe terminy sezonu.
+      </p>
+    </div>
+  </section>
+)}
 
 {page.slug === 'cennik' && <PricingCalculator />}
 
@@ -181,6 +243,89 @@ const breadcrumbHome = languageName ? `Camping Clepardia ${languageName}` : 'Cam
     linear-gradient(180deg, #f2f7f0, #101b14);
 }
 
+.bungalow-types {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(60,179,113,.14), transparent 32%),
+    linear-gradient(180deg, #f8fbf5, #edf6ef);
+}
+
+.bungalow-types__head {
+  max-width: 820px;
+  margin-bottom: clamp(30px, 5vw, 52px);
+}
+
+.bungalow-types__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+:global(.bungalow-types__card) {
+  padding: clamp(24px, 3vw, 34px);
+  border-radius: 24px;
+}
+
+:global(.bungalow-types__card > span) {
+  display: inline-flex;
+  margin-bottom: 24px;
+  color: #3CB371;
+  font-size: .74rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+}
+
+:global(.bungalow-types__card h3) {
+  margin: 0 0 18px;
+  color: #102018;
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  font-weight: 950;
+}
+
+.bungalow-types__prices {
+  display: grid;
+  gap: 10px;
+}
+
+.bungalow-types__prices p {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0;
+  padding: 14px 0;
+  border-top: 1px solid rgba(25,70,44,.10);
+  color: #102018;
+  font-weight: 900;
+}
+
+.bungalow-types__prices strong {
+  color: #64736a;
+  font-size: .78rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.bungalow-types__note {
+  margin: 18px 0 0;
+  color: #536359;
+  line-height: 1.65;
+  font-weight: 760;
+}
+
+:global(.bungalow-types__card small) {
+  display: block;
+  margin-top: 12px;
+  color: #2c6b48;
+  font-weight: 900;
+  line-height: 1.5;
+}
+
+.bungalow-types__season-note {
+  margin: 22px 0 0;
+  color: #536359;
+  font-weight: 850;
+  line-height: 1.65;
+}
+
 .page-cta__panel {
   display: grid;
   gap: 28px;
@@ -247,6 +392,10 @@ const breadcrumbHome = languageName ? `Camping Clepardia ${languageName}` : 'Cam
   }
 
   .page-detail__cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .bungalow-types__grid {
     grid-template-columns: repeat(3, 1fr);
   }
 

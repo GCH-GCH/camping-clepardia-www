@@ -69,12 +69,12 @@ export const sitePages: Record<PageSlug, SitePage> = {
       { title: 'Sezonowa dostępność', copy: 'Rezerwacje domków są zależne od sezonu i aktualnej dostępności.' },
     ],
     cta: {
-      title: 'Zapytaj o domek',
-      copy: 'Recepcja pomoże dobrać termin i typ pobytu do Twojego planu zwiedzania.',
-      primaryLabel: 'Kontakt',
-      primaryHref: '/kontakt',
-      secondaryLabel: 'Zobacz cennik',
-      secondaryHref: '/cennik',
+      title: 'Wybierz domek i potwierdź dostępność',
+      copy: 'Sprawdź orientacyjne ceny, a następnie wyślij zapytanie do recepcji w sprawie wybranego terminu.',
+      primaryLabel: 'Sprawdź cennik',
+      primaryHref: '/cennik',
+      secondaryLabel: 'Zapytaj o domek',
+      secondaryHref: '/kontakt',
     },
   },
   cennik: {
@@ -86,7 +86,7 @@ export const sitePages: Record<PageSlug, SitePage> = {
     seoDescription: 'Cennik Camping Clepardia z kalkulatorem kosztu pobytu dla campingu i domków.',
     highlights: [
       { title: 'Szybka kalkulacja', copy: 'Automatyczne liczenie liczby nocy, osób i dodatków bez arkuszy i notatek.' },
-      { title: 'Sezonowość domków', copy: 'Domek 2-osobowy ma osobną stawkę dla niskiego i wysokiego sezonu.' },
+      { title: 'Sezonowość domków', copy: 'Domki 2-osobowe i 3-osobowe mają osobne stawki dla niskiego i wysokiego sezonu.' },
       { title: 'Breakdown pozycji', copy: 'Podsumowanie pokazuje każdą linię kosztów i sumę końcową.' },
     ],
     cta: {

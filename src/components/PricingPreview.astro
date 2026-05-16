@@ -18,7 +18,8 @@ const getAddon = (id: string) => {
 
 const formatStayTypePrice = (id: string) => {
   const stayType = getStayType(id);
-  if (!('price' in stayType)) return `od ${formatPrice(stayType.seasonalPrices.low)}`;
+  if ('seasonalPrices' in stayType) return `od ${formatPrice(stayType.seasonalPrices.low)}`;
+  if ('startingPrice' in stayType) return `od ${formatPrice(stayType.startingPrice)}`;
   return formatPrice(stayType.price);
 };
 
