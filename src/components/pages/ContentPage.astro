@@ -2,6 +2,7 @@
 import PricingCalculator from '../pricing/PricingCalculator.astro';
 import ReservationInquiryForm from '../forms/ReservationInquiryForm.astro';
 import TransportDirections from './TransportDirections.astro';
+import AttractionsPage from './AttractionsPage.astro';
 import { pricingConfig } from '../../data/pricing';
 import type { SitePage } from '../../data/sitePages';
 import { getLocalizedPath } from '../../utils/localizedLinks';
@@ -69,7 +70,7 @@ const contactCards = [
   </div>
 </section>
 
-{page.slug !== 'cennik' && page.slug !== 'kontakt' && page.slug !== 'dojazd' && (
+{page.slug !== 'cennik' && page.slug !== 'kontakt' && page.slug !== 'dojazd' && page.slug !== 'atrakcje' && (
 <section class="site-section page-detail reveal-section">
   <div class="container page-detail__grid">
     <div class="page-detail__intro">
@@ -166,6 +167,8 @@ const contactCards = [
 
 {page.slug === 'dojazd' && <TransportDirections languageCode={languageCode} />}
 
+{page.slug === 'atrakcje' && <AttractionsPage languageCode={languageCode} />}
+
 {page.slug === 'cennik' && (
   <section class="site-section page-detail pricing-guidance reveal-section">
     <div class="container page-detail__grid">
@@ -210,7 +213,7 @@ const contactCards = [
   </section>
 )}
 
-{page.slug !== 'kontakt' && page.slug !== 'dojazd' && (
+{page.slug !== 'kontakt' && page.slug !== 'dojazd' && page.slug !== 'atrakcje' && (
 <section class="site-section page-cta reveal-section">
   <div class="container">
     <div class="page-cta__panel premium-card">
