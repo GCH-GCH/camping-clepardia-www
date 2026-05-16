@@ -1,6 +1,24 @@
+---
+import ImageFrame from './ImageFrame.astro';
+import { siteAssets } from '../data/assets';
+---
+
 <section class="site-section cabins reveal-section" id="domki">
   <div class="container section-grid section-grid--2">
-    <div class="photo-frame cabins__photo"><span>Miejsce na zdjęcie: komfortowe domki w zieleni</span></div>
+    <div class="cabins__media">
+      <ImageFrame
+        src={siteAssets.bungalows.exterior}
+        alt="Komfortowe domki Camping Clepardia w zieleni"
+        label="Miejsce na zdjęcie: komfortowe domki w zieleni"
+        className="cabins__photo"
+        portrait
+      />
+      <div class="cabins__thumbs">
+        <ImageFrame src={siteAssets.bungalows.room} alt="Pokój w domku Camping Clepardia" label="Wnętrze domku" />
+        <ImageFrame src={siteAssets.bungalows.terrace} alt="Taras przy domku Camping Clepardia" label="Taras" />
+        <ImageFrame src={siteAssets.bungalows.family} alt="Domek dla rodzin i grup" label="Rodziny i grupy" />
+      </div>
+    </div>
     <div>
       <span class="section-kicker">Domki</span>
       <h2 class="section-title">Komfortowe domki w Krakowie dla par, rodzin i grup.</h2>
@@ -19,8 +37,12 @@
 
 <style>
 .cabins { background: linear-gradient(180deg, #f7faf4, #fffaf2); }
-.cabins__photo { min-height: 430px; background: linear-gradient(135deg, rgba(13,28,18,.18), rgba(13,18,13,.72)), radial-gradient(circle at 74% 20%, rgba(236,164,88,.30), transparent 36%), linear-gradient(135deg, #455f3f, #111b11); }
+.cabins__media { display: grid; grid-template-columns: minmax(0, .78fr) minmax(0, .42fr); gap: 14px; align-items: stretch; }
+:global(.cabins__photo) { min-height: 430px; background: linear-gradient(135deg, rgba(13,28,18,.18), rgba(13,18,13,.72)), radial-gradient(circle at 74% 20%, rgba(236,164,88,.30), transparent 36%), linear-gradient(135deg, #455f3f, #111b11); }
+.cabins__thumbs { display: grid; gap: 12px; }
+.cabins__thumbs :global(.asset-frame) { min-height: 132px; }
 .cabins__list { display: grid; gap: 12px; margin: 30px 0 32px; }
 .cabins__list p { padding: 16px 18px; border-radius: 20px; background: rgba(255,255,255,.78); border: 1px solid rgba(60,179,113,.14); font-weight: 850; color: #244331; }
-@media (max-width: 899px) { .cabins__photo { order: 2; } }
+@media (max-width: 899px) { .cabins__media { order: 2; } }
+@media (max-width: 680px) { .cabins__media { grid-template-columns: 1fr; } }
 </style>

@@ -3,7 +3,7 @@ import '../styles/global.css';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import MotionFoundation from '../components/MotionFoundation.astro';
-import { logoMain, logoMainPng } from '../data/assets';
+import { logoMain, logoMainPng, publicAssetExists, siteAssets } from '../data/assets';
 
 interface Props {
   title?: string;
@@ -18,6 +18,8 @@ const {
   ogImage = '/og-image.jpg',
   canonical = Astro.url.pathname
 } = Astro.props as Props;
+
+const shouldPreloadHero = publicAssetExists(siteAssets.hero.desktop);
 ---
 
 <!doctype html>
@@ -47,6 +49,7 @@ const {
 		
 		<!-- Favicon -->
 		<link rel="preload" as="image" href={logoMain} type="image/svg+xml" />
+		{shouldPreloadHero && <link rel="preload" as="image" href={siteAssets.hero.desktop} type="image/webp" fetchpriority="high" />}
 		<link rel="icon" type="image/svg+xml" href={logoMain} />
 		<link rel="apple-touch-icon" href={logoMainPng} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />

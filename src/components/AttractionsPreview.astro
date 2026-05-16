@@ -1,5 +1,15 @@
 ---
-const attractions = ['Stare Miasto', 'Wieliczka', 'Auschwitz', 'Schindler’s Factory', 'Energylandia', 'Kazimierz'];
+import ImageFrame from './ImageFrame.astro';
+import { siteAssets } from '../data/assets';
+
+const attractions = [
+  { name: 'Stare Miasto', image: siteAssets.attractions.oldTown, alt: 'Stare Miasto w Krakowie' },
+  { name: 'Wieliczka', image: siteAssets.attractions.wieliczka, alt: 'Kopalnia Soli Wieliczka' },
+  { name: 'Auschwitz', image: siteAssets.attractions.auschwitz, alt: 'Muzeum Auschwitz' },
+  { name: 'Schindler’s Factory', image: siteAssets.attractions.schindler, alt: 'Fabryka Schindlera w Krakowie' },
+  { name: 'Energylandia', image: siteAssets.attractions.energylandia, alt: 'Energylandia' },
+  { name: 'Zakopane', image: siteAssets.attractions.zakopane, alt: 'Zakopane i Tatry' },
+];
 ---
 
 <section class="site-section attractions reveal-section" id="atrakcje">
@@ -7,8 +17,13 @@ const attractions = ['Stare Miasto', 'Wieliczka', 'Auschwitz', 'Schindler’s Fa
     <span class="section-kicker">Atrakcje</span>
     <h2 class="section-title">Kraków i Małopolska w zasięgu jednego pobytu.</h2>
     <div class="attractions__grid">
-      {attractions.map((name) => (
-        <article class="photo-frame attractions__card"><span>{name}</span></article>
+      {attractions.map((attraction) => (
+        <ImageFrame
+          src={attraction.image}
+          alt={attraction.alt}
+          label={attraction.name}
+          className="attractions__card"
+        />
       ))}
     </div>
     <a class="premium-button attractions__cta" href="#rezerwacja">Zobacz atrakcje</a>
@@ -18,9 +33,10 @@ const attractions = ['Stare Miasto', 'Wieliczka', 'Auschwitz', 'Schindler’s Fa
 <style>
 .attractions { background: #f6f8f2; }
 .attractions__grid { margin-top: 42px; display: grid; grid-template-columns: 1fr; gap: 16px; }
-.attractions__card { min-height: 240px; align-items: end; transition: transform .28s ease, box-shadow .28s ease; }
-.attractions__card:hover { transform: translateY(-5px); }
-.attractions__card span { color: #fff; font-size: 1rem; }
+:global(.attractions__card) { min-height: 240px; align-items: end; transition: transform .28s ease, box-shadow .28s ease; }
+:global(.attractions__card:hover) { transform: translateY(-5px); }
+:global(.attractions__card figcaption),
+:global(.attractions__card .asset-frame__fallback-content span:last-child) { color: #fff; font-size: 1rem; }
 .attractions__cta { margin-top: 30px; }
 @media (min-width: 700px) { .attractions__grid { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1080px) { .attractions__grid { grid-template-columns: repeat(3, 1fr); } }

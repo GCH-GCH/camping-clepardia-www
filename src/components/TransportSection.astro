@@ -1,3 +1,8 @@
+---
+import ImageFrame from './ImageFrame.astro';
+import { siteAssets } from '../data/assets';
+---
+
 <section class="site-section transport reveal-section" id="dojazd">
   <div class="container section-grid section-grid--2">
     <div>
@@ -14,6 +19,12 @@
       <h3>Idealne dla turystów</h3>
       <p>Spokojny nocleg, szybka komunikacja miejska i mniej stresu z parkowaniem w centrum Krakowa.</p>
       <div class="transport__note">JakDojade • tramwaj • centrum miasta</div>
+      <div class="transport__media">
+        <ImageFrame src={siteAssets.transport.tramToCenter} alt="Tramwaj z Camping Clepardia do centrum Krakowa" label="Tramwaj do centrum" />
+        <ImageFrame src={siteAssets.transport.ticketMachine} alt="Biletomat tramwajowy w Krakowie" label="Bilety w tramwaju" />
+        <ImageFrame src={siteAssets.transport.googleMaps} alt="Podgląd trasy z Camping Clepardia w mapach" label="Mapa dojazdu" />
+        <ImageFrame src={siteAssets.transport.jakdojade} alt="Podgląd trasy w aplikacji JakDojade" label="JakDojade" />
+      </div>
     </div>
   </div>
 </section>
@@ -30,4 +41,7 @@
 .transport__panel h3 { color: #fff; font-size: 1.7rem; font-weight: 900; margin-bottom: 16px; }
 .transport__panel p { color: rgba(255,255,255,.78); line-height: 1.75; }
 .transport__note { margin-top: 28px; color: #8fe0b4; font-weight: 900; }
+.transport__media { margin-top: 26px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.transport__media :global(.asset-frame) { min-height: 150px; box-shadow: 0 18px 48px rgba(0,0,0,.18); }
+@media (max-width: 620px) { .transport__media { grid-template-columns: 1fr; } }
 </style>

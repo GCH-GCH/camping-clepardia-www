@@ -1,12 +1,28 @@
 ---
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { heroDesktop } from '../data/assets';
+import { publicAssetExists, siteAssets } from '../data/assets';
 
-const heroImageExists = existsSync(join(process.cwd(), 'public', heroDesktop.replace(/^\//, '')));
+const heroDesktopExists = publicAssetExists(siteAssets.hero.desktop);
+const heroMobileExists = publicAssetExists(siteAssets.hero.mobile);
+const heroTextureExists = publicAssetExists(siteAssets.hero.overlayTexture);
+
+const heroStyle = [
+  heroDesktopExists ? `--hero-bg-desktop: url('${siteAssets.hero.desktop}')` : '',
+  heroMobileExists ? `--hero-bg-mobile: url('${siteAssets.hero.mobile}')` : '',
+  heroTextureExists ? `--hero-texture: url('${siteAssets.hero.overlayTexture}')` : '',
+].filter(Boolean).join(';');
 ---
 
-<section class:list={['hero', heroImageExists ? 'hero--image' : 'hero--fallback']} id="hero" style={heroImageExists ? `background-image: url('${heroDesktop}')` : undefined}>
+<section
+  class:list={[
+    'hero',
+    heroDesktopExists ? 'hero--image' : 'hero--fallback',
+    heroMobileExists && 'hero--mobile-image',
+    heroTextureExists && 'hero--texture',
+  ]}
+  id="hero"
+  style={heroStyle || undefined}
+>
+  <div class="hero__overlay hero__overlay--texture"></div>
   <div class="hero__overlay hero__overlay--cinematic"></div>
   <div class="hero__overlay hero__overlay--warm"></div>
   <div class="hero__overlay hero__overlay--green"></div>
@@ -67,6 +83,14 @@ const heroImageExists = existsSync(join(process.cwd(), 'public', heroDesktop.rep
   isolation: isolate;
 }
 
+.hero--image {
+  background-image:
+    var(--hero-bg-desktop),
+    radial-gradient(circle at 74% 30%, rgba(237, 163, 82, .22), transparent 34%),
+    radial-gradient(circle at 18% 58%, rgba(60, 179, 113, .18), transparent 32%),
+    linear-gradient(125deg, #06100c 0%, #0b2018 42%, #11100c 72%, #211408 100%);
+}
+
 .hero--fallback {
   background:
     radial-gradient(circle at 74% 30%, rgba(237, 163, 82, .22), transparent 34%),
@@ -79,6 +103,19 @@ const heroImageExists = existsSync(join(process.cwd(), 'public', heroDesktop.rep
   inset: 0;
   pointer-events: none;
   z-index: 1;
+}
+
+.hero__overlay--texture {
+  display: none;
+  background-image: var(--hero-texture);
+  background-size: cover;
+  background-position: center;
+  opacity: .14;
+  mix-blend-mode: soft-light;
+}
+
+.hero--texture .hero__overlay--texture {
+  display: block;
 }
 
 .hero__overlay--cinematic {
@@ -279,6 +316,14 @@ const heroImageExists = existsSync(join(process.cwd(), 'public', heroDesktop.rep
 }
 
 @media (max-width: 860px) {
+  .hero--mobile-image {
+    background-image:
+      var(--hero-bg-mobile),
+      radial-gradient(circle at 74% 30%, rgba(237, 163, 82, .22), transparent 34%),
+      radial-gradient(circle at 18% 58%, rgba(60, 179, 113, .18), transparent 32%),
+      linear-gradient(125deg, #06100c 0%, #0b2018 42%, #11100c 72%, #211408 100%);
+  }
+
   .hero { min-height: auto; }
   .hero__wrapper { padding: 118px 20px 250px; }
   .benefits-wrapper { grid-template-columns: repeat(2, 1fr); }

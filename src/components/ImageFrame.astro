@@ -1,0 +1,150 @@
+---
+import { publicAssetExists } from '../data/assets';
+
+interface Props {
+  src: string;
+  alt: string;
+  label: string;
+  className?: string;
+  portrait?: boolean;
+}
+
+const { src, alt, label, className = '', portrait = false } = Astro.props as Props;
+const imageExists = publicAssetExists(src);
+---
+
+<figure
+  class:list={[
+    'photo-frame',
+    'asset-frame',
+    imageExists ? 'asset-frame--image' : 'asset-frame--fallback',
+    portrait && 'asset-frame--portrait',
+    className,
+  ]}
+>
+  {imageExists ? (
+    <>
+      <img src={src} alt={alt} loading="lazy" decoding="async" />
+      <figcaption>{label}</figcaption>
+    </>
+  ) : (
+    <div class="asset-frame__fallback-content">
+      <span class="asset-frame__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14" />
+          <path d="M4 15l4-4 4 4 3-3 5 5" />
+          <path d="M9 8h.01" />
+        </svg>
+      </span>
+      <span>{label}</span>
+    </div>
+  )}
+</figure>
+
+<style is:global>
+.asset-frame.photo-frame {
+  position: relative;
+  display: block;
+  min-height: auto;
+  aspect-ratio: 16 / 10;
+  padding: 0;
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,.28);
+  overflow: hidden;
+  box-shadow: 0 26px 76px rgba(17, 40, 28, .18);
+  background:
+    linear-gradient(135deg, rgba(7, 22, 15, .22), rgba(7, 22, 15, .70)),
+    radial-gradient(circle at 74% 24%, rgba(232, 158, 84, .28), transparent 36%),
+    linear-gradient(135deg, #25412f, #0c1912);
+}
+
+.asset-frame--portrait.photo-frame {
+  aspect-ratio: 4 / 5;
+}
+
+.asset-frame img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transform: scale(1.001);
+  transition: transform .8s cubic-bezier(.2, .8, .2, 1), filter .8s ease;
+}
+
+.asset-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 42%, rgba(3, 13, 9, .58) 100%),
+    radial-gradient(circle at 80% 18%, rgba(255, 196, 121, .16), transparent 34%);
+}
+
+.asset-frame:hover img {
+  transform: scale(1.055);
+  filter: saturate(1.06) contrast(1.03);
+}
+
+.asset-frame figcaption,
+.asset-frame__fallback-content {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 22px;
+  z-index: 2;
+  color: rgba(255,255,255,.88);
+}
+
+.asset-frame figcaption,
+.asset-frame__fallback-content span:last-child {
+  font-size: .76rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.asset-frame__fallback-content {
+  display: grid;
+  gap: 16px;
+}
+
+.asset-frame__icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.08);
+  backdrop-filter: blur(12px);
+}
+
+.asset-frame__icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #8fe0b4;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.asset-frame--fallback.photo-frame {
+  min-height: 240px;
+}
+
+@media (max-width: 680px) {
+  .asset-frame.photo-frame {
+    border-radius: 22px;
+  }
+
+  .asset-frame figcaption,
+  .asset-frame__fallback-content {
+    left: 18px;
+    right: 18px;
+    bottom: 18px;
+  }
+}
+</style>
