@@ -1,0 +1,5 @@
+# TODO: Replace https://twojadomena.pl with the final production domain before launch.
+User-agent: *
+Allow: /
+
+Sitemap: https://twojadomena.pl/sitemap-index.xml

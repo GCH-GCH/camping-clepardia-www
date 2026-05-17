@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import ContentPage from '../../components/pages/ContentPage.astro';
 import { languages } from '../../data/languages';
 import { sitePages } from '../../data/sitePages';
+import { homeSeo } from '../../data/seo';
 
 export function getStaticPaths() {
   return languages.map((language) => ({
@@ -18,8 +19,8 @@ const page = {
   overline: `Camping Clepardia / ${language.name}`,
   title: 'Camping Clepardia',
   lead: 'Routing językowy jest przygotowany pod przyszłe tłumaczenia strony. Aktualnie treści pozostają w wersji bazowej.',
-  seoTitle: `Camping Clepardia | ${language.name}`,
-  seoDescription: `Camping Clepardia - wersja językowa ${language.name} przygotowana pod przyszłe tłumaczenia.`,
+  seoTitle: `${homeSeo.title} | ${language.name}`,
+  seoDescription: homeSeo.description,
   cta: {
     title: 'Wybierz sekcję strony',
     copy: 'Podstrony w tej wersji językowej są gotowe technicznie i mogą zostać uzupełnione tłumaczeniami.',
@@ -31,6 +32,12 @@ const page = {
 };
 ---
 
-<Layout title={page.seoTitle} description={page.seoDescription}>
+<Layout
+  title={page.seoTitle}
+  description={page.seoDescription}
+  ogTitle={homeSeo.ogTitle}
+  ogDescription={homeSeo.ogDescription}
+  ogImage={homeSeo.ogImage}
+>
   <ContentPage page={page} languageCode={language.code} languageName={language.name} />
 </Layout>

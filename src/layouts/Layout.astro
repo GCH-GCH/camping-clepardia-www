@@ -5,26 +5,39 @@ import Footer from '../components/Footer.astro';
 import MotionFoundation from '../components/MotionFoundation.astro';
 import ScrollToTopButton from '../components/ui/ScrollToTopButton.astro';
 import { logoMain, logoMainPng, publicAssetExists, siteAssets } from '../data/assets';
+import { getCampgroundJsonLd, homeSeo, resolveOgImage, siteName } from '../data/seo';
 import { getSeoLanguageMeta, withOrigin } from '../utils/localizedLinks';
 
 interface Props {
   title?: string;
   description?: string;
+  ogTitle?: string;
+  ogDescription?: string;
   ogImage?: string;
   canonical?: string;
 }
 
 const { 
-  title = 'Camping Clepardia | Camping w Krakowie blisko centrum',
-  description = 'Camping Clepardia w Krakowie: camping, domki i szybki dojazd do centrum miasta.',
-  ogImage = '/og-image.jpg',
+  title = homeSeo.title,
+  description = homeSeo.description,
+  ogTitle,
+  ogDescription,
+  ogImage = homeSeo.ogImage,
   canonical
 } = Astro.props as Props;
 
 const shouldPreloadHero = publicAssetExists(siteAssets.hero.desktop);
-const siteOrigin = Astro.site?.origin;
+const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
 const seoLanguageMeta = getSeoLanguageMeta(Astro.url.pathname, siteOrigin, canonical);
 const ogUrl = withOrigin(seoLanguageMeta.canonicalHref, siteOrigin ?? Astro.url.origin);
+const resolvedOgTitle = ogTitle ?? title;
+const resolvedOgDescription = ogDescription ?? description;
+const resolvedOgImage = resolveOgImage(ogImage);
+const absoluteOgImage = withOrigin(resolvedOgImage, siteOrigin);
+const campgroundJsonLd = getCampgroundJsonLd({
+  image: absoluteOgImage,
+  pageUrl: seoLanguageMeta.canonicalHref,
+});
 ---
 
 <!doctype html>
@@ -33,21 +46,26 @@ const ogUrl = withOrigin(seoLanguageMeta.canonicalHref, siteOrigin ?? Astro.url.
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="description" content={description} />
+		<meta name="robots" content="index, follow" />
 		<meta name="theme-color" content="#3CB371" />
 		
 		<!-- Open Graph / Social Media -->
 		<meta property="og:type" content="website" />
 		<meta property="og:url" content={ogUrl} />
-		<meta property="og:title" content={title} />
-		<meta property="og:description" content={description} />
-		<meta property="og:image" content={ogImage} />
+		<meta property="og:site_name" content={siteName} />
+		<meta property="og:title" content={resolvedOgTitle} />
+		<meta property="og:description" content={resolvedOgDescription} />
+		<meta property="og:image" content={absoluteOgImage} />
+		<meta property="og:image:secure_url" content={absoluteOgImage} />
+		<meta property="og:image:alt" content="Camping Clepardia w Krakowie" />
 		<meta property="og:locale" content={seoLanguageMeta.ogLocale} />
 		
 		<!-- Twitter Card -->
 		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:title" content={title} />
-		<meta name="twitter:description" content={description} />
-		<meta name="twitter:image" content={ogImage} />
+		<meta name="twitter:title" content={resolvedOgTitle} />
+		<meta name="twitter:description" content={resolvedOgDescription} />
+		<meta name="twitter:image" content={absoluteOgImage} />
+		<meta name="twitter:image:alt" content="Camping Clepardia w Krakowie" />
 		
 		<!-- Canonical -->
 		<link rel="canonical" href={seoLanguageMeta.canonicalHref} />
@@ -69,6 +87,7 @@ const ogUrl = withOrigin(seoLanguageMeta.canonicalHref, siteOrigin ?? Astro.url.
 		
 		<!-- Generator -->
 		<meta name="generator" content={Astro.generator} />
+		<script type="application/ld+json" set:html={JSON.stringify(campgroundJsonLd)} />
 		
 		<title>{title}</title>
 	</head>

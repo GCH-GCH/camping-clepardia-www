@@ -13,6 +13,11 @@ export function getStaticPaths() {
 const { page } = Astro.props;
 ---
 
-<Layout title={page.seoTitle} description={page.seoDescription}>
+<Layout
+  title={page.seoTitle}
+  description={page.seoDescription}
+  ogTitle={page.seoTitle}
+  ogDescription={page.seoDescription}
+>
   <ContentPage page={page} />
 </Layout>
