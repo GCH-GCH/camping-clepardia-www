@@ -18,6 +18,13 @@ const footerNavLinks = footerNavItems.map((item) => ({
   href: getLocalizedPath(pathContext.explicitLanguage, item.slug),
 }));
 const footerLanguageLinks = getLanguageSwitchLinks(Astro.url.pathname);
+const footerSocialLinks = [
+  { label: 'Facebook', href: 'https://www.facebook.com/CampingClepardia' },
+  {
+    label: 'Google Maps',
+    href: 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w',
+  },
+];
 ---
 
 <footer class="footer" id="kontakt">
@@ -52,9 +59,9 @@ const footerLanguageLinks = getLanguageSwitchLinks(Astro.url.pathname);
     </div>
     <div>
       <h3>Social media</h3>
-      <a href="#facebook">Facebook</a>
-      <a href="#instagram">Instagram</a>
-      <a href="#google">Google</a>
+      {footerSocialLinks.map((link) => (
+        <a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>
+      ))}
     </div>
   </div>
   <div class="container footer__bottom">
