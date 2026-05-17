@@ -4,6 +4,7 @@ import MainNavbar from '../components/layout/MainNavbar.astro';
 import Footer from '../components/Footer.astro';
 import MotionFoundation from '../components/MotionFoundation.astro';
 import ScrollToTopButton from '../components/ui/ScrollToTopButton.astro';
+import FloatingChatButton from '../components/ui/FloatingChatButton.astro';
 import { logoMain, logoMainPng, publicAssetExists, siteAssets } from '../data/assets';
 import { getCampgroundJsonLd, homeSeo, resolveOgImage, siteName } from '../data/seo';
 import { getSeoLanguageMeta, withOrigin } from '../utils/localizedLinks';
@@ -41,10 +42,11 @@ const campgroundJsonLd = getCampgroundJsonLd({
 ---
 
 <!doctype html>
-<html lang={seoLanguageMeta.lang} dir="ltr">
+<html lang={seoLanguageMeta.lang} dir="ltr" data-theme="dark">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="color-scheme" content="dark light" />
 		<meta name="description" content={description} />
 		<meta name="robots" content="index, follow" />
 		<meta name="theme-color" content="#3CB371" />
@@ -87,6 +89,38 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		
 		<!-- Generator -->
 		<meta name="generator" content={Astro.generator} />
+		<script is:inline>
+			(() => {
+				const storageKey = 'cc-theme';
+				const root = document.documentElement;
+				const themeColor = document.querySelector('meta[name="theme-color"]');
+				const isTheme = (value) => value === 'dark' || value === 'light';
+				const readStoredTheme = () => {
+					try {
+						const stored = window.localStorage.getItem(storageKey);
+						return isTheme(stored) ? stored : null;
+					} catch {
+						return null;
+					}
+				};
+				const applyTheme = (theme, persist = false) => {
+					const nextTheme = isTheme(theme) ? theme : 'dark';
+					root.dataset.theme = nextTheme;
+					root.style.colorScheme = nextTheme;
+					if (themeColor) themeColor.setAttribute('content', nextTheme === 'dark' ? '#07120d' : '#f4f2ea');
+					if (persist) {
+						try {
+							window.localStorage.setItem(storageKey, nextTheme);
+						} catch {}
+					}
+					window.dispatchEvent(new CustomEvent('cc-theme-change', { detail: { theme: nextTheme } }));
+				};
+				const preferredScheme = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				root.dataset.systemTheme = preferredScheme;
+				applyTheme(readStoredTheme() ?? 'dark');
+				window.__ccSetTheme = applyTheme;
+			})();
+		</script>
 		<script type="application/ld+json" set:html={JSON.stringify(campgroundJsonLd)} />
 		
 		<title>{title}</title>
@@ -100,6 +134,7 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		
 		<Footer />
 		<ScrollToTopButton />
+		<FloatingChatButton />
 		<MotionFoundation />
 		
 		<script>

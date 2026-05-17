@@ -1,0 +1,570 @@
+<div class="floating-chat" data-floating-chat>
+  <button
+    class="floating-chat__button"
+    type="button"
+    data-chat-toggle
+    aria-label="Otwórz Camping Clepardia Assistant"
+    aria-expanded="false"
+    aria-controls="floatingChatPanel"
+  >
+    <svg class="floating-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M5 17.5c-1.4-1.2-2-2.7-2-4.5 0-4.4 4-8 9-8s9 3.6 9 8-4 8-9 8c-1 0-2-.14-2.88-.42L5 22v-4.5Z" />
+      <path d="m15.5 8.5.45 1.1 1.1.45-1.1.45-.45 1.1-.45-1.1-1.1-.45 1.1-.45.45-1.1Z" />
+      <path d="m9.2 10.2.7 1.7 1.7.7-1.7.7-.7 1.7-.7-1.7-1.7-.7 1.7-.7.7-1.7Z" />
+    </svg>
+  </button>
+
+  <div class="floating-chat__scrim" data-chat-close aria-hidden="true"></div>
+
+  <section
+    class="floating-chat__panel"
+    id="floatingChatPanel"
+    data-chat-panel
+    role="dialog"
+    aria-modal="true"
+    aria-label="Camping Clepardia Assistant"
+    aria-hidden="true"
+    hidden
+  >
+    <header class="floating-chat__header">
+      <div>
+        <span>Camping Clepardia Assistant</span>
+        <strong><i aria-hidden="true"></i> Online</strong>
+      </div>
+      <button type="button" data-chat-close aria-label="Zamknij chat">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
+      </button>
+    </header>
+
+    <div class="floating-chat__messages" data-chat-messages aria-live="polite">
+      <div class="floating-chat__message floating-chat__message--bot">
+        Cześć. Mogę szybko pomóc z cennikiem, dojazdem, domkami, campingiem albo kontaktem z recepcją.
+      </div>
+    </div>
+
+    <div class="floating-chat__quick" aria-label="Szybkie pytania">
+      <button type="button" data-chat-prompt="Sprawdź cennik">Sprawdź cennik</button>
+      <button type="button" data-chat-prompt="Jak dojechać?">Jak dojechać?</button>
+      <button type="button" data-chat-prompt="Zapytaj o domek">Zapytaj o domek</button>
+      <button type="button" data-chat-prompt="Kontakt z recepcją">Kontakt z recepcją</button>
+    </div>
+
+    <form class="floating-chat__form" data-chat-form>
+      <label class="sr-only" for="floatingChatInput">Napisz wiadomość</label>
+      <input id="floatingChatInput" data-chat-input type="text" autocomplete="off" placeholder="Napisz wiadomość..." />
+      <button type="submit" aria-label="Wyślij wiadomość">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12 16-8-5 16-3-7-8-1Z" /><path d="m12 13 8-9" /></svg>
+      </button>
+    </form>
+  </section>
+</div>
+
+<script>
+  (() => {
+    const root = document.querySelector('[data-floating-chat]');
+    if (!(root instanceof HTMLElement)) return;
+
+    const toggle = root.querySelector('[data-chat-toggle]');
+    const panel = root.querySelector('[data-chat-panel]');
+    const closeButtons = root.querySelectorAll('[data-chat-close]');
+    const form = root.querySelector('[data-chat-form]');
+    const input = root.querySelector('[data-chat-input]');
+    const messages = root.querySelector('[data-chat-messages]');
+    const quickActions = root.querySelectorAll('[data-chat-prompt]');
+
+    if (!(toggle instanceof HTMLButtonElement) || !(panel instanceof HTMLElement) || !(messages instanceof HTMLElement)) return;
+
+    let open = false;
+    let hideTimer = 0;
+
+    const updateStickyOffset = () => {
+      const mobileSummary = document.querySelector('[data-mobile-summary]');
+      const hasMobileSummary = mobileSummary instanceof HTMLElement
+        && window.innerWidth <= 1079
+        && window.getComputedStyle(mobileSummary).display !== 'none';
+
+      root.classList.toggle('is-raised', hasMobileSummary);
+    };
+
+    const setOpen = (nextOpen: boolean) => {
+      open = nextOpen;
+      window.clearTimeout(hideTimer);
+      toggle.setAttribute('aria-expanded', String(open));
+      panel.setAttribute('aria-hidden', String(!open));
+      document.body.classList.toggle('has-floating-chat-open', open);
+
+      if (open) {
+        panel.hidden = false;
+        root.classList.add('is-open');
+        window.setTimeout(() => {
+          if (input instanceof HTMLInputElement) input.focus({ preventScroll: true });
+        }, 140);
+        return;
+      }
+
+      root.classList.remove('is-open');
+      hideTimer = window.setTimeout(() => {
+        panel.hidden = true;
+      }, 260);
+      toggle.focus({ preventScroll: true });
+    };
+
+    const appendMessage = (text: string, type: 'user' | 'bot') => {
+      const bubble = document.createElement('div');
+      bubble.className = `floating-chat__message floating-chat__message--${type}`;
+      bubble.textContent = text;
+      messages.appendChild(bubble);
+      messages.scrollTop = messages.scrollHeight;
+    };
+
+    const resolveAnswer = (rawPrompt: string) => {
+      const prompt = rawPrompt.toLowerCase();
+
+      if (prompt.includes('cennik') || prompt.includes('cena') || prompt.includes('koszt')) {
+        return 'Orientacyjnie: kamper 80 PLN / noc, przyczepa 60 PLN / noc, van 75 PLN / noc, prąd 25 PLN / noc, pies bezpłatnie. Pełny kalkulator znajdziesz na stronie Cennik.';
+      }
+
+      if (prompt.includes('dojaz') || prompt.includes('tram') || prompt.includes('jak dojecha')) {
+        return 'Najwygodniej zostawić auto lub kampera na campingu i pojechać tramwajem w stronę centrum Krakowa. Adres: Henryka Pachońskiego 28A, 31-322 Kraków.';
+      }
+
+      if (prompt.includes('domek') || prompt.includes('domki')) {
+        return 'Domki mają osobną dostępność. Domek 2-os. kosztuje 200/220 PLN, 3-os. 250/300 PLN, 4-os. 400/450 PLN zależnie od sezonu. Domek rodzinny wymaga potwierdzenia recepcji.';
+      }
+
+      if (prompt.includes('kontakt') || prompt.includes('recepc')) {
+        return 'Recepcja: +48 795 294 486, email: clepardia@gmail.com. Najszybszy kontakt w sprawie dostępności to telefon lub wiadomość email.';
+      }
+
+      if (prompt.includes('camping') || prompt.includes('kamper') || prompt.includes('namiot') || prompt.includes('przyczepa')) {
+        return 'Camping Clepardia przyjmuje kampery, vany, przyczepy, namioty i auta z namiotem dachowym. W czerwcu, lipcu i sierpniu dostępność pola może być ograniczona.';
+      }
+
+      return 'To jest wersja demo asystenta. W kolejnym etapie można podłączyć prawdziwy backend i wiedzę recepcji. Teraz mogę pomóc z cennikiem, dojazdem, domkami, campingiem i kontaktem.';
+    };
+
+    const submitPrompt = (prompt: string) => {
+      const cleanPrompt = prompt.trim();
+      if (!cleanPrompt) return;
+
+      appendMessage(cleanPrompt, 'user');
+      window.setTimeout(() => appendMessage(resolveAnswer(cleanPrompt), 'bot'), 180);
+
+      if (input instanceof HTMLInputElement) {
+        input.value = '';
+        input.focus({ preventScroll: true });
+      }
+    };
+
+    toggle.addEventListener('click', () => setOpen(!open));
+
+    closeButtons.forEach((button) => {
+      button.addEventListener('click', () => setOpen(false));
+    });
+
+    quickActions.forEach((button) => {
+      button.addEventListener('click', () => {
+        if (!(button instanceof HTMLButtonElement)) return;
+        submitPrompt(button.dataset.chatPrompt ?? button.textContent ?? '');
+      });
+    });
+
+    form?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      submitPrompt(input instanceof HTMLInputElement ? input.value : '');
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && open) setOpen(false);
+    });
+
+    window.addEventListener('resize', updateStickyOffset, { passive: true });
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest('[data-mobile-toggle]')) {
+        window.setTimeout(updateStickyOffset, 40);
+      }
+    });
+
+    updateStickyOffset();
+  })();
+</script>
+
+<style is:global>
+body.has-floating-chat-open {
+  overflow: hidden;
+  touch-action: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.floating-chat {
+  position: fixed;
+  inset: auto max(24px, env(safe-area-inset-right)) max(96px, calc(96px + env(safe-area-inset-bottom))) auto;
+  z-index: 920;
+  pointer-events: none;
+}
+
+.floating-chat__button {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.22);
+  color: #fff;
+  background:
+    radial-gradient(circle at 36% 24%, rgba(255,255,255,.34), transparent 30%),
+    linear-gradient(135deg, #69dea3 0%, #3CB371 44%, #247a4f 100%);
+  box-shadow:
+    0 24px 70px rgba(60,179,113,.42),
+    0 0 0 8px rgba(60,179,113,.08),
+    inset 0 1px 0 rgba(255,255,255,.30);
+  pointer-events: auto;
+  transition:
+    opacity .26s cubic-bezier(.22, 1, .36, 1),
+    transform .26s cubic-bezier(.22, 1, .36, 1),
+    box-shadow .26s cubic-bezier(.22, 1, .36, 1),
+    border-color .26s cubic-bezier(.22, 1, .36, 1);
+  animation: chatPulse 2.8s ease-in-out infinite;
+}
+
+.floating-chat__button:hover {
+  transform: translateY(-4px) scale(1.04);
+  border-color: rgba(255,255,255,.38);
+  box-shadow:
+    0 30px 86px rgba(60,179,113,.52),
+    0 0 44px rgba(60,179,113,.32),
+    inset 0 1px 0 rgba(255,255,255,.34);
+}
+
+.floating-chat__button:active {
+  transform: translateY(0) scale(.96);
+}
+
+.floating-chat__icon {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,.20));
+}
+
+.floating-chat.is-open .floating-chat__button {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px) scale(.9);
+}
+
+.floating-chat.is-raised {
+  inset-block-end: max(166px, calc(166px + env(safe-area-inset-bottom)));
+}
+
+.floating-chat__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: rgba(3, 10, 7, .28);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .26s ease, visibility .26s ease;
+  pointer-events: none;
+}
+
+.floating-chat.is-open .floating-chat__scrim {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.floating-chat__panel {
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(104px, calc(104px + env(safe-area-inset-bottom)));
+  z-index: 1;
+  width: min(392px, calc(100vw - 32px));
+  max-height: min(680px, calc(100svh - 132px));
+  display: grid;
+  grid-template-rows: auto minmax(180px, 1fr) auto auto;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 28px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.24), transparent 34%),
+    linear-gradient(145deg, rgba(5,18,12,.96), rgba(12,35,24,.94));
+  box-shadow:
+    0 34px 110px rgba(0,0,0,.36),
+    0 0 42px rgba(60,179,113,.16),
+    inset 0 1px 0 rgba(255,255,255,.12);
+  backdrop-filter: blur(24px) saturate(145%);
+  -webkit-backdrop-filter: blur(24px) saturate(145%);
+  opacity: 0;
+  transform: translateY(18px) scale(.97);
+  transform-origin: bottom right;
+  pointer-events: auto;
+  transition:
+    opacity .28s cubic-bezier(.22, 1, .36, 1),
+    transform .28s cubic-bezier(.22, 1, .36, 1);
+}
+
+.floating-chat.is-open .floating-chat__panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.floating-chat__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+
+.floating-chat__header span {
+  display: block;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 950;
+  letter-spacing: -.01em;
+}
+
+.floating-chat__header strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 3px;
+  color: #8fe0b4;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.floating-chat__header i {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #8fe0b4;
+  box-shadow: 0 0 16px rgba(143,224,180,.72);
+}
+
+.floating-chat__header button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  color: #fff;
+  background: rgba(255,255,255,.08);
+}
+
+.floating-chat__header svg,
+.floating-chat__form svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.floating-chat__messages {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.floating-chat__message {
+  max-width: 88%;
+  padding: 11px 13px;
+  border-radius: 18px;
+  font-size: .92rem;
+  line-height: 1.55;
+}
+
+.floating-chat__message--bot {
+  justify-self: start;
+  color: rgba(255,255,255,.86);
+  background: rgba(255,255,255,.085);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.floating-chat__message--user {
+  justify-self: end;
+  color: #07120d;
+  background: #8fe0b4;
+  box-shadow: 0 14px 34px rgba(60,179,113,.24);
+}
+
+.floating-chat__quick {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 14px;
+  overflow-x: auto;
+}
+
+.floating-chat__quick button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(143,224,180,.22);
+  border-radius: 999px;
+  color: #d9ffe9;
+  background: rgba(60,179,113,.12);
+  font-size: .78rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.floating-chat__quick button:hover {
+  border-color: rgba(143,224,180,.46);
+  background: rgba(60,179,113,.20);
+}
+
+.floating-chat__form {
+  display: grid;
+  grid-template-columns: 1fr 46px;
+  gap: 10px;
+  padding: 14px 16px 16px;
+  border-top: 1px solid rgba(255,255,255,.10);
+}
+
+.floating-chat__form input {
+  min-width: 0;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  color: #fff;
+  background: rgba(255,255,255,.075);
+  outline: none;
+}
+
+.floating-chat__form input::placeholder {
+  color: rgba(255,255,255,.54);
+}
+
+.floating-chat__form input:focus {
+  border-color: rgba(143,224,180,.54);
+  box-shadow: 0 0 0 4px rgba(60,179,113,.16);
+}
+
+.floating-chat__form button {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: #fff;
+  background: linear-gradient(135deg, #63d99c, #3CB371 50%, #24794e);
+  box-shadow: 0 16px 38px rgba(60,179,113,.30);
+}
+
+.floating-chat button:focus-visible,
+.floating-chat input:focus-visible {
+  outline: 2px solid #8fe0b4;
+  outline-offset: 3px;
+}
+
+html[data-theme="light"] .floating-chat__panel {
+  color: #102018;
+  border-color: rgba(25,54,38,.12);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.18), transparent 34%),
+    linear-gradient(145deg, rgba(247,246,238,.98), rgba(236,244,233,.95));
+  box-shadow: 0 34px 90px rgba(42,62,45,.22), 0 0 34px rgba(60,179,113,.12), inset 0 1px 0 rgba(255,255,255,.78);
+}
+
+html[data-theme="light"] .floating-chat__header,
+html[data-theme="light"] .floating-chat__form {
+  border-color: rgba(25,54,38,.10);
+}
+
+html[data-theme="light"] .floating-chat__header span,
+html[data-theme="light"] .floating-chat__header button {
+  color: #102018;
+}
+
+html[data-theme="light"] .floating-chat__header button,
+html[data-theme="light"] .floating-chat__message--bot,
+html[data-theme="light"] .floating-chat__form input {
+  color: #173624;
+  border-color: rgba(25,54,38,.11);
+  background: rgba(255,255,255,.62);
+}
+
+html[data-theme="light"] .floating-chat__form input::placeholder {
+  color: rgba(23,54,36,.54);
+}
+
+html[data-theme="light"] .floating-chat__quick button {
+  color: #1f744b;
+  background: rgba(60,179,113,.12);
+}
+
+@keyframes chatPulse {
+  0%, 100% { box-shadow: 0 24px 70px rgba(60,179,113,.42), 0 0 0 8px rgba(60,179,113,.08), inset 0 1px 0 rgba(255,255,255,.30); }
+  50% { box-shadow: 0 28px 82px rgba(60,179,113,.54), 0 0 0 12px rgba(60,179,113,.04), inset 0 1px 0 rgba(255,255,255,.34); }
+}
+
+@media (max-width: 640px) {
+  .floating-chat {
+    inset: auto max(16px, env(safe-area-inset-right)) max(84px, calc(84px + env(safe-area-inset-bottom))) auto;
+  }
+
+  .floating-chat.is-raised {
+    inset-block-end: max(154px, calc(154px + env(safe-area-inset-bottom)));
+  }
+
+  .floating-chat__button {
+    width: 58px;
+    height: 58px;
+  }
+
+  .floating-chat__panel {
+    top: 92px;
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    left: 12px;
+    width: auto;
+    max-height: none;
+    border-radius: 26px;
+    transform-origin: bottom center;
+  }
+
+  .floating-chat__scrim {
+    background: rgba(3, 10, 7, .42);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-chat__button {
+    animation: none;
+  }
+
+  .floating-chat,
+  .floating-chat * {
+    transition-duration: .01ms !important;
+  }
+}
+</style>
