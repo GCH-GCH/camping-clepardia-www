@@ -6,6 +6,7 @@ import AttractionsPage from './AttractionsPage.astro';
 import FaqPage from './FaqPage.astro';
 import GalleryPage from './GalleryPage.astro';
 import CampersPage from './CampersPage.astro';
+import FamiliesPage from './FamiliesPage.astro';
 import { pricingConfig } from '../../data/pricing';
 import type { SitePage } from '../../data/sitePages';
 import { getLocalizedPath } from '../../utils/localizedLinks';
@@ -73,7 +74,7 @@ const contactCards = [
   </div>
 </section>
 
-{page.slug !== 'cennik' && page.slug !== 'kontakt' && page.slug !== 'dojazd' && page.slug !== 'atrakcje' && page.slug !== 'faq' && page.slug !== 'galeria' && page.slug !== 'dla-kamperow' && (
+{page.slug !== 'cennik' && page.slug !== 'kontakt' && page.slug !== 'dojazd' && page.slug !== 'atrakcje' && page.slug !== 'faq' && page.slug !== 'galeria' && page.slug !== 'dla-kamperow' && page.slug !== 'dla-rodzin' && (
 <section class="site-section page-detail reveal-section">
   <div class="container page-detail__grid">
     <div class="page-detail__intro">
@@ -178,6 +179,8 @@ const contactCards = [
 
 {page.slug === 'dla-kamperow' && <CampersPage languageCode={languageCode} />}
 
+{page.slug === 'dla-rodzin' && <FamiliesPage languageCode={languageCode} />}
+
 {page.slug === 'cennik' && (
   <section class="site-section page-detail pricing-guidance reveal-section">
     <div class="container page-detail__grid">
@@ -222,7 +225,7 @@ const contactCards = [
   </section>
 )}
 
-{page.slug !== 'kontakt' && page.slug !== 'dojazd' && page.slug !== 'atrakcje' && page.slug !== 'faq' && page.slug !== 'galeria' && page.slug !== 'dla-kamperow' && (
+{page.slug !== 'kontakt' && page.slug !== 'dojazd' && page.slug !== 'atrakcje' && page.slug !== 'faq' && page.slug !== 'galeria' && page.slug !== 'dla-kamperow' && page.slug !== 'dla-rodzin' && (
 <section class="site-section page-cta reveal-section">
   <div class="container">
     <div class="page-cta__panel premium-card">
