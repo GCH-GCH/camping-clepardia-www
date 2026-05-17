@@ -69,18 +69,20 @@ const footerLanguageLinks = getLanguageSwitchLinks(Astro.url.pathname);
 </script>
 
 <style>
-.footer { background: #0d1812; color: #fff; padding: 72px 0 28px; }
+.footer { background: #0d1812; color: #fff; padding: 72px 0 28px; overflow: hidden; }
 .footer__grid { display: grid; gap: 34px; grid-template-columns: 1fr; }
+.footer__grid > *, .footer__brand { min-width: 0; }
 .footer__logo { display: block; height: 52px; width: auto; object-fit: contain; image-rendering: auto; margin-bottom: 22px; filter: drop-shadow(0 16px 34px rgba(60,179,113,.20)); }
 .footer h2 { color: #fff; font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin-bottom: 18px; }
 .footer h3 { color: #8fe0b4; font-size: .86rem; text-transform: uppercase; letter-spacing: .14em; margin-bottom: 18px; }
 .footer p, .footer a { color: rgba(255,255,255,.72); line-height: 1.75; }
-.footer a { display: block; margin: 8px 0; }
+.footer a { display: block; margin: 8px 0; overflow-wrap: anywhere; }
 .footer a:hover { color: #8fe0b4; }
 .footer__brand p { max-width: 520px; }
-.footer__langs { display: flex; gap: 8px; margin-top: 24px; }
+.footer__langs { display: flex; flex-wrap: wrap; gap: 8px; max-width: 100%; margin-top: 24px; }
 .footer__langs a { padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); color: #fff; font-weight: 900; }
 .footer__langs a:hover, .footer__langs a.is-active { border-color: rgba(143,224,180,.48); color: #8fe0b4; }
 .footer__bottom { margin-top: 46px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.10); display: flex; flex-direction: column; gap: 8px; justify-content: space-between; }
 @media (min-width: 800px) { .footer__grid { grid-template-columns: 1.6fr .8fr .8fr .6fr; } .footer__bottom { flex-direction: row; } }
+@media (max-width: 640px) { .footer h2 { font-size: clamp(1.85rem, 9vw, 2.55rem); } .footer__langs a { margin: 0; } }
 </style>

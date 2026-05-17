@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
+import HomeStatsBar from '../components/home/HomeStatsBar.astro';
 import WhyClepardia from '../components/home/WhyClepardia.astro';
 import CampingSection from '../components/home/CampingSection.astro';
 import BungalowsSection from '../components/home/BungalowsSection.astro';
@@ -9,6 +10,7 @@ import TransportSection from '../components/TransportSection.astro';
 import AttractionsPreview from '../components/AttractionsPreview.astro';
 import TrustSection from '../components/TrustSection.astro';
 import BookingCTA from '../components/BookingCTA.astro';
+import HomeFinalCTA from '../components/home/HomeFinalCTA.astro';
 import { homeSeo } from '../data/seo';
 ---
 
@@ -20,6 +22,7 @@ import { homeSeo } from '../data/seo';
   ogImage={homeSeo.ogImage}
 >
   <Hero />
+  <HomeStatsBar />
   <WhyClepardia />
   <CampingSection />
   <BungalowsSection />
@@ -28,4 +31,5 @@ import { homeSeo } from '../data/seo';
   <AttractionsPreview />
   <TrustSection />
   <BookingCTA />
+  <HomeFinalCTA />
 </Layout>

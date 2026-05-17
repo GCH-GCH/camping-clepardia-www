@@ -1,0 +1,165 @@
+---
+const actions = [
+  { label: 'Sprawdź cennik', href: '/cennik', primary: true },
+  { label: 'Zapytaj o dostępność', href: '/kontakt' },
+  { label: 'Zobacz galerię', href: '/galeria' },
+];
+---
+
+<section class="home-final-cta reveal-section" aria-label="Zaplanuj pobyt w Krakowie">
+  <div class="container">
+    <div class="home-final-cta__panel premium-card">
+      <div class="home-final-cta__content">
+        <span class="section-kicker">Gotowi na Kraków?</span>
+        <h2>Zaplanuj pobyt w Krakowie z Camping Clepardia</h2>
+        <p>Sprawdź cennik, zobacz domki lub wyślij zapytanie do recepcji.</p>
+      </div>
+      <div class="home-final-cta__actions">
+        {actions.map((action) => (
+          <a class:list={[action.primary ? 'premium-button' : 'home-final-cta__secondary']} href={action.href}>
+            {action.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.home-final-cta {
+  padding: clamp(72px, 9vw, 128px) 0;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(60,179,113,.18), transparent 34%),
+    radial-gradient(circle at 86% 24%, rgba(239,174,99,.18), transparent 34%),
+    linear-gradient(180deg, #fbfbf7, #101b14);
+}
+
+.home-final-cta__panel {
+  position: relative;
+  display: grid;
+  gap: clamp(28px, 5vw, 52px);
+  padding: clamp(30px, 6vw, 72px);
+  border-radius: 34px;
+  overflow: hidden;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(5,18,12,.94), rgba(13,40,25,.88) 52%, rgba(28,26,14,.82)),
+    radial-gradient(circle at 78% 18%, rgba(255,190,108,.18), transparent 36%),
+    radial-gradient(circle at 14% 82%, rgba(60,179,113,.20), transparent 34%);
+  border-color: rgba(255,255,255,.14);
+  box-shadow:
+    0 34px 110px rgba(0,0,0,.30),
+    0 0 60px rgba(60,179,113,.12),
+    inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+.home-final-cta__panel::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, rgba(255,255,255,.12), transparent 28%, transparent 68%, rgba(143,224,180,.10));
+  mask: linear-gradient(#000, transparent 56%);
+}
+
+.home-final-cta__content,
+.home-final-cta__actions {
+  position: relative;
+  z-index: 1;
+}
+
+.home-final-cta .section-kicker {
+  color: #8fe0b4;
+}
+
+.home-final-cta h2 {
+  max-width: 880px;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.35rem, 6vw, 5.4rem);
+  line-height: .92;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-shadow: 0 16px 48px rgba(0,0,0,.30);
+}
+
+.home-final-cta p {
+  max-width: 680px;
+  margin-top: 22px;
+  color: rgba(255,255,255,.78);
+  font-size: clamp(1.04rem, 1.7vw, 1.2rem);
+  line-height: 1.75;
+}
+
+.home-final-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.home-final-cta__secondary {
+  display: inline-flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff;
+  background: rgba(255,255,255,.085);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  font-weight: 900;
+  letter-spacing: .06em;
+  transition:
+    transform .28s cubic-bezier(.22, 1, .36, 1),
+    border-color .28s cubic-bezier(.22, 1, .36, 1),
+    background .28s cubic-bezier(.22, 1, .36, 1),
+    box-shadow .28s cubic-bezier(.22, 1, .36, 1);
+}
+
+.home-final-cta__secondary:hover {
+  color: #fff;
+  transform: translateY(-3px);
+  border-color: rgba(143,224,180,.42);
+  background: rgba(255,255,255,.14);
+  box-shadow: 0 18px 48px rgba(0,0,0,.22), 0 0 28px rgba(60,179,113,.14);
+}
+
+@media (min-width: 920px) {
+  .home-final-cta__panel {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
+  .home-final-cta__actions {
+    justify-content: end;
+    max-width: 280px;
+  }
+
+  .home-final-cta__actions a {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-final-cta {
+    padding: 64px 0;
+  }
+
+  .home-final-cta__panel {
+    border-radius: 26px;
+  }
+
+  .home-final-cta__actions {
+    display: grid;
+  }
+
+  .home-final-cta__actions a {
+    width: 100%;
+  }
+}
+</style>

@@ -22,16 +22,25 @@ const heroStyle = [
   id="hero"
   style={heroStyle || undefined}
 >
+  <div class="hero__parallax" data-hero-parallax aria-hidden="true"></div>
   <div class="hero__overlay hero__overlay--texture"></div>
   <div class="hero__overlay hero__overlay--cinematic"></div>
+  <div class="hero__overlay hero__overlay--vignette"></div>
+  <div class="hero__overlay hero__overlay--noise"></div>
   <div class="hero__overlay hero__overlay--warm"></div>
   <div class="hero__overlay hero__overlay--green"></div>
 
   <div class="hero__wrapper">
     <div class="hero__content">
       <span class="hero__badge">Kraków • camping • domki • tramwaj do centrum</span>
-      <h1 class="hero__headline">Camping Clepardia</h1>
-      <p class="hero__subheadline">Camping w Krakowie blisko centrum miasta</p>
+      <h1 class="hero__headline" aria-label="Camping Clepardia">
+        <span class="hero__headline-line">Camping</span>
+        <span class="hero__headline-line">Clepardia</span>
+      </h1>
+      <p class="hero__subheadline">
+        <span>Camping w Krakowie</span>
+        <span>blisko centrum miasta</span>
+      </p>
       <p class="hero__description">
         Zielona, spokojna przestrzeń dla kamperów, namiotów, przyczep i gości domków. Zatrzymaj się wygodnie w Krakowie i dojedź tramwajem do Starego Miasta bez wjeżdżania autem do centrum.
       </p>
@@ -40,6 +49,13 @@ const heroStyle = [
         <a href="#cennik" class="hero__button hero__button--secondary">Zobacz cennik</a>
       </div>
     </div>
+  </div>
+
+  <div class="hero__floating-badges" aria-label="Wyróżniki Camping Clepardia">
+    <span>Blisko centrum Krakowa</span>
+    <span>Camping + domki</span>
+    <span>Tramwaj do centrum</span>
+    <span>Mister Camping 2024</span>
   </div>
 
   <div class="hero__benefits-bar" aria-label="Najważniejsze atuty Camping Clepardia">
@@ -64,26 +80,71 @@ const heroStyle = [
   </div>
 
   <a href="#dlaczego" class="hero__scroll-indicator" aria-label="Przewiń do sekcji Dlaczego Clepardia">
-    <span></span>
+    <span class="hero__mouse" aria-hidden="true"><i></i></span>
+    <span class="hero__scroll-text">Przewiń</span>
   </a>
 </section>
+
+<script>
+  const hero = document.querySelector('.hero');
+  const heroParallax = document.querySelector('[data-hero-parallax]');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const wideViewport = window.matchMedia('(min-width: 768px)');
+
+  if (hero instanceof HTMLElement && heroParallax instanceof HTMLElement && !reducedMotion.matches && wideViewport.matches) {
+    let ticking = false;
+
+    const updateHeroParallax = () => {
+      ticking = false;
+      const rect = hero.getBoundingClientRect();
+      const viewport = window.innerHeight || 1;
+
+      if (rect.bottom < 0 || rect.top > viewport) return;
+
+      const progress = Math.max(-1, Math.min(1, rect.top / viewport));
+      heroParallax.style.transform = `translate3d(0, ${progress * -38}px, 0) scale(1.06)`;
+    };
+
+    const requestUpdate = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(updateHeroParallax);
+    };
+
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate, { passive: true });
+    updateHeroParallax();
+  }
+</script>
 
 <style is:global>
 .hero {
   position: relative;
-  min-height: 100svh;
+  min-height: 106svh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
   color: #fff;
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
+  background:
+    radial-gradient(circle at 72% 28%, rgba(237, 163, 82, .24), transparent 34%),
+    radial-gradient(circle at 18% 58%, rgba(60, 179, 113, .20), transparent 32%),
+    linear-gradient(125deg, #06100c 0%, #0b2018 42%, #11100c 72%, #211408 100%);
   isolation: isolate;
 }
 
-.hero--image {
+.hero__parallax {
+  position: absolute;
+  inset: -7%;
+  z-index: 0;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  transform: translate3d(0, 0, 0) scale(1.06);
+  will-change: transform;
+}
+
+.hero--image .hero__parallax {
   background-image:
     var(--hero-bg-desktop),
     radial-gradient(circle at 74% 30%, rgba(237, 163, 82, .22), transparent 34%),
@@ -91,7 +152,7 @@ const heroStyle = [
     linear-gradient(125deg, #06100c 0%, #0b2018 42%, #11100c 72%, #211408 100%);
 }
 
-.hero--fallback {
+.hero--fallback .hero__parallax {
   background:
     radial-gradient(circle at 74% 30%, rgba(237, 163, 82, .22), transparent 34%),
     radial-gradient(circle at 18% 58%, rgba(60, 179, 113, .18), transparent 32%),
@@ -120,8 +181,23 @@ const heroStyle = [
 
 .hero__overlay--cinematic {
   background:
-    linear-gradient(90deg, rgba(2, 10, 7, .82) 0%, rgba(5, 18, 13, .62) 34%, rgba(8, 22, 17, .26) 68%, rgba(9, 18, 13, .10) 100%),
-    linear-gradient(180deg, rgba(0, 0, 0, .24) 0%, transparent 42%, rgba(0, 0, 0, .42) 100%);
+    linear-gradient(90deg, rgba(2, 8, 5, .92) 0%, rgba(4, 17, 11, .76) 34%, rgba(7, 24, 16, .34) 70%, rgba(9, 18, 13, .10) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, .32) 0%, transparent 34%, rgba(0, 0, 0, .55) 100%);
+}
+
+.hero__overlay--vignette {
+  background:
+    radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,.18) 62%, rgba(0,0,0,.62) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.18), transparent 42%, rgba(0,0,0,.28));
+}
+
+.hero__overlay--noise {
+  opacity: .12;
+  mix-blend-mode: overlay;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,.18) 0 1px, transparent 1px 3px),
+    radial-gradient(circle at 80% 12%, rgba(255,255,255,.12) 0 1px, transparent 1px 4px);
+  background-size: 3px 3px, 5px 5px;
 }
 
 .hero__overlay--warm {
@@ -130,7 +206,9 @@ const heroStyle = [
 }
 
 .hero__overlay--green {
-  background: radial-gradient(circle at 20% 42%, rgba(60, 179, 113, .20), rgba(60, 179, 113, .07) 25%, transparent 50%);
+  background:
+    radial-gradient(circle at 20% 42%, rgba(60, 179, 113, .22), rgba(60, 179, 113, .07) 25%, transparent 50%),
+    radial-gradient(circle at 58% 86%, rgba(60, 179, 113, .14), transparent 34%);
 }
 
 .hero__wrapper {
@@ -160,6 +238,8 @@ const heroStyle = [
   font-weight: 800;
   letter-spacing: .14em;
   text-transform: uppercase;
+  box-shadow: 0 18px 44px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.10);
+  animation: heroFade .9s cubic-bezier(.22, 1, .36, 1) .02s both;
 }
 
 .hero__headline {
@@ -171,17 +251,32 @@ const heroStyle = [
   font-weight: 900;
   letter-spacing: 0;
   text-shadow: 0 4px 22px rgba(0,0,0,.48), 0 16px 54px rgba(0,0,0,.34);
-  animation: heroFade .9s ease .08s both;
+}
+
+.hero__headline-line {
+  display: block;
+  overflow: hidden;
+  animation: heroLineReveal 1s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.hero__headline-line:nth-child(2) {
+  animation-delay: .10s;
 }
 
 .hero__subheadline {
+  display: grid;
+  gap: 2px;
   margin: 0 0 18px;
   color: rgba(255,255,255,.94);
   font-size: clamp(1.18rem, 3vw, 1.55rem);
   line-height: 1.45;
   font-weight: 750;
   text-shadow: 0 2px 18px rgba(0,0,0,.38);
-  animation: heroFade .9s ease .18s both;
+  animation: heroFade .9s cubic-bezier(.22, 1, .36, 1) .24s both;
+}
+
+.hero__subheadline span {
+  display: block;
 }
 
 .hero__description {
@@ -191,14 +286,14 @@ const heroStyle = [
   font-size: clamp(1rem, 1.7vw, 1.12rem);
   line-height: 1.75;
   text-shadow: 0 2px 16px rgba(0,0,0,.3);
-  animation: heroFade .9s ease .28s both;
+  animation: heroFade .9s cubic-bezier(.22, 1, .36, 1) .34s both;
 }
 
 .hero__cta {
   display: flex;
   gap: 14px;
   flex-wrap: wrap;
-  animation: heroFade .9s ease .38s both;
+  animation: heroFade .9s cubic-bezier(.22, 1, .36, 1) .46s both;
 }
 
 .hero__button {
@@ -206,19 +301,32 @@ const heroStyle = [
   align-items: center;
   justify-content: center;
   min-height: 52px;
-  padding: 15px 26px;
+  padding: 17px 30px;
   border-radius: 999px;
-  font-size: .9rem;
+  font-size: .92rem;
   font-weight: 900;
   letter-spacing: .08em;
   text-transform: uppercase;
   transition: transform .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease;
+  overflow: hidden;
+  isolation: isolate;
 }
 
 .hero__button--primary {
   color: #fff;
   background: linear-gradient(135deg, #63d99c 0%, #3CB371 45%, #1f744b 100%);
-  box-shadow: 0 18px 48px rgba(60,179,113,.38), inset 0 1px 0 rgba(255,255,255,.28);
+  box-shadow: 0 22px 58px rgba(60,179,113,.42), inset 0 1px 0 rgba(255,255,255,.30);
+}
+
+.hero__button--primary::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  z-index: 1;
+  background: linear-gradient(115deg, transparent 0%, transparent 34%, rgba(255,255,255,.48) 46%, transparent 58%, transparent 100%);
+  transform: translateX(-130%) skewX(-18deg);
+  transition: transform .75s cubic-bezier(.22, 1, .36, 1);
+  pointer-events: none;
 }
 
 .hero__button--primary:hover {
@@ -227,11 +335,17 @@ const heroStyle = [
   box-shadow: 0 24px 64px rgba(60,179,113,.48), 0 8px 26px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.34);
 }
 
+.hero__button--primary:hover::before {
+  transform: translateX(130%) skewX(-18deg);
+}
+
 .hero__button--secondary {
   color: #fff;
   border: 1px solid rgba(255,255,255,.24);
-  background: rgba(255,255,255,.09);
-  backdrop-filter: blur(16px);
+  background: rgba(255,255,255,.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
 }
 
 .hero__button--secondary:hover {
@@ -288,22 +402,87 @@ const heroStyle = [
   filter: drop-shadow(0 4px 14px rgba(60,179,113,.24));
 }
 
+.hero__floating-badges {
+  position: absolute;
+  right: max(26px, calc((100vw - 1440px) / 2 + 42px));
+  top: 50%;
+  z-index: 3;
+  display: grid;
+  gap: 14px;
+  width: min(280px, 25vw);
+  transform: translateY(-42%);
+  pointer-events: none;
+}
+
+.hero__floating-badges span {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 48px;
+  align-items: center;
+  padding: 12px 16px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 999px;
+  color: rgba(255,255,255,.90);
+  background: rgba(7, 20, 14, .42);
+  box-shadow: 0 18px 48px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.10);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  font-size: .78rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  animation: badgeFloat 4.8s ease-in-out infinite;
+}
+
+.hero__floating-badges span:nth-child(1) {
+  animation-delay: .34s;
+}
+
+.hero__floating-badges span:nth-child(2) {
+  justify-self: end;
+  animation-delay: .74s;
+}
+
+.hero__floating-badges span:nth-child(3) {
+  margin-left: 28px;
+  animation-delay: 1.12s;
+}
+
+.hero__floating-badges span:nth-child(4) {
+  justify-self: center;
+  color: #102018;
+  background: rgba(255,255,255,.76);
+  border-color: rgba(255,255,255,.42);
+  animation-delay: 1.48s;
+}
+
 .hero__scroll-indicator {
   position: absolute;
   left: 50%;
-  bottom: 16px;
+  bottom: 18px;
   z-index: 4;
-  width: 22px;
-  height: 34px;
+  width: auto;
+  min-width: 74px;
   transform: translateX(-50%);
-  border: 1px solid rgba(255,255,255,.32);
-  border-radius: 999px;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,.72);
+}
+
+.hero__mouse {
+  width: 24px;
+  height: 38px;
   display: grid;
   place-items: start center;
   padding-top: 7px;
+  border: 1px solid rgba(255,255,255,.34);
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 12px 32px rgba(0,0,0,.18);
 }
 
-.hero__scroll-indicator span {
+.hero__mouse i {
   width: 4px;
   height: 4px;
   border-radius: 999px;
@@ -311,12 +490,20 @@ const heroStyle = [
   animation: scrollDot 1.8s ease-in-out infinite;
 }
 
+.hero__scroll-text {
+  color: rgba(255,255,255,.66);
+  font-size: .66rem;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
 @media (min-width: 900px) {
   .hero__headline { font-size: clamp(3.8rem, 7vw, 6.2rem); }
 }
 
 @media (max-width: 860px) {
-  .hero--mobile-image {
+  .hero--mobile-image .hero__parallax {
     background-image:
       var(--hero-bg-mobile),
       radial-gradient(circle at 74% 30%, rgba(237, 163, 82, .22), transparent 34%),
@@ -324,20 +511,74 @@ const heroStyle = [
       linear-gradient(125deg, #06100c 0%, #0b2018 42%, #11100c 72%, #211408 100%);
   }
 
-  .hero { min-height: auto; }
-  .hero__wrapper { padding: 118px 20px 250px; }
+  .hero { min-height: 100svh; }
+  .hero__wrapper { padding: 126px 20px 270px; }
   .benefits-wrapper { grid-template-columns: repeat(2, 1fr); }
+  .hero__floating-badges {
+    left: 20px;
+    right: 20px;
+    top: auto;
+    bottom: 178px;
+    width: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    transform: none;
+  }
+
+  .hero__floating-badges span {
+    width: 100%;
+    justify-content: center;
+    min-height: 42px;
+    font-size: .68rem;
+    text-align: center;
+  }
+
+  .hero__floating-badges span:nth-child(n) {
+    justify-self: stretch;
+    margin-left: 0;
+  }
 }
 
 @media (max-width: 560px) {
-  .hero__wrapper { padding: 112px 18px 300px; }
+  .hero__wrapper { padding: 118px 18px 384px; }
   .hero__badge { font-size: .68rem; letter-spacing: .1em; }
   .hero__cta { flex-direction: column; }
   .hero__button { width: 100%; }
-  .hero__benefits-bar { bottom: 20px; padding: 18px; }
+  .hero__floating-badges {
+    bottom: 224px;
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+  .hero__floating-badges span {
+    min-height: 38px;
+    padding: 10px 12px;
+  }
+  .hero__benefits-bar { bottom: 18px; padding: 18px; }
   .benefits-wrapper { grid-template-columns: 1fr; gap: 14px; }
   .hero__benefit { font-size: .75rem; }
   .hero__scroll-indicator { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__parallax {
+    will-change: auto;
+    transform: scale(1.02);
+  }
+
+  .hero__badge,
+  .hero__headline-line,
+  .hero__subheadline,
+  .hero__description,
+  .hero__cta,
+  .hero__benefits-bar,
+  .hero__floating-badges span,
+  .hero__mouse i {
+    animation: none;
+  }
+
+  .hero__button,
+  .hero__button:hover {
+    transform: none;
+  }
 }
 
 @keyframes heroFade {
@@ -345,9 +586,19 @@ const heroStyle = [
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes heroLineReveal {
+  from { opacity: 0; transform: translateY(110%) rotate(1.5deg); }
+  to { opacity: 1; transform: translateY(0) rotate(0deg); }
+}
+
 @keyframes benefitRise {
   from { opacity: 0; transform: translateX(-50%) translateY(18px); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes badgeFloat {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -7px, 0); }
 }
 
 @keyframes scrollDot {
