@@ -1,0 +1,584 @@
+---
+import ImageFrame from '../ImageFrame.astro';
+import { siteAssets } from '../../data/assets';
+import { pricingConfig } from '../../data/pricing';
+import { getLocalizedPath } from '../../utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pricingHref = getLocalizedPath(languageCode, 'cennik');
+const contactHref = getLocalizedPath(languageCode, 'kontakt');
+const currency = pricingConfig.currency;
+const formatPrice = (price: number) => `${price} ${currency}`;
+const getStayPrice = (id: string) => {
+  const stayType = pricingConfig.stayTypes.find((item) => item.id === id);
+  if (!stayType || !('price' in stayType)) throw new Error(`Missing camper pricing: ${id}`);
+
+  return {
+    label: stayType.label,
+    price: stayType.price,
+  };
+};
+const getAddonPrice = (id: string) => {
+  const addon = pricingConfig.addons.find((item) => item.id === id);
+  if (!addon) throw new Error(`Missing addon pricing: ${id}`);
+
+  return {
+    label: addon.label,
+    price: addon.price,
+  };
+};
+
+const valueCards = [
+  {
+    title: 'Blisko Krakowa',
+    copy: 'Wygodna baza do zwiedzania miasta bez konieczności parkowania przy Starym Mieście.',
+    icon: 'M4 18V9l8-5 8 5v9M8 18v-6h8v6M9 9h.01M15 9h.01',
+  },
+  {
+    title: 'Dla różnych pojazdów',
+    copy: 'Miejsce dla kamperów, vanów, przyczep oraz aut z namiotem dachowym.',
+    icon: 'M3 14h2l2-5h9l3 5h2v4h-3a2 2 0 1 1-4 0H9a2 2 0 1 1-4 0H3v-4ZM7 14h10M8 9l-1 5M16 9l1 5',
+  },
+  {
+    title: 'Prąd i zaplecze',
+    copy: 'Możliwość podłączenia prądu oraz korzystania z sanitariatów i podstawowych udogodnień.',
+    icon: 'M13 2 5 14h6l-1 8 9-13h-6l1-7Z',
+  },
+  {
+    title: 'Transport do centrum',
+    copy: 'Najwygodniej zostawić pojazd na campingu i dojechać do centrum tramwajem.',
+    icon: 'M4 6h16M6 6v9a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V6M8 18l-2 3M16 18l2 3M9 10h6',
+  },
+];
+
+const facilities = [
+  'miejsca dla kamperów',
+  'miejsca dla przyczep',
+  'miejsca dla vanów',
+  'prąd',
+  'sanitariaty',
+  'kuchnie turystyczne',
+  'możliwość pobytu z psem',
+  'dostęp do informacji turystycznych',
+  'wygodny dojazd do centrum',
+];
+
+const importantNotes = [
+  'Check-in / check-out na campingu: 12:00-12:00.',
+  'Prąd jest płatny według cennika.',
+  'Pies jest bezpłatny.',
+  'W sezonie letnim rezerwacje pola campingowego mogą być ograniczone.',
+  'Finalną dostępność potwierdza recepcja.',
+];
+
+const camperPrices = [
+  getStayPrice('camper'),
+  getStayPrice('van'),
+  getStayPrice('caravan'),
+  getStayPrice('rooftop-tent'),
+  getAddonPrice('electricity'),
+  getAddonPrice('dog'),
+];
+---
+
+<section class="site-section campers-value reveal-section">
+  <div class="container campers-value__grid">
+    <div class="campers-value__intro">
+      <span class="section-kicker">Dlaczego warto</span>
+      <h2 class="section-title">Zielona baza dla podróżujących po Krakowie własnym rytmem</h2>
+      <p class="section-copy">
+        Camping Clepardia pozwala zatrzymać kampera, vana lub przyczepę poza ścisłym centrum,
+        a jednocześnie szybko ruszyć tramwajem do najważniejszych miejsc Krakowa.
+      </p>
+    </div>
+
+    <div class="campers-value__cards">
+      {valueCards.map((card, index) => (
+        <article class="premium-card reveal-section campers-value__card" style={`--reveal-delay: ${index * 80}ms`}>
+          <span class="campers-value__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d={card.icon}></path>
+            </svg>
+          </span>
+          <h3>{card.title}</h3>
+          <p>{card.copy}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<section class="site-section campers-facilities reveal-section">
+  <div class="container campers-facilities__grid">
+    <div class="campers-facilities__content">
+      <span class="section-kicker">Co znajdziesz na miejscu</span>
+      <h2 class="section-title">Praktyczne zaplecze dla kamperów, vanów i przyczep</h2>
+      <p class="section-copy">
+        Sekcja jest przygotowana dla gości, którzy chcą szybko sprawdzić, czy Camping Clepardia
+        pasuje do postoju z pojazdem turystycznym.
+      </p>
+
+      <div class="campers-facilities__list">
+        {facilities.map((item, index) => (
+          <div class="campers-facilities__item reveal-section" style={`--reveal-delay: ${index * 45}ms`}>
+            <span aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M5 13l4 4L19 7"></path>
+              </svg>
+            </span>
+            <strong>{item}</strong>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="campers-facilities__media" aria-label="Zdjęcia i miejsca dla kamperów">
+      <ImageFrame
+        src={siteAssets.camping.camperArea}
+        alt="Strefa dla kamperów i vanów Camping Clepardia"
+        label="Miejsce na zdjęcie: strefa dla kamperów"
+        className="campers-facilities__main-photo"
+      />
+      <div class="campers-facilities__thumbs">
+        <ImageFrame src={siteAssets.camping.pitches} alt="Miejsca campingowe Camping Clepardia" label="Miejsca postojowe" />
+        <ImageFrame src={siteAssets.camping.electricity} alt="Przyłącza prądu na campingu" label="Prąd" />
+        <ImageFrame src={siteAssets.transport.tramToCenter} alt="Tramwaj do centrum Krakowa" label="Tramwaj do centrum" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="site-section campers-info reveal-section">
+  <div class="container campers-info__grid">
+    <article class="premium-card campers-info__panel">
+      <span class="section-kicker">Ważne informacje</span>
+      <h2>Przed przyjazdem kamperem lub przyczepą</h2>
+      <div class="campers-info__timeline">
+        {importantNotes.map((note, index) => (
+          <div class="campers-info__note reveal-section" style={`--reveal-delay: ${index * 70}ms`}>
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <p>{note}</p>
+          </div>
+        ))}
+      </div>
+    </article>
+
+    <article class="premium-card campers-cost">
+      <span class="section-kicker">Orientacyjny koszt</span>
+      <h2>Ceny dla pojazdów i dodatków</h2>
+      <div class="campers-cost__list">
+        {camperPrices.map((item, index) => (
+          <div class="campers-cost__row reveal-section" style={`--reveal-delay: ${index * 60}ms`}>
+            <span>{item.label}</span>
+            <strong>{formatPrice(item.price)} / noc</strong>
+          </div>
+        ))}
+      </div>
+      <a class="premium-button campers-cost__button" href={pricingHref}>Oblicz koszt pobytu</a>
+    </article>
+  </div>
+</section>
+
+<section class="site-section campers-cta reveal-section">
+  <div class="container">
+    <div class="premium-card campers-cta__panel">
+      <div>
+        <span class="section-kicker">Następny krok</span>
+        <h2>Zaplanuj postój w Krakowie bez stresu z parkowaniem</h2>
+        <p>
+          Sprawdź orientacyjny koszt pobytu albo wyślij zapytanie do recepcji,
+          jeśli chcesz potwierdzić dostępność w konkretnym terminie.
+        </p>
+      </div>
+      <div class="campers-cta__actions">
+        <a class="premium-button" href={pricingHref}>Oblicz koszt pobytu</a>
+        <a class="campers-cta__secondary" href={contactHref}>Zapytaj o dostępność</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.campers-value {
+  background:
+    radial-gradient(circle at 86% 12%, rgba(60,179,113,.14), transparent 30%),
+    linear-gradient(180deg, #fbfbf7, #f2f7f0);
+}
+
+.campers-value__grid,
+.campers-facilities__grid,
+.campers-info__grid {
+  display: grid;
+  gap: clamp(30px, 5vw, 62px);
+}
+
+.campers-value__intro {
+  max-width: 820px;
+}
+
+.campers-value__cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+:global(.campers-value__card) {
+  display: grid;
+  gap: 16px;
+  min-height: 240px;
+  padding: clamp(24px, 3vw, 34px);
+  border-radius: 24px;
+}
+
+.campers-value__icon {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  color: #3CB371;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,.92), rgba(255,255,255,.34)),
+    rgba(60,179,113,.12);
+  border: 1px solid rgba(60,179,113,.22);
+  box-shadow: 0 16px 38px rgba(60,179,113,.16);
+}
+
+.campers-value__icon svg {
+  width: 27px;
+  height: 27px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:global(.campers-value__card h3) {
+  margin: 0;
+  color: #102018;
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  font-weight: 950;
+  line-height: 1.15;
+}
+
+:global(.campers-value__card p) {
+  margin: 0;
+  color: #536359;
+  line-height: 1.7;
+}
+
+.campers-facilities {
+  background:
+    radial-gradient(circle at 10% 16%, rgba(60,179,113,.13), transparent 32%),
+    linear-gradient(180deg, #f2f7f0, #fbfbf7);
+}
+
+.campers-facilities__content {
+  align-self: center;
+}
+
+.campers-facilities__list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: clamp(24px, 4vw, 38px);
+}
+
+.campers-facilities__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(25,70,44,.10);
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 16px 42px rgba(17,40,28,.07);
+  transition:
+    transform .28s ease,
+    border-color .28s ease,
+    box-shadow .28s ease;
+}
+
+.campers-facilities__item:hover {
+  transform: translateY(-3px);
+  border-color: rgba(60,179,113,.28);
+  box-shadow: 0 24px 58px rgba(17,40,28,.11);
+}
+
+.campers-facilities__item span {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(60,179,113,.13);
+  color: #2f9d63;
+}
+
+.campers-facilities__item svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.campers-facilities__item strong {
+  color: #102018;
+  line-height: 1.35;
+  font-weight: 900;
+}
+
+.campers-facilities__media {
+  display: grid;
+  gap: 14px;
+}
+
+:global(.campers-facilities__main-photo) {
+  min-height: 420px;
+}
+
+.campers-facilities__thumbs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.campers-facilities__thumbs :global(.asset-frame) {
+  min-height: 170px;
+}
+
+.campers-info {
+  background:
+    radial-gradient(circle at 84% 22%, rgba(239,174,99,.18), transparent 34%),
+    linear-gradient(180deg, #fbfbf7, #edf6ef);
+}
+
+:global(.campers-info__panel),
+:global(.campers-cost) {
+  padding: clamp(26px, 4vw, 44px);
+  border-radius: 28px;
+}
+
+.campers-info__panel {
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(8,24,16,.94), rgba(18,45,29,.86)),
+    radial-gradient(circle at 84% 16%, rgba(239,174,99,.20), transparent 34%);
+  border-color: rgba(255,255,255,.14);
+}
+
+.campers-info__panel .section-kicker {
+  color: #8fe0b4;
+}
+
+.campers-info__panel h2,
+.campers-cost h2 {
+  margin: 10px 0 clamp(24px, 4vw, 36px);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  line-height: 1.02;
+  font-weight: 950;
+}
+
+.campers-info__panel h2 {
+  color: #fff;
+}
+
+.campers-info__timeline {
+  display: grid;
+  gap: 12px;
+}
+
+.campers-info__note {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.075);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.campers-info__note span {
+  color: #8fe0b4;
+  font-size: .76rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+}
+
+.campers-info__note p {
+  margin: 0;
+  color: rgba(255,255,255,.78);
+  line-height: 1.65;
+  font-weight: 760;
+}
+
+.campers-cost {
+  background:
+    radial-gradient(circle at 86% 8%, rgba(60,179,113,.16), transparent 34%),
+    rgba(255,255,255,.82);
+}
+
+.campers-cost h2 {
+  color: #102018;
+}
+
+.campers-cost__list {
+  display: grid;
+  gap: 10px;
+}
+
+.campers-cost__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+  min-height: 62px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(25,70,44,.10);
+}
+
+.campers-cost__row span {
+  color: #536359;
+  font-weight: 900;
+}
+
+.campers-cost__row strong {
+  color: #102018;
+  font-size: clamp(1rem, 2vw, 1.22rem);
+  text-align: right;
+  font-weight: 950;
+}
+
+.campers-cost__button {
+  width: 100%;
+  margin-top: 26px;
+}
+
+.campers-cta {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(60,179,113,.18), transparent 34%),
+    linear-gradient(180deg, #edf6ef, #101b14);
+}
+
+.campers-cta__panel {
+  display: grid;
+  gap: 28px;
+  padding: clamp(28px, 5vw, 54px);
+  border-radius: 28px;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(10,28,18,.92), rgba(17,39,27,.82)),
+    radial-gradient(circle at 86% 18%, rgba(239,174,99,.18), transparent 36%);
+  border-color: rgba(255,255,255,.14);
+}
+
+.campers-cta__panel h2 {
+  max-width: 820px;
+  margin: 0 0 14px;
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: .98;
+  font-weight: 950;
+}
+
+.campers-cta__panel p {
+  max-width: 720px;
+  margin: 0;
+  color: rgba(255,255,255,.76);
+  line-height: 1.75;
+}
+
+.campers-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.campers-cta__secondary {
+  display: inline-flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff;
+  background: rgba(255,255,255,.08);
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+
+.campers-cta__secondary:hover {
+  color: #fff;
+  border-color: rgba(143,224,180,.42);
+  background: rgba(255,255,255,.14);
+}
+
+@media (min-width: 720px) {
+  .campers-value__cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .campers-facilities__list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .campers-facilities__thumbs {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 980px) {
+  .campers-value__grid,
+  .campers-facilities__grid,
+  .campers-info__grid {
+    grid-template-columns: .9fr 1.1fr;
+  }
+
+  .campers-value__intro,
+  .campers-facilities__content {
+    position: sticky;
+    top: 104px;
+    align-self: start;
+  }
+
+  .campers-cta__panel {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+}
+
+@media (max-width: 680px) {
+  :global(.campers-facilities__main-photo) {
+    min-height: 300px;
+  }
+
+  .campers-cost__row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .campers-cost__row strong {
+    text-align: left;
+  }
+
+  .campers-cta__actions {
+    display: grid;
+  }
+
+  .campers-cta__actions a {
+    width: 100%;
+  }
+}
+</style>
