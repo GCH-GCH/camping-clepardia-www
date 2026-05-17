@@ -235,9 +235,9 @@ const contactCards = [
         <p>{page.cta.copy}</p>
       </div>
       <div class="page-cta__actions">
-        <a class="premium-button" href={localizeHref(page.cta.primaryHref)}>{page.cta.primaryLabel}</a>
+        <a class="btn btn-primary premium-button" href={localizeHref(page.cta.primaryHref)}>{page.cta.primaryLabel}</a>
         {page.cta.secondaryHref && page.cta.secondaryLabel && (
-          <a class="page-cta__secondary" href={localizeHref(page.cta.secondaryHref)}>{page.cta.secondaryLabel}</a>
+          <a class="btn btn-glass page-cta__secondary" href={localizeHref(page.cta.secondaryHref)}>{page.cta.secondaryLabel}</a>
         )}
       </div>
     </div>

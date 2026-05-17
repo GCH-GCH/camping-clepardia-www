@@ -16,7 +16,7 @@ const actions = [
       </div>
       <div class="home-final-cta__actions">
         {actions.map((action) => (
-          <a class:list={[action.primary ? 'premium-button' : 'home-final-cta__secondary']} href={action.href}>
+          <a class:list={['btn', action.primary ? 'btn-primary premium-button' : 'btn-glass home-final-cta__secondary']} href={action.href}>
             {action.label}
           </a>
         ))}
