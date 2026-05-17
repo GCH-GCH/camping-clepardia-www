@@ -1,7 +1,7 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import ContentPage from '../components/pages/ContentPage.astro';
-import { pageSlugs, sitePages } from '../data/sitePages';
+import Layout from '@/layouts/Layout.astro';
+import ContentPage from '@/components/pages/ContentPage.astro';
+import { pageSlugs, sitePages } from '@/data/sitePages';
 
 export function getStaticPaths() {
   return pageSlugs.map((slug) => ({

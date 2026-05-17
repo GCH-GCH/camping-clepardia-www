@@ -1,9 +1,9 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import ContentPage from '../../components/pages/ContentPage.astro';
-import { languages } from '../../data/languages';
-import { sitePages } from '../../data/sitePages';
-import { homeSeo } from '../../data/seo';
+import Layout from '@/layouts/Layout.astro';
+import ContentPage from '@/components/pages/ContentPage.astro';
+import { languages } from '@/data/languages';
+import { sitePages } from '@/data/sitePages';
+import { homeSeo } from '@/data/seo';
 
 export function getStaticPaths() {
   return languages.map((language) => ({

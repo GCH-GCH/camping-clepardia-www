@@ -1,4 +1,4 @@
-import { defaultLanguage, languages } from '../data/languages';
+import { defaultLanguage, languages } from '@/data/languages';
 
 export type LanguageCode = (typeof languages)[number]['code'];
 

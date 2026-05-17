@@ -1,15 +1,15 @@
 ---
-import PricingCalculator from '../pricing/PricingCalculator.astro';
-import ReservationInquiryForm from '../forms/ReservationInquiryForm.astro';
+import PricingCalculator from '@/components/pricing/PricingCalculator.astro';
+import ReservationInquiryForm from '@/components/forms/ReservationInquiryForm.astro';
 import TransportDirections from './TransportDirections.astro';
 import AttractionsPage from './AttractionsPage.astro';
 import FaqPage from './FaqPage.astro';
 import GalleryPage from './GalleryPage.astro';
 import CampersPage from './CampersPage.astro';
 import FamiliesPage from './FamiliesPage.astro';
-import { pricingConfig } from '../../data/pricing';
-import type { SitePage } from '../../data/sitePages';
-import { getLocalizedPath } from '../../utils/localizedLinks';
+import { pricingConfig } from '@/data/pricing';
+import type { SitePage } from '@/data/sitePages';
+import { getLocalizedPath } from '@/utils/localizedLinks';
 
 interface Props {
   page: SitePage;
