@@ -1,6 +1,15 @@
 ---
 import { pricingConfig } from '@/data/pricing';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getTranslations } from '@/i18n/config';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const t = getTranslations(languageCode ?? pathContext.languageCode);
 
 const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
 
@@ -18,29 +27,28 @@ const getAddon = (id: string) => {
 
 const formatStayTypePrice = (id: string) => {
   const stayType = getStayType(id);
-  if ('seasonalPrices' in stayType) return `od ${formatPrice(stayType.seasonalPrices.low)}`;
-  if ('startingPrice' in stayType) return `od ${formatPrice(stayType.startingPrice)}`;
+  if ('seasonalPrices' in stayType) return `${t.pricing.from} ${formatPrice(stayType.seasonalPrices.low)}`;
+  if ('startingPrice' in stayType) return `${t.pricing.from} ${formatPrice(stayType.startingPrice)}`;
   return formatPrice(stayType.price);
 };
 
 const prices = [
-  [pricingConfig.people.adults.label, formatPrice(pricingConfig.people.adults.price)],
-  [pricingConfig.people.children.label, formatPrice(pricingConfig.people.children.price)],
-  [getStayType('camper').label, formatStayTypePrice('camper')],
-  [getStayType('caravan').label, formatStayTypePrice('caravan')],
-  [getStayType('van').label, formatStayTypePrice('van')],
-  [getStayType('tent-small').label, formatStayTypePrice('tent-small')],
-  [getStayType('tent-large').label, formatStayTypePrice('tent-large')],
-  [getStayType('bungalow-2').label, formatStayTypePrice('bungalow-2')],
-  [getStayType('bungalow-3').label, formatStayTypePrice('bungalow-3')],
-  [getStayType('bungalow-4').label, formatStayTypePrice('bungalow-4')],
-  [getStayType('bungalow-family').label, formatStayTypePrice('bungalow-family')],
-  [getAddon('electricity').label, formatPrice(getAddon('electricity').price)],
-  [getAddon('dog').label, formatPrice(getAddon('dog').price)],
-  [getAddon('bus').label, formatPrice(getAddon('bus').price)],
+  [t.pricing.adults, formatPrice(pricingConfig.people.adults.price)],
+  [t.pricing.children, formatPrice(pricingConfig.people.children.price)],
+  [t.pricing.stayTypes.camper, formatStayTypePrice('camper')],
+  [t.pricing.stayTypes.caravan, formatStayTypePrice('caravan')],
+  [t.pricing.stayTypes.van, formatStayTypePrice('van')],
+  [t.pricing.stayTypes['tent-small'], formatStayTypePrice('tent-small')],
+  [t.pricing.stayTypes['tent-large'], formatStayTypePrice('tent-large')],
+  [t.pricing.stayTypes['bungalow-2'], formatStayTypePrice('bungalow-2')],
+  [t.pricing.stayTypes['bungalow-3'], formatStayTypePrice('bungalow-3')],
+  [t.pricing.stayTypes['bungalow-4'], formatStayTypePrice('bungalow-4')],
+  [t.pricing.stayTypes['bungalow-family'], formatStayTypePrice('bungalow-family')],
+  [t.pricing.addons.electricity, formatPrice(getAddon('electricity').price)],
+  [t.pricing.addons.dog, formatPrice(getAddon('dog').price)],
+  [t.pricing.addons.bus, formatPrice(getAddon('bus').price)],
 ];
 
-const pathContext = getPathContext(Astro.url.pathname);
 const fullPricingHref = getLocalizedPath(pathContext.explicitLanguage, 'cennik');
 ---
 
@@ -48,10 +56,10 @@ const fullPricingHref = getLocalizedPath(pathContext.explicitLanguage, 'cennik')
   <div class="container">
     <div class="pricing__head">
       <div>
-        <span class="section-kicker">Cennik</span>
-        <h2 class="section-title">Najważniejsze ceny w szybkim podglądzie.</h2>
+        <span class="section-kicker">{t.pages.cennik.overline}</span>
+        <h2 class="section-title">{t.pages.cennik.title}</h2>
       </div>
-      <a class="btn btn-primary premium-button" href={fullPricingHref}>Pełny cennik</a>
+      <a class="btn btn-primary premium-button" href={fullPricingHref}>{t.cta.pricing}</a>
     </div>
     <div class="pricing__grid">
       {prices.map(([label, price]) => (

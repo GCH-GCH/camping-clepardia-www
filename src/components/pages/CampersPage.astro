@@ -3,22 +3,28 @@ import ImageFrame from '@/components/ImageFrame.astro';
 import { siteAssets } from '@/data/assets';
 import { pricingConfig } from '@/data/pricing';
 import { getLocalizedPath } from '@/utils/localizedLinks';
+import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 
 interface Props {
   languageCode?: string;
 }
 
 const { languageCode } = Astro.props as Props;
+const contentLanguage = resolveContentLanguage(languageCode);
+const t = getTranslations(languageCode);
+const page = t.pages['dla-kamperow'];
 const pricingHref = getLocalizedPath(languageCode, 'cennik');
 const contactHref = getLocalizedPath(languageCode, 'kontakt');
 const currency = pricingConfig.currency;
 const formatPrice = (price: number) => `${price} ${currency}`;
+const stayTypeLabels = t.pricing.stayTypes as Record<string, string>;
+const addonLabels = t.pricing.addons as Record<string, string>;
 const getStayPrice = (id: string) => {
   const stayType = pricingConfig.stayTypes.find((item) => item.id === id);
   if (!stayType || !('price' in stayType)) throw new Error(`Missing camper pricing: ${id}`);
 
   return {
-    label: stayType.label,
+    label: stayTypeLabels[id] ?? stayType.label,
     price: stayType.price,
   };
 };
@@ -27,53 +33,193 @@ const getAddonPrice = (id: string) => {
   if (!addon) throw new Error(`Missing addon pricing: ${id}`);
 
   return {
-    label: addon.label,
+    label: addonLabels[id] ?? addon.label,
     price: addon.price,
   };
 };
 
+const camperTextByLanguage = {
+  pl: {
+    whyKicker: 'Dlaczego warto',
+    whyTitle: 'Zielona baza dla podróżujących po Krakowie własnym rytmem',
+    whyLead:
+      'Camping Clepardia pozwala zatrzymać kampera, vana lub przyczepę poza ścisłym centrum, a jednocześnie szybko ruszyć tramwajem do najważniejszych miejsc Krakowa.',
+    facilitiesKicker: 'Co znajdziesz na miejscu',
+    facilitiesTitle: 'Praktyczne zaplecze dla kamperów, vanów i przyczep',
+    facilitiesLead:
+      'Sekcja jest przygotowana dla gości, którzy chcą szybko sprawdzić, czy Camping Clepardia pasuje do postoju z pojazdem turystycznym.',
+    mediaAria: 'Zdjęcia i miejsca dla kamperów',
+    mainPhoto: 'Miejsce na zdjęcie: strefa dla kamperów',
+    pitches: 'Miejsca postojowe',
+    electricity: 'Prąd',
+    tram: 'Tramwaj do centrum',
+    infoKicker: 'Ważne informacje',
+    infoTitle: 'Przed przyjazdem kamperem lub przyczepą',
+    costKicker: 'Orientacyjny koszt',
+    costTitle: 'Ceny dla pojazdów i dodatków',
+    ctaKicker: 'Następny krok',
+    notes: [
+      'Check-in / check-out na campingu: 12:00-12:00.',
+      'Prąd jest płatny według cennika.',
+      'Pies jest bezpłatny.',
+      'W sezonie letnim rezerwacje pola campingowego mogą być ograniczone.',
+      'Finalną dostępność potwierdza recepcja.',
+    ],
+    facilities: [
+      'miejsca dla kamperów',
+      'miejsca dla przyczep',
+      'miejsca dla vanów',
+      'prąd',
+      'sanitariaty',
+      'kuchnie turystyczne',
+      'możliwość pobytu z psem',
+      'dostęp do informacji turystycznych',
+      'wygodny dojazd do centrum',
+    ],
+  },
+  en: {
+    whyKicker: 'Why it works',
+    whyTitle: 'A green base for exploring Krakow at your own pace',
+    whyLead:
+      'Camping Clepardia lets you leave your motorhome, van or caravan outside the strict centre while still reaching Krakow highlights quickly by tram.',
+    facilitiesKicker: 'What you will find on site',
+    facilitiesTitle: 'Practical facilities for motorhomes, vans and caravans',
+    facilitiesLead:
+      'This section helps guests quickly check whether Camping Clepardia is a good stop with a touring vehicle.',
+    mediaAria: 'Photos and spaces for motorhomes',
+    mainPhoto: 'Photo space: motorhome area',
+    pitches: 'Pitches',
+    electricity: 'Electricity',
+    tram: 'Tram to the centre',
+    infoKicker: 'Important information',
+    infoTitle: 'Before arriving with a motorhome or caravan',
+    costKicker: 'Indicative cost',
+    costTitle: 'Vehicle and extra prices',
+    ctaKicker: 'Next step',
+    notes: [
+      'Camping check-in / check-out: 12:00-12:00.',
+      'Electricity is paid according to the price list.',
+      'Dogs stay free of charge.',
+      'In the summer season, camping pitch reservations may be limited.',
+      'Final availability is confirmed by reception.',
+    ],
+    facilities: [
+      'motorhome pitches',
+      'caravan pitches',
+      'van spaces',
+      'electricity',
+      'sanitary facilities',
+      'tourist kitchens',
+      'dog-friendly stay',
+      'tourist information access',
+      'easy access to the centre',
+    ],
+  },
+  de: {
+    whyKicker: 'Warum es sich lohnt',
+    whyTitle: 'Eine grüne Basis für Krakau im eigenen Rhythmus',
+    whyLead:
+      'Camping Clepardia ermöglicht es, Wohnmobil, Van oder Wohnwagen außerhalb des engen Zentrums stehen zu lassen und trotzdem schnell mit der Straßenbahn zu den wichtigsten Orten Krakaus zu fahren.',
+    facilitiesKicker: 'Was Sie vor Ort finden',
+    facilitiesTitle: 'Praktische Infrastruktur für Wohnmobile, Vans und Wohnwagen',
+    facilitiesLead:
+      'Diese Sektion hilft Gästen schnell zu prüfen, ob Camping Clepardia als Halt mit Reisefahrzeug passt.',
+    mediaAria: 'Fotos und Stellplätze für Wohnmobile',
+    mainPhoto: 'Fotoplatz: Wohnmobilbereich',
+    pitches: 'Stellplätze',
+    electricity: 'Strom',
+    tram: 'Straßenbahn ins Zentrum',
+    infoKicker: 'Wichtige Informationen',
+    infoTitle: 'Vor der Anreise mit Wohnmobil oder Wohnwagen',
+    costKicker: 'Richtpreis',
+    costTitle: 'Preise für Fahrzeuge und Extras',
+    ctaKicker: 'Nächster Schritt',
+    notes: [
+      'Check-in / Check-out auf dem Campingplatz: 12:00-12:00.',
+      'Strom wird gemäß Preisliste berechnet.',
+      'Hunde übernachten kostenlos.',
+      'In der Sommersaison können Campingplatz-Reservierungen eingeschränkt sein.',
+      'Die endgültige Verfügbarkeit bestätigt die Rezeption.',
+    ],
+    facilities: [
+      'Stellplätze für Wohnmobile',
+      'Stellplätze für Wohnwagen',
+      'Plätze für Vans',
+      'Strom',
+      'Sanitäranlagen',
+      'Gästeküchen',
+      'Aufenthalt mit Hund möglich',
+      'Zugang zu touristischen Informationen',
+      'bequeme Verbindung ins Zentrum',
+    ],
+  },
+  it: {
+    whyKicker: 'Perché conviene',
+    whyTitle: 'Una base verde per visitare Cracovia con il tuo ritmo',
+    whyLead:
+      'Camping Clepardia permette di lasciare camper, van o roulotte fuori dal pieno centro e raggiungere rapidamente i luoghi principali di Cracovia in tram.',
+    facilitiesKicker: 'Cosa trovi sul posto',
+    facilitiesTitle: 'Servizi pratici per camper, van e roulotte',
+    facilitiesLead:
+      'Questa sezione aiuta gli ospiti a capire rapidamente se Camping Clepardia è adatto a una sosta con veicolo turistico.',
+    mediaAria: 'Foto e spazi per camper',
+    mainPhoto: 'Spazio foto: area camper',
+    pitches: 'Piazzole',
+    electricity: 'Elettricità',
+    tram: 'Tram per il centro',
+    infoKicker: 'Informazioni importanti',
+    infoTitle: 'Prima di arrivare con camper o roulotte',
+    costKicker: 'Costo indicativo',
+    costTitle: 'Prezzi per veicoli ed extra',
+    ctaKicker: 'Prossimo passo',
+    notes: [
+      'Check-in / check-out camping: 12:00-12:00.',
+      'L’elettricità è a pagamento secondo il listino.',
+      'Il cane soggiorna gratuitamente.',
+      'In estate le prenotazioni delle piazzole possono essere limitate.',
+      'La disponibilità finale è confermata dalla reception.',
+    ],
+    facilities: [
+      'piazzole per camper',
+      'piazzole per roulotte',
+      'spazi per van',
+      'elettricità',
+      'servizi igienici',
+      'cucine turistiche',
+      'soggiorno con cane possibile',
+      'accesso a informazioni turistiche',
+      'comodo accesso al centro',
+    ],
+  },
+};
+
+const camperText = camperTextByLanguage[contentLanguage];
+
 const valueCards = [
   {
-    title: 'Blisko Krakowa',
-    copy: 'Wygodna baza do zwiedzania miasta bez konieczności parkowania przy Starym Mieście.',
+    title: page.highlights[0].title,
+    copy: page.highlights[0].copy,
     icon: 'M4 18V9l8-5 8 5v9M8 18v-6h8v6M9 9h.01M15 9h.01',
   },
   {
-    title: 'Dla różnych pojazdów',
-    copy: 'Miejsce dla kamperów, vanów, przyczep oraz aut z namiotem dachowym.',
+    title: page.highlights[1].title,
+    copy: page.highlights[1].copy,
     icon: 'M3 14h2l2-5h9l3 5h2v4h-3a2 2 0 1 1-4 0H9a2 2 0 1 1-4 0H3v-4ZM7 14h10M8 9l-1 5M16 9l1 5',
   },
   {
-    title: 'Prąd i zaplecze',
-    copy: 'Możliwość podłączenia prądu oraz korzystania z sanitariatów i podstawowych udogodnień.',
+    title: page.highlights[2].title,
+    copy: page.highlights[2].copy,
     icon: 'M13 2 5 14h6l-1 8 9-13h-6l1-7Z',
   },
   {
-    title: 'Transport do centrum',
-    copy: 'Najwygodniej zostawić pojazd na campingu i dojechać do centrum tramwajem.',
+    title: page.highlights[3].title,
+    copy: page.highlights[3].copy,
     icon: 'M4 6h16M6 6v9a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V6M8 18l-2 3M16 18l2 3M9 10h6',
   },
 ];
 
-const facilities = [
-  'miejsca dla kamperów',
-  'miejsca dla przyczep',
-  'miejsca dla vanów',
-  'prąd',
-  'sanitariaty',
-  'kuchnie turystyczne',
-  'możliwość pobytu z psem',
-  'dostęp do informacji turystycznych',
-  'wygodny dojazd do centrum',
-];
-
-const importantNotes = [
-  'Check-in / check-out na campingu: 12:00-12:00.',
-  'Prąd jest płatny według cennika.',
-  'Pies jest bezpłatny.',
-  'W sezonie letnim rezerwacje pola campingowego mogą być ograniczone.',
-  'Finalną dostępność potwierdza recepcja.',
-];
+const facilities = camperText.facilities;
+const importantNotes = camperText.notes;
 
 const camperPrices = [
   getStayPrice('camper'),
@@ -88,11 +234,10 @@ const camperPrices = [
 <section class="site-section campers-value reveal-section">
   <div class="container campers-value__grid">
     <div class="campers-value__intro">
-      <span class="section-kicker">Dlaczego warto</span>
-      <h2 class="section-title">Zielona baza dla podróżujących po Krakowie własnym rytmem</h2>
+      <span class="section-kicker">{camperText.whyKicker}</span>
+      <h2 class="section-title">{camperText.whyTitle}</h2>
       <p class="section-copy">
-        Camping Clepardia pozwala zatrzymać kampera, vana lub przyczepę poza ścisłym centrum,
-        a jednocześnie szybko ruszyć tramwajem do najważniejszych miejsc Krakowa.
+        {camperText.whyLead}
       </p>
     </div>
 
@@ -115,11 +260,10 @@ const camperPrices = [
 <section class="site-section campers-facilities reveal-section">
   <div class="container campers-facilities__grid">
     <div class="campers-facilities__content">
-      <span class="section-kicker">Co znajdziesz na miejscu</span>
-      <h2 class="section-title">Praktyczne zaplecze dla kamperów, vanów i przyczep</h2>
+      <span class="section-kicker">{camperText.facilitiesKicker}</span>
+      <h2 class="section-title">{camperText.facilitiesTitle}</h2>
       <p class="section-copy">
-        Sekcja jest przygotowana dla gości, którzy chcą szybko sprawdzić, czy Camping Clepardia
-        pasuje do postoju z pojazdem turystycznym.
+        {camperText.facilitiesLead}
       </p>
 
       <div class="campers-facilities__list">
@@ -136,17 +280,17 @@ const camperPrices = [
       </div>
     </div>
 
-    <div class="campers-facilities__media" aria-label="Zdjęcia i miejsca dla kamperów">
+    <div class="campers-facilities__media" aria-label={camperText.mediaAria}>
       <ImageFrame
         src={siteAssets.camping.camperArea}
-        alt="Strefa dla kamperów i vanów Camping Clepardia"
-        label="Miejsce na zdjęcie: strefa dla kamperów"
+        alt={camperText.mainPhoto}
+        label={camperText.mainPhoto}
         className="campers-facilities__main-photo"
       />
       <div class="campers-facilities__thumbs">
-        <ImageFrame src={siteAssets.camping.pitches} alt="Miejsca campingowe Camping Clepardia" label="Miejsca postojowe" />
-        <ImageFrame src={siteAssets.camping.electricity} alt="Przyłącza prądu na campingu" label="Prąd" />
-        <ImageFrame src={siteAssets.transport.tramToCenter} alt="Tramwaj do centrum Krakowa" label="Tramwaj do centrum" />
+        <ImageFrame src={siteAssets.camping.pitches} alt={camperText.pitches} label={camperText.pitches} />
+        <ImageFrame src={siteAssets.camping.electricity} alt={camperText.electricity} label={camperText.electricity} />
+        <ImageFrame src={siteAssets.transport.tramToCenter} alt={camperText.tram} label={camperText.tram} />
       </div>
     </div>
   </div>
@@ -155,8 +299,8 @@ const camperPrices = [
 <section class="site-section campers-info reveal-section">
   <div class="container campers-info__grid">
     <article class="premium-card campers-info__panel">
-      <span class="section-kicker">Ważne informacje</span>
-      <h2>Przed przyjazdem kamperem lub przyczepą</h2>
+      <span class="section-kicker">{camperText.infoKicker}</span>
+      <h2>{camperText.infoTitle}</h2>
       <div class="campers-info__timeline">
         {importantNotes.map((note, index) => (
           <div class="campers-info__note reveal-section" style={`--reveal-delay: ${index * 70}ms`}>
@@ -168,17 +312,17 @@ const camperPrices = [
     </article>
 
     <article class="premium-card campers-cost">
-      <span class="section-kicker">Orientacyjny koszt</span>
-      <h2>Ceny dla pojazdów i dodatków</h2>
+      <span class="section-kicker">{camperText.costKicker}</span>
+      <h2>{camperText.costTitle}</h2>
       <div class="campers-cost__list">
         {camperPrices.map((item, index) => (
           <div class="campers-cost__row reveal-section" style={`--reveal-delay: ${index * 60}ms`}>
             <span>{item.label}</span>
-            <strong>{formatPrice(item.price)} / noc</strong>
+            <strong>{formatPrice(item.price)} / {t.pricing.perNight}</strong>
           </div>
         ))}
       </div>
-      <a class="btn btn-primary premium-button campers-cost__button" href={pricingHref}>Oblicz koszt pobytu</a>
+      <a class="btn btn-primary premium-button campers-cost__button" href={pricingHref}>{t.cta.camperCost}</a>
     </article>
   </div>
 </section>
@@ -187,16 +331,15 @@ const camperPrices = [
   <div class="container">
     <div class="premium-card campers-cta__panel">
       <div>
-        <span class="section-kicker">Następny krok</span>
-        <h2>Zaplanuj postój w Krakowie bez stresu z parkowaniem</h2>
+        <span class="section-kicker">{camperText.ctaKicker}</span>
+        <h2>{page.cta.title}</h2>
         <p>
-          Sprawdź orientacyjny koszt pobytu albo wyślij zapytanie do recepcji,
-          jeśli chcesz potwierdzić dostępność w konkretnym terminie.
+          {page.cta.copy}
         </p>
       </div>
       <div class="campers-cta__actions">
-        <a class="btn btn-primary premium-button" href={pricingHref}>Oblicz koszt pobytu</a>
-        <a class="btn btn-glass campers-cta__secondary" href={contactHref}>Zapytaj o dostępność</a>
+        <a class="btn btn-primary premium-button" href={pricingHref}>{page.cta.primaryLabel}</a>
+        <a class="btn btn-glass campers-cta__secondary" href={contactHref}>{page.cta.secondaryLabel}</a>
       </div>
     </div>
   </div>

@@ -1,9 +1,18 @@
+---
+import { getTranslations } from '@/i18n/config';
+import { getPathContext } from '@/utils/localizedLinks';
+
+const pathContext = getPathContext(Astro.url.pathname);
+const t = getTranslations(pathContext.languageCode);
+const chatTexts = t.chat;
+---
+
 <div class="floating-chat" data-floating-chat>
   <button
     class="floating-chat__button"
     type="button"
     data-chat-toggle
-    aria-label="Otwórz Camping Clepardia Assistant"
+    aria-label={chatTexts.open}
     aria-expanded="false"
     aria-controls="floatingChatPanel"
   >
@@ -22,44 +31,44 @@
     data-chat-panel
     role="dialog"
     aria-modal="true"
-    aria-label="Camping Clepardia Assistant"
+    aria-label={chatTexts.title}
     aria-hidden="true"
     hidden
   >
     <header class="floating-chat__header">
       <div>
-        <span>Camping Clepardia Assistant</span>
-        <strong><i aria-hidden="true"></i> Online</strong>
+        <span>{chatTexts.title}</span>
+        <strong><i aria-hidden="true"></i> {chatTexts.status}</strong>
       </div>
-      <button type="button" data-chat-close aria-label="Zamknij chat">
+      <button type="button" data-chat-close aria-label={chatTexts.close}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
       </button>
     </header>
 
     <div class="floating-chat__messages" data-chat-messages aria-live="polite">
       <div class="floating-chat__message floating-chat__message--bot">
-        Cześć. Mogę szybko pomóc z cennikiem, dojazdem, domkami, campingiem albo kontaktem z recepcją.
+        {chatTexts.intro}
       </div>
     </div>
 
-    <div class="floating-chat__quick" aria-label="Szybkie pytania">
-      <button type="button" data-chat-prompt="Sprawdź cennik">Sprawdź cennik</button>
-      <button type="button" data-chat-prompt="Jak dojechać?">Jak dojechać?</button>
-      <button type="button" data-chat-prompt="Zapytaj o domek">Zapytaj o domek</button>
-      <button type="button" data-chat-prompt="Kontakt z recepcją">Kontakt z recepcją</button>
+    <div class="floating-chat__quick" aria-label={chatTexts.quickLabel}>
+      <button type="button" data-chat-prompt={chatTexts.actions.pricing}>{chatTexts.actions.pricing}</button>
+      <button type="button" data-chat-prompt={chatTexts.actions.directions}>{chatTexts.actions.directions}</button>
+      <button type="button" data-chat-prompt={chatTexts.actions.bungalow}>{chatTexts.actions.bungalow}</button>
+      <button type="button" data-chat-prompt={chatTexts.actions.reception}>{chatTexts.actions.reception}</button>
     </div>
 
     <form class="floating-chat__form" data-chat-form>
-      <label class="sr-only" for="floatingChatInput">Napisz wiadomość</label>
-      <input id="floatingChatInput" data-chat-input type="text" autocomplete="off" placeholder="Napisz wiadomość..." />
-      <button type="submit" aria-label="Wyślij wiadomość">
+      <label class="sr-only" for="floatingChatInput">{chatTexts.inputLabel}</label>
+      <input id="floatingChatInput" data-chat-input type="text" autocomplete="off" placeholder={chatTexts.inputPlaceholder} />
+      <button type="submit" aria-label={chatTexts.send}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12 16-8-5 16-3-7-8-1Z" /><path d="m12 13 8-9" /></svg>
       </button>
     </form>
   </section>
 </div>
 
-<script>
+<script define:vars={{ chatTexts }}>
   (() => {
     const root = document.querySelector('[data-floating-chat]');
     if (!(root instanceof HTMLElement)) return;
@@ -120,27 +129,32 @@
     const resolveAnswer = (rawPrompt: string) => {
       const prompt = rawPrompt.toLowerCase();
 
+      if (rawPrompt === chatTexts.actions.pricing) return chatTexts.answers.pricing;
+      if (rawPrompt === chatTexts.actions.directions) return chatTexts.answers.directions;
+      if (rawPrompt === chatTexts.actions.bungalow) return chatTexts.answers.bungalows;
+      if (rawPrompt === chatTexts.actions.reception) return chatTexts.answers.reception;
+
       if (prompt.includes('cennik') || prompt.includes('cena') || prompt.includes('koszt')) {
-        return 'Orientacyjnie: kamper 80 PLN / noc, przyczepa 60 PLN / noc, van 75 PLN / noc, prąd 25 PLN / noc, pies bezpłatnie. Pełny kalkulator znajdziesz na stronie Cennik.';
+        return chatTexts.answers.pricing;
       }
 
       if (prompt.includes('dojaz') || prompt.includes('tram') || prompt.includes('jak dojecha')) {
-        return 'Najwygodniej zostawić auto lub kampera na campingu i pojechać tramwajem w stronę centrum Krakowa. Adres: Henryka Pachońskiego 28A, 31-322 Kraków.';
+        return chatTexts.answers.directions;
       }
 
       if (prompt.includes('domek') || prompt.includes('domki')) {
-        return 'Domki mają osobną dostępność. Domek 2-os. kosztuje 200/220 PLN, 3-os. 250/300 PLN, 4-os. 400/450 PLN zależnie od sezonu. Domek rodzinny wymaga potwierdzenia recepcji.';
+        return chatTexts.answers.bungalows;
       }
 
       if (prompt.includes('kontakt') || prompt.includes('recepc')) {
-        return 'Recepcja: +48 795 294 486, email: clepardia@gmail.com. Najszybszy kontakt w sprawie dostępności to telefon lub wiadomość email.';
+        return chatTexts.answers.reception;
       }
 
       if (prompt.includes('camping') || prompt.includes('kamper') || prompt.includes('namiot') || prompt.includes('przyczepa')) {
-        return 'Camping Clepardia przyjmuje kampery, vany, przyczepy, namioty i auta z namiotem dachowym. W czerwcu, lipcu i sierpniu dostępność pola może być ograniczona.';
+        return chatTexts.answers.camping;
       }
 
-      return 'To jest wersja demo asystenta. W kolejnym etapie można podłączyć prawdziwy backend i wiedzę recepcji. Teraz mogę pomóc z cennikiem, dojazdem, domkami, campingiem i kontaktem.';
+      return chatTexts.answers.fallback;
     };
 
     const submitPrompt = (prompt: string) => {

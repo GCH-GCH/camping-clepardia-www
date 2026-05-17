@@ -1,6 +1,7 @@
 ---
 import { publicAssetExists, siteAssets } from '@/data/assets';
 import { getLocalizedPath } from '@/utils/localizedLinks';
+import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 
 interface Props {
   languageCode?: string;
@@ -17,138 +18,306 @@ interface GalleryItem {
 }
 
 const { languageCode } = Astro.props as Props;
+const contentLanguage = resolveContentLanguage(languageCode);
+const t = getTranslations(languageCode);
+const page = t.pages.galeria;
 const pricingHref = getLocalizedPath(languageCode, 'cennik');
 const contactHref = getLocalizedPath(languageCode, 'kontakt');
 
+const galleryTextByLanguage = {
+  pl: {
+    headKicker: 'Zdjęcia i miejsca',
+    headTitle: 'Camping, domki i okolica w jednym miejscu',
+    headCopy:
+      'Przeglądaj kategorie i otwieraj zdjęcia w lightboxie. Brakujące materiały są pokazane jako eleganckie miejsca pod zdjęcia.',
+    filtersAria: 'Filtry galerii',
+    openPhoto: 'Otwórz zdjęcie',
+    dialog: 'Podgląd zdjęcia',
+    close: 'Zamknij galerię',
+    previous: 'Poprzednie zdjęcie',
+    next: 'Następne zdjęcie',
+    ctaKicker: 'Zaplanuj pobyt',
+    category: {
+      all: 'Wszystkie',
+      camping: 'Camping',
+      bungalows: 'Domki',
+      sanitary: 'Sanitariaty',
+      transport: 'Dojazd',
+      krakow: 'Kraków',
+    },
+    items: [
+      ['Miejsca campingowe', 'Miejsca campingowe Camping Clepardia'],
+      ['Strefa dla kamperów', 'Strefa dla kamperów na Camping Clepardia'],
+      ['Strefa namiotowa', 'Strefa namiotowa Camping Clepardia'],
+      ['Prąd i zaplecze', 'Przyłącza prądu na campingu'],
+      ['Domek z zewnątrz', 'Domek Camping Clepardia z zewnątrz'],
+      ['Wnętrze domku', 'Wnętrze domku Camping Clepardia'],
+      ['Taras przy domku', 'Taras przy domku Camping Clepardia'],
+      ['Domki dla rodzin', 'Domek dla rodzin i grup'],
+      ['Budynek sanitarny', 'Budynek sanitarny na campingu'],
+      ['Prysznice', 'Prysznice dla gości Camping Clepardia'],
+      ['Kuchnia turystyczna', 'Kuchnia turystyczna dla gości'],
+      ['Pralnia', 'Pralnia na campingu'],
+      ['Tramwaj do centrum', 'Dojazd tramwajem do centrum Krakowa'],
+      ['Bilety tramwajowe', 'Automat biletowy w tramwaju'],
+      ['Stare Miasto', 'Stare Miasto w Krakowie'],
+      ['Kopalnia Soli Wieliczka', 'Kopalnia Soli Wieliczka'],
+      ['Energylandia', 'Energylandia'],
+    ],
+  },
+  en: {
+    headKicker: 'Photos and places',
+    headTitle: 'Campsite, bungalows and surroundings in one place',
+    headCopy:
+      'Browse categories and open photos in the lightbox. Missing materials are shown as elegant photo placeholders.',
+    filtersAria: 'Gallery filters',
+    openPhoto: 'Open photo',
+    dialog: 'Photo preview',
+    close: 'Close gallery',
+    previous: 'Previous photo',
+    next: 'Next photo',
+    ctaKicker: 'Plan your stay',
+    category: {
+      all: 'All',
+      camping: 'Camping',
+      bungalows: 'Bungalows',
+      sanitary: 'Sanitary facilities',
+      transport: 'Directions',
+      krakow: 'Krakow',
+    },
+    items: [
+      ['Camping pitches', 'Camping Clepardia pitches'],
+      ['Motorhome area', 'Motorhome area at Camping Clepardia'],
+      ['Tent area', 'Tent area at Camping Clepardia'],
+      ['Electricity and facilities', 'Electric hook-ups at the campsite'],
+      ['Bungalow exterior', 'Camping Clepardia bungalow exterior'],
+      ['Bungalow interior', 'Camping Clepardia bungalow interior'],
+      ['Bungalow terrace', 'Terrace by a Camping Clepardia bungalow'],
+      ['Family bungalows', 'Bungalow for families and groups'],
+      ['Sanitary building', 'Sanitary building at the campsite'],
+      ['Showers', 'Showers for Camping Clepardia guests'],
+      ['Tourist kitchen', 'Tourist kitchen for guests'],
+      ['Laundry', 'Laundry at the campsite'],
+      ['Tram to the centre', 'Tram access to Krakow centre'],
+      ['Tram tickets', 'Ticket machine on a tram'],
+      ['Old Town', 'Krakow Old Town'],
+      ['Wieliczka Salt Mine', 'Wieliczka Salt Mine'],
+      ['Energylandia', 'Energylandia'],
+    ],
+  },
+  de: {
+    headKicker: 'Fotos und Orte',
+    headTitle: 'Campingplatz, Bungalows und Umgebung an einem Ort',
+    headCopy:
+      'Durchsuchen Sie Kategorien und öffnen Sie Fotos im Lightbox. Fehlende Materialien erscheinen als elegante Fotoplatzhalter.',
+    filtersAria: 'Galeriefilter',
+    openPhoto: 'Foto öffnen',
+    dialog: 'Fotovorschau',
+    close: 'Galerie schließen',
+    previous: 'Vorheriges Foto',
+    next: 'Nächstes Foto',
+    ctaKicker: 'Aufenthalt planen',
+    category: {
+      all: 'Alle',
+      camping: 'Camping',
+      bungalows: 'Bungalows',
+      sanitary: 'Sanitäranlagen',
+      transport: 'Anfahrt',
+      krakow: 'Krakau',
+    },
+    items: [
+      ['Campingplätze', 'Stellplätze von Camping Clepardia'],
+      ['Wohnmobilbereich', 'Wohnmobilbereich auf Camping Clepardia'],
+      ['Zeltbereich', 'Zeltbereich von Camping Clepardia'],
+      ['Strom und Infrastruktur', 'Stromanschlüsse auf dem Campingplatz'],
+      ['Bungalow von außen', 'Camping Clepardia Bungalow von außen'],
+      ['Bungalow innen', 'Camping Clepardia Bungalow innen'],
+      ['Terrasse am Bungalow', 'Terrasse am Camping Clepardia Bungalow'],
+      ['Bungalows für Familien', 'Bungalow für Familien und Gruppen'],
+      ['Sanitärgebäude', 'Sanitärgebäude auf dem Campingplatz'],
+      ['Duschen', 'Duschen für Gäste von Camping Clepardia'],
+      ['Gästeküche', 'Gästeküche für Gäste'],
+      ['Waschmöglichkeit', 'Waschmöglichkeit auf dem Campingplatz'],
+      ['Straßenbahn ins Zentrum', 'Straßenbahnverbindung ins Zentrum von Krakau'],
+      ['Straßenbahntickets', 'Ticketautomat in der Straßenbahn'],
+      ['Altstadt', 'Krakauer Altstadt'],
+      ['Salzbergwerk Wieliczka', 'Salzbergwerk Wieliczka'],
+      ['Energylandia', 'Energylandia'],
+    ],
+  },
+  it: {
+    headKicker: 'Foto e luoghi',
+    headTitle: 'Camping, bungalow e dintorni in un solo posto',
+    headCopy:
+      'Sfoglia le categorie e apri le foto nel lightbox. I materiali mancanti sono mostrati come eleganti spazi foto.',
+    filtersAria: 'Filtri galleria',
+    openPhoto: 'Apri foto',
+    dialog: 'Anteprima foto',
+    close: 'Chiudi galleria',
+    previous: 'Foto precedente',
+    next: 'Foto successiva',
+    ctaKicker: 'Pianifica il soggiorno',
+    category: {
+      all: 'Tutte',
+      camping: 'Camping',
+      bungalows: 'Bungalow',
+      sanitary: 'Servizi igienici',
+      transport: 'Come arrivare',
+      krakow: 'Cracovia',
+    },
+    items: [
+      ['Piazzole camping', 'Piazzole di Camping Clepardia'],
+      ['Area camper', 'Area camper a Camping Clepardia'],
+      ['Area tende', 'Area tende di Camping Clepardia'],
+      ['Elettricità e servizi', 'Allacci elettrici nel camping'],
+      ['Bungalow esterno', 'Bungalow Camping Clepardia dall’esterno'],
+      ['Interno bungalow', 'Interno bungalow Camping Clepardia'],
+      ['Terrazza del bungalow', 'Terrazza presso il bungalow Camping Clepardia'],
+      ['Bungalow per famiglie', 'Bungalow per famiglie e gruppi'],
+      ['Edificio servizi', 'Edificio servizi nel camping'],
+      ['Docce', 'Docce per gli ospiti di Camping Clepardia'],
+      ['Cucina turistica', 'Cucina turistica per ospiti'],
+      ['Lavanderia', 'Lavanderia nel camping'],
+      ['Tram per il centro', 'Collegamento in tram verso il centro di Cracovia'],
+      ['Biglietti tram', 'Distributore biglietti in tram'],
+      ['Città Vecchia', 'Città Vecchia di Cracovia'],
+      ['Miniera di Sale Wieliczka', 'Miniera di Sale Wieliczka'],
+      ['Energylandia', 'Energylandia'],
+    ],
+  },
+};
+
+const galleryText = galleryTextByLanguage[contentLanguage];
+
 const categories: Array<{ id: 'all' | GalleryCategory; label: string }> = [
-  { id: 'all', label: 'Wszystkie' },
-  { id: 'camping', label: 'Camping' },
-  { id: 'bungalows', label: 'Domki' },
-  { id: 'sanitary', label: 'Sanitariaty' },
-  { id: 'transport', label: 'Dojazd' },
-  { id: 'krakow', label: 'Kraków' },
+  { id: 'all', label: galleryText.category.all },
+  { id: 'camping', label: galleryText.category.camping },
+  { id: 'bungalows', label: galleryText.category.bungalows },
+  { id: 'sanitary', label: galleryText.category.sanitary },
+  { id: 'transport', label: galleryText.category.transport },
+  { id: 'krakow', label: galleryText.category.krakow },
 ];
 
 const categoryLabels = Object.fromEntries(categories.map((category) => [category.id, category.label])) as Record<string, string>;
 
 const galleryItems: GalleryItem[] = [
   {
-    title: 'Miejsca campingowe',
+    title: galleryText.items[0][0],
     category: 'camping',
     image: siteAssets.camping.pitches,
-    alt: 'Miejsca campingowe Camping Clepardia',
+    alt: galleryText.items[0][1],
     size: 'feature',
   },
   {
-    title: 'Strefa dla kamperów',
+    title: galleryText.items[1][0],
     category: 'camping',
     image: siteAssets.camping.camperArea,
-    alt: 'Strefa dla kamperów na Camping Clepardia',
+    alt: galleryText.items[1][1],
     size: 'wide',
   },
   {
-    title: 'Strefa namiotowa',
+    title: galleryText.items[2][0],
     category: 'camping',
     image: siteAssets.camping.tents,
-    alt: 'Strefa namiotowa Camping Clepardia',
+    alt: galleryText.items[2][1],
     size: 'standard',
   },
   {
-    title: 'Prąd i zaplecze',
+    title: galleryText.items[3][0],
     category: 'camping',
     image: siteAssets.camping.electricity,
-    alt: 'Przyłącza prądu na campingu',
+    alt: galleryText.items[3][1],
     size: 'tall',
   },
   {
-    title: 'Domek z zewnątrz',
+    title: galleryText.items[4][0],
     category: 'bungalows',
     image: siteAssets.bungalows.exterior,
-    alt: 'Domek Camping Clepardia z zewnątrz',
+    alt: galleryText.items[4][1],
     size: 'wide',
   },
   {
-    title: 'Wnętrze domku',
+    title: galleryText.items[5][0],
     category: 'bungalows',
     image: siteAssets.bungalows.room,
-    alt: 'Wnętrze domku Camping Clepardia',
+    alt: galleryText.items[5][1],
     size: 'standard',
   },
   {
-    title: 'Taras przy domku',
+    title: galleryText.items[6][0],
     category: 'bungalows',
     image: siteAssets.bungalows.terrace,
-    alt: 'Taras przy domku Camping Clepardia',
+    alt: galleryText.items[6][1],
     size: 'tall',
   },
   {
-    title: 'Domki dla rodzin',
+    title: galleryText.items[7][0],
     category: 'bungalows',
     image: siteAssets.bungalows.family,
-    alt: 'Domek dla rodzin i grup',
+    alt: galleryText.items[7][1],
     size: 'standard',
   },
   {
-    title: 'Budynek sanitarny',
+    title: galleryText.items[8][0],
     category: 'sanitary',
     image: siteAssets.sanitary.building,
-    alt: 'Budynek sanitarny na campingu',
+    alt: galleryText.items[8][1],
     size: 'wide',
   },
   {
-    title: 'Prysznice',
+    title: galleryText.items[9][0],
     category: 'sanitary',
     image: siteAssets.sanitary.showers,
-    alt: 'Prysznice dla gości Camping Clepardia',
+    alt: galleryText.items[9][1],
     size: 'standard',
   },
   {
-    title: 'Kuchnia turystyczna',
+    title: galleryText.items[10][0],
     category: 'sanitary',
     image: siteAssets.sanitary.kitchen,
-    alt: 'Kuchnia turystyczna dla gości',
+    alt: galleryText.items[10][1],
     size: 'tall',
   },
   {
-    title: 'Pralnia',
+    title: galleryText.items[11][0],
     category: 'sanitary',
     image: siteAssets.sanitary.laundry,
-    alt: 'Pralnia na campingu',
+    alt: galleryText.items[11][1],
     size: 'standard',
   },
   {
-    title: 'Tramwaj do centrum',
+    title: galleryText.items[12][0],
     category: 'transport',
     image: siteAssets.transport.tramToCenter,
-    alt: 'Dojazd tramwajem do centrum Krakowa',
+    alt: galleryText.items[12][1],
     size: 'wide',
   },
   {
-    title: 'Bilety tramwajowe',
+    title: galleryText.items[13][0],
     category: 'transport',
     image: siteAssets.transport.ticketMachine,
-    alt: 'Automat biletowy w tramwaju',
+    alt: galleryText.items[13][1],
     size: 'standard',
   },
   {
-    title: 'Stare Miasto',
+    title: galleryText.items[14][0],
     category: 'krakow',
     image: siteAssets.attractions.oldTown,
-    alt: 'Stare Miasto w Krakowie',
+    alt: galleryText.items[14][1],
     size: 'feature',
   },
   {
-    title: 'Kopalnia Soli Wieliczka',
+    title: galleryText.items[15][0],
     category: 'krakow',
     image: siteAssets.attractions.wieliczka,
-    alt: 'Kopalnia Soli Wieliczka',
+    alt: galleryText.items[15][1],
     size: 'standard',
   },
   {
-    title: 'Energylandia',
+    title: galleryText.items[16][0],
     category: 'krakow',
     image: siteAssets.attractions.energylandia,
-    alt: 'Energylandia',
+    alt: galleryText.items[16][1],
     size: 'wide',
   },
 ];
@@ -163,14 +332,14 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 <section class="site-section gallery-page reveal-section" data-gallery-page>
   <div class="container">
     <div class="gallery-page__head">
-      <span class="section-kicker">Zdjęcia i miejsca</span>
-      <h2 class="section-title">Camping, domki i okolica w jednym miejscu</h2>
+      <span class="section-kicker">{galleryText.headKicker}</span>
+      <h2 class="section-title">{galleryText.headTitle}</h2>
       <p class="section-copy">
-        Przeglądaj kategorie i otwieraj zdjęcia w lightboxie. Brakujące materiały są pokazane jako eleganckie miejsca pod zdjęcia.
+        {galleryText.headCopy}
       </p>
     </div>
 
-    <div class="premium-card gallery-page__filters" aria-label="Filtry galerii">
+    <div class="premium-card gallery-page__filters" aria-label={galleryText.filtersAria}>
       {categories.map((category) => (
         <button
           type="button"
@@ -196,7 +365,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
           data-image={item.imageExists ? item.image : ''}
           data-alt={item.alt}
           style={`--reveal-delay: ${Math.min(index, 8) * 45}ms`}
-          aria-label={`Otwórz zdjęcie: ${item.title}`}
+          aria-label={`${galleryText.openPhoto}: ${item.title}`}
         >
           {item.imageExists ? (
             <img src={item.image} alt={item.alt} loading="lazy" decoding="async" />
@@ -221,14 +390,14 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 
   <div class="gallery-lightbox" data-gallery-lightbox hidden aria-hidden="true">
     <div class="gallery-lightbox__backdrop" data-gallery-close></div>
-    <div class="gallery-lightbox__dialog" role="dialog" aria-modal="true" aria-label="Podgląd zdjęcia">
-      <button class="gallery-lightbox__close" type="button" data-gallery-close aria-label="Zamknij galerię">
+    <div class="gallery-lightbox__dialog" role="dialog" aria-modal="true" aria-label={galleryText.dialog}>
+      <button class="gallery-lightbox__close" type="button" data-gallery-close aria-label={galleryText.close}>
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>
       </button>
 
-      <button class="gallery-lightbox__nav gallery-lightbox__nav--prev" type="button" data-gallery-prev aria-label="Poprzednie zdjęcie">
+      <button class="gallery-lightbox__nav gallery-lightbox__nav--prev" type="button" data-gallery-prev aria-label={galleryText.previous}>
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M15 18l-6-6 6-6" />
         </svg>
@@ -242,7 +411,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
         </figcaption>
       </figure>
 
-      <button class="gallery-lightbox__nav gallery-lightbox__nav--next" type="button" data-gallery-next aria-label="Następne zdjęcie">
+      <button class="gallery-lightbox__nav gallery-lightbox__nav--next" type="button" data-gallery-next aria-label={galleryText.next}>
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M9 18l6-6-6-6" />
         </svg>
@@ -255,15 +424,15 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   <div class="container">
     <div class="premium-card gallery-final-cta__panel">
       <div>
-        <span class="section-kicker">Zaplanuj pobyt</span>
-        <h2>Zobacz miejsce i zapytaj o dostępność</h2>
+        <span class="section-kicker">{galleryText.ctaKicker}</span>
+        <h2>{page.cta.title}</h2>
         <p>
-          Galeria jest przygotowana pod realne zdjęcia campingu, domków i zaplecza. Kolejne materiały można dodawać w systemie assetów bez przebudowy układu.
+          {page.cta.copy}
         </p>
       </div>
       <div class="gallery-final-cta__actions">
-        <a class="btn btn-primary premium-button" href={pricingHref}>Sprawdź cennik</a>
-        <a class="btn btn-glass gallery-final-cta__secondary" href={contactHref}>Zapytaj o dostępność</a>
+        <a class="btn btn-primary premium-button" href={pricingHref}>{page.cta.primaryLabel}</a>
+        <a class="btn btn-glass gallery-final-cta__secondary" href={contactHref}>{page.cta.secondaryLabel}</a>
       </div>
     </div>
   </div>

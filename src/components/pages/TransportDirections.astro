@@ -2,38 +2,209 @@
 import ImageFrame from '@/components/ImageFrame.astro';
 import { siteAssets } from '@/data/assets';
 import { getLocalizedPath } from '@/utils/localizedLinks';
+import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 
 interface Props {
   languageCode?: string;
 }
 
 const { languageCode } = Astro.props as Props;
+const contentLanguage = resolveContentLanguage(languageCode);
+const t = getTranslations(languageCode);
+const page = t.pages.dojazd;
 const contactHref = getLocalizedPath(languageCode, 'kontakt');
 const googleMapsHref = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
 
+const transportTextByLanguage = {
+  pl: {
+    quickAria: 'Szybkie informacje o dojeździe',
+    quick: {
+      address: 'Adres',
+      tram: 'Tramwaj',
+      center: 'Centrum',
+      base: 'Baza',
+    },
+    centerKicker: 'Dojazd do centrum',
+    centerTitle: 'Najwygodniej tramwajem',
+    centerCopy:
+      'Zostaw samochód, kampera lub przyczepę na campingu i dojedź do centrum Krakowa komunikacją miejską. To wygodniejsze niż szukanie parkingu w okolicy Starego Miasta.',
+    steps: [
+      'Wyjdź z campingu w stronę przystanku.',
+      'Wsiądź w tramwaj w kierunku centrum.',
+      'Wysiądź w okolicy Starego Kleparza / centrum.',
+      'Dalej dojdziesz pieszo w stronę Starego Miasta.',
+    ],
+    tram: 'Tramwaj',
+    oldTown: 'Stare Miasto',
+    tramPhoto: 'Tramwaj do centrum',
+    ticketsKicker: 'Bilety tramwajowe',
+    ticketsTitle: 'Bilety i aplikacje',
+    ticketsCopy: 'Przed przejazdem sprawdź aktualną trasę i wybierz najwygodniejszą opcję zakupu biletu.',
+    ticketPhoto: 'Bilety w tramwaju',
+    tickets: [
+      { title: 'Automat w tramwaju', copy: 'Bilet można kupić w automacie w tramwaju.' },
+      { title: 'Płatność kartą', copy: 'W wielu tramwajach płatność działa kartą.' },
+      { title: 'Jakdojade', copy: 'Warto użyć aplikacji Jakdojade do sprawdzania trasy i kupowania biletów.' },
+      { title: 'Google Maps', copy: 'Google Maps pomaga szybko sprawdzić trasę pieszo + tramwajem.' },
+    ],
+    carKicker: 'Dojazd samochodem',
+    carTitle: 'Dojazd samochodem lub kamperem',
+    carCopy:
+      'W nawigacji wpisz Camping Clepardia albo adres: Henryka Pachońskiego 28A, Kraków. Po przyjeździe kieruj się do recepcji lub zgodnie z instrukcjami otrzymanymi od obsługi.',
+    maps: 'Otwórz w Google Maps',
+    contact: 'Skontaktuj się z recepcją',
+    mapLabel: 'Mapa dojazdu',
+    finalKicker: 'Wygodny plan przyjazdu',
+    finalTitle: 'Zaplanuj trasę i potwierdź pobyt z recepcją',
+    finalCopy:
+      'Jeśli przyjeżdżasz kamperem, przyczepą lub większym autem, skontaktuj się z recepcją przed przyjazdem i potwierdź szczegóły.',
+  },
+  en: {
+    quickAria: 'Quick directions information',
+    quick: {
+      address: 'Address',
+      tram: 'Tram',
+      center: 'Centre',
+      base: 'Base',
+    },
+    centerKicker: 'Getting to the centre',
+    centerTitle: 'The easiest way is by tram',
+    centerCopy:
+      'Leave your car, motorhome or caravan at the campsite and reach Krakow city centre by public transport. It is easier than searching for parking around the Old Town.',
+    steps: [
+      'Walk from the campsite towards the stop.',
+      'Take a tram towards the centre.',
+      'Get off around Stary Kleparz / the centre.',
+      'Continue on foot towards the Old Town.',
+    ],
+    tram: 'Tram',
+    oldTown: 'Old Town',
+    tramPhoto: 'Tram to the centre',
+    ticketsKicker: 'Tram tickets',
+    ticketsTitle: 'Tickets and apps',
+    ticketsCopy: 'Before travelling, check the current route and choose the most convenient way to buy a ticket.',
+    ticketPhoto: 'Tickets on the tram',
+    tickets: [
+      { title: 'Machine on the tram', copy: 'A ticket can be bought from a machine on the tram.' },
+      { title: 'Card payment', copy: 'Card payment is available in many trams.' },
+      { title: 'Jakdojade', copy: 'Jakdojade is useful for checking routes and buying tickets.' },
+      { title: 'Google Maps', copy: 'Google Maps helps quickly check a walking + tram route.' },
+    ],
+    carKicker: 'Arriving by car',
+    carTitle: 'Arriving by car or motorhome',
+    carCopy:
+      'Enter Camping Clepardia or the address Henryka Pachońskiego 28A, Krakow in navigation. After arrival, go to reception or follow instructions from staff.',
+    maps: 'Open in Google Maps',
+    contact: 'Contact reception',
+    mapLabel: 'Directions map',
+    finalKicker: 'A convenient arrival plan',
+    finalTitle: 'Plan your route and confirm the stay with reception',
+    finalCopy:
+      'If you arrive by motorhome, caravan or a larger vehicle, contact reception before arrival and confirm the details.',
+  },
+  de: {
+    quickAria: 'Kurzinformationen zur Anfahrt',
+    quick: {
+      address: 'Adresse',
+      tram: 'Straßenbahn',
+      center: 'Zentrum',
+      base: 'Basis',
+    },
+    centerKicker: 'Ins Zentrum',
+    centerTitle: 'Am bequemsten mit der Straßenbahn',
+    centerCopy:
+      'Lassen Sie Auto, Wohnmobil oder Wohnwagen auf dem Campingplatz und fahren Sie mit öffentlichen Verkehrsmitteln ins Zentrum von Krakau. Das ist bequemer als Parkplatzsuche rund um die Altstadt.',
+    steps: [
+      'Gehen Sie vom Campingplatz Richtung Haltestelle.',
+      'Steigen Sie in die Straßenbahn Richtung Zentrum.',
+      'Steigen Sie im Bereich Stary Kleparz / Zentrum aus.',
+      'Weiter geht es zu Fuß Richtung Altstadt.',
+    ],
+    tram: 'Straßenbahn',
+    oldTown: 'Altstadt',
+    tramPhoto: 'Straßenbahn ins Zentrum',
+    ticketsKicker: 'Straßenbahntickets',
+    ticketsTitle: 'Tickets und Apps',
+    ticketsCopy: 'Prüfen Sie vor der Fahrt die aktuelle Verbindung und wählen Sie die bequemste Ticketoption.',
+    ticketPhoto: 'Tickets in der Straßenbahn',
+    tickets: [
+      { title: 'Automat in der Straßenbahn', copy: 'Ein Ticket kann am Automaten in der Straßenbahn gekauft werden.' },
+      { title: 'Kartenzahlung', copy: 'In vielen Straßenbahnen ist Kartenzahlung möglich.' },
+      { title: 'Jakdojade', copy: 'Jakdojade hilft bei Routenprüfung und Ticketkauf.' },
+      { title: 'Google Maps', copy: 'Google Maps hilft schnell eine Fußweg- und Straßenbahnroute zu prüfen.' },
+    ],
+    carKicker: 'Anfahrt mit dem Auto',
+    carTitle: 'Anfahrt mit Auto oder Wohnmobil',
+    carCopy:
+      'Geben Sie Camping Clepardia oder Henryka Pachońskiego 28A, Krakau in die Navigation ein. Nach Ankunft gehen Sie zur Rezeption oder folgen den Anweisungen des Personals.',
+    maps: 'In Google Maps öffnen',
+    contact: 'Rezeption kontaktieren',
+    mapLabel: 'Anfahrtskarte',
+    finalKicker: 'Bequemer Anreiseplan',
+    finalTitle: 'Route planen und Aufenthalt mit der Rezeption bestätigen',
+    finalCopy:
+      'Wenn Sie mit Wohnmobil, Wohnwagen oder größerem Fahrzeug anreisen, kontaktieren Sie die Rezeption vorab und bestätigen Sie die Details.',
+  },
+  it: {
+    quickAria: 'Informazioni rapide su come arrivare',
+    quick: {
+      address: 'Indirizzo',
+      tram: 'Tram',
+      center: 'Centro',
+      base: 'Base',
+    },
+    centerKicker: 'Come arrivare in centro',
+    centerTitle: 'Il modo più comodo è il tram',
+    centerCopy:
+      'Lascia auto, camper o roulotte al camping e raggiungi il centro di Cracovia con i mezzi pubblici. È più comodo che cercare parcheggio vicino alla Città Vecchia.',
+    steps: [
+      'Esci dal camping verso la fermata.',
+      'Prendi il tram in direzione centro.',
+      'Scendi nella zona di Stary Kleparz / centro.',
+      'Prosegui a piedi verso la Città Vecchia.',
+    ],
+    tram: 'Tram',
+    oldTown: 'Città Vecchia',
+    tramPhoto: 'Tram per il centro',
+    ticketsKicker: 'Biglietti del tram',
+    ticketsTitle: 'Biglietti e app',
+    ticketsCopy: 'Prima del viaggio controlla il percorso aggiornato e scegli il modo più comodo per acquistare il biglietto.',
+    ticketPhoto: 'Biglietti in tram',
+    tickets: [
+      { title: 'Distributore in tram', copy: 'Il biglietto può essere acquistato al distributore in tram.' },
+      { title: 'Pagamento con carta', copy: 'In molti tram è possibile pagare con carta.' },
+      { title: 'Jakdojade', copy: 'Jakdojade è utile per controllare il percorso e comprare i biglietti.' },
+      { title: 'Google Maps', copy: 'Google Maps aiuta a controllare rapidamente il percorso a piedi + tram.' },
+    ],
+    carKicker: 'Arrivo in auto',
+    carTitle: 'Arrivo in auto o camper',
+    carCopy:
+      'Inserisci Camping Clepardia o l’indirizzo Henryka Pachońskiego 28A, Cracovia nel navigatore. All’arrivo vai in reception o segui le indicazioni dello staff.',
+    maps: 'Apri in Google Maps',
+    contact: 'Contatta la reception',
+    mapLabel: 'Mappa percorso',
+    finalKicker: 'Piano di arrivo comodo',
+    finalTitle: 'Pianifica il percorso e conferma il soggiorno con la reception',
+    finalCopy:
+      'Se arrivi in camper, roulotte o con un veicolo più grande, contatta la reception prima dell’arrivo e conferma i dettagli.',
+  },
+};
+
+const transportText = transportTextByLanguage[contentLanguage];
+
 const quickInfo = [
-  { icon: 'M12 21s7-4.6 7-11a7 7 0 1 0-14 0c0 6.4 7 11 7 11Z M12 10.5h.01', label: 'Adres', value: 'Henryka Pachońskiego 28A, 31-322 Kraków' },
-  { icon: 'M4 6h16M6 6v9a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V6M8 18l-2 3M16 18l2 3M9 10h6', label: 'Tramwaj', value: 'Tramwaj blisko campingu' },
-  { icon: 'M5 12h14M13 6l6 6-6 6', label: 'Centrum', value: 'Szybki dojazd do Starego Miasta' },
-  { icon: 'M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14M8 7h8M8 11h8M8 15h5', label: 'Baza', value: 'Wygodna baza do zwiedzania Krakowa' },
+  { icon: 'M12 21s7-4.6 7-11a7 7 0 1 0-14 0c0 6.4 7 11 7 11Z M12 10.5h.01', label: transportText.quick.address, value: page.highlights[0].copy },
+  { icon: 'M4 6h16M6 6v9a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V6M8 18l-2 3M16 18l2 3M9 10h6', label: transportText.quick.tram, value: page.highlights[1].title },
+  { icon: 'M5 12h14M13 6l6 6-6 6', label: transportText.quick.center, value: page.highlights[2].copy },
+  { icon: 'M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14M8 7h8M8 11h8M8 15h5', label: transportText.quick.base, value: page.highlights[3].copy },
 ];
 
-const centerSteps = [
-  'Wyjdź z campingu w stronę przystanku.',
-  'Wsiądź w tramwaj w kierunku centrum.',
-  'Wysiądź w okolicy Starego Kleparza / centrum.',
-  'Dalej dojdziesz pieszo w stronę Starego Miasta.',
-];
+const centerSteps = transportText.steps;
 
-const ticketCards = [
-  { title: 'Automat w tramwaju', copy: 'Bilet można kupić w automacie w tramwaju.' },
-  { title: 'Płatność kartą', copy: 'W wielu tramwajach płatność działa kartą.' },
-  { title: 'Jakdojade', copy: 'Warto użyć aplikacji Jakdojade do sprawdzania trasy i kupowania biletów.' },
-  { title: 'Google Maps', copy: 'Google Maps pomaga szybko sprawdzić trasę pieszo + tramwajem.' },
-];
+const ticketCards = transportText.tickets;
 ---
 
-<section class="site-section transport-page-quick reveal-section" aria-label="Szybkie informacje o dojeździe">
+<section class="site-section transport-page-quick reveal-section" aria-label={transportText.quickAria}>
   <div class="container transport-page-quick__grid">
     {quickInfo.map((item, index) => (
       <article class="premium-card reveal-section transport-page-quick__card" style={`--reveal-delay: ${index * 80}ms`}>
@@ -56,11 +227,10 @@ const ticketCards = [
 <section class="site-section transport-center reveal-section">
   <div class="container transport-center__grid">
     <div class="transport-center__content">
-      <span class="section-kicker">Dojazd do centrum</span>
-      <h2 class="section-title">Najwygodniej tramwajem</h2>
+      <span class="section-kicker">{transportText.centerKicker}</span>
+      <h2 class="section-title">{transportText.centerTitle}</h2>
       <p class="section-copy">
-        Zostaw samochód, kampera lub przyczepę na campingu i dojedź do centrum Krakowa komunikacją miejską.
-        To wygodniejsze niż szukanie parkingu w okolicy Starego Miasta.
+        {transportText.centerCopy}
       </p>
 
       <ol class="transport-center__steps">
@@ -76,11 +246,11 @@ const ticketCards = [
     <div class="transport-center__media">
       <ImageFrame
         src={siteAssets.transport.tramToCenter}
-        alt="Tramwaj z okolicy Camping Clepardia do centrum Krakowa"
-        label="Tramwaj do centrum"
+        alt={transportText.tramPhoto}
+        label={transportText.tramPhoto}
       />
       <div class="transport-center__route premium-card">
-        <span>Camping</span><i></i><span>Tramwaj</span><i></i><span>Stare Miasto</span>
+        <span>Camping</span><i></i><span>{transportText.tram}</span><i></i><span>{transportText.oldTown}</span>
       </div>
     </div>
   </div>
@@ -89,10 +259,10 @@ const ticketCards = [
 <section class="site-section transport-tickets reveal-section">
   <div class="container">
     <div class="transport-tickets__head">
-      <span class="section-kicker">Bilety tramwajowe</span>
-      <h2 class="section-title">Bilety i aplikacje</h2>
+      <span class="section-kicker">{transportText.ticketsKicker}</span>
+      <h2 class="section-title">{transportText.ticketsTitle}</h2>
       <p class="section-copy">
-        Przed przejazdem sprawdź aktualną trasę i wybierz najwygodniejszą opcję zakupu biletu.
+        {transportText.ticketsCopy}
       </p>
     </div>
 
@@ -108,7 +278,7 @@ const ticketCards = [
       </div>
 
       <div class="transport-tickets__media">
-        <ImageFrame src={siteAssets.transport.ticketMachine} alt="Automat biletowy w krakowskim tramwaju" label="Bilety w tramwaju" />
+        <ImageFrame src={siteAssets.transport.ticketMachine} alt={transportText.ticketPhoto} label={transportText.ticketPhoto} />
         <ImageFrame src={siteAssets.transport.jakdojade} alt="Podgląd trasy w aplikacji Jakdojade" label="Jakdojade" />
       </div>
     </div>
@@ -118,21 +288,20 @@ const ticketCards = [
 <section class="site-section transport-car reveal-section">
   <div class="container transport-car__grid">
     <div class="premium-card transport-car__panel">
-      <span class="section-kicker">Dojazd samochodem</span>
-      <h2>Dojazd samochodem lub kamperem</h2>
+      <span class="section-kicker">{transportText.carKicker}</span>
+      <h2>{transportText.carTitle}</h2>
       <p>
-        W nawigacji wpisz Camping Clepardia albo adres: Henryka Pachońskiego 28A, Kraków.
-        Po przyjeździe kieruj się do recepcji lub zgodnie z instrukcjami otrzymanymi od obsługi.
+        {transportText.carCopy}
       </p>
 
       <div class="transport-car__actions">
-        <a class="btn btn-primary premium-button" href={googleMapsHref} target="_blank" rel="noopener noreferrer">Otwórz w Google Maps</a>
-        <a class="btn btn-glass transport-car__secondary" href={contactHref}>Skontaktuj się z recepcją</a>
+        <a class="btn btn-primary premium-button" href={googleMapsHref} target="_blank" rel="noopener noreferrer">{transportText.maps}</a>
+        <a class="btn btn-glass transport-car__secondary" href={contactHref}>{transportText.contact}</a>
       </div>
     </div>
 
     <div class="transport-car__media">
-      <ImageFrame src={siteAssets.transport.googleMaps} alt="Podgląd trasy do Camping Clepardia w Google Maps" label="Mapa dojazdu" />
+      <ImageFrame src={siteAssets.transport.googleMaps} alt={transportText.mapLabel} label={transportText.mapLabel} />
     </div>
   </div>
 </section>
@@ -141,14 +310,14 @@ const ticketCards = [
   <div class="container">
     <div class="premium-card transport-final-cta__panel">
       <div>
-        <span class="section-kicker">Wygodny plan przyjazdu</span>
-        <h2>Zaplanuj trasę i potwierdź pobyt z recepcją</h2>
+        <span class="section-kicker">{transportText.finalKicker}</span>
+        <h2>{transportText.finalTitle}</h2>
         <p>
-          Jeśli przyjeżdżasz kamperem, przyczepą lub większym autem, skontaktuj się z recepcją przed przyjazdem i potwierdź szczegóły.
+          {transportText.finalCopy}
         </p>
       </div>
       <div class="transport-final-cta__actions">
-        <a class="btn btn-primary premium-button" href={contactHref}>Skontaktuj się z recepcją</a>
+        <a class="btn btn-primary premium-button" href={contactHref}>{transportText.contact}</a>
         <a class="btn btn-glass transport-car__secondary" href={googleMapsHref} target="_blank" rel="noopener noreferrer">Google Maps</a>
       </div>
     </div>

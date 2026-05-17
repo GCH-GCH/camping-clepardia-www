@@ -2,13 +2,14 @@
 import Layout from '@/layouts/Layout.astro';
 import ContentPage from '@/components/pages/ContentPage.astro';
 import { languages } from '@/data/languages';
-import { pageSlugs, sitePages } from '@/data/sitePages';
+import { pageSlugs } from '@/data/sitePages';
+import { getSitePage } from '@/i18n/config';
 
 export function getStaticPaths() {
   return languages.flatMap((language) =>
     pageSlugs.map((slug) => ({
       params: { lang: language.code, slug },
-      props: { language, page: sitePages[slug] },
+      props: { language, page: getSitePage(slug, language.code) },
     }))
   );
 }

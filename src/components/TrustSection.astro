@@ -1,21 +1,26 @@
 ---
-const cards = [
-  ['Mister Camping 2024', 'Wyróżnienie budujące zaufanie wśród gości planujących pobyt.'],
-  ['Wysoka ocena gości', 'Goście doceniają lokalizację, atmosferę i wygodę pobytu.'],
-  ['Rodzinna atmosfera', 'Campingowy rytm, bez anonimowego hotelowego dystansu.'],
-  ['Wiele lat doświadczenia', 'Sprawdzone miejsce dla turystów odwiedzających Kraków.'],
-];
+import { getTranslations } from '@/i18n/config';
+import { getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const t = getTranslations(languageCode ?? pathContext.languageCode);
+const cards = t.home.trust.cards;
 ---
 
 <section class="site-section trust reveal-section">
   <div class="container">
-    <span class="section-kicker">Zaufanie</span>
-    <h2 class="section-title">Miejsce wybierane przez gości, którzy chcą zwiedzać Kraków po swojemu.</h2>
+    <span class="section-kicker">{t.home.trust.overline}</span>
+    <h2 class="section-title">{t.home.trust.title}</h2>
     <div class="trust__grid">
-      {cards.map(([title, copy]) => (
+      {cards.map((card) => (
         <article class="premium-card trust__card">
-          <h3>{title}</h3>
-          <p>{copy}</p>
+          <h3>{card.title}</h3>
+          <p>{card.copy}</p>
         </article>
       ))}
     </div>

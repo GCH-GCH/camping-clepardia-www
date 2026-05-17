@@ -1,5 +1,15 @@
 ---
 import { publicAssetExists } from '@/data/assets';
+import { getTranslations } from '@/i18n/config';
+import { getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const t = getTranslations(languageCode ?? pathContext.languageCode);
 
 const iconFallbacks = {
   tram: ['track', 'dot', 'dot', 'line'],
@@ -14,42 +24,42 @@ const resolveIcon = (...paths: string[]) => paths.find((path) => publicAssetExis
 
 const benefits = [
   {
-    title: 'Blisko centrum Krakowa',
-    copy: 'Szybki dojazd tramwajem do Starego Miasta bez szukania parkingu w centrum.',
+    title: t.home.why.benefits[0].title,
+    copy: t.home.why.benefits[0].copy,
     icon: resolveIcon('/brand/icons/icon-tram.svg', '/brand/icons/icon-map.svg'),
     fallback: 'tram',
     delay: 0,
   },
   {
-    title: 'Miejsca dla kamperów i przyczep',
-    copy: 'Wygodna baza dla podróżujących kamperem, vanem, przyczepą lub autem z namiotem dachowym.',
+    title: t.home.why.benefits[1].title,
+    copy: t.home.why.benefits[1].copy,
     icon: resolveIcon('/brand/icons/icon-camper.svg'),
     fallback: 'camper',
     delay: 80,
   },
   {
-    title: 'Domki dla gości',
-    copy: 'Komfortowa opcja noclegu dla osób, które chcą zostać w Krakowie bez własnego sprzętu campingowego.',
+    title: t.home.why.benefits[2].title,
+    copy: t.home.why.benefits[2].copy,
     icon: resolveIcon('/brand/icons/icon-bungalow.svg'),
     fallback: 'bungalow',
     delay: 160,
   },
   {
-    title: 'Zielona okolica',
-    copy: 'Spokojniejsza przestrzeń do odpoczynku po całym dniu zwiedzania Krakowa i Małopolski.',
+    title: t.home.why.benefits[3].title,
+    copy: t.home.why.benefits[3].copy,
     fallback: 'leaf',
     delay: 240,
   },
   {
-    title: 'Dobre zaplecze',
-    copy: 'Sanitariaty, kuchnie turystyczne, prąd, pralnia i podstawowe udogodnienia potrzebne w podróży.',
+    title: t.home.why.benefits[4].title,
+    copy: t.home.why.benefits[4].copy,
     icon: resolveIcon('/brand/icons/icon-shower.svg'),
     fallback: 'shower',
     delay: 320,
   },
   {
-    title: 'Dobra baza wypadowa',
-    copy: 'Wygodny start do zwiedzania Krakowa, Wieliczki, Ojcowa, Energylandii i innych atrakcji regionu.',
+    title: t.home.why.benefits[5].title,
+    copy: t.home.why.benefits[5].copy,
     icon: resolveIcon('/brand/icons/icon-map.svg'),
     fallback: 'map',
     delay: 400,
@@ -60,10 +70,10 @@ const benefits = [
 <section class="site-section why reveal-section" id="dlaczego">
   <div class="container">
     <div class="why__header">
-      <span class="section-kicker">Zielona baza w Krakowie</span>
-      <h2 class="section-title">Dlaczego Camping Clepardia?</h2>
+      <span class="section-kicker">{t.home.why.overline}</span>
+      <h2 class="section-title">{t.home.why.title}</h2>
       <p class="section-copy">
-        Zielona przestrzeń w Krakowie, wygodna baza do zwiedzania i szybki dojazd do centrum bez stresu z parkowaniem.
+        {t.home.why.lead}
       </p>
     </div>
 

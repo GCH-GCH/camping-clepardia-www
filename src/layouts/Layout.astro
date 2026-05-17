@@ -35,6 +35,7 @@ const resolvedOgTitle = ogTitle ?? title;
 const resolvedOgDescription = ogDescription ?? description;
 const resolvedOgImage = resolveOgImage(ogImage);
 const absoluteOgImage = withOrigin(resolvedOgImage, siteOrigin);
+const socialImageAlt = 'Camping Clepardia in Krakow';
 const campgroundJsonLd = getCampgroundJsonLd({
   image: absoluteOgImage,
   pageUrl: seoLanguageMeta.canonicalHref,
@@ -59,7 +60,7 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		<meta property="og:description" content={resolvedOgDescription} />
 		<meta property="og:image" content={absoluteOgImage} />
 		<meta property="og:image:secure_url" content={absoluteOgImage} />
-		<meta property="og:image:alt" content="Camping Clepardia w Krakowie" />
+		<meta property="og:image:alt" content={socialImageAlt} />
 		<meta property="og:locale" content={seoLanguageMeta.ogLocale} />
 		
 		<!-- Twitter Card -->
@@ -67,7 +68,7 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		<meta name="twitter:title" content={resolvedOgTitle} />
 		<meta name="twitter:description" content={resolvedOgDescription} />
 		<meta name="twitter:image" content={absoluteOgImage} />
-		<meta name="twitter:image:alt" content="Camping Clepardia w Krakowie" />
+		<meta name="twitter:image:alt" content={socialImageAlt} />
 		
 		<!-- Canonical -->
 		<link rel="canonical" href={seoLanguageMeta.canonicalHref} />

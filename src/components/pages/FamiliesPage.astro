@@ -3,17 +3,22 @@ import ImageFrame from '@/components/ImageFrame.astro';
 import { siteAssets } from '@/data/assets';
 import { pricingConfig } from '@/data/pricing';
 import { getLocalizedPath } from '@/utils/localizedLinks';
+import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 
 interface Props {
   languageCode?: string;
 }
 
 const { languageCode } = Astro.props as Props;
+const contentLanguage = resolveContentLanguage(languageCode);
+const t = getTranslations(languageCode);
+const page = t.pages['dla-rodzin'];
 const pricingHref = getLocalizedPath(languageCode, 'cennik');
 const contactHref = getLocalizedPath(languageCode, 'kontakt');
 const attractionsHref = getLocalizedPath(languageCode, 'atrakcje');
 const currency = pricingConfig.currency;
 const formatPrice = (price: number) => `${price} ${currency}`;
+const stayTypeLabels = t.pricing.stayTypes as Record<string, string>;
 const getStayType = (id: string) => {
   const stayType = pricingConfig.stayTypes.find((item) => item.id === id);
   if (!stayType) throw new Error(`Missing family stay pricing: ${id}`);
@@ -43,103 +48,285 @@ const getStartingPrice = (stayType: typeof pricingConfig.stayTypes[number]) => {
   return stayType.startingPrice;
 };
 
+const familyTextByLanguage = {
+  pl: {
+    benefitsKicker: 'Dlaczego rodziny wybierają Clepardię',
+    benefitsTitle: 'Kraków blisko, a po zwiedzaniu spokojniejsza zielona baza',
+    benefitsLead:
+      'To wygodne rozwiązanie dla rodzin, które chcą połączyć zwiedzanie miasta, wycieczki po Małopolsce i odpoczynek w miejscu z campingowym klimatem.',
+    stayKicker: 'Domki i camping dla rodzin',
+    stayTitle: 'Wybierz wygodną opcję pobytu dla swojej rodziny',
+    stayLead:
+      'Domki mają osobne ceny sezonowe, a pobyt campingowy sprawdza się dla rodzin podróżujących kamperem, przyczepą, vanem, namiotem albo autem z namiotem dachowym.',
+    lowSeason: 'niski sezon',
+    highSeason: 'wysoki sezon',
+    priceFrom: 'cena od',
+    campingOptions: 'Opcje campingowe',
+    familyMedia: 'Domki i pobyt rodzinny',
+    familyPhoto: 'Miejsce na zdjęcie: domek rodzinny',
+    bungalows: 'Domki',
+    krakow: 'Kraków',
+    attractionsKicker: 'Atrakcje dla dzieci',
+    attractionsTitle: 'Pomysły na rodzinne wycieczki z Krakowa',
+    attractionsLead:
+      'Camping Clepardia może być spokojną bazą noclegową po intensywnym dniu w mieście, parku rozrywki albo na jednodniowej trasie po Małopolsce.',
+    infoKicker: 'Praktyczne informacje',
+    infoTitle: 'Najważniejsze rzeczy przed rodzinnym przyjazdem',
+    pricesKicker: 'Ceny rodzinne',
+    pricesTitle: 'Dzieci i pobyt z psem',
+    free: 'bezpłatnie',
+    toddlers: 'Dzieci do 4 lat',
+    children: 'Dzieci 4-14 lat',
+    dog: 'Pies',
+    nextStep: 'Następny krok',
+    stayCopies: [
+      'Praktyczna opcja dla mniejszej rodziny albo rodzica z dziećmi.',
+      'Więcej miejsca dla rodzin, które chcą zostać blisko centrum Krakowa.',
+      'Finalna cena i dostępność potwierdzana przez recepcję.',
+      'Kamper, przyczepa, van, namiot lub auto z namiotem dachowym według aktualnego cennika campingu.',
+    ],
+    kidsAttractions: [
+      { title: 'Energylandia', copy: 'Popularny park rozrywki na całodniową wycieczkę rodzinną.', label: 'Energylandia' },
+      { title: 'Krakowskie Stare Miasto', copy: 'Spacer po Rynku, Sukiennicach i Plantach to dobry plan na rodzinne zwiedzanie.', label: 'Stare Miasto' },
+      { title: 'Ojcowski Park Narodowy', copy: 'Dobry kierunek na spokojniejszą wycieczkę z naturą i zamkami.', label: 'Miejsce na zdjęcie: Ojców' },
+      { title: 'Wieliczka', copy: 'Jedna z najpopularniejszych atrakcji w okolicy Krakowa.', label: 'Wieliczka' },
+    ],
+    practicalEnding: 'Finalną dostępność potwierdza recepcja.',
+  },
+  en: {
+    benefitsKicker: 'Why families choose Clepardia',
+    benefitsTitle: 'Krakow is close, with a calmer green base after sightseeing',
+    benefitsLead:
+      'A convenient option for families who want to combine city sightseeing, Małopolska trips and rest in a place with a camping atmosphere.',
+    stayKicker: 'Bungalows and camping for families',
+    stayTitle: 'Choose a comfortable stay option for your family',
+    stayLead:
+      'Bungalows have separate seasonal prices, while camping works well for families travelling by motorhome, caravan, van, tent or rooftop tent.',
+    lowSeason: 'low season',
+    highSeason: 'high season',
+    priceFrom: 'from',
+    campingOptions: 'Camping options',
+    familyMedia: 'Bungalows and family stay',
+    familyPhoto: 'Photo space: family bungalow',
+    bungalows: 'Bungalows',
+    krakow: 'Krakow',
+    attractionsKicker: 'Attractions for children',
+    attractionsTitle: 'Ideas for family trips from Krakow',
+    attractionsLead:
+      'Camping Clepardia can be a calm accommodation base after an intense day in the city, amusement park or on a one-day Małopolska route.',
+    infoKicker: 'Practical information',
+    infoTitle: 'Key things before a family arrival',
+    pricesKicker: 'Family prices',
+    pricesTitle: 'Children and staying with a dog',
+    free: 'free',
+    toddlers: 'Children under 4',
+    children: 'Children 4-14',
+    dog: 'Dog',
+    nextStep: 'Next step',
+    stayCopies: [
+      'A practical option for a smaller family or a parent with children.',
+      'More space for families who want to stay close to Krakow city centre.',
+      'Final price and availability are confirmed by reception.',
+      'Motorhome, caravan, van, tent or car with rooftop tent according to the current camping price list.',
+    ],
+    kidsAttractions: [
+      { title: 'Energylandia', copy: 'A popular amusement park for a full-day family trip.', label: 'Energylandia' },
+      { title: 'Krakow Old Town', copy: 'A walk around the Main Square, Cloth Hall and Planty is a good family sightseeing plan.', label: 'Old Town' },
+      { title: 'Ojców National Park', copy: 'A good direction for a calmer trip with nature and castles.', label: 'Photo space: Ojców' },
+      { title: 'Wieliczka', copy: 'One of the most popular attractions near Krakow.', label: 'Wieliczka' },
+    ],
+    practicalEnding: 'Final availability is confirmed by reception.',
+  },
+  de: {
+    benefitsKicker: 'Warum Familien Clepardia wählen',
+    benefitsTitle: 'Krakau ist nah, danach wartet eine ruhigere grüne Basis',
+    benefitsLead:
+      'Eine praktische Lösung für Familien, die Stadtbesichtigung, Ausflüge in Małopolska und Erholung an einem Ort mit Campingatmosphäre verbinden möchten.',
+    stayKicker: 'Bungalows und Camping für Familien',
+    stayTitle: 'Wählen Sie eine bequeme Aufenthaltsoption für Ihre Familie',
+    stayLead:
+      'Bungalows haben separate Saisonpreise, Camping passt gut für Familien mit Wohnmobil, Wohnwagen, Van, Zelt oder Dachzelt.',
+    lowSeason: 'Nebensaison',
+    highSeason: 'Hauptsaison',
+    priceFrom: 'ab',
+    campingOptions: 'Campingoptionen',
+    familyMedia: 'Bungalows und Familienaufenthalt',
+    familyPhoto: 'Fotoplatz: Familienbungalow',
+    bungalows: 'Bungalows',
+    krakow: 'Krakau',
+    attractionsKicker: 'Attraktionen für Kinder',
+    attractionsTitle: 'Ideen für Familienausflüge ab Krakau',
+    attractionsLead:
+      'Camping Clepardia kann eine ruhige Unterkunftsbasis nach einem intensiven Tag in der Stadt, im Freizeitpark oder auf einer Tagestour durch Małopolska sein.',
+    infoKicker: 'Praktische Informationen',
+    infoTitle: 'Das Wichtigste vor der Familienanreise',
+    pricesKicker: 'Familienpreise',
+    pricesTitle: 'Kinder und Aufenthalt mit Hund',
+    free: 'kostenlos',
+    toddlers: 'Kinder unter 4',
+    children: 'Kinder 4-14',
+    dog: 'Hund',
+    nextStep: 'Nächster Schritt',
+    stayCopies: [
+      'Praktische Option für eine kleinere Familie oder ein Elternteil mit Kindern.',
+      'Mehr Platz für Familien, die nahe am Zentrum von Krakau bleiben möchten.',
+      'Endgültiger Preis und Verfügbarkeit werden von der Rezeption bestätigt.',
+      'Wohnmobil, Wohnwagen, Van, Zelt oder Auto mit Dachzelt gemäß aktueller Camping-Preisliste.',
+    ],
+    kidsAttractions: [
+      { title: 'Energylandia', copy: 'Beliebter Freizeitpark für einen ganztägigen Familienausflug.', label: 'Energylandia' },
+      { title: 'Krakauer Altstadt', copy: 'Ein Spaziergang über den Hauptmarkt, die Tuchhallen und Planty ist ein guter Familienplan.', label: 'Altstadt' },
+      { title: 'Nationalpark Ojców', copy: 'Gute Richtung für einen ruhigeren Ausflug mit Natur und Burgen.', label: 'Fotoplatz: Ojców' },
+      { title: 'Wieliczka', copy: 'Eine der beliebtesten Attraktionen in der Nähe von Krakau.', label: 'Wieliczka' },
+    ],
+    practicalEnding: 'Die endgültige Verfügbarkeit bestätigt die Rezeption.',
+  },
+  it: {
+    benefitsKicker: 'Perché le famiglie scelgono Clepardia',
+    benefitsTitle: 'Cracovia è vicina, poi si torna a una base verde più tranquilla',
+    benefitsLead:
+      'Una soluzione comoda per famiglie che vogliono unire visita della città, gite in Małopolska e riposo in un luogo con atmosfera camping.',
+    stayKicker: 'Bungalow e camping per famiglie',
+    stayTitle: 'Scegli un’opzione comoda per la tua famiglia',
+    stayLead:
+      'I bungalow hanno prezzi stagionali separati, mentre il camping è adatto a famiglie con camper, roulotte, van, tenda o tenda da tetto.',
+    lowSeason: 'bassa stagione',
+    highSeason: 'alta stagione',
+    priceFrom: 'da',
+    campingOptions: 'Opzioni camping',
+    familyMedia: 'Bungalow e soggiorno in famiglia',
+    familyPhoto: 'Spazio foto: bungalow familiare',
+    bungalows: 'Bungalow',
+    krakow: 'Cracovia',
+    attractionsKicker: 'Attrazioni per bambini',
+    attractionsTitle: 'Idee per gite in famiglia da Cracovia',
+    attractionsLead:
+      'Camping Clepardia può essere una base tranquilla dopo una giornata intensa in città, al parco divertimenti o in un itinerario di un giorno in Małopolska.',
+    infoKicker: 'Informazioni pratiche',
+    infoTitle: 'Le cose principali prima dell’arrivo in famiglia',
+    pricesKicker: 'Prezzi famiglia',
+    pricesTitle: 'Bambini e soggiorno con cane',
+    free: 'gratuito',
+    toddlers: 'Bambini sotto i 4 anni',
+    children: 'Bambini 4-14',
+    dog: 'Cane',
+    nextStep: 'Prossimo passo',
+    stayCopies: [
+      'Opzione pratica per una famiglia più piccola o un genitore con bambini.',
+      'Più spazio per famiglie che vogliono stare vicino al centro di Cracovia.',
+      'Prezzo finale e disponibilità sono confermati dalla reception.',
+      'Camper, roulotte, van, tenda o auto con tenda da tetto secondo il listino camping attuale.',
+    ],
+    kidsAttractions: [
+      { title: 'Energylandia', copy: 'Parco divertimenti popolare per una gita familiare di un’intera giornata.', label: 'Energylandia' },
+      { title: 'Città Vecchia di Cracovia', copy: 'Una passeggiata tra Rynek, Sukiennice e Planty è un buon piano per visitare in famiglia.', label: 'Città Vecchia' },
+      { title: 'Parco Nazionale di Ojców', copy: 'Una buona meta per una gita più tranquilla tra natura e castelli.', label: 'Spazio foto: Ojców' },
+      { title: 'Wieliczka', copy: 'Una delle attrazioni più popolari vicino a Cracovia.', label: 'Wieliczka' },
+    ],
+    practicalEnding: 'La disponibilità finale è confermata dalla reception.',
+  },
+};
+
+const familyText = familyTextByLanguage[contentLanguage];
+const perNight = t.pricing.perNight;
+const freeLabel = familyText.free;
+
 const familyBenefits = [
   {
-    title: 'Blisko centrum Krakowa',
-    copy: 'Możecie łatwo dojechać tramwajem do centrum, bez stresu z parkowaniem przy Starym Mieście.',
+    title: page.highlights[0].title,
+    copy: page.highlights[0].copy,
     icon: 'M4 6h16M6 6v9a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V6M8 18l-2 3M16 18l2 3M9 10h6',
   },
   {
-    title: 'Zielona przestrzeń',
-    copy: 'Po dniu zwiedzania można wrócić w spokojniejsze miejsce i odpocząć poza ścisłym centrum.',
+    title: page.highlights[1].title,
+    copy: page.highlights[1].copy,
     icon: 'M5 19c8 0 14-6 14-14C11 5 5 11 5 19ZM5 19c0-5 4-9 9-9',
   },
   {
-    title: 'Domki dla rodzin',
-    copy: 'Domki są praktyczną opcją dla rodzin, które nie podróżują kamperem ani namiotem.',
+    title: page.highlights[2].title,
+    copy: page.highlights[2].copy,
     icon: 'M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-8Z',
   },
   {
-    title: 'Baza do wycieczek',
-    copy: 'Dobry punkt startowy do Wieliczki, Energylandii, Ojcowa i innych atrakcji Małopolski.',
+    title: page.highlights[3].title,
+    copy: page.highlights[3].copy,
     icon: 'M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3ZM9 3v15M15 6v15',
   },
 ];
 
 const familyStayOptions = [
   {
-    title: 'Domek 3-osobowy',
+    title: stayTypeLabels['bungalow-3'],
     type: 'seasonal',
     low: getSeasonalPrices(bungalow3).low,
     high: getSeasonalPrices(bungalow3).high,
-    copy: 'Praktyczna opcja dla mniejszej rodziny albo rodzica z dziećmi.',
+    copy: familyText.stayCopies[0],
   },
   {
-    title: 'Domek 4-osobowy',
+    title: stayTypeLabels['bungalow-4'],
     type: 'seasonal',
     low: getSeasonalPrices(bungalow4).low,
     high: getSeasonalPrices(bungalow4).high,
-    copy: 'Więcej miejsca dla rodzin, które chcą zostać blisko centrum Krakowa.',
+    copy: familyText.stayCopies[1],
   },
   {
-    title: 'Domek rodzinny',
+    title: stayTypeLabels['bungalow-family'],
     type: 'confirmation',
     startingPrice: getStartingPrice(bungalowFamily),
-    copy: 'Finalna cena i dostępność potwierdzana przez recepcję.',
+    copy: familyText.stayCopies[2],
   },
   {
     title: 'Camping',
     type: 'camping',
-    copy: 'Kamper, przyczepa, van, namiot lub auto z namiotem dachowym według aktualnego cennika campingu.',
+    copy: familyText.stayCopies[3],
   },
 ];
 
 const kidsAttractions = [
   {
-    title: 'Energylandia',
-    copy: 'Popularny park rozrywki na całodniową wycieczkę rodzinną.',
+    title: familyText.kidsAttractions[0].title,
+    copy: familyText.kidsAttractions[0].copy,
     image: siteAssets.attractions.energylandia,
-    label: 'Energylandia',
+    label: familyText.kidsAttractions[0].label,
   },
   {
-    title: 'Krakowskie Stare Miasto',
-    copy: 'Spacer po Rynku, Sukiennicach i Plantach to dobry plan na rodzinne zwiedzanie.',
+    title: familyText.kidsAttractions[1].title,
+    copy: familyText.kidsAttractions[1].copy,
     image: siteAssets.attractions.oldTown,
-    label: 'Stare Miasto',
+    label: familyText.kidsAttractions[1].label,
   },
   {
-    title: 'Ojcowski Park Narodowy',
-    copy: 'Dobry kierunek na spokojniejszą wycieczkę z naturą i zamkami.',
+    title: familyText.kidsAttractions[2].title,
+    copy: familyText.kidsAttractions[2].copy,
     image: undefined,
-    label: 'Miejsce na zdjęcie: Ojców',
+    label: familyText.kidsAttractions[2].label,
   },
   {
-    title: 'Wieliczka',
-    copy: 'Jedna z najpopularniejszych atrakcji w okolicy Krakowa.',
+    title: familyText.kidsAttractions[3].title,
+    copy: familyText.kidsAttractions[3].copy,
     image: siteAssets.attractions.wieliczka,
-    label: 'Wieliczka',
+    label: familyText.kidsAttractions[3].label,
   },
 ];
 
 const practicalInfo = [
-  `Dzieci do 4 lat: ${pricingConfig.people.toddlers.price === 0 ? 'bezpłatnie' : `${formatPrice(pricingConfig.people.toddlers.price)} / noc`}.`,
-  `Dzieci 4-14 lat: ${formatPrice(pricingConfig.people.children.price)} / noc.`,
-  `Pies: ${dog.price === 0 ? 'bezpłatnie' : `${formatPrice(dog.price)} / noc`}.`,
+  `${familyText.toddlers}: ${pricingConfig.people.toddlers.price === 0 ? freeLabel : `${formatPrice(pricingConfig.people.toddlers.price)} / ${perNight}`}.`,
+  `${familyText.children}: ${formatPrice(pricingConfig.people.children.price)} / ${perNight}.`,
+  `${familyText.dog}: ${dog.price === 0 ? freeLabel : `${formatPrice(dog.price)} / ${perNight}`}.`,
   'Check-in/check-out camping: 12:00-12:00.',
-  'Check-in domki: od 16:00.',
-  'Check-out domki: do 11:00.',
-  'Finalną dostępność potwierdza recepcja.',
+  contentLanguage === 'pl' ? 'Check-in domki: od 16:00.' : contentLanguage === 'de' ? 'Check-in Bungalows: ab 16:00.' : contentLanguage === 'it' ? 'Check-in bungalow: dalle 16:00.' : 'Bungalow check-in: from 16:00.',
+  contentLanguage === 'pl' ? 'Check-out domki: do 11:00.' : contentLanguage === 'de' ? 'Check-out Bungalows: bis 11:00.' : contentLanguage === 'it' ? 'Check-out bungalow: entro le 11:00.' : 'Bungalow check-out: by 11:00.',
+  familyText.practicalEnding,
 ];
 ---
 
 <section class="site-section families-benefits reveal-section">
   <div class="container families-benefits__grid">
     <div class="families-benefits__intro">
-      <span class="section-kicker">Dlaczego rodziny wybierają Clepardię</span>
-      <h2 class="section-title">Kraków blisko, a po zwiedzaniu spokojniejsza zielona baza</h2>
+      <span class="section-kicker">{familyText.benefitsKicker}</span>
+      <h2 class="section-title">{familyText.benefitsTitle}</h2>
       <p class="section-copy">
-        To wygodne rozwiązanie dla rodzin, które chcą połączyć zwiedzanie miasta,
-        wycieczki po Małopolsce i odpoczynek w miejscu z campingowym klimatem.
+        {familyText.benefitsLead}
       </p>
     </div>
 
@@ -162,11 +349,10 @@ const practicalInfo = [
 <section class="site-section families-stay reveal-section">
   <div class="container families-stay__grid">
     <div class="families-stay__content">
-      <span class="section-kicker">Domki i camping dla rodzin</span>
-      <h2 class="section-title">Wybierz wygodną opcję pobytu dla swojej rodziny</h2>
+      <span class="section-kicker">{familyText.stayKicker}</span>
+      <h2 class="section-title">{familyText.stayTitle}</h2>
       <p class="section-copy">
-        Domki mają osobne ceny sezonowe, a pobyt campingowy sprawdza się dla rodzin
-        podróżujących kamperem, przyczepą, vanem, namiotem albo autem z namiotem dachowym.
+        {familyText.stayLead}
       </p>
 
       <div class="families-stay__options">
@@ -176,22 +362,22 @@ const practicalInfo = [
             <h3>{option.title}</h3>
             {option.type === 'seasonal' && (
               <div class="families-stay__prices">
-                <p><strong>niski sezon</strong>{formatPrice(option.low)} / noc</p>
-                <p><strong>wysoki sezon</strong>{formatPrice(option.high)} / noc</p>
+                <p><strong>{familyText.lowSeason}</strong>{formatPrice(option.low)} / {perNight}</p>
+                <p><strong>{familyText.highSeason}</strong>{formatPrice(option.high)} / {perNight}</p>
               </div>
             )}
             {option.type === 'confirmation' && (
               <div class="families-stay__prices">
-                <p><strong>cena od</strong>{formatPrice(option.startingPrice)} / noc</p>
+                <p><strong>{familyText.priceFrom}</strong>{formatPrice(option.startingPrice)} / {perNight}</p>
               </div>
             )}
             {option.type === 'camping' && (
-              <div class="families-stay__tag-list" aria-label="Opcje campingowe">
-                <em>kamper</em>
-                <em>przyczepa</em>
+              <div class="families-stay__tag-list" aria-label={familyText.campingOptions}>
+                <em>{stayTypeLabels.camper}</em>
+                <em>{stayTypeLabels.caravan}</em>
                 <em>van</em>
-                <em>namiot</em>
-                <em>auto + namiot dachowy</em>
+                <em>{stayTypeLabels['tent-small']}</em>
+                <em>{stayTypeLabels['rooftop-tent']}</em>
               </div>
             )}
             <p>{option.copy}</p>
@@ -200,16 +386,16 @@ const practicalInfo = [
       </div>
     </div>
 
-    <div class="families-stay__media" aria-label="Domki i pobyt rodzinny">
+    <div class="families-stay__media" aria-label={familyText.familyMedia}>
       <ImageFrame
         src={siteAssets.bungalows.family}
-        alt="Domek rodzinny Camping Clepardia"
-        label="Miejsce na zdjęcie: domek rodzinny"
+        alt={familyText.familyPhoto}
+        label={familyText.familyPhoto}
         className="families-stay__main-photo"
       />
       <div class="families-stay__thumbs">
-        <ImageFrame src={siteAssets.bungalows.exterior} alt="Domki Camping Clepardia" label="Domki" />
-        <ImageFrame src={siteAssets.attractions.oldTown} alt="Stare Miasto w Krakowie" label="Kraków" />
+        <ImageFrame src={siteAssets.bungalows.exterior} alt={familyText.bungalows} label={familyText.bungalows} />
+        <ImageFrame src={siteAssets.attractions.oldTown} alt={familyText.krakow} label={familyText.krakow} />
       </div>
     </div>
   </div>
@@ -218,11 +404,10 @@ const practicalInfo = [
 <section class="site-section families-attractions reveal-section">
   <div class="container">
     <div class="families-attractions__head">
-      <span class="section-kicker">Atrakcje dla dzieci</span>
-      <h2 class="section-title">Pomysły na rodzinne wycieczki z Krakowa</h2>
+      <span class="section-kicker">{familyText.attractionsKicker}</span>
+      <h2 class="section-title">{familyText.attractionsTitle}</h2>
       <p class="section-copy">
-        Camping Clepardia może być spokojną bazą noclegową po intensywnym dniu w mieście,
-        parku rozrywki albo na jednodniowej trasie po Małopolsce.
+        {familyText.attractionsLead}
       </p>
     </div>
 
@@ -254,8 +439,8 @@ const practicalInfo = [
 <section class="site-section families-info reveal-section">
   <div class="container families-info__grid">
     <article class="premium-card families-info__panel">
-      <span class="section-kicker">Praktyczne informacje</span>
-      <h2>Najważniejsze rzeczy przed rodzinnym przyjazdem</h2>
+      <span class="section-kicker">{familyText.infoKicker}</span>
+      <h2>{familyText.infoTitle}</h2>
       <div class="families-info__list">
         {practicalInfo.map((item, index) => (
           <div class="families-info__item reveal-section" style={`--reveal-delay: ${index * 60}ms`}>
@@ -271,20 +456,20 @@ const practicalInfo = [
     </article>
 
     <article class="premium-card families-info__price-card">
-      <span class="section-kicker">Ceny rodzinne</span>
-      <h2>Dzieci i pobyt z psem</h2>
+      <span class="section-kicker">{familyText.pricesKicker}</span>
+      <h2>{familyText.pricesTitle}</h2>
       <div class="families-info__prices">
         <div>
-          <span>Dzieci do 4 lat</span>
-          <strong>{pricingConfig.people.toddlers.price === 0 ? 'bezpłatnie' : `${formatPrice(pricingConfig.people.toddlers.price)} / noc`}</strong>
+          <span>{familyText.toddlers}</span>
+          <strong>{pricingConfig.people.toddlers.price === 0 ? freeLabel : `${formatPrice(pricingConfig.people.toddlers.price)} / ${perNight}`}</strong>
         </div>
         <div>
-          <span>Dzieci 4-14 lat</span>
-          <strong>{formatPrice(pricingConfig.people.children.price)} / noc</strong>
+          <span>{familyText.children}</span>
+          <strong>{formatPrice(pricingConfig.people.children.price)} / {perNight}</strong>
         </div>
         <div>
-          <span>Pies</span>
-          <strong>{dog.price === 0 ? 'bezpłatnie' : `${formatPrice(dog.price)} / noc`}</strong>
+          <span>{familyText.dog}</span>
+          <strong>{dog.price === 0 ? freeLabel : `${formatPrice(dog.price)} / ${perNight}`}</strong>
         </div>
       </div>
     </article>
@@ -295,17 +480,16 @@ const practicalInfo = [
   <div class="container">
     <div class="premium-card families-cta__panel">
       <div>
-        <span class="section-kicker">Następny krok</span>
-        <h2>Zaplanuj rodzinny pobyt w Krakowie</h2>
+        <span class="section-kicker">{familyText.nextStep}</span>
+        <h2>{page.cta.title}</h2>
         <p>
-          Sprawdź orientacyjny cennik, zapytaj recepcję o dostępność albo zobacz,
-          które atrakcje możecie łatwo zaplanować z Camping Clepardia.
+          {page.cta.copy}
         </p>
       </div>
       <div class="families-cta__actions">
-        <a class="btn btn-primary premium-button" href={pricingHref}>Sprawdź cennik</a>
-        <a class="btn btn-glass families-cta__secondary" href={contactHref}>Zapytaj o dostępność</a>
-        <a class="btn btn-glass families-cta__secondary" href={attractionsHref}>Zobacz atrakcje</a>
+        <a class="btn btn-primary premium-button" href={pricingHref}>{page.cta.primaryLabel}</a>
+        <a class="btn btn-glass families-cta__secondary" href={contactHref}>{page.cta.secondaryLabel}</a>
+        <a class="btn btn-glass families-cta__secondary" href={attractionsHref}>{t.nav.items.atrakcje}</a>
       </div>
     </div>
   </div>

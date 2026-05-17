@@ -10,6 +10,7 @@ import FamiliesPage from './FamiliesPage.astro';
 import { pricingConfig } from '@/data/pricing';
 import type { SitePage } from '@/data/sitePages';
 import { getLocalizedPath } from '@/utils/localizedLinks';
+import { getTranslations } from '@/i18n/config';
 
 interface Props {
   page: SitePage;
@@ -18,6 +19,7 @@ interface Props {
 }
 
 const { page, languageCode, languageName } = Astro.props as Props;
+const t = getTranslations(languageCode);
 const localizeHref = (href: string) => href.startsWith('/') ? getLocalizedPath(languageCode, href) : href;
 const homeHref = getLocalizedPath(languageCode, '');
 const breadcrumbHome = languageName ? `Camping Clepardia ${languageName}` : 'Camping Clepardia';
@@ -27,10 +29,10 @@ const formatSeasonDate = (value: string) => {
   return `${day}.${month}`;
 };
 const bungalowNames = {
-  'bungalow-2': 'Domek 2-osobowy',
-  'bungalow-3': 'Domek 3-osobowy',
-  'bungalow-4': 'Domek 4-osobowy',
-  'bungalow-family': 'Domek rodzinny',
+  'bungalow-2': t.pricing.stayTypes['bungalow-2'],
+  'bungalow-3': t.pricing.stayTypes['bungalow-3'],
+  'bungalow-4': t.pricing.stayTypes['bungalow-4'],
+  'bungalow-family': t.pricing.stayTypes['bungalow-family'],
 } as const;
 const bungalowCards = pricingConfig.stayTypes
   .filter((type) => type.category === 'bungalow')
@@ -40,23 +42,23 @@ const bungalowCards = pricingConfig.stayTypes
     lowSeasonPrice: 'seasonalPrices' in type ? formatPrice(type.seasonalPrices.low) : undefined,
     highSeasonPrice: 'seasonalPrices' in type ? formatPrice(type.seasonalPrices.high) : undefined,
     startingPrice: 'startingPrice' in type ? formatPrice(type.startingPrice) : undefined,
-    note: 'note' in type ? type.note : undefined,
+    note: 'note' in type ? t.pricing.familyNotice : undefined,
     requiresConfirmation: 'requiresConfirmation' in type ? type.requiresConfirmation : false,
   }));
 const highSeasonRange = `${formatSeasonDate(pricingConfig.seasons.high.start)}–${formatSeasonDate(pricingConfig.seasons.high.end)}`;
 const dogAddon = pricingConfig.addons.find((addon) => addon.id === 'dog');
 const electricityAddon = pricingConfig.addons.find((addon) => addon.id === 'electricity');
 const pricingInfoBarItems = [
-  { label: 'Wysoki sezon', value: highSeasonRange },
-  { label: 'Niski sezon', value: 'pozostałe terminy' },
-  { label: 'Pies', value: dogAddon?.price === 0 ? 'bezpłatnie' : dogAddon ? `${formatPrice(dogAddon.price)} / noc` : 'do potwierdzenia' },
-  { label: 'Prąd', value: electricityAddon ? `${formatPrice(electricityAddon.price)} / noc` : 'do potwierdzenia' },
+  { label: t.content.highSeason, value: highSeasonRange },
+  { label: t.content.lowSeason, value: t.content.remainingDates },
+  { label: t.content.dog, value: dogAddon?.price === 0 ? t.content.free : dogAddon ? `${formatPrice(dogAddon.price)} / ${t.pricing.perNight}` : t.content.confirm },
+  { label: t.content.electricity, value: electricityAddon ? `${formatPrice(electricityAddon.price)} / ${t.pricing.perNight}` : t.content.confirm },
 ];
 const contactCards = [
-  { label: 'Telefon', value: '+48 795 294 486', href: 'tel:+48795294486' },
-  { label: 'Email', value: 'clepardia@gmail.com', href: 'mailto:clepardia@gmail.com' },
-  { label: 'Adres', value: 'Henryka Pachońskiego 28A, 31-322 Kraków' },
-  { label: 'Godziny recepcji', value: '9:00–20:00' },
+  { label: t.content.contactCards.phone, value: '+48 795 294 486', href: 'tel:+48795294486' },
+  { label: t.content.contactCards.email, value: 'clepardia@gmail.com', href: 'mailto:clepardia@gmail.com' },
+  { label: t.content.contactCards.address, value: 'Henryka Pachońskiego 28A, 31-322 Kraków' },
+  { label: t.content.contactCards.receptionHours, value: '9:00–20:00' },
 ];
 ---
 
@@ -78,8 +80,8 @@ const contactCards = [
 <section class="site-section page-detail reveal-section">
   <div class="container page-detail__grid">
     <div class="page-detail__intro">
-      <span class="section-kicker">Informacje</span>
-      <h2 class="section-title">Najważniejsze informacje przed przyjazdem</h2>
+      <span class="section-kicker">{t.content.infoKicker}</span>
+      <h2 class="section-title">{t.content.infoTitle}</h2>
       <p class="section-copy">{page.seoDescription}</p>
     </div>
 
@@ -97,7 +99,7 @@ const contactCards = [
 )}
 
 {page.slug === 'cennik' && (
-  <section class="pricing-quick-info reveal-section" aria-label="Najważniejsze informacje o cenniku">
+  <section class="pricing-quick-info reveal-section" aria-label={t.content.pricingQuickAria}>
     <div class="container pricing-quick-info__grid">
       {pricingInfoBarItems.map((item) => (
         <div class="pricing-quick-info__item">
@@ -110,7 +112,7 @@ const contactCards = [
 )}
 
 {page.slug === 'kontakt' && (
-  <section class="site-section contact-cards reveal-section" aria-label="Dane kontaktowe Camping Clepardia">
+  <section class="site-section contact-cards reveal-section" aria-label={t.content.contactAria}>
     <div class="container contact-cards__grid">
       {contactCards.map((item, index) => (
         <article class="premium-card reveal-section contact-cards__card" style={`--reveal-delay: ${index * 80}ms`}>
@@ -130,10 +132,10 @@ const contactCards = [
   <section class="site-section bungalow-types reveal-section">
     <div class="container">
       <div class="bungalow-types__head">
-        <span class="section-kicker">Cennik domków</span>
-        <h2 class="section-title">Rodzaje domków</h2>
+        <span class="section-kicker">{t.content.bungalowKicker}</span>
+        <h2 class="section-title">{t.content.bungalowTitle}</h2>
         <p class="section-copy">
-          Ceny domków zależą od sezonu i konfiguracji pobytu. Domek rodzinny wymaga potwierdzenia dostępności oraz finalnej ceny przez recepcję.
+          {t.content.bungalowCopy}
         </p>
       </div>
 
@@ -144,28 +146,28 @@ const contactCards = [
             <h3>{bungalow.title}</h3>
             {bungalow.lowSeasonPrice && bungalow.highSeasonPrice ? (
               <div class="bungalow-types__prices">
-                <p><strong>niski sezon</strong>{bungalow.lowSeasonPrice} / noc</p>
-                <p><strong>wysoki sezon</strong>{bungalow.highSeasonPrice} / noc</p>
+                <p><strong>{t.content.lowSeasonLabel}</strong>{bungalow.lowSeasonPrice} / {t.pricing.perNight}</p>
+                <p><strong>{t.content.highSeasonLabel}</strong>{bungalow.highSeasonPrice} / {t.pricing.perNight}</p>
               </div>
             ) : (
               <div class="bungalow-types__prices">
-                <p><strong>cena od</strong>{bungalow.startingPrice} / noc</p>
+                <p><strong>{t.content.priceFromLabel}</strong>{bungalow.startingPrice} / {t.pricing.perNight}</p>
               </div>
             )}
             {bungalow.note && <p class="bungalow-types__note">{bungalow.note}</p>}
-            {bungalow.requiresConfirmation && <small>Dostępność i finalna cena potwierdzana przez recepcję.</small>}
+            {bungalow.requiresConfirmation && <small>{t.content.bungalowConfirm}</small>}
           </article>
         ))}
       </div>
 
       <p class="bungalow-types__season-note">
-        Wysoki sezon: {highSeasonRange}. Niski sezon: pozostałe terminy sezonu.
+        {t.content.seasonNote.replace('{range}', highSeasonRange)}
       </p>
     </div>
   </section>
 )}
 
-{page.slug === 'cennik' && <PricingCalculator />}
+{page.slug === 'cennik' && <PricingCalculator languageCode={languageCode} />}
 
 {page.slug === 'kontakt' && <ReservationInquiryForm languageCode={languageCode} />}
 
@@ -185,8 +187,8 @@ const contactCards = [
   <section class="site-section page-detail pricing-guidance reveal-section">
     <div class="container page-detail__grid">
       <div class="page-detail__intro">
-        <span class="section-kicker">Ważne przed rezerwacją</span>
-        <h2 class="section-title">Najważniejsze informacje</h2>
+        <span class="section-kicker">{t.content.pricingGuidanceKicker}</span>
+        <h2 class="section-title">{t.content.pricingGuidanceTitle}</h2>
         <p class="section-copy">{page.seoDescription}</p>
       </div>
 
@@ -207,8 +209,8 @@ const contactCards = [
   <section class="site-section page-detail contact-guidance reveal-section">
     <div class="container page-detail__grid">
       <div class="page-detail__intro">
-        <span class="section-kicker">Przed wysłaniem zapytania</span>
-        <h2 class="section-title">Co warto wiedzieć?</h2>
+        <span class="section-kicker">{t.content.contactGuidanceKicker}</span>
+        <h2 class="section-title">{t.content.contactGuidanceTitle}</h2>
         <p class="section-copy">{page.seoDescription}</p>
       </div>
 
@@ -230,7 +232,7 @@ const contactCards = [
   <div class="container">
     <div class="page-cta__panel premium-card">
       <div>
-        <span class="section-kicker">Następny krok</span>
+        <span class="section-kicker">{t.global.nextStep}</span>
         <h2>{page.cta.title}</h2>
         <p>{page.cta.copy}</p>
       </div>

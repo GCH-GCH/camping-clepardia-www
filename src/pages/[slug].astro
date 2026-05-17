@@ -1,12 +1,13 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import ContentPage from '@/components/pages/ContentPage.astro';
-import { pageSlugs, sitePages } from '@/data/sitePages';
+import { pageSlugs } from '@/data/sitePages';
+import { getSitePage } from '@/i18n/config';
 
 export function getStaticPaths() {
   return pageSlugs.map((slug) => ({
     params: { slug },
-    props: { page: sitePages[slug] },
+    props: { page: getSitePage(slug, 'pl') },
   }));
 }
 

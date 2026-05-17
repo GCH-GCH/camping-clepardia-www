@@ -1,18 +1,29 @@
 ---
+import { getTranslations } from '@/i18n/config';
+import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const t = getTranslations(languageCode ?? pathContext.languageCode);
+const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
 const actions = [
-  { label: 'Sprawdź cennik', href: '/cennik', primary: true },
-  { label: 'Zapytaj o dostępność', href: '/kontakt' },
-  { label: 'Zobacz galerię', href: '/galeria' },
+  { label: t.cta.pricing, href: getLocalizedPath(explicitLanguage, 'cennik'), primary: true },
+  { label: t.cta.availability, href: getLocalizedPath(explicitLanguage, 'kontakt') },
+  { label: t.cta.gallery, href: getLocalizedPath(explicitLanguage, 'galeria') },
 ];
 ---
 
-<section class="home-final-cta reveal-section" aria-label="Zaplanuj pobyt w Krakowie">
+<section class="home-final-cta reveal-section" aria-label={t.pages.kontakt.cta.title}>
   <div class="container">
     <div class="home-final-cta__panel premium-card">
       <div class="home-final-cta__content">
-        <span class="section-kicker">Gotowi na Kraków?</span>
-        <h2>Zaplanuj pobyt w Krakowie z Camping Clepardia</h2>
-        <p>Sprawdź cennik, zobacz domki lub wyślij zapytanie do recepcji.</p>
+        <span class="section-kicker">{t.global.nextStep}</span>
+        <h2>{t.pages.atrakcje.cta.title}</h2>
+        <p>{t.pages.atrakcje.cta.copy}</p>
       </div>
       <div class="home-final-cta__actions">
         {actions.map((action) => (

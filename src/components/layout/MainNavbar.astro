@@ -1,18 +1,20 @@
 ---
 import { logoMain, logoMainPng } from '@/data/assets';
 import { getLanguageSwitchLinks, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
-
-const navItems = [
-  { slug: '', label: 'Start' },
-  { slug: 'camping', label: 'Camping' },
-  { slug: 'domki', label: 'Domki' },
-  { slug: 'cennik', label: 'Cennik' },
-  { slug: 'dojazd', label: 'Dojazd' },
-  { slug: 'atrakcje', label: 'Atrakcje' },
-  { slug: 'kontakt', label: 'Kontakt' },
-];
+import { getTranslations } from '@/i18n/config';
 
 const pathContext = getPathContext(Astro.url.pathname);
+const t = getTranslations(pathContext.languageCode);
+const navItems = [
+  { slug: '', label: t.nav.items.start },
+  { slug: 'camping', label: t.nav.items.camping },
+  { slug: 'domki', label: t.nav.items.domki },
+  { slug: 'cennik', label: t.nav.items.cennik },
+  { slug: 'dojazd', label: t.nav.items.dojazd },
+  { slug: 'atrakcje', label: t.nav.items.atrakcje },
+  { slug: 'kontakt', label: t.nav.items.kontakt },
+];
+
 const currentLanguage = pathContext.currentLanguage;
 const currentSlug = pathContext.slug;
 const activeLanguagePrefix = pathContext.explicitLanguage;
@@ -25,11 +27,19 @@ const localizedNavItems = navItems.map((item) => ({
   active: item.slug === currentSlug,
 }));
 const languageLinks = getLanguageSwitchLinks(Astro.url.pathname);
+const navMessages = {
+  openMenu: t.nav.openMenu,
+  closeMenu: t.nav.closeMenu,
+  enableLight: t.nav.enableLight,
+  enableDark: t.nav.enableDark,
+  lightMode: t.nav.lightMode,
+  darkMode: t.nav.darkMode,
+};
 ---
 
 <header class="main-navbar-shell" id="mainNavbarShell">
-  <nav class="main-navbar" id="mainNavbar" aria-label="Główna nawigacja Camping Clepardia">
-    <a href={homeHref} class="main-navbar__brand" aria-label="Wróć na stronę główną Camping Clepardia">
+  <nav class="main-navbar" id="mainNavbar" aria-label={t.nav.aria}>
+    <a href={homeHref} class="main-navbar__brand" aria-label={t.nav.homeAria}>
       <img class="main-navbar__logo" src={logoMain} alt="Camping Clepardia" width="180" height="46" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
     </a>
 
@@ -53,7 +63,7 @@ const languageLinks = getLanguageSwitchLinks(Astro.url.pathname);
           class="main-navbar-lang__toggle"
           id="mainNavbarLangToggle"
           type="button"
-          aria-label="Zmień język"
+          aria-label={t.nav.changeLanguage}
           aria-haspopup="menu"
           aria-expanded="false"
           aria-controls="mainNavbarLangMenu"
@@ -63,7 +73,7 @@ const languageLinks = getLanguageSwitchLinks(Astro.url.pathname);
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
         </button>
 
-        <div class="main-navbar-lang__menu" id="mainNavbarLangMenu" role="menu" aria-label="Lista języków">
+        <div class="main-navbar-lang__menu" id="mainNavbarLangMenu" role="menu" aria-label={t.nav.languageList}>
           {languageLinks.map((language) => (
             <a
               href={language.href}
@@ -83,7 +93,7 @@ const languageLinks = getLanguageSwitchLinks(Astro.url.pathname);
         class="main-navbar-theme"
         type="button"
         data-theme-toggle
-        aria-label="Zmień motyw strony"
+        aria-label={t.nav.changeTheme}
         aria-pressed="false"
       >
         <span class="main-navbar-theme__icon main-navbar-theme__icon--sun" aria-hidden="true">
@@ -94,14 +104,14 @@ const languageLinks = getLanguageSwitchLinks(Astro.url.pathname);
         </span>
       </button>
 
-      <a href={contactHref} class="main-navbar__cta">Sprawdź dostępność</a>
+      <a href={contactHref} class="main-navbar__cta">{t.nav.cta}</a>
     </div>
 
     <button
       class="main-navbar__hamburger"
       id="mainNavbarToggle"
       type="button"
-      aria-label="Otwórz menu"
+      aria-label={t.nav.openMenu}
       aria-expanded="false"
       aria-controls="mainNavbarMobile"
     >
@@ -112,9 +122,9 @@ const languageLinks = getLanguageSwitchLinks(Astro.url.pathname);
   </nav>
 
   <div class="main-navbar-mobile" id="mainNavbarMobile" aria-hidden="true">
-    <div class="main-navbar-mobile__panel" role="dialog" aria-modal="true" aria-label="Menu mobilne Camping Clepardia">
+    <div class="main-navbar-mobile__panel" role="dialog" aria-modal="true" aria-label={t.nav.mobileMenu}>
       <div class="main-navbar-mobile__top">
-        <a href={homeHref} class="main-navbar-mobile__brand" aria-label="Wróć na stronę główną Camping Clepardia">
+        <a href={homeHref} class="main-navbar-mobile__brand" aria-label={t.nav.homeAria}>
           <img src={logoMain} alt="Camping Clepardia" width="164" height="42" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
         </a>
       </div>
@@ -138,7 +148,7 @@ const languageLinks = getLanguageSwitchLinks(Astro.url.pathname);
           class="main-navbar-theme main-navbar-theme--mobile"
           type="button"
           data-theme-toggle
-          aria-label="Zmień motyw strony"
+          aria-label={t.nav.changeTheme}
           aria-pressed="false"
         >
           <span class="main-navbar-theme__icon main-navbar-theme__icon--sun" aria-hidden="true">
@@ -147,10 +157,10 @@ const languageLinks = getLanguageSwitchLinks(Astro.url.pathname);
           <span class="main-navbar-theme__icon main-navbar-theme__icon--moon" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5 7 7 0 1 0 20.5 14.6Z" /></svg>
           </span>
-          <span data-theme-label>Tryb jasny</span>
+          <span data-theme-label>{t.nav.lightMode}</span>
         </button>
 
-        <div class="main-navbar-mobile__languages" aria-label="Wybór języka">
+        <div class="main-navbar-mobile__languages" aria-label={t.nav.chooseLanguage}>
           {languageLinks.map((language) => (
             <a
               href={language.href}
@@ -163,13 +173,13 @@ const languageLinks = getLanguageSwitchLinks(Astro.url.pathname);
             </a>
           ))}
         </div>
-        <a href={contactHref} class="main-navbar__cta main-navbar__cta--mobile">Sprawdź dostępność</a>
+        <a href={contactHref} class="main-navbar__cta main-navbar__cta--mobile">{t.nav.cta}</a>
       </div>
     </div>
   </div>
 </header>
 
-<script>
+<script define:vars={{ navMessages }}>
   (() => {
     const shell = document.getElementById('mainNavbarShell');
     const toggle = document.getElementById('mainNavbarToggle');
@@ -197,7 +207,7 @@ const languageLinks = getLanguageSwitchLinks(Astro.url.pathname);
       toggle?.classList.toggle('is-open', open);
       mobile?.setAttribute('aria-hidden', String(!open));
       toggle?.setAttribute('aria-expanded', String(open));
-      toggle?.setAttribute('aria-label', open ? 'Zamknij menu' : 'Otwórz menu');
+      toggle?.setAttribute('aria-label', open ? navMessages.closeMenu : navMessages.openMenu);
       document.body.classList.toggle('has-main-navbar-open', open);
 
       if (open) {
@@ -219,9 +229,9 @@ const languageLinks = getLanguageSwitchLinks(Astro.url.pathname);
       themeToggles.forEach((button) => {
         if (!(button instanceof HTMLButtonElement)) return;
         button.setAttribute('aria-pressed', String(activeTheme === 'light'));
-        button.setAttribute('aria-label', nextTheme === 'light' ? 'Włącz tryb jasny' : 'Włącz tryb ciemny');
+        button.setAttribute('aria-label', nextTheme === 'light' ? navMessages.enableLight : navMessages.enableDark);
         const label = button.querySelector('[data-theme-label]');
-        if (label) label.textContent = nextTheme === 'light' ? 'Tryb jasny' : 'Tryb ciemny';
+        if (label) label.textContent = nextTheme === 'light' ? navMessages.lightMode : navMessages.darkMode;
       });
     };
 

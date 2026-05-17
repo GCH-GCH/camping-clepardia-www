@@ -1,9 +1,26 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
 import { siteAssets } from '@/data/assets';
+import { getTranslations } from '@/i18n/config';
+import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
+const activeLanguage = languageCode ?? pathContext.languageCode;
+const t = getTranslations(activeLanguage);
+const page = t.pages.atrakcje;
 
 const attractions = [
-  { name: 'Stare Miasto', image: siteAssets.attractions.oldTown, alt: 'Stare Miasto w Krakowie' },
+  {
+    name: activeLanguage === 'de' ? 'Altstadt' : activeLanguage === 'it' ? 'Città Vecchia' : activeLanguage === 'pl' ? 'Stare Miasto' : 'Old Town',
+    image: siteAssets.attractions.oldTown,
+    alt: activeLanguage === 'de' ? 'Altstadt von Krakau' : activeLanguage === 'it' ? 'Città Vecchia di Cracovia' : activeLanguage === 'pl' ? 'Stare Miasto w Krakowie' : 'Krakow Old Town',
+  },
   { name: 'Wieliczka', image: siteAssets.attractions.wieliczka, alt: 'Kopalnia Soli Wieliczka' },
   { name: 'Auschwitz', image: siteAssets.attractions.auschwitz, alt: 'Muzeum Auschwitz' },
   { name: 'Schindler’s Factory', image: siteAssets.attractions.schindler, alt: 'Fabryka Schindlera w Krakowie' },
@@ -14,8 +31,8 @@ const attractions = [
 
 <section class="site-section attractions reveal-section" id="atrakcje">
   <div class="container">
-    <span class="section-kicker">Atrakcje</span>
-    <h2 class="section-title">Kraków i Małopolska w zasięgu jednego pobytu.</h2>
+    <span class="section-kicker">{page.overline}</span>
+    <h2 class="section-title">{page.title}</h2>
     <div class="attractions__grid">
       {attractions.map((attraction) => (
         <ImageFrame
@@ -26,7 +43,7 @@ const attractions = [
         />
       ))}
     </div>
-    <a class="btn btn-primary premium-button attractions__cta" href="#rezerwacja">Zobacz atrakcje</a>
+    <a class="btn btn-primary premium-button attractions__cta" href={getLocalizedPath(explicitLanguage, 'atrakcje')}>{t.nav.items.atrakcje}</a>
   </div>
 </section>
 

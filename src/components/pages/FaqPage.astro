@@ -1,6 +1,7 @@
 ---
 import { pricingConfig } from '@/data/pricing';
 import { getLocalizedPath } from '@/utils/localizedLinks';
+import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 
 interface Props {
   languageCode?: string;
@@ -15,6 +16,9 @@ interface FaqItem {
 }
 
 const { languageCode } = Astro.props as Props;
+const contentLanguage = resolveContentLanguage(languageCode);
+const t = getTranslations(languageCode);
+const page = t.pages.faq;
 const pricingHref = getLocalizedPath(languageCode, 'cennik');
 const contactHref = getLocalizedPath(languageCode, 'kontakt');
 const currency = pricingConfig.currency;
@@ -28,21 +32,210 @@ const bungalow4 = findStayType('bungalow-4');
 const dog = findAddon('dog');
 const electricity = findAddon('electricity');
 
+const faqTextByLanguage = {
+  pl: {
+    headKicker: 'Baza odpowiedzi',
+    headTitle: 'Znajdź odpowiedź przed przyjazdem',
+    headCopy: 'Wybierz kategorię albo wpisz hasło. FAQ działa jako szybka pomoc przed wysłaniem zapytania do recepcji.',
+    search: 'Szukaj w FAQ',
+    placeholder: 'Np. pies, prąd, check-in, dojazd',
+    categoriesAria: 'Kategorie FAQ',
+    emptyTitle: 'Nie znaleziono odpowiedzi.',
+    emptyCopy: 'Skontaktuj się z recepcją, a pomożemy doprecyzować pobyt.',
+    finalKicker: 'Masz inne pytanie?',
+    finalTitle: 'Recepcja pomoże doprecyzować pobyt',
+    finalCopy:
+      'Jeśli nie widzisz odpowiedzi w FAQ, sprawdź orientacyjny koszt pobytu albo wyślij zapytanie do recepcji Camping Clepardia.',
+    categories: {
+      all: 'Wszystkie',
+      reservations: 'Rezerwacje',
+      pricing: 'Cennik',
+      arrival: 'Przyjazd i wyjazd',
+      camping: 'Camping',
+      bungalows: 'Domki',
+      transport: 'Dojazd',
+      pets: 'Psy i zwierzęta',
+      facilities: 'Udogodnienia',
+    },
+    toConfirm: 'do potwierdzenia',
+    seasonalAnswer: (low: string, high: string) => `${low} w niskim sezonie i ${high} w wysokim sezonie`,
+    items: {
+      reservations1: ['Czy trzeba rezerwować miejsce na polu campingowym?', 'W sezonie letnim rezerwacje pola campingowego mogą być ograniczone. Najlepiej skontaktować się z recepcją, aby potwierdzić aktualną dostępność.'],
+      reservations2: ['Czy można rezerwować domki?', 'Tak, domki można rezerwować zgodnie z aktualną dostępnością. Finalną cenę i termin potwierdza recepcja.'],
+      pricing1: ['Czy kalkulator pokazuje finalną cenę?', 'Kalkulator pokazuje cenę orientacyjną na podstawie wybranego terminu, liczby osób, typu pobytu i dodatków. Finalna cena i dostępność są potwierdzane przez recepcję.'],
+      dogFree: ['Czy pies jest płatny?', dog?.price === 0 ? 'Nie, pobyt psa jest bezpłatny.' : `Pobyt psa kosztuje ${dog ? formatPrice(dog.price) : 'do potwierdzenia'}.`],
+      electricity: ['Ile kosztuje prąd?', `Prąd kosztuje ${electricity ? formatPrice(electricity.price) : '25 PLN'} za noc.`],
+      campingCheck: ['O której jest check-in i check-out na campingu?', 'Na polu campingowym standardowo doba trwa od 12:00 do 12:00.'],
+      bungalowCheck: ['O której jest check-in i check-out w domkach?', 'W domkach check-in jest od 16:00, a check-out do 11:00.'],
+      campers: ['Czy są miejsca dla kamperów?', 'Tak, Camping Clepardia przyjmuje kampery, vany, przyczepy, namioty oraz auta z namiotem dachowym.'],
+      power: ['Czy można podłączyć prąd?', 'Tak, dostępne jest podłączenie do prądu. Skrzynki elektryczne na campingu mają ograniczenia, dlatego nie należy podłączać urządzeń o bardzo dużym poborze mocy.'],
+      bungalows: ['Jakie są ceny domków?', ''],
+      centre: ['Czy łatwo dojechać do centrum Krakowa?', 'Tak, najwygodniej zostawić auto lub kampera na campingu i dojechać do centrum tramwajem.'],
+      address: ['Jaki adres wpisać w nawigację?', 'Henryka Pachońskiego 28A, 31-322 Kraków.'],
+      pets: ['Czy można przyjechać z psem?', 'Tak, psy są mile widziane, a ich pobyt jest bezpłatny. Prosimy tylko o zachowanie zasad bezpieczeństwa i sprzątanie po zwierzętach.'],
+      sanitary: ['Czy na campingu są sanitariaty?', 'Tak, na miejscu dostępne są sanitariaty i podstawowe zaplecze dla gości.'],
+      laundry: ['Czy jest pralnia?', 'Tak, dostępne są podstawowe udogodnienia przydatne podczas dłuższego pobytu.'],
+    },
+    bungalowPriceAnswer: (b2: string, b3: string, b4: string) =>
+      `Domek 2-osobowy kosztuje ${b2}. Domek 3-osobowy kosztuje ${b3}. Domek 4-osobowy kosztuje ${b4}.`,
+  },
+  en: {
+    headKicker: 'Answer base',
+    headTitle: 'Find an answer before arrival',
+    headCopy: 'Choose a category or type a keyword. FAQ works as quick help before sending an enquiry to reception.',
+    search: 'Search FAQ',
+    placeholder: 'E.g. dog, electricity, check-in, directions',
+    categoriesAria: 'FAQ categories',
+    emptyTitle: 'No answer found.',
+    emptyCopy: 'Contact reception and we will help clarify your stay.',
+    finalKicker: 'Have another question?',
+    finalTitle: 'Reception will help clarify your stay',
+    finalCopy:
+      'If you do not see the answer in FAQ, check the estimated stay cost or send an enquiry to Camping Clepardia reception.',
+    categories: {
+      all: 'All',
+      reservations: 'Reservations',
+      pricing: 'Prices',
+      arrival: 'Arrival and departure',
+      camping: 'Camping',
+      bungalows: 'Bungalows',
+      transport: 'Directions',
+      pets: 'Dogs and pets',
+      facilities: 'Facilities',
+    },
+    toConfirm: 'to confirm',
+    seasonalAnswer: (low: string, high: string) => `${low} in low season and ${high} in high season`,
+    items: {
+      reservations1: ['Do I need to reserve a camping pitch?', 'In the summer season, camping pitch reservations may be limited. It is best to contact reception to confirm current availability.'],
+      reservations2: ['Can bungalows be booked?', 'Yes, bungalows can be booked according to current availability. Reception confirms the final price and dates.'],
+      pricing1: ['Does the calculator show the final price?', 'The calculator shows an indicative price based on dates, number of guests, stay type and extras. Final price and availability are confirmed by reception.'],
+      dogFree: ['Is a dog paid?', dog?.price === 0 ? 'No, dogs stay free of charge.' : `Dog stay costs ${dog ? formatPrice(dog.price) : 'to confirm'}.`],
+      electricity: ['How much does electricity cost?', `Electricity costs ${electricity ? formatPrice(electricity.price) : '25 PLN'} per night.`],
+      campingCheck: ['What are camping check-in and check-out times?', 'On the camping field, the standard day runs from 12:00 to 12:00.'],
+      bungalowCheck: ['What are bungalow check-in and check-out times?', 'Bungalow check-in is from 16:00 and check-out is by 11:00.'],
+      campers: ['Are there motorhome pitches?', 'Yes, Camping Clepardia accepts motorhomes, vans, caravans, tents and cars with rooftop tents.'],
+      power: ['Can I connect electricity?', 'Yes, electric hook-up is available. Campsite electric boxes have limits, so devices with very high power consumption should not be connected.'],
+      bungalows: ['What are bungalow prices?', ''],
+      centre: ['Is it easy to get to Krakow centre?', 'Yes, the easiest way is to leave your car or camper at the campsite and take the tram to the centre.'],
+      address: ['What address should I enter in navigation?', 'Henryka Pachońskiego 28A, 31-322 Krakow.'],
+      pets: ['Can I come with a dog?', 'Yes, dogs are welcome and stay free. Please follow safety rules and clean up after pets.'],
+      sanitary: ['Are there sanitary facilities on site?', 'Yes, sanitary facilities and basic guest infrastructure are available on site.'],
+      laundry: ['Is there laundry?', 'Yes, basic facilities useful during longer stays are available.'],
+    },
+    bungalowPriceAnswer: (b2: string, b3: string, b4: string) =>
+      `The 2-person bungalow costs ${b2}. The 3-person bungalow costs ${b3}. The 4-person bungalow costs ${b4}.`,
+  },
+  de: {
+    headKicker: 'Antwortbasis',
+    headTitle: 'Antwort vor der Anreise finden',
+    headCopy: 'Wählen Sie eine Kategorie oder geben Sie ein Stichwort ein. Das FAQ hilft schnell vor einer Anfrage an die Rezeption.',
+    search: 'FAQ durchsuchen',
+    placeholder: 'Z. B. Hund, Strom, Check-in, Anfahrt',
+    categoriesAria: 'FAQ-Kategorien',
+    emptyTitle: 'Keine Antwort gefunden.',
+    emptyCopy: 'Kontaktieren Sie die Rezeption, wir helfen beim Klären des Aufenthalts.',
+    finalKicker: 'Noch eine Frage?',
+    finalTitle: 'Die Rezeption hilft beim Klären des Aufenthalts',
+    finalCopy:
+      'Wenn Sie im FAQ keine Antwort finden, prüfen Sie den Richtpreis oder senden Sie eine Anfrage an die Rezeption von Camping Clepardia.',
+    categories: {
+      all: 'Alle',
+      reservations: 'Reservierungen',
+      pricing: 'Preise',
+      arrival: 'Ankunft und Abreise',
+      camping: 'Camping',
+      bungalows: 'Bungalows',
+      transport: 'Anfahrt',
+      pets: 'Hunde und Tiere',
+      facilities: 'Ausstattung',
+    },
+    toConfirm: 'zu bestätigen',
+    seasonalAnswer: (low: string, high: string) => `${low} in der Nebensaison und ${high} in der Hauptsaison`,
+    items: {
+      reservations1: ['Muss man einen Campingplatz reservieren?', 'In der Sommersaison können Reservierungen für Campingplätze eingeschränkt sein. Kontaktieren Sie am besten die Rezeption, um die aktuelle Verfügbarkeit zu bestätigen.'],
+      reservations2: ['Kann man Bungalows reservieren?', 'Ja, Bungalows können je nach aktueller Verfügbarkeit reserviert werden. Endpreis und Termin bestätigt die Rezeption.'],
+      pricing1: ['Zeigt der Rechner den Endpreis?', 'Der Rechner zeigt einen Richtpreis nach Termin, Personenzahl, Aufenthaltsart und Extras. Endpreis und Verfügbarkeit bestätigt die Rezeption.'],
+      dogFree: ['Ist ein Hund kostenpflichtig?', dog?.price === 0 ? 'Nein, der Aufenthalt mit Hund ist kostenlos.' : `Der Aufenthalt mit Hund kostet ${dog ? formatPrice(dog.price) : 'zu bestätigen'}.`],
+      electricity: ['Was kostet Strom?', `Strom kostet ${electricity ? formatPrice(electricity.price) : '25 PLN'} pro Nacht.`],
+      campingCheck: ['Wann ist Check-in und Check-out auf dem Campingplatz?', 'Auf dem Campingfeld dauert die Standardnacht von 12:00 bis 12:00.'],
+      bungalowCheck: ['Wann ist Check-in und Check-out in den Bungalows?', 'Check-in in den Bungalows ist ab 16:00, Check-out bis 11:00.'],
+      campers: ['Gibt es Stellplätze für Wohnmobile?', 'Ja, Camping Clepardia nimmt Wohnmobile, Vans, Wohnwagen, Zelte und Autos mit Dachzelt auf.'],
+      power: ['Kann man Strom anschließen?', 'Ja, Stromanschluss ist verfügbar. Die Stromkästen auf dem Campingplatz haben Begrenzungen, daher sollten Geräte mit sehr hohem Verbrauch nicht angeschlossen werden.'],
+      bungalows: ['Wie hoch sind die Bungalowpreise?', ''],
+      centre: ['Kommt man leicht ins Zentrum von Krakau?', 'Ja, am bequemsten lässt man Auto oder Wohnmobil auf dem Campingplatz und fährt mit der Straßenbahn ins Zentrum.'],
+      address: ['Welche Adresse soll ich in die Navigation eingeben?', 'Henryka Pachońskiego 28A, 31-322 Krakau.'],
+      pets: ['Kann man mit Hund kommen?', 'Ja, Hunde sind willkommen und übernachten kostenlos. Bitte beachten Sie Sicherheitsregeln und räumen Sie nach dem Tier auf.'],
+      sanitary: ['Gibt es Sanitäranlagen?', 'Ja, vor Ort gibt es Sanitäranlagen und grundlegende Infrastruktur für Gäste.'],
+      laundry: ['Gibt es eine Waschmöglichkeit?', 'Ja, grundlegende Einrichtungen für längere Aufenthalte sind verfügbar.'],
+    },
+    bungalowPriceAnswer: (b2: string, b3: string, b4: string) =>
+      `Der 2-Personen-Bungalow kostet ${b2}. Der 3-Personen-Bungalow kostet ${b3}. Der 4-Personen-Bungalow kostet ${b4}.`,
+  },
+  it: {
+    headKicker: 'Base risposte',
+    headTitle: 'Trova una risposta prima dell’arrivo',
+    headCopy: 'Scegli una categoria o inserisci una parola chiave. Le FAQ aiutano rapidamente prima di inviare una richiesta alla reception.',
+    search: 'Cerca nelle FAQ',
+    placeholder: 'Es. cane, elettricità, check-in, come arrivare',
+    categoriesAria: 'Categorie FAQ',
+    emptyTitle: 'Nessuna risposta trovata.',
+    emptyCopy: 'Contatta la reception e ti aiuteremo a chiarire il soggiorno.',
+    finalKicker: 'Hai un’altra domanda?',
+    finalTitle: 'La reception aiuta a chiarire il soggiorno',
+    finalCopy:
+      'Se non trovi la risposta nelle FAQ, controlla il costo orientativo o invia una richiesta alla reception di Camping Clepardia.',
+    categories: {
+      all: 'Tutte',
+      reservations: 'Prenotazioni',
+      pricing: 'Prezzi',
+      arrival: 'Arrivo e partenza',
+      camping: 'Camping',
+      bungalows: 'Bungalow',
+      transport: 'Come arrivare',
+      pets: 'Cani e animali',
+      facilities: 'Servizi',
+    },
+    toConfirm: 'da confermare',
+    seasonalAnswer: (low: string, high: string) => `${low} in bassa stagione e ${high} in alta stagione`,
+    items: {
+      reservations1: ['Bisogna prenotare una piazzola?', 'In estate le prenotazioni delle piazzole possono essere limitate. È meglio contattare la reception per confermare la disponibilità attuale.'],
+      reservations2: ['Si possono prenotare i bungalow?', 'Sì, i bungalow si possono prenotare secondo la disponibilità attuale. Prezzo finale e date sono confermati dalla reception.'],
+      pricing1: ['Il calcolatore mostra il prezzo finale?', 'Il calcolatore mostra un prezzo indicativo in base a date, numero di persone, tipo di soggiorno ed extra. Prezzo finale e disponibilità sono confermati dalla reception.'],
+      dogFree: ['Il cane è a pagamento?', dog?.price === 0 ? 'No, il cane soggiorna gratuitamente.' : `Il soggiorno con cane costa ${dog ? formatPrice(dog.price) : 'da confermare'}.`],
+      electricity: ['Quanto costa l’elettricità?', `L’elettricità costa ${electricity ? formatPrice(electricity.price) : '25 PLN'} a notte.`],
+      campingCheck: ['Quali sono gli orari di check-in e check-out in camping?', 'Nell’area camping la giornata standard va dalle 12:00 alle 12:00.'],
+      bungalowCheck: ['Quali sono gli orari di check-in e check-out nei bungalow?', 'Nei bungalow il check-in è dalle 16:00 e il check-out entro le 11:00.'],
+      campers: ['Ci sono posti per camper?', 'Sì, Camping Clepardia accoglie camper, van, roulotte, tende e auto con tenda da tetto.'],
+      power: ['Si può collegare l’elettricità?', 'Sì, è disponibile l’allaccio elettrico. Le colonnine del camping hanno limiti, quindi non collegare dispositivi ad altissimo consumo.'],
+      bungalows: ['Quali sono i prezzi dei bungalow?', ''],
+      centre: ['È facile arrivare al centro di Cracovia?', 'Sì, il modo più comodo è lasciare auto o camper al camping e prendere il tram verso il centro.'],
+      address: ['Quale indirizzo inserire nel navigatore?', 'Henryka Pachońskiego 28A, 31-322 Cracovia.'],
+      pets: ['Si può venire con il cane?', 'Sì, i cani sono benvenuti e soggiornano gratuitamente. Chiediamo solo di rispettare le regole di sicurezza e pulire dopo gli animali.'],
+      sanitary: ['Ci sono servizi igienici nel camping?', 'Sì, sul posto sono disponibili servizi igienici e dotazioni base per gli ospiti.'],
+      laundry: ['C’è una lavanderia?', 'Sì, sono disponibili servizi base utili per soggiorni più lunghi.'],
+    },
+    bungalowPriceAnswer: (b2: string, b3: string, b4: string) =>
+      `Il bungalow 2 persone costa ${b2}. Il bungalow 3 persone costa ${b3}. Il bungalow 4 persone costa ${b4}.`,
+  },
+};
+
+const faqText = faqTextByLanguage[contentLanguage];
+
 const getSeasonalAnswer = (stayType: typeof pricingConfig.stayTypes[number] | undefined) => {
-  if (!stayType || !('seasonalPrices' in stayType)) return 'do potwierdzenia';
-  return `${formatPrice(stayType.seasonalPrices.low)} w niskim sezonie i ${formatPrice(stayType.seasonalPrices.high)} w wysokim sezonie`;
+  if (!stayType || !('seasonalPrices' in stayType)) return faqText.toConfirm;
+  return faqText.seasonalAnswer(formatPrice(stayType.seasonalPrices.low), formatPrice(stayType.seasonalPrices.high));
 };
 
 const categories: Array<{ id: 'all' | FaqCategoryId; label: string }> = [
-  { id: 'all', label: 'Wszystkie' },
-  { id: 'reservations', label: 'Rezerwacje' },
-  { id: 'pricing', label: 'Cennik' },
-  { id: 'arrival', label: 'Przyjazd i wyjazd' },
-  { id: 'camping', label: 'Camping' },
-  { id: 'bungalows', label: 'Domki' },
-  { id: 'transport', label: 'Dojazd' },
-  { id: 'pets', label: 'Psy i zwierzęta' },
-  { id: 'facilities', label: 'Udogodnienia' },
+  { id: 'all', label: faqText.categories.all },
+  { id: 'reservations', label: faqText.categories.reservations },
+  { id: 'pricing', label: faqText.categories.pricing },
+  { id: 'arrival', label: faqText.categories.arrival },
+  { id: 'camping', label: faqText.categories.camping },
+  { id: 'bungalows', label: faqText.categories.bungalows },
+  { id: 'transport', label: faqText.categories.transport },
+  { id: 'pets', label: faqText.categories.pets },
+  { id: 'facilities', label: faqText.categories.facilities },
 ];
 
 const categoryLabels = Object.fromEntries(categories.map((category) => [category.id, category.label])) as Record<string, string>;
@@ -50,78 +243,78 @@ const categoryLabels = Object.fromEntries(categories.map((category) => [category
 const faqItems: FaqItem[] = [
   {
     category: 'reservations',
-    question: 'Czy trzeba rezerwować miejsce na polu campingowym?',
-    answer: 'W sezonie letnim rezerwacje pola campingowego mogą być ograniczone. Najlepiej skontaktować się z recepcją, aby potwierdzić aktualną dostępność.',
+    question: faqText.items.reservations1[0],
+    answer: faqText.items.reservations1[1],
   },
   {
     category: 'reservations',
-    question: 'Czy można rezerwować domki?',
-    answer: 'Tak, domki można rezerwować zgodnie z aktualną dostępnością. Finalną cenę i termin potwierdza recepcja.',
+    question: faqText.items.reservations2[0],
+    answer: faqText.items.reservations2[1],
   },
   {
     category: 'pricing',
-    question: 'Czy kalkulator pokazuje finalną cenę?',
-    answer: 'Kalkulator pokazuje cenę orientacyjną na podstawie wybranego terminu, liczby osób, typu pobytu i dodatków. Finalna cena i dostępność są potwierdzane przez recepcję.',
+    question: faqText.items.pricing1[0],
+    answer: faqText.items.pricing1[1],
   },
   {
     category: 'pricing',
-    question: 'Czy pies jest płatny?',
-    answer: dog?.price === 0 ? 'Nie, pobyt psa jest bezpłatny.' : `Pobyt psa kosztuje ${dog ? formatPrice(dog.price) : 'do potwierdzenia'}.`,
+    question: faqText.items.dogFree[0],
+    answer: faqText.items.dogFree[1],
   },
   {
     category: 'pricing',
-    question: 'Ile kosztuje prąd?',
-    answer: `Prąd kosztuje ${electricity ? formatPrice(electricity.price) : '25 PLN'} za noc.`,
+    question: faqText.items.electricity[0],
+    answer: faqText.items.electricity[1],
   },
   {
     category: 'arrival',
-    question: 'O której jest check-in i check-out na campingu?',
-    answer: 'Na polu campingowym standardowo doba trwa od 12:00 do 12:00.',
+    question: faqText.items.campingCheck[0],
+    answer: faqText.items.campingCheck[1],
   },
   {
     category: 'arrival',
-    question: 'O której jest check-in i check-out w domkach?',
-    answer: 'W domkach check-in jest od 16:00, a check-out do 11:00.',
+    question: faqText.items.bungalowCheck[0],
+    answer: faqText.items.bungalowCheck[1],
   },
   {
     category: 'camping',
-    question: 'Czy są miejsca dla kamperów?',
-    answer: 'Tak, Camping Clepardia przyjmuje kampery, vany, przyczepy, namioty oraz auta z namiotem dachowym.',
+    question: faqText.items.campers[0],
+    answer: faqText.items.campers[1],
   },
   {
     category: 'camping',
-    question: 'Czy można podłączyć prąd?',
-    answer: 'Tak, dostępne jest podłączenie do prądu. Skrzynki elektryczne na campingu mają ograniczenia, dlatego nie należy podłączać urządzeń o bardzo dużym poborze mocy.',
+    question: faqText.items.power[0],
+    answer: faqText.items.power[1],
   },
   {
     category: 'bungalows',
-    question: 'Jakie są ceny domków?',
-    answer: `Domek 2-osobowy kosztuje ${getSeasonalAnswer(bungalow2)}. Domek 3-osobowy kosztuje ${getSeasonalAnswer(bungalow3)}. Domek 4-osobowy kosztuje ${getSeasonalAnswer(bungalow4)}.`,
+    question: faqText.items.bungalows[0],
+    answer: faqText.bungalowPriceAnswer(getSeasonalAnswer(bungalow2), getSeasonalAnswer(bungalow3), getSeasonalAnswer(bungalow4)),
   },
   {
     category: 'transport',
-    question: 'Czy łatwo dojechać do centrum Krakowa?',
-    answer: 'Tak, najwygodniej zostawić auto lub kampera na campingu i dojechać do centrum tramwajem.',
+    question: faqText.items.centre[0],
+    answer: faqText.items.centre[1],
   },
   {
     category: 'transport',
-    question: 'Jaki adres wpisać w nawigację?',
-    answer: 'Henryka Pachońskiego 28A, 31-322 Kraków.',
+    question: faqText.items.address[0],
+    answer: faqText.items.address[1],
   },
   {
     category: 'pets',
-    question: 'Czy można przyjechać z psem?',
-    answer: 'Tak, psy są mile widziane, a ich pobyt jest bezpłatny. Prosimy tylko o zachowanie zasad bezpieczeństwa i sprzątanie po zwierzętach.',
+    question: faqText.items.pets[0],
+    answer: faqText.items.pets[1],
   },
   {
     category: 'facilities',
-    question: 'Czy na campingu są sanitariaty?',
-    answer: 'Tak, na miejscu dostępne są sanitariaty i podstawowe zaplecze dla gości.',
+    question: faqText.items.sanitary[0],
+    answer: faqText.items.sanitary[1],
   },
   {
     category: 'facilities',
-    question: 'Czy jest pralnia?',
-    answer: 'Tak, dostępne są podstawowe udogodnienia przydatne podczas dłuższego pobytu.',
+    question: faqText.items.laundry[0],
+    answer: faqText.items.laundry[1],
   },
 ];
 
@@ -144,20 +337,20 @@ const faqSchema = {
 
   <div class="container">
     <div class="faq-page__head">
-      <span class="section-kicker">Baza odpowiedzi</span>
-      <h2 class="section-title">Znajdź odpowiedź przed przyjazdem</h2>
+      <span class="section-kicker">{faqText.headKicker}</span>
+      <h2 class="section-title">{faqText.headTitle}</h2>
       <p class="section-copy">
-        Wybierz kategorię albo wpisz hasło. FAQ działa jako szybka pomoc przed wysłaniem zapytania do recepcji.
+        {faqText.headCopy}
       </p>
     </div>
 
     <div class="premium-card faq-page__controls">
       <label class="faq-page__search">
-        <span>Szukaj w FAQ</span>
-        <input type="search" placeholder="Np. pies, prąd, check-in, dojazd" data-faq-search autocomplete="off" />
+        <span>{faqText.search}</span>
+        <input type="search" placeholder={faqText.placeholder} data-faq-search autocomplete="off" />
       </label>
 
-      <div class="faq-page__categories" role="list" aria-label="Kategorie FAQ">
+      <div class="faq-page__categories" role="list" aria-label={faqText.categoriesAria}>
         {categories.map((category) => (
           <button
             type="button"
@@ -172,9 +365,9 @@ const faqSchema = {
     </div>
 
     <div class="faq-page__layout">
-      <aside class="faq-page__aside" aria-label="Kategorie FAQ">
+      <aside class="faq-page__aside" aria-label={faqText.categoriesAria}>
         <div class="premium-card faq-page__aside-panel">
-          <span class="section-kicker">Kategorie FAQ</span>
+          <span class="section-kicker">{faqText.categoriesAria}</span>
           <ul>
             {categories.filter((category) => category.id !== 'all').map((category) => (
               <li>
@@ -230,9 +423,9 @@ const faqSchema = {
         })}
 
         <div class="premium-card faq-page__empty" data-faq-empty hidden>
-          <h3>Nie znaleziono odpowiedzi.</h3>
-          <p>Skontaktuj się z recepcją, a pomożemy doprecyzować pobyt.</p>
-          <a class="btn btn-primary premium-button" href={contactHref}>Zapytaj recepcję</a>
+          <h3>{faqText.emptyTitle}</h3>
+          <p>{faqText.emptyCopy}</p>
+          <a class="btn btn-primary premium-button" href={contactHref}>{t.cta.contactReception}</a>
         </div>
       </div>
     </div>
@@ -243,15 +436,15 @@ const faqSchema = {
   <div class="container">
     <div class="premium-card faq-final-cta__panel">
       <div>
-        <span class="section-kicker">Masz inne pytanie?</span>
-        <h2>Recepcja pomoże doprecyzować pobyt</h2>
+        <span class="section-kicker">{faqText.finalKicker}</span>
+        <h2>{faqText.finalTitle}</h2>
         <p>
-          Jeśli nie widzisz odpowiedzi w FAQ, sprawdź orientacyjny koszt pobytu albo wyślij zapytanie do recepcji Camping Clepardia.
+          {faqText.finalCopy}
         </p>
       </div>
       <div class="faq-final-cta__actions">
-        <a class="btn btn-primary premium-button" href={pricingHref}>Sprawdź cennik</a>
-        <a class="btn btn-glass faq-final-cta__secondary" href={contactHref}>Zapytaj recepcję</a>
+        <a class="btn btn-primary premium-button" href={pricingHref}>{page.cta.primaryLabel}</a>
+        <a class="btn btn-glass faq-final-cta__secondary" href={contactHref}>{page.cta.secondaryLabel}</a>
       </div>
     </div>
   </div>

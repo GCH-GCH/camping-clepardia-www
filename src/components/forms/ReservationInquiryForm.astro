@@ -1,6 +1,7 @@
 ---
 import { languages } from '@/data/languages';
 import { pricingConfig } from '@/data/pricing';
+import { getTranslations } from '@/i18n/config';
 
 interface Props {
   languageCode?: string;
@@ -8,32 +9,36 @@ interface Props {
 
 const { languageCode } = Astro.props as Props;
 const activeLanguageCode = languages.some((language) => language.code === languageCode) ? languageCode : 'pl';
+const t = getTranslations(activeLanguageCode);
+const formText = t.form;
+const pricingText = t.pricing;
 
 const stayOptions = [
-  { id: 'camper', label: 'Kamper', category: 'camping' },
-  { id: 'caravan', label: 'Przyczepa', category: 'camping' },
-  { id: 'tent', label: 'Namiot', category: 'camping' },
-  { id: 'van', label: 'Van', category: 'camping' },
-  { id: 'rooftop-tent', label: 'Auto + namiot dachowy', category: 'camping' },
-  { id: 'bungalow-2', label: 'Domek 2-os.', category: 'bungalow' },
-  { id: 'bungalow-3', label: 'Domek 3-os.', category: 'bungalow' },
-  { id: 'bungalow-4', label: 'Domek 4-os.', category: 'bungalow' },
-  { id: 'bungalow-family', label: 'Domek rodzinny', category: 'bungalow' },
+  { id: 'camper', label: pricingText.stayTypes.camper, category: 'camping' },
+  { id: 'caravan', label: pricingText.stayTypes.caravan, category: 'camping' },
+  { id: 'tent', label: pricingText.stayTypes['tent-small'], category: 'camping' },
+  { id: 'van', label: pricingText.stayTypes.van, category: 'camping' },
+  { id: 'rooftop-tent', label: pricingText.stayTypes['rooftop-tent'], category: 'camping' },
+  { id: 'bungalow-2', label: pricingText.stayTypes['bungalow-2'], category: 'bungalow' },
+  { id: 'bungalow-3', label: pricingText.stayTypes['bungalow-3'], category: 'bungalow' },
+  { id: 'bungalow-4', label: pricingText.stayTypes['bungalow-4'], category: 'bungalow' },
+  { id: 'bungalow-family', label: pricingText.stayTypes['bungalow-family'], category: 'bungalow' },
 ] as const;
 
 const inquiryAddonIds = ['electricity', 'dog', 'extra-car', 'motorcycle', 'cargo-trailer'] as const;
 const addonOptions = inquiryAddonIds
   .map((id) => pricingConfig.addons.find((addon) => addon.id === id))
   .filter((addon): addon is (typeof pricingConfig.addons)[number] => Boolean(addon));
+const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as keyof typeof pricingText.addons] ?? fallback;
 ---
 
 <section class="site-section reservation-inquiry reveal-section" data-reservation-inquiry>
   <div class="container">
     <div class="reservation-inquiry__head">
-      <span class="section-kicker">Formularz zapytania rezerwacyjnego</span>
-      <h2 class="section-title">Wyślij szczegóły planowanego pobytu</h2>
+      <span class="section-kicker">{formText.kicker}</span>
+      <h2 class="section-title">{formText.title}</h2>
       <p class="section-copy">
-        Im więcej informacji podasz od razu, tym szybciej recepcja może potwierdzić dostępność terminu i najlepszą opcję pobytu.
+        {formText.lead}
       </p>
     </div>
 
@@ -42,32 +47,32 @@ const addonOptions = inquiryAddonIds
         <div class="reservation-inquiry__errors" data-form-errors role="alert" hidden></div>
 
         <fieldset class="reservation-inquiry__group reveal-section" style="--reveal-delay: 0ms">
-          <legend>Dane</legend>
+          <legend>{formText.data}</legend>
           <div class="reservation-inquiry__fields">
             <label class="reservation-inquiry__field" data-field="fullName">
-              <span>Imię i nazwisko *</span>
+              <span>{formText.fullName} *</span>
               <input id="fullName" name="fullName" type="text" autocomplete="name" required data-required aria-describedby="fullNameError">
               <small id="fullNameError" data-field-error="fullName"></small>
             </label>
 
             <label class="reservation-inquiry__field" data-field="email">
-              <span>Email *</span>
+              <span>{formText.email} *</span>
               <input id="email" name="email" type="email" autocomplete="email" required data-required aria-describedby="emailError">
               <small id="emailError" data-field-error="email"></small>
             </label>
 
             <label class="reservation-inquiry__field" data-field="phone">
-              <span>Telefon</span>
+              <span>{formText.phone}</span>
               <input id="phone" name="phone" type="tel" autocomplete="tel">
             </label>
 
             <label class="reservation-inquiry__field" data-field="country">
-              <span>Kraj</span>
+              <span>{formText.country}</span>
               <input id="country" name="country" type="text" autocomplete="country-name">
             </label>
 
             <label class="reservation-inquiry__field" data-field="contactLanguage">
-              <span>Język kontaktu</span>
+              <span>{formText.contactLanguage}</span>
               <select id="contactLanguage" name="contactLanguage">
                 {languages.map((language) => (
                   <option value={language.code} selected={language.code === activeLanguageCode}>
@@ -80,25 +85,25 @@ const addonOptions = inquiryAddonIds
         </fieldset>
 
         <fieldset class="reservation-inquiry__group reveal-section" style="--reveal-delay: 80ms">
-          <legend>Termin</legend>
+          <legend>{formText.dates}</legend>
           <div class="reservation-inquiry__fields">
             <label class="reservation-inquiry__field" data-field="arrival">
-              <span>Data przyjazdu *</span>
+              <span>{formText.arrival} *</span>
               <input id="arrival" name="arrival" type="date" required data-arrival data-required aria-describedby="arrivalError">
               <small id="arrivalError" data-field-error="arrival"></small>
             </label>
 
             <label class="reservation-inquiry__field" data-field="departure">
-              <span>Data wyjazdu *</span>
+              <span>{formText.departure} *</span>
               <input id="departure" name="departure" type="date" required data-departure data-required aria-describedby="departureError">
               <small id="departureError" data-field-error="departure"></small>
             </label>
           </div>
-          <p class="reservation-inquiry__nights">Liczba nocy: <strong data-nights-label>Uzupełnij termin</strong></p>
+          <p class="reservation-inquiry__nights">{formText.nights}: <strong data-nights-label>{formText.completeDates}</strong></p>
         </fieldset>
 
         <fieldset class="reservation-inquiry__group reveal-section" data-stay-group style="--reveal-delay: 160ms">
-          <legend>Typ pobytu *</legend>
+          <legend>{formText.stayType} *</legend>
           <div class="reservation-inquiry__options">
             {stayOptions.map((option) => (
               <label class="reservation-inquiry__option">
@@ -111,98 +116,98 @@ const addonOptions = inquiryAddonIds
         </fieldset>
 
         <fieldset class="reservation-inquiry__group reveal-section" style="--reveal-delay: 240ms">
-          <legend>Osoby</legend>
+          <legend>{formText.people}</legend>
           <div class="reservation-inquiry__counters">
             <div class="reservation-counter">
-              <label for="adults">Dorośli</label>
+              <label for="adults">{formText.adults}</label>
               <div>
-                <button type="button" data-counter="adults" data-delta="-1" aria-label="Zmniejsz liczbę dorosłych">-</button>
+                <button type="button" data-counter="adults" data-delta="-1" aria-label={`${pricingText.decrement} ${formText.adults}`}>-</button>
                 <input id="adults" name="adults" type="number" min="0" value="2" inputmode="numeric" data-counter-input="adults">
-                <button type="button" data-counter="adults" data-delta="1" aria-label="Zwiększ liczbę dorosłych">+</button>
+                <button type="button" data-counter="adults" data-delta="1" aria-label={`${pricingText.increment} ${formText.adults}`}>+</button>
               </div>
             </div>
 
             <div class="reservation-counter">
-              <label for="children">Dzieci 4-14</label>
+              <label for="children">{formText.children}</label>
               <div>
-                <button type="button" data-counter="children" data-delta="-1" aria-label="Zmniejsz liczbę dzieci 4-14">-</button>
+                <button type="button" data-counter="children" data-delta="-1" aria-label={`${pricingText.decrement} ${formText.children}`}>-</button>
                 <input id="children" name="children" type="number" min="0" value="0" inputmode="numeric" data-counter-input="children">
-                <button type="button" data-counter="children" data-delta="1" aria-label="Zwiększ liczbę dzieci 4-14">+</button>
+                <button type="button" data-counter="children" data-delta="1" aria-label={`${pricingText.increment} ${formText.children}`}>+</button>
               </div>
             </div>
 
             <div class="reservation-counter">
-              <label for="toddlers">Dzieci do 4</label>
+              <label for="toddlers">{formText.toddlers}</label>
               <div>
-                <button type="button" data-counter="toddlers" data-delta="-1" aria-label="Zmniejsz liczbę dzieci do 4 lat">-</button>
+                <button type="button" data-counter="toddlers" data-delta="-1" aria-label={`${pricingText.decrement} ${formText.toddlers}`}>-</button>
                 <input id="toddlers" name="toddlers" type="number" min="0" value="0" inputmode="numeric" data-counter-input="toddlers">
-                <button type="button" data-counter="toddlers" data-delta="1" aria-label="Zwiększ liczbę dzieci do 4 lat">+</button>
+                <button type="button" data-counter="toddlers" data-delta="1" aria-label={`${pricingText.increment} ${formText.toddlers}`}>+</button>
               </div>
             </div>
           </div>
         </fieldset>
 
         <fieldset class="reservation-inquiry__group reveal-section" style="--reveal-delay: 320ms">
-          <legend>Dodatki</legend>
+          <legend>{formText.extras}</legend>
           <div class="reservation-inquiry__addons">
             {addonOptions.map((addon) => (
               <label class="reservation-inquiry__addon">
-                <input type="checkbox" name="addons" value={addon.id} data-label={addon.label}>
-                <span>{addon.label}</span>
+                <input type="checkbox" name="addons" value={addon.id} data-label={getAddonLabel(addon.id, addon.label)}>
+                <span>{getAddonLabel(addon.id, addon.label)}</span>
               </label>
             ))}
           </div>
         </fieldset>
 
         <label class="reservation-inquiry__field reservation-inquiry__field--textarea reveal-section" data-field="message" style="--reveal-delay: 400ms">
-          <span>Wiadomość</span>
-          <textarea id="message" name="message" rows="5" placeholder="Napisz, czego potrzebujesz: godzina przyjazdu, typ sprzętu, pytania o domek lub dodatkowe informacje."></textarea>
+          <span>{formText.message}</span>
+          <textarea id="message" name="message" rows="5" placeholder={formText.messagePlaceholder}></textarea>
         </label>
 
         <div class="reservation-inquiry__season-notice" data-season-banner hidden>
-          W sezonie letnim rezerwacje pola campingowego mogą być ograniczone. Recepcja potwierdzi dostępność w odpowiedzi na zapytanie.
+          {formText.summerNotice}
         </div>
 
         <label class="reservation-inquiry__consent" data-field="consent">
           <input id="consent" name="consent" type="checkbox" required data-required aria-describedby="consentError">
-          <span>Akceptuję kontakt zwrotny w sprawie mojego zapytania.</span>
+          <span>{formText.consent}</span>
         </label>
         <small class="reservation-inquiry__field-error" id="consentError" data-field-error="consent"></small>
 
-        <button class="btn btn-primary reservation-inquiry__submit" type="submit">Wyślij zapytanie</button>
+        <button class="btn btn-primary reservation-inquiry__submit" type="submit">{formText.submit}</button>
 
         <div class="reservation-inquiry__success" data-success role="status" tabindex="-1" hidden>
-          Zapytanie zostało przygotowane. W kolejnym etapie podłączymy wysyłkę do recepcji Camping Clepardia.
+          {formText.success}
         </div>
       </form>
 
       <aside class="premium-card reservation-inquiry__summary" aria-live="polite">
-        <span class="section-kicker">Podsumowanie zapytania</span>
-        <h3>Podsumowanie zapytania</h3>
+        <span class="section-kicker">{formText.summary}</span>
+        <h3>{formText.summary}</h3>
         <p data-summary-empty>
-          Uzupełnij formularz, a tutaj pojawi się podsumowanie zapytania.
+          {formText.summaryEmpty}
         </p>
 
         <div class="reservation-inquiry__summary-details" data-summary-details hidden>
-          <div><span>Termin</span><strong data-summary-dates>Do uzupełnienia</strong></div>
-          <div><span>Liczba nocy</span><strong data-summary-nights>Do uzupełnienia</strong></div>
-          <div><span>Typ pobytu</span><strong data-summary-stay>Do uzupełnienia</strong></div>
-          <div><span>Osoby</span><strong data-summary-people>2 dorosłych</strong></div>
-          <div><span>Dodatki</span><strong data-summary-addons>Brak</strong></div>
-          <div><span>Kraj</span><strong data-summary-country>Do uzupełnienia</strong></div>
-          <div><span>Język</span><strong data-summary-language>Polski</strong></div>
-          <div><span>Sezon</span><strong data-summary-season>Do uzupełnienia</strong></div>
+          <div><span>{formText.term}</span><strong data-summary-dates>{formText.toComplete}</strong></div>
+          <div><span>{formText.nights}</span><strong data-summary-nights>{formText.toComplete}</strong></div>
+          <div><span>{formText.stayType}</span><strong data-summary-stay>{formText.toComplete}</strong></div>
+          <div><span>{formText.people}</span><strong data-summary-people>2 {formText.adults}</strong></div>
+          <div><span>{formText.extras}</span><strong data-summary-addons>{formText.noAddons}</strong></div>
+          <div><span>{formText.countrySummary}</span><strong data-summary-country>{formText.toComplete}</strong></div>
+          <div><span>{formText.language}</span><strong data-summary-language>{activeLanguageCode.toUpperCase()}</strong></div>
+          <div><span>{formText.season}</span><strong data-summary-season>{formText.toComplete}</strong></div>
         </div>
 
         <p class="reservation-inquiry__summary-notice" data-summary-notice hidden>
-          W sezonie letnim rezerwacje pola campingowego mogą być ograniczone. Recepcja potwierdzi dostępność w odpowiedzi na zapytanie.
+          {formText.summerNotice}
         </p>
       </aside>
     </div>
   </div>
 </section>
 
-<script>
+<script define:vars={{ formText, pricingText }}>
   (() => {
     const root = document.querySelector('[data-reservation-inquiry]');
     if (!root) return;
@@ -218,7 +223,7 @@ const addonOptions = inquiryAddonIds
     const summaryDetails = root.querySelector('[data-summary-details]');
     const summaryNotice = root.querySelector('[data-summary-notice]');
     const DAY = 24 * 60 * 60 * 1000;
-    const summerNotice = 'W sezonie letnim rezerwacje pola campingowego mogą być ograniczone. Recepcja potwierdzi dostępność w odpowiedzi na zapytanie.';
+    const summerNotice = formText.summerNotice;
 
     const summary = {
       dates: root.querySelector('[data-summary-dates]'),
@@ -277,9 +282,9 @@ const addonOptions = inquiryAddonIds
     const formatNights = (nights) => {
       const mod10 = nights % 10;
       const mod100 = nights % 100;
-      if (nights === 1) return '1 noc';
-      if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return `${nights} noce`;
-      return `${nights} nocy`;
+      return nights === 1
+        ? pricingText.night.one
+        : pricingText.night.other.replace('{count}', String(nights));
     };
     const normalizeCounterValue = (value) => {
       const numericValue = Number(value);
@@ -323,10 +328,10 @@ const addonOptions = inquiryAddonIds
     });
     const getPeopleSummary = (people) => {
       const parts = [];
-      if (people.adults > 0) parts.push(`${people.adults} dor.`);
-      if (people.children > 0) parts.push(`${people.children} dzieci 4-14`);
-      if (people.toddlers > 0) parts.push(`${people.toddlers} dzieci do 4`);
-      return parts.length ? parts.join(', ') : 'Brak osób';
+      if (people.adults > 0) parts.push(`${people.adults} ${formText.adults}`);
+      if (people.children > 0) parts.push(`${people.children} ${formText.children}`);
+      if (people.toddlers > 0) parts.push(`${people.toddlers} ${formText.toddlers}`);
+      return parts.length ? parts.join(', ') : formText.noPeople;
     };
     const hasSummerCampingNotice = () => {
       const stay = getSelectedStay();
@@ -361,7 +366,7 @@ const addonOptions = inquiryAddonIds
       }
       if (departureInput && arrival) departureInput.min = toDateValue(addDays(arrival, 1));
 
-      setText(nightsLabel, nights > 0 ? formatNights(nights) : 'Uzupełnij termin');
+      setText(nightsLabel, nights > 0 ? formatNights(nights) : formText.completeDates);
       seasonBanner.hidden = !hasNotice;
       summaryNotice.hidden = !hasNotice;
       if (!summaryNotice.hidden) setText(summaryNotice, summerNotice);
@@ -371,14 +376,14 @@ const addonOptions = inquiryAddonIds
       summaryDetails.hidden = !hasData;
       if (!hasData) return;
 
-      setText(summary.dates, arrival && departure && nights > 0 ? `${formatDate(arrival)} - ${formatDate(departure)}` : 'Do uzupełnienia');
-      setText(summary.nights, nights > 0 ? formatNights(nights) : 'Do uzupełnienia');
-      setText(summary.stay, stay?.label ?? 'Do uzupełnienia');
+      setText(summary.dates, arrival && departure && nights > 0 ? `${formatDate(arrival)} - ${formatDate(departure)}` : formText.toComplete);
+      setText(summary.nights, nights > 0 ? formatNights(nights) : formText.toComplete);
+      setText(summary.stay, stay?.label ?? formText.toComplete);
       setText(summary.people, getPeopleSummary(people));
-      setText(summary.addons, addons.length ? addons.map((addon) => addon.label).join(', ') : 'Brak');
-      setText(summary.country, country || 'Do uzupełnienia');
+      setText(summary.addons, addons.length ? addons.map((addon) => addon.label).join(', ') : formText.noAddons);
+      setText(summary.country, country || formText.toComplete);
       setText(summary.language, getLanguageLabel());
-      setText(summary.season, hasNotice ? 'Sezon letni' : arrival && departure ? 'Poza głównym sezonem letnim' : 'Do uzupełnienia');
+      setText(summary.season, hasNotice ? formText.summerSeason : arrival && departure ? formText.outsideSummer : formText.toComplete);
     };
     const validate = () => {
       const errors = [];
@@ -393,40 +398,40 @@ const addonOptions = inquiryAddonIds
       setStayError();
 
       if (!fullName) {
-        errors.push('Podaj imię i nazwisko.');
-        setFieldError('fullName', 'Podaj imię i nazwisko.');
+        errors.push(formText.validation.fullName);
+        setFieldError('fullName', formText.validation.fullName);
       }
       if (!email) {
-        errors.push('Podaj adres email.');
-        setFieldError('email', 'Podaj adres email.');
+        errors.push(formText.validation.email);
+        setFieldError('email', formText.validation.email);
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        errors.push('Podaj poprawny adres email.');
-        setFieldError('email', 'Podaj poprawny adres email.');
+        errors.push(formText.validation.emailFormat);
+        setFieldError('email', formText.validation.emailFormat);
       }
       if (!arrival) {
-        errors.push('Podaj datę przyjazdu.');
-        setFieldError('arrival', 'Podaj datę przyjazdu.');
+        errors.push(formText.validation.arrival);
+        setFieldError('arrival', formText.validation.arrival);
       }
       if (!departure) {
-        errors.push('Podaj datę wyjazdu.');
-        setFieldError('departure', 'Podaj datę wyjazdu.');
+        errors.push(formText.validation.departure);
+        setFieldError('departure', formText.validation.departure);
       } else if (arrival && departure <= arrival) {
-        errors.push('Data wyjazdu musi być po dacie przyjazdu.');
-        setFieldError('departure', 'Data wyjazdu musi być po dacie przyjazdu.');
+        errors.push(formText.validation.departureAfterArrival);
+        setFieldError('departure', formText.validation.departureAfterArrival);
       }
       if (!stay) {
-        errors.push('Wybierz typ pobytu.');
-        setStayError('Wybierz typ pobytu.');
+        errors.push(formText.validation.stayType);
+        setStayError(formText.validation.stayType);
       }
       if (!(consent instanceof HTMLInputElement) || !consent.checked) {
-        errors.push('Zaakceptuj kontakt zwrotny w sprawie zapytania.');
-        setFieldError('consent', 'Zaakceptuj kontakt zwrotny w sprawie zapytania.');
+        errors.push(formText.validation.consent);
+        setFieldError('consent', formText.validation.consent);
       }
 
       if (errorBox) {
         errorBox.hidden = errors.length === 0;
         errorBox.innerHTML = errors.length
-          ? `<strong>Popraw formularz:</strong><ul>${errors.map((error) => `<li>${error}</li>`).join('')}</ul>`
+          ? `<strong>${formText.errorHeading}</strong><ul>${errors.map((error) => `<li>${error}</li>`).join('')}</ul>`
           : '';
       }
 
@@ -457,25 +462,25 @@ const addonOptions = inquiryAddonIds
       };
     };
     const buildMailBody = (payload) => [
-      'Zapytanie rezerwacyjne Camping Clepardia',
+      formText.mailTitle,
       '',
-      `Imię i nazwisko: ${payload.fullName}`,
-      `Email: ${payload.email}`,
-      `Telefon: ${payload.phone || 'nie podano'}`,
-      `Kraj: ${payload.country || 'nie podano'}`,
-      `Język kontaktu: ${payload.contactLanguage}`,
+      `${formText.mailLabels.fullName}: ${payload.fullName}`,
+      `${formText.mailLabels.email}: ${payload.email}`,
+      `${formText.mailLabels.phone}: ${payload.phone || formText.mailLabels.notProvided}`,
+      `${formText.mailLabels.country}: ${payload.country || formText.mailLabels.notProvided}`,
+      `${formText.mailLabels.contactLanguage}: ${payload.contactLanguage}`,
       '',
-      `Termin: ${payload.arrival} - ${payload.departure}`,
-      `Liczba nocy: ${payload.nights}`,
-      `Typ pobytu: ${payload.stayType}`,
-      `Dorośli: ${payload.people.adults}`,
-      `Dzieci 4-14: ${payload.people.children}`,
-      `Dzieci do 4: ${payload.people.toddlers}`,
-      `Dodatki: ${payload.addons.length ? payload.addons.join(', ') : 'brak'}`,
+      `${formText.mailLabels.term}: ${payload.arrival} - ${payload.departure}`,
+      `${formText.mailLabels.nights}: ${payload.nights}`,
+      `${formText.mailLabels.stayType}: ${payload.stayType}`,
+      `${formText.mailLabels.adults}: ${payload.people.adults}`,
+      `${formText.mailLabels.children}: ${payload.people.children}`,
+      `${formText.mailLabels.toddlers}: ${payload.people.toddlers}`,
+      `${formText.mailLabels.addons}: ${payload.addons.length ? payload.addons.join(', ') : formText.mailLabels.none}`,
       '',
-      `Komunikat sezonowy: ${payload.summerNotice ? summerNotice : 'nie dotyczy'}`,
+      `${formText.mailLabels.summerNotice}: ${payload.summerNotice ? summerNotice : formText.mailLabels.notApplicable}`,
       '',
-      `Wiadomość: ${payload.message || 'brak'}`,
+      `${formText.mailLabels.message}: ${payload.message || formText.mailLabels.none}`,
     ].join('\n');
 
     form?.addEventListener('submit', (event) => {

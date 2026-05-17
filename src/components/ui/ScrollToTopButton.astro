@@ -1,8 +1,16 @@
+---
+import { getTranslations } from '@/i18n/config';
+import { getPathContext } from '@/utils/localizedLinks';
+
+const pathContext = getPathContext(Astro.url.pathname);
+const t = getTranslations(pathContext.languageCode);
+---
+
 <button
   class="scroll-to-top"
   type="button"
   data-scroll-to-top
-  aria-label="Wróć na początek strony"
+  aria-label={t.global.scrollToTop}
   aria-hidden="true"
   tabindex="-1"
 >

@@ -1,111 +1,152 @@
 ---
 import { pricingConfig } from '@/data/pricing';
+import { getTranslations } from '@/i18n/config';
+import { getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const t = getTranslations(languageCode ?? pathContext.languageCode);
+const pricingText = t.pricing;
 
 const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
+const getStayTypeLabel = (id: string, fallback: string) => pricingText.stayTypes[id as keyof typeof pricingText.stayTypes] ?? fallback;
+const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as keyof typeof pricingText.addons] ?? fallback;
+const localizedPricingConfig = {
+  ...pricingConfig,
+  seasons: {
+    ...pricingConfig.seasons,
+    high: {
+      ...pricingConfig.seasons.high,
+      label: pricingText.highSeason,
+    },
+    low: {
+      ...pricingConfig.seasons.low,
+      label: pricingText.lowSeason,
+    },
+  },
+  people: {
+    adults: { ...pricingConfig.people.adults, label: pricingText.adults },
+    children: { ...pricingConfig.people.children, label: pricingText.children },
+    toddlers: { ...pricingConfig.people.toddlers, label: pricingText.toddlers },
+  },
+  stayTypes: pricingConfig.stayTypes.map((type) => ({
+    ...type,
+    label: getStayTypeLabel(type.id, type.label),
+    ...('note' in type ? { note: pricingText.familyNotice } : {}),
+  })),
+  addons: pricingConfig.addons.map((addon) => ({
+    ...addon,
+    label: getAddonLabel(addon.id, addon.label),
+  })),
+};
 ---
 
 <section class="site-section pricing-calculator reveal-section" id="kalkulator">
   <div class="container">
     <div class="pricing-calculator__header">
-      <span class="section-kicker">Kalkulator pobytu</span>
-      <h2 class="section-title">Sprawdź orientacyjny koszt rezerwacji</h2>
+      <span class="section-kicker">{pricingText.kicker}</span>
+      <h2 class="section-title">{pricingText.title}</h2>
       <p class="section-copy">
-        Kalkulator liczy noce, typ pobytu, osoby i dodatki. Finalną dostępność oraz warunki rezerwacji potwierdza recepcja.
+        {pricingText.lead}
       </p>
     </div>
 
     <div class="pricing-calculator__layout" data-pricing-calculator>
-      <form class="premium-card pricing-calculator__form" aria-label="Kalkulator cennika Camping Clepardia">
+      <form class="premium-card pricing-calculator__form" aria-label={pricingText.formAria}>
         <fieldset class="pricing-calculator__group reveal-section" style="--reveal-delay: 0ms">
-          <legend>Daty pobytu</legend>
+          <legend>{pricingText.dates}</legend>
           <div class="pricing-calculator__fields">
             <label>
-              <span>Data przyjazdu</span>
-              <input type="date" name="arrival" data-arrival aria-label="Data przyjazdu" />
+              <span>{pricingText.arrival}</span>
+              <input type="date" name="arrival" data-arrival aria-label={pricingText.arrival} />
             </label>
             <label>
-              <span>Data wyjazdu</span>
-              <input type="date" name="departure" data-departure aria-label="Data wyjazdu" />
+              <span>{pricingText.departure}</span>
+              <input type="date" name="departure" data-departure aria-label={pricingText.departure} />
             </label>
           </div>
           <p class="pricing-calculator__hint">
-            Liczba nocy: <strong data-nights-label>1</strong>
+            {pricingText.nightsLabel}: <strong data-nights-label>{pricingText.night.one}</strong>
           </p>
         </fieldset>
 
         <fieldset class="pricing-calculator__group reveal-section" style="--reveal-delay: 80ms">
-          <legend>Typ pobytu</legend>
+          <legend>{pricingText.stayType}</legend>
           <div class="pricing-calculator__options">
             {pricingConfig.stayTypes.map((type, index) => {
               const price = 'seasonalPrices' in type
-                ? `od ${type.seasonalPrices.low} PLN`
+                ? `${pricingText.from} ${type.seasonalPrices.low} PLN`
                 : 'startingPrice' in type
-                  ? `od ${type.startingPrice} PLN`
+                  ? `${pricingText.from} ${type.startingPrice} PLN`
                   : formatPrice(type.price);
               return (
                 <label class="pricing-calculator__option">
                   <input type="radio" name="stayType" value={type.id} checked={index === 0} />
                   <span>
-                    <strong>{type.label}</strong>
-                    <small>{price} / noc</small>
-                    {'note' in type && <em>{type.note}</em>}
+                    <strong>{getStayTypeLabel(type.id, type.label)}</strong>
+                    <small>{price} / {pricingText.perNight}</small>
+                    {'note' in type && <em>{pricingText.familyNotice}</em>}
                   </span>
                 </label>
               );
             })}
           </div>
           <div class="pricing-calculator__notice" data-summer-notice hidden>
-            W sezonie letnim rezerwacje pola campingowego mogą być ograniczone. Skontaktuj się z recepcją w sprawie dostępności.
+            {pricingText.summerNotice}
           </div>
           <div class="pricing-calculator__notice pricing-calculator__notice--confirmation" data-family-notice hidden>
-            Cena domku rodzinnego zależy od konfiguracji i wymaga potwierdzenia przez recepcję.
+            {pricingText.familyNotice}
           </div>
         </fieldset>
 
         <fieldset class="pricing-calculator__group reveal-section" style="--reveal-delay: 160ms">
-          <legend>Osoby</legend>
+          <legend>{pricingText.people}</legend>
           <div class="pricing-calculator__counters">
             <div class="pricing-counter">
-              <label for="adults">Dorośli</label>
+              <label for="adults">{pricingText.adults}</label>
               <div>
-                <button type="button" data-counter="adults" data-delta="-1" aria-label="Zmniejsz liczbę dorosłych">-</button>
+                <button type="button" data-counter="adults" data-delta="-1" aria-label={`${pricingText.decrement} ${pricingText.adults}`}>-</button>
                 <input id="adults" type="number" min="0" value="2" inputmode="numeric" data-counter-input="adults" />
-                <button type="button" data-counter="adults" data-delta="1" aria-label="Zwiększ liczbę dorosłych">+</button>
+                <button type="button" data-counter="adults" data-delta="1" aria-label={`${pricingText.increment} ${pricingText.adults}`}>+</button>
               </div>
-              <small>{formatPrice(pricingConfig.people.adults.price)} / noc</small>
+              <small>{formatPrice(pricingConfig.people.adults.price)} / {pricingText.perNight}</small>
             </div>
 
             <div class="pricing-counter">
-              <label for="children">Dzieci 4-14</label>
+              <label for="children">{pricingText.children}</label>
               <div>
-                <button type="button" data-counter="children" data-delta="-1" aria-label="Zmniejsz liczbę dzieci 4-14">-</button>
+                <button type="button" data-counter="children" data-delta="-1" aria-label={`${pricingText.decrement} ${pricingText.children}`}>-</button>
                 <input id="children" type="number" min="0" value="0" inputmode="numeric" data-counter-input="children" />
-                <button type="button" data-counter="children" data-delta="1" aria-label="Zwiększ liczbę dzieci 4-14">+</button>
+                <button type="button" data-counter="children" data-delta="1" aria-label={`${pricingText.increment} ${pricingText.children}`}>+</button>
               </div>
-              <small>{formatPrice(pricingConfig.people.children.price)} / noc</small>
+              <small>{formatPrice(pricingConfig.people.children.price)} / {pricingText.perNight}</small>
             </div>
 
             <div class="pricing-counter">
-              <label for="toddlers">Dzieci do 4</label>
+              <label for="toddlers">{pricingText.toddlers}</label>
               <div>
-                <button type="button" data-counter="toddlers" data-delta="-1" aria-label="Zmniejsz liczbę dzieci do 4 lat">-</button>
+                <button type="button" data-counter="toddlers" data-delta="-1" aria-label={`${pricingText.decrement} ${pricingText.toddlers}`}>-</button>
                 <input id="toddlers" type="number" min="0" value="0" inputmode="numeric" data-counter-input="toddlers" />
-                <button type="button" data-counter="toddlers" data-delta="1" aria-label="Zwiększ liczbę dzieci do 4 lat">+</button>
+                <button type="button" data-counter="toddlers" data-delta="1" aria-label={`${pricingText.increment} ${pricingText.toddlers}`}>+</button>
               </div>
-              <small>{formatPrice(pricingConfig.people.toddlers.price)} / noc</small>
+              <small>{formatPrice(pricingConfig.people.toddlers.price)} / {pricingText.perNight}</small>
             </div>
           </div>
         </fieldset>
 
         <fieldset class="pricing-calculator__group reveal-section" style="--reveal-delay: 240ms">
-          <legend>Dodatki</legend>
+          <legend>{pricingText.extras}</legend>
           <div class="pricing-calculator__addons">
             {pricingConfig.addons.map((addon) => (
               <label class="pricing-calculator__addon">
                 <input type="checkbox" name="addons" value={addon.id} />
                 <span>
-                  <strong>{addon.label}</strong>
-                  <small>{formatPrice(addon.price)} / noc</small>
+                  <strong>{getAddonLabel(addon.id, addon.label)}</strong>
+                  <small>{formatPrice(addon.price)} / {pricingText.perNight}</small>
                 </span>
               </label>
             ))}
@@ -113,47 +154,47 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
         </fieldset>
       </form>
 
-      <aside class="premium-card pricing-summary" aria-label="Podsumowanie kalkulacji" aria-live="polite">
+      <aside class="premium-card pricing-summary" aria-label={pricingText.summary} aria-live="polite">
         <div class="pricing-summary__head">
           <div>
-            <span>Podsumowanie</span>
-            <small>Suma końcowa</small>
+            <span>{pricingText.summary}</span>
+            <small>{pricingText.total}</small>
           </div>
           <strong data-total data-value="0">0 PLN</strong>
         </div>
         <dl class="pricing-summary__details">
           <div>
-            <dt>Termin</dt>
-            <dd data-summary-dates>Do uzupełnienia</dd>
+            <dt>{pricingText.term}</dt>
+            <dd data-summary-dates>{pricingText.toComplete}</dd>
           </div>
           <div>
-            <dt>Liczba nocy</dt>
-            <dd data-summary-nights>1 noc</dd>
+            <dt>{pricingText.nightsLabel}</dt>
+            <dd data-summary-nights>{pricingText.night.one}</dd>
           </div>
           <div>
-            <dt>Typ pobytu</dt>
-            <dd data-summary-stay>Kamper</dd>
+            <dt>{pricingText.stayType}</dt>
+            <dd data-summary-stay>{pricingText.stayTypes.camper}</dd>
           </div>
           <div>
-            <dt>Sezon</dt>
-            <dd data-summary-season>Niski sezon</dd>
+            <dt>{pricingText.season}</dt>
+            <dd data-summary-season>{pricingText.lowSeason}</dd>
           </div>
           <div>
-            <dt>Osoby</dt>
-            <dd data-summary-people>2 dorosłych</dd>
+            <dt>{pricingText.people}</dt>
+            <dd data-summary-people>2 {pricingText.adults}</dd>
           </div>
           <div>
-            <dt>Dodatki</dt>
-            <dd data-summary-addons>Brak</dd>
+            <dt>{pricingText.extras}</dt>
+            <dd data-summary-addons>{pricingText.noAddons}</dd>
           </div>
           <div>
-            <dt>Cena za noc</dt>
-            <dd data-nightly-rate>0 PLN / noc</dd>
+            <dt>{pricingText.pricePerNight}</dt>
+            <dd data-nightly-rate>0 PLN / {pricingText.perNight}</dd>
           </div>
         </dl>
         <div class="pricing-summary__breakdown" data-breakdown></div>
         <p class="pricing-summary__footnote" data-summary-footnote>
-          To orientacyjna kalkulacja. Recepcja potwierdza dostępność, sezon i szczegóły pobytu.
+          {pricingText.summaryFootnote}
         </p>
       </aside>
     </div>
@@ -161,44 +202,44 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
 
   <div class="pricing-mobile-summary" data-mobile-summary>
     <button type="button" data-mobile-toggle aria-expanded="false" aria-controls="pricingMobilePanel">
-      <span>Suma pobytu</span>
+      <span>{pricingText.mobileTotal}</span>
       <strong data-mobile-total data-value="0">0 PLN</strong>
     </button>
     <div id="pricingMobilePanel" class="pricing-mobile-summary__panel" data-mobile-panel hidden>
       <div class="pricing-mobile-summary__row">
-        <span>Termin</span>
-        <strong data-mobile-dates>Do uzupełnienia</strong>
+        <span>{pricingText.term}</span>
+        <strong data-mobile-dates>{pricingText.toComplete}</strong>
       </div>
       <div class="pricing-mobile-summary__row">
-        <span>Noce</span>
-        <strong data-mobile-nights>1 noc</strong>
+        <span>{pricingText.nightsLabel}</span>
+        <strong data-mobile-nights>{pricingText.night.one}</strong>
       </div>
       <div class="pricing-mobile-summary__row">
-        <span>Typ pobytu</span>
-        <strong data-mobile-stay>Kamper</strong>
+        <span>{pricingText.stayType}</span>
+        <strong data-mobile-stay>{pricingText.stayTypes.camper}</strong>
       </div>
       <div class="pricing-mobile-summary__row">
-        <span>Sezon</span>
-        <strong data-mobile-season>Niski sezon</strong>
+        <span>{pricingText.season}</span>
+        <strong data-mobile-season>{pricingText.lowSeason}</strong>
       </div>
       <div class="pricing-mobile-summary__row">
-        <span>Osoby</span>
-        <strong data-mobile-people>2 dorosłych</strong>
+        <span>{pricingText.people}</span>
+        <strong data-mobile-people>2 {pricingText.adults}</strong>
       </div>
       <div class="pricing-mobile-summary__row">
-        <span>Dodatki</span>
-        <strong data-mobile-addons>Brak</strong>
+        <span>{pricingText.extras}</span>
+        <strong data-mobile-addons>{pricingText.noAddons}</strong>
       </div>
       <div class="pricing-mobile-summary__row">
-        <span>Cena za noc</span>
-        <strong data-mobile-rate>0 PLN / noc</strong>
+        <span>{pricingText.pricePerNight}</span>
+        <strong data-mobile-rate>0 PLN / {pricingText.perNight}</strong>
       </div>
       <div class="pricing-mobile-summary__breakdown" data-mobile-breakdown></div>
     </div>
   </div>
 </section>
 
-<script define:vars={{ pricingConfig }}>
+<script define:vars={{ pricingConfig: localizedPricingConfig, pricingText }}>
   (() => {
     const root = document.querySelector('[data-pricing-calculator]');
     if (!root) return;
@@ -236,7 +277,7 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const formatMoney = (value) => `${Math.round(value).toLocaleString('pl-PL')} ${currency}`;
-    const formatDisplayMoney = (value, approximate = false) => `${approximate ? 'od ' : ''}${formatMoney(value)}`;
+    const formatDisplayMoney = (value, approximate = false) => `${approximate ? `${pricingText.from} ` : ''}${formatMoney(value)}`;
     const setText = (element, value) => {
       if (element) element.textContent = value;
     };
@@ -249,9 +290,9 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
     const formatNightsText = (nights) => {
       const mod10 = nights % 10;
       const mod100 = nights % 100;
-      if (nights === 1) return '1 noc';
-      if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return `${nights} noce`;
-      return `${nights} nocy`;
+      if (pricingText.night?.other) return nights === 1 ? pricingText.night.one : pricingText.night.other.replace('{count}', String(nights));
+      if (nights === 1) return '1 night';
+      return `${nights} nights`;
     };
     const toDateValue = (date) => {
       const year = date.getFullYear();
@@ -311,29 +352,31 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
       return type.price;
     };
     const getSeasonSummary = (nightDates) => {
-      if (!nightDates.length) return 'Niski sezon';
+      if (!nightDates.length) return pricingText.lowSeason;
       const highSeasonNights = nightDates.filter(isHighSeason).length;
-      if (highSeasonNights === 0) return 'Niski sezon';
-      if (highSeasonNights === nightDates.length) return 'Wysoki sezon';
-      return 'Sezon mieszany';
+      if (highSeasonNights === 0) return pricingText.lowSeason;
+      if (highSeasonNights === nightDates.length) return pricingText.highSeason;
+      return pricingText.mixedSeason;
     };
     const getRateSummary = (type, nightDates) => {
-      if ('startingPrice' in type) return `od ${formatMoney(type.startingPrice)} / noc`;
+      if ('startingPrice' in type) return `${pricingText.from} ${formatMoney(type.startingPrice)} / ${pricingText.perNight}`;
 
       const rates = nightDates.map((date) => getStayRate(type, date));
       const uniqueRates = Array.from(new Set(rates)).sort((a, b) => a - b);
-      if (!uniqueRates.length) return `${formatMoney(getStayRate(type, new Date()))} / noc`;
-      if (uniqueRates.length === 1) return `${formatMoney(uniqueRates[0])} / noc`;
-      return `${formatMoney(uniqueRates[0])}-${formatMoney(uniqueRates[uniqueRates.length - 1])} / noc`;
+      if (!uniqueRates.length) return `${formatMoney(getStayRate(type, new Date()))} / ${pricingText.perNight}`;
+      if (uniqueRates.length === 1) return `${formatMoney(uniqueRates[0])} / ${pricingText.perNight}`;
+      return `${formatMoney(uniqueRates[0])}-${formatMoney(uniqueRates[uniqueRates.length - 1])} / ${pricingText.perNight}`;
     };
     const getPeopleSummary = ({ adults, children, toddlers }) => {
       const parts = [];
-      if (adults > 0) parts.push(`${adults} dor.`);
-      if (children > 0) parts.push(`${children} dzieci 4-14`);
-      if (toddlers > 0) parts.push(`${toddlers} dzieci do 4`);
-      return parts.length ? parts.join(', ') : 'Brak osób';
+      if (adults > 0) parts.push(`${adults} ${pricingText.adults}`);
+      if (children > 0) parts.push(`${children} ${pricingText.children}`);
+      if (toddlers > 0) parts.push(`${toddlers} ${pricingText.toddlers}`);
+      return parts.length ? parts.join(', ') : pricingText.noPeople;
     };
-    const getAddonsSummary = (addons) => addons.length ? addons.map((addon) => addon.label).join(', ') : 'Brak';
+    const getTranslatedStayLabel = (type) => pricingText.stayTypes?.[type.id] ?? type.label;
+    const getTranslatedAddonLabel = (addon) => pricingText.addons?.[addon.id] ?? addon.label;
+    const getAddonsSummary = (addons) => addons.length ? addons.map(getTranslatedAddonLabel).join(', ') : pricingText.noAddons;
     const isConfirmationStay = (type) => Boolean(type.requiresConfirmation);
     const animateMoney = (element, nextValue, approximate = false) => {
       if (!element) return;
@@ -363,8 +406,8 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
     const renderBreakdown = (items) => {
       const html = items.map((item) => `
         <div class="pricing-summary__line">
-          <span>${item.label}${item.note ? `<small>${item.note}</small>` : ''}</span>
-          <strong>${item.confirmation ? 'do potwierdzenia' : `${item.approximate ? 'od ' : ''}${formatMoney(item.amount)}`}</strong>
+        <span>${item.label}${item.note ? `<small>${item.note}</small>` : ''}</span>
+        <strong>${item.confirmation ? pricingText.confirmPrice : `${item.approximate ? `${pricingText.from} ` : ''}${formatMoney(item.amount)}`}</strong>
         </div>
       `).join('');
       if (breakdownEl) breakdownEl.innerHTML = html;
@@ -413,7 +456,7 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
       const total = accommodationTotal + peopleTotal + addonsTotal;
       const hasSummerCamping = type.category === 'camping' && nightDates.some(isSummerNoticeMonth);
       const requiresConfirmation = isConfirmationStay(type);
-      const datesSummary = arrival && departure ? `${formatDateDisplay(arrival)} - ${formatDateDisplay(departure)}` : 'Do uzupełnienia';
+      const datesSummary = arrival && departure ? `${formatDateDisplay(arrival)} - ${formatDateDisplay(departure)}` : pricingText.toComplete;
       const nightsSummary = formatNightsText(nights);
       const seasonSummary = getSeasonSummary(nightDates);
       const peopleSummary = getPeopleSummary({ adults, children, toddlers });
@@ -422,29 +465,29 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
 
       const breakdown = [
         {
-          label: `${type.label} x ${nightsSummary}`,
+          label: `${getTranslatedStayLabel(type)} x ${nightsSummary}`,
           amount: accommodationTotal,
           approximate: requiresConfirmation,
-          note: requiresConfirmation ? 'Cena od 300 PLN / noc, finalnie potwierdzana przez recepcję.' : '',
+          note: requiresConfirmation ? pricingText.familyNotice : '',
         },
       ];
 
-      if (adults > 0) breakdown.push({ label: `${config.people.adults.label} x ${adults} x ${nightsSummary}`, amount: adults * config.people.adults.price * nights });
-      if (children > 0) breakdown.push({ label: `${config.people.children.label} x ${children} x ${nightsSummary}`, amount: children * config.people.children.price * nights });
-      if (toddlers > 0) breakdown.push({ label: `${config.people.toddlers.label} x ${toddlers} x ${nightsSummary}`, amount: 0 });
-      selectedAddonItems.forEach((addon) => breakdown.push({ label: `${addon.label} x ${nightsSummary}`, amount: addon.price * nights }));
+      if (adults > 0) breakdown.push({ label: `${pricingText.adults} x ${adults} x ${nightsSummary}`, amount: adults * config.people.adults.price * nights });
+      if (children > 0) breakdown.push({ label: `${pricingText.children} x ${children} x ${nightsSummary}`, amount: children * config.people.children.price * nights });
+      if (toddlers > 0) breakdown.push({ label: `${pricingText.toddlers} x ${toddlers} x ${nightsSummary}`, amount: 0 });
+      selectedAddonItems.forEach((addon) => breakdown.push({ label: `${getTranslatedAddonLabel(addon)} x ${nightsSummary}`, amount: addon.price * nights }));
 
       setText(nightsLabel, nightsSummary);
       setText(summaryDates, datesSummary);
       setText(summaryNights, nightsSummary);
-      setText(summaryStay, type.label);
+      setText(summaryStay, getTranslatedStayLabel(type));
       setText(summarySeason, seasonSummary);
       setText(summaryPeople, peopleSummary);
       setText(summaryAddons, addonsSummary);
       setText(nightlyRate, rateSummary);
       setText(mobileDates, datesSummary);
       setText(mobileNights, nightsSummary);
-      setText(mobileStay, type.label);
+      setText(mobileStay, getTranslatedStayLabel(type));
       setText(mobileSeason, seasonSummary);
       setText(mobilePeople, peopleSummary);
       setText(mobileAddons, addonsSummary);
@@ -453,8 +496,8 @@ const formatPrice = (price: number) => `${price} ${pricingConfig.currency}`;
       if (familyNotice) familyNotice.hidden = !requiresConfirmation;
       if (summaryFootnote) {
         summaryFootnote.textContent = requiresConfirmation
-          ? 'Dla domku rodzinnego kalkulator pokazuje wartość orientacyjną od ceny bazowej. Dostępność i finalną cenę potwierdza recepcja.'
-          : 'To orientacyjna kalkulacja. Recepcja potwierdza dostępność, sezon i szczegóły pobytu.';
+          ? pricingText.familyFootnote
+          : pricingText.summaryFootnote;
       }
       animateMoney(totalEl, total, requiresConfirmation);
       animateMoney(mobileTotal, total, requiresConfirmation);

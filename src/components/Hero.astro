@@ -1,5 +1,19 @@
 ---
 import { publicAssetExists, siteAssets } from '@/data/assets';
+import { getTranslations } from '@/i18n/config';
+import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const activeLanguage = languageCode ?? pathContext.languageCode;
+const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
+const t = getTranslations(activeLanguage);
+const contactHref = getLocalizedPath(explicitLanguage, 'kontakt');
+const pricingHref = getLocalizedPath(explicitLanguage, 'cennik');
 
 const heroDesktopExists = publicAssetExists(siteAssets.hero.desktop);
 const heroMobileExists = publicAssetExists(siteAssets.hero.mobile);
@@ -32,56 +46,52 @@ const heroStyle = [
 
   <div class="hero__wrapper">
     <div class="hero__content">
-      <span class="hero__badge">Kraków • camping • domki • tramwaj do centrum</span>
+      <span class="hero__badge">{t.home.hero.badge}</span>
       <h1 class="hero__headline" aria-label="Camping Clepardia">
-        <span class="hero__headline-line">Camping</span>
-        <span class="hero__headline-line">Clepardia</span>
+        <span class="hero__headline-line">{t.home.hero.title.split(' ')[0] ?? 'Camping'}</span>
+        <span class="hero__headline-line">{t.home.hero.title.split(' ').slice(1).join(' ') || 'Clepardia'}</span>
       </h1>
       <p class="hero__subheadline">
-        <span>Camping w Krakowie</span>
-        <span>blisko centrum miasta</span>
+        <span>{t.home.hero.subtitle}</span>
       </p>
       <p class="hero__description">
-        Zielona, spokojna przestrzeń dla kamperów, namiotów, przyczep i gości domków. Zatrzymaj się wygodnie w Krakowie i dojedź tramwajem do Starego Miasta bez wjeżdżania autem do centrum.
+        {t.home.hero.copy}
       </p>
       <div class="hero__cta">
-        <a href="#rezerwacja" class="btn btn-primary btn-large hero__button hero__button--primary">Sprawdź dostępność</a>
-        <a href="#cennik" class="btn btn-glass btn-large hero__button hero__button--secondary">Zobacz cennik</a>
+        <a href={contactHref} class="btn btn-primary btn-large hero__button hero__button--primary">{t.home.hero.primary}</a>
+        <a href={pricingHref} class="btn btn-glass btn-large hero__button hero__button--secondary">{t.home.hero.secondary}</a>
       </div>
     </div>
   </div>
 
-  <div class="hero__floating-badges" aria-label="Wyróżniki Camping Clepardia">
-    <span>Blisko centrum Krakowa</span>
-    <span>Camping + domki</span>
-    <span>Tramwaj do centrum</span>
-    <span>Mister Camping 2024</span>
+  <div class="hero__floating-badges" aria-label="Camping Clepardia">
+    {t.home.hero.badges.map((badge) => <span>{badge}</span>)}
   </div>
 
-  <div class="hero__benefits-bar" aria-label="Najważniejsze atuty Camping Clepardia">
+  <div class="hero__benefits-bar" aria-label="Camping Clepardia">
     <div class="benefits-wrapper">
       <div class="hero__benefit">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16V8a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v8"/><path d="M4 16h16v3H4z"/><path d="M7 19v2M17 19v2M8 8h8M8 12h8"/></svg>
-        <span>Tramwaj blisko campingu</span>
+        <span>{t.home.hero.benefits[0]}</span>
       </div>
       <div class="hero__benefit">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-7h6v7"/></svg>
-        <span>Blisko centrum Krakowa</span>
+        <span>{t.home.hero.benefits[1]}</span>
       </div>
       <div class="hero__benefit">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 12 5l8 13H4z"/><path d="M12 5v13"/></svg>
-        <span>Domki i camping</span>
+        <span>{t.home.hero.benefits[2]}</span>
       </div>
       <div class="hero__benefit">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-4 7-11V5l-7-3-7 3v6c0 7 7 11 7 11z"/><path d="m9 12 2 2 4-5"/></svg>
-        <span>Spokojna baza podróży</span>
+        <span>{t.home.hero.badges[1]}</span>
       </div>
     </div>
   </div>
 
-  <a href="#dlaczego" class="hero__scroll-indicator" aria-label="Przewiń do sekcji Dlaczego Clepardia">
+  <a href="#dlaczego" class="hero__scroll-indicator" aria-label={t.home.hero.scroll}>
     <span class="hero__mouse" aria-hidden="true"><i></i></span>
-    <span class="hero__scroll-text">Przewiń</span>
+    <span class="hero__scroll-text">{t.home.hero.scroll}</span>
   </a>
 </section>
 

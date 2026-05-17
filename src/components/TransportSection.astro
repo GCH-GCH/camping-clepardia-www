@@ -1,30 +1,78 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
 import { siteAssets } from '@/data/assets';
+import { getTranslations } from '@/i18n/config';
+import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
+const activeLanguage = languageCode ?? pathContext.languageCode;
+const t = getTranslations(activeLanguage);
+const page = t.pages.dojazd;
+const timeline = {
+  tram: activeLanguage === 'de' ? 'Straßenbahn' : activeLanguage === 'it' ? 'Tram' : activeLanguage === 'pl' ? 'Tramwaj' : 'Tram',
+  center: activeLanguage === 'de' ? 'Altstadt' : activeLanguage === 'it' ? 'Città Vecchia' : activeLanguage === 'pl' ? 'Stare Miasto' : 'Old Town',
+};
+const imageLabels = activeLanguage === 'de'
+  ? {
+      note: 'Jakdojade • Straßenbahn • Stadtzentrum',
+      tram: 'Straßenbahn ins Zentrum',
+      tickets: 'Tickets in der Straßenbahn',
+      map: 'Anfahrtskarte',
+      app: 'Jakdojade',
+    }
+  : activeLanguage === 'it'
+    ? {
+        note: 'Jakdojade • tram • centro città',
+        tram: 'Tram per il centro',
+        tickets: 'Biglietti in tram',
+        map: 'Mappa del percorso',
+        app: 'Jakdojade',
+      }
+    : activeLanguage === 'pl'
+      ? {
+          note: 'Jakdojade • tramwaj • centrum miasta',
+          tram: 'Tramwaj do centrum',
+          tickets: 'Bilety w tramwaju',
+          map: 'Mapa dojazdu',
+          app: 'JakDojade',
+        }
+      : {
+          note: 'Jakdojade • tram • city centre',
+          tram: 'Tram to the centre',
+          tickets: 'Tickets on the tram',
+          map: 'Directions map',
+          app: 'Jakdojade',
+        };
 ---
 
 <section class="site-section transport reveal-section" id="dojazd">
   <div class="container section-grid section-grid--2">
     <div>
-      <span class="section-kicker">Dojazd do centrum</span>
-      <h2 class="section-title">Zostaw auto na campingu i jedź tramwajem do Starego Miasta.</h2>
+      <span class="section-kicker">{page.overline}</span>
+      <h2 class="section-title">{page.title}</h2>
       <p class="section-copy">
-        Przystanek tramwajowy znajduje się blisko campingu, więc zwiedzanie Krakowa jest wygodne także bez auta w centrum. Trasę sprawdzisz w mapach lub aplikacji Jakdojade, a bilet zwykle kupisz w tramwaju albo aplikacji.
+        {page.lead}
       </p>
       <div class="transport__timeline">
-        <span>Camping</span><i></i><span>Tramwaj</span><i></i><span>Stare Miasto</span>
+        <span>Camping</span><i></i><span>{timeline.tram}</span><i></i><span>{timeline.center}</span>
       </div>
-      <a class="transport__link" href="/dojazd">Zobacz szczegóły dojazdu</a>
+      <a class="transport__link" href={getLocalizedPath(explicitLanguage, 'dojazd')}>{t.cta.directions}</a>
     </div>
     <div class="premium-card transport__panel">
-      <h3>Idealne dla turystów</h3>
-      <p>Spokojny nocleg, szybka komunikacja miejska i mniej stresu z parkowaniem w centrum Krakowa.</p>
-      <div class="transport__note">Jakdojade • tramwaj • centrum miasta</div>
+      <h3>{page.highlights[3].title}</h3>
+      <p>{page.highlights[3].copy}</p>
+      <div class="transport__note">{imageLabels.note}</div>
       <div class="transport__media">
-        <ImageFrame src={siteAssets.transport.tramToCenter} alt="Tramwaj z Camping Clepardia do centrum Krakowa" label="Tramwaj do centrum" />
-        <ImageFrame src={siteAssets.transport.ticketMachine} alt="Biletomat tramwajowy w Krakowie" label="Bilety w tramwaju" />
-        <ImageFrame src={siteAssets.transport.googleMaps} alt="Podgląd trasy z Camping Clepardia w mapach" label="Mapa dojazdu" />
-        <ImageFrame src={siteAssets.transport.jakdojade} alt="Podgląd trasy w aplikacji JakDojade" label="JakDojade" />
+        <ImageFrame src={siteAssets.transport.tramToCenter} alt={imageLabels.tram} label={imageLabels.tram} />
+        <ImageFrame src={siteAssets.transport.ticketMachine} alt={imageLabels.tickets} label={imageLabels.tickets} />
+        <ImageFrame src={siteAssets.transport.googleMaps} alt={imageLabels.map} label={imageLabels.map} />
+        <ImageFrame src={siteAssets.transport.jakdojade} alt={imageLabels.app} label={imageLabels.app} />
       </div>
     </div>
   </div>

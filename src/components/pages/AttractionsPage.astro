@@ -2,108 +2,237 @@
 import ImageFrame from '@/components/ImageFrame.astro';
 import { siteAssets } from '@/data/assets';
 import { getLocalizedPath } from '@/utils/localizedLinks';
+import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 
 interface Props {
   languageCode?: string;
 }
 
 const { languageCode } = Astro.props as Props;
+const contentLanguage = resolveContentLanguage(languageCode);
+const t = getTranslations(languageCode);
+const page = t.pages.atrakcje;
 const pricingHref = getLocalizedPath(languageCode, 'cennik');
 const contactHref = getLocalizedPath(languageCode, 'kontakt');
 const transportHref = getLocalizedPath(languageCode, 'dojazd');
 
-const krakowCards = [
-  'Stare Miasto',
-  'Rynek Główny',
-  'Kazimierz',
-  'Wawel',
-  'Planty',
-];
+const attractionsTextByLanguage = {
+  pl: {
+    localKicker: 'Kraków blisko campingu',
+    localTitle: 'Kraków bez stresu z parkowaniem',
+    localCopy:
+      'Z Camping Clepardia możesz zostawić auto, kampera lub przyczepę na miejscu i dojechać do centrum tramwajem. To wygodne rozwiązanie dla gości, którzy chcą zwiedzać miasto bez szukania parkingu przy Starym Mieście.',
+    localAria: 'Miejsca w Krakowie blisko Camping Clepardia',
+    routeCamping: 'Camping Clepardia',
+    routeTram: 'Tramwaj',
+    routeCenter: 'Centrum Krakowa',
+    listKicker: 'Najpopularniejsze atrakcje',
+    listTitle: 'Kraków, Małopolska i rodzinne wyjazdy',
+    listCopy: 'Wybierz klasyczne zwiedzanie miasta, jednodniową trasę poza Kraków albo spokojniejszy dzień wśród zieleni.',
+    itineraryKicker: 'Pomysł na pobyt',
+    itineraryTitle: 'Zaplanuj zwiedzanie bez przepakowywania auta',
+    itineraryCopy:
+      'Camping Clepardia może być jedną bazą na krótki city break, rodzinny weekend albo dłuższy pobyt z wycieczkami po regionie.',
+    ctaKicker: 'Baza wypadowa w Krakowie',
+    cards: ['Stare Miasto', 'Rynek Główny', 'Kazimierz', 'Wawel', 'Planty'],
+    attractions: [
+      { title: 'Stare Miasto w Krakowie', copy: 'Spacer po Rynku Głównym, Sukiennicach, ulicy Floriańskiej i okolicach Plant.', label: 'Stare Miasto' },
+      { title: 'Kazimierz', copy: 'Historyczna dzielnica z klimatycznymi uliczkami, restauracjami i kawiarniami.', label: 'Kazimierz' },
+      { title: 'Wawel', copy: 'Jedno z najważniejszych miejsc w Krakowie, dobre na spacer i klasyczne zwiedzanie.', label: 'Wawel' },
+      { title: 'Kopalnia Soli Wieliczka', copy: 'Jedna z najpopularniejszych atrakcji w okolicy Krakowa.', label: 'Wieliczka' },
+      { title: 'Fabryka Schindlera', copy: 'Miejsce dla osób zainteresowanych historią Krakowa i II wojną światową.', label: 'Fabryka Schindlera' },
+      { title: 'Auschwitz-Birkenau', copy: 'Ważne miejsce pamięci, często odwiedzane podczas pobytu w Małopolsce.', label: 'Auschwitz-Birkenau' },
+      { title: 'Energylandia', copy: 'Duży park rozrywki, popularny szczególnie wśród rodzin z dziećmi.', label: 'Energylandia' },
+      { title: 'Ojców i Ojcowski Park Narodowy', copy: 'Dobry pomysł na spokojniejszy wyjazd poza miasto, z naturą i zamkami.', label: 'Ojców' },
+      { title: 'Zakopane', copy: 'Popularny kierunek jednodniowej wycieczki w Tatry.', label: 'Zakopane' },
+    ],
+    plans: [
+      { title: '1 dzień', items: ['Stare Miasto', 'Wawel', 'Kazimierz'] },
+      { title: '2-3 dni', items: ['Kraków', 'Wieliczka', 'Fabryka Schindlera'] },
+      { title: 'Dłuższy pobyt', items: ['Kraków', 'Wieliczka', 'Ojców', 'Energylandia', 'Zakopane'] },
+    ],
+  },
+  en: {
+    localKicker: 'Krakow close to the campsite',
+    localTitle: 'Krakow without parking stress',
+    localCopy:
+      'From Camping Clepardia you can leave your car, camper or caravan on site and reach the centre by tram. It is a convenient solution for guests who want to explore the city without searching for parking near the Old Town.',
+    localAria: 'Places in Krakow close to Camping Clepardia',
+    routeCamping: 'Camping Clepardia',
+    routeTram: 'Tram',
+    routeCenter: 'Krakow centre',
+    listKicker: 'Most popular attractions',
+    listTitle: 'Krakow, Małopolska and family trips',
+    listCopy: 'Choose classic city sightseeing, a one-day route outside Krakow or a calmer day surrounded by greenery.',
+    itineraryKicker: 'Stay idea',
+    itineraryTitle: 'Plan sightseeing without repacking the car',
+    itineraryCopy:
+      'Camping Clepardia can be one base for a short city break, family weekend or a longer stay with trips around the region.',
+    ctaKicker: 'A trip base in Krakow',
+    cards: ['Old Town', 'Main Square', 'Kazimierz', 'Wawel', 'Planty'],
+    attractions: [
+      { title: 'Krakow Old Town', copy: 'A walk around the Main Square, Cloth Hall, Floriańska Street and Planty.', label: 'Old Town' },
+      { title: 'Kazimierz', copy: 'A historic district with atmospheric streets, restaurants and cafes.', label: 'Kazimierz' },
+      { title: 'Wawel', copy: 'One of the most important places in Krakow, good for a walk and classic sightseeing.', label: 'Wawel' },
+      { title: 'Wieliczka Salt Mine', copy: 'One of the most popular attractions near Krakow.', label: 'Wieliczka' },
+      { title: 'Schindler’s Factory', copy: 'A place for visitors interested in Krakow history and World War II.', label: 'Schindler’s Factory' },
+      { title: 'Auschwitz-Birkenau', copy: 'An important memorial site often visited during stays in Małopolska.', label: 'Auschwitz-Birkenau' },
+      { title: 'Energylandia', copy: 'A large amusement park, especially popular with families with children.', label: 'Energylandia' },
+      { title: 'Ojców National Park', copy: 'A good idea for a calmer trip outside the city with nature and castles.', label: 'Ojców' },
+      { title: 'Zakopane', copy: 'A popular direction for a one-day trip to the Tatra Mountains.', label: 'Zakopane' },
+    ],
+    plans: [
+      { title: '1 day', items: ['Old Town', 'Wawel', 'Kazimierz'] },
+      { title: '2-3 days', items: ['Krakow', 'Wieliczka', 'Schindler’s Factory'] },
+      { title: 'Longer stay', items: ['Krakow', 'Wieliczka', 'Ojców', 'Energylandia', 'Zakopane'] },
+    ],
+  },
+  de: {
+    localKicker: 'Krakau nahe dem Campingplatz',
+    localTitle: 'Krakau ohne Parkplatzstress',
+    localCopy:
+      'Vom Camping Clepardia aus können Sie Auto, Camper oder Wohnwagen vor Ort lassen und mit der Straßenbahn ins Zentrum fahren. Das ist bequem für Gäste, die die Stadt ohne Parkplatzsuche bei der Altstadt entdecken möchten.',
+    localAria: 'Orte in Krakau nahe Camping Clepardia',
+    routeCamping: 'Camping Clepardia',
+    routeTram: 'Straßenbahn',
+    routeCenter: 'Zentrum von Krakau',
+    listKicker: 'Beliebteste Attraktionen',
+    listTitle: 'Krakau, Małopolska und Familienausflüge',
+    listCopy: 'Wählen Sie klassische Stadtbesichtigung, eine Tagestour außerhalb Krakaus oder einen ruhigeren Tag im Grünen.',
+    itineraryKicker: 'Idee für den Aufenthalt',
+    itineraryTitle: 'Sightseeing planen, ohne das Auto umzupacken',
+    itineraryCopy:
+      'Camping Clepardia kann eine Basis für City Break, Familienwochenende oder längeren Aufenthalt mit Ausflügen in der Region sein.',
+    ctaKicker: 'Ausflugsbasis in Krakau',
+    cards: ['Altstadt', 'Hauptmarkt', 'Kazimierz', 'Wawel', 'Planty'],
+    attractions: [
+      { title: 'Krakauer Altstadt', copy: 'Spaziergang über den Hauptmarkt, die Tuchhallen, die Floriańska-Straße und Planty.', label: 'Altstadt' },
+      { title: 'Kazimierz', copy: 'Historisches Viertel mit stimmungsvollen Straßen, Restaurants und Cafés.', label: 'Kazimierz' },
+      { title: 'Wawel', copy: 'Einer der wichtigsten Orte Krakaus, gut für Spaziergang und klassische Besichtigung.', label: 'Wawel' },
+      { title: 'Salzbergwerk Wieliczka', copy: 'Eine der beliebtesten Attraktionen in der Umgebung von Krakau.', label: 'Wieliczka' },
+      { title: 'Schindlers Fabrik', copy: 'Ein Ort für Gäste, die sich für Krakauer Geschichte und den Zweiten Weltkrieg interessieren.', label: 'Schindlers Fabrik' },
+      { title: 'Auschwitz-Birkenau', copy: 'Wichtige Gedenkstätte, oft während eines Aufenthalts in Małopolska besucht.', label: 'Auschwitz-Birkenau' },
+      { title: 'Energylandia', copy: 'Großer Freizeitpark, besonders beliebt bei Familien mit Kindern.', label: 'Energylandia' },
+      { title: 'Ojców-Nationalpark', copy: 'Gute Idee für einen ruhigeren Ausflug außerhalb der Stadt mit Natur und Burgen.', label: 'Ojców' },
+      { title: 'Zakopane', copy: 'Beliebtes Ziel für einen Tagesausflug in die Tatra.', label: 'Zakopane' },
+    ],
+    plans: [
+      { title: '1 Tag', items: ['Altstadt', 'Wawel', 'Kazimierz'] },
+      { title: '2-3 Tage', items: ['Krakau', 'Wieliczka', 'Schindlers Fabrik'] },
+      { title: 'Längerer Aufenthalt', items: ['Krakau', 'Wieliczka', 'Ojców', 'Energylandia', 'Zakopane'] },
+    ],
+  },
+  it: {
+    localKicker: 'Cracovia vicino al camping',
+    localTitle: 'Cracovia senza stress da parcheggio',
+    localCopy:
+      'Da Camping Clepardia puoi lasciare auto, camper o roulotte sul posto e raggiungere il centro in tram. È una soluzione comoda per visitare la città senza cercare parcheggio vicino alla Città Vecchia.',
+    localAria: 'Luoghi di Cracovia vicino a Camping Clepardia',
+    routeCamping: 'Camping Clepardia',
+    routeTram: 'Tram',
+    routeCenter: 'Centro di Cracovia',
+    listKicker: 'Attrazioni più popolari',
+    listTitle: 'Cracovia, Małopolska e gite in famiglia',
+    listCopy: 'Scegli una visita classica della città, un itinerario di un giorno fuori Cracovia o una giornata più tranquilla nel verde.',
+    itineraryKicker: 'Idea di soggiorno',
+    itineraryTitle: 'Pianifica le visite senza risistemare l’auto',
+    itineraryCopy:
+      'Camping Clepardia può essere un’unica base per un city break, un weekend in famiglia o un soggiorno più lungo con gite nella regione.',
+    ctaKicker: 'Base per escursioni a Cracovia',
+    cards: ['Città Vecchia', 'Piazza del Mercato', 'Kazimierz', 'Wawel', 'Planty'],
+    attractions: [
+      { title: 'Città Vecchia di Cracovia', copy: 'Passeggiata tra Rynek, Sukiennice, via Floriańska e Planty.', label: 'Città Vecchia' },
+      { title: 'Kazimierz', copy: 'Quartiere storico con strade suggestive, ristoranti e caffè.', label: 'Kazimierz' },
+      { title: 'Wawel', copy: 'Uno dei luoghi più importanti di Cracovia, adatto a una passeggiata e visita classica.', label: 'Wawel' },
+      { title: 'Miniera di Sale Wieliczka', copy: 'Una delle attrazioni più popolari vicino a Cracovia.', label: 'Wieliczka' },
+      { title: 'Fabbrica di Schindler', copy: 'Luogo per chi è interessato alla storia di Cracovia e alla Seconda guerra mondiale.', label: 'Fabbrica di Schindler' },
+      { title: 'Auschwitz-Birkenau', copy: 'Importante luogo della memoria, spesso visitato durante un soggiorno in Małopolska.', label: 'Auschwitz-Birkenau' },
+      { title: 'Energylandia', copy: 'Grande parco divertimenti, molto popolare tra le famiglie con bambini.', label: 'Energylandia' },
+      { title: 'Parco Nazionale di Ojców', copy: 'Buona idea per una gita più tranquilla fuori città, tra natura e castelli.', label: 'Ojców' },
+      { title: 'Zakopane', copy: 'Meta popolare per una gita di un giorno verso i Tatra.', label: 'Zakopane' },
+    ],
+    plans: [
+      { title: '1 giorno', items: ['Città Vecchia', 'Wawel', 'Kazimierz'] },
+      { title: '2-3 giorni', items: ['Cracovia', 'Wieliczka', 'Fabbrica di Schindler'] },
+      { title: 'Soggiorno più lungo', items: ['Cracovia', 'Wieliczka', 'Ojców', 'Energylandia', 'Zakopane'] },
+    ],
+  },
+};
+
+const attractionsText = attractionsTextByLanguage[contentLanguage];
+
+const krakowCards = attractionsText.cards;
 
 const attractions = [
   {
-    title: 'Stare Miasto w Krakowie',
-    copy: 'Spacer po Rynku Głównym, Sukiennicach, ulicy Floriańskiej i okolicach Plant.',
+    title: attractionsText.attractions[0].title,
+    copy: attractionsText.attractions[0].copy,
     image: siteAssets.attractions.oldTown,
-    label: 'Stare Miasto',
+    label: attractionsText.attractions[0].label,
   },
   {
-    title: 'Kazimierz',
-    copy: 'Historyczna dzielnica z klimatycznymi uliczkami, restauracjami i kawiarniami.',
+    title: attractionsText.attractions[1].title,
+    copy: attractionsText.attractions[1].copy,
     image: '/images/attractions/krakow-kazimierz.webp',
-    label: 'Kazimierz',
+    label: attractionsText.attractions[1].label,
   },
   {
-    title: 'Wawel',
-    copy: 'Jedno z najważniejszych miejsc w Krakowie, dobre na spacer i klasyczne zwiedzanie.',
+    title: attractionsText.attractions[2].title,
+    copy: attractionsText.attractions[2].copy,
     image: '/images/attractions/wawel-castle.webp',
-    label: 'Wawel',
+    label: attractionsText.attractions[2].label,
   },
   {
-    title: 'Kopalnia Soli Wieliczka',
-    copy: 'Jedna z najpopularniejszych atrakcji w okolicy Krakowa.',
+    title: attractionsText.attractions[3].title,
+    copy: attractionsText.attractions[3].copy,
     image: siteAssets.attractions.wieliczka,
-    label: 'Wieliczka',
+    label: attractionsText.attractions[3].label,
   },
   {
-    title: 'Fabryka Schindlera',
-    copy: 'Miejsce dla osób zainteresowanych historią Krakowa i II wojną światową.',
+    title: attractionsText.attractions[4].title,
+    copy: attractionsText.attractions[4].copy,
     image: siteAssets.attractions.schindler,
-    label: 'Fabryka Schindlera',
+    label: attractionsText.attractions[4].label,
   },
   {
-    title: 'Auschwitz-Birkenau',
-    copy: 'Ważne miejsce pamięci, często odwiedzane podczas pobytu w Małopolsce.',
+    title: attractionsText.attractions[5].title,
+    copy: attractionsText.attractions[5].copy,
     image: siteAssets.attractions.auschwitz,
-    label: 'Auschwitz-Birkenau',
+    label: attractionsText.attractions[5].label,
   },
   {
-    title: 'Energylandia',
-    copy: 'Duży park rozrywki, popularny szczególnie wśród rodzin z dziećmi.',
+    title: attractionsText.attractions[6].title,
+    copy: attractionsText.attractions[6].copy,
     image: siteAssets.attractions.energylandia,
-    label: 'Energylandia',
+    label: attractionsText.attractions[6].label,
   },
   {
-    title: 'Ojców i Ojcowski Park Narodowy',
-    copy: 'Dobry pomysł na spokojniejszy wyjazd poza miasto, z naturą i zamkami.',
+    title: attractionsText.attractions[7].title,
+    copy: attractionsText.attractions[7].copy,
     image: '/images/attractions/ojcow-national-park.webp',
-    label: 'Ojców',
+    label: attractionsText.attractions[7].label,
   },
   {
-    title: 'Zakopane',
-    copy: 'Popularny kierunek jednodniowej wycieczki w Tatry.',
+    title: attractionsText.attractions[8].title,
+    copy: attractionsText.attractions[8].copy,
     image: siteAssets.attractions.zakopane,
-    label: 'Zakopane',
+    label: attractionsText.attractions[8].label,
   },
 ];
 
-const stayPlans = [
-  {
-    title: '1 dzień',
-    items: ['Stare Miasto', 'Wawel', 'Kazimierz'],
-  },
-  {
-    title: '2-3 dni',
-    items: ['Kraków', 'Wieliczka', 'Fabryka Schindlera'],
-  },
-  {
-    title: 'Dłuższy pobyt',
-    items: ['Kraków', 'Wieliczka', 'Ojców', 'Energylandia', 'Zakopane'],
-  },
-];
+const stayPlans = attractionsText.plans;
 ---
 
 <section class="site-section attractions-local reveal-section">
   <div class="container attractions-local__grid">
     <div class="attractions-local__content">
-      <span class="section-kicker">Kraków blisko campingu</span>
-      <h2 class="section-title">Kraków bez stresu z parkowaniem</h2>
+      <span class="section-kicker">{attractionsText.localKicker}</span>
+      <h2 class="section-title">{attractionsText.localTitle}</h2>
       <p class="section-copy">
-        Z Camping Clepardia możesz zostawić auto, kampera lub przyczepę na miejscu i dojechać do centrum tramwajem.
-        To wygodne rozwiązanie dla gości, którzy chcą zwiedzać miasto bez szukania parkingu przy Starym Mieście.
+        {attractionsText.localCopy}
       </p>
 
-      <div class="attractions-local__cards" aria-label="Miejsca w Krakowie blisko Camping Clepardia">
+      <div class="attractions-local__cards" aria-label={attractionsText.localAria}>
         {krakowCards.map((item, index) => (
           <article class="premium-card reveal-section attractions-local__card" style={`--reveal-delay: ${index * 70}ms`}>
             <span>{String(index + 1).padStart(2, '0')}</span>
@@ -116,12 +245,12 @@ const stayPlans = [
     <div class="attractions-local__media">
       <ImageFrame
         src={siteAssets.attractions.oldTown}
-        alt="Stare Miasto w Krakowie blisko Camping Clepardia"
-        label="Kraków blisko campingu"
+        alt={attractionsText.localTitle}
+        label={attractionsText.localKicker}
         className="attractions-local__image"
       />
       <div class="premium-card attractions-local__route">
-        <span>Camping Clepardia</span><i></i><span>Tramwaj</span><i></i><span>Centrum Krakowa</span>
+        <span>{attractionsText.routeCamping}</span><i></i><span>{attractionsText.routeTram}</span><i></i><span>{attractionsText.routeCenter}</span>
       </div>
     </div>
   </div>
@@ -130,10 +259,10 @@ const stayPlans = [
 <section class="site-section attractions-list reveal-section">
   <div class="container">
     <div class="attractions-list__head">
-      <span class="section-kicker">Najpopularniejsze atrakcje</span>
-      <h2 class="section-title">Kraków, Małopolska i rodzinne wyjazdy</h2>
+      <span class="section-kicker">{attractionsText.listKicker}</span>
+      <h2 class="section-title">{attractionsText.listTitle}</h2>
       <p class="section-copy">
-        Wybierz klasyczne zwiedzanie miasta, jednodniową trasę poza Kraków albo spokojniejszy dzień wśród zieleni.
+        {attractionsText.listCopy}
       </p>
     </div>
 
@@ -160,10 +289,10 @@ const stayPlans = [
 <section class="site-section attractions-itinerary reveal-section">
   <div class="container attractions-itinerary__grid">
     <div class="attractions-itinerary__intro">
-      <span class="section-kicker">Pomysł na pobyt</span>
-      <h2 class="section-title">Zaplanuj zwiedzanie bez przepakowywania auta</h2>
+      <span class="section-kicker">{attractionsText.itineraryKicker}</span>
+      <h2 class="section-title">{attractionsText.itineraryTitle}</h2>
       <p class="section-copy">
-        Camping Clepardia może być jedną bazą na krótki city break, rodzinny weekend albo dłuższy pobyt z wycieczkami po regionie.
+        {attractionsText.itineraryCopy}
       </p>
     </div>
 
@@ -184,16 +313,16 @@ const stayPlans = [
   <div class="container">
     <div class="premium-card attractions-final-cta__panel">
       <div>
-        <span class="section-kicker">Baza wypadowa w Krakowie</span>
-        <h2>Zaplanuj pobyt w Krakowie z Camping Clepardia</h2>
+        <span class="section-kicker">{attractionsText.ctaKicker}</span>
+        <h2>{page.cta.title}</h2>
         <p>
-          Połącz spokojniejszy nocleg na campingu z wygodnym dojazdem do centrum i jednodniowymi trasami po Małopolsce.
+          {page.cta.copy}
         </p>
       </div>
       <div class="attractions-final-cta__actions">
-        <a class="btn btn-primary premium-button" href={pricingHref}>Sprawdź cennik</a>
-        <a class="btn btn-glass attractions-final-cta__secondary" href={contactHref}>Zapytaj o dostępność</a>
-        <a class="btn btn-glass attractions-final-cta__secondary" href={transportHref}>Jak dojechać</a>
+        <a class="btn btn-primary premium-button" href={pricingHref}>{page.cta.primaryLabel}</a>
+        <a class="btn btn-glass attractions-final-cta__secondary" href={contactHref}>{t.cta.availability}</a>
+        <a class="btn btn-glass attractions-final-cta__secondary" href={transportHref}>{t.cta.directions}</a>
       </div>
     </div>
   </div>

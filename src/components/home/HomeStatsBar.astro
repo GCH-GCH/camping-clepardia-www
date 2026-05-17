@@ -1,29 +1,18 @@
 ---
-const stats = [
-  {
-    label: 'Kraków blisko centrum',
-    value: 'Miasto',
-    copy: 'Zielona baza bez wjazdu autem w ścisłe centrum.',
-  },
-  {
-    label: 'Tramwaj w pobliżu',
-    value: 'Dojazd',
-    copy: 'Wygodny start do Starego Miasta i Kazimierza.',
-  },
-  {
-    label: 'Camping + domki',
-    value: 'Pobyt',
-    copy: 'Miejsca dla kamperów, namiotów, przyczep i gości domków.',
-  },
-  {
-    label: 'Baza do zwiedzania Małopolski',
-    value: 'Region',
-    copy: 'Wieliczka, Ojców i rodzinne atrakcje w zasięgu wycieczki.',
-  },
-];
+import { getTranslations } from '@/i18n/config';
+import { getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const t = getTranslations(languageCode ?? pathContext.languageCode);
+const stats = t.home.stats;
 ---
 
-<section class="home-stats reveal-section" aria-label="Najważniejsze atuty Camping Clepardia">
+<section class="home-stats reveal-section" aria-label="Camping Clepardia">
   <div class="container">
     <div class="home-stats__panel">
       {stats.map((item, index) => (

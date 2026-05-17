@@ -42,8 +42,8 @@ export const getCampgroundJsonLd = ({ image, pageUrl }: BusinessJsonLdOptions) =
   },
   geo: {
     '@type': 'GeoCoordinates',
-    latitude: 'TODO: uzupełnić dokładną szerokość geograficzną',
-    longitude: 'TODO: uzupełnić dokładną długość geograficzną',
+    latitude: 'TODO: add exact latitude',
+    longitude: 'TODO: add exact longitude',
   },
   openingHoursSpecification: [
     {

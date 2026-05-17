@@ -1,17 +1,30 @@
+---
+import { getTranslations } from '@/i18n/config';
+import { getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const t = getTranslations(languageCode ?? pathContext.languageCode);
+---
+
 <section class="site-section booking reveal-section" id="rezerwacja">
   <div class="container">
     <div class="booking__panel">
       <div>
-        <span class="section-kicker">Rezerwacja</span>
-        <h2 class="section-title">Zaplanuj pobyt w Krakowie</h2>
-        <p class="section-copy">Formularz jest gotowy jako UI mockup pod późniejsze podłączenie z CC SYSTEM i obsługę zapytań online.</p>
+        <span class="section-kicker">{t.form.kicker}</span>
+        <h2 class="section-title">{t.pages.kontakt.title}</h2>
+        <p class="section-copy">{t.pages.kontakt.lead}</p>
       </div>
       <form class="booking__form">
-        <label>Data przyjazdu<input type="date" /></label>
-        <label>Data wyjazdu<input type="date" /></label>
-        <label>Typ pobytu<select><option>Kamper</option><option>Namiot</option><option>Przyczepa</option><option>Domek</option></select></label>
-        <label>Liczba osób<input type="number" min="1" value="2" /></label>
-        <button class="btn btn-primary" type="button">Wyślij zapytanie</button>
+        <label>{t.form.arrival}<input type="date" /></label>
+        <label>{t.form.departure}<input type="date" /></label>
+        <label>{t.form.stayType}<select><option>{t.pricing.stayTypes.camper}</option><option>{t.pricing.stayTypes['tent-small']}</option><option>{t.pricing.stayTypes.caravan}</option><option>{t.pricing.stayTypes['bungalow-2']}</option></select></label>
+        <label>{t.form.people}<input type="number" min="1" value="2" /></label>
+        <button class="btn btn-primary" type="button">{t.form.submit}</button>
       </form>
     </div>
   </div>

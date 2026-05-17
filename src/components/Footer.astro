@@ -1,18 +1,20 @@
 ---
 import { logoMain, logoMainPng } from '@/data/assets';
 import { getLanguageSwitchLinks, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
-
-const footerNavItems = [
-  { slug: '', label: 'Start' },
-  { slug: 'camping', label: 'Camping' },
-  { slug: 'domki', label: 'Domki' },
-  { slug: 'cennik', label: 'Cennik' },
-  { slug: 'dojazd', label: 'Dojazd' },
-  { slug: 'atrakcje', label: 'Atrakcje' },
-  { slug: 'kontakt', label: 'Kontakt' },
-];
+import { getTranslations } from '@/i18n/config';
 
 const pathContext = getPathContext(Astro.url.pathname);
+const t = getTranslations(pathContext.languageCode);
+const footerNavItems = [
+  { slug: '', label: t.nav.items.start },
+  { slug: 'camping', label: t.nav.items.camping },
+  { slug: 'domki', label: t.nav.items.domki },
+  { slug: 'cennik', label: t.nav.items.cennik },
+  { slug: 'dojazd', label: t.nav.items.dojazd },
+  { slug: 'atrakcje', label: t.nav.items.atrakcje },
+  { slug: 'kontakt', label: t.nav.items.kontakt },
+];
+
 const footerNavLinks = footerNavItems.map((item) => ({
   ...item,
   href: getLocalizedPath(pathContext.explicitLanguage, item.slug),
@@ -32,8 +34,8 @@ const footerSocialLinks = [
     <div class="footer__brand">
       <img class="footer__logo" src={logoMain} alt="Camping Clepardia" width="196" height="52" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
       <h2>Camping Clepardia</h2>
-      <p>Camping w Krakowie blisko centrum miasta. Strona przygotowana pod przyszłe rezerwacje online i integrację z CC SYSTEM.</p>
-      <div class="footer__langs" aria-label="Wersje językowe">
+      <p>{t.footer.description}</p>
+      <div class="footer__langs" aria-label={t.footer.languages}>
         {footerLanguageLinks.map((language) => (
           <a
             href={language.href}
@@ -47,26 +49,26 @@ const footerSocialLinks = [
       </div>
     </div>
     <div>
-      <h3>Szybkie linki</h3>
+      <h3>{t.footer.quickLinks}</h3>
       {footerNavLinks.map((link) => (
         <a href={link.href}>{link.label}</a>
       ))}
     </div>
     <div>
-      <h3>Kontakt</h3>
-      <p>Camping Clepardia<br />Kraków, Polska</p>
-      <p>Recepcja i zapytania rezerwacyjne</p>
+      <h3>{t.footer.contact}</h3>
+      <p set:html={t.footer.contactPlace} />
+      <p>{t.footer.reception}</p>
     </div>
     <div>
-      <h3>Social media</h3>
+      <h3>{t.footer.social}</h3>
       {footerSocialLinks.map((link) => (
         <a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>
       ))}
     </div>
   </div>
   <div class="container footer__bottom">
-    <p>© <span id="year"></span> Camping Clepardia. Wszystkie prawa zastrzeżone.</p>
-    <p>Online booking foundation ready.</p>
+    <p>© <span id="year"></span> Camping Clepardia. {t.footer.rights}</p>
+    <p>{t.footer.bookingReady}</p>
   </div>
 </footer>
 

@@ -1,42 +1,34 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
 import { siteAssets } from '@/data/assets';
+import { getTranslations } from '@/i18n/config';
+import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
-const bungalowCards = [
-  {
-    title: 'Dla par i rodzin',
-    copy: 'Praktyczne domki dla osób, które chcą wygodnie odpocząć po zwiedzaniu Krakowa.',
-    label: 'Stay',
-    delay: 0,
-  },
-  {
-    title: 'Blisko centrum',
-    copy: 'Szybki dojazd tramwajem do Starego Miasta bez konieczności szukania parkingu.',
-    label: 'City',
-    delay: 80,
-  },
-  {
-    title: 'Campingowy klimat',
-    copy: 'Więcej swobody niż w typowym hotelu i zielona przestrzeń wokół.',
-    label: 'Green',
-    delay: 160,
-  },
-  {
-    title: 'Rezerwacje sezonowe',
-    copy: 'Domki można rezerwować w sezonie zgodnie z aktualną dostępnością.',
-    label: 'Season',
-    delay: 240,
-  },
-];
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
+const t = getTranslations(languageCode ?? pathContext.languageCode);
+const page = t.pages.domki;
+const bungalowCards = page.highlights.map((item, index) => ({
+  ...item,
+  label: String(index + 1).padStart(2, '0'),
+  delay: index * 80,
+}));
+const pricingHref = getLocalizedPath(explicitLanguage, 'cennik');
+const contactHref = getLocalizedPath(explicitLanguage, 'kontakt');
 ---
 
 <section class="site-section bungalows-section reveal-section" id="domki">
   <div class="container bungalows-section__grid">
     <div class="bungalows-section__content">
-      <span class="section-kicker">Domki Camping Clepardia</span>
-      <h2 class="section-title">Wygodny nocleg w Krakowie bez własnego sprzętu</h2>
+      <span class="section-kicker">{page.overline}</span>
+      <h2 class="section-title">{page.title}</h2>
       <p class="section-copy">
-        Domki to dobra opcja dla gości, którzy chcą zostać blisko centrum Krakowa, ale wolą spokojniejsze miejsce z campingowym klimatem.
+        {page.lead}
       </p>
 
       <div class="bungalows-section__cards">
@@ -50,8 +42,8 @@ const bungalowCards = [
       </div>
 
       <div class="bungalows-section__cta">
-        <a class="btn btn-primary premium-button" href="#rezerwacja">Zapytaj o domek</a>
-        <a class="btn btn-glass bungalows-section__button-secondary" href="#cennik">Zobacz cennik</a>
+        <a class="btn btn-primary premium-button" href={contactHref}>{page.cta.secondaryLabel}</a>
+        <a class="btn btn-glass bungalows-section__button-secondary" href={pricingHref}>{t.cta.pricing}</a>
       </div>
     </div>
 
