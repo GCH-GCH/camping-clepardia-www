@@ -1,0 +1,105 @@
+export interface InquiryPeople {
+  adults: number;
+  children: number;
+  toddlers: number;
+}
+
+export interface InquiryCalculatorSummary {
+  total?: string;
+  pricePerNight?: string;
+  season?: string;
+  breakdown?: string[];
+}
+
+export interface ReservationInquiryPayload {
+  fullName: string;
+  email: string;
+  phone?: string;
+  country?: string;
+  contactLanguage?: string;
+  arrival?: string;
+  departure?: string;
+  arrivalIso?: string;
+  departureIso?: string;
+  nights?: number;
+  stayType: string;
+  stayTypeId?: string;
+  stayCategory?: string;
+  people?: InquiryPeople;
+  addons?: string[];
+  message?: string;
+  summerNotice?: boolean;
+  consent?: boolean;
+  website?: string;
+  source?: string;
+  locale?: string;
+  calculatorSummary?: InquiryCalculatorSummary | null;
+}
+
+export interface NormalizedReservationInquiry extends ReservationInquiryPayload {
+  fullName: string;
+  email: string;
+  phone: string;
+  country: string;
+  contactLanguage: string;
+  arrival: string;
+  departure: string;
+  arrivalIso: string;
+  departureIso: string;
+  nights: number;
+  stayType: string;
+  stayTypeId: string;
+  stayCategory: string;
+  people: InquiryPeople;
+  addons: string[];
+  message: string;
+  summerNotice: boolean;
+  consent: boolean;
+  website: string;
+  source: 'website';
+  locale: string;
+  submittedAt: string;
+  inquiryId: string;
+}
+
+export interface CcSystemLeadDraft {
+  source: 'website';
+  status: 'new';
+  type: 'reservation_inquiry';
+  customer: {
+    fullName: string;
+    email: string;
+    phone: string;
+    country: string;
+    language: string;
+  };
+  stay: {
+    arrivalIso: string;
+    departureIso: string;
+    nights: number;
+    stayTypeId: string;
+    stayType: string;
+    stayCategory: string;
+    people: InquiryPeople;
+    addons: string[];
+    summerNotice: boolean;
+  };
+  notes: string;
+  createdAt: string;
+}
+
+export interface MailMessage {
+  to: string;
+  from: string;
+  replyTo?: string;
+  subject: string;
+  text: string;
+  html: string;
+}
+
+export interface MailDeliveryResult {
+  provider: string;
+  delivered: boolean;
+  messageId?: string;
+  reason?: string;
+}

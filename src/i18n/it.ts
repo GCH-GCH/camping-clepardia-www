@@ -230,6 +230,8 @@ export const it = {
       'Scrivi cosa ti serve: ora di arrivo, tipo di mezzo, domande sui bungalow o altre informazioni.',
     consent: 'Accetto di essere ricontattato in merito alla mia richiesta.',
     submit: 'Invia richiesta',
+    loading: 'Invio...',
+    networkError: 'Non e stato possibile inviare la richiesta. Riprova o contatta direttamente la reception.',
     summary: 'Riepilogo richiesta',
     summaryEmpty: 'Completa il modulo e qui apparirà il riepilogo della richiesta.',
     term: 'Periodo',

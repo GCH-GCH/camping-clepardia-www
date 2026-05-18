@@ -648,6 +648,8 @@ export const en = {
       'Write what you need: arrival time, equipment type, bungalow questions or additional information.',
     consent: 'I agree to be contacted back about my enquiry.',
     submit: 'Send enquiry',
+    loading: 'Sending...',
+    networkError: 'We could not send the enquiry. Please try again or contact reception directly.',
     summary: 'Enquiry summary',
     summaryEmpty: 'Complete the form and your enquiry summary will appear here.',
     term: 'Dates',

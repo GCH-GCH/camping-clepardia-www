@@ -230,6 +230,8 @@ export const de = {
       'Schreiben Sie, was Sie benötigen: Ankunftszeit, Fahrzeugtyp, Fragen zum Bungalow oder weitere Informationen.',
     consent: 'Ich akzeptiere die Rückkontaktaufnahme zu meiner Anfrage.',
     submit: 'Anfrage senden',
+    loading: 'Wird gesendet...',
+    networkError: 'Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder kontaktieren Sie die Rezeption direkt.',
     summary: 'Zusammenfassung der Anfrage',
     summaryEmpty: 'Füllen Sie das Formular aus, dann erscheint hier die Zusammenfassung.',
     term: 'Termin',

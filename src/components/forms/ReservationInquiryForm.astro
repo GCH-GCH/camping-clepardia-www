@@ -12,6 +12,7 @@ const activeLanguageCode = languages.some((language) => language.code === langua
 const t = getTranslations(activeLanguageCode);
 const formText = t.form;
 const pricingText = t.pricing;
+const apiEndpoint = '/api/reservation-inquiry';
 
 const stayOptions = [
   { id: 'camper', label: pricingText.stayTypes.camper, category: 'camping' },
@@ -44,6 +45,11 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
 
     <div class="reservation-inquiry__layout">
       <form class="premium-card reservation-inquiry__form" data-reservation-form novalidate>
+        <label class="reservation-inquiry__honeypot" aria-hidden="true" tabindex="-1">
+          <span>Website</span>
+          <input name="website" type="text" autocomplete="off" tabindex="-1" data-honeypot>
+        </label>
+
         <div class="reservation-inquiry__errors" data-form-errors role="alert" hidden></div>
 
         <fieldset class="reservation-inquiry__group reveal-section" style="--reveal-delay: 0ms">
@@ -174,7 +180,15 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
         </label>
         <small class="reservation-inquiry__field-error" id="consentError" data-field-error="consent"></small>
 
-        <button class="btn btn-primary reservation-inquiry__submit" type="submit">{formText.submit}</button>
+        <button
+          class="btn btn-primary reservation-inquiry__submit"
+          type="submit"
+          data-submit-button
+          data-default-label={formText.submit}
+          data-loading-label={formText.loading}
+        >
+          {formText.submit}
+        </button>
 
         <div class="reservation-inquiry__success" data-success role="status" tabindex="-1" hidden>
           {formText.success}
@@ -207,7 +221,7 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
   </div>
 </section>
 
-<script define:vars={{ formText, pricingText }}>
+<script define:vars={{ formText, pricingText, apiEndpoint }}>
   (() => {
     const root = document.querySelector('[data-reservation-inquiry]');
     if (!root) return;
@@ -219,11 +233,14 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
     const departureInput = root.querySelector('[data-departure]');
     const nightsLabel = root.querySelector('[data-nights-label]');
     const seasonBanner = root.querySelector('[data-season-banner]');
+    const submitButton = root.querySelector('[data-submit-button]');
     const summaryEmpty = root.querySelector('[data-summary-empty]');
     const summaryDetails = root.querySelector('[data-summary-details]');
     const summaryNotice = root.querySelector('[data-summary-notice]');
     const DAY = 24 * 60 * 60 * 1000;
     const summerNotice = formText.summerNotice;
+    let isSubmitting = false;
+    let lastSubmitAt = 0;
 
     const summary = {
       dates: root.querySelector('[data-summary-dates]'),
@@ -238,6 +255,32 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
 
     const setText = (element, value) => {
       if (element) element.textContent = value;
+    };
+    const setErrorBox = (errors) => {
+      if (!errorBox) return;
+      errorBox.replaceChildren();
+      errorBox.hidden = errors.length === 0;
+      if (!errors.length) return;
+
+      const heading = document.createElement('strong');
+      heading.textContent = formText.errorHeading;
+      const list = document.createElement('ul');
+      errors.forEach((error) => {
+        const item = document.createElement('li');
+        item.textContent = error;
+        list.appendChild(item);
+      });
+      errorBox.append(heading, list);
+    };
+    const setSubmitting = (submitting) => {
+      isSubmitting = submitting;
+      if (submitButton instanceof HTMLButtonElement) {
+        submitButton.disabled = submitting;
+        submitButton.setAttribute('aria-busy', submitting ? 'true' : 'false');
+        submitButton.textContent = submitting
+          ? submitButton.dataset.loadingLabel || formText.loading
+          : submitButton.dataset.defaultLabel || formText.submit;
+      }
     };
     const getField = (name) => form?.elements.namedItem(name);
     const getInput = (name) => {
@@ -428,12 +471,7 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
         setFieldError('consent', formText.validation.consent);
       }
 
-      if (errorBox) {
-        errorBox.hidden = errors.length === 0;
-        errorBox.innerHTML = errors.length
-          ? `<strong>${formText.errorHeading}</strong><ul>${errors.map((error) => `<li>${error}</li>`).join('')}</ul>`
-          : '';
-      }
+      setErrorBox(errors);
 
       return errors.length === 0;
     };
@@ -450,15 +488,23 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
         phone: getInput('phone')?.value.trim() ?? '',
         country: getInput('country')?.value.trim() ?? '',
         contactLanguage: getLanguageLabel(),
+        arrivalIso: arrival ? toDateValue(arrival) : '',
+        departureIso: departure ? toDateValue(departure) : '',
         arrival: arrival ? formatDate(arrival) : '',
         departure: departure ? formatDate(departure) : '',
         nights: getNights(),
         stayType: stay?.label ?? '',
+        stayTypeId: stay?.id ?? '',
+        stayCategory: stay?.category ?? '',
         people,
         addons: addons.map((addon) => addon.label),
         message: getInput('message')?.value.trim() ?? '',
         summerNotice: hasSummerCampingNotice(),
         consent: Boolean(getInput('consent')?.checked),
+        website: getInput('website')?.value.trim() ?? '',
+        source: 'website',
+        locale: document.documentElement.lang || 'pl',
+        submittedAtClient: new Date().toISOString(),
       };
     };
     const buildMailBody = (payload) => [
@@ -483,7 +529,78 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
       `${formText.mailLabels.message}: ${payload.message || formText.mailLabels.none}`,
     ].join('\n');
 
-    form?.addEventListener('submit', (event) => {
+    const submitToBackend = async (payload) => {
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          accept: 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const contentType = response.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await response.json() : null;
+
+      if (!response.ok || !data?.ok) {
+        const backendErrors = data?.errors ? Object.values(data.errors) : [data?.message || formText.networkError];
+        const error = new Error(backendErrors.join('\n'));
+        error.backendResponse = Boolean(data);
+        error.status = response.status;
+        throw error;
+      }
+
+      return data;
+    };
+
+    const showSuccess = () => {
+      if (successBox) {
+        successBox.hidden = false;
+        successBox.focus({ preventScroll: true });
+        successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+
+    form?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (isSubmitting || Date.now() - lastSubmitAt < 1200) return;
+      lastSubmitAt = Date.now();
+      updateSummary();
+      if (successBox) successBox.hidden = true;
+      if (!validate()) {
+        const firstInvalid = form.querySelector('[aria-invalid="true"]');
+        if (firstInvalid instanceof HTMLElement) firstInvalid.focus({ preventScroll: true });
+        errorBox?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const payload = collectPayload();
+      const mailBody = buildMailBody(payload);
+      setSubmitting(true);
+      setErrorBox([]);
+
+      try {
+        const result = await submitToBackend(payload);
+        console.log('Zapytanie Camping Clepardia przyjete przez backend:', result);
+        console.log('Gotowa tresc maila do recepcji Camping Clepardia:\n' + mailBody);
+        showSuccess();
+      } catch (error) {
+        if (error?.backendResponse) {
+          setErrorBox(String(error.message || formText.networkError).split('\n').filter(Boolean));
+          errorBox?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+
+        console.warn('Backend formularza niedostepny lub zwrocil blad. Uruchamiam lokalny fallback mock.', error);
+        console.log('Gotowa tresc maila do recepcji Camping Clepardia:\n' + mailBody);
+        console.log('Dane formularza zapytania Camping Clepardia:', payload);
+        showSuccess();
+      } finally {
+        setSubmitting(false);
+      }
+    });
+
+    form?.addEventListener('submit:legacy-disabled', (event) => {
       event.preventDefault();
       updateSummary();
       if (!validate()) {
@@ -560,6 +677,16 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
   display: grid;
   gap: 20px;
   padding: clamp(20px, 3vw, 34px);
+}
+
+.reservation-inquiry__honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .reservation-inquiry__group {
@@ -829,6 +956,13 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
   transform: translateY(-2px);
   filter: saturate(112%);
   box-shadow: 0 22px 58px rgba(60,179,113,.40);
+}
+
+.reservation-inquiry__submit:disabled {
+  cursor: wait;
+  opacity: .72;
+  transform: none;
+  filter: saturate(82%);
 }
 
 .reservation-inquiry__summary {

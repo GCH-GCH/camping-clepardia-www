@@ -219,6 +219,8 @@ export const pl = {
       'Napisz, czego potrzebujesz: godzina przyjazdu, typ sprzętu, pytania o domek lub dodatkowe informacje.',
     consent: 'Akceptuję kontakt zwrotny w sprawie mojego zapytania.',
     submit: 'Wyślij zapytanie',
+    loading: 'WysyĹ‚amy...',
+    networkError: 'Nie udaĹ‚o siÄ™ wysĹ‚aÄ‡ zapytania. SprĂłbuj ponownie albo skontaktuj siÄ™ bezpoĹ›rednio z recepcjÄ….',
     summary: 'Podsumowanie zapytania',
     summaryEmpty: 'Uzupełnij formularz, a tutaj pojawi się podsumowanie zapytania.',
     term: 'Termin',
