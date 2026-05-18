@@ -1,5 +1,6 @@
 ---
 import { publicAssetExists, siteAssets } from '@/data/assets';
+import Icon from '@/components/ui/Icon.astro';
 import { getLocalizedPath } from '@/utils/localizedLinks';
 import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 
@@ -371,11 +372,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
             <img src={item.image} alt={item.alt} loading="lazy" decoding="async" />
           ) : (
             <span class="gallery-card__fallback-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14" />
-                <path d="M4 15l4-4 4 4 3-3 5 5" />
-                <path d="M9 8h.01" />
-              </svg>
+              <Icon name="gallery" size={22} strokeWidth={1.8} />
             </span>
           )}
           <span class="gallery-card__shade" aria-hidden="true"></span>
@@ -392,15 +389,11 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
     <div class="gallery-lightbox__backdrop" data-gallery-close></div>
     <div class="gallery-lightbox__dialog" role="dialog" aria-modal="true" aria-label={galleryText.dialog}>
       <button class="gallery-lightbox__close" type="button" data-gallery-close aria-label={galleryText.close}>
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M6 6l12 12M18 6L6 18" />
-        </svg>
+        <Icon name="close" size={22} strokeWidth={2} />
       </button>
 
       <button class="gallery-lightbox__nav gallery-lightbox__nav--prev" type="button" data-gallery-prev aria-label={galleryText.previous}>
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
+        <Icon name="chevronLeft" size={24} strokeWidth={2} />
       </button>
 
       <figure class="gallery-lightbox__figure">
@@ -412,9 +405,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
       </figure>
 
       <button class="gallery-lightbox__nav gallery-lightbox__nav--next" type="button" data-gallery-next aria-label={galleryText.next}>
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M9 18l6-6-6-6" />
-        </svg>
+        <Icon name="chevronRight" size={24} strokeWidth={2} />
       </button>
     </div>
   </div>

@@ -1,3 +1,5 @@
+import { defaultOgImage } from '@/data/seo';
+
 export const en = {
   seo: {
     home: {
@@ -7,7 +9,7 @@ export const en = {
       ogTitle: 'Camping Clepardia - Camping in Krakow close to the city centre',
       ogDescription:
         'A green camping base in Krakow for motorhomes, caravans, tents and bungalows with easy tram access to the Old Town.',
-      ogImage: '/seo/og/og-home-pl.jpg',
+      ogImage: defaultOgImage,
     },
   },
   nav: {

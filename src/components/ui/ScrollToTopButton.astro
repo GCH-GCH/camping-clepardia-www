@@ -1,6 +1,7 @@
 ---
 import { getTranslations } from '@/i18n/config';
 import { getPathContext } from '@/utils/localizedLinks';
+import Icon from '@/components/ui/Icon.astro';
 
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
@@ -14,10 +15,7 @@ const t = getTranslations(pathContext.languageCode);
   aria-hidden="true"
   tabindex="-1"
 >
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path d="M12 19V5" />
-    <path d="M6 11l6-6 6 6" />
-  </svg>
+  <Icon name="scrollTop" size={24} strokeWidth={2} />
 </button>
 
 <script>

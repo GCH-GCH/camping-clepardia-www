@@ -1,7 +1,7 @@
 ---
-import { publicAssetExists } from '@/data/assets';
 import { getTranslations } from '@/i18n/config';
 import { getPathContext } from '@/utils/localizedLinks';
+import Icon from '@/components/ui/Icon.astro';
 
 interface Props {
   languageCode?: string;
@@ -11,57 +11,41 @@ const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(languageCode ?? pathContext.languageCode);
 
-const iconFallbacks = {
-  tram: ['track', 'dot', 'dot', 'line'],
-  camper: ['body', 'wheel', 'wheel', 'line'],
-  bungalow: ['roof', 'body', 'door'],
-  leaf: ['leaf', 'stem'],
-  shower: ['drop', 'line', 'dot'],
-  map: ['pin', 'route'],
-} as const;
-
-const resolveIcon = (...paths: string[]) => paths.find((path) => publicAssetExists(path));
-
 const benefits = [
   {
     title: t.home.why.benefits[0].title,
     copy: t.home.why.benefits[0].copy,
-    icon: resolveIcon('/brand/icons/icon-tram.svg', '/brand/icons/icon-map.svg'),
-    fallback: 'tram',
+    icon: 'tram',
     delay: 0,
   },
   {
     title: t.home.why.benefits[1].title,
     copy: t.home.why.benefits[1].copy,
-    icon: resolveIcon('/brand/icons/icon-camper.svg'),
-    fallback: 'camper',
+    icon: 'camper',
     delay: 80,
   },
   {
     title: t.home.why.benefits[2].title,
     copy: t.home.why.benefits[2].copy,
-    icon: resolveIcon('/brand/icons/icon-bungalow.svg'),
-    fallback: 'bungalow',
+    icon: 'bungalow',
     delay: 160,
   },
   {
     title: t.home.why.benefits[3].title,
     copy: t.home.why.benefits[3].copy,
-    fallback: 'leaf',
+    icon: 'leaf',
     delay: 240,
   },
   {
     title: t.home.why.benefits[4].title,
     copy: t.home.why.benefits[4].copy,
-    icon: resolveIcon('/brand/icons/icon-shower.svg'),
-    fallback: 'shower',
+    icon: 'shower',
     delay: 320,
   },
   {
     title: t.home.why.benefits[5].title,
     copy: t.home.why.benefits[5].copy,
-    icon: resolveIcon('/brand/icons/icon-map.svg'),
-    fallback: 'map',
+    icon: 'map',
     delay: 400,
   },
 ];
@@ -81,13 +65,7 @@ const benefits = [
       {benefits.map((benefit) => (
         <article class="premium-card reveal-section why__card" style={`--reveal-delay: ${benefit.delay}ms`}>
           <div class="why__icon" aria-hidden="true">
-            {benefit.icon ? (
-              <img src={benefit.icon} alt="" width="34" height="34" loading="lazy" decoding="async" />
-            ) : (
-              <span class:list={['why__icon-fallback', `why__icon-fallback--${benefit.fallback}`]}>
-                {iconFallbacks[benefit.fallback].map((part) => <i class={`why__icon-part why__icon-part--${part}`}></i>)}
-              </span>
-            )}
+            <Icon name={benefit.icon} size={34} strokeWidth={1.8} />
           </div>
           <h3>{benefit.title}</h3>
           <p>{benefit.copy}</p>
@@ -184,144 +162,9 @@ const benefits = [
   box-shadow: 0 16px 38px rgba(17, 40, 28, .10);
 }
 
-.why__icon img {
-  width: 34px;
-  height: 34px;
-  object-fit: contain;
-}
-
-.why__icon-fallback {
-  position: relative;
-  width: 34px;
-  height: 34px;
-  display: block;
+.why__icon :global(svg) {
   color: #2f9b62;
-}
-
-.why__icon-part {
-  position: absolute;
-  display: block;
-  border-color: currentColor;
-  background: currentColor;
-}
-
-.why__icon-part--track {
-  left: 6px;
-  top: 7px;
-  width: 22px;
-  height: 18px;
-  border: 2px solid currentColor;
-  border-radius: 7px 7px 5px 5px;
-  background: transparent;
-}
-
-.why__icon-part--dot {
-  bottom: 3px;
-  width: 5px;
-  height: 5px;
-  border-radius: 999px;
-}
-
-.why__icon-part--dot:nth-child(2) { left: 9px; }
-.why__icon-part--dot:nth-child(3) { right: 9px; }
-
-.why__icon-part--line {
-  left: 7px;
-  right: 7px;
-  bottom: 10px;
-  height: 2px;
-  border-radius: 999px;
-}
-
-.why__icon-part--body {
-  left: 3px;
-  top: 10px;
-  width: 27px;
-  height: 15px;
-  border: 2px solid currentColor;
-  border-radius: 5px 8px 4px 4px;
-  background: transparent;
-}
-
-.why__icon-part--wheel {
-  bottom: 4px;
-  width: 7px;
-  height: 7px;
-  border: 2px solid currentColor;
-  border-radius: 999px;
-  background: rgba(255,255,255,.7);
-}
-
-.why__icon-part--wheel:nth-child(2) { left: 8px; }
-.why__icon-part--wheel:nth-child(3) { right: 6px; }
-
-.why__icon-part--roof {
-  left: 4px;
-  top: 7px;
-  width: 24px;
-  height: 24px;
-  border-left: 2px solid currentColor;
-  border-top: 2px solid currentColor;
-  background: transparent;
-  transform: rotate(45deg);
-}
-
-.why__icon-part--door {
-  left: 14px;
-  bottom: 4px;
-  width: 7px;
-  height: 12px;
-  border: 2px solid currentColor;
-  border-bottom: 0;
-  border-radius: 4px 4px 0 0;
-  background: transparent;
-}
-
-.why__icon-part--leaf {
-  left: 8px;
-  top: 4px;
-  width: 20px;
-  height: 24px;
-  border-radius: 20px 2px 20px 2px;
-  transform: rotate(18deg);
-}
-
-.why__icon-part--stem {
-  left: 16px;
-  bottom: 4px;
-  width: 2px;
-  height: 18px;
-  border-radius: 999px;
-  transform: rotate(32deg);
-}
-
-.why__icon-part--drop {
-  left: 10px;
-  top: 4px;
-  width: 14px;
-  height: 20px;
-  border-radius: 14px 14px 14px 4px;
-  transform: rotate(45deg);
-}
-
-.why__icon-part--pin {
-  left: 10px;
-  top: 3px;
-  width: 14px;
-  height: 20px;
-  border: 2px solid currentColor;
-  border-radius: 12px 12px 12px 2px;
-  background: transparent;
-  transform: rotate(-45deg);
-}
-
-.why__icon-part--route {
-  left: 5px;
-  right: 4px;
-  bottom: 5px;
-  height: 2px;
-  border-radius: 999px;
-  box-shadow: 10px -5px 0 currentColor, 20px 0 0 currentColor;
+  filter: drop-shadow(0 8px 18px rgba(60,179,113,.16));
 }
 
 .why__card h3 {

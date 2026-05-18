@@ -1,0 +1,59 @@
+---
+import { icons } from 'lucide';
+import { siteIconMap, type SiteIconName, type LucideIconKey } from '@/data/icons';
+
+interface Props {
+  name: SiteIconName | LucideIconKey | string;
+  size?: number | string;
+  strokeWidth?: number | string;
+  title?: string;
+  class?: string;
+  className?: string;
+  ariaHidden?: boolean;
+}
+
+const {
+  name,
+  size = 24,
+  strokeWidth = 1.8,
+  title,
+  ariaHidden = true,
+} = Astro.props as Props;
+
+const className = (Astro.props as Props).class ?? (Astro.props as Props).className ?? '';
+const mappedIconName = siteIconMap[name as SiteIconName] ?? name;
+const iconNode = icons[mappedIconName as LucideIconKey] ?? icons.CircleHelp;
+const renderedSize = typeof size === 'number' ? `${size}px` : size;
+const titleId = title ? `cc-icon-${String(mappedIconName).toLowerCase().replace(/[^a-z0-9]+/g, '-')}` : undefined;
+---
+
+<svg
+  class:list={['cc-icon', className]}
+  xmlns="http://www.w3.org/2000/svg"
+  width={renderedSize}
+  height={renderedSize}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width={strokeWidth}
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden={title ? undefined : String(ariaHidden)}
+  role={title ? 'img' : undefined}
+  aria-labelledby={titleId}
+  focusable="false"
+>
+  {title && <title id={titleId}>{title}</title>}
+  {iconNode.map(([tag, attrs]) => {
+    const Tag = tag as keyof HTMLElementTagNameMap;
+    return <Tag {...attrs} />;
+  })}
+</svg>
+
+<style is:global>
+.cc-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  vertical-align: middle;
+}
+</style>

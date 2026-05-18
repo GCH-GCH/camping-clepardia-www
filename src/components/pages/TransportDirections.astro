@@ -1,5 +1,6 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
+import Icon from '@/components/ui/Icon.astro';
 import { siteAssets } from '@/data/assets';
 import { getLocalizedPath } from '@/utils/localizedLinks';
 import { getTranslations, resolveContentLanguage } from '@/i18n/config';
@@ -193,15 +194,16 @@ const transportTextByLanguage = {
 const transportText = transportTextByLanguage[contentLanguage];
 
 const quickInfo = [
-  { icon: 'M12 21s7-4.6 7-11a7 7 0 1 0-14 0c0 6.4 7 11 7 11Z M12 10.5h.01', label: transportText.quick.address, value: page.highlights[0].copy },
-  { icon: 'M4 6h16M6 6v9a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V6M8 18l-2 3M16 18l2 3M9 10h6', label: transportText.quick.tram, value: page.highlights[1].title },
-  { icon: 'M5 12h14M13 6l6 6-6 6', label: transportText.quick.center, value: page.highlights[2].copy },
-  { icon: 'M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14M8 7h8M8 11h8M8 15h5', label: transportText.quick.base, value: page.highlights[3].copy },
+  { icon: 'map', label: transportText.quick.address, value: page.highlights[0].copy },
+  { icon: 'tram', label: transportText.quick.tram, value: page.highlights[1].title },
+  { icon: 'route', label: transportText.quick.center, value: page.highlights[2].copy },
+  { icon: 'landmark', label: transportText.quick.base, value: page.highlights[3].copy },
 ];
 
 const centerSteps = transportText.steps;
 
 const ticketCards = transportText.tickets;
+const ticketIcons = ['ticket', 'receipt', 'route', 'map'] as const;
 ---
 
 <section class="site-section transport-page-quick reveal-section" aria-label={transportText.quickAria}>
@@ -209,11 +211,7 @@ const ticketCards = transportText.tickets;
     {quickInfo.map((item, index) => (
       <article class="premium-card reveal-section transport-page-quick__card" style={`--reveal-delay: ${index * 80}ms`}>
         <span aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            {item.icon.split(' M').map((path, pathIndex) => (
-              <path d={pathIndex === 0 ? path : `M${path}`} />
-            ))}
-          </svg>
+          <Icon name={item.icon} size={24} strokeWidth={1.8} />
         </span>
         <div>
           <small>{item.label}</small>
@@ -270,7 +268,9 @@ const ticketCards = transportText.tickets;
       <div class="transport-tickets__cards">
         {ticketCards.map((item, index) => (
           <article class="premium-card reveal-section transport-tickets__card" style={`--reveal-delay: ${index * 80}ms`}>
-            <span class="transport-tickets__icon" aria-hidden="true"></span>
+            <span class="transport-tickets__icon" aria-hidden="true">
+              <Icon name={ticketIcons[index] ?? 'ticket'} size={20} strokeWidth={1.8} />
+            </span>
             <h3>{item.title}</h3>
             <p>{item.copy}</p>
           </article>
@@ -531,15 +531,6 @@ const ticketCards = transportText.tickets;
   color: #fff;
   background: #3CB371;
   box-shadow: 0 10px 28px rgba(60,179,113,.22);
-}
-
-:global(.transport-tickets__icon)::before {
-  content: '';
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 0 0 6px rgba(255,255,255,.18);
 }
 
 :global(.transport-tickets__card h3) {

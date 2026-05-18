@@ -1,3 +1,4 @@
+import { defaultOgImage } from '@/data/seo';
 import { en } from './en';
 
 export const de = {
@@ -10,7 +11,7 @@ export const de = {
       ogTitle: 'Camping Clepardia - Camping in Krakau nahe dem Zentrum',
       ogDescription:
         'Eine grüne Campingbasis in Krakau für Wohnmobile, Wohnwagen, Zelte und Bungalows mit bequemer Straßenbahnverbindung zur Altstadt.',
-      ogImage: '/seo/og/og-home-pl.jpg',
+      ogImage: defaultOgImage,
     },
   },
   nav: {

@@ -1,5 +1,6 @@
 ---
 import { publicAssetExists } from '@/data/assets';
+import Icon from '@/components/ui/Icon.astro';
 
 interface Props {
   src: string;
@@ -30,11 +31,7 @@ const imageExists = publicAssetExists(src);
   ) : (
     <div class="asset-frame__fallback-content">
       <span class="asset-frame__icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24">
-          <path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14" />
-          <path d="M4 15l4-4 4 4 3-3 5 5" />
-          <path d="M9 8h.01" />
-        </svg>
+        <Icon name="image" />
       </span>
       <span>{label}</span>
     </div>

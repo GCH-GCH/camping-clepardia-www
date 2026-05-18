@@ -1,3 +1,4 @@
+import { defaultOgImage } from '@/data/seo';
 import { en } from './en';
 
 export const it = {
@@ -10,7 +11,7 @@ export const it = {
       ogTitle: 'Camping Clepardia - Camping a Cracovia vicino al centro',
       ogDescription:
         'Una base verde a Cracovia per camper, roulotte, tende e bungalow con comodo collegamento in tram verso la Città Vecchia.',
-      ogImage: '/seo/og/og-home-pl.jpg',
+      ogImage: defaultOgImage,
     },
   },
   nav: {

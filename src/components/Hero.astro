@@ -2,6 +2,7 @@
 import { publicAssetExists, siteAssets } from '@/data/assets';
 import { getTranslations } from '@/i18n/config';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import Icon from '@/components/ui/Icon.astro';
 
 interface Props {
   languageCode?: string;
@@ -71,19 +72,19 @@ const heroStyle = [
   <div class="hero__benefits-bar" aria-label="Camping Clepardia">
     <div class="benefits-wrapper">
       <div class="hero__benefit">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16V8a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v8"/><path d="M4 16h16v3H4z"/><path d="M7 19v2M17 19v2M8 8h8M8 12h8"/></svg>
+        <Icon name="tram" />
         <span>{t.home.hero.benefits[0]}</span>
       </div>
       <div class="hero__benefit">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-7h6v7"/></svg>
+        <Icon name="bungalow" />
         <span>{t.home.hero.benefits[1]}</span>
       </div>
       <div class="hero__benefit">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 12 5l8 13H4z"/><path d="M12 5v13"/></svg>
+        <Icon name="camping" />
         <span>{t.home.hero.benefits[2]}</span>
       </div>
       <div class="hero__benefit">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-4 7-11V5l-7-3-7 3v6c0 7 7 11 7 11z"/><path d="m9 12 2 2 4-5"/></svg>
+        <Icon name="shield" />
         <span>{t.home.hero.badges[1]}</span>
       </div>
     </div>

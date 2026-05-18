@@ -1,5 +1,6 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
+import Icon from '@/components/ui/Icon.astro';
 import { siteAssets } from '@/data/assets';
 import { pricingConfig } from '@/data/pricing';
 import { getLocalizedPath } from '@/utils/localizedLinks';
@@ -235,22 +236,22 @@ const familyBenefits = [
   {
     title: page.highlights[0].title,
     copy: page.highlights[0].copy,
-    icon: 'M4 6h16M6 6v9a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V6M8 18l-2 3M16 18l2 3M9 10h6',
+    icon: 'tram',
   },
   {
     title: page.highlights[1].title,
     copy: page.highlights[1].copy,
-    icon: 'M5 19c8 0 14-6 14-14C11 5 5 11 5 19ZM5 19c0-5 4-9 9-9',
+    icon: 'leaf',
   },
   {
     title: page.highlights[2].title,
     copy: page.highlights[2].copy,
-    icon: 'M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-8Z',
+    icon: 'bungalow',
   },
   {
     title: page.highlights[3].title,
     copy: page.highlights[3].copy,
-    icon: 'M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3ZM9 3v15M15 6v15',
+    icon: 'map',
   },
 ];
 
@@ -334,9 +335,7 @@ const practicalInfo = [
       {familyBenefits.map((card, index) => (
         <article class="premium-card reveal-section families-benefits__card" style={`--reveal-delay: ${index * 80}ms`}>
           <span class="families-benefits__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <path d={card.icon}></path>
-            </svg>
+            <Icon name={card.icon} size={27} strokeWidth={1.9} />
           </span>
           <h3>{card.title}</h3>
           <p>{card.copy}</p>
@@ -419,9 +418,7 @@ const practicalInfo = [
           ) : (
             <div class="families-attractions__fallback photo-frame">
               <span aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M5 19c8 0 14-6 14-14C11 5 5 11 5 19ZM5 19c0-5 4-9 9-9"></path>
-                </svg>
+                <Icon name="leaf" size={22} strokeWidth={1.8} />
               </span>
               <strong>{item.label}</strong>
             </div>
@@ -445,9 +442,7 @@ const practicalInfo = [
         {practicalInfo.map((item, index) => (
           <div class="families-info__item reveal-section" style={`--reveal-delay: ${index * 60}ms`}>
             <span aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M5 13l4 4L19 7"></path>
-              </svg>
+              <Icon name="check" size={18} strokeWidth={2} />
             </span>
             <p>{item}</p>
           </div>

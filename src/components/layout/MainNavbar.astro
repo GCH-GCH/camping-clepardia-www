@@ -2,6 +2,7 @@
 import { logoMain, logoMainPng } from '@/data/assets';
 import { getLanguageSwitchLinks, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import { getTranslations } from '@/i18n/config';
+import Icon from '@/components/ui/Icon.astro';
 
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
@@ -70,7 +71,7 @@ const navMessages = {
         >
           <img src={currentLanguage.flag} alt="" width="22" height="22" loading="eager" decoding="async" />
           <span>{currentLanguage.code.toUpperCase()}</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+          <Icon name="chevronDown" size={15} strokeWidth={2.4} />
         </button>
 
         <div class="main-navbar-lang__menu" id="mainNavbarLangMenu" role="menu" aria-label={t.nav.languageList}>
@@ -97,10 +98,10 @@ const navMessages = {
         aria-pressed="false"
       >
         <span class="main-navbar-theme__icon main-navbar-theme__icon--sun" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
+          <Icon name="sun" size={19} strokeWidth={2} />
         </span>
         <span class="main-navbar-theme__icon main-navbar-theme__icon--moon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5 7 7 0 1 0 20.5 14.6Z" /></svg>
+          <Icon name="moon" size={19} strokeWidth={2} />
         </span>
       </button>
 
@@ -152,10 +153,10 @@ const navMessages = {
           aria-pressed="false"
         >
           <span class="main-navbar-theme__icon main-navbar-theme__icon--sun" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
+            <Icon name="sun" size={19} strokeWidth={2} />
           </span>
           <span class="main-navbar-theme__icon main-navbar-theme__icon--moon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5 7 7 0 1 0 20.5 14.6Z" /></svg>
+            <Icon name="moon" size={19} strokeWidth={2} />
           </span>
           <span data-theme-label>{t.nav.lightMode}</span>
         </button>

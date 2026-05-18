@@ -1,5 +1,6 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
+import Icon from '@/components/ui/Icon.astro';
 import { siteAssets } from '@/data/assets';
 import { pricingConfig } from '@/data/pricing';
 import { getLocalizedPath } from '@/utils/localizedLinks';
@@ -199,22 +200,22 @@ const valueCards = [
   {
     title: page.highlights[0].title,
     copy: page.highlights[0].copy,
-    icon: 'M4 18V9l8-5 8 5v9M8 18v-6h8v6M9 9h.01M15 9h.01',
+    icon: 'map',
   },
   {
     title: page.highlights[1].title,
     copy: page.highlights[1].copy,
-    icon: 'M3 14h2l2-5h9l3 5h2v4h-3a2 2 0 1 1-4 0H9a2 2 0 1 1-4 0H3v-4ZM7 14h10M8 9l-1 5M16 9l1 5',
+    icon: 'camper',
   },
   {
     title: page.highlights[2].title,
     copy: page.highlights[2].copy,
-    icon: 'M13 2 5 14h6l-1 8 9-13h-6l1-7Z',
+    icon: 'electricity',
   },
   {
     title: page.highlights[3].title,
     copy: page.highlights[3].copy,
-    icon: 'M4 6h16M6 6v9a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V6M8 18l-2 3M16 18l2 3M9 10h6',
+    icon: 'tram',
   },
 ];
 
@@ -245,9 +246,7 @@ const camperPrices = [
       {valueCards.map((card, index) => (
         <article class="premium-card reveal-section campers-value__card" style={`--reveal-delay: ${index * 80}ms`}>
           <span class="campers-value__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <path d={card.icon}></path>
-            </svg>
+            <Icon name={card.icon} size={27} strokeWidth={1.9} />
           </span>
           <h3>{card.title}</h3>
           <p>{card.copy}</p>
@@ -270,9 +269,7 @@ const camperPrices = [
         {facilities.map((item, index) => (
           <div class="campers-facilities__item reveal-section" style={`--reveal-delay: ${index * 45}ms`}>
             <span aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M5 13l4 4L19 7"></path>
-              </svg>
+              <Icon name="check" size={18} strokeWidth={2} />
             </span>
             <strong>{item}</strong>
           </div>

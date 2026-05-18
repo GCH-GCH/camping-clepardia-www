@@ -1,6 +1,7 @@
 ---
 import { getTranslations } from '@/i18n/config';
 import { getPathContext } from '@/utils/localizedLinks';
+import Icon from '@/components/ui/Icon.astro';
 
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
@@ -16,11 +17,7 @@ const chatTexts = t.chat;
     aria-expanded="false"
     aria-controls="floatingChatPanel"
   >
-    <svg class="floating-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M5 17.5c-1.4-1.2-2-2.7-2-4.5 0-4.4 4-8 9-8s9 3.6 9 8-4 8-9 8c-1 0-2-.14-2.88-.42L5 22v-4.5Z" />
-      <path d="m15.5 8.5.45 1.1 1.1.45-1.1.45-.45 1.1-.45-1.1-1.1-.45 1.1-.45.45-1.1Z" />
-      <path d="m9.2 10.2.7 1.7 1.7.7-1.7.7-.7 1.7-.7-1.7-1.7-.7 1.7-.7.7-1.7Z" />
-    </svg>
+    <Icon name="chat" class="floating-chat__icon" size={28} strokeWidth={1.9} />
   </button>
 
   <div class="floating-chat__scrim" data-chat-close aria-hidden="true"></div>
@@ -41,7 +38,7 @@ const chatTexts = t.chat;
         <strong><i aria-hidden="true"></i> {chatTexts.status}</strong>
       </div>
       <button type="button" data-chat-close aria-label={chatTexts.close}>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
+        <Icon name="close" size={20} strokeWidth={2} />
       </button>
     </header>
 
@@ -62,7 +59,7 @@ const chatTexts = t.chat;
       <label class="sr-only" for="floatingChatInput">{chatTexts.inputLabel}</label>
       <input id="floatingChatInput" data-chat-input type="text" autocomplete="off" placeholder={chatTexts.inputPlaceholder} />
       <button type="submit" aria-label={chatTexts.send}>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12 16-8-5 16-3-7-8-1Z" /><path d="m12 13 8-9" /></svg>
+        <Icon name="send" size={20} strokeWidth={2} />
       </button>
     </form>
   </section>

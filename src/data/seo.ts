@@ -2,8 +2,8 @@ import { publicAssetExists, siteAssets } from './assets';
 
 export const siteUrl = 'https://twojadomena.pl';
 export const siteName = 'Camping Clepardia';
-export const defaultOgImage = '/seo/og/og-home-pl.jpg';
-export const fallbackOgImage = siteAssets.logo.mainPng;
+export const defaultOgImage = siteAssets.seo.ogHomePl;
+export const fallbackOgImage = siteAssets.seo.ogFallback;
 
 export const homeSeo = {
   title: 'Camping Clepardia — Camping w Krakowie blisko centrum',
