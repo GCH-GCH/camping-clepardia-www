@@ -1,16 +1,18 @@
 ---
 import PricingCalculator from '@/components/pricing/PricingCalculator.astro';
 import ReservationInquiryForm from '@/components/forms/ReservationInquiryForm.astro';
+import Icon from '@/components/ui/Icon.astro';
 import TransportDirections from './TransportDirections.astro';
 import AttractionsPage from './AttractionsPage.astro';
 import FaqPage from './FaqPage.astro';
 import GalleryPage from './GalleryPage.astro';
 import CampersPage from './CampersPage.astro';
 import FamiliesPage from './FamiliesPage.astro';
+import { publicAssetExists, siteAssets } from '@/data/assets';
 import { pricingConfig } from '@/data/pricing';
 import type { SitePage } from '@/data/sitePages';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
-import { getTranslations } from '@/i18n/config';
+import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 
 interface Props {
   page: SitePage;
@@ -21,6 +23,7 @@ interface Props {
 const { page, languageCode, languageName } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const contentLanguage = languageCode ?? pathContext.languageCode;
+const resolvedContentLanguage = resolveContentLanguage(contentLanguage);
 const linkLanguage = pathContext.explicitLanguage;
 const t = getTranslations(contentLanguage);
 const localizeHref = (href: string) => href.startsWith('/') ? getLocalizedPath(linkLanguage, href) : href;
@@ -63,6 +66,78 @@ const contactCards = [
   { label: t.content.contactCards.address, value: 'Henryka Pachońskiego 28A, 31-322 Kraków' },
   { label: t.content.contactCards.receptionHours, value: '9:00–20:00' },
 ];
+const campingGuideExists = publicAssetExists(siteAssets.documents.campingGuidePdf);
+const operationalTextByLanguage = {
+  pl: {
+    arrivalKicker: 'Przyjazd na camping',
+    arrivalTitle: 'Po przyjeździe zatrzymaj się przy recepcji',
+    arrivalCopy:
+      'Po przyjeździe zatrzymaj się na parkingu w pobliżu recepcji. Personel recepcji podejdzie, wskaże miejsce i oprowadzi po campingu. Następnie odbywa się rejestracja.',
+    practicalKicker: 'Praktyczne informacje na miejscu',
+    practicalTitle: 'Najważniejsze rzeczy dla gości',
+    guideReady: 'Pobierz Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — w przygotowaniu.',
+    cards: [
+      { icon: 'phone', title: 'Telefon do recepcji', copy: '+48 795 294 486' },
+      { icon: 'warning', title: 'Lodówka', copy: 'Prosimy pilnować swoich rzeczy i podpisywać produkty.' },
+      { icon: 'utensils', title: 'Kuchnia turystyczna', copy: 'Na miejscu dostępna jest podstawowa przestrzeń do przygotowania posiłku.' },
+      { icon: 'shower', title: 'Toalety i sanitariaty', copy: 'Sanitariaty są dostępne dla gości campingu.' },
+      { icon: 'laundry', title: 'Suszarnia', copy: 'Suszarnia pomaga wygodnie ogarnąć rzeczy po podróży lub praniu.' },
+    ],
+  },
+  en: {
+    arrivalKicker: 'Arrival at the campsite',
+    arrivalTitle: 'After arrival, please stop near reception',
+    arrivalCopy:
+      'After arrival, please stop at the parking area near reception. Our reception staff will come to you, show you your place and guide you around the campsite. Registration is completed afterwards.',
+    practicalKicker: 'Practical information on site',
+    practicalTitle: 'Useful things for guests',
+    guideReady: 'Download Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — coming soon.',
+    cards: [
+      { icon: 'phone', title: 'Reception phone', copy: '+48 795 294 486' },
+      { icon: 'warning', title: 'Fridge', copy: 'Please keep an eye on your belongings and label your food.' },
+      { icon: 'utensils', title: 'Tourist kitchen', copy: 'Basic space for preparing a meal is available on site.' },
+      { icon: 'shower', title: 'Toilets and sanitary facilities', copy: 'Sanitary facilities are available for campsite guests.' },
+      { icon: 'laundry', title: 'Drying room', copy: 'The drying room is useful after travel, rain or laundry.' },
+    ],
+  },
+  de: {
+    arrivalKicker: 'Ankunft auf dem Campingplatz',
+    arrivalTitle: 'Bitte halten Sie nach der Ankunft nahe der Rezeption',
+    arrivalCopy:
+      'Bitte halten Sie bei der Ankunft auf dem Parkplatz in der Nähe der Rezeption. Unser Rezeptionsteam kommt zu Ihnen, zeigt Ihnen den Platz und erklärt Ihnen den Campingplatz. Danach erfolgt die Anmeldung.',
+    practicalKicker: 'Praktische Informationen vor Ort',
+    practicalTitle: 'Nützliche Hinweise für Gäste',
+    guideReady: 'Camping Guide PDF herunterladen',
+    guidePending: 'Camping Guide PDF — in Vorbereitung.',
+    cards: [
+      { icon: 'phone', title: 'Telefon der Rezeption', copy: '+48 795 294 486' },
+      { icon: 'warning', title: 'Kühlschrank', copy: 'Bitte achten Sie auf Ihre Sachen und beschriften Sie Lebensmittel.' },
+      { icon: 'utensils', title: 'Touristische Küche', copy: 'Vor Ort gibt es eine einfache Möglichkeit zur Essenszubereitung.' },
+      { icon: 'shower', title: 'Toiletten und Sanitäranlagen', copy: 'Sanitäranlagen stehen den Campinggästen zur Verfügung.' },
+      { icon: 'laundry', title: 'Trockenraum', copy: 'Der Trockenraum ist nach Reise, Regen oder Wäsche hilfreich.' },
+    ],
+  },
+  it: {
+    arrivalKicker: 'Arrivo al camping',
+    arrivalTitle: 'All’arrivo fermati vicino alla reception',
+    arrivalCopy:
+      'All’arrivo, fermati nell’area di parcheggio vicino alla reception. Il personale della reception verrà da te, ti indicherà la piazzola e ti accompagnerà nel campeggio. La registrazione verrà completata dopo.',
+    practicalKicker: 'Informazioni pratiche sul posto',
+    practicalTitle: 'Cose utili per gli ospiti',
+    guideReady: 'Scarica Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — in preparazione.',
+    cards: [
+      { icon: 'phone', title: 'Telefono reception', copy: '+48 795 294 486' },
+      { icon: 'warning', title: 'Frigorifero', copy: 'Ti chiediamo di controllare le tue cose e firmare i prodotti.' },
+      { icon: 'utensils', title: 'Cucina turistica', copy: 'Sul posto è disponibile uno spazio base per preparare un pasto.' },
+      { icon: 'shower', title: 'Bagni e servizi igienici', copy: 'I servizi igienici sono disponibili per gli ospiti del camping.' },
+      { icon: 'laundry', title: 'Stenditoio', copy: 'Lo stenditoio è utile dopo il viaggio, la pioggia o il bucato.' },
+    ],
+  },
+};
+const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 ---
 
 <section class="page-mini-hero reveal-section">
@@ -127,6 +202,41 @@ const contactCards = [
           )}
         </article>
       ))}
+    </div>
+  </section>
+)}
+
+{page.slug === 'kontakt' && (
+  <section class="site-section operational-info reveal-section">
+    <div class="container operational-info__grid">
+      <article class="premium-card operational-info__arrival">
+        <span class="section-kicker">{operationalText.arrivalKicker}</span>
+        <h2>{operationalText.arrivalTitle}</h2>
+        <p>{operationalText.arrivalCopy}</p>
+        {campingGuideExists ? (
+          <a class="btn btn-glass operational-info__guide" href={siteAssets.documents.campingGuidePdf} target="_blank" rel="noopener noreferrer">
+            {operationalText.guideReady}
+          </a>
+        ) : (
+          <small>{operationalText.guidePending}</small>
+        )}
+      </article>
+
+      <div class="operational-info__practical">
+        <div class="operational-info__head">
+          <span class="section-kicker">{operationalText.practicalKicker}</span>
+          <h2 class="section-title">{operationalText.practicalTitle}</h2>
+        </div>
+        <div class="operational-info__cards">
+          {operationalText.cards.map((item, index) => (
+            <article class="premium-card reveal-section operational-info__card" style={`--reveal-delay: ${index * 70}ms`}>
+              <span aria-hidden="true"><Icon name={item.icon} size={22} strokeWidth={1.8} /></span>
+              <h3>{item.title}</h3>
+              <p>{item.copy}</p>
+            </article>
+          ))}
+        </div>
+      </div>
     </div>
   </section>
 )}
@@ -416,6 +526,112 @@ const contactCards = [
     linear-gradient(180deg, #eef6ef, #fbfbf7);
 }
 
+.operational-info {
+  background:
+    radial-gradient(circle at 82% 14%, rgba(60,179,113,.14), transparent 32%),
+    linear-gradient(180deg, #f2f7f0, #101b14);
+}
+
+.operational-info__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(24px, 4vw, 44px);
+}
+
+.operational-info__arrival {
+  padding: clamp(28px, 5vw, 48px);
+  border-radius: 28px;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(9,26,17,.94), rgba(18,48,31,.86)),
+    radial-gradient(circle at 88% 10%, rgba(242,192,120,.18), transparent 34%);
+  border-color: rgba(255,255,255,.14);
+}
+
+.operational-info__arrival .section-kicker,
+.operational-info__head .section-kicker {
+  color: #8fe0b4;
+}
+
+.operational-info__arrival h2 {
+  margin: 12px 0 16px;
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1;
+  font-weight: 950;
+}
+
+.operational-info__arrival p {
+  max-width: 760px;
+  margin: 0;
+  color: rgba(255,255,255,.78);
+  line-height: 1.75;
+}
+
+.operational-info__arrival small {
+  display: inline-flex;
+  margin-top: 24px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  color: rgba(255,255,255,.78);
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  font-weight: 850;
+}
+
+.operational-info__guide {
+  width: fit-content;
+  margin-top: 24px;
+}
+
+.operational-info__practical {
+  display: grid;
+  gap: 22px;
+}
+
+.operational-info__head .section-title {
+  color: #fff;
+}
+
+.operational-info__cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+:global(.operational-info__card) {
+  padding: 22px;
+  border-radius: 24px;
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.12);
+  color: #fff;
+}
+
+:global(.operational-info__card > span) {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+  border-radius: 999px;
+  color: #8fe0b4;
+  background: rgba(143,224,180,.12);
+  border: 1px solid rgba(143,224,180,.22);
+}
+
+:global(.operational-info__card h3) {
+  margin: 0 0 10px;
+  color: #fff;
+  font-size: 1.06rem;
+  font-weight: 950;
+}
+
+:global(.operational-info__card p) {
+  margin: 0;
+  color: rgba(255,255,255,.72);
+  line-height: 1.65;
+}
+
 .page-detail__grid {
   display: grid;
   gap: clamp(30px, 5vw, 62px);
@@ -619,6 +835,15 @@ const contactCards = [
 
   .contact-cards__grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  .operational-info__grid {
+    grid-template-columns: .9fr 1.1fr;
+    align-items: start;
+  }
+
+  .operational-info__cards {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .bungalow-types__grid {

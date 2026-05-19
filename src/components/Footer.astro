@@ -27,6 +27,7 @@ const footerSocialLinks = [
     href: 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w',
   },
 ];
+const googleMapsHref = footerSocialLinks[1].href;
 ---
 
 <footer class="footer" id="kontakt">
@@ -56,8 +57,11 @@ const footerSocialLinks = [
     </div>
     <div>
       <h3>{t.footer.contact}</h3>
-      <p set:html={t.footer.contactPlace} />
-      <p>{t.footer.reception}</p>
+      <p><strong>{t.footer.addressLabel}</strong><br /><span set:html={t.footer.contactPlace} /></p>
+      <a href="tel:+48795294486">{t.footer.phoneLabel}: +48 795 294 486</a>
+      <a href="mailto:clepardia@gmail.com">{t.footer.emailLabel}: clepardia@gmail.com</a>
+      <p>{t.footer.receptionHoursLabel}: {t.footer.reception}</p>
+      <a href={googleMapsHref} target="_blank" rel="noopener noreferrer">{t.footer.mapsLabel}</a>
     </div>
     <div>
       <h3>{t.footer.social}</h3>
@@ -85,6 +89,7 @@ const footerSocialLinks = [
 .footer h2 { color: #fff; font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin-bottom: 18px; }
 .footer h3 { color: #8fe0b4; font-size: .86rem; text-transform: uppercase; letter-spacing: .14em; margin-bottom: 18px; }
 .footer p, .footer a { color: rgba(255,255,255,.72); line-height: 1.75; }
+.footer p strong { color: rgba(255,255,255,.88); }
 .footer a { display: block; margin: 8px 0; overflow-wrap: anywhere; }
 .footer a:hover { color: #8fe0b4; }
 .footer__brand p { max-width: 520px; }

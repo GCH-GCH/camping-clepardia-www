@@ -15,6 +15,7 @@ const t = getTranslations(languageCode);
 const page = t.pages.dojazd;
 const contactHref = getLocalizedPath(languageCode, 'kontakt');
 const googleMapsHref = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
+const sctHref = 'https://ztp.krakow.pl/sct';
 
 const transportTextByLanguage = {
   pl: {
@@ -52,6 +53,15 @@ const transportTextByLanguage = {
     carTitle: 'Dojazd samochodem lub kamperem',
     carCopy:
       'W nawigacji wpisz Camping Clepardia albo adres: Henryka Pachońskiego 28A, Kraków. Po przyjeździe kieruj się do recepcji lub zgodnie z instrukcjami otrzymanymi od obsługi.',
+    arrivalKicker: 'Przyjazd na camping',
+    arrivalTitle: 'Zatrzymaj się przy recepcji',
+    arrivalCopy:
+      'Po przyjeździe zatrzymaj się na parkingu w pobliżu recepcji. Personel recepcji podejdzie, wskaże miejsce i oprowadzi po campingu. Następnie odbywa się rejestracja.',
+    sctKicker: 'Przed wjazdem do Krakowa',
+    sctTitle: 'Strefa Czystego Transportu w Krakowie',
+    sctCopy:
+      'Przed przyjazdem do Krakowa warto sprawdzić aktualne zasady Strefy Czystego Transportu. Przepisy mogą się zmieniać, dlatego najlepiej zweryfikować informacje na oficjalnej stronie miasta Krakowa przed podróżą.',
+    sctButton: 'Sprawdź aktualne zasady SCT',
     maps: 'Otwórz w Google Maps',
     contact: 'Skontaktuj się z recepcją',
     mapLabel: 'Mapa dojazdu',
@@ -95,6 +105,15 @@ const transportTextByLanguage = {
     carTitle: 'Arriving by car or motorhome',
     carCopy:
       'Enter Camping Clepardia or the address Henryka Pachońskiego 28A, Krakow in navigation. After arrival, go to reception or follow instructions from staff.',
+    arrivalKicker: 'Arrival at the campsite',
+    arrivalTitle: 'Stop near reception after arrival',
+    arrivalCopy:
+      'After arrival, please stop at the parking area near reception. Our reception staff will come to you, show you your place and guide you around the campsite. Registration is completed afterwards.',
+    sctKicker: 'Before entering Krakow',
+    sctTitle: 'Clean Transport Zone in Krakow',
+    sctCopy:
+      'Before travelling to Krakow, it is worth checking the current Clean Transport Zone rules. Regulations may change, so please verify the information on the official City of Krakow website before your trip.',
+    sctButton: 'Check current CTZ rules',
     maps: 'Open in Google Maps',
     contact: 'Contact reception',
     mapLabel: 'Directions map',
@@ -138,6 +157,15 @@ const transportTextByLanguage = {
     carTitle: 'Anfahrt mit Auto oder Wohnmobil',
     carCopy:
       'Geben Sie Camping Clepardia oder Henryka Pachońskiego 28A, Krakau in die Navigation ein. Nach Ankunft gehen Sie zur Rezeption oder folgen den Anweisungen des Personals.',
+    arrivalKicker: 'Ankunft auf dem Campingplatz',
+    arrivalTitle: 'Bitte halten Sie nahe der Rezeption',
+    arrivalCopy:
+      'Bitte halten Sie bei der Ankunft auf dem Parkplatz in der Nähe der Rezeption. Unser Rezeptionsteam kommt zu Ihnen, zeigt Ihnen den Platz und erklärt Ihnen den Campingplatz. Danach erfolgt die Anmeldung.',
+    sctKicker: 'Vor der Einfahrt nach Krakau',
+    sctTitle: 'Umweltzone in Krakau',
+    sctCopy:
+      'Vor der Reise nach Krakau lohnt es sich, die aktuellen Regeln der Umweltzone zu prüfen. Vorschriften können sich ändern, daher prüfen Sie die Informationen bitte vor der Reise auf der offiziellen Website der Stadt Krakau.',
+    sctButton: 'Aktuelle Regeln prüfen',
     maps: 'In Google Maps öffnen',
     contact: 'Rezeption kontaktieren',
     mapLabel: 'Anfahrtskarte',
@@ -181,6 +209,15 @@ const transportTextByLanguage = {
     carTitle: 'Arrivo in auto o camper',
     carCopy:
       'Inserisci Camping Clepardia o l’indirizzo Henryka Pachońskiego 28A, Cracovia nel navigatore. All’arrivo vai in reception o segui le indicazioni dello staff.',
+    arrivalKicker: 'Arrivo al camping',
+    arrivalTitle: 'Fermati vicino alla reception',
+    arrivalCopy:
+      'All’arrivo, fermati nell’area di parcheggio vicino alla reception. Il personale della reception verrà da te, ti indicherà la piazzola e ti accompagnerà nel campeggio. La registrazione verrà completata dopo.',
+    sctKicker: 'Prima di entrare a Cracovia',
+    sctTitle: 'Zona di Trasporto Pulito a Cracovia',
+    sctCopy:
+      'Prima di arrivare a Cracovia vale la pena controllare le regole aggiornate della Zona di Trasporto Pulito. Le norme possono cambiare, quindi verifica le informazioni sul sito ufficiale della città di Cracovia prima del viaggio.',
+    sctButton: 'Controlla le regole aggiornate',
     maps: 'Apri in Google Maps',
     contact: 'Contatta la reception',
     mapLabel: 'Mappa percorso',
@@ -303,6 +340,29 @@ const ticketIcons = ['ticket', 'receipt', 'route', 'map'] as const;
     <div class="transport-car__media">
       <ImageFrame src={siteAssets.transport.googleMaps} alt={transportText.mapLabel} label={transportText.mapLabel} />
     </div>
+  </div>
+</section>
+
+<section class="site-section transport-arrival reveal-section">
+  <div class="container transport-arrival__grid">
+    <article class="premium-card transport-arrival__panel">
+      <span aria-hidden="true"><Icon name="info" size={22} strokeWidth={1.8} /></span>
+      <div>
+        <span class="section-kicker">{transportText.arrivalKicker}</span>
+        <h2>{transportText.arrivalTitle}</h2>
+        <p>{transportText.arrivalCopy}</p>
+      </div>
+    </article>
+
+    <article class="premium-card transport-arrival__panel transport-arrival__panel--sct">
+      <span aria-hidden="true"><Icon name="leaf" size={22} strokeWidth={1.8} /></span>
+      <div>
+        <span class="section-kicker">{transportText.sctKicker}</span>
+        <h2>{transportText.sctTitle}</h2>
+        <p>{transportText.sctCopy}</p>
+        <a class="btn btn-glass transport-car__secondary" href={sctHref} target="_blank" rel="noopener noreferrer">{transportText.sctButton}</a>
+      </div>
+    </article>
   </div>
 </section>
 
@@ -547,6 +607,7 @@ const ticketIcons = ['ticket', 'receipt', 'route', 'map'] as const;
 }
 
 .transport-car,
+.transport-arrival,
 .transport-final-cta {
   background:
     radial-gradient(circle at 18% 20%, rgba(60,179,113,.18), transparent 34%),
@@ -608,6 +669,60 @@ const ticketIcons = ['ticket', 'receipt', 'route', 'map'] as const;
   background: rgba(255,255,255,.14);
 }
 
+.transport-arrival {
+  padding-top: 0;
+}
+
+.transport-arrival__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.transport-arrival__panel {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 18px;
+  align-items: start;
+  padding: clamp(24px, 4vw, 36px);
+  border-radius: 28px;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(10,28,18,.90), rgba(17,39,27,.78)),
+    radial-gradient(circle at 90% 12%, rgba(242,192,120,.16), transparent 34%);
+  border-color: rgba(255,255,255,.14);
+}
+
+.transport-arrival__panel > span {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #8fe0b4;
+  background: rgba(143,224,180,.12);
+  border: 1px solid rgba(143,224,180,.22);
+}
+
+.transport-arrival__panel h2 {
+  margin: 10px 0 12px;
+  color: #fff;
+  font-size: clamp(1.55rem, 3vw, 2.4rem);
+  line-height: 1.06;
+  font-weight: 950;
+}
+
+.transport-arrival__panel p {
+  margin: 0;
+  color: rgba(255,255,255,.76);
+  line-height: 1.72;
+}
+
+.transport-arrival__panel a {
+  width: fit-content;
+  margin-top: 22px;
+}
+
 .transport-final-cta {
   padding-top: 0;
 }
@@ -640,6 +755,10 @@ const ticketIcons = ['ticket', 'receipt', 'route', 'map'] as const;
 
   .transport-tickets__grid {
     grid-template-columns: 1.1fr .9fr;
+  }
+
+  .transport-arrival__grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .transport-final-cta__panel {

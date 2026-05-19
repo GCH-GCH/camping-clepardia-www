@@ -122,6 +122,9 @@ export const siteAssets = {
     ogHomeEn: '/seo/og/og-home-en.jpg',
     ogFallback: '/brand/logo/clepardia-logo-main.png',
   },
+  documents: {
+    campingGuidePdf: '/documents/pdf/camping-guide-pl.pdf',
+  },
 } as const;
 
 export const publicAssetExists = (assetPath: string) =>

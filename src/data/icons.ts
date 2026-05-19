@@ -68,6 +68,8 @@ export const siteIconMap = {
   shield: 'ShieldCheck',
   sparkle: 'Sparkles',
   bed: 'BedDouble',
+  utensils: 'Utensils',
+  laundry: 'Shirt',
 } as const satisfies Record<string, LucideIconKey>;
 
 export type SiteIconName = keyof typeof siteIconMap;
