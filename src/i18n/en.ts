@@ -471,10 +471,10 @@ export const en = {
       scroll: 'Scroll',
     },
     stats: [
-      { value: 'Krakow', label: 'Close to the centre', copy: 'A calm base with access to city attractions.' },
-      { value: 'Tram', label: 'Nearby stop', copy: 'Comfortable access to the Old Town.' },
-      { value: '2 modes', label: 'Camping + bungalows', copy: 'Choose your style of stay.' },
-      { value: 'Region', label: 'Małopolska base', copy: 'Wieliczka, Ojców and Energylandia within reach.' },
+      { value: 'Krakow', label: 'Close to Krakow centre', copy: 'A calm base with access to city attractions.' },
+      { value: 'Tram', label: 'Tram nearby', copy: 'Comfortable access to the Old Town.' },
+      { value: 'Stay', label: 'Camping + bungalows', copy: 'Choose your style of stay.' },
+      { value: 'Green', label: 'Green part of the city', copy: 'Rest after sightseeing in a calmer space.' },
     ],
     why: {
       overline: 'A green base in Krakow',

@@ -54,25 +54,26 @@
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --color-bg-primary: #091A13;
-  --color-bg-secondary: #0e2218;
-  --color-bg-tertiary: #163123;
+  --color-bg-primary: #0B1B13;
+  --color-bg-secondary: #10261A;
+  --color-bg-tertiary: #1A3425;
   --color-text-primary: #F3F8F4;
-  --color-text-secondary: rgba(243, 248, 244, .72);
-  --color-text-tertiary: rgba(243, 248, 244, .56);
+  --color-text-secondary: rgba(243, 248, 244, .76);
+  --color-text-tertiary: rgba(243, 248, 244, .60);
   --theme-body-background:
-    radial-gradient(circle at 12% 6%, rgba(60, 179, 113, .13), transparent 30%),
-    radial-gradient(circle at 86% 18%, rgba(242, 192, 120, .14), transparent 34%),
-    linear-gradient(180deg, #07140F 0%, #091A13 48%, #0c2117 100%);
+    radial-gradient(circle at 12% 6%, rgba(60, 179, 113, .16), transparent 30%),
+    radial-gradient(circle at 84% 14%, rgba(242, 192, 120, .18), transparent 34%),
+    radial-gradient(circle at 50% 100%, rgba(60,179,113,.10), transparent 42%),
+    linear-gradient(180deg, #0B1B13 0%, #10261A 48%, #132C1F 100%);
   --theme-section-background:
-    radial-gradient(circle at 10% 0%, rgba(60,179,113,.09), transparent 28%),
-    radial-gradient(circle at 92% 8%, rgba(242,192,120,.08), transparent 30%),
-    linear-gradient(180deg, #091A13 0%, #0d2117 100%);
-  --theme-card-background: rgba(255,255,255,.06);
-  --theme-card-border: rgba(255,255,255,.12);
-  --theme-card-shadow: 0 24px 72px rgba(0,0,0,.20), 0 0 24px rgba(60,179,113,.06);
+    radial-gradient(circle at 10% 0%, rgba(60,179,113,.12), transparent 30%),
+    radial-gradient(circle at 92% 8%, rgba(242,192,120,.12), transparent 32%),
+    linear-gradient(180deg, #10261A 0%, #142B1F 100%);
+  --theme-card-background: rgba(255,255,255,.075);
+  --theme-card-border: rgba(255,255,255,.14);
+  --theme-card-shadow: 0 24px 72px rgba(0,0,0,.18), 0 0 28px rgba(60,179,113,.08);
   --theme-heading: #F3F8F4;
-  --theme-copy: rgba(243, 248, 244, .72);
+  --theme-copy: rgba(243, 248, 244, .76);
 }
 
 html[data-theme="light"] {
@@ -621,7 +622,7 @@ input, textarea, select {
   border: 1px solid rgba(22, 50, 36, .10);
   border-radius: 28px;
   background: rgba(255,255,255,.78);
-  box-shadow: 0 24px 70px rgba(17, 40, 28, .08);
+  box-shadow: 0 24px 70px rgba(17, 40, 28, .08), 0 0 0 1px rgba(255,255,255,.02) inset;
   backdrop-filter: blur(18px);
   transition:
     transform .32s cubic-bezier(.22, 1, .36, 1),
@@ -646,7 +647,7 @@ input, textarea, select {
 .premium-card:hover {
   transform: translate3d(0, -5px, 0);
   border-color: rgba(60,179,113,.34);
-  box-shadow: var(--shadow-premium-hover);
+  box-shadow: var(--shadow-premium-hover), 0 0 32px rgba(242,192,120,.07);
 }
 
 .premium-card:hover::before {
@@ -831,8 +832,9 @@ a:focus-visible {
 .premium-button {
   color: #fff;
   border-color: rgba(255,255,255,.10);
-  background: linear-gradient(135deg, #63d99c, #3CB371 45%, #24794e);
-  box-shadow: 0 16px 42px rgba(60,179,113,.28), inset 0 1px 0 rgba(255,255,255,.16);
+  background:
+    linear-gradient(135deg, #72e2aa 0%, #3CB371 44%, #24794e 100%);
+  box-shadow: 0 18px 48px rgba(60,179,113,.30), 0 0 22px rgba(242,192,120,.08), inset 0 1px 0 rgba(255,255,255,.18);
 }
 
 .btn-secondary,
@@ -1033,7 +1035,9 @@ html[data-theme="dark"] .reservation-inquiry__form,
 html[data-theme="dark"] .reservation-inquiry__summary {
   color: var(--color-text-primary);
   border-color: var(--theme-card-border) !important;
-  background: var(--theme-card-background) !important;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.082), rgba(255,255,255,.052)),
+    radial-gradient(circle at 88% 0%, rgba(242,192,120,.08), transparent 34%) !important;
   box-shadow: var(--theme-card-shadow) !important;
 }
 

@@ -1,0 +1,244 @@
+---
+import ImageFrame from '@/components/ImageFrame.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { siteAssets } from '@/data/assets';
+import { resolveContentLanguage } from '@/i18n/config';
+import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const contentLanguage = resolveContentLanguage(languageCode ?? pathContext.languageCode);
+const linkLanguage = pathContext.explicitLanguage;
+const directionsHref = getLocalizedPath(linkLanguage, 'dojazd');
+const contactHref = getLocalizedPath(linkLanguage, 'kontakt');
+
+const textByLanguage = {
+  pl: {
+    overline: 'Kraków bez stresu z parkowaniem',
+    title: 'Zostaw kampera w zielonej bazie i wróć wieczorem do spokojniejszego miejsca',
+    copy:
+      'Camping Clepardia pozwala zwiedzać Kraków jak turysta, a odpoczywać jak poza centrum. Zostaw auto, kampera albo przyczepę na miejscu, pojedź tramwajem do miasta i po dniu pełnym wrażeń wróć do zielonej przestrzeni.',
+    primary: 'Jak dojechać',
+    secondary: 'Zapytaj o dostępność',
+    imageMain: 'Camping Clepardia — spokojna baza w Krakowie',
+    imageSmall: 'Tramwaj do centrum Krakowa',
+    steps: [
+      { icon: 'parking', title: 'Zostaw pojazd', copy: 'Kamper, auto lub przyczepa zostają na campingu.' },
+      { icon: 'tram', title: 'Jedź tramwajem', copy: 'Do centrum jedziesz wygodnie bez szukania parkingu.' },
+      { icon: 'leaf', title: 'Wróć do zieleni', copy: 'Wieczorem odpoczywasz w spokojniejszej części miasta.' },
+    ],
+  },
+  en: {
+    overline: 'Krakow without parking stress',
+    title: 'Leave your camper at a green base and return to a calmer place in the evening',
+    copy:
+      'Camping Clepardia lets you explore Krakow like a traveller and rest away from the strict city centre. Leave your car, motorhome or caravan on site, take the tram into town and return to green space after a full day.',
+    primary: 'How to get here',
+    secondary: 'Ask availability',
+    imageMain: 'Camping Clepardia — a calm base in Krakow',
+    imageSmall: 'Tram to Krakow city centre',
+    steps: [
+      { icon: 'parking', title: 'Leave the vehicle', copy: 'Your camper, car or caravan stays at the campsite.' },
+      { icon: 'tram', title: 'Take the tram', copy: 'Reach the centre comfortably without looking for parking.' },
+      { icon: 'leaf', title: 'Return to green space', copy: 'In the evening you rest in a calmer part of the city.' },
+    ],
+  },
+  de: {
+    overline: 'Krakau ohne Parkplatzstress',
+    title: 'Lassen Sie das Wohnmobil in einer grünen Basis und kehren Sie abends an einen ruhigeren Ort zurück',
+    copy:
+      'Camping Clepardia lässt Sie Krakau wie Reisende entdecken und abseits des engen Zentrums entspannen. Auto, Wohnmobil oder Wohnwagen bleiben vor Ort, mit der Straßenbahn geht es in die Stadt und nach einem vollen Tag zurück ins Grüne.',
+    primary: 'Anfahrt ansehen',
+    secondary: 'Verfügbarkeit anfragen',
+    imageMain: 'Camping Clepardia — ruhige Basis in Krakau',
+    imageSmall: 'Straßenbahn ins Zentrum von Krakau',
+    steps: [
+      { icon: 'parking', title: 'Fahrzeug abstellen', copy: 'Wohnmobil, Auto oder Wohnwagen bleiben auf dem Campingplatz.' },
+      { icon: 'tram', title: 'Straßenbahn nehmen', copy: 'Bequem ins Zentrum fahren, ohne Parkplatzsuche.' },
+      { icon: 'leaf', title: 'Ins Grüne zurückkehren', copy: 'Am Abend ruhen Sie in einem ruhigeren Teil der Stadt.' },
+    ],
+  },
+  it: {
+    overline: 'Cracovia senza stress da parcheggio',
+    title: 'Lascia il camper in una base verde e torna la sera in un luogo più tranquillo',
+    copy:
+      'Camping Clepardia ti permette di visitare Cracovia come viaggiatore e riposare fuori dal centro più affollato. Lascia auto, camper o roulotte sul posto, prendi il tram verso la città e torna nel verde dopo una giornata intensa.',
+    primary: 'Come arrivare',
+    secondary: 'Chiedi disponibilità',
+    imageMain: 'Camping Clepardia — base tranquilla a Cracovia',
+    imageSmall: 'Tram per il centro di Cracovia',
+    steps: [
+      { icon: 'parking', title: 'Lascia il veicolo', copy: 'Camper, auto o roulotte restano al camping.' },
+      { icon: 'tram', title: 'Prendi il tram', copy: 'Raggiungi il centro comodamente senza cercare parcheggio.' },
+      { icon: 'leaf', title: 'Torna nel verde', copy: 'La sera riposi in una zona più tranquilla della città.' },
+    ],
+  },
+};
+
+const text = textByLanguage[contentLanguage];
+---
+
+<section class="site-section home-story reveal-section">
+  <div class="container home-story__grid">
+    <div class="home-story__media">
+      <ImageFrame
+        src={siteAssets.camping.camperArea}
+        alt={text.imageMain}
+        label={text.imageMain}
+        className="home-story__image-main"
+      />
+      <div class="home-story__floating-photo">
+        <ImageFrame
+          src={siteAssets.transport.tramToCenter}
+          alt={text.imageSmall}
+          label={text.imageSmall}
+          className="home-story__image-small"
+        />
+      </div>
+    </div>
+
+    <div class="home-story__content">
+      <span class="section-kicker">{text.overline}</span>
+      <h2 class="section-title">{text.title}</h2>
+      <p class="section-copy">{text.copy}</p>
+
+      <div class="home-story__steps">
+        {text.steps.map((item, index) => (
+          <article class="premium-card home-story__step reveal-section" style={`--reveal-delay: ${index * 90}ms`}>
+            <span aria-hidden="true"><Icon name={item.icon} size={22} strokeWidth={1.8} /></span>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.copy}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div class="section-actions">
+        <a class="btn btn-primary premium-button" href={directionsHref}>{text.primary}</a>
+        <a class="btn btn-glass" href={contactHref}>{text.secondary}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.home-story {
+  background:
+    radial-gradient(circle at 78% 12%, rgba(242,192,120,.16), transparent 32%),
+    radial-gradient(circle at 12% 82%, rgba(60,179,113,.13), transparent 34%),
+    linear-gradient(180deg, #f7fbf4, #eef6ef);
+}
+
+:global(html[data-theme="dark"]) .home-story {
+  background:
+    radial-gradient(circle at 78% 12%, rgba(242,192,120,.13), transparent 34%),
+    radial-gradient(circle at 12% 82%, rgba(60,179,113,.14), transparent 36%),
+    linear-gradient(180deg, #10261A, #142B1F);
+}
+
+.home-story__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(34px, 6vw, 76px);
+  align-items: center;
+}
+
+.home-story__media {
+  position: relative;
+  isolation: isolate;
+}
+
+:global(.home-story__image-main.asset-frame) {
+  aspect-ratio: 5 / 4;
+  border-radius: 34px;
+  box-shadow: 0 34px 110px rgba(17,40,28,.22);
+}
+
+.home-story__floating-photo {
+  width: min(58%, 360px);
+  margin: -24% 0 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+:global(.home-story__image-small.asset-frame) {
+  aspect-ratio: 4 / 3;
+  border-radius: 28px;
+  box-shadow: 0 26px 80px rgba(0,0,0,.24);
+}
+
+.home-story__content {
+  position: relative;
+  z-index: 2;
+}
+
+.home-story__steps {
+  display: grid;
+  gap: 12px;
+  margin-top: clamp(26px, 4vw, 40px);
+}
+
+:global(.home-story__step) {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 18px;
+  border-radius: 24px;
+}
+
+:global(.home-story__step > span) {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #2f9d63;
+  background: rgba(60,179,113,.12);
+  border: 1px solid rgba(60,179,113,.18);
+}
+
+:global(.home-story__step h3) {
+  margin: 0 0 6px;
+  color: #102018;
+  font-size: 1.05rem;
+  font-weight: 950;
+}
+
+:global(html[data-theme="dark"] .home-story__step h3) {
+  color: #F3F8F4;
+}
+
+:global(.home-story__step p) {
+  margin: 0;
+  color: #536359;
+  line-height: 1.58;
+}
+
+:global(html[data-theme="dark"] .home-story__step p) {
+  color: rgba(243,248,244,.74);
+}
+
+@media (min-width: 980px) {
+  .home-story__grid {
+    grid-template-columns: .95fr 1.05fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-story__floating-photo {
+    width: 72%;
+    margin-top: -18%;
+  }
+
+  :global(.home-story__step) {
+    grid-template-columns: 44px 1fr;
+    padding: 16px;
+  }
+}
+</style>

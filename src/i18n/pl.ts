@@ -300,10 +300,10 @@ export const pl = {
       scroll: 'Przewiń',
     },
     stats: [
-      { value: 'Kraków', label: 'Blisko centrum', copy: 'Spokojna baza z dostępem do atrakcji miasta.' },
-      { value: 'Tramwaj', label: 'Przystanek w pobliżu', copy: 'Wygodny dojazd do Starego Miasta.' },
-      { value: '2 tryby', label: 'Camping + domki', copy: 'Wybierz swój styl pobytu.' },
-      { value: 'Region', label: 'Baza do Małopolski', copy: 'Wieliczka, Ojców i Energylandia w zasięgu.' },
+      { value: 'Kraków', label: 'Blisko centrum Krakowa', copy: 'Spokojna baza z dostępem do atrakcji miasta.' },
+      { value: 'Tramwaj', label: 'Tramwaj w pobliżu', copy: 'Wygodny dojazd do Starego Miasta.' },
+      { value: 'Pobyt', label: 'Camping + domki', copy: 'Wybierz swój styl pobytu.' },
+      { value: 'Zieleń', label: 'Zielona część miasta', copy: 'Odpocznij po zwiedzaniu w spokojniejszej przestrzeni.' },
     ],
     why: {
       overline: 'Zielona baza w Krakowie',

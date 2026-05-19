@@ -531,10 +531,10 @@ export const de = {
       scroll: 'Scrollen',
     },
     stats: [
-      { value: 'Krakau', label: 'Nah am Zentrum', copy: 'Eine ruhige Basis mit Zugang zu Stadtattraktionen.' },
-      { value: 'Tram', label: 'Haltestelle in der Nähe', copy: 'Bequeme Fahrt in die Altstadt.' },
-      { value: '2 Optionen', label: 'Camping + Bungalows', copy: 'Wählen Sie Ihren Aufenthaltsstil.' },
-      { value: 'Region', label: 'Basis für Małopolska', copy: 'Wieliczka, Ojców und Energylandia in Reichweite.' },
+      { value: 'Krakau', label: 'Nah am Zentrum von Krakau', copy: 'Eine ruhige Basis mit Zugang zu Stadtattraktionen.' },
+      { value: 'Tram', label: 'Straßenbahn in der Nähe', copy: 'Bequeme Fahrt in die Altstadt.' },
+      { value: 'Aufenthalt', label: 'Camping + Bungalows', copy: 'Wählen Sie Ihren Aufenthaltsstil.' },
+      { value: 'Grün', label: 'Grüner Stadtteil', copy: 'Erholen Sie sich nach dem Sightseeing in ruhigerer Umgebung.' },
     ],
     why: {
       overline: 'Grüne Basis in Krakau',

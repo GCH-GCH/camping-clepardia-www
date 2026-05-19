@@ -531,10 +531,10 @@ export const it = {
       scroll: 'Scorri',
     },
     stats: [
-      { value: 'Cracovia', label: 'Vicino al centro', copy: 'Una base tranquilla con accesso alle attrazioni della città.' },
-      { value: 'Tram', label: 'Fermata vicina', copy: 'Comodo collegamento con la Città Vecchia.' },
-      { value: '2 opzioni', label: 'Camping + bungalow', copy: 'Scegli il tuo stile di soggiorno.' },
-      { value: 'Regione', label: 'Base per Małopolska', copy: 'Wieliczka, Ojców ed Energylandia a portata.' },
+      { value: 'Cracovia', label: 'Vicino al centro di Cracovia', copy: 'Una base tranquilla con accesso alle attrazioni della città.' },
+      { value: 'Tram', label: 'Tram nelle vicinanze', copy: 'Comodo collegamento con la Città Vecchia.' },
+      { value: 'Soggiorno', label: 'Camping + bungalow', copy: 'Scegli il tuo stile di soggiorno.' },
+      { value: 'Verde', label: 'Zona verde della città', copy: 'Riposati dopo la visita in uno spazio più tranquillo.' },
     ],
     why: {
       overline: 'Base verde a Cracovia',

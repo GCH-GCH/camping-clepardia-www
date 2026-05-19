@@ -1,6 +1,7 @@
 ---
 import { getTranslations } from '@/i18n/config';
 import { getPathContext } from '@/utils/localizedLinks';
+import Icon from '@/components/ui/Icon.astro';
 
 interface Props {
   languageCode?: string;
@@ -10,15 +11,26 @@ const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(languageCode ?? pathContext.languageCode);
 const cards = t.home.trust.cards;
+const icons = ['shield', 'check', 'family', 'clock'] as const;
 ---
 
 <section class="site-section trust reveal-section">
   <div class="container">
-    <span class="section-kicker">{t.home.trust.overline}</span>
-    <h2 class="section-title">{t.home.trust.title}</h2>
+    <div class="trust__head">
+      <div>
+        <span class="section-kicker">{t.home.trust.overline}</span>
+        <h2 class="section-title">{t.home.trust.title}</h2>
+      </div>
+      <div class="trust__award-badge" aria-label={cards[0].title}>
+        <Icon name="shield" size={28} />
+        <strong>{cards[0].title}</strong>
+      </div>
+    </div>
+
     <div class="trust__grid">
-      {cards.map((card) => (
-        <article class="premium-card trust__card">
+      {cards.map((card, index) => (
+        <article class:list={['premium-card', 'trust__card', index === 0 && 'trust__card--award']} style={`--reveal-delay: ${index * 80}ms`}>
+          <span aria-hidden="true"><Icon name={icons[index] ?? 'check'} size={24} strokeWidth={1.8} /></span>
           <h3>{card.title}</h3>
           <p>{card.copy}</p>
         </article>
@@ -28,11 +40,124 @@ const cards = t.home.trust.cards;
 </section>
 
 <style>
-.trust { background: linear-gradient(180deg, #f6f8f2, #fffaf2); }
-.trust__grid { margin-top: 42px; display: grid; grid-template-columns: 1fr; gap: 16px; }
-.trust__card { padding: 28px; }
-.trust__card h3 { font-size: 1.25rem; font-weight: 900; margin-bottom: 12px; }
-.trust__card p { color: #5c685f; line-height: 1.72; }
-@media (min-width: 760px) { .trust__grid { grid-template-columns: repeat(2, 1fr); } }
+.trust {
+  background:
+    radial-gradient(circle at 84% 12%, rgba(242,192,120,.18), transparent 30%),
+    radial-gradient(circle at 16% 82%, rgba(60,179,113,.12), transparent 30%),
+    linear-gradient(180deg, #f6f8f2, #fffaf2);
+}
+
+:global(html[data-theme="dark"]) .trust {
+  background:
+    radial-gradient(circle at 84% 12%, rgba(242,192,120,.13), transparent 32%),
+    radial-gradient(circle at 16% 82%, rgba(60,179,113,.14), transparent 34%),
+    linear-gradient(180deg, #142B1F, #10261A);
+}
+
+.trust__head {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: end;
+}
+
+.trust__award-badge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 999px;
+  color: #2f2112;
+  background:
+    linear-gradient(135deg, rgba(255,246,205,.98), rgba(242,192,120,.88)),
+    radial-gradient(circle at 20% 10%, rgba(255,255,255,.7), transparent 34%);
+  border: 1px solid rgba(151,101,35,.18);
+  box-shadow: 0 18px 48px rgba(150,103,41,.16);
+  font-weight: 950;
+}
+
+.trust__grid {
+  margin-top: 42px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.trust__card {
+  min-height: 230px;
+  display: grid;
+  align-content: end;
+  padding: 28px;
+  overflow: hidden;
+}
+
+.trust__card::after {
+  content: '';
+  position: absolute;
+  inset: auto -20% -38% auto;
+  width: 180px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(60,179,113,.20), transparent 62%);
+  pointer-events: none;
+}
+
+.trust__card--award::after {
+  background: radial-gradient(circle, rgba(242,192,120,.30), transparent 62%);
+}
+
+.trust__card > span {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 24px;
+  border-radius: 999px;
+  color: #2f9d63;
+  background: rgba(60,179,113,.12);
+  border: 1px solid rgba(60,179,113,.18);
+}
+
+.trust__card--award > span {
+  color: #2f2112;
+  background: rgba(242,192,120,.32);
+  border-color: rgba(242,192,120,.38);
+}
+
+.trust__card h3 {
+  position: relative;
+  z-index: 1;
+  color: #102018;
+  font-size: 1.25rem;
+  font-weight: 950;
+  margin-bottom: 12px;
+}
+
+:global(html[data-theme="dark"] .trust__card h3) {
+  color: #F3F8F4;
+}
+
+.trust__card p {
+  position: relative;
+  z-index: 1;
+  color: #5c685f;
+  line-height: 1.72;
+}
+
+:global(html[data-theme="dark"] .trust__card p) {
+  color: rgba(243,248,244,.74);
+}
+
+@media (min-width: 760px) {
+  .trust__head {
+    grid-template-columns: 1fr auto;
+  }
+
+  .trust__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (min-width: 1120px) { .trust__grid { grid-template-columns: repeat(4, 1fr); } }
 </style>
