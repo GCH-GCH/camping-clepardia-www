@@ -1,5 +1,11 @@
 ---
 import { loaderLogo, logoMainPng } from '@/data/assets';
+import { getTranslations } from '@/i18n/config';
+import { getPathContext } from '@/utils/localizedLinks';
+
+const pathContext = getPathContext(Astro.url.pathname);
+const t = getTranslations(pathContext.languageCode);
+const loaderMessages = t.loader.messages;
 ---
 
 <script is:inline>
@@ -16,13 +22,13 @@ import { loaderLogo, logoMainPng } from '@/data/assets';
   })();
 </script>
 
-<div class="page-loader" aria-hidden="true">
+<div class="page-loader" aria-hidden="true" data-loader-messages={JSON.stringify(loaderMessages)}>
   <div class="page-loader__stage">
     <div class="page-loader__radar"></div>
     <div class="page-loader__glow"></div>
     <img class="page-loader__logo" src={loaderLogo} alt="" width="240" height="240" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
   </div>
-  <p class="page-loader__status" id="pageLoaderStatus">Ładujemy Camping Clepardia</p>
+  <p class="page-loader__status" id="pageLoaderStatus">{loaderMessages[0]}</p>
   <div class="page-loader__line"></div>
 </div>
 
@@ -31,8 +37,16 @@ import { loaderLogo, logoMainPng } from '@/data/assets';
 
   const root = document.documentElement;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const loader = document.querySelector('.page-loader');
   const loaderStatus = document.getElementById('pageLoaderStatus');
-  const loaderMessages = ['Ładujemy Camping Clepardia', 'Przygotowujemy zieloną bazę', 'Otwieramy bramę campingu'];
+  const loaderMessages = (() => {
+    try {
+      const parsed = JSON.parse(loader?.dataset.loaderMessages ?? '[]');
+      return Array.isArray(parsed) && parsed.length ? parsed : ['Loading Camping Clepardia'];
+    } catch {
+      return ['Loading Camping Clepardia'];
+    }
+  })();
   let lenis;
   let rafId = 0;
   let loaderMessageIndex = 0;

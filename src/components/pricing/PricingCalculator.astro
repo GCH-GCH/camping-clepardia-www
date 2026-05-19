@@ -43,6 +43,20 @@ const localizedPricingConfig = {
     label: getAddonLabel(addon.id, addon.label),
   })),
 };
+const defaultStayType = localizedPricingConfig.stayTypes[0];
+const defaultAdults = 2;
+const defaultNights = 1;
+const defaultAccommodationPerNight = 'seasonalPrices' in defaultStayType
+  ? defaultStayType.seasonalPrices.low
+  : 'startingPrice' in defaultStayType
+    ? defaultStayType.startingPrice
+    : defaultStayType.price;
+const defaultPeoplePerNight = defaultStayType.category === 'bungalow'
+  ? 0
+  : defaultAdults * localizedPricingConfig.people.adults.price;
+const defaultTotal = (defaultAccommodationPerNight + defaultPeoplePerNight) * defaultNights;
+const defaultTotalLabel = formatPrice(defaultTotal);
+const defaultRateLabel = `${defaultTotalLabel} / ${pricingText.perNight}`;
 ---
 
 <section class="site-section pricing-calculator reveal-section" id="kalkulator">
@@ -160,7 +174,7 @@ const localizedPricingConfig = {
             <span>{pricingText.summary}</span>
             <small>{pricingText.total}</small>
           </div>
-          <strong data-total data-value="0">0 PLN</strong>
+          <strong data-total data-value={defaultTotal}>{defaultTotalLabel}</strong>
         </div>
         <dl class="pricing-summary__details">
           <div>
@@ -189,7 +203,7 @@ const localizedPricingConfig = {
           </div>
           <div>
             <dt>{pricingText.pricePerNight}</dt>
-            <dd data-nightly-rate>0 PLN / {pricingText.perNight}</dd>
+            <dd data-nightly-rate>{defaultRateLabel}</dd>
           </div>
         </dl>
         <div class="pricing-summary__breakdown" data-breakdown></div>
@@ -203,7 +217,7 @@ const localizedPricingConfig = {
   <div class="pricing-mobile-summary" data-mobile-summary>
     <button type="button" data-mobile-toggle aria-expanded="false" aria-controls="pricingMobilePanel">
       <span>{pricingText.mobileTotal}</span>
-      <strong data-mobile-total data-value="0">0 PLN</strong>
+      <strong data-mobile-total data-value={defaultTotal}>{defaultTotalLabel}</strong>
     </button>
     <div id="pricingMobilePanel" class="pricing-mobile-summary__panel" data-mobile-panel hidden>
       <div class="pricing-mobile-summary__row">
@@ -232,7 +246,7 @@ const localizedPricingConfig = {
       </div>
       <div class="pricing-mobile-summary__row">
         <span>{pricingText.pricePerNight}</span>
-        <strong data-mobile-rate>0 PLN / {pricingText.perNight}</strong>
+        <strong data-mobile-rate>{defaultRateLabel}</strong>
       </div>
       <div class="pricing-mobile-summary__breakdown" data-mobile-breakdown></div>
     </div>
@@ -339,8 +353,8 @@ const localizedPricingConfig = {
     const getNightDates = () => {
       const arrival = parseDate(arrivalInput?.value);
       const nights = getNights();
-      if (!arrival) return [];
-      return Array.from({ length: nights }, (_, index) => addDays(arrival, index));
+      const start = arrival ?? new Date();
+      return Array.from({ length: nights }, (_, index) => addDays(start, index));
     };
     const getStayRate = (type, date) => {
       if ('seasonalPrices' in type) {
@@ -444,16 +458,22 @@ const localizedPricingConfig = {
       const children = getCounterValue('children');
       const toddlers = getCounterValue('toddlers');
       const selectedAddons = Array.from(root.querySelectorAll('input[name="addons"]:checked')).map((input) => input.value);
-      const accommodationTotal = nightDates.reduce((sum, date) => sum + getStayRate(type, date), 0);
+      const chargePeople = type.category !== 'bungalow';
+      const accommodationTotal = nightDates.length
+        ? nightDates.reduce((sum, date) => sum + getStayRate(type, date), 0)
+        : getStayRate(type, new Date()) * nights;
       const peoplePerNight =
-        adults * config.people.adults.price +
-        children * config.people.children.price +
-        toddlers * config.people.toddlers.price;
+        chargePeople
+          ? adults * config.people.adults.price +
+            children * config.people.children.price +
+            toddlers * config.people.toddlers.price
+          : 0;
       const selectedAddonItems = config.addons.filter((addon) => selectedAddons.includes(addon.id));
       const addonsPerNight = selectedAddonItems.reduce((sum, addon) => sum + addon.price, 0);
       const peopleTotal = peoplePerNight * nights;
       const addonsTotal = addonsPerNight * nights;
       const total = accommodationTotal + peopleTotal + addonsTotal;
+      const nightlyTotal = nights > 0 ? total / nights : total;
       const hasSummerCamping = type.category === 'camping' && nightDates.some(isSummerNoticeMonth);
       const requiresConfirmation = isConfirmationStay(type);
       const datesSummary = arrival && departure ? `${formatDateDisplay(arrival)} - ${formatDateDisplay(departure)}` : pricingText.toComplete;
@@ -461,7 +481,7 @@ const localizedPricingConfig = {
       const seasonSummary = getSeasonSummary(nightDates);
       const peopleSummary = getPeopleSummary({ adults, children, toddlers });
       const addonsSummary = getAddonsSummary(selectedAddonItems);
-      const rateSummary = getRateSummary(type, nightDates);
+      const rateSummary = `${requiresConfirmation ? `${pricingText.from} ` : ''}${formatMoney(nightlyTotal)} / ${pricingText.perNight}`;
 
       const breakdown = [
         {
@@ -472,9 +492,9 @@ const localizedPricingConfig = {
         },
       ];
 
-      if (adults > 0) breakdown.push({ label: `${pricingText.adults} x ${adults} x ${nightsSummary}`, amount: adults * config.people.adults.price * nights });
-      if (children > 0) breakdown.push({ label: `${pricingText.children} x ${children} x ${nightsSummary}`, amount: children * config.people.children.price * nights });
-      if (toddlers > 0) breakdown.push({ label: `${pricingText.toddlers} x ${toddlers} x ${nightsSummary}`, amount: 0 });
+      if (chargePeople && adults > 0) breakdown.push({ label: `${pricingText.adults} x ${adults} x ${nightsSummary}`, amount: adults * config.people.adults.price * nights });
+      if (chargePeople && children > 0) breakdown.push({ label: `${pricingText.children} x ${children} x ${nightsSummary}`, amount: children * config.people.children.price * nights });
+      if (chargePeople && toddlers > 0) breakdown.push({ label: `${pricingText.toddlers} x ${toddlers} x ${nightsSummary}`, amount: 0 });
       selectedAddonItems.forEach((addon) => breakdown.push({ label: `${getTranslatedAddonLabel(addon)} x ${nightsSummary}`, amount: addon.price * nights }));
 
       setText(nightsLabel, nightsSummary);

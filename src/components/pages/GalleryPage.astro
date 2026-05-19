@@ -37,6 +37,7 @@ const galleryTextByLanguage = {
     close: 'Zamknij galerię',
     previous: 'Poprzednie zdjęcie',
     next: 'Następne zdjęcie',
+    photoComingSoon: 'Zdjęcie w przygotowaniu',
     ctaKicker: 'Zaplanuj pobyt',
     category: {
       all: 'Wszystkie',
@@ -77,6 +78,7 @@ const galleryTextByLanguage = {
     close: 'Close gallery',
     previous: 'Previous photo',
     next: 'Next photo',
+    photoComingSoon: 'Photo coming soon',
     ctaKicker: 'Plan your stay',
     category: {
       all: 'All',
@@ -117,6 +119,7 @@ const galleryTextByLanguage = {
     close: 'Galerie schließen',
     previous: 'Vorheriges Foto',
     next: 'Nächstes Foto',
+    photoComingSoon: 'Foto folgt in Kürze',
     ctaKicker: 'Aufenthalt planen',
     category: {
       all: 'Alle',
@@ -157,6 +160,7 @@ const galleryTextByLanguage = {
     close: 'Chiudi galleria',
     previous: 'Foto precedente',
     next: 'Foto successiva',
+    photoComingSoon: 'Foto in arrivo',
     ctaKicker: 'Pianifica il soggiorno',
     category: {
       all: 'Tutte',
@@ -363,6 +367,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
           data-index={index}
           data-title={item.title}
           data-category-label={item.categoryLabel}
+          data-placeholder-label={galleryText.photoComingSoon}
           data-image={item.imageExists ? item.image : ''}
           data-alt={item.alt}
           style={`--reveal-delay: ${Math.min(index, 8) * 45}ms`}
@@ -379,6 +384,12 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
           <span class="gallery-card__body">
             <small>{item.categoryLabel}</small>
             <strong>{item.title}</strong>
+            {!item.imageExists && (
+              <>
+                <em>{galleryText.photoComingSoon}</em>
+                <p>{item.alt}</p>
+              </>
+            )}
           </span>
         </button>
       ))}
@@ -478,6 +489,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
       const imageTitle = item.dataset.title ?? 'Camping Clepardia';
       const imageCategory = item.dataset.categoryLabel ?? 'Galeria';
       const imageAlt = item.dataset.alt ?? imageTitle;
+      const placeholderLabel = item.dataset.placeholderLabel ?? 'Photo coming soon';
 
       if (title) title.textContent = imageTitle;
       if (category) category.textContent = imageCategory;
@@ -492,7 +504,15 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
       } else {
         const fallback = document.createElement('div');
         fallback.className = 'gallery-lightbox__fallback';
-        fallback.innerHTML = `<span>${imageCategory}</span><strong>${imageTitle}</strong>`;
+        const categoryLabel = document.createElement('span');
+        categoryLabel.textContent = imageCategory;
+        const heading = document.createElement('strong');
+        heading.textContent = imageTitle;
+        const note = document.createElement('p');
+        note.textContent = placeholderLabel;
+        const copy = document.createElement('small');
+        copy.textContent = imageAlt;
+        fallback.append(categoryLabel, heading, note, copy);
         media.append(fallback);
       }
     };
@@ -724,6 +744,30 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   text-shadow: 0 8px 24px rgba(0,0,0,.32);
 }
 
+.gallery-card__body em,
+.gallery-card__body p {
+  max-width: 440px;
+  color: rgba(255,255,255,.78);
+  font-style: normal;
+  line-height: 1.5;
+}
+
+.gallery-card__body em {
+  width: fit-content;
+  padding: 7px 11px;
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: 999px;
+  color: #d9ffe9;
+  background: rgba(60,179,113,.14);
+  font-size: .78rem;
+  font-weight: 900;
+}
+
+.gallery-card__body p {
+  margin: 0;
+  font-size: .92rem;
+}
+
 .gallery-lightbox {
   position: fixed;
   inset: 0;
@@ -813,6 +857,24 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   font-size: clamp(2rem, 6vw, 4.4rem);
   line-height: .98;
   font-weight: 950;
+}
+
+.gallery-lightbox__fallback p {
+  margin: 0;
+  padding: 8px 13px;
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: 999px;
+  color: #d9ffe9;
+  background: rgba(60,179,113,.14);
+  font-size: .86rem;
+  font-weight: 900;
+}
+
+.gallery-lightbox__fallback small {
+  max-width: 620px;
+  color: rgba(255,255,255,.72);
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 .gallery-lightbox figcaption {

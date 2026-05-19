@@ -49,7 +49,14 @@ export const it = {
     reception: 'Reception e richieste di prenotazione',
     social: 'Social media',
     rights: 'Tutti i diritti riservati.',
-    bookingReady: 'Base per prenotazioni online pronta.',
+    bookingReady: 'Sito Camping Clepardia — informazioni, prezzi e richieste di disponibilità.',
+  },
+  loader: {
+    messages: [
+      'Caricamento Camping Clepardia',
+      'Prepariamo la tua base verde',
+      'Apriamo il cancello del campeggio',
+    ],
   },
   global: {
     scrollToTop: 'Torna all’inizio della pagina',
@@ -68,12 +75,14 @@ export const it = {
   },
   chat: {
     ...en.chat,
-    open: 'Apri Camping Clepardia Assistant',
+    open: 'Apri assistente informativo',
     close: 'Chiudi chat',
-    title: 'Camping Clepardia Assistant',
-    status: 'Online',
+    title: 'Assistente informativo — versione test',
+    status: 'Versione test',
     intro:
-      'Ciao. Posso aiutarti rapidamente con prezzi, indicazioni, bungalow, camping o contatto con la reception.',
+      'Ciao. Posso aiutarti con informazioni di base su prezzi, indicazioni, bungalow, camping e contatto con la reception.',
+    notice:
+      'Le risposte sono informative. Per le prenotazioni contatta la reception.',
     quickLabel: 'Domande rapide',
     inputLabel: 'Scrivi un messaggio',
     inputPlaceholder: 'Scrivi un messaggio...',
@@ -96,7 +105,7 @@ export const it = {
       camping:
         'Camping Clepardia accoglie camper, van, roulotte, tende e auto con tenda da tetto. A giugno, luglio e agosto la disponibilità può essere limitata.',
       fallback:
-        'Questa è una versione demo dell’assistente. In seguito potrà essere collegata a un vero backend e alla conoscenza della reception. Ora posso aiutare con prezzi, indicazioni, bungalow, camping e contatti.',
+        'Questo è un assistente informativo in versione test. Per prenotazioni, disponibilità e prezzi finali contatta la reception di Camping Clepardia.',
     },
   },
   content: {

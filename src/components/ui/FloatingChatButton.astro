@@ -46,6 +46,9 @@ const chatTexts = t.chat;
       <div class="floating-chat__message floating-chat__message--bot">
         {chatTexts.intro}
       </div>
+      <div class="floating-chat__notice">
+        {chatTexts.notice}
+      </div>
     </div>
 
     <div class="floating-chat__quick" aria-label={chatTexts.quickLabel}>
@@ -435,6 +438,16 @@ body.has-floating-chat-open {
   box-shadow: 0 14px 34px rgba(60,179,113,.24);
 }
 
+.floating-chat__notice {
+  padding: 11px 13px;
+  border-radius: 16px;
+  color: rgba(255,255,255,.76);
+  background: rgba(242,192,120,.10);
+  border: 1px solid rgba(242,192,120,.20);
+  font-size: .78rem;
+  line-height: 1.5;
+}
+
 .floating-chat__quick {
   display: flex;
   gap: 8px;
@@ -530,6 +543,12 @@ html[data-theme="light"] .floating-chat__form input {
   color: #173624;
   border-color: rgba(25,54,38,.11);
   background: rgba(255,255,255,.62);
+}
+
+html[data-theme="light"] .floating-chat__notice {
+  color: rgba(23,54,36,.72);
+  border-color: rgba(166,115,47,.18);
+  background: rgba(242,192,120,.16);
 }
 
 html[data-theme="light"] .floating-chat__form input::placeholder {

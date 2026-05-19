@@ -42,7 +42,14 @@ export const pl = {
     reception: 'Recepcja i zapytania rezerwacyjne',
     social: 'Social media',
     rights: 'Wszystkie prawa zastrzeżone.',
-    bookingReady: 'Online booking foundation ready.',
+    bookingReady: 'Strona Camping Clepardia — informacje, cennik i zapytania o dostępność.',
+  },
+  loader: {
+    messages: [
+      'Ładujemy Camping Clepardia',
+      'Przygotowujemy zieloną bazę',
+      'Otwieramy bramę campingu',
+    ],
   },
   global: {
     scrollToTop: 'Wróć na początek strony',
@@ -60,12 +67,14 @@ export const pl = {
     camperCost: 'Oblicz koszt pobytu',
   },
   chat: {
-    open: 'Otwórz Camping Clepardia Assistant',
+    open: 'Otwórz asystenta informacyjnego',
     close: 'Zamknij chat',
-    title: 'Camping Clepardia Assistant',
-    status: 'Online',
+    title: 'Asystent informacyjny — wersja testowa',
+    status: 'Wersja testowa',
     intro:
-      'Cześć. Mogę szybko pomóc z cennikiem, dojazdem, domkami, campingiem albo kontaktem z recepcją.',
+      'Cześć. Mogę pomóc w podstawowych informacjach o cenniku, dojeździe, domkach, campingu i kontakcie z recepcją.',
+    notice:
+      'Odpowiedzi mają charakter informacyjny. W sprawie rezerwacji skontaktuj się z recepcją.',
     quickLabel: 'Szybkie pytania',
     inputLabel: 'Napisz wiadomość',
     inputPlaceholder: 'Napisz wiadomość...',
@@ -88,7 +97,7 @@ export const pl = {
       camping:
         'Camping Clepardia przyjmuje kampery, vany, przyczepy, namioty i auta z namiotem dachowym. W czerwcu, lipcu i sierpniu dostępność pola może być ograniczona.',
       fallback:
-        'To jest wersja demo asystenta. W kolejnym etapie można podłączyć prawdziwy backend i wiedzę recepcji. Teraz mogę pomóc z cennikiem, dojazdem, domkami, campingiem i kontaktem.',
+        'To jest testowy asystent informacyjny. W sprawie rezerwacji, dostępności i finalnych cen skontaktuj się z recepcją Camping Clepardia.',
     },
   },
   content: {

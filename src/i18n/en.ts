@@ -47,7 +47,14 @@ export const en = {
     reception: 'Reception and booking enquiries',
     social: 'Social media',
     rights: 'All rights reserved.',
-    bookingReady: 'Online booking foundation ready.',
+    bookingReady: 'Camping Clepardia website — information, prices and availability enquiries.',
+  },
+  loader: {
+    messages: [
+      'Loading Camping Clepardia',
+      'Preparing your green base',
+      'Opening the campsite gate',
+    ],
   },
   global: {
     scrollToTop: 'Back to the top of the page',
@@ -65,12 +72,14 @@ export const en = {
     camperCost: 'Calculate stay cost',
   },
   chat: {
-    open: 'Open Camping Clepardia Assistant',
+    open: 'Open information assistant',
     close: 'Close chat',
-    title: 'Camping Clepardia Assistant',
-    status: 'Online',
+    title: 'Information assistant — test version',
+    status: 'Test version',
     intro:
-      'Hi. I can quickly help with prices, directions, bungalows, camping or contacting reception.',
+      'Hi. I can help with basic information about prices, directions, bungalows, camping and reception contact.',
+    notice:
+      'Answers are informational. For bookings, please contact reception.',
     quickLabel: 'Quick questions',
     inputLabel: 'Write a message',
     inputPlaceholder: 'Write a message...',
@@ -93,7 +102,7 @@ export const en = {
       camping:
         'Camping Clepardia welcomes motorhomes, vans, caravans, tents and cars with rooftop tents. Availability may be limited in June, July and August.',
       fallback:
-        'This is a demo assistant. In the next stage it can be connected to a real backend and reception knowledge base. For now I can help with prices, directions, bungalows, camping and contact.',
+        'This is an informational test assistant. For bookings, availability and final prices, please contact Camping Clepardia reception.',
     },
   },
   pages: {

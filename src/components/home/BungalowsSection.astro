@@ -1,7 +1,7 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
 import { siteAssets } from '@/data/assets';
-import { getTranslations } from '@/i18n/config';
+import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
+const contentLanguage = resolveContentLanguage(languageCode ?? pathContext.languageCode);
 const t = getTranslations(languageCode ?? pathContext.languageCode);
 const page = t.pages.domki;
 const bungalowCards = page.highlights.map((item, index) => ({
@@ -20,6 +21,52 @@ const bungalowCards = page.highlights.map((item, index) => ({
 }));
 const pricingHref = getLocalizedPath(explicitLanguage, 'cennik');
 const contactHref = getLocalizedPath(explicitLanguage, 'kontakt');
+const mediaLabels = {
+  pl: {
+    aria: 'Zdjęcia sekcji domki',
+    mainAlt: 'Domki Camping Clepardia w Krakowie',
+    main: 'Domki Camping Clepardia',
+    roomAlt: 'Wnętrze domku Camping Clepardia',
+    room: 'Wnętrze domku',
+    terraceAlt: 'Taras przy domku Camping Clepardia',
+    terrace: 'Taras',
+    familyAlt: 'Domek dla par, rodzin i grup',
+    family: 'Dla rodzin',
+  },
+  en: {
+    aria: 'Bungalow section photos',
+    mainAlt: 'Camping Clepardia bungalows in Krakow',
+    main: 'Camping Clepardia bungalows',
+    roomAlt: 'Camping Clepardia bungalow interior',
+    room: 'Bungalow interior',
+    terraceAlt: 'Terrace by a Camping Clepardia bungalow',
+    terrace: 'Terrace',
+    familyAlt: 'Bungalow for couples, families and groups',
+    family: 'For families',
+  },
+  de: {
+    aria: 'Fotos der Bungalowsektion',
+    mainAlt: 'Bungalows von Camping Clepardia in Krakau',
+    main: 'Camping Clepardia Bungalows',
+    roomAlt: 'Innenraum eines Camping Clepardia Bungalows',
+    room: 'Bungalow innen',
+    terraceAlt: 'Terrasse am Camping Clepardia Bungalow',
+    terrace: 'Terrasse',
+    familyAlt: 'Bungalow für Paare, Familien und Gruppen',
+    family: 'Für Familien',
+  },
+  it: {
+    aria: 'Foto della sezione bungalow',
+    mainAlt: 'Bungalow Camping Clepardia a Cracovia',
+    main: 'Bungalow Camping Clepardia',
+    roomAlt: 'Interno bungalow Camping Clepardia',
+    room: 'Interno bungalow',
+    terraceAlt: 'Terrazza presso il bungalow Camping Clepardia',
+    terrace: 'Terrazza',
+    familyAlt: 'Bungalow per coppie, famiglie e gruppi',
+    family: 'Per famiglie',
+  },
+}[contentLanguage];
 ---
 
 <section class="site-section bungalows-section reveal-section" id="domki">
@@ -47,21 +94,21 @@ const contactHref = getLocalizedPath(explicitLanguage, 'kontakt');
       </div>
     </div>
 
-    <div class="bungalows-section__media" aria-label="Zdjęcia sekcji domki">
+    <div class="bungalows-section__media" aria-label={mediaLabels.aria}>
       <ImageFrame
         src={siteAssets.bungalows.exterior}
-        alt="Domki Camping Clepardia w Krakowie"
-        label="Domki Camping Clepardia"
+        alt={mediaLabels.mainAlt}
+        label={mediaLabels.main}
         className="bungalows-section__main-photo"
       />
       <div class="bungalows-section__floating bungalows-section__floating--one">
-        <ImageFrame src={siteAssets.bungalows.room} alt="Wnętrze domku Camping Clepardia" label="Wnętrze domku" />
+        <ImageFrame src={siteAssets.bungalows.room} alt={mediaLabels.roomAlt} label={mediaLabels.room} />
       </div>
       <div class="bungalows-section__floating bungalows-section__floating--two">
-        <ImageFrame src={siteAssets.bungalows.terrace} alt="Taras przy domku Camping Clepardia" label="Taras" />
+        <ImageFrame src={siteAssets.bungalows.terrace} alt={mediaLabels.terraceAlt} label={mediaLabels.terrace} />
       </div>
       <div class="bungalows-section__floating bungalows-section__floating--three">
-        <ImageFrame src={siteAssets.bungalows.family} alt="Domek dla par, rodzin i grup" label="Dla rodzin" />
+        <ImageFrame src={siteAssets.bungalows.family} alt={mediaLabels.familyAlt} label={mediaLabels.family} />
       </div>
     </div>
   </div>

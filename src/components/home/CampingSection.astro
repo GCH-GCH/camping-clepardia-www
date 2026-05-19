@@ -1,7 +1,7 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
 import { siteAssets } from '@/data/assets';
-import { getTranslations } from '@/i18n/config';
+import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
+const contentLanguage = resolveContentLanguage(languageCode ?? pathContext.languageCode);
 const t = getTranslations(languageCode ?? pathContext.languageCode);
 const page = t.pages.camping;
 const campingCards = page.highlights.map((item, index) => ({
@@ -20,6 +21,52 @@ const campingCards = page.highlights.map((item, index) => ({
 }));
 const pricingHref = getLocalizedPath(explicitLanguage, 'cennik');
 const contactHref = getLocalizedPath(explicitLanguage, 'kontakt');
+const mediaLabels = {
+  pl: {
+    aria: 'Zdjęcia sekcji camping',
+    mainAlt: 'Strefa dla kamperów i vanów Camping Clepardia',
+    main: 'Kampery i vany',
+    pitchesAlt: 'Miejsca campingowe Camping Clepardia',
+    pitches: 'Miejsca campingowe',
+    tentsAlt: 'Strefa namiotowa Camping Clepardia',
+    tents: 'Namioty',
+    electricityAlt: 'Przyłącza prądu na campingu',
+    electricity: 'Prąd i zaplecze',
+  },
+  en: {
+    aria: 'Camping section photos',
+    mainAlt: 'Motorhome and van area at Camping Clepardia',
+    main: 'Motorhomes and vans',
+    pitchesAlt: 'Camping pitches at Camping Clepardia',
+    pitches: 'Camping pitches',
+    tentsAlt: 'Tent area at Camping Clepardia',
+    tents: 'Tents',
+    electricityAlt: 'Electric hook-ups at the campsite',
+    electricity: 'Electricity and facilities',
+  },
+  de: {
+    aria: 'Fotos der Campingsektion',
+    mainAlt: 'Wohnmobil- und Vanbereich auf Camping Clepardia',
+    main: 'Wohnmobile und Vans',
+    pitchesAlt: 'Stellplätze auf Camping Clepardia',
+    pitches: 'Stellplätze',
+    tentsAlt: 'Zeltbereich auf Camping Clepardia',
+    tents: 'Zelte',
+    electricityAlt: 'Stromanschlüsse auf dem Campingplatz',
+    electricity: 'Strom und Infrastruktur',
+  },
+  it: {
+    aria: 'Foto della sezione camping',
+    mainAlt: 'Area camper e van a Camping Clepardia',
+    main: 'Camper e van',
+    pitchesAlt: 'Piazzole a Camping Clepardia',
+    pitches: 'Piazzole camping',
+    tentsAlt: 'Area tende a Camping Clepardia',
+    tents: 'Tende',
+    electricityAlt: 'Allacci elettrici nel camping',
+    electricity: 'Elettricità e servizi',
+  },
+}[contentLanguage];
 ---
 
 <section class="site-section camping-section reveal-section" id="camping">
@@ -47,21 +94,21 @@ const contactHref = getLocalizedPath(explicitLanguage, 'kontakt');
       </div>
     </div>
 
-    <div class="camping-section__media" aria-label="Zdjęcia sekcji camping">
+    <div class="camping-section__media" aria-label={mediaLabels.aria}>
       <ImageFrame
         src={siteAssets.camping.camperArea}
-        alt="Strefa dla kamperów i vanów Camping Clepardia"
-        label="Kampery i vany"
+        alt={mediaLabels.mainAlt}
+        label={mediaLabels.main}
         className="camping-section__main-photo"
       />
       <div class="camping-section__floating camping-section__floating--one">
-        <ImageFrame src={siteAssets.camping.pitches} alt="Miejsca campingowe Camping Clepardia" label="Miejsca campingowe" />
+        <ImageFrame src={siteAssets.camping.pitches} alt={mediaLabels.pitchesAlt} label={mediaLabels.pitches} />
       </div>
       <div class="camping-section__floating camping-section__floating--two">
-        <ImageFrame src={siteAssets.camping.tents} alt="Strefa namiotowa Camping Clepardia" label="Namioty" />
+        <ImageFrame src={siteAssets.camping.tents} alt={mediaLabels.tentsAlt} label={mediaLabels.tents} />
       </div>
       <div class="camping-section__floating camping-section__floating--three">
-        <ImageFrame src={siteAssets.camping.electricity} alt="Przyłącza prądu na campingu" label="Prąd i zaplecze" />
+        <ImageFrame src={siteAssets.camping.electricity} alt={mediaLabels.electricityAlt} label={mediaLabels.electricity} />
       </div>
     </div>
   </div>
