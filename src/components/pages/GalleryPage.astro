@@ -376,8 +376,10 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
           {item.imageExists ? (
             <img src={item.image} alt={item.alt} loading="lazy" decoding="async" />
           ) : (
-            <span class="gallery-card__fallback-icon" aria-hidden="true">
-              <Icon name="gallery" size={22} strokeWidth={1.8} />
+            <span class="gallery-card__mood" aria-hidden="true">
+              <span class="gallery-card__mood-light"></span>
+              <span class="gallery-card__mood-shape gallery-card__mood-shape--back"></span>
+              <span class="gallery-card__mood-shape gallery-card__mood-shape--front"></span>
             </span>
           )}
           <span class="gallery-card__shade" aria-hidden="true"></span>
@@ -681,34 +683,61 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 
 .gallery-card--fallback {
   background:
-    linear-gradient(135deg, rgba(7, 22, 15, .22), rgba(7, 22, 15, .78)),
-    radial-gradient(circle at 74% 24%, rgba(232, 158, 84, .28), transparent 36%),
+    linear-gradient(135deg, rgba(12, 34, 22, .16), rgba(8, 24, 16, .72)),
+    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .26), transparent 36%),
     radial-gradient(circle at 16% 78%, rgba(60,179,113,.22), transparent 34%),
-    linear-gradient(135deg, #25412f, #0c1912);
+    linear-gradient(135deg, #284734, #0f2118);
 }
 
-.gallery-card__fallback-icon {
+.gallery-card__mood {
   position: absolute;
-  left: 26px;
-  top: 26px;
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.18);
-  background: rgba(255,255,255,.08);
-  backdrop-filter: blur(12px);
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-.gallery-card__fallback-icon svg {
-  width: 22px;
-  height: 22px;
-  fill: none;
-  stroke: #8fe0b4;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.gallery-card__mood::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .15;
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(255,255,255,.36) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at 72% 52%, rgba(255,255,255,.24) 0 1px, transparent 1px 6px);
+  background-size: 8px 8px, 12px 12px;
+  mix-blend-mode: screen;
+}
+
+.gallery-card__mood-light {
+  position: absolute;
+  right: 14%;
+  top: 14%;
+  width: clamp(100px, 16vw, 190px);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,236,185,.88), rgba(242,192,120,.42) 42%, transparent 70%);
+  opacity: .68;
+}
+
+.gallery-card__mood-shape {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: -17%;
+  height: 48%;
+  border-radius: 52% 52% 0 0;
+  background: linear-gradient(180deg, rgba(60,179,113,.30), rgba(6,22,14,.95));
+}
+
+.gallery-card__mood-shape--back {
+  bottom: -8%;
+  opacity: .54;
+  transform: translateX(14%);
+}
+
+.gallery-card__mood-shape--front {
+  height: 40%;
+  background: linear-gradient(180deg, rgba(48,135,86,.66), rgba(5,18,11,.98));
 }
 
 .gallery-card__shade {

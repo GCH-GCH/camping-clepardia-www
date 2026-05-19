@@ -13,6 +13,7 @@ const navItems = [
   { slug: 'cennik', label: t.nav.items.cennik },
   { slug: 'dojazd', label: t.nav.items.dojazd },
   { slug: 'atrakcje', label: t.nav.items.atrakcje },
+  { slug: 'galeria', label: t.nav.items.galeria },
   { slug: 'kontakt', label: t.nav.items.kontakt },
 ];
 
@@ -376,7 +377,7 @@ body.has-main-navbar-open {
   justify-self: center;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -387,7 +388,7 @@ body.has-main-navbar-open {
   min-height: 40px;
   align-items: center;
   justify-content: center;
-  padding: 0 13px;
+  padding: 0 12px;
   border: 1px solid transparent;
   border-radius: 999px;
   color: rgba(255,255,255,.82);
@@ -427,11 +428,13 @@ body.has-main-navbar-open {
   min-height: 42px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 7px;
+  padding: 7px 11px;
   border: 1px solid rgba(255,255,255,.12);
   border-radius: 999px;
-  background: rgba(255,255,255,.075);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.095), rgba(255,255,255,.055)),
+    rgba(255,255,255,.06);
   color: #fff;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
   font-size: 13px;
@@ -442,7 +445,7 @@ body.has-main-navbar-open {
 
 .main-navbar-lang__toggle:hover,
 .main-navbar-lang.is-open .main-navbar-lang__toggle {
-  background: rgba(255,255,255,.12);
+  background: rgba(60,179,113,.14);
   border-color: rgba(143,224,180,.42);
   transform: translateY(-1px);
 }
@@ -453,7 +456,9 @@ body.has-main-navbar-open {
   display: block;
   border-radius: 999px;
   object-fit: cover;
-  box-shadow: 0 5px 14px rgba(0,0,0,.22);
+  border: 1px solid rgba(143,224,180,.30);
+  background: rgba(255,255,255,.12);
+  box-shadow: 0 5px 14px rgba(0,0,0,.22), 0 0 0 3px rgba(60,179,113,.06);
 }
 
 .main-navbar-lang__toggle svg {
@@ -476,11 +481,13 @@ body.has-main-navbar-open {
   position: absolute;
   top: calc(100% + 14px);
   right: 0;
-  width: 260px;
+  width: 270px;
   padding: 10px;
-  border: 1px solid rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.13);
   border-radius: 24px;
-  background: rgba(9, 28, 19, .94);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(60,179,113,.10), transparent 34%),
+    rgba(9, 28, 19, .94);
   box-shadow: 0 24px 70px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.11);
   backdrop-filter: blur(24px) saturate(140%);
   -webkit-backdrop-filter: blur(24px) saturate(140%);
@@ -503,11 +510,12 @@ body.has-main-navbar-open {
   align-items: center;
   gap: 10px;
   padding: 11px 12px;
+  border: 1px solid transparent;
   border-radius: 16px;
   color: rgba(255,255,255,.84);
   font-size: 14px;
   font-weight: 750;
-  transition: color .2s ease, background .2s ease, transform .2s ease;
+  transition: color .2s ease, background .2s ease, transform .2s ease, border-color .2s ease;
 }
 
 .main-navbar-lang__item strong {
@@ -519,6 +527,7 @@ body.has-main-navbar-open {
 .main-navbar-lang__item:hover,
 .main-navbar-lang__item.is-active {
   color: #fff;
+  border-color: rgba(60,179,113,.24);
   background: rgba(60,179,113,.16);
   transform: translateX(2px);
 }
@@ -773,7 +782,9 @@ html[data-theme="light"] .main-navbar-theme__icon--moon {
   padding: 8px 4px;
   border: 1px solid rgba(255,255,255,.12);
   border-radius: 18px;
-  background: rgba(255,255,255,.07);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.045)),
+    rgba(255,255,255,.06);
   color: rgba(255,255,255,.84);
   font-size: 11px;
   font-weight: 850;
@@ -882,15 +893,15 @@ html[data-theme="light"] .main-navbar-mobile__language {
   background: rgba(255,255,255,.56);
 }
 
-@media (max-width: 1160px) and (min-width: 921px) {
+@media (max-width: 1240px) and (min-width: 921px) {
   .main-navbar {
     gap: 10px;
     padding-inline: 14px;
   }
 
   .main-navbar__link {
-    padding-inline: 9px;
-    font-size: 13px;
+    padding-inline: 8px;
+    font-size: 12.8px;
   }
 
   .main-navbar__cta {

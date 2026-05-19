@@ -42,16 +42,16 @@ const icons = ['shield', 'check', 'family', 'clock'] as const;
 <style>
 .trust {
   background:
-    radial-gradient(circle at 84% 12%, rgba(242,192,120,.18), transparent 30%),
-    radial-gradient(circle at 16% 82%, rgba(60,179,113,.12), transparent 30%),
+    radial-gradient(circle at 84% 12%, rgba(242,192,120,.12), transparent 32%),
+    radial-gradient(circle at 16% 82%, rgba(60,179,113,.10), transparent 32%),
     linear-gradient(180deg, #f6f8f2, #fffaf2);
 }
 
 :global(html[data-theme="dark"]) .trust {
   background:
-    radial-gradient(circle at 84% 12%, rgba(242,192,120,.13), transparent 32%),
-    radial-gradient(circle at 16% 82%, rgba(60,179,113,.14), transparent 34%),
-    linear-gradient(180deg, #142B1F, #10261A);
+    radial-gradient(circle at 84% 12%, rgba(242,192,120,.09), transparent 34%),
+    radial-gradient(circle at 16% 82%, rgba(60,179,113,.10), transparent 36%),
+    linear-gradient(180deg, #102117, #0B1A14);
 }
 
 .trust__head {
@@ -65,58 +65,59 @@ const icons = ['shield', 'check', 'family', 'clock'] as const;
   width: fit-content;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
+  gap: 10px;
+  padding: 11px 16px;
   border-radius: 999px;
   color: #2f2112;
   background:
     linear-gradient(135deg, rgba(255,246,205,.98), rgba(242,192,120,.88)),
     radial-gradient(circle at 20% 10%, rgba(255,255,255,.7), transparent 34%);
   border: 1px solid rgba(151,101,35,.18);
-  box-shadow: 0 18px 48px rgba(150,103,41,.16);
+  box-shadow: 0 14px 34px rgba(150,103,41,.13);
   font-weight: 950;
+  font-size: .9rem;
 }
 
 .trust__grid {
-  margin-top: 42px;
+  margin-top: clamp(46px, 5vw, 58px);
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
 }
 
 .trust__card {
-  min-height: 230px;
+  min-height: 208px;
   display: grid;
   align-content: end;
-  padding: 28px;
+  padding: 26px;
   overflow: hidden;
 }
 
 .trust__card::after {
   content: '';
   position: absolute;
-  inset: auto -20% -38% auto;
-  width: 180px;
+  inset: auto -18% -40% auto;
+  width: 160px;
   aspect-ratio: 1;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(60,179,113,.20), transparent 62%);
+  background: radial-gradient(circle, rgba(60,179,113,.15), transparent 64%);
   pointer-events: none;
 }
 
 .trust__card--award::after {
-  background: radial-gradient(circle, rgba(242,192,120,.30), transparent 62%);
+  background: radial-gradient(circle, rgba(242,192,120,.22), transparent 64%);
 }
 
 .trust__card > span {
-  width: 50px;
-  height: 50px;
+  width: 46px;
+  height: 46px;
   display: grid;
   place-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   border-radius: 999px;
   color: #2f9d63;
-  background: rgba(60,179,113,.12);
-  border: 1px solid rgba(60,179,113,.18);
+  background: rgba(60,179,113,.14);
+  border: 1px solid rgba(60,179,113,.24);
 }
 
 .trust__card--award > span {

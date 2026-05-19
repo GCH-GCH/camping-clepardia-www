@@ -2,6 +2,7 @@
 import { pricingConfig } from '@/data/pricing';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import { getTranslations } from '@/i18n/config';
+import Icon from '@/components/ui/Icon.astro';
 
 interface Props {
   languageCode?: string;
@@ -33,20 +34,20 @@ const formatStayTypePrice = (id: string) => {
 };
 
 const prices = [
-  [t.pricing.adults, formatPrice(pricingConfig.people.adults.price)],
-  [t.pricing.children, formatPrice(pricingConfig.people.children.price)],
-  [t.pricing.stayTypes.camper, formatStayTypePrice('camper')],
-  [t.pricing.stayTypes.caravan, formatStayTypePrice('caravan')],
-  [t.pricing.stayTypes.van, formatStayTypePrice('van')],
-  [t.pricing.stayTypes['tent-small'], formatStayTypePrice('tent-small')],
-  [t.pricing.stayTypes['tent-large'], formatStayTypePrice('tent-large')],
-  [t.pricing.stayTypes['bungalow-2'], formatStayTypePrice('bungalow-2')],
-  [t.pricing.stayTypes['bungalow-3'], formatStayTypePrice('bungalow-3')],
-  [t.pricing.stayTypes['bungalow-4'], formatStayTypePrice('bungalow-4')],
-  [t.pricing.stayTypes['bungalow-family'], formatStayTypePrice('bungalow-family')],
-  [t.pricing.addons.electricity, formatPrice(getAddon('electricity').price)],
-  [t.pricing.addons.dog, formatPrice(getAddon('dog').price)],
-  [t.pricing.addons.bus, formatPrice(getAddon('bus').price)],
+  { label: t.pricing.adults, price: formatPrice(pricingConfig.people.adults.price), icon: 'family' },
+  { label: t.pricing.children, price: formatPrice(pricingConfig.people.children.price), icon: 'family' },
+  { label: t.pricing.stayTypes.camper, price: formatStayTypePrice('camper'), icon: 'camper' },
+  { label: t.pricing.stayTypes.caravan, price: formatStayTypePrice('caravan'), icon: 'caravan' },
+  { label: t.pricing.stayTypes.van, price: formatStayTypePrice('van'), icon: 'camper' },
+  { label: t.pricing.stayTypes['tent-small'], price: formatStayTypePrice('tent-small'), icon: 'tent' },
+  { label: t.pricing.stayTypes['tent-large'], price: formatStayTypePrice('tent-large'), icon: 'tent' },
+  { label: t.pricing.stayTypes['bungalow-2'], price: formatStayTypePrice('bungalow-2'), icon: 'bungalow' },
+  { label: t.pricing.stayTypes['bungalow-3'], price: formatStayTypePrice('bungalow-3'), icon: 'bungalow' },
+  { label: t.pricing.stayTypes['bungalow-4'], price: formatStayTypePrice('bungalow-4'), icon: 'bungalow' },
+  { label: t.pricing.stayTypes['bungalow-family'], price: formatStayTypePrice('bungalow-family'), icon: 'family' },
+  { label: t.pricing.addons.electricity, price: formatPrice(getAddon('electricity').price), icon: 'electricity' },
+  { label: t.pricing.addons.dog, price: formatPrice(getAddon('dog').price), icon: 'dog' },
+  { label: t.pricing.addons.bus, price: formatPrice(getAddon('bus').price), icon: 'bus' },
 ];
 
 const fullPricingHref = getLocalizedPath(pathContext.explicitLanguage, 'cennik');
@@ -62,10 +63,11 @@ const fullPricingHref = getLocalizedPath(pathContext.explicitLanguage, 'cennik')
       <a class="btn btn-primary premium-button" href={fullPricingHref}>{t.cta.pricing}</a>
     </div>
     <div class="pricing__grid">
-      {prices.map(([label, price]) => (
+      {prices.map((item) => (
         <div class="premium-card pricing__item">
-          <span>{label}</span>
-          <strong>{price}</strong>
+          <i aria-hidden="true"><Icon name={item.icon} size={22} strokeWidth={1.85} /></i>
+          <span>{item.label}</span>
+          <strong>{item.price}</strong>
         </div>
       ))}
     </div>
@@ -78,9 +80,13 @@ const fullPricingHref = getLocalizedPath(pathContext.explicitLanguage, 'cennik')
 .pricing .section-kicker { color: #8fe0b4; }
 .pricing__head { display: flex; flex-direction: column; gap: 24px; justify-content: space-between; }
 .pricing__grid { margin-top: 42px; display: grid; grid-template-columns: 1fr; gap: 14px; }
-.pricing__item { padding: 22px; background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.pricing__item { padding: 18px; background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: #fff; display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 14px; }
+.pricing__item i { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 18px; color: #fff; border: 1px solid rgba(143,224,180,.24); background: linear-gradient(135deg, rgba(60,179,113,.24), rgba(60,179,113,.11)); box-shadow: 0 14px 34px rgba(60,179,113,.14); transition: transform .22s ease, background .22s ease, box-shadow .22s ease; }
+.pricing__item svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.85; stroke-linecap: round; stroke-linejoin: round; }
+.pricing__item:hover i { transform: translateY(-2px); background: linear-gradient(135deg, #55d293, #3CB371); box-shadow: 0 18px 42px rgba(60,179,113,.24); }
 .pricing__item span { color: rgba(255,255,255,.76); font-weight: 800; }
-.pricing__item strong { font-size: 1.15rem; }
+.pricing__item strong { font-size: 1.08rem; text-align: right; white-space: nowrap; }
 @media (min-width: 760px) { .pricing__head { flex-direction: row; align-items: end; } .pricing__grid { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1120px) { .pricing__grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 520px) { .pricing__item { grid-template-columns: 44px 1fr; } .pricing__item strong { grid-column: 2; text-align: left; } .pricing__item i { width: 44px; height: 44px; grid-row: span 2; } }
 </style>

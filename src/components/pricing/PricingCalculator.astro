@@ -2,6 +2,7 @@
 import { pricingConfig } from '@/data/pricing';
 import { getTranslations } from '@/i18n/config';
 import { getPathContext } from '@/utils/localizedLinks';
+import Icon from '@/components/ui/Icon.astro';
 
 interface Props {
   languageCode?: string;
@@ -57,6 +58,27 @@ const defaultPeoplePerNight = defaultStayType.category === 'bungalow'
 const defaultTotal = (defaultAccommodationPerNight + defaultPeoplePerNight) * defaultNights;
 const defaultTotalLabel = formatPrice(defaultTotal);
 const defaultRateLabel = `${defaultTotalLabel} / ${pricingText.perNight}`;
+const stayTypeIcons: Record<string, string> = {
+  camper: 'camper',
+  caravan: 'caravan',
+  'tent-small': 'tent',
+  'tent-large': 'tent',
+  van: 'camper',
+  'rooftop-tent': 'car',
+  'bungalow-2': 'bungalow',
+  'bungalow-3': 'bungalow',
+  'bungalow-4': 'bungalow',
+  'bungalow-family': 'family',
+};
+const addonIcons: Record<string, string> = {
+  electricity: 'electricity',
+  dog: 'dog',
+  motorcycle: 'motorcycle',
+  'cargo-trailer': 'caravan',
+  bus: 'bus',
+  parking: 'parking',
+  'extra-car': 'car',
+};
 ---
 
 <section class="site-section pricing-calculator reveal-section" id="kalkulator">
@@ -101,9 +123,14 @@ const defaultRateLabel = `${defaultTotalLabel} / ${pricingText.perNight}`;
                 <label class="pricing-calculator__option">
                   <input type="radio" name="stayType" value={type.id} checked={index === 0} />
                   <span>
-                    <strong>{getStayTypeLabel(type.id, type.label)}</strong>
-                    <small>{price} / {pricingText.perNight}</small>
-                    {'note' in type && <em>{pricingText.familyNotice}</em>}
+                    <i class="pricing-calculator__option-icon" aria-hidden="true">
+                      <Icon name={stayTypeIcons[type.id] ?? 'pricing'} size={22} strokeWidth={1.85} />
+                    </i>
+                    <span class="pricing-calculator__option-copy">
+                      <strong>{getStayTypeLabel(type.id, type.label)}</strong>
+                      <small>{price} / {pricingText.perNight}</small>
+                      {'note' in type && <em>{pricingText.familyNotice}</em>}
+                    </span>
                   </span>
                 </label>
               );
@@ -159,8 +186,13 @@ const defaultRateLabel = `${defaultTotalLabel} / ${pricingText.perNight}`;
               <label class="pricing-calculator__addon">
                 <input type="checkbox" name="addons" value={addon.id} />
                 <span>
-                  <strong>{getAddonLabel(addon.id, addon.label)}</strong>
-                  <small>{formatPrice(addon.price)} / {pricingText.perNight}</small>
+                  <i class="pricing-calculator__option-icon" aria-hidden="true">
+                    <Icon name={addonIcons[addon.id] ?? 'check'} size={21} strokeWidth={1.9} />
+                  </i>
+                  <span class="pricing-calculator__option-copy">
+                    <strong>{getAddonLabel(addon.id, addon.label)}</strong>
+                    <small>{formatPrice(addon.price)} / {pricingText.perNight}</small>
+                  </span>
                 </span>
               </label>
             ))}
@@ -662,14 +694,46 @@ const defaultRateLabel = `${defaultTotalLabel} / ${pricingText.perNight}`;
 .pricing-calculator__addon > span {
   min-height: 74px;
   display: grid;
-  align-content: center;
-  gap: 5px;
-  padding: 16px 18px;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+  padding: 15px 17px;
   border-radius: 20px;
   border: 1px solid rgba(25, 70, 44, .12);
   background: rgba(255,255,255,.68);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.62);
   transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
+}
+
+.pricing-calculator__option-icon {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  color: #2f9d63;
+  border: 1px solid rgba(60,179,113,.20);
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255,255,255,.58), transparent 34%),
+    rgba(60,179,113,.12);
+  box-shadow: 0 12px 28px rgba(60,179,113,.10), inset 0 1px 0 rgba(255,255,255,.42);
+  transition: transform .22s ease, color .22s ease, background .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+.pricing-calculator__option-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.85;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pricing-calculator__option-copy {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
 }
 
 .pricing-calculator__option strong,
@@ -694,7 +758,20 @@ const defaultRateLabel = `${defaultTotalLabel} / ${pricingText.perNight}`;
   transform: translateY(-2px);
   border-color: rgba(60,179,113,.36);
   background: rgba(255,255,255,.92);
-  box-shadow: 0 16px 42px rgba(17,40,28,.10);
+  box-shadow: 0 18px 46px rgba(17,40,28,.12), 0 0 28px rgba(60,179,113,.10);
+}
+
+.pricing-calculator__option:hover .pricing-calculator__option-icon,
+.pricing-calculator__addon:hover .pricing-calculator__option-icon,
+.pricing-calculator__option input:checked + span .pricing-calculator__option-icon,
+.pricing-calculator__addon input:checked + span .pricing-calculator__option-icon {
+  color: #fff;
+  border-color: rgba(60,179,113,.38);
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255,255,255,.32), transparent 34%),
+    linear-gradient(135deg, #55d293, #3CB371);
+  box-shadow: 0 16px 38px rgba(60,179,113,.28), inset 0 1px 0 rgba(255,255,255,.30);
+  transform: translateY(-1px);
 }
 
 .pricing-calculator__option input:checked + span::before,
@@ -995,6 +1072,14 @@ const defaultRateLabel = `${defaultTotalLabel} / ${pricingText.perNight}`;
   .pricing-calculator__option > span,
   .pricing-calculator__addon > span {
     min-height: 68px;
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 11px;
+    padding: 13px 14px;
+  }
+
+  .pricing-calculator__option-icon {
+    width: 44px;
+    height: 44px;
   }
 }
 

@@ -162,9 +162,9 @@ const heroStyle = [
   overflow: hidden;
   color: #fff;
   background:
-    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .28), transparent 34%),
-    radial-gradient(circle at 18% 58%, rgba(60, 179, 113, .20), transparent 34%),
-    linear-gradient(125deg, #07140f 0%, #0d2a1c 44%, #172417 70%, #2b1b0d 100%);
+    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .22), transparent 36%),
+    radial-gradient(circle at 18% 58%, rgba(60, 179, 113, .16), transparent 36%),
+    linear-gradient(125deg, #081510 0%, #0B1A14 44%, #102117 72%, #24180d 100%);
   isolation: isolate;
 }
 
@@ -216,14 +216,14 @@ const heroStyle = [
 
 .hero__overlay--cinematic {
   background:
-    linear-gradient(90deg, rgba(4, 14, 9, .94) 0%, rgba(7, 24, 15, .78) 34%, rgba(12, 34, 22, .38) 68%, rgba(17, 27, 17, .08) 100%),
-    linear-gradient(180deg, rgba(2, 8, 5, .44) 0%, transparent 34%, rgba(5, 15, 10, .62) 100%);
+    linear-gradient(90deg, rgba(5, 17, 11, .88) 0%, rgba(8, 25, 17, .66) 34%, rgba(14, 38, 25, .28) 68%, rgba(17, 27, 17, .05) 100%),
+    linear-gradient(180deg, rgba(2, 8, 5, .30) 0%, transparent 36%, rgba(5, 15, 10, .46) 100%);
 }
 
 .hero__overlay--vignette {
   background:
-    radial-gradient(ellipse at center, transparent 26%, rgba(3, 12, 8, .14) 62%, rgba(3, 12, 8, .58) 100%),
-    linear-gradient(180deg, rgba(0,0,0,.20), transparent 42%, rgba(0,0,0,.34));
+    radial-gradient(ellipse at center, transparent 30%, rgba(3, 12, 8, .10) 66%, rgba(3, 12, 8, .42) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.12), transparent 44%, rgba(0,0,0,.24));
 }
 
 .hero__overlay--noise {
@@ -237,15 +237,15 @@ const heroStyle = [
 
 .hero__overlay--warm {
   background:
-    radial-gradient(circle at 76% 30%, rgba(255, 190, 105, .30), rgba(255, 190, 105, .10) 24%, transparent 48%),
-    radial-gradient(circle at 56% 12%, rgba(242, 192, 120, .16), transparent 34%);
+    radial-gradient(circle at 76% 30%, rgba(255, 190, 105, .22), rgba(255, 190, 105, .08) 24%, transparent 50%),
+    radial-gradient(circle at 56% 12%, rgba(242, 192, 120, .12), transparent 36%);
   mix-blend-mode: screen;
 }
 
 .hero__overlay--green {
   background:
-    radial-gradient(circle at 18% 42%, rgba(60, 179, 113, .26), rgba(60, 179, 113, .08) 25%, transparent 52%),
-    radial-gradient(circle at 58% 86%, rgba(60, 179, 113, .18), transparent 36%);
+    radial-gradient(circle at 18% 42%, rgba(60, 179, 113, .18), rgba(60, 179, 113, .06) 25%, transparent 54%),
+    radial-gradient(circle at 58% 86%, rgba(60, 179, 113, .12), transparent 38%);
 }
 
 .hero__particles {
@@ -261,9 +261,9 @@ const heroStyle = [
   width: clamp(120px, 15vw, 230px);
   aspect-ratio: 1;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(255, 218, 155, .16), rgba(60,179,113,.06) 38%, transparent 68%);
-  filter: blur(14px);
-  opacity: .42;
+  background: radial-gradient(circle, rgba(255, 218, 155, .11), rgba(60,179,113,.045) 38%, transparent 68%);
+  filter: blur(18px);
+  opacity: .30;
   animation: heroParticle 12s ease-in-out infinite;
 }
 
@@ -300,6 +300,7 @@ const heroStyle = [
 }
 
 .hero__content {
+  width: min(100%, 680px);
   max-width: 680px;
   min-width: 0;
   animation: heroFade .9s ease both;
@@ -358,6 +359,8 @@ const heroStyle = [
 
 .hero__subheadline span {
   display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .hero__description {
@@ -380,9 +383,9 @@ const heroStyle = [
   border: 1px solid rgba(255,255,255,.16);
   border-radius: 34px;
   background:
-    linear-gradient(145deg, rgba(255,255,255,.15), rgba(255,255,255,.055)),
-    radial-gradient(circle at 90% 0%, rgba(242,192,120,.18), transparent 34%);
-  box-shadow: 0 30px 90px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.16);
+    linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.05)),
+    radial-gradient(circle at 90% 0%, rgba(242,192,120,.13), transparent 36%);
+  box-shadow: 0 26px 76px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.14);
   backdrop-filter: blur(22px) saturate(150%);
   -webkit-backdrop-filter: blur(22px) saturate(150%);
   animation: heroFade .9s cubic-bezier(.22, 1, .36, 1) .58s both;
@@ -612,7 +615,7 @@ const heroStyle = [
   top: 50%;
   z-index: 3;
   display: grid;
-  gap: 14px;
+  gap: 10px;
   width: min(280px, 25vw);
   transform: translateY(-42%);
   pointer-events: none;
@@ -621,17 +624,17 @@ const heroStyle = [
 .hero__floating-badges span {
   display: inline-flex;
   width: fit-content;
-  min-height: 48px;
+  min-height: 42px;
   align-items: center;
-  padding: 12px 16px;
-  border: 1px solid rgba(255,255,255,.14);
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,.12);
   border-radius: 999px;
   color: rgba(255,255,255,.90);
-  background: rgba(7, 20, 14, .42);
-  box-shadow: 0 18px 48px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.10);
+  background: rgba(8, 23, 16, .34);
+  box-shadow: 0 14px 34px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.08);
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
-  font-size: .78rem;
+  font-size: .72rem;
   font-weight: 900;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -763,10 +766,18 @@ const heroStyle = [
 @media (max-width: 560px) {
   .hero { min-height: 112svh; }
   .hero__wrapper { padding: 118px 18px 392px; }
+  .hero__content,
+  .hero__headline,
+  .hero__subheadline,
+  .hero__description {
+    max-width: calc(100vw - 36px);
+  }
   .hero__badge { font-size: .68rem; letter-spacing: .1em; }
   .hero__subheadline {
     font-size: clamp(1.08rem, 6vw, 1.28rem);
     line-height: 1.35;
+    white-space: normal;
+    word-break: normal;
   }
   .hero__description {
     font-size: .98rem;

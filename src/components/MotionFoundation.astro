@@ -23,7 +23,14 @@ const loaderMessages = t.loader.messages;
 </script>
 
 <div class="page-loader" aria-hidden="true" data-loader-messages={JSON.stringify(loaderMessages)}>
+  <div class="page-loader__particles" aria-hidden="true">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
   <div class="page-loader__stage">
+    <div class="page-loader__halo"></div>
     <div class="page-loader__radar"></div>
     <div class="page-loader__glow"></div>
     <img class="page-loader__logo" src={loaderLogo} alt="" width="240" height="240" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
@@ -187,10 +194,10 @@ const loaderMessages = t.loader.messages;
   justify-content: center;
   gap: 24px;
   background:
-    radial-gradient(circle at 50% 42%, rgba(60, 179, 113, .18), transparent 24%),
-    radial-gradient(circle at 72% 30%, rgba(242, 192, 120, .18), transparent 34%),
-    radial-gradient(circle at 22% 64%, rgba(60, 179, 113, .14), transparent 34%),
-    linear-gradient(135deg, #07140f 0%, #0b2016 48%, #091a13 100%);
+    radial-gradient(circle at 50% 42%, rgba(60, 179, 113, .20), transparent 24%),
+    radial-gradient(circle at 72% 30%, rgba(242, 192, 120, .16), transparent 36%),
+    radial-gradient(circle at 22% 64%, rgba(60, 179, 113, .12), transparent 36%),
+    linear-gradient(135deg, #081510 0%, #0B1A14 48%, #102117 100%);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -205,12 +212,14 @@ const loaderMessages = t.loader.messages;
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+  animation: loaderMaxLife 1.8s ease forwards;
 }
 
 .motion-ready.motion-loaded .page-loader {
   opacity: 0;
   visibility: hidden;
   transform: translateY(-14px) scale(1.015);
+  animation: none;
 }
 
 .page-loader__stage {
@@ -221,12 +230,25 @@ const loaderMessages = t.loader.messages;
   place-items: center;
 }
 
+.page-loader__halo {
+  position: absolute;
+  inset: 7px;
+  border-radius: 999px;
+  background:
+    conic-gradient(from 0deg, transparent, rgba(60,179,113,.12), rgba(242,192,120,.44), rgba(60,179,113,.62), transparent 76%);
+  filter: drop-shadow(0 0 24px rgba(60,179,113,.16));
+  animation: loaderSpin 5.5s linear infinite;
+  -webkit-mask: radial-gradient(circle, transparent 60%, #000 61%);
+  mask: radial-gradient(circle, transparent 60%, #000 61%);
+}
+
 .page-loader__glow {
   position: absolute;
-  inset: 35px;
+  inset: 30px;
   border-radius: 999px;
-  background: rgba(60, 179, 113, .18);
-  filter: blur(34px);
+  background:
+    radial-gradient(circle, rgba(60, 179, 113, .23), rgba(242,192,120,.10) 46%, transparent 70%);
+  filter: blur(30px);
   animation: loaderGlow 1.8s ease-in-out infinite;
 }
 
@@ -234,7 +256,8 @@ const loaderMessages = t.loader.messages;
   position: absolute;
   inset: 12px;
   border-radius: 999px;
-  border: 1px solid rgba(143, 224, 180, .24);
+  border: 1px solid rgba(143, 224, 180, .26);
+  box-shadow: inset 0 0 0 1px rgba(242,192,120,.08), 0 0 38px rgba(60,179,113,.10);
 }
 
 .page-loader__radar::before,
@@ -259,7 +282,7 @@ const loaderMessages = t.loader.messages;
   height: 120px;
   object-fit: contain;
   image-rendering: auto;
-  filter: drop-shadow(0 22px 48px rgba(60,179,113,.26)) drop-shadow(0 4px 18px rgba(242,192,120,.12));
+  filter: drop-shadow(0 24px 54px rgba(60,179,113,.30)) drop-shadow(0 6px 20px rgba(242,192,120,.16));
   animation: loaderBreath 2.2s ease-in-out infinite;
 }
 
@@ -277,7 +300,9 @@ const loaderMessages = t.loader.messages;
   height: 2px;
   border-radius: 99px;
   overflow: hidden;
-  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 24px rgba(60,179,113,.08);
 }
 
 .page-loader__line::after {
@@ -286,9 +311,32 @@ const loaderMessages = t.loader.messages;
   width: 45%;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, transparent, #8fe0b4, transparent);
+  background: linear-gradient(90deg, transparent, #3CB371 30%, #f2c078 52%, #8fe0b4 72%, transparent);
   animation: loaderLine 1.15s ease-in-out infinite;
 }
+
+.page-loader__particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.page-loader__particles span {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(242,192,120,.72);
+  box-shadow: 0 0 18px rgba(242,192,120,.38);
+  opacity: .48;
+  animation: loaderParticle 4.6s ease-in-out infinite;
+}
+
+.page-loader__particles span:nth-child(1) { left: 20%; top: 30%; }
+.page-loader__particles span:nth-child(2) { right: 23%; top: 36%; animation-delay: -1.1s; background: rgba(143,224,180,.72); }
+.page-loader__particles span:nth-child(3) { left: 31%; bottom: 24%; animation-delay: -2.2s; }
+.page-loader__particles span:nth-child(4) { right: 32%; bottom: 22%; animation-delay: -3.1s; background: rgba(143,224,180,.72); }
 
 .motion-ready .motion-reveal {
   opacity: 0;
@@ -331,6 +379,21 @@ const loaderMessages = t.loader.messages;
   100% { transform: translateX(260%); }
 }
 
+@keyframes loaderMaxLife {
+  0%, 72% {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-14px) scale(1.015);
+  }
+}
+
 @keyframes loaderRadar {
   0% { transform: scale(.62); opacity: .78; }
   100% { transform: scale(1.18); opacity: 0; }
@@ -341,9 +404,18 @@ const loaderMessages = t.loader.messages;
   50% { opacity: 1; transform: scale(1.06); }
 }
 
+@keyframes loaderSpin {
+  to { transform: rotate(360deg); }
+}
+
 @keyframes loaderBreath {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.035); }
+}
+
+@keyframes loaderParticle {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(.86); opacity: .30; }
+  45% { transform: translate3d(10px, -18px, 0) scale(1.18); opacity: .72; }
 }
 
 @media (max-width: 720px) {
@@ -373,6 +445,8 @@ const loaderMessages = t.loader.messages;
   .motion-ready .premium-card.motion-reveal,
   .page-loader__logo,
   .page-loader__glow,
+  .page-loader__halo,
+  .page-loader__particles span,
   .page-loader__radar::before,
   .page-loader__radar::after,
   .page-loader__line::after {

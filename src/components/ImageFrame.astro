@@ -1,6 +1,5 @@
 ---
 import { publicAssetExists } from '@/data/assets';
-import Icon from '@/components/ui/Icon.astro';
 
 interface Props {
   src: string;
@@ -29,12 +28,18 @@ const imageExists = publicAssetExists(src);
       <figcaption>{label}</figcaption>
     </>
   ) : (
-    <div class="asset-frame__fallback-content">
-      <span class="asset-frame__icon" aria-hidden="true">
-        <Icon name="image" />
-      </span>
-      <span>{label}</span>
-    </div>
+    <>
+      <div class="asset-frame__fallback-scene" aria-hidden="true">
+        <span class="asset-frame__sun"></span>
+        <span class="asset-frame__hill asset-frame__hill--back"></span>
+        <span class="asset-frame__hill asset-frame__hill--front"></span>
+        <span class="asset-frame__tent"></span>
+      </div>
+      <div class="asset-frame__fallback-content">
+        <span class="asset-frame__fallback-kicker">Camping Clepardia</span>
+        <span>{label}</span>
+      </div>
+    </>
   )}
 </figure>
 
@@ -50,9 +55,10 @@ const imageExists = publicAssetExists(src);
   overflow: hidden;
   box-shadow: 0 26px 76px rgba(17, 40, 28, .18);
   background:
-    linear-gradient(135deg, rgba(7, 22, 15, .22), rgba(7, 22, 15, .70)),
-    radial-gradient(circle at 74% 24%, rgba(232, 158, 84, .28), transparent 36%),
-    linear-gradient(135deg, #25412f, #0c1912);
+    linear-gradient(135deg, rgba(12, 34, 22, .18), rgba(8, 24, 16, .66)),
+    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .24), transparent 36%),
+    radial-gradient(circle at 18% 86%, rgba(60,179,113,.22), transparent 38%),
+    linear-gradient(135deg, #2a4735, #102119);
 }
 
 .asset-frame--portrait.photo-frame {
@@ -74,8 +80,8 @@ const imageExists = publicAssetExists(src);
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(180deg, transparent 42%, rgba(3, 13, 9, .58) 100%),
-    radial-gradient(circle at 80% 18%, rgba(255, 196, 121, .16), transparent 34%);
+    linear-gradient(180deg, rgba(3, 12, 8, .04) 0%, transparent 42%, rgba(3, 13, 9, .58) 100%),
+    radial-gradient(circle at 80% 18%, rgba(255, 196, 121, .14), transparent 34%);
 }
 
 .asset-frame:hover img {
@@ -104,28 +110,89 @@ const imageExists = publicAssetExists(src);
 
 .asset-frame__fallback-content {
   display: grid;
-  gap: 16px;
+  gap: 8px;
 }
 
-.asset-frame__icon {
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
+.asset-frame__fallback-kicker {
+  width: fit-content;
+  padding: 6px 10px;
+  border: 1px solid rgba(143,224,180,.22);
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.18);
-  background: rgba(255,255,255,.08);
-  backdrop-filter: blur(12px);
+  color: #d9ffe9;
+  background: rgba(60,179,113,.12);
+  font-size: .68rem !important;
+  letter-spacing: .14em !important;
 }
 
-.asset-frame__icon svg {
-  width: 22px;
-  height: 22px;
-  fill: none;
-  stroke: #8fe0b4;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.asset-frame__fallback-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 76% 20%, rgba(242,192,120,.24), transparent 20%),
+    radial-gradient(circle at 26% 14%, rgba(143,224,180,.14), transparent 24%),
+    linear-gradient(160deg, rgba(14,47,31,.74), rgba(8,24,16,.92));
+}
+
+.asset-frame__fallback-scene::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .18;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(255,255,255,.38) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at 78% 42%, rgba(255,255,255,.28) 0 1px, transparent 1px 6px);
+  background-size: 7px 7px, 11px 11px;
+  mix-blend-mode: screen;
+}
+
+.asset-frame__sun {
+  position: absolute;
+  right: 16%;
+  top: 18%;
+  width: clamp(74px, 12vw, 140px);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,236,185,.92), rgba(242,192,120,.46) 44%, transparent 68%);
+  filter: blur(.4px);
+  opacity: .72;
+}
+
+.asset-frame__hill {
+  position: absolute;
+  left: -12%;
+  right: -12%;
+  bottom: -18%;
+  height: 52%;
+  border-radius: 52% 52% 0 0;
+  background: linear-gradient(180deg, rgba(60,179,113,.30), rgba(7,23,15,.92));
+  filter: blur(.2px);
+}
+
+.asset-frame__hill--back {
+  bottom: -8%;
+  height: 48%;
+  opacity: .56;
+  transform: translateX(18%);
+}
+
+.asset-frame__hill--front {
+  height: 42%;
+  background: linear-gradient(180deg, rgba(44,124,80,.66), rgba(5,19,12,.98));
+}
+
+.asset-frame__tent {
+  position: absolute;
+  left: 14%;
+  bottom: 25%;
+  width: clamp(86px, 17vw, 160px);
+  height: clamp(58px, 10vw, 104px);
+  border-radius: 10px 10px 4px 4px;
+  background:
+    linear-gradient(116deg, transparent 0 49%, rgba(255,255,255,.16) 50% 52%, transparent 53% 100%),
+    linear-gradient(135deg, rgba(242,192,120,.62), rgba(60,179,113,.58));
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  box-shadow: 0 18px 46px rgba(0,0,0,.22);
 }
 
 .asset-frame--fallback.photo-frame {

@@ -6,6 +6,12 @@ import Icon from '@/components/ui/Icon.astro';
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
 const chatTexts = t.chat;
+const quickActions = [
+  { key: 'pricing', icon: 'pricing', label: chatTexts.actions.pricing },
+  { key: 'directions', icon: 'tram', label: chatTexts.actions.directions },
+  { key: 'bungalow', icon: 'bungalow', label: chatTexts.actions.bungalow },
+  { key: 'reception', icon: 'phone', label: chatTexts.actions.reception },
+];
 ---
 
 <div class="floating-chat" data-floating-chat>
@@ -33,7 +39,10 @@ const chatTexts = t.chat;
     hidden
   >
     <header class="floating-chat__header">
-      <div>
+      <span class="floating-chat__avatar" aria-hidden="true">
+        <Icon name="sparkle" size={22} strokeWidth={1.9} />
+      </span>
+      <div class="floating-chat__identity">
         <span>{chatTexts.title}</span>
         <strong><i aria-hidden="true"></i> {chatTexts.status}</strong>
       </div>
@@ -52,10 +61,12 @@ const chatTexts = t.chat;
     </div>
 
     <div class="floating-chat__quick" aria-label={chatTexts.quickLabel}>
-      <button type="button" data-chat-prompt={chatTexts.actions.pricing}>{chatTexts.actions.pricing}</button>
-      <button type="button" data-chat-prompt={chatTexts.actions.directions}>{chatTexts.actions.directions}</button>
-      <button type="button" data-chat-prompt={chatTexts.actions.bungalow}>{chatTexts.actions.bungalow}</button>
-      <button type="button" data-chat-prompt={chatTexts.actions.reception}>{chatTexts.actions.reception}</button>
+      {quickActions.map((action) => (
+        <button type="button" data-chat-prompt={action.label}>
+          <Icon name={action.icon} size={16} strokeWidth={1.9} />
+          <span>{action.label}</span>
+        </button>
+      ))}
     </div>
 
     <form class="floating-chat__form" data-chat-form>
@@ -125,6 +136,16 @@ const chatTexts = t.chat;
       bubble.textContent = text;
       messages.appendChild(bubble);
       messages.scrollTop = messages.scrollHeight;
+      return bubble;
+    };
+
+    const appendTyping = () => {
+      const bubble = document.createElement('div');
+      bubble.className = 'floating-chat__message floating-chat__message--bot floating-chat__message--typing';
+      bubble.innerHTML = '<span></span><span></span><span></span>';
+      messages.appendChild(bubble);
+      messages.scrollTop = messages.scrollHeight;
+      return bubble;
     };
 
     const resolveAnswer = (rawPrompt) => {
@@ -163,7 +184,11 @@ const chatTexts = t.chat;
       if (!cleanPrompt) return;
 
       appendMessage(cleanPrompt, 'user');
-      window.setTimeout(() => appendMessage(resolveAnswer(cleanPrompt), 'bot'), 180);
+      const typing = appendTyping();
+      window.setTimeout(() => {
+        typing.remove();
+        appendMessage(resolveAnswer(cleanPrompt), 'bot');
+      }, 420);
 
       if (input instanceof HTMLInputElement) {
         input.value = '';
@@ -325,9 +350,9 @@ body.has-floating-chat-open {
   border-radius: 28px;
   color: #fff;
   background:
-    radial-gradient(circle at 18% 0%, rgba(60,179,113,.20), transparent 34%),
-    radial-gradient(circle at 88% 100%, rgba(242,192,120,.12), transparent 38%),
-    linear-gradient(145deg, rgba(8,24,17,.96), rgba(15,40,28,.94));
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.17), transparent 36%),
+    radial-gradient(circle at 88% 100%, rgba(242,192,120,.10), transparent 40%),
+    linear-gradient(145deg, rgba(8,21,16,.96), rgba(18,42,29,.92));
   box-shadow:
     0 30px 92px rgba(0,0,0,.28),
     0 0 34px rgba(60,179,113,.14),
@@ -349,15 +374,37 @@ body.has-floating-chat-open {
 }
 
 .floating-chat__header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 48px 1fr 40px;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 18px 18px 14px;
+  gap: 12px;
+  padding: 18px 18px 15px;
   border-bottom: 1px solid rgba(255,255,255,.10);
 }
 
-.floating-chat__header span {
+.floating-chat__avatar {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  color: #092016;
+  background:
+    radial-gradient(circle at 28% 20%, rgba(255,255,255,.82), transparent 30%),
+    linear-gradient(135deg, #f2c078, #8fe0b4 48%, #3CB371);
+  box-shadow: 0 16px 34px rgba(60,179,113,.22), inset 0 1px 0 rgba(255,255,255,.38);
+}
+
+.floating-chat__avatar svg {
+  width: 22px;
+  height: 22px;
+}
+
+.floating-chat__identity {
+  min-width: 0;
+}
+
+.floating-chat__identity > span {
   display: block;
   color: #fff;
   font-size: 1rem;
@@ -365,7 +412,7 @@ body.has-floating-chat-open {
   letter-spacing: -.01em;
 }
 
-.floating-chat__header strong {
+.floating-chat__identity strong {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -394,6 +441,13 @@ body.has-floating-chat-open {
   border-radius: 14px;
   color: #fff;
   background: rgba(255,255,255,.08);
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+
+.floating-chat__header button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(143,224,180,.34);
+  background: rgba(255,255,255,.12);
 }
 
 .floating-chat__header svg,
@@ -418,16 +472,19 @@ body.has-floating-chat-open {
 
 .floating-chat__message {
   max-width: 88%;
-  padding: 11px 13px;
-  border-radius: 18px;
+  padding: 12px 14px;
+  border-radius: 20px;
   font-size: .92rem;
   line-height: 1.55;
+  box-shadow: 0 12px 28px rgba(0,0,0,.08);
 }
 
 .floating-chat__message--bot {
   justify-self: start;
   color: rgba(255,255,255,.86);
-  background: rgba(255,255,255,.085);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.10), rgba(255,255,255,.065)),
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.10), transparent 36%);
   border: 1px solid rgba(255,255,255,.10);
 }
 
@@ -448,6 +505,26 @@ body.has-floating-chat-open {
   line-height: 1.5;
 }
 
+.floating-chat__message--typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  min-width: 62px;
+}
+
+.floating-chat__message--typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #8fe0b4;
+  opacity: .42;
+  animation: chatTyping 1s ease-in-out infinite;
+}
+
+.floating-chat__message--typing span:nth-child(2) { animation-delay: .14s; }
+.floating-chat__message--typing span:nth-child(3) { animation-delay: .28s; }
+
 .floating-chat__quick {
   display: flex;
   gap: 8px;
@@ -457,8 +534,11 @@ body.has-floating-chat-open {
 
 .floating-chat__quick button {
   flex: 0 0 auto;
-  min-height: 36px;
-  padding: 0 12px;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 13px;
   border: 1px solid rgba(143,224,180,.22);
   border-radius: 999px;
   color: #d9ffe9;
@@ -466,11 +546,23 @@ body.has-floating-chat-open {
   font-size: .78rem;
   font-weight: 850;
   white-space: nowrap;
+  transition: transform .2s ease, background .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.floating-chat__quick svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .floating-chat__quick button:hover {
   border-color: rgba(143,224,180,.46);
   background: rgba(60,179,113,.20);
+  transform: translateY(-1px);
 }
 
 .floating-chat__form {
@@ -522,8 +614,9 @@ html[data-theme="light"] .floating-chat__panel {
   color: #102018;
   border-color: rgba(25,54,38,.12);
   background:
-    radial-gradient(circle at 18% 0%, rgba(60,179,113,.18), transparent 34%),
-    linear-gradient(145deg, rgba(247,246,238,.98), rgba(236,244,233,.95));
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.16), transparent 34%),
+    radial-gradient(circle at 88% 100%, rgba(242,192,120,.14), transparent 38%),
+    linear-gradient(145deg, rgba(247,248,241,.98), rgba(236,244,233,.95));
   box-shadow: 0 34px 90px rgba(42,62,45,.22), 0 0 34px rgba(60,179,113,.12), inset 0 1px 0 rgba(255,255,255,.78);
 }
 
@@ -532,7 +625,7 @@ html[data-theme="light"] .floating-chat__form {
   border-color: rgba(25,54,38,.10);
 }
 
-html[data-theme="light"] .floating-chat__header span,
+html[data-theme="light"] .floating-chat__identity > span,
 html[data-theme="light"] .floating-chat__header button {
   color: #102018;
 }
@@ -563,6 +656,11 @@ html[data-theme="light"] .floating-chat__quick button {
 @keyframes chatPulse {
   0%, 100% { box-shadow: 0 24px 70px rgba(60,179,113,.42), 0 0 0 8px rgba(60,179,113,.08), inset 0 1px 0 rgba(255,255,255,.30); }
   50% { box-shadow: 0 28px 82px rgba(60,179,113,.54), 0 0 0 12px rgba(60,179,113,.04), inset 0 1px 0 rgba(255,255,255,.34); }
+}
+
+@keyframes chatTyping {
+  0%, 100% { transform: translateY(0); opacity: .34; }
+  50% { transform: translateY(-4px); opacity: .92; }
 }
 
 @media (max-width: 640px) {
