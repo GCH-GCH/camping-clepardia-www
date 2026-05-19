@@ -51,7 +51,7 @@ const t = getTranslations(pathContext.languageCode);
     };
 
     const scrollToTop = () => {
-      const motionWindow = window as Window & { __ccScrollToTop?: () => void };
+      const motionWindow = window;
 
       if (typeof motionWindow.__ccScrollToTop === 'function') {
         motionWindow.__ccScrollToTop();
@@ -81,7 +81,7 @@ const t = getTranslations(pathContext.languageCode);
   position: fixed;
   right: max(24px, env(safe-area-inset-right));
   bottom: max(24px, env(safe-area-inset-bottom));
-  z-index: 900;
+  z-index: 1240;
   width: 58px;
   height: 58px;
   display: grid;

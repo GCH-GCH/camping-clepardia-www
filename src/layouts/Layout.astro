@@ -108,7 +108,7 @@ const campgroundJsonLd = getCampgroundJsonLd({
 					const nextTheme = isTheme(theme) ? theme : 'dark';
 					root.dataset.theme = nextTheme;
 					root.style.colorScheme = nextTheme;
-					if (themeColor) themeColor.setAttribute('content', nextTheme === 'dark' ? '#07120d' : '#f4f2ea');
+					if (themeColor) themeColor.setAttribute('content', nextTheme === 'dark' ? '#091A13' : '#F7F8F3');
 					if (persist) {
 						try {
 							window.localStorage.setItem(storageKey, nextTheme);

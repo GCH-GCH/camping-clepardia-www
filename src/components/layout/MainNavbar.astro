@@ -112,6 +112,7 @@ const navMessages = {
       class="main-navbar__hamburger"
       id="mainNavbarToggle"
       type="button"
+      data-mobile-toggle
       aria-label={t.nav.openMenu}
       aria-expanded="false"
       aria-controls="mainNavbarMobile"
@@ -194,7 +195,7 @@ const navMessages = {
 
     let mobileOpen = false;
     let langOpen = false;
-    const themeWindow = window as Window & { __ccSetTheme?: (theme: 'dark' | 'light', persist?: boolean) => void };
+    const themeWindow = window;
 
     const setLangOpen = (open) => {
       langOpen = open;
@@ -206,6 +207,7 @@ const navMessages = {
       mobileOpen = open;
       mobile?.classList.toggle('is-open', open);
       toggle?.classList.toggle('is-open', open);
+      shell?.classList.toggle('has-mobile-open', open);
       mobile?.setAttribute('aria-hidden', String(!open));
       toggle?.setAttribute('aria-expanded', String(open));
       toggle?.setAttribute('aria-label', open ? navMessages.closeMenu : navMessages.openMenu);
@@ -231,6 +233,7 @@ const navMessages = {
         if (!(button instanceof HTMLButtonElement)) return;
         button.setAttribute('aria-pressed', String(activeTheme === 'light'));
         button.setAttribute('aria-label', nextTheme === 'light' ? navMessages.enableLight : navMessages.enableDark);
+        button.dataset.currentTheme = activeTheme;
         const label = button.querySelector('[data-theme-label]');
         if (label) label.textContent = nextTheme === 'light' ? navMessages.lightMode : navMessages.darkMode;
       });
@@ -314,6 +317,10 @@ body.has-main-navbar-open {
   pointer-events: none;
 }
 
+.main-navbar-shell.has-mobile-open {
+  z-index: 1200;
+}
+
 .main-navbar {
   position: relative;
   z-index: 2;
@@ -327,8 +334,8 @@ body.has-main-navbar-open {
   gap: 18px;
   border: 1px solid rgba(255,255,255,.10);
   border-radius: 999px;
-  background: rgba(5, 18, 12, .72);
-  box-shadow: 0 20px 60px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.10);
+  background: rgba(7, 23, 16, .76);
+  box-shadow: 0 18px 54px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.11);
   backdrop-filter: blur(22px) saturate(140%);
   -webkit-backdrop-filter: blur(22px) saturate(140%);
   pointer-events: auto;
@@ -338,9 +345,9 @@ body.has-main-navbar-open {
 .main-navbar-shell.is-scrolled .main-navbar {
   height: 64px;
   margin-top: 10px;
-  background: rgba(5, 18, 12, .86);
+  background: rgba(8, 27, 18, .88);
   border-color: rgba(255,255,255,.14);
-  box-shadow: 0 18px 52px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.11);
+  box-shadow: 0 16px 46px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.12);
 }
 
 .main-navbar__brand,
@@ -473,8 +480,8 @@ body.has-main-navbar-open {
   padding: 10px;
   border: 1px solid rgba(255,255,255,.14);
   border-radius: 24px;
-  background: rgba(6, 18, 12, .94);
-  box-shadow: 0 28px 80px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.10);
+  background: rgba(9, 28, 19, .94);
+  box-shadow: 0 24px 70px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.11);
   backdrop-filter: blur(24px) saturate(140%);
   -webkit-backdrop-filter: blur(24px) saturate(140%);
   opacity: 0;
@@ -674,14 +681,14 @@ html[data-theme="light"] .main-navbar-theme__icon--moon {
 .main-navbar-mobile {
   position: fixed;
   inset: 0;
-  z-index: 1;
+  z-index: 1200;
   pointer-events: auto;
   opacity: 0;
   visibility: hidden;
   background:
-    radial-gradient(circle at 14% 12%, rgba(60,179,113,.22), transparent 34%),
-    radial-gradient(circle at 82% 78%, rgba(239,174,99,.14), transparent 38%),
-    rgba(3, 12, 8, .82);
+    radial-gradient(circle at 14% 12%, rgba(60,179,113,.20), transparent 34%),
+    radial-gradient(circle at 82% 78%, rgba(242,192,120,.16), transparent 38%),
+    rgba(7, 20, 15, .86);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   transition: opacity .28s ease, visibility .28s ease;

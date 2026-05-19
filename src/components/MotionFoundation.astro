@@ -33,13 +33,10 @@ import { loaderLogo, logoMainPng } from '@/data/assets';
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const loaderStatus = document.getElementById('pageLoaderStatus');
   const loaderMessages = ['Ładujemy Camping Clepardia', 'Przygotowujemy zieloną bazę', 'Otwieramy bramę campingu'];
-  let lenis: Lenis | undefined;
+  let lenis;
   let rafId = 0;
   let loaderMessageIndex = 0;
-  const motionWindow = window as Window & {
-    __ccMotionFinishLoading?: () => void;
-    __ccScrollToTop?: () => void;
-  };
+  const motionWindow = window;
 
   const loaderMessageTimer = window.setInterval(() => {
     if (!loaderStatus || reduceMotion.matches) return;
@@ -86,7 +83,7 @@ import { loaderLogo, logoMainPng } from '@/data/assets';
     nodes.forEach((node) => observer.observe(node));
   };
 
-  const animate = (time: number) => {
+  const animate = (time) => {
     if (!lenis) return;
     lenis.raf(time);
     rafId = requestAnimationFrame(animate);
@@ -96,7 +93,7 @@ import { loaderLogo, logoMainPng } from '@/data/assets';
     if (lenis || reduceMotion.matches || window.innerWidth < 768) return;
     lenis = new Lenis({
       duration: 1.08,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
       wheelMultiplier: 0.85,
       touchMultiplier: 1,
@@ -130,7 +127,8 @@ import { loaderLogo, logoMainPng } from '@/data/assets';
   };
 
   document.addEventListener('click', (event) => {
-    const anchor = (event.target as Element | null)?.closest?.('a[href^="#"]') as HTMLAnchorElement | null;
+    const targetElement = event.target instanceof Element ? event.target : null;
+    const anchor = targetElement?.closest?.('a[href^="#"]');
     if (!anchor) return;
 
     const href = anchor.getAttribute('href');
@@ -168,17 +166,17 @@ import { loaderLogo, logoMainPng } from '@/data/assets';
 .page-loader {
   position: fixed;
   inset: 0;
-  z-index: 3000;
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 24px;
   background:
-    radial-gradient(circle at 50% 42%, rgba(60, 179, 113, .22), transparent 22%),
-    radial-gradient(circle at 72% 30%, rgba(231, 157, 84, .18), transparent 34%),
-    radial-gradient(circle at 22% 64%, rgba(60, 179, 113, .18), transparent 34%),
-    linear-gradient(135deg, #030705 0%, #0b1711 46%, #050806 100%);
+    radial-gradient(circle at 50% 42%, rgba(60, 179, 113, .18), transparent 24%),
+    radial-gradient(circle at 72% 30%, rgba(242, 192, 120, .18), transparent 34%),
+    radial-gradient(circle at 22% 64%, rgba(60, 179, 113, .14), transparent 34%),
+    linear-gradient(135deg, #07140f 0%, #0b2016 48%, #091a13 100%);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -213,7 +211,7 @@ import { loaderLogo, logoMainPng } from '@/data/assets';
   position: absolute;
   inset: 35px;
   border-radius: 999px;
-  background: rgba(60, 179, 113, .22);
+  background: rgba(60, 179, 113, .18);
   filter: blur(34px);
   animation: loaderGlow 1.8s ease-in-out infinite;
 }
@@ -247,7 +245,7 @@ import { loaderLogo, logoMainPng } from '@/data/assets';
   height: 120px;
   object-fit: contain;
   image-rendering: auto;
-  filter: drop-shadow(0 26px 56px rgba(60,179,113,.30)) drop-shadow(0 4px 22px rgba(0,0,0,.34));
+  filter: drop-shadow(0 22px 48px rgba(60,179,113,.26)) drop-shadow(0 4px 18px rgba(242,192,120,.12));
   animation: loaderBreath 2.2s ease-in-out infinite;
 }
 
