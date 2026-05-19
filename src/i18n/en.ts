@@ -635,6 +635,7 @@ export const en = {
     title: 'Send the details of your planned stay',
     lead:
       'The more information you provide right away, the faster reception can confirm date availability and the best stay option.',
+    honeypotLabel: 'Website',
     data: 'Details',
     fullName: 'Full name',
     email: 'Email',

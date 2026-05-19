@@ -206,6 +206,7 @@ export const pl = {
     title: 'Wyślij szczegóły planowanego pobytu',
     lead:
       'Im więcej informacji podasz od razu, tym szybciej recepcja może potwierdzić dostępność terminu i najlepszą opcję pobytu.',
+    honeypotLabel: 'Strona internetowa',
     data: 'Dane',
     fullName: 'Imię i nazwisko',
     email: 'Email',

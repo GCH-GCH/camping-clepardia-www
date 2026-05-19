@@ -217,6 +217,7 @@ export const de = {
     title: 'Senden Sie Details Ihres geplanten Aufenthalts',
     lead:
       'Je mehr Informationen Sie direkt angeben, desto schneller kann die Rezeption Verfügbarkeit und passende Option bestätigen.',
+    honeypotLabel: 'Website',
     data: 'Daten',
     fullName: 'Vor- und Nachname',
     email: 'E-Mail',

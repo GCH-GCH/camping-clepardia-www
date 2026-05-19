@@ -217,6 +217,7 @@ export const it = {
     title: 'Invia i dettagli del soggiorno previsto',
     lead:
       'Più informazioni fornisci subito, più rapidamente la reception potrà confermare disponibilità e opzione migliore.',
+    honeypotLabel: 'Sito web',
     data: 'Dati',
     fullName: 'Nome e cognome',
     email: 'Email',

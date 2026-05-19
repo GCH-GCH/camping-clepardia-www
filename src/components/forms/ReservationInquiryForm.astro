@@ -46,7 +46,7 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
     <div class="reservation-inquiry__layout">
       <form class="premium-card reservation-inquiry__form" data-reservation-form novalidate>
         <label class="reservation-inquiry__honeypot" aria-hidden="true" tabindex="-1">
-          <span>Website</span>
+          <span>{formText.honeypotLabel}</span>
           <input name="website" type="text" autocomplete="off" tabindex="-1" data-honeypot>
         </label>
 
