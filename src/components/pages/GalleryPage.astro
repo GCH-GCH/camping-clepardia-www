@@ -204,6 +204,13 @@ const categories: Array<{ id: 'all' | GalleryCategory; label: string }> = [
 ];
 
 const categoryLabels = Object.fromEntries(categories.map((category) => [category.id, category.label])) as Record<string, string>;
+const categoryIcons: Record<GalleryCategory, string> = {
+  camping: 'tent',
+  bungalows: 'bungalow',
+  sanitary: 'sanitary',
+  transport: 'tram',
+  krakow: 'attractions',
+};
 
 const galleryItems: GalleryItem[] = [
   {
@@ -331,6 +338,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   ...item,
   imageExists: publicAssetExists(item.image),
   categoryLabel: categoryLabels[item.category],
+  fallbackIcon: categoryIcons[item.category],
 }));
 ---
 
@@ -380,6 +388,9 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
               <span class="gallery-card__mood-light"></span>
               <span class="gallery-card__mood-shape gallery-card__mood-shape--back"></span>
               <span class="gallery-card__mood-shape gallery-card__mood-shape--front"></span>
+              <span class="gallery-card__mood-icon">
+                <Icon name={item.fallbackIcon} size={34} strokeWidth={1.75} />
+              </span>
             </span>
           )}
           <span class="gallery-card__shade" aria-hidden="true"></span>
@@ -738,6 +749,33 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 .gallery-card__mood-shape--front {
   height: 40%;
   background: linear-gradient(180deg, rgba(48,135,86,.66), rgba(5,18,11,.98));
+}
+
+.gallery-card__mood-icon {
+  position: absolute;
+  right: 24px;
+  top: 24px;
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  color: #f5fff8;
+  border: 1px solid rgba(143,224,180,.24);
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255,255,255,.28), transparent 34%),
+    rgba(60,179,113,.18);
+  box-shadow: 0 20px 50px rgba(60,179,113,.18), inset 0 1px 0 rgba(255,255,255,.16);
+}
+
+.gallery-card__mood-icon svg {
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .gallery-card__shade {

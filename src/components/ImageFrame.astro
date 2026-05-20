@@ -1,5 +1,6 @@
 ---
 import { publicAssetExists } from '@/data/assets';
+import Icon from '@/components/ui/Icon.astro';
 
 interface Props {
   src: string;
@@ -11,6 +12,18 @@ interface Props {
 
 const { src, alt, label, className = '', portrait = false } = Astro.props as Props;
 const imageExists = publicAssetExists(src);
+const fallbackScope = `${src} ${label} ${alt}`.toLowerCase();
+const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('transport')
+  ? 'tram'
+  : fallbackScope.includes('bungalow') || fallbackScope.includes('domek')
+    ? 'bungalow'
+    : fallbackScope.includes('electric') || fallbackScope.includes('prąd') || fallbackScope.includes('prad')
+      ? 'electricity'
+      : fallbackScope.includes('camper') || fallbackScope.includes('kamper') || fallbackScope.includes('van')
+        ? 'camper'
+        : fallbackScope.includes('attraction') || fallbackScope.includes('krak') || fallbackScope.includes('wieliczka')
+          ? 'attractions'
+          : 'tent';
 ---
 
 <figure
@@ -35,6 +48,9 @@ const imageExists = publicAssetExists(src);
         <span class="asset-frame__hill asset-frame__hill--front"></span>
         <span class="asset-frame__tent"></span>
       </div>
+      <span class="asset-frame__fallback-icon" aria-hidden="true">
+        <Icon name={fallbackIcon} size={28} strokeWidth={1.75} />
+      </span>
       <div class="asset-frame__fallback-content">
         <span class="asset-frame__fallback-kicker">Camping Clepardia</span>
         <span>{label}</span>
@@ -111,6 +127,34 @@ const imageExists = publicAssetExists(src);
 .asset-frame__fallback-content {
   display: grid;
   gap: 8px;
+}
+
+.asset-frame__fallback-icon {
+  position: absolute;
+  right: 22px;
+  top: 22px;
+  z-index: 2;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  color: #f5fff8;
+  border: 1px solid rgba(143,224,180,.24);
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255,255,255,.28), transparent 34%),
+    rgba(60,179,113,.18);
+  box-shadow: 0 18px 42px rgba(60,179,113,.16), inset 0 1px 0 rgba(255,255,255,.16);
+}
+
+.asset-frame__fallback-icon svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .asset-frame__fallback-kicker {

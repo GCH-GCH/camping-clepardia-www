@@ -79,7 +79,7 @@ const icons = ['shield', 'check', 'family', 'clock'] as const;
 }
 
 .trust__grid {
-  margin-top: clamp(46px, 5vw, 58px);
+  margin-top: clamp(34px, 4.4vw, 52px);
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
@@ -91,6 +91,7 @@ const icons = ['shield', 'check', 'family', 'clock'] as const;
   align-content: end;
   padding: 26px;
   overflow: hidden;
+  isolation: isolate;
 }
 
 .trust__card::after {

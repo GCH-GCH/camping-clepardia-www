@@ -73,14 +73,14 @@ export const pl = {
     camperCost: 'Oblicz koszt pobytu',
   },
   chat: {
-    open: 'Otwórz Clepardia Concierge',
+    open: 'Otwórz pomocnika Clepek',
     close: 'Zamknij chat',
-    title: 'Clepardia Concierge',
-    status: 'Pomoc informacyjna',
+    title: 'Clepek — pomocnik Camping Clepardia',
+    status: 'Gotowy do pomocy',
     intro:
-      'Cześć. Jestem Clepardia Concierge. Pomogę Ci szybko znaleźć informacje o campingu, domkach, tramwaju do centrum i pobycie w Krakowie.',
+      'Cześć! Jestem Clepek, mały pomocnik Camping Clepardia. Mogę szybko podpowiedzieć Ci coś o cenniku, domkach, dojeździe tramwajem do centrum albo kontakcie z recepcją.',
     notice:
-      'To pomoc informacyjna w wersji testowej. W sprawie rezerwacji, dostępności i finalnej ceny skontaktuj się z recepcją.',
+      'Odpowiedzi są informacyjne. Rezerwacje potwierdza recepcja.',
     quickLabel: 'Szybkie tematy',
     inputLabel: 'Napisz wiadomość',
     inputPlaceholder: 'Napisz wiadomość...',
@@ -103,7 +103,7 @@ export const pl = {
       camping:
         'Camping Clepardia przyjmuje kampery, vany, przyczepy, namioty i auta z namiotem dachowym. W czerwcu, lipcu i sierpniu dostępność pola może być ograniczona.',
       fallback:
-        'To jest testowy asystent informacyjny. W sprawie rezerwacji, dostępności i finalnych cen skontaktuj się z recepcją Camping Clepardia.',
+        'Najpewniej pomoże recepcja Camping Clepardia: +48 795 294 486 lub clepardia@gmail.com. Clepek podpowiada najważniejsze informacje, a rezerwacje potwierdza recepcja.',
     },
   },
   content: {
@@ -296,7 +296,7 @@ export const pl = {
         'Zielona baza dla kamperów, przyczep, namiotów i komfortowych domków. Odpoczywaj spokojnie i dojedź tramwajem do Starego Miasta.',
       primary: 'Sprawdź dostępność',
       secondary: 'Zobacz cennik',
-      badges: ['Blisko centrum Krakowa', 'Camping + domki', 'Tramwaj do centrum', 'Mister Camping 2024'],
+      badges: ['Blisko centrum Krakowa', 'Camping + domki', 'Tramwaj do centrum', 'Mister Camping 2024 i 2025'],
       benefits: ['Blisko centrum', 'Tramwaj do Starego Miasta', 'Kampery, namioty i domki'],
       scroll: 'Przewiń',
     },
@@ -346,7 +346,7 @@ export const pl = {
       title: 'Miejsce wybierane przez gości, którzy chcą zwiedzać Kraków po swojemu.',
       cards: [
         {
-          title: 'Mister Camping 2024',
+          title: 'Mister Camping 2024 i 2025',
           copy: 'Wyróżnienie budujące zaufanie wśród gości planujących pobyt.',
         },
         {

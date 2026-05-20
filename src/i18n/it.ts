@@ -81,14 +81,14 @@ export const it = {
   },
   chat: {
     ...en.chat,
-    open: 'Apri Clepardia Concierge',
+    open: 'Apri Clepek',
     close: 'Chiudi chat',
-    title: 'Clepardia Concierge',
-    status: 'Aiuto informativo',
+    title: 'Clepek — assistente di Camping Clepardia',
+    status: 'Pronto ad aiutare',
     intro:
-      'Ciao. Sono Clepardia Concierge. Ti aiuto rapidamente con informazioni su camping, bungalow, tram per il centro e soggiorno a Cracovia.',
+      'Ciao! Sono Clepek, il tuo assistente di Camping Clepardia. Posso aiutarti rapidamente con prezzi, bungalow, tram per il centro o contatto con la reception.',
     notice:
-      'Questo è un aiuto informativo in versione test. Per prenotazioni, disponibilità e prezzi finali contatta la reception.',
+      'Le risposte sono informative. Le prenotazioni sono confermate dalla reception.',
     quickLabel: 'Temi rapidi',
     inputLabel: 'Scrivi un messaggio',
     inputPlaceholder: 'Scrivi un messaggio...',
@@ -111,7 +111,7 @@ export const it = {
       camping:
         'Camping Clepardia accoglie camper, van, roulotte, tende e auto con tenda da tetto. A giugno, luglio e agosto la disponibilità può essere limitata.',
       fallback:
-        'Questo è un assistente informativo in versione test. Per prenotazioni, disponibilità e prezzi finali contatta la reception di Camping Clepardia.',
+        'La scelta più sicura è contattare la reception di Camping Clepardia: +48 795 294 486 o clepardia@gmail.com. Clepek offre indicazioni rapide, la reception conferma le prenotazioni.',
     },
   },
   content: {
@@ -527,7 +527,7 @@ export const it = {
         'Una base verde per camper, roulotte, tende e bungalow confortevoli. Riposa con calma e raggiungi la Città Vecchia in tram.',
       primary: 'Verifica disponibilità',
       secondary: 'Guarda i prezzi',
-      badges: ['Vicino al centro di Cracovia', 'Camping + bungalow', 'Tram per il centro', 'Mister Camping 2024'],
+      badges: ['Vicino al centro di Cracovia', 'Camping + bungalow', 'Tram per il centro', 'Mister Camping 2024 e 2025'],
       benefits: ['Vicino al centro', 'Tram per la Città Vecchia', 'Camper, tende e bungalow'],
       scroll: 'Scorri',
     },
@@ -556,7 +556,7 @@ export const it = {
       title: 'Un luogo scelto da chi vuole scoprire Cracovia a modo proprio.',
       cards: [
         {
-          title: 'Mister Camping 2024',
+          title: 'Mister Camping 2024 e 2025',
           copy: 'Un riconoscimento che dà fiducia agli ospiti che stanno pianificando il soggiorno.',
         },
         {

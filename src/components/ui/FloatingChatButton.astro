@@ -40,7 +40,7 @@ const quickActions = [
   >
     <header class="floating-chat__header">
       <span class="floating-chat__avatar" aria-hidden="true">
-        <Icon name="sparkle" size={22} strokeWidth={1.9} />
+        <Icon name="camping" size={23} strokeWidth={1.9} />
       </span>
       <div class="floating-chat__identity">
         <span>{chatTexts.title}</span>
@@ -350,9 +350,9 @@ body.has-floating-chat-open {
   border-radius: 28px;
   color: #fff;
   background:
-    radial-gradient(circle at 18% 0%, rgba(60,179,113,.17), transparent 36%),
-    radial-gradient(circle at 88% 100%, rgba(242,192,120,.10), transparent 40%),
-    linear-gradient(145deg, rgba(8,21,16,.96), rgba(18,42,29,.92));
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.22), transparent 36%),
+    radial-gradient(circle at 88% 100%, rgba(242,192,120,.14), transparent 40%),
+    linear-gradient(145deg, rgba(11,26,20,.97), rgba(25,55,39,.93));
   box-shadow:
     0 30px 92px rgba(0,0,0,.28),
     0 0 34px rgba(60,179,113,.14),
@@ -387,12 +387,12 @@ body.has-floating-chat-open {
   height: 48px;
   display: grid;
   place-items: center;
-  border-radius: 18px;
+  border-radius: 20px;
   color: #092016;
   background:
     radial-gradient(circle at 28% 20%, rgba(255,255,255,.82), transparent 30%),
     linear-gradient(135deg, #f2c078, #8fe0b4 48%, #3CB371);
-  box-shadow: 0 16px 34px rgba(60,179,113,.22), inset 0 1px 0 rgba(255,255,255,.38);
+  box-shadow: 0 16px 36px rgba(60,179,113,.28), 0 0 22px rgba(242,192,120,.14), inset 0 1px 0 rgba(255,255,255,.38);
 }
 
 .floating-chat__avatar svg {
@@ -483,8 +483,8 @@ body.has-floating-chat-open {
   justify-self: start;
   color: rgba(255,255,255,.86);
   background:
-    linear-gradient(145deg, rgba(255,255,255,.10), rgba(255,255,255,.065)),
-    radial-gradient(circle at 12% 0%, rgba(60,179,113,.10), transparent 36%);
+    linear-gradient(145deg, rgba(255,255,255,.125), rgba(255,255,255,.075)),
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.16), transparent 36%);
   border: 1px solid rgba(255,255,255,.10);
 }
 
@@ -498,8 +498,8 @@ body.has-floating-chat-open {
 .floating-chat__notice {
   padding: 11px 13px;
   border-radius: 16px;
-  color: rgba(255,255,255,.76);
-  background: rgba(242,192,120,.10);
+  color: rgba(255,255,255,.82);
+  background: linear-gradient(135deg, rgba(242,192,120,.12), rgba(60,179,113,.08));
   border: 1px solid rgba(242,192,120,.20);
   font-size: .78rem;
   line-height: 1.5;

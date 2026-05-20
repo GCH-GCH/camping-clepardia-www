@@ -34,11 +34,11 @@ const formatStayTypePrice = (id: string) => {
 };
 
 const prices = [
-  { label: t.pricing.adults, price: formatPrice(pricingConfig.people.adults.price), icon: 'family' },
-  { label: t.pricing.children, price: formatPrice(pricingConfig.people.children.price), icon: 'family' },
+  { label: t.pricing.adults, price: formatPrice(pricingConfig.people.adults.price), icon: 'user' },
+  { label: t.pricing.children, price: formatPrice(pricingConfig.people.children.price), icon: 'baby' },
   { label: t.pricing.stayTypes.camper, price: formatStayTypePrice('camper'), icon: 'camper' },
   { label: t.pricing.stayTypes.caravan, price: formatStayTypePrice('caravan'), icon: 'caravan' },
-  { label: t.pricing.stayTypes.van, price: formatStayTypePrice('van'), icon: 'camper' },
+  { label: t.pricing.stayTypes.van, price: formatStayTypePrice('van'), icon: 'busFront' },
   { label: t.pricing.stayTypes['tent-small'], price: formatStayTypePrice('tent-small'), icon: 'tent' },
   { label: t.pricing.stayTypes['tent-large'], price: formatStayTypePrice('tent-large'), icon: 'tent' },
   { label: t.pricing.stayTypes['bungalow-2'], price: formatStayTypePrice('bungalow-2'), icon: 'bungalow' },
@@ -47,7 +47,7 @@ const prices = [
   { label: t.pricing.stayTypes['bungalow-family'], price: formatStayTypePrice('bungalow-family'), icon: 'family' },
   { label: t.pricing.addons.electricity, price: formatPrice(getAddon('electricity').price), icon: 'electricity' },
   { label: t.pricing.addons.dog, price: formatPrice(getAddon('dog').price), icon: 'dog' },
-  { label: t.pricing.addons.bus, price: formatPrice(getAddon('bus').price), icon: 'bus' },
+  { label: t.pricing.addons.bus, price: formatPrice(getAddon('bus').price), icon: 'truck' },
 ];
 
 const fullPricingHref = getLocalizedPath(pathContext.explicitLanguage, 'cennik');
@@ -81,9 +81,9 @@ const fullPricingHref = getLocalizedPath(pathContext.explicitLanguage, 'cennik')
 .pricing__head { display: flex; flex-direction: column; gap: 24px; justify-content: space-between; }
 .pricing__grid { margin-top: 42px; display: grid; grid-template-columns: 1fr; gap: 14px; }
 .pricing__item { padding: 18px; background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: #fff; display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 14px; }
-.pricing__item i { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 18px; color: #fff; border: 1px solid rgba(143,224,180,.24); background: linear-gradient(135deg, rgba(60,179,113,.24), rgba(60,179,113,.11)); box-shadow: 0 14px 34px rgba(60,179,113,.14); transition: transform .22s ease, background .22s ease, box-shadow .22s ease; }
-.pricing__item svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.85; stroke-linecap: round; stroke-linejoin: round; }
-.pricing__item:hover i { transform: translateY(-2px); background: linear-gradient(135deg, #55d293, #3CB371); box-shadow: 0 18px 42px rgba(60,179,113,.24); }
+.pricing__item i { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 20px; color: #f5fff8; border: 1px solid rgba(143,224,180,.30); background: radial-gradient(circle at 30% 18%, rgba(255,255,255,.24), transparent 34%), linear-gradient(135deg, rgba(60,179,113,.34), rgba(60,179,113,.14)); box-shadow: 0 16px 38px rgba(60,179,113,.18), inset 0 1px 0 rgba(255,255,255,.16); transition: transform .22s ease, background .22s ease, box-shadow .22s ease, border-color .22s ease; }
+.pricing__item svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.85; stroke-linecap: round; stroke-linejoin: round; }
+.pricing__item:hover i { transform: translateY(-2px) scale(1.03); border-color: rgba(143,224,180,.54); background: radial-gradient(circle at 30% 18%, rgba(255,255,255,.32), transparent 34%), linear-gradient(135deg, #55d293, #3CB371); box-shadow: 0 20px 48px rgba(60,179,113,.30), 0 0 28px rgba(60,179,113,.18); }
 .pricing__item span { color: rgba(255,255,255,.76); font-weight: 800; }
 .pricing__item strong { font-size: 1.08rem; text-align: right; white-space: nowrap; }
 @media (min-width: 760px) { .pricing__head { flex-direction: row; align-items: end; } .pricing__grid { grid-template-columns: repeat(2, 1fr); } }

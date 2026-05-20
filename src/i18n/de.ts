@@ -81,14 +81,14 @@ export const de = {
   },
   chat: {
     ...en.chat,
-    open: 'Clepardia Concierge öffnen',
+    open: 'Clepek öffnen',
     close: 'Chat schließen',
-    title: 'Clepardia Concierge',
-    status: 'Informationshilfe',
+    title: 'Clepek — Helfer von Camping Clepardia',
+    status: 'Bereit zu helfen',
     intro:
-      'Hallo. Ich bin Clepardia Concierge. Ich helfe schnell mit Informationen zu Camping, Bungalows, Straßenbahn ins Zentrum und Ihrem Aufenthalt in Krakau.',
+      'Hallo! Ich bin Clepek, der Helfer von Camping Clepardia. Ich helfe schnell mit Preisen, Bungalows, der Straßenbahn ins Zentrum und dem Kontakt zur Rezeption.',
     notice:
-      'Dies ist eine Informationshilfe in Testversion. Für Buchungen, Verfügbarkeit und Endpreise kontaktieren Sie bitte die Rezeption.',
+      'Antworten dienen zur Information. Buchungen werden von der Rezeption bestätigt.',
     quickLabel: 'Schnelle Themen',
     inputLabel: 'Nachricht schreiben',
     inputPlaceholder: 'Nachricht schreiben...',
@@ -111,7 +111,7 @@ export const de = {
       camping:
         'Camping Clepardia nimmt Wohnmobile, Vans, Wohnwagen, Zelte und Autos mit Dachzelt auf. Im Juni, Juli und August kann die Verfügbarkeit eingeschränkt sein.',
       fallback:
-        'Dies ist ein Informationsassistent in der Testversion. Für Buchungen, Verfügbarkeit und Endpreise kontaktieren Sie bitte die Rezeption von Camping Clepardia.',
+        'Am sichersten ist der Kontakt mit der Rezeption von Camping Clepardia: +48 795 294 486 oder clepardia@gmail.com. Clepek gibt kurze Hinweise, die Buchung bestätigt die Rezeption.',
     },
   },
   content: {
@@ -527,7 +527,7 @@ export const de = {
         'Eine grüne Basis für Wohnmobile, Wohnwagen, Zelte und komfortable Bungalows. Ruhig wohnen und mit der Straßenbahn in die Altstadt fahren.',
       primary: 'Verfügbarkeit prüfen',
       secondary: 'Preise ansehen',
-      badges: ['Nahe am Zentrum von Krakau', 'Camping + Bungalows', 'Straßenbahn ins Zentrum', 'Mister Camping 2024'],
+      badges: ['Nahe am Zentrum von Krakau', 'Camping + Bungalows', 'Straßenbahn ins Zentrum', 'Mister Camping 2024 & 2025'],
       benefits: ['Nahe am Zentrum', 'Straßenbahn zur Altstadt', 'Wohnmobile, Zelte und Bungalows'],
       scroll: 'Scrollen',
     },
@@ -556,7 +556,7 @@ export const de = {
       title: 'Ein Ort für Gäste, die Krakau auf ihre eigene Art entdecken möchten.',
       cards: [
         {
-          title: 'Mister Camping 2024',
+          title: 'Mister Camping 2024 & 2025',
           copy: 'Eine Auszeichnung, die Vertrauen bei Gästen schafft, die ihren Aufenthalt planen.',
         },
         {

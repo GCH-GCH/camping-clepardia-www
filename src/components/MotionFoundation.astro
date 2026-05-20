@@ -14,6 +14,15 @@ const loaderMessages = t.loader.messages;
     const finishLoading = () => {
       root.classList.add('motion-loaded');
       root.classList.remove('motion-loading');
+      const loader = document.querySelector('.page-loader');
+      if (loader instanceof HTMLElement) {
+        loader.setAttribute('aria-hidden', 'true');
+        loader.setAttribute('inert', '');
+        loader.querySelector('.page-loader__status')?.removeAttribute('aria-live');
+        window.setTimeout(() => {
+          loader.hidden = true;
+        }, 680);
+      }
     };
 
     root.classList.add('motion-ready', 'motion-loading');
@@ -22,7 +31,7 @@ const loaderMessages = t.loader.messages;
   })();
 </script>
 
-<div class="page-loader" aria-hidden="true" data-loader-messages={JSON.stringify(loaderMessages)}>
+<div class="page-loader" hidden inert aria-hidden="true" data-loader-messages={JSON.stringify(loaderMessages)}>
   <div class="page-loader__particles" aria-hidden="true">
     <span></span>
     <span></span>
@@ -38,6 +47,19 @@ const loaderMessages = t.loader.messages;
   <p class="page-loader__status" id="pageLoaderStatus">{loaderMessages[0]}</p>
   <div class="page-loader__line"></div>
 </div>
+
+<script is:inline>
+  (() => {
+    const loader = document.querySelector('.page-loader');
+    const root = document.documentElement;
+    if (!(loader instanceof HTMLElement) || !root.classList.contains('motion-loading')) return;
+
+    loader.hidden = false;
+    loader.removeAttribute('inert');
+    loader.setAttribute('aria-hidden', 'false');
+    loader.querySelector('.page-loader__status')?.setAttribute('aria-live', 'polite');
+  })();
+</script>
 
 <script>
   import Lenis from 'lenis';
@@ -74,6 +96,14 @@ const loaderMessages = t.loader.messages;
     }
     root.classList.add('motion-loaded');
     root.classList.remove('motion-loading');
+    if (loader instanceof HTMLElement) {
+      loader.setAttribute('aria-hidden', 'true');
+      loader.setAttribute('inert', '');
+      loaderStatus?.removeAttribute('aria-live');
+      window.setTimeout(() => {
+        loader.hidden = true;
+      }, 680);
+    }
   };
 
   const revealElements = () => {
@@ -202,6 +232,10 @@ const loaderMessages = t.loader.messages;
   visibility: hidden;
   pointer-events: none;
   transition: opacity .62s ease, visibility .62s ease, transform .62s ease;
+}
+
+.page-loader[hidden] {
+  display: none !important;
 }
 
 .motion-ready.motion-loading body {

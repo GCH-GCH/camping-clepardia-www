@@ -78,14 +78,14 @@ export const en = {
     camperCost: 'Calculate stay cost',
   },
   chat: {
-    open: 'Open Clepardia Concierge',
+    open: 'Open Clepek helper',
     close: 'Close chat',
-    title: 'Clepardia Concierge',
-    status: 'Information helper',
+    title: 'Clepek — Camping Clepardia helper',
+    status: 'Ready to help',
     intro:
-      'Hi. I am Clepardia Concierge. I can quickly help you find information about camping, bungalows, the tram to the centre and your stay in Krakow.',
+      'Hi! I’m Clepek, your Camping Clepardia helper. I can quickly help with prices, bungalows, tram access to the city centre or reception contact.',
     notice:
-      'This is a test information helper. For bookings, availability and final prices, please contact reception.',
+      'Answers are informational. Bookings are confirmed by reception.',
     quickLabel: 'Quick topics',
     inputLabel: 'Write a message',
     inputPlaceholder: 'Write a message...',
@@ -108,7 +108,7 @@ export const en = {
       camping:
         'Camping Clepardia welcomes motorhomes, vans, caravans, tents and cars with rooftop tents. Availability may be limited in June, July and August.',
       fallback:
-        'This is an informational test assistant. For bookings, availability and final prices, please contact Camping Clepardia reception.',
+        'The safest next step is to contact Camping Clepardia reception: +48 795 294 486 or clepardia@gmail.com. Clepek shares key information, and reception confirms bookings.',
     },
   },
   pages: {
@@ -467,7 +467,7 @@ export const en = {
         'A green base for motorhomes, caravans, tents and comfortable bungalows. Stay calmly and reach the Old Town by tram.',
       primary: 'Check availability',
       secondary: 'View prices',
-      badges: ['Close to Krakow centre', 'Camping + bungalows', 'Tram to the centre', 'Mister Camping 2024'],
+      badges: ['Close to Krakow centre', 'Camping + bungalows', 'Tram to the centre', 'Mister Camping 2024 & 2025'],
       benefits: ['Near the centre', 'Tram to the Old Town', 'Motorhomes, tents and bungalows'],
       scroll: 'Scroll',
     },
@@ -517,7 +517,7 @@ export const en = {
       title: 'A place chosen by guests who want to explore Krakow their own way.',
       cards: [
         {
-          title: 'Mister Camping 2024',
+          title: 'Mister Camping 2024 & 2025',
           copy: 'A distinction that builds confidence for guests planning their stay.',
         },
         {
