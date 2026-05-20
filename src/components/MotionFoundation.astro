@@ -1,5 +1,5 @@
 ---
-import { loaderLogo, logoMainPng } from '@/data/assets';
+import { logoMain, logoMainPng } from '@/data/assets';
 import { getTranslations } from '@/i18n/config';
 import { getPathContext } from '@/utils/localizedLinks';
 
@@ -11,23 +11,45 @@ const loaderMessages = t.loader.messages;
 <script is:inline>
   (() => {
     const root = document.documentElement;
+    let didFinish = false;
+
+    const setLoaderProgress = (value) => {
+      const loader = document.querySelector('.page-loader');
+      if (!(loader instanceof HTMLElement)) return;
+      const safeValue = Math.max(0, Math.min(100, Math.round(value)));
+      loader.style.setProperty('--loader-progress', `${safeValue}%`);
+      loader.dataset.loaderProgress = String(safeValue);
+      const progressValue = loader.querySelector('.page-loader__progress-value');
+      if (progressValue instanceof HTMLElement) {
+        progressValue.textContent = `${safeValue}%`;
+      }
+    };
+
     const finishLoading = () => {
+      if (didFinish) return;
+      didFinish = true;
+      setLoaderProgress(100);
       root.classList.add('motion-loaded');
       root.classList.remove('motion-loading');
       const loader = document.querySelector('.page-loader');
       if (loader instanceof HTMLElement) {
+        loader.classList.add('is-hidden');
         loader.setAttribute('aria-hidden', 'true');
         loader.setAttribute('inert', '');
+        loader.removeAttribute('role');
+        loader.removeAttribute('aria-live');
         loader.querySelector('.page-loader__status')?.removeAttribute('aria-live');
         window.setTimeout(() => {
           loader.hidden = true;
-        }, 680);
+        }, 620);
       }
     };
 
     root.classList.add('motion-ready', 'motion-loading');
+    window.__ccMotionSetLoaderProgress = setLoaderProgress;
     window.__ccMotionFinishLoading = finishLoading;
-    window.setTimeout(finishLoading, 1800);
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.setTimeout(finishLoading, reduceMotion ? 400 : 2200);
   })();
 </script>
 
@@ -39,21 +61,50 @@ const loaderMessages = t.loader.messages;
   data-loader-message-0={loaderMessages[0]}
   data-loader-message-1={loaderMessages[1]}
   data-loader-message-2={loaderMessages[2]}
+  data-loader-progress="0"
 >
+  <div class="page-loader__ambient" aria-hidden="true">
+    <span class="page-loader__light page-loader__light--green"></span>
+    <span class="page-loader__light page-loader__light--warm"></span>
+    <span class="page-loader__horizon"></span>
+  </div>
   <div class="page-loader__particles" aria-hidden="true">
+    <span></span>
+    <span></span>
+    <span></span>
     <span></span>
     <span></span>
     <span></span>
     <span></span>
   </div>
   <div class="page-loader__stage">
-    <div class="page-loader__halo"></div>
-    <div class="page-loader__radar"></div>
-    <div class="page-loader__glow"></div>
-    <img class="page-loader__logo" src={loaderLogo} alt="" width="240" height="240" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
+    <span class="page-loader__orbit page-loader__orbit--outer" aria-hidden="true"></span>
+    <span class="page-loader__orbit page-loader__orbit--inner" aria-hidden="true"></span>
+    <span class="page-loader__radar" aria-hidden="true"></span>
+    <span class="page-loader__sweep" aria-hidden="true"></span>
+    <span class="page-loader__glow" aria-hidden="true"></span>
+    <div class="page-loader__core">
+      <span class="page-loader__logo-fallback" aria-hidden="true">CC</span>
+      <img
+        class="page-loader__logo"
+        src={logoMain}
+        alt=""
+        width="260"
+        height="260"
+        decoding="async"
+        onerror={`if (!this.dataset.fallbackApplied) { this.dataset.fallbackApplied = 'true'; this.src = '${logoMainPng}'; } else { this.hidden = true; this.closest('.page-loader__core')?.classList.add('has-fallback'); }`}
+      />
+    </div>
   </div>
-  <p class="page-loader__status" id="pageLoaderStatus"></p>
-  <div class="page-loader__line"></div>
+  <div class="page-loader__copy">
+    <p class="page-loader__status" id="pageLoaderStatus"></p>
+    <div class="page-loader__progress" aria-hidden="true">
+      <span class="page-loader__progress-track">
+        <span class="page-loader__progress-bar" id="pageLoaderProgressBar"></span>
+      </span>
+      <span class="page-loader__progress-value" id="pageLoaderProgressValue"></span>
+    </div>
+  </div>
 </div>
 
 <noscript><style>.page-loader{display:none!important}</style></noscript>
@@ -65,12 +116,19 @@ const loaderMessages = t.loader.messages;
     if (!(loader instanceof HTMLElement) || !root.classList.contains('motion-loading')) return;
 
     loader.hidden = false;
+    loader.classList.remove('is-hidden');
     loader.removeAttribute('inert');
     loader.setAttribute('aria-hidden', 'false');
+    loader.setAttribute('role', 'status');
+    loader.setAttribute('aria-live', 'polite');
     const status = loader.querySelector('.page-loader__status');
     if (status instanceof HTMLElement) {
       status.textContent = loader.dataset.loaderMessage0 || '';
       status.setAttribute('aria-live', 'polite');
+    }
+    const progressValue = loader.querySelector('.page-loader__progress-value');
+    if (progressValue instanceof HTMLElement) {
+      progressValue.textContent = '0%';
     }
   })();
 </script>
@@ -82,6 +140,7 @@ const loaderMessages = t.loader.messages;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const loader = document.querySelector('.page-loader');
   const loaderStatus = document.getElementById('pageLoaderStatus');
+  const loaderProgressValue = document.getElementById('pageLoaderProgressValue');
   const loaderMessages = (() => {
     const messages = [
       loader?.dataset.loaderMessage0,
@@ -91,19 +150,67 @@ const loaderMessages = t.loader.messages;
 
     return messages.length ? messages : ['Loading Camping Clepardia'];
   })();
+  if (loaderStatus) {
+    loaderStatus.textContent = loaderMessages[0] || '';
+  }
   let lenis;
   let rafId = 0;
   let loaderMessageIndex = 0;
+  let loaderProgress = 0;
+  let loaderProgressTimer = 0;
+  let loaderLoaded = false;
+  const loaderStartedAt = performance.now();
   const motionWindow = window;
+
+  const setLoaderProgress = (value) => {
+    loaderProgress = Math.max(0, Math.min(100, value));
+    const safeValue = Math.round(loaderProgress);
+    const externalProgress = motionWindow.__ccMotionSetLoaderProgress;
+    if (externalProgress) {
+      externalProgress(safeValue);
+      return;
+    }
+    if (loader instanceof HTMLElement) {
+      loader.style.setProperty('--loader-progress', `${safeValue}%`);
+      loader.dataset.loaderProgress = String(safeValue);
+    }
+    if (loaderProgressValue) {
+      loaderProgressValue.textContent = `${safeValue}%`;
+    }
+  };
+
+  const startLoaderProgress = () => {
+    if (!loader || reduceMotion.matches) {
+      setLoaderProgress(100);
+      return;
+    }
+
+    setLoaderProgress(0);
+    loaderProgressTimer = window.setInterval(() => {
+      const target = loaderLoaded ? 100 : 92;
+      const step = loaderProgress < 38 ? 9 : loaderProgress < 65 ? 5 : loaderProgress < 92 ? 1.8 : 0.9;
+      setLoaderProgress(Math.min(target, loaderProgress + step));
+
+      if (loaderLoaded && loaderProgress >= 100) {
+        window.clearInterval(loaderProgressTimer);
+      }
+    }, 86);
+  };
 
   const loaderMessageTimer = window.setInterval(() => {
     if (!loaderStatus || reduceMotion.matches) return;
     loaderMessageIndex = (loaderMessageIndex + 1) % loaderMessages.length;
-    loaderStatus.textContent = loaderMessages[loaderMessageIndex];
-  }, 520);
+    loaderStatus.classList.add('is-swapping');
+    window.setTimeout(() => {
+      loaderStatus.textContent = loaderMessages[loaderMessageIndex];
+      loaderStatus.classList.remove('is-swapping');
+    }, 130);
+  }, 820);
 
   const finishLoading = () => {
     window.clearInterval(loaderMessageTimer);
+    window.clearInterval(loaderProgressTimer);
+    setLoaderProgress(100);
     const safetyFinish = motionWindow.__ccMotionFinishLoading;
     if (safetyFinish) {
       safetyFinish();
@@ -112,13 +219,24 @@ const loaderMessages = t.loader.messages;
     root.classList.add('motion-loaded');
     root.classList.remove('motion-loading');
     if (loader instanceof HTMLElement) {
+      loader.classList.add('is-hidden');
       loader.setAttribute('aria-hidden', 'true');
       loader.setAttribute('inert', '');
+      loader.removeAttribute('role');
+      loader.removeAttribute('aria-live');
       loaderStatus?.removeAttribute('aria-live');
       window.setTimeout(() => {
         loader.hidden = true;
-      }, 680);
+      }, 620);
     }
+  };
+
+  const completeLoader = () => {
+    loaderLoaded = true;
+    const minimumDuration = reduceMotion.matches ? 160 : 1320;
+    const elapsed = performance.now() - loaderStartedAt;
+    const wait = Math.max(reduceMotion.matches ? 0 : 240, minimumDuration - elapsed);
+    window.setTimeout(finishLoading, wait);
   };
 
   const revealElements = () => {
@@ -216,41 +334,74 @@ const loaderMessages = t.loader.messages;
     history.pushState(null, '', href);
   });
 
+  startLoaderProgress();
   revealElements();
   syncLenis();
   reduceMotion.addEventListener('change', syncLenis);
   window.addEventListener('resize', syncLenis, { passive: true });
 
   if (document.readyState === 'complete') {
-    window.setTimeout(finishLoading, reduceMotion.matches ? 0 : 260);
+    window.setTimeout(completeLoader, reduceMotion.matches ? 0 : 160);
   } else {
-    window.addEventListener('load', () => window.setTimeout(finishLoading, reduceMotion.matches ? 0 : 260), { once: true });
+    window.addEventListener('load', () => window.setTimeout(completeLoader, reduceMotion.matches ? 0 : 160), { once: true });
   }
 </script>
 
 <style is:global>
 .page-loader {
+  --loader-progress: 0%;
   position: fixed;
   inset: 0;
   z-index: 9999;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: 1fr auto auto 1fr;
+  justify-items: center;
   align-items: center;
-  justify-content: center;
-  gap: 24px;
+  min-height: 100dvh;
+  padding: clamp(24px, 4vw, 48px);
+  overflow: hidden;
+  color: #F4FBF6;
   background:
-    radial-gradient(circle at 50% 42%, rgba(60, 179, 113, .20), transparent 24%),
-    radial-gradient(circle at 72% 30%, rgba(242, 192, 120, .16), transparent 36%),
-    radial-gradient(circle at 22% 64%, rgba(60, 179, 113, .12), transparent 36%),
-    linear-gradient(135deg, #081510 0%, #0B1A14 48%, #102117 100%);
+    radial-gradient(circle at 50% 44%, rgba(60, 179, 113, .22), transparent 22%),
+    radial-gradient(circle at 72% 28%, rgba(242, 192, 120, .17), transparent 34%),
+    radial-gradient(circle at 18% 72%, rgba(60, 179, 113, .12), transparent 40%),
+    linear-gradient(135deg, #07140F 0%, #0B1A14 46%, #102117 100%);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity .62s ease, visibility .62s ease, transform .62s ease;
+  transform: scale(1);
+  filter: blur(0);
+  transition:
+    opacity .58s cubic-bezier(.22, 1, .36, 1),
+    visibility .58s cubic-bezier(.22, 1, .36, 1),
+    transform .58s cubic-bezier(.22, 1, .36, 1),
+    filter .58s cubic-bezier(.22, 1, .36, 1);
 }
 
 .page-loader[hidden] {
   display: none !important;
+}
+
+.page-loader::before,
+.page-loader::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.page-loader::before {
+  opacity: .32;
+  background:
+    linear-gradient(115deg, transparent 0 18%, rgba(255,255,255,.035) 18.2% 18.7%, transparent 19% 100%),
+    repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,.04) 0 1px, transparent 1px 6px);
+  mix-blend-mode: screen;
+}
+
+.page-loader::after {
+  background:
+    radial-gradient(ellipse at center, transparent 0 46%, rgba(1, 8, 5, .18) 68%, rgba(1, 8, 5, .44) 100%),
+    linear-gradient(180deg, rgba(7,20,15,.24), transparent 42%, rgba(7,20,15,.54));
 }
 
 .motion-ready.motion-loading body {
@@ -261,52 +412,111 @@ const loaderMessages = t.loader.messages;
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  animation: loaderMaxLife 1.8s ease forwards;
 }
 
-.motion-ready.motion-loaded .page-loader {
+.motion-ready.motion-loaded .page-loader,
+.page-loader.is-hidden {
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-14px) scale(1.015);
-  animation: none;
+  pointer-events: none;
+  transform: scale(1.025);
+  filter: blur(8px);
+}
+
+.page-loader__ambient,
+.page-loader__particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.page-loader__light {
+  position: absolute;
+  display: block;
+  border-radius: 999px;
+  filter: blur(20px);
+  opacity: .82;
+}
+
+.page-loader__light--green {
+  width: min(56vw, 640px);
+  height: min(56vw, 640px);
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(60,179,113,.30), rgba(60,179,113,.08) 42%, transparent 70%);
+  animation: loaderAmbient 4.8s ease-in-out infinite;
+}
+
+.page-loader__light--warm {
+  width: min(38vw, 460px);
+  height: min(38vw, 460px);
+  right: 8%;
+  top: 18%;
+  background: radial-gradient(circle, rgba(242,192,120,.22), rgba(242,192,120,.07) 48%, transparent 70%);
+  animation: loaderAmbient 5.8s ease-in-out infinite reverse;
+}
+
+.page-loader__horizon {
+  position: absolute;
+  left: 50%;
+  bottom: 16%;
+  width: min(720px, 82vw);
+  height: 120px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(242,192,120,.12), rgba(60,179,113,.08) 42%, transparent 70%);
+  filter: blur(18px);
+  opacity: .78;
+  animation: loaderHorizon 4.5s ease-in-out infinite;
 }
 
 .page-loader__stage {
   position: relative;
-  width: 220px;
-  height: 220px;
+  z-index: 2;
+  grid-row: 2;
+  width: clamp(210px, 23vw, 280px);
+  height: clamp(210px, 23vw, 280px);
   display: grid;
   place-items: center;
+  animation: loaderStageIn .72s cubic-bezier(.22, 1, .36, 1) both;
 }
 
-.page-loader__halo {
-  position: absolute;
-  inset: 7px;
-  border-radius: 999px;
-  background:
-    conic-gradient(from 0deg, transparent, rgba(60,179,113,.12), rgba(242,192,120,.44), rgba(60,179,113,.62), transparent 76%);
-  filter: drop-shadow(0 0 24px rgba(60,179,113,.16));
-  animation: loaderSpin 5.5s linear infinite;
-  -webkit-mask: radial-gradient(circle, transparent 60%, #000 61%);
-  mask: radial-gradient(circle, transparent 60%, #000 61%);
-}
-
+.page-loader__orbit,
+.page-loader__radar,
+.page-loader__sweep,
 .page-loader__glow {
   position: absolute;
-  inset: 30px;
   border-radius: 999px;
+  pointer-events: none;
+}
+
+.page-loader__orbit--outer {
+  inset: 0;
+  border: 1px solid rgba(244,251,246,.14);
   background:
-    radial-gradient(circle, rgba(60, 179, 113, .23), rgba(242,192,120,.10) 46%, transparent 70%);
-  filter: blur(30px);
-  animation: loaderGlow 1.8s ease-in-out infinite;
+    conic-gradient(from 0deg, transparent 0 10%, rgba(60,179,113,.62) 18%, rgba(242,192,120,.52) 27%, transparent 38% 100%);
+  box-shadow: 0 0 44px rgba(60,179,113,.14), inset 0 0 42px rgba(60,179,113,.08);
+  -webkit-mask: radial-gradient(circle, transparent 61%, #000 62%);
+  mask: radial-gradient(circle, transparent 61%, #000 62%);
+  animation: loaderOrbit 6.2s linear infinite;
+}
+
+.page-loader__orbit--inner {
+  inset: 24px;
+  border: 1px solid rgba(143,224,180,.18);
+  background:
+    conic-gradient(from 180deg, transparent 0 48%, rgba(143,224,180,.54) 58%, rgba(242,192,120,.36) 66%, transparent 76% 100%);
+  -webkit-mask: radial-gradient(circle, transparent 57%, #000 58%);
+  mask: radial-gradient(circle, transparent 57%, #000 58%);
+  animation: loaderInnerOrbit 8.8s linear infinite;
 }
 
 .page-loader__radar {
-  position: absolute;
-  inset: 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(143, 224, 180, .26);
-  box-shadow: inset 0 0 0 1px rgba(242,192,120,.08), 0 0 38px rgba(60,179,113,.10);
+  inset: 34px;
+  border: 1px solid rgba(143,224,180,.22);
+  box-shadow: inset 0 0 0 1px rgba(242,192,120,.08), 0 0 38px rgba(60,179,113,.12);
 }
 
 .page-loader__radar::before,
@@ -315,60 +525,158 @@ const loaderMessages = t.loader.messages;
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  border: 1px solid rgba(143, 224, 180, .28);
-  animation: loaderRadar 1.9s ease-out infinite;
+  border: 1px solid rgba(143,224,180,.28);
+  animation: loaderRadar 2.15s ease-out infinite;
 }
 
 .page-loader__radar::after {
-  animation-delay: .55s;
+  animation-delay: .7s;
+}
+
+.page-loader__sweep {
+  inset: 16px;
+  background: conic-gradient(from 0deg, rgba(60,179,113,.20), transparent 18%, transparent 100%);
+  opacity: .72;
+  -webkit-mask: radial-gradient(circle, transparent 0 36%, #000 37% 63%, transparent 64%);
+  mask: radial-gradient(circle, transparent 0 36%, #000 37% 63%, transparent 64%);
+  animation: loaderOrbit 3.8s linear infinite;
+}
+
+.page-loader__glow {
+  inset: 46px;
+  background:
+    radial-gradient(circle, rgba(60,179,113,.34), rgba(242,192,120,.13) 48%, transparent 72%);
+  filter: blur(30px);
+  animation: loaderGlow 2.35s ease-in-out infinite;
+}
+
+.page-loader__core {
+  position: relative;
+  z-index: 2;
+  width: clamp(124px, 13vw, 156px);
+  height: clamp(124px, 13vw, 156px);
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(255,255,255,.12), transparent 40%),
+    linear-gradient(145deg, rgba(255,255,255,.10), rgba(255,255,255,.045));
+  border: 1px solid rgba(255,255,255,.16);
+  box-shadow:
+    0 28px 90px rgba(0,0,0,.30),
+    0 0 54px rgba(60,179,113,.24),
+    inset 0 1px 0 rgba(255,255,255,.16);
+  animation: loaderBreath 2.25s ease-in-out infinite;
 }
 
 .page-loader__logo {
   position: relative;
   z-index: 2;
   display: block;
+  max-width: 78%;
   width: auto;
-  height: 120px;
+  height: clamp(96px, 10.6vw, 132px);
   object-fit: contain;
   image-rendering: auto;
-  filter: drop-shadow(0 24px 54px rgba(60,179,113,.30)) drop-shadow(0 6px 20px rgba(242,192,120,.16));
-  animation: loaderBreath 2.2s ease-in-out infinite;
+  filter: drop-shadow(0 22px 44px rgba(60,179,113,.34)) drop-shadow(0 5px 18px rgba(242,192,120,.16));
+}
+
+.page-loader__logo-fallback {
+  position: absolute;
+  z-index: 1;
+  display: none;
+  width: 82px;
+  height: 82px;
+  place-items: center;
+  border-radius: 999px;
+  color: #F4FBF6;
+  font-size: 1.55rem;
+  font-weight: 950;
+  letter-spacing: .04em;
+  background: linear-gradient(135deg, rgba(60,179,113,.95), rgba(47,157,99,.82));
+  box-shadow: 0 0 36px rgba(60,179,113,.34);
+}
+
+.page-loader__core.has-fallback .page-loader__logo-fallback {
+  display: grid;
+}
+
+.page-loader__copy {
+  position: relative;
+  z-index: 2;
+  grid-row: 3;
+  width: min(340px, calc(100vw - 48px));
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+  margin-top: 8px;
 }
 
 .page-loader__status {
-  min-height: 22px;
-  color: rgba(255,255,255,.78);
-  font-size: .78rem;
+  min-height: 24px;
+  max-width: min(420px, calc(100vw - 48px));
+  margin: 0;
+  color: rgba(244,251,246,.82);
+  font-size: .76rem;
   font-weight: 900;
-  letter-spacing: .16em;
+  letter-spacing: .15em;
+  line-height: 1.45;
+  text-align: center;
   text-transform: uppercase;
+  text-wrap: balance;
+  transition: opacity .16s ease, transform .16s ease;
 }
 
-.page-loader__line {
-  width: min(260px, calc(100vw - 84px));
-  height: 2px;
-  border-radius: 99px;
+.page-loader__status.is-swapping {
+  opacity: 0;
+  transform: translateY(5px);
+}
+
+.page-loader__progress {
+  width: min(320px, calc(100vw - 72px));
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-loader__progress-track {
+  position: relative;
+  height: 4px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
   background: rgba(255,255,255,.12);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 24px rgba(60,179,113,.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 0 26px rgba(60,179,113,.10);
 }
 
-.page-loader__line::after {
+.page-loader__progress-track::after {
   content: '';
-  display: block;
-  width: 45%;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, transparent, #3CB371 30%, #f2c078 52%, #8fe0b4 72%, transparent);
-  animation: loaderLine 1.15s ease-in-out infinite;
-}
-
-.page-loader__particles {
   position: absolute;
   inset: 0;
-  overflow: hidden;
-  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.36), transparent);
+  opacity: .42;
+  transform: translateX(-100%);
+  animation: loaderProgressSheen 1.3s ease-in-out infinite;
+}
+
+.page-loader__progress-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--loader-progress);
+  border-radius: inherit;
+  background: linear-gradient(90deg, #3CB371, #8FE0B4 58%, #F2C078);
+  box-shadow: 0 0 22px rgba(60,179,113,.40);
+  transition: width .24s ease;
+}
+
+.page-loader__progress-value {
+  min-width: 40px;
+  color: rgba(244,251,246,.76);
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .10em;
+  text-align: right;
 }
 
 .page-loader__particles span {
@@ -377,15 +685,18 @@ const loaderMessages = t.loader.messages;
   height: 5px;
   border-radius: 999px;
   background: rgba(242,192,120,.72);
-  box-shadow: 0 0 18px rgba(242,192,120,.38);
-  opacity: .48;
-  animation: loaderParticle 4.6s ease-in-out infinite;
+  box-shadow: 0 0 18px rgba(242,192,120,.42);
+  opacity: .42;
+  animation: loaderParticle 5.2s ease-in-out infinite;
 }
 
-.page-loader__particles span:nth-child(1) { left: 20%; top: 30%; }
-.page-loader__particles span:nth-child(2) { right: 23%; top: 36%; animation-delay: -1.1s; background: rgba(143,224,180,.72); }
-.page-loader__particles span:nth-child(3) { left: 31%; bottom: 24%; animation-delay: -2.2s; }
-.page-loader__particles span:nth-child(4) { right: 32%; bottom: 22%; animation-delay: -3.1s; background: rgba(143,224,180,.72); }
+.page-loader__particles span:nth-child(1) { left: 17%; top: 28%; }
+.page-loader__particles span:nth-child(2) { right: 19%; top: 33%; animation-delay: -1.1s; background: rgba(143,224,180,.76); }
+.page-loader__particles span:nth-child(3) { left: 29%; bottom: 23%; animation-delay: -2.2s; }
+.page-loader__particles span:nth-child(4) { right: 31%; bottom: 21%; animation-delay: -3.1s; background: rgba(143,224,180,.76); }
+.page-loader__particles span:nth-child(5) { left: 47%; top: 17%; width: 3px; height: 3px; animation-delay: -1.8s; }
+.page-loader__particles span:nth-child(6) { right: 12%; bottom: 34%; width: 4px; height: 4px; animation-delay: -3.9s; background: rgba(143,224,180,.72); }
+.page-loader__particles span:nth-child(7) { left: 12%; bottom: 40%; width: 4px; height: 4px; animation-delay: -4.5s; }
 
 .motion-ready .motion-reveal {
   opacity: 0;
@@ -423,38 +734,27 @@ const loaderMessages = t.loader.messages;
   pointer-events: none;
 }
 
-@keyframes loaderLine {
-  0% { transform: translateX(-120%); }
-  100% { transform: translateX(260%); }
+@keyframes loaderStageIn {
+  from { opacity: 0; transform: translateY(16px) scale(.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes loaderMaxLife {
-  0%, 72% {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: none;
-  }
-  100% {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transform: translateY(-14px) scale(1.015);
-  }
+@keyframes loaderOrbit {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes loaderInnerOrbit {
+  to { transform: rotate(-360deg); }
 }
 
 @keyframes loaderRadar {
   0% { transform: scale(.62); opacity: .78; }
-  100% { transform: scale(1.18); opacity: 0; }
+  100% { transform: scale(1.24); opacity: 0; }
 }
 
 @keyframes loaderGlow {
-  0%, 100% { opacity: .62; transform: scale(.96); }
-  50% { opacity: 1; transform: scale(1.06); }
-}
-
-@keyframes loaderSpin {
-  to { transform: rotate(360deg); }
+  0%, 100% { opacity: .64; transform: scale(.96); }
+  50% { opacity: 1; transform: scale(1.07); }
 }
 
 @keyframes loaderBreath {
@@ -463,46 +763,102 @@ const loaderMessages = t.loader.messages;
 }
 
 @keyframes loaderParticle {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(.86); opacity: .30; }
-  45% { transform: translate3d(10px, -18px, 0) scale(1.18); opacity: .72; }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(.86); opacity: .24; }
+  45% { transform: translate3d(12px, -22px, 0) scale(1.18); opacity: .76; }
+}
+
+@keyframes loaderAmbient {
+  0%, 100% { opacity: .62; filter: blur(20px) saturate(1); }
+  50% { opacity: .92; filter: blur(24px) saturate(1.08); }
+}
+
+@keyframes loaderHorizon {
+  0%, 100% { opacity: .48; transform: translateX(-50%) scaleX(.92); }
+  50% { opacity: .78; transform: translateX(-50%) scaleX(1.04); }
+}
+
+@keyframes loaderProgressSheen {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(140%); }
 }
 
 @media (max-width: 720px) {
+  .page-loader {
+    padding-inline: 20px;
+  }
+
   .page-loader__stage {
-    width: 176px;
-    height: 176px;
+    width: 188px;
+    height: 188px;
+  }
+
+  .page-loader__orbit--inner {
+    inset: 18px;
+  }
+
+  .page-loader__radar {
+    inset: 26px;
+  }
+
+  .page-loader__core {
+    width: 112px;
+    height: 112px;
   }
 
   .page-loader__logo {
-    height: 88px;
+    height: 92px;
+  }
+
+  .page-loader__copy {
+    width: min(300px, calc(100vw - 36px));
+    gap: 14px;
   }
 
   .page-loader__status {
-    max-width: 280px;
-    text-align: center;
-    line-height: 1.5;
+    font-size: .68rem;
+    letter-spacing: .11em;
+  }
+
+  .page-loader__progress {
+    width: min(260px, calc(100vw - 52px));
+  }
+
+  .page-loader__particles span:nth-child(n+5) {
+    display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .page-loader {
+    transition: opacity .18s ease, visibility .18s ease;
+  }
+
+  .page-loader__particles,
+  .page-loader__orbit,
+  .page-loader__radar,
+  .page-loader__sweep,
+  .page-loader__glow,
+  .page-loader__light,
+  .page-loader__horizon {
     display: none;
   }
 
   .motion-ready .motion-reveal,
   .motion-ready .photo-frame.motion-reveal,
   .motion-ready .premium-card.motion-reveal,
-  .page-loader__logo,
-  .page-loader__glow,
-  .page-loader__halo,
-  .page-loader__particles span,
-  .page-loader__radar::before,
-  .page-loader__radar::after,
-  .page-loader__line::after {
+  .page-loader__stage,
+  .page-loader__core,
+  .page-loader__progress-track::after {
     opacity: 1;
     transform: none;
     animation: none;
     transition: none;
+  }
+
+  .motion-ready.motion-loaded .page-loader,
+  .page-loader.is-hidden {
+    transform: none;
+    filter: none;
   }
 }
 </style>

@@ -60,7 +60,7 @@ export const it = {
   loader: {
     messages: [
       'Caricamento Camping Clepardia',
-      'Prepariamo la tua base verde',
+      'Prepariamo la tua base verde a Cracovia',
       'Apriamo il cancello del campeggio',
     ],
   },

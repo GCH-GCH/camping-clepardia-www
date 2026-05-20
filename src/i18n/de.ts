@@ -60,7 +60,7 @@ export const de = {
   loader: {
     messages: [
       'Camping Clepardia wird geladen',
-      'Wir bereiten Ihre grüne Basis vor',
+      'Wir bereiten Ihre grüne Basis in Krakau vor',
       'Das Campingtor wird geöffnet',
     ],
   },

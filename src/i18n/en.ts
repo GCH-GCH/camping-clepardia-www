@@ -58,7 +58,7 @@ export const en = {
   loader: {
     messages: [
       'Loading Camping Clepardia',
-      'Preparing your green base',
+      'Preparing your green base in Kraków',
       'Opening the campsite gate',
     ],
   },

@@ -53,7 +53,7 @@ export const pl = {
   loader: {
     messages: [
       'Ładujemy Camping Clepardia',
-      'Przygotowujemy zieloną bazę',
+      'Przygotowujemy zieloną bazę w Krakowie',
       'Otwieramy bramę campingu',
     ],
   },
