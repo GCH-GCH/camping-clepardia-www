@@ -1116,3 +1116,87 @@ html[data-theme="light"] .section-title {
 html[data-theme="light"] .section-copy {
   color: var(--theme-copy);
 }
+
+html[data-theme="dark"] main .premium-card :is(h1, h2, h3, h4, strong, a:not(.btn):not(.premium-button):not([class*="button"])) {
+  color: var(--theme-heading) !important;
+}
+
+html[data-theme="dark"] main .premium-card :is(p, small, dd, dt, label) {
+  color: var(--theme-copy) !important;
+}
+
+html[data-theme="dark"] main .premium-card span:not(.section-kicker):not([aria-hidden="true"]):not([class*="icon"]):not([class*="avatar"]):not([class*="badge"]) {
+  color: var(--theme-copy) !important;
+}
+
+html[data-theme="dark"] :is(
+  .contact-cards__card > span,
+  .pricing-quick-info__item span,
+  .pricing-summary__head span,
+  .pricing-mobile-summary button span,
+  .bungalow-types__card > span,
+  .section-kicker
+) {
+  color: #8fe0b4 !important;
+}
+
+html[data-theme="dark"] :is(
+  .contact-cards__card a,
+  .contact-cards__card strong,
+  .bungalow-types__prices p,
+  .bungalow-types__card h3,
+  .campers-cost__price strong,
+  .families-practical__item strong
+) {
+  color: var(--theme-heading) !important;
+}
+
+html[data-theme="dark"] :is(
+  .bungalow-types__prices strong,
+  .campers-cost__price span,
+  .families-practical__item span
+) {
+  color: #8fe0b4 !important;
+}
+
+html[data-theme="dark"] :is(
+  .bungalow-types__note,
+  .bungalow-types__season-note,
+  .reservation-inquiry__field > span,
+  .reservation-counter label,
+  .reservation-inquiry__nights,
+  .pricing-calculator label span,
+  .pricing-counter label,
+  .pricing-calculator__hint
+) {
+  color: var(--theme-copy) !important;
+}
+
+html[data-theme="dark"] :is(
+  .pricing-calculator__option strong,
+  .pricing-calculator__addon strong,
+  .reservation-inquiry__option span,
+  .reservation-inquiry__addon span
+) {
+  color: var(--theme-heading) !important;
+}
+
+html[data-theme="dark"] :is(
+  .pricing-calculator__option small,
+  .pricing-calculator__addon small,
+  .pricing-calculator__option em,
+  .reservation-inquiry__consent
+) {
+  color: var(--theme-copy) !important;
+}
+
+html[data-theme="dark"] :is(
+  .pricing-calculator__option input:checked + span,
+  .pricing-calculator__addon input:checked + span,
+  .reservation-inquiry__option input:checked + span,
+  .reservation-inquiry__addon input:checked + span
+) {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.115), rgba(255,255,255,.065)),
+    radial-gradient(circle at 0% 0%, rgba(60,179,113,.16), transparent 36%) !important;
+}

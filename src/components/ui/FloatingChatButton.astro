@@ -97,6 +97,11 @@ const quickActions = [
     let open = false;
     let hideTimer = 0;
 
+    const updateMobileAvailability = () => {
+      const available = window.innerWidth > 640 || window.scrollY > 320 || open;
+      root.classList.toggle('is-available', available);
+    };
+
     const updateStickyOffset = () => {
       const mobileSummary = document.querySelector('[data-mobile-summary]');
       const hasMobileSummary = mobileSummary instanceof HTMLElement
@@ -104,6 +109,7 @@ const quickActions = [
         && window.getComputedStyle(mobileSummary).display !== 'none';
 
       root.classList.toggle('is-raised', hasMobileSummary);
+      updateMobileAvailability();
     };
 
     const setOpen = (nextOpen) => {
@@ -113,6 +119,7 @@ const quickActions = [
       toggle.setAttribute('aria-label', open ? chatTexts.close : chatTexts.open);
       panel.setAttribute('aria-hidden', String(!open));
       document.body.classList.toggle('has-floating-chat-open', open);
+      updateMobileAvailability();
 
       if (open) {
         panel.hidden = false;
@@ -218,6 +225,7 @@ const quickActions = [
       if (event.key === 'Escape' && open) setOpen(false);
     });
 
+    window.addEventListener('scroll', updateMobileAvailability, { passive: true });
     window.addEventListener('resize', updateStickyOffset, { passive: true });
     document.addEventListener('click', (event) => {
       const target = event.target;
@@ -666,6 +674,17 @@ html[data-theme="light"] .floating-chat__quick button {
 @media (max-width: 640px) {
   .floating-chat {
     inset: auto max(16px, env(safe-area-inset-right)) max(84px, calc(84px + env(safe-area-inset-bottom))) auto;
+    opacity: 0;
+    transform: translateY(10px) scale(.96);
+    transition:
+      opacity .24s cubic-bezier(.22, 1, .36, 1),
+      transform .24s cubic-bezier(.22, 1, .36, 1);
+  }
+
+  .floating-chat.is-available,
+  .floating-chat.is-open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 
   .floating-chat.is-raised {
