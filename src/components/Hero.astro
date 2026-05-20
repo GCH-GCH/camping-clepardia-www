@@ -25,6 +25,35 @@ const heroStyle = [
   heroMobileExists ? `--hero-bg-mobile: url('${siteAssets.hero.mobile}')` : '',
   heroTextureExists ? `--hero-texture: url('${siteAssets.hero.overlayTexture}')` : '',
 ].filter(Boolean).join(';');
+
+const experienceItems = [
+  {
+    icon: 'shield',
+    label: t.home.hero.badges[3],
+    detail: t.home.trust.cards[0]?.copy,
+    tone: 'award',
+  },
+  {
+    icon: 'map',
+    label: t.home.hero.badges[0],
+    detail: t.home.stats[0]?.copy,
+  },
+  {
+    icon: 'tram',
+    label: t.home.hero.badges[2],
+    detail: t.home.stats[1]?.copy,
+  },
+  {
+    icon: 'camping',
+    label: t.home.hero.badges[1],
+    detail: t.home.hero.benefits[2],
+  },
+  {
+    icon: 'tent',
+    label: t.home.hero.benefits[2],
+    detail: t.home.hero.benefits[1],
+  },
+];
 ---
 
 <section
@@ -69,22 +98,46 @@ const heroStyle = [
       </div>
     </div>
 
-    <aside class="hero__experience-card" aria-label="Camping Clepardia">
-      <div class="hero__award">
-        <span aria-hidden="true"><Icon name="shield" size={24} /></span>
+    <aside class="hero__experience-card" data-hero-experience-card aria-label="Camping Clepardia">
+      <span class="hero-experience-card__halo" aria-hidden="true"></span>
+      <div class="hero-experience-card__top">
+        <span class="hero-experience-card__award-icon" aria-hidden="true"><Icon name="shield" size={28} /></span>
         <div>
+          <span class="hero-experience-card__eyebrow">Camping Clepardia</span>
           <strong>{t.home.hero.badges[3]}</strong>
-          <small>{t.home.trust.cards[0].copy}</small>
+          <small>{t.home.trust.cards[0]?.copy}</small>
         </div>
       </div>
-      <div class="hero__mini-route">
+
+      <div class="hero-experience-card__route">
         <span><Icon name="camping" size={18} /> Camping</span>
-        <i></i>
+        <i aria-hidden="true"></i>
         <span><Icon name="tram" size={18} /> {t.home.hero.badges[2]}</span>
       </div>
-      <div class="hero__experience-grid">
-        <span>{t.home.hero.badges[0]}</span>
-        <span>{t.home.hero.badges[1]}</span>
+
+      <div class="hero-experience-card__chips" aria-label="Camping Clepardia">
+        {experienceItems.map((item, index) => (
+          <span
+            class:list={[
+              'hero-experience-card__chip',
+              item.tone === 'award' && 'hero-experience-card__chip--award',
+              index === 0 && 'is-active',
+            ]}
+            style={`--chip-index: ${index}`}
+            data-experience-chip
+          >
+            <Icon name={item.icon} size={18} strokeWidth={1.85} />
+            <span>
+              <strong>{item.label}</strong>
+              {item.detail && <small>{item.detail}</small>}
+            </span>
+          </span>
+        ))}
+      </div>
+
+      <div class="hero-experience-card__footer">
+        <span><Icon name="leaf" size={17} /> {t.home.hero.badge}</span>
+        <span><Icon name="map" size={17} /> Kraków</span>
       </div>
     </aside>
   </div>
@@ -114,7 +167,7 @@ const heroStyle = [
     </div>
   </div>
 
-  <a href="#dlaczego" class="hero__scroll-indicator" aria-label={t.home.hero.scroll}>
+  <a href="#after-hero" class="hero__scroll-indicator" aria-label={t.home.hero.scroll}>
     <span class="hero__mouse" aria-hidden="true"><i></i></span>
     <span class="hero__scroll-text">{t.home.hero.scroll}</span>
   </a>
@@ -149,6 +202,35 @@ const heroStyle = [
     window.addEventListener('scroll', requestUpdate, { passive: true });
     window.addEventListener('resize', requestUpdate, { passive: true });
     updateHeroParallax();
+  }
+
+  const experienceCards = document.querySelectorAll('[data-hero-experience-card]');
+  experienceCards.forEach((card) => {
+    if (!(card instanceof HTMLElement)) return;
+    const chips = Array.from(card.querySelectorAll('[data-experience-chip]')).filter((chip) => chip instanceof HTMLElement);
+    if (!chips.length || reducedMotion.matches) return;
+
+    let activeIndex = 0;
+    window.setInterval(() => {
+      chips[activeIndex]?.classList.remove('is-active');
+      activeIndex = (activeIndex + 1) % chips.length;
+      chips[activeIndex]?.classList.add('is-active');
+    }, 3000);
+  });
+
+  const scrollIndicator = document.querySelector('.hero__scroll-indicator');
+  if (scrollIndicator instanceof HTMLAnchorElement) {
+    scrollIndicator.addEventListener('click', (event) => {
+      const target = document.getElementById('after-hero') ?? document.getElementById('dlaczego');
+      if (!(target instanceof HTMLElement)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      const offset = window.innerWidth >= 1080 ? 86 : 76;
+      const top = Math.max(0, target.getBoundingClientRect().top + window.scrollY - offset);
+      window.scrollTo({ top, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+      history.pushState(null, '', '#after-hero');
+    });
   }
 </script>
 
@@ -378,79 +460,138 @@ const heroStyle = [
   position: relative;
   align-self: center;
   display: grid;
-  gap: 16px;
-  padding: 22px;
-  border: 1px solid rgba(255,255,255,.16);
-  border-radius: 34px;
+  gap: 18px;
+  padding: clamp(20px, 2.2vw, 28px);
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: 36px;
   background:
-    linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.05)),
-    radial-gradient(circle at 90% 0%, rgba(242,192,120,.13), transparent 36%);
-  box-shadow: 0 26px 76px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.14);
-  backdrop-filter: blur(22px) saturate(150%);
-  -webkit-backdrop-filter: blur(22px) saturate(150%);
-  animation: heroFade .9s cubic-bezier(.22, 1, .36, 1) .58s both;
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.22), transparent 34%),
+    radial-gradient(circle at 88% 12%, rgba(242,192,120,.18), transparent 38%),
+    linear-gradient(145deg, rgba(255,255,255,.15), rgba(255,255,255,.055));
+  box-shadow:
+    0 34px 94px rgba(0,0,0,.30),
+    0 0 54px rgba(60,179,113,.16),
+    inset 0 1px 0 rgba(255,255,255,.16);
+  backdrop-filter: blur(25px) saturate(158%);
+  -webkit-backdrop-filter: blur(25px) saturate(158%);
+  overflow: hidden;
+  animation:
+    heroFade .9s cubic-bezier(.22, 1, .36, 1) .58s both,
+    heroExperienceFloat 7.6s ease-in-out 1.4s infinite;
 }
 
 .hero__experience-card::before {
   content: '';
   position: absolute;
-  inset: -1px;
+  inset: 0;
   border-radius: inherit;
-  border: 1px solid rgba(143,224,180,.22);
-  opacity: .62;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.20), transparent 34%),
+    radial-gradient(circle at 74% 76%, rgba(60,179,113,.16), transparent 36%);
+  opacity: .78;
   pointer-events: none;
 }
 
-.hero__award {
+.hero__experience-card::after {
+  content: '';
+  position: absolute;
+  inset: auto -18% -24% 22%;
+  height: 150px;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(60,179,113,.22), transparent 66%);
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.hero-experience-card__halo {
+  position: absolute;
+  right: -72px;
+  top: -72px;
+  width: 210px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(242,192,120,.26), rgba(60,179,113,.12) 42%, transparent 70%);
+  filter: blur(8px);
+  opacity: .82;
+  pointer-events: none;
+}
+
+.hero-experience-card__top,
+.hero-experience-card__route,
+.hero-experience-card__chips,
+.hero-experience-card__footer {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-experience-card__top {
   display: grid;
-  grid-template-columns: 58px 1fr;
+  grid-template-columns: 62px 1fr;
   gap: 16px;
   align-items: center;
   padding: 18px;
-  border-radius: 26px;
-  background: rgba(9, 24, 16, .42);
-  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 28px;
+  background:
+    linear-gradient(145deg, rgba(12, 34, 23, .62), rgba(11, 30, 21, .38)),
+    radial-gradient(circle at 88% 10%, rgba(242,192,120,.13), transparent 40%);
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
 }
 
-.hero__award > span {
-  width: 58px;
-  height: 58px;
+.hero-experience-card__award-icon {
+  width: 62px;
+  height: 62px;
   display: grid;
   place-items: center;
   border-radius: 999px;
   color: #2d2010;
   background:
-    radial-gradient(circle at 30% 18%, #fff3c9, #f2c078 54%, #c08a35);
-  box-shadow: 0 14px 34px rgba(242,192,120,.22);
+    radial-gradient(circle at 30% 18%, #fff8d8, #f2c078 52%, #bd8730);
+  box-shadow:
+    0 16px 42px rgba(242,192,120,.28),
+    0 0 26px rgba(242,192,120,.16);
 }
 
-.hero__award strong {
+.hero-experience-card__eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 7px;
+  color: #8fe0b4;
+  font-size: .66rem;
+  font-weight: 950;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.hero-experience-card__top strong {
   display: block;
   color: #fff;
-  font-size: 1.1rem;
+  font-size: clamp(1rem, 1.45vw, 1.18rem);
   line-height: 1.1;
   font-weight: 950;
 }
 
-.hero__award small {
+.hero-experience-card__top small {
   display: block;
   margin-top: 8px;
-  color: rgba(255,255,255,.68);
+  color: rgba(255,255,255,.74);
   line-height: 1.5;
 }
 
-.hero__mini-route {
+.hero-experience-card__route {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px;
-  border-radius: 22px;
-  color: rgba(255,255,255,.86);
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.12);
+  padding: 14px 16px;
+  border-radius: 24px;
+  color: rgba(255,255,255,.90);
+  background:
+    linear-gradient(90deg, rgba(60,179,113,.12), rgba(255,255,255,.075)),
+    rgba(255,255,255,.06);
+  border: 1px solid rgba(143,224,180,.18);
 }
 
-.hero__mini-route span {
+.hero-experience-card__route span {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -460,39 +601,140 @@ const heroStyle = [
   text-transform: uppercase;
 }
 
-.hero__mini-route svg {
+.hero-experience-card__route svg {
   color: #8fe0b4;
+  filter: drop-shadow(0 6px 16px rgba(60,179,113,.22));
 }
 
-.hero__mini-route i {
+.hero-experience-card__route i {
   flex: 1;
   min-width: 28px;
   height: 1px;
-  background: linear-gradient(90deg, rgba(143,224,180,.25), rgba(143,224,180,.9), rgba(143,224,180,.25));
+  background: linear-gradient(90deg, rgba(143,224,180,.25), rgba(143,224,180,.92), rgba(242,192,120,.36));
+  box-shadow: 0 0 18px rgba(60,179,113,.24);
 }
 
-.hero__experience-grid {
+.hero-experience-card__chips {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.hero-experience-card__chip {
+  position: relative;
+  min-height: 94px;
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  align-items: start;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 23px;
+  color: rgba(255,255,255,.86);
+  background:
+    radial-gradient(circle at 84% 10%, rgba(60,179,113,.18), transparent 42%),
+    linear-gradient(145deg, rgba(255,255,255,.095), rgba(255,255,255,.045));
+  border: 1px solid rgba(255,255,255,.11);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  transform: translateY(0);
+  transition:
+    transform .34s cubic-bezier(.22, 1, .36, 1),
+    border-color .34s cubic-bezier(.22, 1, .36, 1),
+    background .34s cubic-bezier(.22, 1, .36, 1),
+    box-shadow .34s cubic-bezier(.22, 1, .36, 1);
+  animation: heroChipFloat 5.8s ease-in-out infinite;
+  animation-delay: calc(var(--chip-index) * -520ms);
+}
+
+.hero-experience-card__chip::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(143,224,180,.28), transparent 48%, rgba(242,192,120,.18));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .34s ease;
+}
+
+.hero-experience-card__chip svg {
+  position: relative;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
+  padding: 8px;
+  border-radius: 14px;
+  color: #dfffea;
+  background: rgba(60,179,113,.16);
+  box-shadow: 0 10px 22px rgba(60,179,113,.13);
+}
+
+.hero-experience-card__chip strong,
+.hero-experience-card__chip small {
+  position: relative;
+  z-index: 1;
+  display: block;
+}
+
+.hero-experience-card__chip strong {
+  color: #fff;
+  font-size: .76rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  line-height: 1.28;
+  text-transform: uppercase;
+}
+
+.hero-experience-card__chip small {
+  margin-top: 6px;
+  color: rgba(255,255,255,.64);
+  font-size: .72rem;
+  line-height: 1.45;
+}
+
+.hero-experience-card__chip--award {
+  grid-column: 1 / -1;
+  min-height: 82px;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(242,192,120,.18), transparent 38%),
+    linear-gradient(145deg, rgba(242,192,120,.12), rgba(255,255,255,.055));
+}
+
+.hero-experience-card__chip.is-active {
+  transform: translateY(-4px);
+  border-color: rgba(143,224,180,.42);
+  background:
+    radial-gradient(circle at 84% 10%, rgba(60,179,113,.27), transparent 44%),
+    linear-gradient(145deg, rgba(60,179,113,.16), rgba(255,255,255,.07));
+  box-shadow: 0 18px 44px rgba(60,179,113,.18), inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+.hero-experience-card__chip.is-active::before {
+  opacity: 1;
+}
+
+.hero-experience-card__footer {
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
-.hero__experience-grid span {
-  min-height: 86px;
-  display: grid;
-  align-items: end;
-  padding: 14px;
-  border-radius: 22px;
-  color: rgba(255,255,255,.84);
-  background:
-    radial-gradient(circle at 80% 12%, rgba(143,224,180,.16), transparent 34%),
-    rgba(255,255,255,.075);
-  border: 1px solid rgba(255,255,255,.11);
-  font-size: .78rem;
+.hero-experience-card__footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 11px;
+  border-radius: 999px;
+  color: rgba(255,255,255,.86);
+  border: 1px solid rgba(143,224,180,.18);
+  background: rgba(60,179,113,.10);
+  font-size: .72rem;
   font-weight: 900;
   letter-spacing: .08em;
-  line-height: 1.25;
   text-transform: uppercase;
+}
+
+.hero-experience-card__footer svg {
+  color: #8fe0b4;
 }
 
 .hero__cta {
@@ -675,6 +917,20 @@ const heroStyle = [
   justify-items: center;
   gap: 8px;
   color: rgba(255,255,255,.72);
+  transition:
+    color .26s cubic-bezier(.22, 1, .36, 1),
+    transform .26s cubic-bezier(.22, 1, .36, 1);
+  cursor: pointer;
+}
+
+.hero__scroll-indicator::after {
+  display: none !important;
+  content: none !important;
+}
+
+.hero__scroll-indicator:hover {
+  color: #fff;
+  transform: translateX(-50%) translateY(-3px);
 }
 
 .hero__mouse {
@@ -687,6 +943,16 @@ const heroStyle = [
   border-radius: 999px;
   background: rgba(255,255,255,.06);
   box-shadow: 0 12px 32px rgba(0,0,0,.18);
+  transition:
+    border-color .26s cubic-bezier(.22, 1, .36, 1),
+    background .26s cubic-bezier(.22, 1, .36, 1),
+    box-shadow .26s cubic-bezier(.22, 1, .36, 1);
+}
+
+.hero__scroll-indicator:hover .hero__mouse {
+  border-color: rgba(143,224,180,.64);
+  background: rgba(60,179,113,.13);
+  box-shadow: 0 16px 38px rgba(60,179,113,.20), 0 12px 32px rgba(0,0,0,.20);
 }
 
 .hero__mouse i {
@@ -736,36 +1002,39 @@ const heroStyle = [
   }
 
   .hero { min-height: 106svh; }
-  .hero__wrapper { padding: 126px 20px 276px; }
-  .hero__experience-card { display: none; }
+  .hero__wrapper { padding: 126px 20px 292px; }
+  .hero__experience-card {
+    width: 100%;
+    max-width: 620px;
+    align-self: start;
+    padding: 18px;
+    border-radius: 30px;
+  }
+  .hero-experience-card__top {
+    grid-template-columns: 50px 1fr;
+    padding: 14px;
+    border-radius: 24px;
+  }
+  .hero-experience-card__award-icon {
+    width: 50px;
+    height: 50px;
+  }
+  .hero-experience-card__chips {
+    grid-template-columns: 1fr;
+  }
+  .hero-experience-card__chip,
+  .hero-experience-card__chip--award {
+    min-height: auto;
+  }
   .benefits-wrapper { grid-template-columns: repeat(2, 1fr); }
   .hero__floating-badges {
-    left: 20px;
-    right: 20px;
-    top: auto;
-    bottom: 178px;
-    width: auto;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    transform: none;
-  }
-
-  .hero__floating-badges span {
-    width: 100%;
-    justify-content: center;
-    min-height: 42px;
-    font-size: .68rem;
-    text-align: center;
-  }
-
-  .hero__floating-badges span:nth-child(n) {
-    justify-self: stretch;
-    margin-left: 0;
+    display: none;
   }
 }
 
 @media (max-width: 560px) {
   .hero { min-height: 112svh; }
-  .hero__wrapper { padding: 118px 18px 392px; }
+  .hero__wrapper { padding: 118px 18px 328px; }
   .hero__content,
   .hero__headline,
   .hero__subheadline,
@@ -789,14 +1058,20 @@ const heroStyle = [
     flex-direction: column;
   }
   .hero__button { width: 100%; }
-  .hero__floating-badges {
-    bottom: 318px;
-    grid-template-columns: 1fr;
-    gap: 9px;
+  .hero__experience-card { padding: 15px; border-radius: 26px; }
+  .hero-experience-card__route {
+    align-items: flex-start;
+    flex-direction: column;
   }
-  .hero__floating-badges span {
-    min-height: 38px;
-    padding: 10px 12px;
+  .hero-experience-card__route i { width: 100%; min-height: 1px; }
+  .hero-experience-card__chip {
+    grid-template-columns: 30px 1fr;
+    padding: 12px;
+  }
+  .hero-experience-card__chip svg {
+    width: 30px;
+    height: 30px;
+    padding: 7px;
   }
   .hero__benefits-bar { bottom: 18px; padding: 18px; }
   .benefits-wrapper { grid-template-columns: 1fr; gap: 14px; }
@@ -814,12 +1089,14 @@ const heroStyle = [
   .hero__headline-line,
   .hero__subheadline,
   .hero__description,
-  .hero__cta,
-  .hero__benefits-bar,
-  .hero__floating-badges span,
-  .hero__mouse i {
-    animation: none;
-  }
+    .hero__cta,
+    .hero__benefits-bar,
+    .hero__floating-badges span,
+    .hero__mouse i,
+    .hero__experience-card,
+    .hero-experience-card__chip {
+      animation: none;
+    }
 
   .hero__button,
   .hero__button:hover {
@@ -855,5 +1132,15 @@ const heroStyle = [
 @keyframes heroParticle {
   0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: .32; }
   50% { transform: translate3d(-14px, 18px, 0) scale(1.08); opacity: .52; }
+}
+
+@keyframes heroExperienceFloat {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -8px, 0); }
+}
+
+@keyframes heroChipFloat {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -3px; }
 }
 </style>

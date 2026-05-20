@@ -54,24 +54,24 @@
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --color-bg-primary: #0E1F17;
-  --color-bg-secondary: #142B1F;
-  --color-bg-tertiary: #1A3828;
+  --color-bg-primary: #0B1A14;
+  --color-bg-secondary: #102117;
+  --color-bg-tertiary: #173322;
   --color-text-primary: #F4FBF6;
   --color-text-secondary: rgba(244, 251, 246, .84);
   --color-text-tertiary: rgba(244, 251, 246, .70);
   --theme-body-background:
-    radial-gradient(circle at 14% 8%, rgba(60, 179, 113, .18), transparent 30%),
-    radial-gradient(circle at 86% 16%, rgba(242, 192, 120, .14), transparent 34%),
-    radial-gradient(circle at 54% 100%, rgba(60,179,113,.14), transparent 42%),
-    linear-gradient(180deg, #0E1F17 0%, #142B1F 54%, #1A3828 100%);
+    radial-gradient(circle at 14% 8%, rgba(60, 179, 113, .22), transparent 30%),
+    radial-gradient(circle at 86% 16%, rgba(242, 192, 120, .16), transparent 34%),
+    radial-gradient(circle at 54% 100%, rgba(60,179,113,.17), transparent 42%),
+    linear-gradient(180deg, #0B1A14 0%, #102117 54%, #173322 100%);
   --theme-section-background:
-    radial-gradient(circle at 12% 0%, rgba(60,179,113,.13), transparent 30%),
-    radial-gradient(circle at 90% 10%, rgba(242,192,120,.10), transparent 30%),
-    linear-gradient(180deg, #142B1F 0%, #0E1F17 100%);
-  --theme-card-background: rgba(255,255,255,.082);
-  --theme-card-border: rgba(255,255,255,.15);
-  --theme-card-shadow: 0 24px 72px rgba(0,0,0,.105), 0 0 34px rgba(60,179,113,.12);
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.16), transparent 30%),
+    radial-gradient(circle at 90% 10%, rgba(242,192,120,.12), transparent 30%),
+    linear-gradient(180deg, #102117 0%, #0B1A14 100%);
+  --theme-card-background: rgba(255,255,255,.092);
+  --theme-card-border: rgba(143,224,180,.18);
+  --theme-card-shadow: 0 24px 72px rgba(0,0,0,.13), 0 0 38px rgba(60,179,113,.14);
   --theme-heading: #F4FBF6;
   --theme-copy: rgba(244, 251, 246, .84);
 }
@@ -340,11 +340,11 @@ a:hover {
   color: var(--color-primary-dark);
 }
 
-main a:not(.btn):not(.premium-button):not([class*="button"]):not([class*="cta"]):not([class*="secondary"]):not([class*="option"]):not([class*="addon"]) {
+main a:not(.btn):not(.premium-button):not(.hero__scroll-indicator):not([class*="button"]):not([class*="cta"]):not([class*="secondary"]):not([class*="option"]):not([class*="addon"]) {
   position: relative;
 }
 
-main a:not(.btn):not(.premium-button):not([class*="button"]):not([class*="cta"]):not([class*="secondary"]):not([class*="option"]):not([class*="addon"])::after {
+main a:not(.btn):not(.premium-button):not(.hero__scroll-indicator):not([class*="button"]):not([class*="cta"]):not([class*="secondary"]):not([class*="option"]):not([class*="addon"])::after {
   content: '';
   position: absolute;
   left: 0;
@@ -358,8 +358,8 @@ main a:not(.btn):not(.premium-button):not([class*="button"]):not([class*="cta"])
   transition: transform 320ms cubic-bezier(.22, 1, .36, 1);
 }
 
-main a:not(.btn):not(.premium-button):not([class*="button"]):not([class*="cta"]):not([class*="secondary"]):not([class*="option"]):not([class*="addon"]):hover::after,
-main a:not(.btn):not(.premium-button):not([class*="button"]):not([class*="cta"]):not([class*="secondary"]):not([class*="option"]):not([class*="addon"]):focus-visible::after {
+main a:not(.btn):not(.premium-button):not(.hero__scroll-indicator):not([class*="button"]):not([class*="cta"]):not([class*="secondary"]):not([class*="option"]):not([class*="addon"]):hover::after,
+main a:not(.btn):not(.premium-button):not(.hero__scroll-indicator):not([class*="button"]):not([class*="cta"]):not([class*="secondary"]):not([class*="option"]):not([class*="addon"]):focus-visible::after {
   transform: scaleX(1);
 }
 

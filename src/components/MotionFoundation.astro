@@ -1,4 +1,5 @@
 ---
+import { Buffer } from 'node:buffer';
 import { logoMain, logoMainPng } from '@/data/assets';
 import { getTranslations } from '@/i18n/config';
 import { getPathContext } from '@/utils/localizedLinks';
@@ -6,6 +7,7 @@ import { getPathContext } from '@/utils/localizedLinks';
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
 const loaderMessages = t.loader.messages;
+const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8').toString('base64');
 ---
 
 <script is:inline>
@@ -58,9 +60,7 @@ const loaderMessages = t.loader.messages;
   hidden
   inert
   aria-hidden="true"
-  data-loader-message-0={loaderMessages[0]}
-  data-loader-message-1={loaderMessages[1]}
-  data-loader-message-2={loaderMessages[2]}
+  data-loader-messages={loaderMessagesEncoded}
   data-loader-progress="0"
 >
   <div class="page-loader__ambient" aria-hidden="true">
@@ -121,9 +121,20 @@ const loaderMessages = t.loader.messages;
     loader.setAttribute('aria-hidden', 'false');
     loader.setAttribute('role', 'status');
     loader.setAttribute('aria-live', 'polite');
+    const decodeMessages = () => {
+      try {
+        const encoded = loader.dataset.loaderMessages || '';
+        const binary = window.atob(encoded);
+        const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+        const parsed = JSON.parse(new TextDecoder().decode(bytes));
+        return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+      } catch {
+        return [];
+      }
+    };
     const status = loader.querySelector('.page-loader__status');
     if (status instanceof HTMLElement) {
-      status.textContent = loader.dataset.loaderMessage0 || '';
+      status.textContent = decodeMessages()[0] || 'Loading Camping Clepardia';
       status.setAttribute('aria-live', 'polite');
     }
     const progressValue = loader.querySelector('.page-loader__progress-value');
@@ -142,13 +153,18 @@ const loaderMessages = t.loader.messages;
   const loaderStatus = document.getElementById('pageLoaderStatus');
   const loaderProgressValue = document.getElementById('pageLoaderProgressValue');
   const loaderMessages = (() => {
-    const messages = [
-      loader?.dataset.loaderMessage0,
-      loader?.dataset.loaderMessage1,
-      loader?.dataset.loaderMessage2,
-    ].filter(Boolean);
+    if (!(loader instanceof HTMLElement)) return ['Loading Camping Clepardia'];
 
-    return messages.length ? messages : ['Loading Camping Clepardia'];
+    try {
+      const encoded = loader.dataset.loaderMessages || '';
+      const binary = window.atob(encoded);
+      const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+      const parsed = JSON.parse(new TextDecoder().decode(bytes));
+      const messages = Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+      return messages.length ? messages : ['Loading Camping Clepardia'];
+    } catch {
+      return ['Loading Camping Clepardia'];
+    }
   })();
   if (loaderStatus) {
     loaderStatus.textContent = loaderMessages[0] || '';
@@ -311,6 +327,7 @@ const loaderMessages = t.loader.messages;
   };
 
   document.addEventListener('click', (event) => {
+    if (event.defaultPrevented) return;
     const targetElement = event.target instanceof Element ? event.target : null;
     const anchor = targetElement?.closest?.('a[href^="#"]');
     if (!anchor) return;

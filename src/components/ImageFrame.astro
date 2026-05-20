@@ -67,14 +67,14 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
   aspect-ratio: 16 / 10;
   padding: 0;
   border-radius: 24px;
-  border: 1px solid rgba(255,255,255,.28);
+  border: 1px solid rgba(143,224,180,.30);
   overflow: hidden;
-  box-shadow: 0 26px 76px rgba(17, 40, 28, .18);
+  box-shadow: 0 28px 82px rgba(17, 40, 28, .20), 0 0 30px rgba(60,179,113,.10);
   background:
-    linear-gradient(135deg, rgba(14, 44, 29, .28), rgba(16, 45, 31, .72)),
-    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .28), transparent 36%),
-    radial-gradient(circle at 18% 86%, rgba(60,179,113,.32), transparent 42%),
-    linear-gradient(135deg, #345f45, #132c20);
+    linear-gradient(135deg, rgba(14, 44, 29, .18), rgba(16, 45, 31, .68)),
+    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .32), transparent 36%),
+    radial-gradient(circle at 18% 86%, rgba(60,179,113,.38), transparent 42%),
+    linear-gradient(135deg, #3d7452, #143322 58%, #0d2418);
 }
 
 .asset-frame--portrait.photo-frame {
@@ -135,17 +135,18 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
   right: 22px;
   top: 22px;
   z-index: 2;
-  width: 56px;
-  height: 56px;
+  width: 62px;
+  height: 62px;
   display: grid;
   place-items: center;
-  border-radius: 20px;
+  border-radius: 22px;
   color: #f8fff9;
   border: 1px solid rgba(143,224,180,.32);
   background:
-    radial-gradient(circle at 30% 18%, rgba(255,255,255,.34), transparent 34%),
-    linear-gradient(135deg, rgba(60,179,113,.30), rgba(60,179,113,.15));
-  box-shadow: 0 18px 48px rgba(60,179,113,.24), 0 0 28px rgba(60,179,113,.12), inset 0 1px 0 rgba(255,255,255,.18);
+    radial-gradient(circle at 30% 18%, rgba(255,255,255,.38), transparent 34%),
+    radial-gradient(circle at 74% 76%, rgba(242,192,120,.20), transparent 40%),
+    linear-gradient(135deg, rgba(60,179,113,.36), rgba(60,179,113,.16));
+  box-shadow: 0 20px 52px rgba(60,179,113,.28), 0 0 34px rgba(60,179,113,.16), inset 0 1px 0 rgba(255,255,255,.20);
 }
 
 .asset-frame__fallback-icon svg {
@@ -174,10 +175,10 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
   inset: 0;
   overflow: hidden;
   background:
-    radial-gradient(circle at 76% 20%, rgba(242,192,120,.30), transparent 22%),
-    radial-gradient(circle at 26% 14%, rgba(143,224,180,.20), transparent 26%),
-    radial-gradient(circle at 14% 78%, rgba(60,179,113,.24), transparent 34%),
-    linear-gradient(160deg, rgba(20,67,44,.78), rgba(12,36,25,.90));
+    radial-gradient(circle at 76% 20%, rgba(242,192,120,.34), transparent 24%),
+    radial-gradient(circle at 26% 14%, rgba(143,224,180,.24), transparent 28%),
+    radial-gradient(circle at 14% 78%, rgba(60,179,113,.30), transparent 36%),
+    linear-gradient(160deg, rgba(26,82,53,.82), rgba(12,39,27,.92));
 }
 
 .asset-frame__fallback-scene::before {
@@ -190,6 +191,17 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
     radial-gradient(circle at 78% 42%, rgba(255,255,255,.28) 0 1px, transparent 1px 6px);
   background-size: 7px 7px, 11px 11px;
   mix-blend-mode: screen;
+}
+
+.asset-frame__fallback-scene::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .34;
+  background:
+    linear-gradient(115deg, transparent 0 18%, rgba(255,255,255,.08) 18.4% 18.8%, transparent 19% 100%),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.045) 0 1px, transparent 1px 18px);
+  mask-image: radial-gradient(circle at 50% 50%, #000, transparent 76%);
 }
 
 .asset-frame__sun {

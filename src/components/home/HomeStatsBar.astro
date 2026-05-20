@@ -14,7 +14,7 @@ const stats = t.home.stats;
 const icons = ['map', 'tram', 'camping', 'leaf'] as const;
 ---
 
-<section class="home-stats reveal-section" aria-label="Camping Clepardia">
+<section class="home-stats reveal-section" id="after-hero" aria-label="Camping Clepardia">
   <div class="container">
     <div class="home-stats__panel">
       {stats.map((item, index) => (
@@ -37,6 +37,7 @@ const icons = ['map', 'tram', 'camping', 'leaf'] as const;
   z-index: 4;
   margin-top: clamp(18px, 2.4vw, 34px);
   padding: 0 0 clamp(66px, 8vw, 112px);
+  scroll-margin-top: 96px;
 }
 
 .home-stats__panel {
