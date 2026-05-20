@@ -83,9 +83,9 @@ export const en = {
     title: 'Clepek — Camping Clepardia helper',
     status: 'Ready to help',
     intro:
-      'Hi! I’m Clepek, your Camping Clepardia helper. I can quickly help with prices, bungalows, tram access to the city centre or reception contact.',
+      'Hi! 👋 I’m Clepek, your Camping Clepardia helper. I can quickly help with prices, bungalows, tram access to the city centre or reception contact.',
     notice:
-      'Answers are informational. Bookings are confirmed by reception.',
+      'Answers are informational. Bookings and availability are confirmed by reception.',
     quickLabel: 'Quick topics',
     inputLabel: 'Write a message',
     inputPlaceholder: 'Write a message...',

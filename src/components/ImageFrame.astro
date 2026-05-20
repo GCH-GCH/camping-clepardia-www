@@ -71,10 +71,10 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
   overflow: hidden;
   box-shadow: 0 26px 76px rgba(17, 40, 28, .18);
   background:
-    linear-gradient(135deg, rgba(12, 34, 22, .18), rgba(8, 24, 16, .66)),
-    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .24), transparent 36%),
-    radial-gradient(circle at 18% 86%, rgba(60,179,113,.22), transparent 38%),
-    linear-gradient(135deg, #2a4735, #102119);
+    linear-gradient(135deg, rgba(14, 44, 29, .28), rgba(16, 45, 31, .72)),
+    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .28), transparent 36%),
+    radial-gradient(circle at 18% 86%, rgba(60,179,113,.32), transparent 42%),
+    linear-gradient(135deg, #345f45, #132c20);
 }
 
 .asset-frame--portrait.photo-frame {
@@ -96,8 +96,9 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(3, 12, 8, .04) 0%, transparent 42%, rgba(3, 13, 9, .58) 100%),
-    radial-gradient(circle at 80% 18%, rgba(255, 196, 121, .14), transparent 34%);
+    linear-gradient(180deg, rgba(3, 12, 8, .02) 0%, transparent 46%, rgba(3, 13, 9, .46) 100%),
+    radial-gradient(circle at 80% 18%, rgba(255, 196, 121, .16), transparent 34%),
+    radial-gradient(circle at 16% 86%, rgba(60,179,113,.16), transparent 34%);
 }
 
 .asset-frame:hover img {
@@ -139,12 +140,12 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
   display: grid;
   place-items: center;
   border-radius: 20px;
-  color: #f5fff8;
-  border: 1px solid rgba(143,224,180,.24);
+  color: #f8fff9;
+  border: 1px solid rgba(143,224,180,.32);
   background:
-    radial-gradient(circle at 30% 18%, rgba(255,255,255,.28), transparent 34%),
-    rgba(60,179,113,.18);
-  box-shadow: 0 18px 42px rgba(60,179,113,.16), inset 0 1px 0 rgba(255,255,255,.16);
+    radial-gradient(circle at 30% 18%, rgba(255,255,255,.34), transparent 34%),
+    linear-gradient(135deg, rgba(60,179,113,.30), rgba(60,179,113,.15));
+  box-shadow: 0 18px 48px rgba(60,179,113,.24), 0 0 28px rgba(60,179,113,.12), inset 0 1px 0 rgba(255,255,255,.18);
 }
 
 .asset-frame__fallback-icon svg {
@@ -162,8 +163,8 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
   padding: 6px 10px;
   border: 1px solid rgba(143,224,180,.22);
   border-radius: 999px;
-  color: #d9ffe9;
-  background: rgba(60,179,113,.12);
+  color: #e9fff1;
+  background: rgba(60,179,113,.16);
   font-size: .68rem !important;
   letter-spacing: .14em !important;
 }
@@ -173,16 +174,17 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
   inset: 0;
   overflow: hidden;
   background:
-    radial-gradient(circle at 76% 20%, rgba(242,192,120,.24), transparent 20%),
-    radial-gradient(circle at 26% 14%, rgba(143,224,180,.14), transparent 24%),
-    linear-gradient(160deg, rgba(14,47,31,.74), rgba(8,24,16,.92));
+    radial-gradient(circle at 76% 20%, rgba(242,192,120,.30), transparent 22%),
+    radial-gradient(circle at 26% 14%, rgba(143,224,180,.20), transparent 26%),
+    radial-gradient(circle at 14% 78%, rgba(60,179,113,.24), transparent 34%),
+    linear-gradient(160deg, rgba(20,67,44,.78), rgba(12,36,25,.90));
 }
 
 .asset-frame__fallback-scene::before {
   content: '';
   position: absolute;
   inset: 0;
-  opacity: .18;
+  opacity: .14;
   background-image:
     radial-gradient(circle at 12% 18%, rgba(255,255,255,.38) 0 1px, transparent 1px 5px),
     radial-gradient(circle at 78% 42%, rgba(255,255,255,.28) 0 1px, transparent 1px 6px);
@@ -209,7 +211,7 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
   bottom: -18%;
   height: 52%;
   border-radius: 52% 52% 0 0;
-  background: linear-gradient(180deg, rgba(60,179,113,.30), rgba(7,23,15,.92));
+  background: linear-gradient(180deg, rgba(60,179,113,.38), rgba(11,31,21,.86));
   filter: blur(.2px);
 }
 
@@ -222,7 +224,7 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
 
 .asset-frame__hill--front {
   height: 42%;
-  background: linear-gradient(180deg, rgba(44,124,80,.66), rgba(5,19,12,.98));
+  background: linear-gradient(180deg, rgba(55,151,96,.70), rgba(10,30,20,.94));
 }
 
 .asset-frame__tent {

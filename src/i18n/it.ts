@@ -86,9 +86,9 @@ export const it = {
     title: 'Clepek — assistente di Camping Clepardia',
     status: 'Pronto ad aiutare',
     intro:
-      'Ciao! Sono Clepek, il tuo assistente di Camping Clepardia. Posso aiutarti rapidamente con prezzi, bungalow, tram per il centro o contatto con la reception.',
+      'Ciao! 👋 Sono Clepek, il tuo assistente di Camping Clepardia. Posso aiutarti rapidamente con prezzi, bungalow, tram per il centro o contatto con la reception.',
     notice:
-      'Le risposte sono informative. Le prenotazioni sono confermate dalla reception.',
+      'Le risposte sono informative. Prenotazioni e disponibilità sono confermate dalla reception.',
     quickLabel: 'Temi rapidi',
     inputLabel: 'Scrivi un messaggio',
     inputPlaceholder: 'Scrivi un messaggio...',

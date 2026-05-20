@@ -31,7 +31,15 @@ const loaderMessages = t.loader.messages;
   })();
 </script>
 
-<div class="page-loader" hidden inert aria-hidden="true" data-loader-messages={JSON.stringify(loaderMessages)}>
+<div
+  class="page-loader"
+  hidden
+  inert
+  aria-hidden="true"
+  data-loader-message-0={loaderMessages[0]}
+  data-loader-message-1={loaderMessages[1]}
+  data-loader-message-2={loaderMessages[2]}
+>
   <div class="page-loader__particles" aria-hidden="true">
     <span></span>
     <span></span>
@@ -44,9 +52,11 @@ const loaderMessages = t.loader.messages;
     <div class="page-loader__glow"></div>
     <img class="page-loader__logo" src={loaderLogo} alt="" width="240" height="240" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
   </div>
-  <p class="page-loader__status" id="pageLoaderStatus">{loaderMessages[0]}</p>
+  <p class="page-loader__status" id="pageLoaderStatus"></p>
   <div class="page-loader__line"></div>
 </div>
+
+<noscript><style>.page-loader{display:none!important}</style></noscript>
 
 <script is:inline>
   (() => {
@@ -57,7 +67,11 @@ const loaderMessages = t.loader.messages;
     loader.hidden = false;
     loader.removeAttribute('inert');
     loader.setAttribute('aria-hidden', 'false');
-    loader.querySelector('.page-loader__status')?.setAttribute('aria-live', 'polite');
+    const status = loader.querySelector('.page-loader__status');
+    if (status instanceof HTMLElement) {
+      status.textContent = loader.dataset.loaderMessage0 || '';
+      status.setAttribute('aria-live', 'polite');
+    }
   })();
 </script>
 
@@ -69,12 +83,13 @@ const loaderMessages = t.loader.messages;
   const loader = document.querySelector('.page-loader');
   const loaderStatus = document.getElementById('pageLoaderStatus');
   const loaderMessages = (() => {
-    try {
-      const parsed = JSON.parse(loader?.dataset.loaderMessages ?? '[]');
-      return Array.isArray(parsed) && parsed.length ? parsed : ['Loading Camping Clepardia'];
-    } catch {
-      return ['Loading Camping Clepardia'];
-    }
+    const messages = [
+      loader?.dataset.loaderMessage0,
+      loader?.dataset.loaderMessage1,
+      loader?.dataset.loaderMessage2,
+    ].filter(Boolean);
+
+    return messages.length ? messages : ['Loading Camping Clepardia'];
   })();
   let lenis;
   let rafId = 0;

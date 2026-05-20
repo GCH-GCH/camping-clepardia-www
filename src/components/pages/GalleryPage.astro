@@ -400,7 +400,6 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
             {!item.imageExists && (
               <>
                 <em>{galleryText.photoComingSoon}</em>
-                <p>{item.alt}</p>
               </>
             )}
           </span>
@@ -694,10 +693,10 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 
 .gallery-card--fallback {
   background:
-    linear-gradient(135deg, rgba(12, 34, 22, .16), rgba(8, 24, 16, .72)),
-    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .26), transparent 36%),
-    radial-gradient(circle at 16% 78%, rgba(60,179,113,.22), transparent 34%),
-    linear-gradient(135deg, #284734, #0f2118);
+    linear-gradient(135deg, rgba(14, 44, 29, .24), rgba(14, 42, 29, .72)),
+    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .30), transparent 36%),
+    radial-gradient(circle at 16% 78%, rgba(60,179,113,.32), transparent 38%),
+    linear-gradient(135deg, #345f45, #132c20);
 }
 
 .gallery-card__mood {
@@ -711,7 +710,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   content: '';
   position: absolute;
   inset: 0;
-  opacity: .15;
+  opacity: .13;
   background-image:
     radial-gradient(circle at 18% 22%, rgba(255,255,255,.36) 0 1px, transparent 1px 5px),
     radial-gradient(circle at 72% 52%, rgba(255,255,255,.24) 0 1px, transparent 1px 6px);
@@ -727,7 +726,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   aspect-ratio: 1;
   border-radius: 999px;
   background: radial-gradient(circle, rgba(255,236,185,.88), rgba(242,192,120,.42) 42%, transparent 70%);
-  opacity: .68;
+  opacity: .76;
 }
 
 .gallery-card__mood-shape {
@@ -737,7 +736,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   bottom: -17%;
   height: 48%;
   border-radius: 52% 52% 0 0;
-  background: linear-gradient(180deg, rgba(60,179,113,.30), rgba(6,22,14,.95));
+  background: linear-gradient(180deg, rgba(60,179,113,.40), rgba(10,30,20,.88));
 }
 
 .gallery-card__mood-shape--back {
@@ -748,7 +747,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 
 .gallery-card__mood-shape--front {
   height: 40%;
-  background: linear-gradient(180deg, rgba(48,135,86,.66), rgba(5,18,11,.98));
+  background: linear-gradient(180deg, rgba(55,151,96,.70), rgba(10,30,20,.94));
 }
 
 .gallery-card__mood-icon {
@@ -760,12 +759,12 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   display: grid;
   place-items: center;
   border-radius: 24px;
-  color: #f5fff8;
-  border: 1px solid rgba(143,224,180,.24);
+  color: #f8fff9;
+  border: 1px solid rgba(143,224,180,.32);
   background:
-    radial-gradient(circle at 28% 18%, rgba(255,255,255,.28), transparent 34%),
-    rgba(60,179,113,.18);
-  box-shadow: 0 20px 50px rgba(60,179,113,.18), inset 0 1px 0 rgba(255,255,255,.16);
+    radial-gradient(circle at 28% 18%, rgba(255,255,255,.34), transparent 34%),
+    linear-gradient(135deg, rgba(60,179,113,.32), rgba(60,179,113,.15));
+  box-shadow: 0 20px 56px rgba(60,179,113,.26), 0 0 30px rgba(60,179,113,.12), inset 0 1px 0 rgba(255,255,255,.18);
 }
 
 .gallery-card__mood-icon svg {
@@ -821,13 +820,15 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 
 .gallery-card__body em {
   width: fit-content;
-  padding: 7px 11px;
+  padding: 6px 10px;
   border: 1px solid rgba(143,224,180,.24);
   border-radius: 999px;
-  color: #d9ffe9;
-  background: rgba(60,179,113,.14);
-  font-size: .78rem;
+  color: #e9fff1;
+  background: rgba(60,179,113,.13);
+  font-size: .68rem;
   font-weight: 900;
+  letter-spacing: .10em;
+  text-transform: uppercase;
 }
 
 .gallery-card__body p {
