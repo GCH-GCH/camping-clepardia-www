@@ -1060,6 +1060,72 @@ const addonIcons: Record<string, string> = {
   }
 }
 
+/* Task 48: premium pricing polish */
+.pricing-calculator__form {
+  border-color: rgba(60,179,113,.16);
+  background:
+    radial-gradient(circle at 6% 0%, rgba(60,179,113,.10), transparent 34%),
+    rgba(255,255,255,.82);
+}
+
+.pricing-calculator__option > span,
+.pricing-calculator__addon > span {
+  position: relative;
+  overflow: hidden;
+}
+
+.pricing-calculator__option > span::after,
+.pricing-calculator__addon > span::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 90% 12%, rgba(60,179,113,.12), transparent 34%);
+  transition: opacity .24s ease;
+}
+
+.pricing-calculator__option:hover > span::after,
+.pricing-calculator__addon:hover > span::after,
+.pricing-calculator__option input:checked + span::after,
+.pricing-calculator__addon input:checked + span::after {
+  opacity: 1;
+}
+
+.pricing-calculator__option-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 20px;
+}
+
+.pricing-summary {
+  overflow: hidden;
+  border-color: rgba(143,224,180,.18);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.26), transparent 34%),
+    radial-gradient(circle at 92% 16%, rgba(242,192,120,.16), transparent 34%),
+    linear-gradient(145deg, rgba(9,28,18,.96), rgba(17,45,30,.91));
+  box-shadow:
+    0 30px 88px rgba(0,0,0,.22),
+    0 0 46px rgba(60,179,113,.18),
+    inset 0 1px 0 rgba(255,255,255,.13);
+}
+
+.pricing-summary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.10), transparent 34%),
+    repeating-linear-gradient(120deg, transparent 0 26px, rgba(255,255,255,.026) 27px 28px);
+}
+
+.pricing-summary > * {
+  position: relative;
+  z-index: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pricing-calculator *,
   .pricing-mobile-summary * {

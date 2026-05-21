@@ -1149,6 +1149,79 @@ const experienceItems = [
   .hero__scroll-indicator { display: none; }
 }
 
+/* Task 48: final premium travel polish */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 28% 40%, rgba(143,224,180,.10), transparent 34%),
+    radial-gradient(ellipse at 76% 30%, rgba(242,192,120,.13), transparent 30%),
+    linear-gradient(180deg, transparent 0 68%, rgba(11, 26, 20, .22) 100%);
+  mix-blend-mode: screen;
+  opacity: .78;
+}
+
+.hero__overlay--cinematic {
+  background:
+    linear-gradient(90deg, rgba(5, 17, 11, .84) 0%, rgba(8, 28, 18, .62) 34%, rgba(18, 52, 34, .25) 68%, rgba(17, 27, 17, .04) 100%),
+    linear-gradient(180deg, rgba(2, 8, 5, .18) 0%, transparent 42%, rgba(6, 17, 12, .34) 100%);
+}
+
+.hero__overlay--vignette {
+  background:
+    radial-gradient(ellipse at center, transparent 34%, rgba(8, 26, 17, .08) 68%, rgba(5, 18, 12, .34) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.08), transparent 46%, rgba(5,18,12,.24));
+}
+
+.hero__experience-card {
+  border-color: rgba(143,224,180,.30);
+  background:
+    radial-gradient(circle at 16% -8%, rgba(143,224,180,.24), transparent 34%),
+    radial-gradient(circle at 88% 10%, rgba(242,192,120,.24), transparent 38%),
+    linear-gradient(145deg, rgba(255,255,255,.18), rgba(255,255,255,.070));
+  box-shadow:
+    0 42px 110px rgba(0,0,0,.31),
+    0 0 78px rgba(60,179,113,.23),
+    0 0 38px rgba(242,192,120,.10),
+    inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+.hero__experience-card::before {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.22), transparent 32%),
+    radial-gradient(circle at 20% 84%, rgba(60,179,113,.18), transparent 32%),
+    repeating-linear-gradient(120deg, transparent 0 24px, rgba(255,255,255,.035) 25px 26px);
+}
+
+.hero-experience-card__halo {
+  animation: heroHaloBreathe 6s ease-in-out infinite;
+}
+
+.hero-experience-card__chip {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.09),
+    0 8px 26px rgba(0,0,0,.10);
+}
+
+.hero-experience-card__chip:hover {
+  transform: translateY(-5px);
+  border-color: rgba(143,224,180,.48);
+  box-shadow: 0 20px 52px rgba(60,179,113,.20), inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+.hero__button--primary {
+  box-shadow:
+    0 24px 60px rgba(60,179,113,.38),
+    0 0 0 8px rgba(60,179,113,.08);
+}
+
+.hero__button--secondary {
+  border-color: rgba(143,224,180,.30);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero__parallax {
     will-change: auto;
@@ -1212,5 +1285,10 @@ const experienceItems = [
 @keyframes heroChipFloat {
   0%, 100% { translate: 0 0; }
   50% { translate: 0 -3px; }
+}
+
+@keyframes heroHaloBreathe {
+  0%, 100% { transform: scale(1); opacity: .76; }
+  50% { transform: scale(1.08); opacity: .94; }
 }
 </style>

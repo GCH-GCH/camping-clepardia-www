@@ -1216,3 +1216,100 @@ html[data-theme="dark"] :is(
     linear-gradient(145deg, rgba(255,255,255,.115), rgba(255,255,255,.065)),
     radial-gradient(circle at 0% 0%, rgba(60,179,113,.16), transparent 36%) !important;
 }
+
+/* Task 48: final realism and production polish */
+html[data-theme="dark"] {
+  --color-bg-primary: #0B1A14;
+  --color-bg-secondary: #102117;
+  --color-bg-tertiary: #173524;
+  --color-text-primary: #F6FCF7;
+  --color-text-secondary: rgba(246, 252, 247, .90);
+  --color-text-tertiary: rgba(246, 252, 247, .76);
+  --theme-body-background:
+    radial-gradient(circle at 10% 7%, rgba(60,179,113,.26), transparent 30%),
+    radial-gradient(circle at 84% 10%, rgba(242,192,120,.16), transparent 31%),
+    radial-gradient(circle at 54% 102%, rgba(60,179,113,.20), transparent 42%),
+    linear-gradient(180deg, #0B1A14 0%, #102117 55%, #173524 100%);
+  --theme-section-background:
+    radial-gradient(circle at 14% 0%, rgba(60,179,113,.18), transparent 30%),
+    radial-gradient(circle at 90% 8%, rgba(242,192,120,.12), transparent 30%),
+    linear-gradient(180deg, #102117 0%, #0B1A14 100%);
+  --theme-card-background: rgba(255,255,255,.112);
+  --theme-card-border: rgba(143,224,180,.24);
+  --theme-card-shadow: 0 26px 78px rgba(0,0,0,.13), 0 0 46px rgba(60,179,113,.19);
+}
+
+html[data-theme="light"] {
+  --color-bg-primary: #FAF9F0;
+  --color-bg-secondary: #F3F8EF;
+  --color-bg-tertiary: #EAF4E8;
+  --theme-body-background:
+    radial-gradient(circle at 10% 8%, rgba(60,179,113,.14), transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(242,192,120,.18), transparent 30%),
+    linear-gradient(180deg, #FFFDF4 0%, #F3F8EF 48%, #FAF8EE 100%);
+  --theme-card-background: rgba(255,255,255,.86);
+  --theme-card-shadow: 0 30px 84px rgba(17,40,28,.105), 0 0 0 1px rgba(255,255,255,.54) inset, 0 0 30px rgba(60,179,113,.075);
+}
+
+.premium-card,
+.glass-card,
+.info-card,
+.price-card,
+.cta-card {
+  backdrop-filter: blur(18px) saturate(128%);
+  -webkit-backdrop-filter: blur(18px) saturate(128%);
+}
+
+.photo-frame,
+.asset-frame--fallback,
+.gallery-card--fallback {
+  background:
+    radial-gradient(circle at 18% 14%, rgba(143,224,180,.24), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgba(242,192,120,.22), transparent 32%),
+    linear-gradient(135deg, #45785a 0%, #183927 54%, #102418 100%) !important;
+}
+
+.asset-frame--fallback::after,
+.gallery-card--fallback::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .18;
+  background-image:
+    radial-gradient(circle at 20% 24%, rgba(255,255,255,.32) 0 1px, transparent 1px 7px),
+    radial-gradient(circle at 78% 52%, rgba(255,255,255,.22) 0 1px, transparent 1px 10px),
+    linear-gradient(118deg, transparent 0 20%, rgba(255,255,255,.08) 20.5% 21%, transparent 21.5% 100%);
+  background-size: 10px 10px, 16px 16px, auto;
+  mix-blend-mode: screen;
+}
+
+.section-kicker,
+.section-overline {
+  color: #3CB371;
+}
+
+html[data-theme="dark"] .section-kicker,
+html[data-theme="dark"] .section-overline {
+  color: #8fe0b4;
+  text-shadow: 0 0 22px rgba(60,179,113,.18);
+}
+
+@media (max-width: 430px) {
+  .site-section {
+    padding-top: clamp(56px, 16vw, 78px);
+    padding-bottom: clamp(56px, 16vw, 78px);
+  }
+
+  .section-title {
+    line-height: 1.04;
+  }
+
+  .premium-card,
+  .glass-card,
+  .info-card,
+  .price-card,
+  .cta-card {
+    border-radius: 22px;
+  }
+}
