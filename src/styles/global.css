@@ -250,20 +250,27 @@ html[data-theme="light"] {
 /* ==================== */
 /* BASE STYLES */
 /* ==================== */
-* {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
 html {
+  width: 100%;
+  max-width: 100%;
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: clip;
+  overflow-x: hidden;
 }
 
 body {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   font-family: var(--font-family-sans);
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-normal);
@@ -273,6 +280,13 @@ body {
   transition: background-color var(--transition-base) var(--ease-smooth),
               color var(--transition-base) var(--ease-smooth);
   overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
 }
 
 body {
@@ -391,7 +405,7 @@ input, textarea, select {
 /* ==================== */
 .container {
   width: 100%;
-  max-width: var(--container-2xl);
+  max-width: min(var(--container-2xl), 100%);
   margin-left: auto;
   margin-right: auto;
   padding-left: var(--container-padding-mobile);
@@ -609,6 +623,7 @@ input, textarea, select {
   position: relative;
   z-index: 1;
   width: min(100% - 32px, var(--container-xl));
+  max-width: 100%;
   margin-inline: auto;
 }
 

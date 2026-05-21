@@ -260,7 +260,6 @@ const quickActions = [
 <style is:global>
 body.has-floating-chat-open {
   overflow: hidden;
-  touch-action: none;
 }
 
 .sr-only {
@@ -776,6 +775,7 @@ html[data-theme="light"] .floating-chat__quick button {
 @media (max-width: 640px) {
   .floating-chat {
     inset: auto max(16px, env(safe-area-inset-right)) max(84px, calc(84px + env(safe-area-inset-bottom))) auto;
+    max-width: calc(100vw - 24px);
     opacity: 0;
     transform: translateY(10px) scale(.96);
     transition:
@@ -804,9 +804,17 @@ html[data-theme="light"] .floating-chat__quick button {
     bottom: max(12px, env(safe-area-inset-bottom));
     left: 12px;
     width: auto;
-    max-height: none;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 104px);
     border-radius: 26px;
     transform-origin: bottom center;
+  }
+
+  .floating-chat__messages {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .floating-chat__quick {

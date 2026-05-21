@@ -21,6 +21,10 @@ export const siteAssets = {
     icon: '/brand/logo/clepardia-logo-icon.svg',
     loader: '/brand/logo/clepardia-logo-loader.svg',
   },
+  motion: {
+    loaderLogo: '/motion/loader/loader-logo.svg',
+    loaderLogoWhite: '/motion/loader/loader-logo-white.svg',
+  },
   hero: {
     desktop: '/images/hero/hero-camping-clepardia-main.webp',
     mobile: '/images/hero/hero-camping-clepardia-main-mobile.webp',
@@ -178,6 +182,14 @@ export const getMissingRequiredAssets = () =>
 
 export const logoMain = siteAssets.logo.mainSvg;
 export const logoMainPng = siteAssets.logo.mainPng;
-export const loaderLogo = publicAssetExists(siteAssets.logo.loader) ? siteAssets.logo.loader : logoMain;
+const loaderLogoCandidates = [
+  siteAssets.logo.mainSvg,
+  siteAssets.logo.whiteSvg,
+  siteAssets.motion.loaderLogoWhite,
+  siteAssets.logo.loader,
+  siteAssets.motion.loaderLogo,
+];
+export const loaderLogo = loaderLogoCandidates.find((asset) => publicAssetExists(asset)) ?? logoMain;
+export const loaderLogoFallback = publicAssetExists(siteAssets.logo.mainPng) ? siteAssets.logo.mainPng : logoMain;
 export const heroDesktop = siteAssets.hero.desktop;
 export const heroMobile = siteAssets.hero.mobile;

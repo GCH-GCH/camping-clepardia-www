@@ -1,6 +1,6 @@
 ---
 import { Buffer } from 'node:buffer';
-import { loaderLogo, logoMainPng } from '@/data/assets';
+import { loaderLogo, loaderLogoFallback } from '@/data/assets';
 import { getTranslations } from '@/i18n/config';
 import { getPathContext } from '@/utils/localizedLinks';
 
@@ -92,7 +92,7 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
         width="260"
         height="260"
         decoding="async"
-        onerror={`if (!this.dataset.fallbackApplied) { this.dataset.fallbackApplied = 'true'; this.src = '${logoMainPng}'; } else { this.hidden = true; this.closest('.page-loader__core')?.classList.add('has-fallback'); }`}
+        onerror={`if (!this.dataset.fallbackApplied) { this.dataset.fallbackApplied = 'true'; this.src = '${loaderLogoFallback}'; } else { this.hidden = true; this.closest('.page-loader__core')?.classList.add('has-fallback'); }`}
       />
     </div>
   </div>
