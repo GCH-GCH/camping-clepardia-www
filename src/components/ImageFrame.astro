@@ -52,7 +52,6 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
         <Icon name={fallbackIcon} size={28} strokeWidth={1.75} />
       </span>
       <div class="asset-frame__fallback-content">
-        <span class="asset-frame__fallback-kicker">Camping Clepardia</span>
         <span>{label}</span>
       </div>
     </>
@@ -110,10 +109,13 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
 .asset-frame__fallback-content {
   position: absolute;
   left: 22px;
-  right: 22px;
   bottom: 22px;
   z-index: 2;
   color: rgba(255,255,255,.88);
+}
+
+.asset-frame figcaption {
+  right: 22px;
 }
 
 .asset-frame figcaption,
@@ -127,7 +129,18 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
 
 .asset-frame__fallback-content {
   display: grid;
+  max-width: calc(100% - 120px);
+  width: fit-content;
   gap: 8px;
+  padding: 10px 13px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(9,27,18,.40), rgba(60,179,113,.12)),
+    rgba(255,255,255,.08);
+  box-shadow: 0 14px 34px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .asset-frame__fallback-icon {
@@ -267,8 +280,15 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
   .asset-frame figcaption,
   .asset-frame__fallback-content {
     left: 18px;
-    right: 18px;
     bottom: 18px;
+  }
+
+  .asset-frame figcaption {
+    right: 18px;
+  }
+
+  .asset-frame__fallback-content {
+    max-width: calc(100% - 104px);
   }
 }
 </style>

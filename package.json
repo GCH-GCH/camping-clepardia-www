@@ -9,7 +9,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "images:webp": "node scripts/convert-raw-to-webp.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.2",
@@ -18,5 +19,8 @@
     "lenis": "^1.3.23",
     "lucide": "^1.16.0",
     "tailwindcss": "^4.3.0"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5"
   }
 }

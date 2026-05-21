@@ -25,6 +25,11 @@ export const siteAssets = {
     loaderLogo: '/motion/loader/loader-logo.svg',
     loaderLogoWhite: '/motion/loader/loader-logo-white.svg',
   },
+  ui: {
+    campy: {
+      icon: '/images/ui/campy/campy-icon.webp',
+    },
+  },
   hero: {
     desktop: '/images/hero/hero-camping-clepardia-main.webp',
     mobile: '/images/hero/hero-camping-clepardia-main-mobile.webp',
@@ -183,8 +188,8 @@ export const getMissingRequiredAssets = () =>
 export const logoMain = siteAssets.logo.mainSvg;
 export const logoMainPng = siteAssets.logo.mainPng;
 const loaderLogoCandidates = [
-  siteAssets.logo.mainSvg,
   siteAssets.logo.whiteSvg,
+  siteAssets.logo.mainSvg,
   siteAssets.motion.loaderLogoWhite,
   siteAssets.logo.loader,
   siteAssets.motion.loaderLogo,
@@ -193,3 +198,4 @@ export const loaderLogo = loaderLogoCandidates.find((asset) => publicAssetExists
 export const loaderLogoFallback = publicAssetExists(siteAssets.logo.mainPng) ? siteAssets.logo.mainPng : logoMain;
 export const heroDesktop = siteAssets.hero.desktop;
 export const heroMobile = siteAssets.hero.mobile;
+export const campyIcon = siteAssets.ui.campy.icon;

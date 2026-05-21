@@ -130,6 +130,9 @@ const navMessages = {
         <a href={homeHref} class="main-navbar-mobile__brand" aria-label={t.nav.homeAria}>
           <img src={logoMain} alt="Camping Clepardia" width="180" height="44" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
         </a>
+        <button class="main-navbar-mobile__close" type="button" data-mobile-close aria-label={t.nav.closeMenu}>
+          <Icon name="close" size={22} strokeWidth={2.2} />
+        </button>
       </div>
 
       <ul class="main-navbar-mobile__links">
@@ -192,6 +195,7 @@ const navMessages = {
     const langToggle = document.getElementById('mainNavbarLangToggle');
     const langMenu = document.getElementById('mainNavbarLangMenu');
     const mobileLinks = document.querySelectorAll('.main-navbar-mobile a, .main-navbar__cta--mobile');
+    const mobileCloseButtons = document.querySelectorAll('[data-mobile-close]');
     const themeToggles = document.querySelectorAll('[data-theme-toggle]');
 
     let mobileOpen = false;
@@ -259,6 +263,10 @@ const navMessages = {
     });
 
     toggle?.addEventListener('click', () => setMobileOpen(!mobileOpen));
+
+    mobileCloseButtons.forEach((button) => {
+      button.addEventListener('click', () => setMobileOpen(false));
+    });
 
     mobile?.addEventListener('click', (event) => {
       if (event.target === mobile) setMobileOpen(false);
@@ -759,9 +767,17 @@ html[data-theme="light"] .main-navbar-theme__icon--moon {
 }
 
 .main-navbar-mobile__top {
-  display: flex;
-  justify-content: center;
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 26px;
+}
+
+.main-navbar-mobile__brand {
+  grid-column: 2;
+  justify-self: center;
 }
 
 .main-navbar-mobile__brand img {
@@ -770,6 +786,43 @@ html[data-theme="light"] .main-navbar-theme__icon--moon {
   object-fit: contain;
   image-rendering: auto;
   filter: drop-shadow(0 18px 38px rgba(60,179,113,.24));
+}
+
+.main-navbar-mobile__close {
+  position: fixed;
+  top: max(22px, env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  z-index: 4;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(143,224,180,.28);
+  border-radius: 17px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255,255,255,.16), transparent 38%),
+    rgba(11, 34, 23, .78);
+  box-shadow: 0 18px 44px rgba(0,0,0,.22), 0 0 24px rgba(60,179,113,.14), inset 0 1px 0 rgba(255,255,255,.10);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: transform .22s ease, border-color .22s ease, background .22s ease;
+}
+
+.main-navbar-mobile__close:hover {
+  transform: translateY(-1px);
+  border-color: rgba(143,224,180,.48);
+  background: rgba(60,179,113,.18);
+}
+
+.main-navbar-mobile__close svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .main-navbar-mobile__links {
@@ -929,6 +982,13 @@ html[data-theme="light"] .main-navbar-mobile__language {
   color: #173624;
   border-color: rgba(25, 54, 38, .12);
   background: rgba(255,255,255,.56);
+}
+
+html[data-theme="light"] .main-navbar-mobile__close {
+  color: #102018;
+  border-color: rgba(25,54,38,.14);
+  background: rgba(247,246,238,.78);
+  box-shadow: 0 18px 42px rgba(42,62,45,.16), 0 0 24px rgba(60,179,113,.10), inset 0 1px 0 rgba(255,255,255,.72);
 }
 
 @media (max-width: 1240px) and (min-width: 921px) {

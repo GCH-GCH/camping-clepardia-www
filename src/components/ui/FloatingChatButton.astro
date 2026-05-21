@@ -2,10 +2,12 @@
 import { getTranslations } from '@/i18n/config';
 import { getPathContext } from '@/utils/localizedLinks';
 import Icon from '@/components/ui/Icon.astro';
+import { campyIcon, publicAssetExists } from '@/data/assets';
 
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
 const chatTexts = t.chat;
+const hasCampyIcon = publicAssetExists(campyIcon);
 const quickActions = [
   { key: 'pricing', icon: 'pricing', label: chatTexts.actions.pricing },
   { key: 'transit', icon: 'tram', label: chatTexts.actions.transit ?? chatTexts.actions.directions },
@@ -26,7 +28,11 @@ const quickActions = [
     aria-expanded="false"
     aria-controls="floatingChatPanel"
   >
-    <Icon name="chat" class="floating-chat__icon" size={28} strokeWidth={1.9} />
+    {hasCampyIcon ? (
+      <img class="floating-chat__button-image" src={campyIcon} alt="" width="46" height="46" loading="eager" decoding="async" />
+    ) : (
+      <span class="floating-chat__button-fallback" aria-hidden="true">CAMPY</span>
+    )}
   </button>
 
   <div class="floating-chat__scrim" data-chat-close aria-hidden="true"></div>
@@ -43,8 +49,14 @@ const quickActions = [
   >
     <header class="floating-chat__header">
       <span class="floating-chat__avatar" aria-hidden="true">
-        <Icon name="sparkle" size={21} strokeWidth={1.9} />
-        <strong>C</strong>
+        {hasCampyIcon ? (
+          <img class="floating-chat__avatar-image" src={campyIcon} alt="" width="48" height="48" loading="lazy" decoding="async" />
+        ) : (
+          <>
+            <Icon name="sparkle" size={21} strokeWidth={1.9} />
+            <strong>CAMPY</strong>
+          </>
+        )}
       </span>
       <div class="floating-chat__identity">
         <span>{chatTexts.title}</span>
@@ -335,6 +347,29 @@ body.has-floating-chat-open {
   filter: drop-shadow(0 8px 18px rgba(0,0,0,.20));
 }
 
+.floating-chat__button-image {
+  position: relative;
+  z-index: 1;
+  width: 46px;
+  height: 46px;
+  display: block;
+  object-fit: contain;
+  border-radius: 999px;
+  filter:
+    drop-shadow(0 10px 22px rgba(0,0,0,.22))
+    drop-shadow(0 0 16px rgba(255,255,255,.18));
+}
+
+.floating-chat__button-fallback {
+  position: relative;
+  z-index: 1;
+  color: #082017;
+  font-size: .68rem;
+  font-weight: 1000;
+  letter-spacing: .06em;
+  text-shadow: 0 1px 0 rgba(255,255,255,.34);
+}
+
 .floating-chat.is-open .floating-chat__button {
   opacity: 0;
   pointer-events: none;
@@ -422,6 +457,17 @@ body.has-floating-chat-open {
   box-shadow: 0 16px 36px rgba(60,179,113,.28), 0 0 22px rgba(242,192,120,.14), inset 0 1px 0 rgba(255,255,255,.38);
 }
 
+.floating-chat__avatar-image {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,.16));
+}
+
 .floating-chat__avatar svg {
   position: absolute;
   right: 7px;
@@ -435,9 +481,9 @@ body.has-floating-chat-open {
   position: relative;
   z-index: 1;
   color: #092016;
-  font-size: 1.08rem;
+  font-size: .62rem;
   font-weight: 1000;
-  letter-spacing: -.02em;
+  letter-spacing: .08em;
   text-shadow: 0 1px 0 rgba(255,255,255,.36);
 }
 
