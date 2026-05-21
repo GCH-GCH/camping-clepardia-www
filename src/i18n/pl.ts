@@ -88,16 +88,20 @@ export const pl = {
     actions: {
       pricing: 'Sprawdź cennik',
       directions: 'Jak dojechać?',
+      transit: 'Tramwaj do centrum',
       bungalow: 'Zapytaj o domek',
       reception: 'Kontakt z recepcją',
       quiet: 'Zasady ciszy',
-      maps: 'Google Maps',
+      maps: 'Dojazd Google Maps',
+      attractions: 'Atrakcje',
     },
     answers: {
       pricing:
         'Orientacyjnie: kamper 80 PLN / noc, przyczepa 60 PLN / noc, van 75 PLN / noc, prąd 25 PLN / noc, pies bezpłatnie. Pełny kalkulator znajdziesz na stronie Cennik.',
       directions:
         'Najwygodniej zostawić auto lub kampera na campingu i pojechać tramwajem w stronę centrum Krakowa. Do nawigacji zalecamy używać Google Maps. Wjazd / trasa dojazdu zmieniła się w 2022 roku, dlatego starsze nawigacje mogą prowadzić nieprawidłowo.',
+      transit:
+        'Do centrum najwygodniej pojechać tramwajem. Zostaw auto, kampera albo przyczepę na campingu i jedź do Starego Miasta bez szukania parkingu.',
       bungalows:
         'Domki mają osobną dostępność. Dostępne są tylko domki 2-os., 3-os. i 4-os. Ceny: 200/220 PLN, 250/300 PLN oraz 400/450 PLN zależnie od sezonu.',
       reception:
@@ -108,6 +112,8 @@ export const pl = {
         'Camping Clepardia nie jest miejscem imprezowym. Cisza nocna obowiązuje od 22:00 do 07:00. Jeśli planujesz imprezować, wybierz inne miejsce.',
       maps:
         'Do nawigacji zalecamy używać Google Maps. Wjazd / trasa dojazdu zmieniła się w 2022 roku, dlatego starsze nawigacje mogą prowadzić nieprawidłowo.',
+      attractions:
+        'Clepardia jest dobrą bazą do zwiedzania Krakowa, Wieliczki, Kazimierza, Ojcowa i Energylandii. Najpierw odpoczynek w zielonej bazie, potem wygodny wypad w Małopolskę.',
       fallback:
         'Najpewniej pomoże recepcja Camping Clepardia: +48 795 294 486 lub clepardia@gmail.com. CAMPY podpowiada najważniejsze informacje, a rezerwacje potwierdza recepcja.',
     },

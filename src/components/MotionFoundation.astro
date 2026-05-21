@@ -1,6 +1,6 @@
 ---
 import { Buffer } from 'node:buffer';
-import { logoMain, logoMainPng } from '@/data/assets';
+import { loaderLogo, logoMainPng } from '@/data/assets';
 import { getTranslations } from '@/i18n/config';
 import { getPathContext } from '@/utils/localizedLinks';
 
@@ -87,7 +87,7 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
       <span class="page-loader__logo-fallback" aria-hidden="true">CC</span>
       <img
         class="page-loader__logo"
-        src={logoMain}
+        src={loaderLogo}
         alt=""
         width="260"
         height="260"
@@ -379,10 +379,10 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
   overflow: hidden;
   color: #F4FBF6;
   background:
-    radial-gradient(circle at 50% 44%, rgba(60, 179, 113, .22), transparent 22%),
-    radial-gradient(circle at 72% 28%, rgba(242, 192, 120, .17), transparent 34%),
-    radial-gradient(circle at 18% 72%, rgba(60, 179, 113, .12), transparent 40%),
-    linear-gradient(135deg, #07140F 0%, #0B1A14 46%, #102117 100%);
+    radial-gradient(circle at 50% 44%, rgba(60, 179, 113, .30), transparent 24%),
+    radial-gradient(circle at 72% 28%, rgba(242, 192, 120, .20), transparent 34%),
+    radial-gradient(circle at 18% 72%, rgba(60, 179, 113, .16), transparent 40%),
+    linear-gradient(135deg, #0B1A14 0%, #102117 48%, #163222 100%);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -436,8 +436,8 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: scale(1.025);
-  filter: blur(8px);
+  transform: scale(1.035);
+  filter: blur(10px);
 }
 
 .page-loader__ambient,
@@ -493,8 +493,8 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
   position: relative;
   z-index: 2;
   grid-row: 2;
-  width: clamp(210px, 23vw, 280px);
-  height: clamp(210px, 23vw, 280px);
+  width: clamp(220px, 24vw, 300px);
+  height: clamp(220px, 24vw, 300px);
   display: grid;
   place-items: center;
   animation: loaderStageIn .72s cubic-bezier(.22, 1, .36, 1) both;
@@ -514,7 +514,7 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
   border: 1px solid rgba(244,251,246,.14);
   background:
     conic-gradient(from 0deg, transparent 0 10%, rgba(60,179,113,.62) 18%, rgba(242,192,120,.52) 27%, transparent 38% 100%);
-  box-shadow: 0 0 44px rgba(60,179,113,.14), inset 0 0 42px rgba(60,179,113,.08);
+  box-shadow: 0 0 54px rgba(60,179,113,.20), inset 0 0 46px rgba(60,179,113,.10);
   -webkit-mask: radial-gradient(circle, transparent 61%, #000 62%);
   mask: radial-gradient(circle, transparent 61%, #000 62%);
   animation: loaderOrbit 6.2s linear infinite;
@@ -570,8 +570,8 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
 .page-loader__core {
   position: relative;
   z-index: 2;
-  width: clamp(124px, 13vw, 156px);
-  height: clamp(124px, 13vw, 156px);
+  width: clamp(132px, 14vw, 166px);
+  height: clamp(132px, 14vw, 166px);
   display: grid;
   place-items: center;
   border-radius: 999px;
@@ -581,7 +581,7 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
   border: 1px solid rgba(255,255,255,.16);
   box-shadow:
     0 28px 90px rgba(0,0,0,.30),
-    0 0 54px rgba(60,179,113,.24),
+    0 0 68px rgba(60,179,113,.30),
     inset 0 1px 0 rgba(255,255,255,.16);
   animation: loaderBreath 2.25s ease-in-out infinite;
 }
@@ -590,12 +590,12 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
   position: relative;
   z-index: 2;
   display: block;
-  max-width: 78%;
+  max-width: 82%;
   width: auto;
-  height: clamp(96px, 10.6vw, 132px);
+  height: clamp(104px, 11.4vw, 140px);
   object-fit: contain;
   image-rendering: auto;
-  filter: drop-shadow(0 22px 44px rgba(60,179,113,.34)) drop-shadow(0 5px 18px rgba(242,192,120,.16));
+  filter: drop-shadow(0 24px 50px rgba(60,179,113,.40)) drop-shadow(0 6px 20px rgba(242,192,120,.20));
 }
 
 .page-loader__logo-fallback {
@@ -633,7 +633,7 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
   min-height: 24px;
   max-width: min(420px, calc(100vw - 48px));
   margin: 0;
-  color: rgba(244,251,246,.82);
+  color: rgba(244,251,246,.88);
   font-size: .76rem;
   font-weight: 900;
   letter-spacing: .15em;
@@ -659,7 +659,7 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
 
 .page-loader__progress-track {
   position: relative;
-  height: 4px;
+  height: 5px;
   overflow: hidden;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,.10);
@@ -683,7 +683,7 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
   width: var(--loader-progress);
   border-radius: inherit;
   background: linear-gradient(90deg, #3CB371, #8FE0B4 58%, #F2C078);
-  box-shadow: 0 0 22px rgba(60,179,113,.40);
+  box-shadow: 0 0 28px rgba(60,179,113,.48), 0 0 10px rgba(242,192,120,.20);
   transition: width .24s ease;
 }
 

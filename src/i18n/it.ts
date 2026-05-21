@@ -96,16 +96,20 @@ export const it = {
     actions: {
       pricing: 'Controlla i prezzi',
       directions: 'Come arrivare?',
+      transit: 'Tram per il centro',
       bungalow: 'Chiedi un bungalow',
       reception: 'Contatto reception',
       quiet: 'Silenzio notturno',
-      maps: 'Google Maps',
+      maps: 'Indicazioni Google Maps',
+      attractions: 'Attrazioni',
     },
     answers: {
       pricing:
         'Indicativamente: camper 80 PLN / notte, roulotte 60 PLN / notte, van 75 PLN / notte, elettricità 25 PLN / notte, cane gratuito. Il calcolatore completo è nella pagina Prezzi.',
       directions:
         'La soluzione più comoda è lasciare auto o camper al campeggio e prendere il tram verso il centro di Cracovia. Per la navigazione consigliamo Google Maps. L’ingresso / percorso di accesso è cambiato nel 2022, quindi i navigatori più vecchi possono indicare una strada sbagliata.',
+      transit:
+        'Il modo più comodo per raggiungere il centro è il tram. Lascia auto, camper o roulotte al campeggio e visita la Città Vecchia senza cercare parcheggio.',
       bungalows:
         'I bungalow hanno disponibilità separata. Sono disponibili solo bungalow da 2, 3 e 4 persone. Prezzi: 200/220 PLN, 250/300 PLN e 400/450 PLN secondo la stagione.',
       reception:
@@ -116,6 +120,8 @@ export const it = {
         'Camping Clepardia non è un luogo per feste. Il silenzio notturno è dalle 22:00 alle 07:00. Se vuoi fare festa, scegli un altro posto.',
       maps:
         'Per la navigazione consigliamo Google Maps. L’ingresso / percorso di accesso è cambiato nel 2022, quindi i navigatori più vecchi possono indicare una strada sbagliata.',
+      attractions:
+        'Clepardia è una base comoda per Cracovia, Wieliczka, Kazimierz, Ojców ed Energylandia. Prima relax nel verde, poi gite facili in Małopolska.',
       fallback:
         'La scelta più sicura è contattare la reception di Camping Clepardia: +48 795 294 486 o clepardia@gmail.com. CAMPY offre indicazioni rapide, la reception conferma le prenotazioni.',
     },

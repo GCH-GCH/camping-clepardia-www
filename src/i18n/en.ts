@@ -93,16 +93,20 @@ export const en = {
     actions: {
       pricing: 'Check prices',
       directions: 'How to get here?',
+      transit: 'Tram to the centre',
       bungalow: 'Ask about a bungalow',
       reception: 'Contact reception',
       quiet: 'Quiet hours',
-      maps: 'Google Maps',
+      maps: 'Google Maps directions',
+      attractions: 'Attractions',
     },
     answers: {
       pricing:
         'As a guide: motorhome 80 PLN / night, caravan 60 PLN / night, van 75 PLN / night, electricity 25 PLN / night and dogs stay free. The full calculator is on the Prices page.',
       directions:
         'The easiest way is to leave your car or camper at the campsite and take the tram towards the centre of Krakow. For navigation we recommend Google Maps: the entrance route changed in 2022, so older navigation systems may lead incorrectly.',
+      transit:
+        'The easiest way to reach the city centre is by tram. Leave your car, camper or caravan at the campsite and visit the Old Town without hunting for parking.',
       bungalows:
         'Bungalows have separate availability. 2-person: 200/220 PLN, 3-person: 250/300 PLN, 4-person: 400/450 PLN depending on season.',
       reception:
@@ -113,6 +117,8 @@ export const en = {
         'Camping Clepardia is not a party place. Quiet hours are from 22:00 to 07:00. If you plan to party, please choose another place.',
       maps:
         'For navigation we recommend Google Maps. The entrance / access route changed in 2022, so older navigation systems may lead incorrectly.',
+      attractions:
+        'Clepardia is a convenient base for Krakow, Wieliczka, Kazimierz, Ojców and Energylandia. Stay in the green base, then head out for easy Małopolska trips.',
       fallback:
         'The safest next step is to contact Camping Clepardia reception: +48 795 294 486 or clepardia@gmail.com. CAMPY shares key information, and reception confirms bookings.',
     },

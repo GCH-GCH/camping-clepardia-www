@@ -96,16 +96,20 @@ export const de = {
     actions: {
       pricing: 'Preise prüfen',
       directions: 'Wie komme ich hin?',
+      transit: 'Straßenbahn ins Zentrum',
       bungalow: 'Bungalow anfragen',
       reception: 'Kontakt zur Rezeption',
       quiet: 'Nachtruhe',
-      maps: 'Google Maps',
+      maps: 'Google Maps Anfahrt',
+      attractions: 'Attraktionen',
     },
     answers: {
       pricing:
         'Orientierungspreise: Wohnmobil 80 PLN / Nacht, Wohnwagen 60 PLN / Nacht, Van 75 PLN / Nacht, Strom 25 PLN / Nacht, Hund kostenlos. Den vollständigen Rechner finden Sie auf der Preisseite.',
       directions:
         'Am bequemsten ist es, Auto oder Camper auf dem Campingplatz zu lassen und mit der Straßenbahn Richtung Zentrum von Krakau zu fahren. Für die Navigation empfehlen wir Google Maps. Die Einfahrt / Zufahrt wurde 2022 geändert, ältere Navigationssysteme können falsch führen.',
+      transit:
+        'Ins Zentrum kommen Sie am bequemsten mit der Straßenbahn. Auto, Camper oder Wohnwagen bleiben auf dem Campingplatz, die Altstadt erreichen Sie ohne Parkplatzsuche.',
       bungalows:
         'Bungalows haben separate Verfügbarkeit. Es gibt nur 2-, 3- und 4-Personen-Bungalows. Preise: 200/220 PLN, 250/300 PLN und 400/450 PLN je nach Saison.',
       reception:
@@ -116,6 +120,8 @@ export const de = {
         'Camping Clepardia ist kein Partyort. Die Nachtruhe gilt von 22:00 bis 07:00. Wenn Sie feiern möchten, wählen Sie bitte einen anderen Ort.',
       maps:
         'Für die Navigation empfehlen wir Google Maps. Die Einfahrt / Zufahrt wurde 2022 geändert, ältere Navigationssysteme können falsch führen.',
+      attractions:
+        'Clepardia ist eine bequeme Basis für Krakau, Wieliczka, Kazimierz, Ojców und Energylandia. Erst entspannen im Grünen, dann einfach Małopolska entdecken.',
       fallback:
         'Am sichersten ist der Kontakt mit der Rezeption von Camping Clepardia: +48 795 294 486 oder clepardia@gmail.com. CAMPY gibt kurze Hinweise, die Buchung bestätigt die Rezeption.',
     },

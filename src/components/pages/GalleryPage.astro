@@ -137,7 +137,7 @@ const galleryTextByLanguage = {
       ['Bungalow von außen', 'Camping Clepardia Bungalow von außen'],
       ['Bungalow innen', 'Camping Clepardia Bungalow innen'],
       ['Terrasse am Bungalow', 'Terrasse am Camping Clepardia Bungalow'],
-      ['Bungalows für Familien', 'Bungalow für Familien und Gruppen'],
+      ['Bungalows für Gäste', 'Camping Clepardia Bungalows für Gäste'],
       ['Sanitärgebäude', 'Sanitärgebäude auf dem Campingplatz'],
       ['Duschen', 'Duschen für Gäste von Camping Clepardia'],
       ['Gästeküche', 'Gästeküche für Gäste'],
@@ -178,7 +178,7 @@ const galleryTextByLanguage = {
       ['Bungalow esterno', 'Bungalow Camping Clepardia dall’esterno'],
       ['Interno bungalow', 'Interno bungalow Camping Clepardia'],
       ['Terrazza del bungalow', 'Terrazza presso il bungalow Camping Clepardia'],
-      ['Bungalow per famiglie', 'Bungalow per famiglie e gruppi'],
+      ['Bungalow per ospiti', 'Bungalow Camping Clepardia per gli ospiti'],
       ['Edificio servizi', 'Edificio servizi nel camping'],
       ['Docce', 'Docce per gli ospiti di Camping Clepardia'],
       ['Cucina turistica', 'Cucina turistica per ospiti'],
@@ -693,10 +693,12 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 
 .gallery-card--fallback {
   background:
-    linear-gradient(135deg, rgba(14, 44, 29, .24), rgba(14, 42, 29, .72)),
-    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .30), transparent 36%),
-    radial-gradient(circle at 16% 78%, rgba(60,179,113,.32), transparent 38%),
-    linear-gradient(135deg, #345f45, #132c20);
+    linear-gradient(135deg, rgba(14, 44, 29, .20), rgba(14, 42, 29, .64)),
+    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .36), transparent 36%),
+    radial-gradient(circle at 16% 78%, rgba(60,179,113,.42), transparent 40%),
+    linear-gradient(135deg, #477b59, #173d29 58%, #10291c);
+  border-color: rgba(143,224,180,.38);
+  box-shadow: 0 30px 88px rgba(17,40,28,.20), 0 0 44px rgba(60,179,113,.16);
 }
 
 .gallery-card__mood {
@@ -727,6 +729,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   border-radius: 999px;
   background: radial-gradient(circle, rgba(255,236,185,.88), rgba(242,192,120,.42) 42%, transparent 70%);
   opacity: .76;
+  filter: blur(.3px);
 }
 
 .gallery-card__mood-shape {
@@ -762,9 +765,10 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   color: #f8fff9;
   border: 1px solid rgba(143,224,180,.32);
   background:
-    radial-gradient(circle at 28% 18%, rgba(255,255,255,.34), transparent 34%),
-    linear-gradient(135deg, rgba(60,179,113,.32), rgba(60,179,113,.15));
-  box-shadow: 0 20px 56px rgba(60,179,113,.26), 0 0 30px rgba(60,179,113,.12), inset 0 1px 0 rgba(255,255,255,.18);
+    radial-gradient(circle at 28% 18%, rgba(255,255,255,.38), transparent 34%),
+    radial-gradient(circle at 72% 78%, rgba(242,192,120,.20), transparent 42%),
+    linear-gradient(135deg, rgba(60,179,113,.40), rgba(60,179,113,.18));
+  box-shadow: 0 22px 62px rgba(60,179,113,.30), 0 0 36px rgba(60,179,113,.16), inset 0 1px 0 rgba(255,255,255,.20);
 }
 
 .gallery-card__mood-icon svg {

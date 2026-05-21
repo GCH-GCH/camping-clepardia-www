@@ -54,47 +54,47 @@
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --color-bg-primary: #0B1A14;
-  --color-bg-secondary: #102117;
-  --color-bg-tertiary: #173322;
+  --color-bg-primary: #0D1F17;
+  --color-bg-secondary: #13291D;
+  --color-bg-tertiary: #1A3A28;
   --color-text-primary: #F4FBF6;
-  --color-text-secondary: rgba(244, 251, 246, .84);
-  --color-text-tertiary: rgba(244, 251, 246, .70);
+  --color-text-secondary: rgba(244, 251, 246, .88);
+  --color-text-tertiary: rgba(244, 251, 246, .74);
   --theme-body-background:
-    radial-gradient(circle at 14% 8%, rgba(60, 179, 113, .22), transparent 30%),
-    radial-gradient(circle at 86% 16%, rgba(242, 192, 120, .16), transparent 34%),
-    radial-gradient(circle at 54% 100%, rgba(60,179,113,.17), transparent 42%),
-    linear-gradient(180deg, #0B1A14 0%, #102117 54%, #173322 100%);
+    radial-gradient(circle at 14% 8%, rgba(60, 179, 113, .27), transparent 30%),
+    radial-gradient(circle at 86% 16%, rgba(242, 192, 120, .19), transparent 34%),
+    radial-gradient(circle at 54% 100%, rgba(60,179,113,.21), transparent 42%),
+    linear-gradient(180deg, #0D1F17 0%, #13291D 54%, #1A3A28 100%);
   --theme-section-background:
-    radial-gradient(circle at 12% 0%, rgba(60,179,113,.16), transparent 30%),
-    radial-gradient(circle at 90% 10%, rgba(242,192,120,.12), transparent 30%),
-    linear-gradient(180deg, #102117 0%, #0B1A14 100%);
-  --theme-card-background: rgba(255,255,255,.092);
-  --theme-card-border: rgba(143,224,180,.18);
-  --theme-card-shadow: 0 24px 72px rgba(0,0,0,.13), 0 0 38px rgba(60,179,113,.14);
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.20), transparent 30%),
+    radial-gradient(circle at 90% 10%, rgba(242,192,120,.14), transparent 30%),
+    linear-gradient(180deg, #13291D 0%, #0D1F17 100%);
+  --theme-card-background: rgba(255,255,255,.105);
+  --theme-card-border: rgba(143,224,180,.22);
+  --theme-card-shadow: 0 24px 72px rgba(0,0,0,.12), 0 0 42px rgba(60,179,113,.18);
   --theme-heading: #F4FBF6;
   --theme-copy: rgba(244, 251, 246, .84);
 }
 
 html[data-theme="light"] {
   color-scheme: light;
-  --color-bg-primary: #F7F8F3;
-  --color-bg-secondary: #F1F7EF;
-  --color-bg-tertiary: #E9F2E7;
+  --color-bg-primary: #F8F8F1;
+  --color-bg-secondary: #F1F7EE;
+  --color-bg-tertiary: #E8F3E7;
   --color-text-primary: #102116;
   --color-text-secondary: rgba(16, 33, 22, .68);
   --color-text-tertiary: rgba(16, 33, 22, .52);
   --theme-body-background:
-    radial-gradient(circle at 10% 8%, rgba(60, 179, 113, .10), transparent 28%),
-    radial-gradient(circle at 88% 12%, rgba(242, 192, 120, .13), transparent 30%),
-    linear-gradient(180deg, #FDFBF3 0%, #F1F7EF 46%, #F8F7EF 100%);
+    radial-gradient(circle at 10% 8%, rgba(60, 179, 113, .13), transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(242, 192, 120, .16), transparent 30%),
+    linear-gradient(180deg, #FFFDF4 0%, #F1F7EE 46%, #F8F7EF 100%);
   --theme-section-background:
     radial-gradient(circle at 12% 0%, rgba(60,179,113,.09), transparent 30%),
     radial-gradient(circle at 88% 12%, rgba(242,192,120,.08), transparent 28%),
     linear-gradient(180deg, #FDFBF3 0%, #F1F7EF 100%);
   --theme-card-background: rgba(255,255,255,.82);
   --theme-card-border: rgba(22, 50, 36, .10);
-  --theme-card-shadow: 0 24px 70px rgba(17, 40, 28, .075), 0 0 0 1px rgba(255,255,255,.40) inset;
+  --theme-card-shadow: 0 26px 76px rgba(17, 40, 28, .092), 0 0 0 1px rgba(255,255,255,.46) inset, 0 0 28px rgba(60,179,113,.065);
   --theme-heading: #102018;
   --theme-copy: #4d5c53;
 }
@@ -693,14 +693,16 @@ input, textarea, select {
 }
 
 .photo-frame {
+  position: relative;
   min-height: 360px;
   border-radius: 34px;
-  border: 1px solid rgba(255,255,255,.36);
+  border: 1px solid rgba(143,224,180,.28);
   background:
-    linear-gradient(135deg, rgba(7, 22, 15, .22), rgba(7, 22, 15, .70)),
-    radial-gradient(circle at 74% 24%, rgba(232, 158, 84, .28), transparent 36%),
-    linear-gradient(135deg, #25412f, #0c1912);
-  box-shadow: 0 30px 90px rgba(17, 40, 28, .20);
+    linear-gradient(135deg, rgba(9, 34, 22, .18), rgba(9, 34, 22, .70)),
+    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .30), transparent 36%),
+    radial-gradient(circle at 16% 86%, rgba(60,179,113,.32), transparent 40%),
+    linear-gradient(135deg, #38684a, #102a1d 58%, #0d2418);
+  box-shadow: 0 30px 90px rgba(17, 40, 28, .20), 0 0 34px rgba(60,179,113,.12);
   color: rgba(255,255,255,.76);
   display: flex;
   align-items: end;
@@ -711,6 +713,20 @@ input, textarea, select {
     box-shadow .32s cubic-bezier(.22, 1, .36, 1),
     border-color .32s cubic-bezier(.22, 1, .36, 1),
     filter .32s cubic-bezier(.22, 1, .36, 1);
+}
+
+.photo-frame:not(.asset-frame):not(.gallery-card)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .16;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(255,255,255,.34) 0 1px, transparent 1px 6px),
+    radial-gradient(circle at 78% 48%, rgba(255,255,255,.22) 0 1px, transparent 1px 8px),
+    linear-gradient(115deg, transparent 0 18%, rgba(255,255,255,.08) 18.4% 18.8%, transparent 19% 100%);
+  background-size: 9px 9px, 14px 14px, auto;
+  mix-blend-mode: screen;
 }
 
 .photo-frame:hover {

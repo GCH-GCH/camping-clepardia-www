@@ -8,11 +8,12 @@ const t = getTranslations(pathContext.languageCode);
 const chatTexts = t.chat;
 const quickActions = [
   { key: 'pricing', icon: 'pricing', label: chatTexts.actions.pricing },
-  { key: 'directions', icon: 'tram', label: chatTexts.actions.directions },
+  { key: 'transit', icon: 'tram', label: chatTexts.actions.transit ?? chatTexts.actions.directions },
   { key: 'bungalow', icon: 'bungalow', label: chatTexts.actions.bungalow },
+  { key: 'maps', icon: 'map', label: chatTexts.actions.maps },
   { key: 'reception', icon: 'phone', label: chatTexts.actions.reception },
   { key: 'quiet', icon: 'moon', label: chatTexts.actions.quiet },
-  { key: 'maps', icon: 'map', label: chatTexts.actions.maps },
+  { key: 'attractions', icon: 'attractions', label: chatTexts.actions.attractions ?? 'Atrakcje' },
 ];
 ---
 
@@ -42,7 +43,8 @@ const quickActions = [
   >
     <header class="floating-chat__header">
       <span class="floating-chat__avatar" aria-hidden="true">
-        <Icon name="sparkle" size={23} strokeWidth={1.9} />
+        <Icon name="sparkle" size={21} strokeWidth={1.9} />
+        <strong>C</strong>
       </span>
       <div class="floating-chat__identity">
         <span>{chatTexts.title}</span>
@@ -161,18 +163,27 @@ const quickActions = [
       const prompt = rawPrompt.toLowerCase();
 
       if (rawPrompt === chatTexts.actions.pricing) return chatTexts.answers.pricing;
-      if (rawPrompt === chatTexts.actions.directions) return chatTexts.answers.directions;
+      if (rawPrompt === chatTexts.actions.directions || rawPrompt === chatTexts.actions.transit) return chatTexts.answers.transit ?? chatTexts.answers.directions;
       if (rawPrompt === chatTexts.actions.bungalow) return chatTexts.answers.bungalows;
       if (rawPrompt === chatTexts.actions.reception) return chatTexts.answers.reception;
       if (rawPrompt === chatTexts.actions.quiet) return chatTexts.answers.quiet;
       if (rawPrompt === chatTexts.actions.maps) return chatTexts.answers.maps;
+      if (rawPrompt === chatTexts.actions.attractions) return chatTexts.answers.attractions ?? chatTexts.answers.fallback;
 
       if (prompt.includes('cennik') || prompt.includes('cena') || prompt.includes('koszt')) {
         return chatTexts.answers.pricing;
       }
 
-      if (prompt.includes('dojaz') || prompt.includes('tram') || prompt.includes('jak dojecha') || prompt.includes('maps') || prompt.includes('map') || prompt.includes('nawig')) {
-        return chatTexts.answers.directions;
+      if (prompt.includes('tram') || prompt.includes('centrum') || prompt.includes('transport')) {
+        return chatTexts.answers.transit ?? chatTexts.answers.directions;
+      }
+
+      if (prompt.includes('dojaz') || prompt.includes('jak dojecha') || prompt.includes('maps') || prompt.includes('map') || prompt.includes('nawig')) {
+        return chatTexts.answers.maps ?? chatTexts.answers.directions;
+      }
+
+      if (prompt.includes('atrakc') || prompt.includes('krak') || prompt.includes('wielicz') || prompt.includes('energy') || prompt.includes('zwiedz')) {
+        return chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       }
 
       if (prompt.includes('cisza') || prompt.includes('imprez') || prompt.includes('quiet') || prompt.includes('party') || prompt.includes('ruhe')) {
@@ -366,9 +377,9 @@ body.has-floating-chat-open {
   border-radius: 28px;
   color: #fff;
   background:
-    radial-gradient(circle at 18% 0%, rgba(60,179,113,.22), transparent 36%),
-    radial-gradient(circle at 88% 100%, rgba(242,192,120,.14), transparent 40%),
-    linear-gradient(145deg, rgba(11,26,20,.97), rgba(25,55,39,.93));
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.30), transparent 38%),
+    radial-gradient(circle at 88% 100%, rgba(242,192,120,.18), transparent 42%),
+    linear-gradient(145deg, rgba(13,32,24,.98), rgba(29,63,45,.94));
   box-shadow:
     0 30px 92px rgba(0,0,0,.28),
     0 0 34px rgba(60,179,113,.14),
@@ -399,6 +410,7 @@ body.has-floating-chat-open {
 }
 
 .floating-chat__avatar {
+  position: relative;
   width: 48px;
   height: 48px;
   display: grid;
@@ -412,8 +424,22 @@ body.has-floating-chat-open {
 }
 
 .floating-chat__avatar svg {
+  position: absolute;
+  right: 7px;
+  top: 7px;
   width: 22px;
   height: 22px;
+  opacity: .72;
+}
+
+.floating-chat__avatar strong {
+  position: relative;
+  z-index: 1;
+  color: #092016;
+  font-size: 1.08rem;
+  font-weight: 1000;
+  letter-spacing: -.02em;
+  text-shadow: 0 1px 0 rgba(255,255,255,.36);
 }
 
 .floating-chat__identity {
@@ -499,9 +525,9 @@ body.has-floating-chat-open {
   justify-self: start;
   color: rgba(255,255,255,.86);
   background:
-    linear-gradient(145deg, rgba(255,255,255,.125), rgba(255,255,255,.075)),
-    radial-gradient(circle at 12% 0%, rgba(60,179,113,.16), transparent 36%);
-  border: 1px solid rgba(255,255,255,.10);
+    linear-gradient(145deg, rgba(255,255,255,.145), rgba(255,255,255,.082)),
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.22), transparent 38%);
+  border: 1px solid rgba(143,224,180,.16);
 }
 
 .floating-chat__message--user {
@@ -555,10 +581,12 @@ body.has-floating-chat-open {
   align-items: center;
   gap: 7px;
   padding: 0 13px;
-  border: 1px solid rgba(143,224,180,.22);
+  border: 1px solid rgba(143,224,180,.28);
   border-radius: 999px;
   color: #d9ffe9;
-  background: rgba(60,179,113,.12);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255,255,255,.12), transparent 38%),
+    rgba(60,179,113,.14);
   font-size: .78rem;
   font-weight: 850;
   white-space: nowrap;
@@ -576,8 +604,9 @@ body.has-floating-chat-open {
 }
 
 .floating-chat__quick button:hover {
-  border-color: rgba(143,224,180,.46);
-  background: rgba(60,179,113,.20);
+  border-color: rgba(143,224,180,.56);
+  background: rgba(60,179,113,.24);
+  box-shadow: 0 12px 28px rgba(60,179,113,.18);
   transform: translateY(-1px);
 }
 
@@ -713,6 +742,10 @@ html[data-theme="light"] .floating-chat__quick button {
     max-height: none;
     border-radius: 26px;
     transform-origin: bottom center;
+  }
+
+  .floating-chat__quick {
+    padding-bottom: 12px;
   }
 
   .floating-chat__scrim {

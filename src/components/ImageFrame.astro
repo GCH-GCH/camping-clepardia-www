@@ -71,10 +71,10 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
   overflow: hidden;
   box-shadow: 0 28px 82px rgba(17, 40, 28, .20), 0 0 30px rgba(60,179,113,.10);
   background:
-    linear-gradient(135deg, rgba(14, 44, 29, .18), rgba(16, 45, 31, .68)),
-    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .32), transparent 36%),
-    radial-gradient(circle at 18% 86%, rgba(60,179,113,.38), transparent 42%),
-    linear-gradient(135deg, #3d7452, #143322 58%, #0d2418);
+    linear-gradient(135deg, rgba(14, 44, 29, .16), rgba(16, 45, 31, .62)),
+    radial-gradient(circle at 74% 24%, rgba(242, 192, 120, .36), transparent 36%),
+    radial-gradient(circle at 18% 86%, rgba(60,179,113,.44), transparent 42%),
+    linear-gradient(135deg, #477b59, #163a27 58%, #0e271a);
 }
 
 .asset-frame--portrait.photo-frame {
@@ -255,6 +255,8 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
 
 .asset-frame--fallback.photo-frame {
   min-height: 240px;
+  border-color: rgba(143,224,180,.38);
+  box-shadow: 0 30px 88px rgba(17,40,28,.22), 0 0 44px rgba(60,179,113,.16);
 }
 
 @media (max-width: 680px) {
