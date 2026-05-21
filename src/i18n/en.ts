@@ -94,7 +94,7 @@ export const en = {
       pricing: 'Check prices',
       directions: 'How to get here?',
       transit: 'Tram to the centre',
-      bungalow: 'Ask about a bungalow',
+      bungalow: 'Bungalows',
       reception: 'Contact reception',
       quiet: 'Quiet hours',
       maps: 'Google Maps directions',
@@ -102,11 +102,11 @@ export const en = {
     },
     answers: {
       pricing:
-        'As a guide: motorhome 80 PLN / night, caravan 60 PLN / night, van 75 PLN / night, electricity 25 PLN / night and dogs stay free. The full calculator is on the Prices page.',
+        'As a guide: motorhome 80 PLN / night, truck / bus 160 PLN / night, electricity 25 PLN / night and dog 0 PLN. The full calculator is on the Prices page.',
       directions:
         'The easiest way is to leave your car or camper at the campsite and take the tram towards the centre of Krakow. For navigation we recommend Google Maps: the entrance route changed in 2022, so older navigation systems may lead incorrectly.',
       transit:
-        'The easiest way to reach the city centre is by tram. Leave your car, camper or caravan at the campsite and visit the Old Town without hunting for parking.',
+        'The easiest way to reach the city centre is by tram: the stop is about 40 m from the gate, Stary Kleparz / the centre is about 9 stops away and the ride takes around 14 minutes.',
       bungalows:
         'Bungalows have separate availability. 2-person: 200/220 PLN, 3-person: 250/300 PLN, 4-person: 400/450 PLN depending on season.',
       reception:
@@ -386,7 +386,7 @@ export const en = {
         },
         {
           title: 'Bungalows',
-          copy: 'Space for exterior, interior and terrace photos.',
+          copy: 'Space for exterior, interior and 2-, 3- and 4-person bungalow photos.',
         },
         {
           title: 'Krakow',
@@ -459,7 +459,7 @@ export const en = {
           copy: 'After sightseeing you can return to a calmer place outside the strict centre.',
         },
         {
-          title: 'Bungalows for families',
+          title: '3- and 4-person bungalows',
           copy:
             'A practical option for families who do not travel by camper or tent.',
         },
@@ -476,6 +476,52 @@ export const en = {
         primaryHref: '/cennik',
         secondaryLabel: 'Ask about availability',
         secondaryHref: '/kontakt',
+      },
+    },
+    regulamin: {
+      slug: 'regulamin',
+      overline: 'Rules',
+      title: 'Camping Clepardia stay rules',
+      lead:
+        'Key information about quiet hours, arrival, registration, bungalows, camping pitches and safety rules.',
+      seoTitle: 'Camping Clepardia rules - stay regulations',
+      seoDescription:
+        'Read Camping Clepardia stay rules: quiet hours, arrival, registration, bungalows, camping pitches, electricity, dogs and invoices.',
+      highlights: [
+        { title: 'Not a party campsite', copy: 'Camping Clepardia is a calm place to stay. Quiet hours are from 22:00 to 07:00.' },
+        { title: 'Arrival and registration', copy: 'After arrival, stop near reception or the parking area. Staff will show you your place and complete registration.' },
+        { title: 'Reception confirms availability', copy: 'The calculator shows an indicative price. Final availability is confirmed by reception.' },
+      ],
+      cta: {
+        title: 'Have a question about the rules?',
+        copy: 'Contact Camping Clepardia reception before arrival.',
+        primaryLabel: 'Ask reception',
+        primaryHref: '/kontakt',
+        secondaryLabel: 'Check FAQ',
+        secondaryHref: '/faq',
+      },
+    },
+    'polityka-prywatnosci': {
+      slug: 'polityka-prywatnosci',
+      overline: 'Privacy policy',
+      title: 'How we process enquiry form data',
+      lead:
+        'A safe privacy information draft for enquiries sent through the Camping Clepardia website.',
+      seoTitle: 'Privacy policy - Camping Clepardia',
+      seoDescription:
+        'Camping Clepardia privacy policy: enquiry form data, contact purpose, reception email, cookies and information to complete before production publication.',
+      highlights: [
+        { title: 'Form data', copy: 'The data is used to answer your stay and availability enquiry.' },
+        { title: 'Reception contact', copy: 'For data and enquiry matters, use clepardia@gmail.com.' },
+        { title: 'Draft to complete', copy: 'Full administrator data must be confirmed before production publication.' },
+      ],
+      cta: {
+        title: 'Need to contact reception?',
+        copy: 'Write or call Camping Clepardia.',
+        primaryLabel: 'Contact',
+        primaryHref: '/kontakt',
+        secondaryLabel: 'FAQ',
+        secondaryHref: '/faq',
       },
     },
   },

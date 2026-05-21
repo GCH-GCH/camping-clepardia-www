@@ -1,0 +1,481 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { resolveContentLanguage } from '@/i18n/config';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const lang = resolveContentLanguage(languageCode);
+
+const copy = {
+  pl: {
+    aria: 'Najważniejsze informacje Camping Clepardia',
+    prev: 'Poprzednia informacja',
+    next: 'Następna informacja',
+    of: 'z',
+    slides: [
+      {
+        icon: 'tram',
+        kicker: 'Tramwajem do centrum',
+        title: '9 przystanków do Starego Kleparza / centrum',
+        detail: 'Około 14 minut jazdy, przystanek ok. 40 m od bramy campingu.',
+      },
+      {
+        icon: 'shield',
+        kicker: 'Mister Camping 2024 i 2025',
+        title: 'Wyróżnienie i zaufanie gości',
+        detail: 'Elegancka baza w zielonej części Krakowa, blisko komunikacji i atrakcji miasta.',
+      },
+      {
+        icon: 'bungalow',
+        kicker: 'Camping + domki',
+        title: 'Kampery, przyczepy, namioty oraz domki 2/3/4-os.',
+        detail: 'Wybierz styl pobytu i sprawdź orientacyjny koszt w cenniku.',
+      },
+      {
+        icon: 'map',
+        kicker: 'Google Maps',
+        title: 'Zalecamy Google Maps',
+        detail: 'Dojazd zmienił się w 2022 roku, starsze nawigacje mogą prowadzić nieprawidłowo.',
+      },
+    ],
+  },
+  en: {
+    aria: 'Camping Clepardia key information',
+    prev: 'Previous information',
+    next: 'Next information',
+    of: 'of',
+    slides: [
+      {
+        icon: 'tram',
+        kicker: 'By tram to the centre',
+        title: '9 stops to Stary Kleparz / the centre',
+        detail: 'Around 14 minutes by tram, with a stop about 40 m from the campsite gate.',
+      },
+      {
+        icon: 'shield',
+        kicker: 'Mister Camping 2024 & 2025',
+        title: 'Recognition and guest trust',
+        detail: 'An elegant base in a green part of Krakow, close to public transport and city attractions.',
+      },
+      {
+        icon: 'bungalow',
+        kicker: 'Camping + bungalows',
+        title: 'Motorhomes, caravans, tents and 2/3/4-person bungalows',
+        detail: 'Choose your stay style and check the indicative cost in the price list.',
+      },
+      {
+        icon: 'map',
+        kicker: 'Google Maps',
+        title: 'We recommend Google Maps',
+        detail: 'The access route changed in 2022, so older navigation may lead incorrectly.',
+      },
+    ],
+  },
+  de: {
+    aria: 'Wichtige Informationen Camping Clepardia',
+    prev: 'Vorherige Information',
+    next: 'Nächste Information',
+    of: 'von',
+    slides: [
+      {
+        icon: 'tram',
+        kicker: 'Mit der Straßenbahn ins Zentrum',
+        title: '9 Haltestellen bis Stary Kleparz / Zentrum',
+        detail: 'Etwa 14 Minuten Fahrt, Haltestelle ca. 40 m vom Campingeingang.',
+      },
+      {
+        icon: 'shield',
+        kicker: 'Mister Camping 2024 & 2025',
+        title: 'Auszeichnung und Vertrauen der Gäste',
+        detail: 'Elegante Basis im grünen Teil von Krakau, nahe Kommunikation und Attraktionen.',
+      },
+      {
+        icon: 'bungalow',
+        kicker: 'Camping + Bungalows',
+        title: 'Wohnmobile, Wohnwagen, Zelte und 2/3/4-Personen-Bungalows',
+        detail: 'Wählen Sie Ihren Aufenthaltsstil und prüfen Sie den Richtpreis im Preisrechner.',
+      },
+      {
+        icon: 'map',
+        kicker: 'Google Maps',
+        title: 'Wir empfehlen Google Maps',
+        detail: 'Die Zufahrt wurde 2022 geändert, ältere Navigation kann falsch führen.',
+      },
+    ],
+  },
+  it: {
+    aria: 'Informazioni chiave Camping Clepardia',
+    prev: 'Informazione precedente',
+    next: 'Informazione successiva',
+    of: 'di',
+    slides: [
+      {
+        icon: 'tram',
+        kicker: 'In tram verso il centro',
+        title: '9 fermate fino a Stary Kleparz / centro',
+        detail: 'Circa 14 minuti in tram, fermata a circa 40 m dal cancello del camping.',
+      },
+      {
+        icon: 'shield',
+        kicker: 'Mister Camping 2024 e 2025',
+        title: 'Riconoscimento e fiducia degli ospiti',
+        detail: 'Una base elegante nella parte verde di Cracovia, vicino ai trasporti e alle attrazioni.',
+      },
+      {
+        icon: 'bungalow',
+        kicker: 'Camping + bungalow',
+        title: 'Camper, roulotte, tende e bungalow da 2/3/4 persone',
+        detail: 'Scegli il tuo stile di soggiorno e controlla il costo indicativo nel listino.',
+      },
+      {
+        icon: 'map',
+        kicker: 'Google Maps',
+        title: 'Consigliamo Google Maps',
+        detail: 'L’accesso è cambiato nel 2022, i navigatori più vecchi possono indicare una strada errata.',
+      },
+    ],
+  },
+}[lang];
+---
+
+<aside class="hero-experience-slider" data-hero-experience-slider aria-label={copy.aria}>
+  <span class="hero-experience-slider__glow" aria-hidden="true"></span>
+  <div class="hero-experience-slider__top">
+    <span data-hero-slide-index>01</span>
+    <small>{copy.of} {String(copy.slides.length).padStart(2, '0')}</small>
+  </div>
+
+  <div class="hero-experience-slider__slides">
+    {copy.slides.map((slide, index) => (
+      <article class:list={['hero-experience-slider__slide', index === 0 && 'is-active']} data-hero-slide>
+        <span class="hero-experience-slider__icon" aria-hidden="true">
+          <Icon name={slide.icon} size={30} strokeWidth={1.8} />
+        </span>
+        <p>{slide.kicker}</p>
+        <h2>{slide.title}</h2>
+        <small>{slide.detail}</small>
+      </article>
+    ))}
+  </div>
+
+  <div class="hero-experience-slider__controls">
+    <button type="button" data-hero-slide-prev aria-label={copy.prev}>
+      <Icon name="chevronLeft" size={19} strokeWidth={2.2} />
+    </button>
+    <div class="hero-experience-slider__dots" aria-hidden="true">
+      {copy.slides.map((_, index) => <span class:list={[index === 0 && 'is-active']} data-hero-slide-dot></span>)}
+    </div>
+    <button type="button" data-hero-slide-next aria-label={copy.next}>
+      <Icon name="chevronRight" size={19} strokeWidth={2.2} />
+    </button>
+  </div>
+</aside>
+
+<script>
+  (() => {
+    const sliders = document.querySelectorAll('[data-hero-experience-slider]');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    sliders.forEach((slider) => {
+      if (!(slider instanceof HTMLElement)) return;
+
+      const slides = Array.from(slider.querySelectorAll('[data-hero-slide]')).filter((slide): slide is HTMLElement => slide instanceof HTMLElement);
+      const dots = Array.from(slider.querySelectorAll('[data-hero-slide-dot]')).filter((dot): dot is HTMLElement => dot instanceof HTMLElement);
+      const indexLabel = slider.querySelector('[data-hero-slide-index]');
+      const prev = slider.querySelector('[data-hero-slide-prev]');
+      const next = slider.querySelector('[data-hero-slide-next]');
+      let active = 0;
+      let timer: number | undefined;
+
+      const setActive = (nextIndex: number) => {
+        slides[active]?.classList.remove('is-active');
+        dots[active]?.classList.remove('is-active');
+        active = (nextIndex + slides.length) % slides.length;
+        slides[active]?.classList.add('is-active');
+        dots[active]?.classList.add('is-active');
+        if (indexLabel) indexLabel.textContent = String(active + 1).padStart(2, '0');
+      };
+
+      const stop = () => {
+        if (timer) window.clearInterval(timer);
+        timer = undefined;
+      };
+
+      const start = () => {
+        if (reducedMotion.matches || slides.length < 2 || timer) return;
+        timer = window.setInterval(() => setActive(active + 1), 3600);
+      };
+
+      prev?.addEventListener('click', () => {
+        stop();
+        setActive(active - 1);
+        start();
+      });
+
+      next?.addEventListener('click', () => {
+        stop();
+        setActive(active + 1);
+        start();
+      });
+
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          stop();
+          setActive(index);
+          start();
+        });
+      });
+
+      slider.addEventListener('mouseenter', stop);
+      slider.addEventListener('mouseleave', start);
+      reducedMotion.addEventListener?.('change', () => {
+        stop();
+        start();
+      });
+      start();
+    });
+  })();
+</script>
+
+<style>
+.hero-experience-slider {
+  position: relative;
+  width: min(100%, 430px);
+  min-width: 0;
+  justify-self: end;
+  display: grid;
+  gap: 18px;
+  padding: clamp(22px, 2.6vw, 32px);
+  border: 1px solid rgba(143,224,180,.28);
+  border-radius: 36px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.30), transparent 38%),
+    radial-gradient(circle at 86% 12%, rgba(242,192,120,.24), transparent 40%),
+    linear-gradient(145deg, rgba(255,255,255,.17), rgba(255,255,255,.065));
+  box-shadow:
+    0 36px 100px rgba(0,0,0,.30),
+    0 0 66px rgba(60,179,113,.20),
+    inset 0 1px 0 rgba(255,255,255,.18);
+  backdrop-filter: blur(26px) saturate(158%);
+  -webkit-backdrop-filter: blur(26px) saturate(158%);
+  overflow: hidden;
+  isolation: isolate;
+  animation:
+    heroExperienceReveal .9s cubic-bezier(.22, 1, .36, 1) .58s both,
+    heroExperienceFloat 7.8s ease-in-out 1.2s infinite;
+}
+
+.hero-experience-slider::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: 35px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.16), transparent 38%),
+    radial-gradient(circle at 74% 82%, rgba(60,179,113,.18), transparent 38%);
+}
+
+.hero-experience-slider__glow {
+  position: absolute;
+  right: -88px;
+  top: -82px;
+  width: 230px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(242,192,120,.28), rgba(60,179,113,.14) 44%, transparent 72%);
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+.hero-experience-slider__top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgba(255,255,255,.78);
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.hero-experience-slider__top span {
+  color: #8fe0b4;
+}
+
+.hero-experience-slider__slides {
+  position: relative;
+  min-height: 300px;
+}
+
+.hero-experience-slider__slide {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  gap: 14px;
+  opacity: 0;
+  transform: translateY(18px) scale(.985);
+  filter: blur(6px);
+  pointer-events: none;
+  transition: opacity .54s cubic-bezier(.22, 1, .36, 1), transform .54s cubic-bezier(.22, 1, .36, 1), filter .54s ease;
+}
+
+.hero-experience-slider__slide.is-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  pointer-events: auto;
+}
+
+.hero-experience-slider__icon {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(143,224,180,.32);
+  border-radius: 26px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 32% 18%, rgba(255,255,255,.34), transparent 36%),
+    linear-gradient(135deg, rgba(60,179,113,.56), rgba(60,179,113,.22));
+  box-shadow: 0 24px 64px rgba(60,179,113,.28), inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+.hero-experience-slider__slide p {
+  margin: 0;
+  color: #8fe0b4;
+  font-size: .78rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.hero-experience-slider__slide h2 {
+  max-width: 360px;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.7rem, 3.1vw, 2.35rem);
+  line-height: 1.02;
+  font-weight: 950;
+  text-shadow: 0 12px 34px rgba(0,0,0,.30);
+}
+
+.hero-experience-slider__slide small {
+  max-width: 340px;
+  color: rgba(255,255,255,.76);
+  font-size: .98rem;
+  line-height: 1.6;
+}
+
+.hero-experience-slider__controls {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.hero-experience-slider__controls button {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(143,224,180,.22);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255,255,255,.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+  transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
+}
+
+.hero-experience-slider__controls button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(143,224,180,.46);
+  background: rgba(60,179,113,.18);
+  box-shadow: 0 0 28px rgba(60,179,113,.18), inset 0 1px 0 rgba(255,255,255,.16);
+}
+
+.hero-experience-slider__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.hero-experience-slider__dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.28);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.08);
+  transition: width .28s ease, background .28s ease, box-shadow .28s ease;
+}
+
+.hero-experience-slider__dots span.is-active {
+  width: 26px;
+  background: #3CB371;
+  box-shadow: 0 0 22px rgba(60,179,113,.44);
+}
+
+@keyframes heroExperienceReveal {
+  from { opacity: 0; transform: translateY(18px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes heroExperienceFloat {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -10px, 0); }
+}
+
+@media (max-width: 1120px) {
+  .hero-experience-slider {
+    justify-self: start;
+    width: min(620px, 100%);
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-experience-slider {
+    width: 100%;
+    max-width: calc(100vw - 32px);
+    padding: 18px;
+    border-radius: 28px;
+  }
+
+  .hero-experience-slider__slides {
+    min-height: 270px;
+  }
+
+  .hero-experience-slider__slide h2 {
+    font-size: clamp(1.45rem, 8vw, 2rem);
+  }
+
+  .hero-experience-slider__slide small {
+    font-size: .94rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero-experience-slider {
+    max-width: calc(100vw - 28px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-experience-slider,
+  .hero-experience-slider__slide,
+  .hero-experience-slider__dots span,
+  .hero-experience-slider__controls button {
+    animation: none !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>

@@ -9,6 +9,8 @@ export const pageSlugs = [
   'galeria',
   'dla-kamperow',
   'dla-rodzin',
+  'regulamin',
+  'polityka-prywatnosci',
 ] as const;
 
 export type PageSlug = typeof pageSlugs[number];
@@ -196,7 +198,7 @@ export const sitePages: Record<PageSlug, SitePage> = {
     seoDescription: 'Zobacz galerię Camping Clepardia w Krakowie: camping, domki, sanitariaty, dojazd, okolica i atrakcje dla gości.',
     highlights: [
       { title: 'Camping', copy: 'Miejsce na zdjęcia pól, kamperów, namiotów i infrastruktury.' },
-      { title: 'Domki', copy: 'Miejsce na zdjęcia zewnętrzne, wnętrza i tarasy domków.' },
+      { title: 'Domki', copy: 'Miejsce na zdjęcia zewnętrzne, wnętrza oraz domki 2-, 3- i 4-osobowe.' },
       { title: 'Kraków', copy: 'Miejsce na zdjęcia dojazdu, okolicy i atrakcji regionu.' },
     ],
     cta: {
@@ -240,7 +242,7 @@ export const sitePages: Record<PageSlug, SitePage> = {
     highlights: [
       { title: 'Blisko centrum Krakowa', copy: 'Łatwy dojazd tramwajem do centrum bez stresu z parkowaniem przy Starym Mieście.' },
       { title: 'Zielona przestrzeń', copy: 'Po dniu zwiedzania można wrócić w spokojniejsze miejsce poza ścisłym centrum.' },
-      { title: 'Domki dla rodzin', copy: 'Praktyczna opcja dla rodzin, które nie podróżują kamperem ani namiotem.' },
+      { title: 'Domki 3- i 4-osobowe', copy: 'Praktyczna opcja dla rodzin, które nie podróżują kamperem ani namiotem.' },
       { title: 'Baza do wycieczek', copy: 'Dobry start do Wieliczki, Energylandii, Ojcowa i innych atrakcji Małopolski.' },
     ],
     cta: {
@@ -250,6 +252,48 @@ export const sitePages: Record<PageSlug, SitePage> = {
       primaryHref: '/cennik',
       secondaryLabel: 'Zapytaj o dostępność',
       secondaryHref: '/kontakt',
+    },
+  },
+  regulamin: {
+    slug: 'regulamin',
+    overline: 'Regulamin',
+    title: 'Zasady pobytu na Camping Clepardia',
+    lead: 'Najważniejsze informacje o ciszy nocnej, przyjeździe, rejestracji, domkach, miejscach campingowych i zasadach bezpieczeństwa.',
+    seoTitle: 'Regulamin Camping Clepardia — zasady pobytu',
+    seoDescription: 'Sprawdź zasady pobytu na Camping Clepardia: cisza nocna, przyjazd, rejestracja, domki, miejsca campingowe, prąd, psy i faktury.',
+    highlights: [
+      { title: 'Nieimprezowy charakter', copy: 'Camping Clepardia jest miejscem spokojnego pobytu. Cisza nocna obowiązuje od 22:00 do 07:00.' },
+      { title: 'Przyjazd i rejestracja', copy: 'Po przyjeździe zatrzymaj się przy recepcji lub parkingu. Obsługa wskaże miejsce i przeprowadzi rejestrację.' },
+      { title: 'Dostępność potwierdza recepcja', copy: 'Kalkulator pokazuje cenę orientacyjną, a finalną dostępność potwierdza recepcja.' },
+    ],
+    cta: {
+      title: 'Masz pytanie o zasady pobytu?',
+      copy: 'Skontaktuj się z recepcją Camping Clepardia przed przyjazdem.',
+      primaryLabel: 'Zapytaj recepcję',
+      primaryHref: '/kontakt',
+      secondaryLabel: 'Sprawdź FAQ',
+      secondaryHref: '/faq',
+    },
+  },
+  'polityka-prywatnosci': {
+    slug: 'polityka-prywatnosci',
+    overline: 'Polityka prywatności',
+    title: 'Jak przetwarzamy dane z formularza',
+    lead: 'Bezpieczny draft informacji prywatności dla zapytań wysyłanych przez stronę Camping Clepardia.',
+    seoTitle: 'Polityka prywatności — Camping Clepardia',
+    seoDescription: 'Polityka prywatności Camping Clepardia: dane z formularza, cel kontaktu, email recepcji, cookies i informacje do uzupełnienia przed publikacją.',
+    highlights: [
+      { title: 'Dane z formularza', copy: 'Dane są używane do odpowiedzi na zapytanie o pobyt i dostępność.' },
+      { title: 'Kontakt z recepcją', copy: 'W sprawach danych i zapytań użyj adresu clepardia@gmail.com.' },
+      { title: 'Draft do uzupełnienia', copy: 'Pełne dane administratora wymagają potwierdzenia przed publikacją produkcyjną.' },
+    ],
+    cta: {
+      title: 'Potrzebujesz kontaktu z recepcją?',
+      copy: 'Napisz lub zadzwoń do Camping Clepardia.',
+      primaryLabel: 'Kontakt',
+      primaryHref: '/kontakt',
+      secondaryLabel: 'FAQ',
+      secondaryHref: '/faq',
     },
   },
 };

@@ -97,7 +97,7 @@ export const de = {
       pricing: 'Preise prüfen',
       directions: 'Wie komme ich hin?',
       transit: 'Straßenbahn ins Zentrum',
-      bungalow: 'Bungalow anfragen',
+      bungalow: 'Bungalows',
       reception: 'Kontakt zur Rezeption',
       quiet: 'Nachtruhe',
       maps: 'Google Maps Anfahrt',
@@ -105,11 +105,11 @@ export const de = {
     },
     answers: {
       pricing:
-        'Orientierungspreise: Wohnmobil 80 PLN / Nacht, Wohnwagen 60 PLN / Nacht, Van 75 PLN / Nacht, Strom 25 PLN / Nacht, Hund kostenlos. Den vollständigen Rechner finden Sie auf der Preisseite.',
+        'Orientierungspreise: Wohnmobil 80 PLN / Nacht, Lkw / Bus 160 PLN / Nacht, Strom 25 PLN / Nacht, Hund 0 PLN. Den vollständigen Rechner finden Sie auf der Preisseite.',
       directions:
         'Am bequemsten ist es, Auto oder Camper auf dem Campingplatz zu lassen und mit der Straßenbahn Richtung Zentrum von Krakau zu fahren. Für die Navigation empfehlen wir Google Maps. Die Einfahrt / Zufahrt wurde 2022 geändert, ältere Navigationssysteme können falsch führen.',
       transit:
-        'Ins Zentrum kommen Sie am bequemsten mit der Straßenbahn. Auto, Camper oder Wohnwagen bleiben auf dem Campingplatz, die Altstadt erreichen Sie ohne Parkplatzsuche.',
+        'Ins Zentrum kommen Sie am bequemsten mit der Straßenbahn: Die Haltestelle ist ca. 40 m vom Tor entfernt, bis Stary Kleparz / Zentrum sind es ca. 9 Haltestellen und rund 14 Minuten Fahrt.',
       bungalows:
         'Bungalows haben separate Verfügbarkeit. Es gibt nur 2-, 3- und 4-Personen-Bungalows. Preise: 200/220 PLN, 250/300 PLN und 400/450 PLN je nach Saison.',
       reception:
@@ -520,7 +520,7 @@ export const de = {
       highlights: [
         { title: 'Nahe am Zentrum von Krakau', copy: 'Einfache Straßenbahnverbindung ins Zentrum ohne Parkplatzstress bei der Altstadt.' },
         { title: 'Grüner Raum', copy: 'Nach dem Sightseeing kann man an einen ruhigeren Ort außerhalb des engen Zentrums zurückkehren.' },
-        { title: 'Bungalows für Familien', copy: 'Praktische Option für Familien, die nicht mit Camper oder Zelt reisen.' },
+        { title: '3- und 4-Personen-Bungalows', copy: 'Praktische Option für Familien, die nicht mit Camper oder Zelt reisen.' },
         { title: 'Basis für Ausflüge', copy: 'Guter Startpunkt für Wieliczka, Energylandia, Ojców und andere Attraktionen in Małopolska.' },
       ],
       cta: {
@@ -531,6 +531,40 @@ export const de = {
         secondaryLabel: 'Verfügbarkeit anfragen',
         secondaryHref: '/kontakt',
       },
+    },
+    regulamin: {
+      ...en.pages.regulamin,
+      overline: 'Regeln',
+      title: 'Aufenthaltsregeln von Camping Clepardia',
+      lead: 'Wichtige Informationen zu Nachtruhe, Ankunft, Anmeldung, Bungalows, Stellplätzen und Sicherheit.',
+      seoTitle: 'Regeln Camping Clepardia - Aufenthaltsordnung',
+      seoDescription: 'Regeln für Camping Clepardia: Nachtruhe, Ankunft, Anmeldung, Bungalows, Stellplätze, Strom, Hunde und Rechnungen.',
+      highlights: [
+        { title: 'Kein Party-Campingplatz', copy: 'Camping Clepardia ist ein ruhiger Aufenthaltsort. Die Nachtruhe gilt von 22:00 bis 07:00.' },
+        { title: 'Ankunft und Anmeldung', copy: 'Halten Sie nach der Ankunft nahe der Rezeption oder am Parkplatz. Das Team zeigt Ihnen den Platz und erledigt die Anmeldung.' },
+        { title: 'Verfügbarkeit bestätigt die Rezeption', copy: 'Der Rechner zeigt einen Richtpreis. Die endgültige Verfügbarkeit bestätigt die Rezeption.' },
+      ],
+      cta: {
+        title: 'Fragen zu den Regeln?',
+        copy: 'Kontaktieren Sie die Rezeption von Camping Clepardia vor der Anreise.',
+        primaryLabel: 'Rezeption fragen',
+        primaryHref: '/kontakt',
+        secondaryLabel: 'FAQ ansehen',
+        secondaryHref: '/faq',
+      },
+    },
+    'polityka-prywatnosci': {
+      ...en.pages['polityka-prywatnosci'],
+      overline: 'Datenschutz',
+      title: 'Wie wir Daten aus dem Anfrageformular verarbeiten',
+      lead: 'Sicherer Entwurf der Datenschutzinformationen für Anfragen über die Website Camping Clepardia.',
+      seoTitle: 'Datenschutz - Camping Clepardia',
+      seoDescription: 'Datenschutz Camping Clepardia: Formulardaten, Kontaktzweck, E-Mail der Rezeption, Cookies und vor Veröffentlichung zu ergänzende Angaben.',
+      highlights: [
+        { title: 'Formulardaten', copy: 'Die Daten werden verwendet, um auf Ihre Anfrage zu Aufenthalt und Verfügbarkeit zu antworten.' },
+        { title: 'Kontakt zur Rezeption', copy: 'Für Daten- und Anfrageangelegenheiten nutzen Sie clepardia@gmail.com.' },
+        { title: 'Entwurf zu ergänzen', copy: 'Vollständige Administratorangaben müssen vor der Veröffentlichung bestätigt werden.' },
+      ],
     },
   },
   home: {

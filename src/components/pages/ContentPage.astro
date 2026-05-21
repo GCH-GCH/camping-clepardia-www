@@ -8,11 +8,13 @@ import FaqPage from './FaqPage.astro';
 import GalleryPage from './GalleryPage.astro';
 import CampersPage from './CampersPage.astro';
 import FamiliesPage from './FamiliesPage.astro';
+import LegalPage from './LegalPage.astro';
 import { publicAssetExists, siteAssets } from '@/data/assets';
 import { pricingConfig } from '@/data/pricing';
 import type { SitePage } from '@/data/sitePages';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import { getTranslations, resolveContentLanguage } from '@/i18n/config';
+import { getCurrentYear } from '@/utils/currentYear';
 
 interface Props {
   page: SitePage;
@@ -26,6 +28,15 @@ const contentLanguage = languageCode ?? pathContext.languageCode;
 const resolvedContentLanguage = resolveContentLanguage(contentLanguage);
 const linkLanguage = pathContext.explicitLanguage;
 const t = getTranslations(contentLanguage);
+const currentYear = getCurrentYear();
+const pricingOverlineByLanguage = {
+  pl: `Cennik Camping Clepardia ${currentYear}`,
+  en: `Camping Clepardia prices ${currentYear}`,
+  de: `Camping Clepardia Preisliste ${currentYear}`,
+  it: `Prezzi Camping Clepardia ${currentYear}`,
+};
+const displayOverline = page.slug === 'cennik' ? pricingOverlineByLanguage[resolvedContentLanguage] : page.overline;
+const displayTitle = page.title;
 const localizeHref = (href: string) => href.startsWith('/') ? getLocalizedPath(linkLanguage, href) : href;
 const homeHref = getLocalizedPath(linkLanguage, '');
 const breadcrumbHome = languageName ? `Camping Clepardia ${languageName}` : 'Camping Clepardia';
@@ -149,16 +160,16 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
     <nav class="breadcrumbs" aria-label="Breadcrumb">
       <a href={homeHref}>{breadcrumbHome}</a>
       <span aria-hidden="true">/</span>
-      <span>{page.title}</span>
+      <span>{displayTitle}</span>
     </nav>
 
-    <span class="section-kicker">{page.overline}</span>
-    <h1>{page.title}</h1>
+    <span class="section-kicker">{displayOverline}</span>
+    <h1>{displayTitle}</h1>
     <p>{page.lead}</p>
   </div>
 </section>
 
-{page.slug !== 'cennik' && page.slug !== 'kontakt' && page.slug !== 'dojazd' && page.slug !== 'atrakcje' && page.slug !== 'faq' && page.slug !== 'galeria' && page.slug !== 'dla-kamperow' && page.slug !== 'dla-rodzin' && (
+{page.slug !== 'cennik' && page.slug !== 'kontakt' && page.slug !== 'dojazd' && page.slug !== 'atrakcje' && page.slug !== 'faq' && page.slug !== 'galeria' && page.slug !== 'dla-kamperow' && page.slug !== 'dla-rodzin' && page.slug !== 'regulamin' && page.slug !== 'polityka-prywatnosci' && (
 <section class="site-section page-detail reveal-section">
   <div class="container page-detail__grid">
     <div class="page-detail__intro">
@@ -294,6 +305,8 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 {page.slug === 'dla-kamperow' && <CampersPage languageCode={contentLanguage} />}
 
 {page.slug === 'dla-rodzin' && <FamiliesPage languageCode={contentLanguage} />}
+
+{(page.slug === 'regulamin' || page.slug === 'polityka-prywatnosci') && <LegalPage pageSlug={page.slug} languageCode={contentLanguage} />}
 
 {page.slug === 'cennik' && (
   <section class="site-section page-detail pricing-guidance reveal-section">

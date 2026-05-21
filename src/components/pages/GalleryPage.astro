@@ -54,8 +54,8 @@ const galleryTextByLanguage = {
       ['Prąd i zaplecze', 'Przyłącza prądu na campingu'],
       ['Domek z zewnątrz', 'Domek Camping Clepardia z zewnątrz'],
       ['Wnętrze domku', 'Wnętrze domku Camping Clepardia'],
-      ['Taras przy domku', 'Taras przy domku Camping Clepardia'],
-      ['Domki dla rodzin', 'Domek dla rodzin i grup'],
+      ['Domek 3-osobowy', 'Domek 3-osobowy Camping Clepardia'],
+      ['Domek 4-osobowy', 'Domek 4-osobowy Camping Clepardia'],
       ['Budynek sanitarny', 'Budynek sanitarny na campingu'],
       ['Prysznice', 'Prysznice dla gości Camping Clepardia'],
       ['Kuchnia turystyczna', 'Kuchnia turystyczna dla gości'],
@@ -95,8 +95,8 @@ const galleryTextByLanguage = {
       ['Electricity and facilities', 'Electric hook-ups at the campsite'],
       ['Bungalow exterior', 'Camping Clepardia bungalow exterior'],
       ['Bungalow interior', 'Camping Clepardia bungalow interior'],
-      ['Bungalow terrace', 'Terrace by a Camping Clepardia bungalow'],
-      ['Bungalows for guests', 'Camping Clepardia bungalows for guests'],
+      ['3-person bungalow', 'Camping Clepardia 3-person bungalow'],
+      ['4-person bungalow', 'Camping Clepardia 4-person bungalow'],
       ['Sanitary building', 'Sanitary building at the campsite'],
       ['Showers', 'Showers for Camping Clepardia guests'],
       ['Tourist kitchen', 'Tourist kitchen for guests'],
@@ -136,8 +136,8 @@ const galleryTextByLanguage = {
       ['Strom und Infrastruktur', 'Stromanschlüsse auf dem Campingplatz'],
       ['Bungalow von außen', 'Camping Clepardia Bungalow von außen'],
       ['Bungalow innen', 'Camping Clepardia Bungalow innen'],
-      ['Terrasse am Bungalow', 'Terrasse am Camping Clepardia Bungalow'],
-      ['Bungalows für Gäste', 'Camping Clepardia Bungalows für Gäste'],
+      ['3-Personen-Bungalow', 'Camping Clepardia 3-Personen-Bungalow'],
+      ['4-Personen-Bungalow', 'Camping Clepardia 4-Personen-Bungalow'],
       ['Sanitärgebäude', 'Sanitärgebäude auf dem Campingplatz'],
       ['Duschen', 'Duschen für Gäste von Camping Clepardia'],
       ['Gästeküche', 'Gästeküche für Gäste'],
@@ -177,8 +177,8 @@ const galleryTextByLanguage = {
       ['Elettricità e servizi', 'Allacci elettrici nel camping'],
       ['Bungalow esterno', 'Bungalow Camping Clepardia dall’esterno'],
       ['Interno bungalow', 'Interno bungalow Camping Clepardia'],
-      ['Terrazza del bungalow', 'Terrazza presso il bungalow Camping Clepardia'],
-      ['Bungalow per ospiti', 'Bungalow Camping Clepardia per gli ospiti'],
+      ['Bungalow 3 persone', 'Bungalow 3 persone Camping Clepardia'],
+      ['Bungalow 4 persone', 'Bungalow 4 persone Camping Clepardia'],
       ['Edificio servizi', 'Edificio servizi nel camping'],
       ['Docce', 'Docce per gli ospiti di Camping Clepardia'],
       ['Cucina turistica', 'Cucina turistica per ospiti'],
@@ -258,14 +258,14 @@ const galleryItems: GalleryItem[] = [
   {
     title: galleryText.items[6][0],
     category: 'bungalows',
-    image: siteAssets.bungalows.terrace,
+    image: siteAssets.bungalows.bungalow3,
     alt: galleryText.items[6][1],
     size: 'tall',
   },
   {
     title: galleryText.items[7][0],
     category: 'bungalows',
-    image: siteAssets.bungalows.family,
+    image: siteAssets.bungalows.bungalow4,
     alt: galleryText.items[7][1],
     size: 'standard',
   },
@@ -1133,6 +1133,8 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 
   .gallery-lightbox__dialog {
     grid-template-columns: 1fr;
+    width: 100%;
+    max-height: calc(100dvh - 24px);
   }
 
   .gallery-lightbox__figure {
@@ -1142,6 +1144,14 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   .gallery-lightbox__media,
   .gallery-lightbox__fallback {
     min-height: 56vh;
+    max-height: 80dvh;
+  }
+
+  .gallery-lightbox__media img {
+    width: auto;
+    height: auto;
+    max-width: calc(100vw - 24px);
+    max-height: 80dvh;
   }
 
   .gallery-lightbox__nav {

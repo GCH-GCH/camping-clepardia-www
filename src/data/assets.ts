@@ -44,8 +44,8 @@ export const siteAssets = {
   bungalows: {
     exterior: '/images/bungalows/bungalow-exterior.webp',
     room: '/images/bungalows/bungalow-room.webp',
-    terrace: '/images/bungalows/bungalow-terrace.webp',
-    family: '/images/bungalows/bungalow-family.webp',
+    bungalow3: '/images/bungalows/bungalow-3-person.webp',
+    bungalow4: '/images/bungalows/bungalow-4-person.webp',
   },
   sanitary: {
     building: '/images/sanitary/sanitary-building.webp',
@@ -77,8 +77,8 @@ export const siteAssets = {
     campingElectricity: '/images/camping/camping-electricity.webp',
     bungalowExterior: '/images/bungalows/bungalow-exterior.webp',
     bungalowRoom: '/images/bungalows/bungalow-room.webp',
-    bungalowTerrace: '/images/bungalows/bungalow-terrace.webp',
-    bungalowFamily: '/images/bungalows/bungalow-family.webp',
+    bungalow3: '/images/bungalows/bungalow-3-person.webp',
+    bungalow4: '/images/bungalows/bungalow-4-person.webp',
     sanitaryBuilding: '/images/sanitary/sanitary-building.webp',
     showers: '/images/sanitary/showers.webp',
     kitchen: '/images/sanitary/kitchen.webp',
@@ -99,8 +99,8 @@ export const siteAssets = {
     bungalows: {
       main: '/images/bungalows/bungalow-exterior.webp',
       room: '/images/bungalows/bungalow-room.webp',
-      terrace: '/images/bungalows/bungalow-terrace.webp',
-      family: '/images/bungalows/bungalow-family.webp',
+      bungalow3: '/images/bungalows/bungalow-3-person.webp',
+      bungalow4: '/images/bungalows/bungalow-4-person.webp',
     },
     sanitary: {
       building: '/images/sanitary/sanitary-building.webp',
@@ -155,8 +155,8 @@ export const requiredAssets: RequiredAsset[] = [
   { key: 'camping.electricity', path: siteAssets.camping.electricity, group: 'camping', label: 'Prąd / infrastruktura', recommendedSize: '1200x800', format: 'webp', priority: 'recommended' },
   { key: 'bungalows.exterior', path: siteAssets.bungalows.exterior, group: 'bungalows', label: 'Domek z zewnątrz', recommendedSize: '1600x1000', format: 'webp', priority: 'required' },
   { key: 'bungalows.room', path: siteAssets.bungalows.room, group: 'bungalows', label: 'Pokój w domku', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
-  { key: 'bungalows.terrace', path: siteAssets.bungalows.terrace, group: 'bungalows', label: 'Taras domku', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
-  { key: 'bungalows.family', path: siteAssets.bungalows.family, group: 'bungalows', label: 'Domki dla rodzin', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
+  { key: 'bungalows.bungalow3', path: siteAssets.bungalows.bungalow3, group: 'bungalows', label: 'Domek 3-osobowy', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
+  { key: 'bungalows.bungalow4', path: siteAssets.bungalows.bungalow4, group: 'bungalows', label: 'Domek 4-osobowy', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
   { key: 'sanitary.building', path: siteAssets.sanitary.building, group: 'sanitary', label: 'Budynek sanitarny', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
   { key: 'sanitary.showers', path: siteAssets.sanitary.showers, group: 'sanitary', label: 'Prysznice', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
   { key: 'sanitary.kitchen', path: siteAssets.sanitary.kitchen, group: 'sanitary', label: 'Kuchnia turystyczna', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
@@ -190,6 +190,7 @@ export const logoMainPng = siteAssets.logo.mainPng;
 const loaderLogoCandidates = [
   siteAssets.logo.whiteSvg,
   siteAssets.logo.mainSvg,
+  siteAssets.logo.icon,
   siteAssets.motion.loaderLogoWhite,
   siteAssets.logo.loader,
   siteAssets.motion.loaderLogo,

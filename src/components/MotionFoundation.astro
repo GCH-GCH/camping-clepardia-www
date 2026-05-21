@@ -570,8 +570,8 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
 .page-loader__core {
   position: relative;
   z-index: 2;
-  width: clamp(132px, 14vw, 166px);
-  height: clamp(132px, 14vw, 166px);
+  width: clamp(136px, 13.6vw, 164px);
+  height: clamp(136px, 13.6vw, 164px);
   display: grid;
   place-items: center;
   border-radius: 999px;
@@ -592,7 +592,7 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
   display: block;
   max-width: 82%;
   width: auto;
-  height: clamp(104px, 11.4vw, 140px);
+  height: clamp(112px, 10.8vw, 136px);
   object-fit: contain;
   image-rendering: auto;
   filter: drop-shadow(0 24px 50px rgba(60,179,113,.40)) drop-shadow(0 6px 20px rgba(242,192,120,.20));
@@ -818,12 +818,12 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
   }
 
   .page-loader__core {
-    width: 112px;
-    height: 112px;
+    width: 118px;
+    height: 118px;
   }
 
   .page-loader__logo {
-    height: 92px;
+    height: clamp(84px, 24vw, 104px);
   }
 
   .page-loader__copy {

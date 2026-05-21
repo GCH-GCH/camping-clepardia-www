@@ -28,10 +28,8 @@ const mediaLabels = {
     main: 'Domki Camping Clepardia',
     roomAlt: 'Wnętrze domku Camping Clepardia',
     room: 'Wnętrze domku',
-    terraceAlt: 'Taras przy domku Camping Clepardia',
-    terrace: 'Taras',
-    familyAlt: 'Domek dla par, rodzin i grup',
-    family: 'Dla rodzin',
+    bungalow4Alt: 'Domek 4-osobowy Camping Clepardia',
+    bungalow4: 'Domek 4-os.',
   },
   en: {
     aria: 'Bungalow section photos',
@@ -39,10 +37,8 @@ const mediaLabels = {
     main: 'Camping Clepardia bungalows',
     roomAlt: 'Camping Clepardia bungalow interior',
     room: 'Bungalow interior',
-    terraceAlt: 'Terrace by a Camping Clepardia bungalow',
-    terrace: 'Terrace',
-    familyAlt: 'Bungalow for couples, families and groups',
-    family: 'For families',
+    bungalow4Alt: 'Camping Clepardia 4-person bungalow',
+    bungalow4: '4-person bungalow',
   },
   de: {
     aria: 'Fotos der Bungalowsektion',
@@ -50,10 +46,8 @@ const mediaLabels = {
     main: 'Camping Clepardia Bungalows',
     roomAlt: 'Innenraum eines Camping Clepardia Bungalows',
     room: 'Bungalow innen',
-    terraceAlt: 'Terrasse am Camping Clepardia Bungalow',
-    terrace: 'Terrasse',
-    familyAlt: 'Bungalow für Paare, Familien und Gruppen',
-    family: 'Für Familien',
+    bungalow4Alt: '4-Personen-Bungalow von Camping Clepardia',
+    bungalow4: '4-Personen-Bungalow',
   },
   it: {
     aria: 'Foto della sezione bungalow',
@@ -61,10 +55,8 @@ const mediaLabels = {
     main: 'Bungalow Camping Clepardia',
     roomAlt: 'Interno bungalow Camping Clepardia',
     room: 'Interno bungalow',
-    terraceAlt: 'Terrazza presso il bungalow Camping Clepardia',
-    terrace: 'Terrazza',
-    familyAlt: 'Bungalow per coppie, famiglie e gruppi',
-    family: 'Per famiglie',
+    bungalow4Alt: 'Bungalow 4 persone Camping Clepardia',
+    bungalow4: 'Bungalow 4 persone',
   },
 }[contentLanguage];
 ---
@@ -105,10 +97,7 @@ const mediaLabels = {
         <ImageFrame src={siteAssets.bungalows.room} alt={mediaLabels.roomAlt} label={mediaLabels.room} />
       </div>
       <div class="bungalows-section__floating bungalows-section__floating--two">
-        <ImageFrame src={siteAssets.bungalows.terrace} alt={mediaLabels.terraceAlt} label={mediaLabels.terrace} />
-      </div>
-      <div class="bungalows-section__floating bungalows-section__floating--three">
-        <ImageFrame src={siteAssets.bungalows.family} alt={mediaLabels.familyAlt} label={mediaLabels.family} />
+        <ImageFrame src={siteAssets.bungalows.bungalow4} alt={mediaLabels.bungalow4Alt} label={mediaLabels.bungalow4} />
       </div>
     </div>
   </div>
@@ -233,12 +222,6 @@ const mediaLabels = {
 .bungalows-section__floating--two {
   left: -18px;
   bottom: 72px;
-}
-
-.bungalows-section__floating--three {
-  right: 32px;
-  bottom: 8px;
-  width: min(38%, 224px);
 }
 
 @media (min-width: 760px) {
