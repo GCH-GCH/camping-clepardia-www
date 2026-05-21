@@ -35,7 +35,6 @@ const getAddon = (id: string) => {
 
 const bungalow3 = getStayType('bungalow-3');
 const bungalow4 = getStayType('bungalow-4');
-const bungalowFamily = getStayType('bungalow-family');
 const dog = getAddon('dog');
 
 const getSeasonalPrices = (stayType: typeof pricingConfig.stayTypes[number]) => {
@@ -43,12 +42,6 @@ const getSeasonalPrices = (stayType: typeof pricingConfig.stayTypes[number]) => 
 
   return stayType.seasonalPrices;
 };
-const getStartingPrice = (stayType: typeof pricingConfig.stayTypes[number]) => {
-  if (!('startingPrice' in stayType)) throw new Error(`Missing starting price for ${stayType.label}`);
-
-  return stayType.startingPrice;
-};
-
 const familyTextByLanguage = {
   pl: {
     benefitsKicker: 'Dlaczego rodziny wybierają Clepardię',
@@ -64,7 +57,7 @@ const familyTextByLanguage = {
     priceFrom: 'cena od',
     campingOptions: 'Opcje campingowe',
     familyMedia: 'Domki i pobyt rodzinny',
-    familyPhoto: 'Miejsce na zdjęcie: domek rodzinny',
+    familyPhoto: 'Miejsce na zdjęcie: domki Camping Clepardia',
     bungalows: 'Domki',
     krakow: 'Kraków',
     attractionsKicker: 'Atrakcje dla dzieci',
@@ -83,7 +76,6 @@ const familyTextByLanguage = {
     stayCopies: [
       'Praktyczna opcja dla mniejszej rodziny albo rodzica z dziećmi.',
       'Więcej miejsca dla rodzin, które chcą zostać blisko centrum Krakowa.',
-      'Finalna cena i dostępność potwierdzana przez recepcję.',
       'Kamper, przyczepa, van, namiot lub auto z namiotem dachowym według aktualnego cennika campingu.',
     ],
     kidsAttractions: [
@@ -108,7 +100,7 @@ const familyTextByLanguage = {
     priceFrom: 'from',
     campingOptions: 'Camping options',
     familyMedia: 'Bungalows and family stay',
-    familyPhoto: 'Photo space: family bungalow',
+    familyPhoto: 'Photo space: Camping Clepardia bungalows',
     bungalows: 'Bungalows',
     krakow: 'Krakow',
     attractionsKicker: 'Attractions for children',
@@ -127,7 +119,6 @@ const familyTextByLanguage = {
     stayCopies: [
       'A practical option for a smaller family or a parent with children.',
       'More space for families who want to stay close to Krakow city centre.',
-      'Final price and availability are confirmed by reception.',
       'Motorhome, caravan, van, tent or car with rooftop tent according to the current camping price list.',
     ],
     kidsAttractions: [
@@ -152,7 +143,7 @@ const familyTextByLanguage = {
     priceFrom: 'ab',
     campingOptions: 'Campingoptionen',
     familyMedia: 'Bungalows und Familienaufenthalt',
-    familyPhoto: 'Fotoplatz: Familienbungalow',
+    familyPhoto: 'Fotoplatz: Bungalows Camping Clepardia',
     bungalows: 'Bungalows',
     krakow: 'Krakau',
     attractionsKicker: 'Attraktionen für Kinder',
@@ -171,7 +162,6 @@ const familyTextByLanguage = {
     stayCopies: [
       'Praktische Option für eine kleinere Familie oder ein Elternteil mit Kindern.',
       'Mehr Platz für Familien, die nahe am Zentrum von Krakau bleiben möchten.',
-      'Endgültiger Preis und Verfügbarkeit werden von der Rezeption bestätigt.',
       'Wohnmobil, Wohnwagen, Van, Zelt oder Auto mit Dachzelt gemäß aktueller Camping-Preisliste.',
     ],
     kidsAttractions: [
@@ -196,7 +186,7 @@ const familyTextByLanguage = {
     priceFrom: 'da',
     campingOptions: 'Opzioni camping',
     familyMedia: 'Bungalow e soggiorno in famiglia',
-    familyPhoto: 'Spazio foto: bungalow familiare',
+    familyPhoto: 'Spazio foto: bungalow Camping Clepardia',
     bungalows: 'Bungalow',
     krakow: 'Cracovia',
     attractionsKicker: 'Attrazioni per bambini',
@@ -215,7 +205,6 @@ const familyTextByLanguage = {
     stayCopies: [
       'Opzione pratica per una famiglia più piccola o un genitore con bambini.',
       'Più spazio per famiglie che vogliono stare vicino al centro di Cracovia.',
-      'Prezzo finale e disponibilità sono confermati dalla reception.',
       'Camper, roulotte, van, tenda o auto con tenda da tetto secondo il listino camping attuale.',
     ],
     kidsAttractions: [
@@ -271,15 +260,9 @@ const familyStayOptions = [
     copy: familyText.stayCopies[1],
   },
   {
-    title: stayTypeLabels['bungalow-family'],
-    type: 'confirmation',
-    startingPrice: getStartingPrice(bungalowFamily),
-    copy: familyText.stayCopies[2],
-  },
-  {
     title: 'Camping',
     type: 'camping',
-    copy: familyText.stayCopies[3],
+    copy: familyText.stayCopies[2],
   },
 ];
 
@@ -365,11 +348,6 @@ const practicalInfo = [
                 <p><strong>{familyText.highSeason}</strong>{formatPrice(option.high)} / {perNight}</p>
               </div>
             )}
-            {option.type === 'confirmation' && (
-              <div class="families-stay__prices">
-                <p><strong>{familyText.priceFrom}</strong>{formatPrice(option.startingPrice)} / {perNight}</p>
-              </div>
-            )}
             {option.type === 'camping' && (
               <div class="families-stay__tag-list" aria-label={familyText.campingOptions}>
                 <em>{stayTypeLabels.camper}</em>
@@ -387,7 +365,7 @@ const practicalInfo = [
 
     <div class="families-stay__media" aria-label={familyText.familyMedia}>
       <ImageFrame
-        src={siteAssets.bungalows.family}
+        src={siteAssets.bungalows.exterior}
         alt={familyText.familyPhoto}
         label={familyText.familyPhoto}
         className="families-stay__main-photo"

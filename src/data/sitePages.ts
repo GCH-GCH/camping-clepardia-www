@@ -46,6 +46,7 @@ export const sitePages: Record<PageSlug, SitePage> = {
       { title: 'Kampery i vany', copy: 'Praktyczna przestrzeń dla osób podróżujących kamperem, vanem lub autem turystycznym.' },
       { title: 'Przyczepy i namioty', copy: 'Miejsca pod klasyczny camping z dostępem do podstawowego zaplecza.' },
       { title: 'Blisko komunikacji', copy: 'Wygodny dojazd tramwajem do Starego Miasta bez szukania parkingu w centrum.' },
+      { title: 'Płyty betonowe i asfalt', copy: 'Miejsca dla kamperów są głównie na płytach betonowych, a busy, trucki, autobusy i ciężkie pojazdy ustawiamy na asfalcie z możliwością wyjścia na trawę.' },
     ],
     cta: {
       title: 'Zaplanuj pobyt campingowy',
@@ -154,6 +155,7 @@ export const sitePages: Record<PageSlug, SitePage> = {
       { title: 'Domki', copy: 'Domki mają osobną dostępność.' },
       { title: 'Potwierdzenie', copy: 'Finalną cenę i dostępność potwierdza recepcja.' },
       { title: 'Najszybszy kontakt', copy: 'Najszybszy kontakt: telefon lub email.' },
+      { title: 'Google Maps', copy: 'Do nawigacji zalecamy Google Maps, bo wjazd / trasa dojazdu zmieniła się w 2022 roku.' },
     ],
     cta: {
       title: 'Napisz do recepcji',

@@ -38,7 +38,6 @@ const bungalowNames = {
   'bungalow-2': t.pricing.stayTypes['bungalow-2'],
   'bungalow-3': t.pricing.stayTypes['bungalow-3'],
   'bungalow-4': t.pricing.stayTypes['bungalow-4'],
-  'bungalow-family': t.pricing.stayTypes['bungalow-family'],
 } as const;
 const bungalowCards = pricingConfig.stayTypes
   .filter((type) => type.category === 'bungalow')
@@ -47,9 +46,6 @@ const bungalowCards = pricingConfig.stayTypes
     title: bungalowNames[type.id as keyof typeof bungalowNames] ?? type.label,
     lowSeasonPrice: 'seasonalPrices' in type ? formatPrice(type.seasonalPrices.low) : undefined,
     highSeasonPrice: 'seasonalPrices' in type ? formatPrice(type.seasonalPrices.high) : undefined,
-    startingPrice: 'startingPrice' in type ? formatPrice(type.startingPrice) : undefined,
-    note: 'note' in type ? t.pricing.familyNotice : undefined,
-    requiresConfirmation: 'requiresConfirmation' in type ? type.requiresConfirmation : false,
   }));
 const highSeasonRange = `${formatSeasonDate(pricingConfig.seasons.high.start)}–${formatSeasonDate(pricingConfig.seasons.high.end)}`;
 const dogAddon = pricingConfig.addons.find((addon) => addon.id === 'dog');
@@ -73,6 +69,8 @@ const operationalTextByLanguage = {
     arrivalTitle: 'Po przyjeździe zatrzymaj się przy recepcji',
     arrivalCopy:
       'Po przyjeździe zatrzymaj się na parkingu w pobliżu recepcji. Personel recepcji podejdzie, wskaże miejsce i oprowadzi po campingu. Następnie odbywa się rejestracja.',
+    mapsCopy:
+      'Do nawigacji zalecamy używać Google Maps. Wjazd / trasa dojazdu zmieniła się w 2022 roku, dlatego starsze nawigacje mogą prowadzić nieprawidłowo.',
     practicalKicker: 'Praktyczne informacje na miejscu',
     practicalTitle: 'Najważniejsze rzeczy dla gości',
     guideReady: 'Pobierz Camping Guide PDF',
@@ -90,6 +88,8 @@ const operationalTextByLanguage = {
     arrivalTitle: 'After arrival, please stop near reception',
     arrivalCopy:
       'After arrival, please stop at the parking area near reception. Our reception staff will come to you, show you your place and guide you around the campsite. Registration is completed afterwards.',
+    mapsCopy:
+      'For navigation we recommend Google Maps. The entrance / access route changed in 2022, so older navigation systems may lead incorrectly.',
     practicalKicker: 'Practical information on site',
     practicalTitle: 'Useful things for guests',
     guideReady: 'Download Camping Guide PDF',
@@ -107,6 +107,8 @@ const operationalTextByLanguage = {
     arrivalTitle: 'Bitte halten Sie nach der Ankunft nahe der Rezeption',
     arrivalCopy:
       'Bitte halten Sie bei der Ankunft auf dem Parkplatz in der Nähe der Rezeption. Unser Rezeptionsteam kommt zu Ihnen, zeigt Ihnen den Platz und erklärt Ihnen den Campingplatz. Danach erfolgt die Anmeldung.',
+    mapsCopy:
+      'Für die Navigation empfehlen wir Google Maps. Die Einfahrt / Zufahrt wurde 2022 geändert, ältere Navigationssysteme können falsch führen.',
     practicalKicker: 'Praktische Informationen vor Ort',
     practicalTitle: 'Nützliche Hinweise für Gäste',
     guideReady: 'Camping Guide PDF herunterladen',
@@ -124,6 +126,8 @@ const operationalTextByLanguage = {
     arrivalTitle: 'All’arrivo fermati vicino alla reception',
     arrivalCopy:
       'All’arrivo, fermati nell’area di parcheggio vicino alla reception. Il personale della reception verrà da te, ti indicherà la piazzola e ti accompagnerà nel campeggio. La registrazione verrà completata dopo.',
+    mapsCopy:
+      'Per la navigazione consigliamo Google Maps. L’ingresso / percorso di accesso è cambiato nel 2022, quindi i navigatori più vecchi possono indicare una strada sbagliata.',
     practicalKicker: 'Informazioni pratiche sul posto',
     practicalTitle: 'Cose utili per gli ospiti',
     guideReady: 'Scarica Camping Guide PDF',
@@ -213,6 +217,7 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
         <span class="section-kicker">{operationalText.arrivalKicker}</span>
         <h2>{operationalText.arrivalTitle}</h2>
         <p>{operationalText.arrivalCopy}</p>
+        <p class="operational-info__maps-note">{operationalText.mapsCopy}</p>
         {campingGuideExists ? (
           <a class="btn btn-glass operational-info__guide" href={siteAssets.documents.campingGuidePdf} target="_blank" rel="noopener noreferrer">
             {operationalText.guideReady}
@@ -262,13 +267,7 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
                 <p><strong>{t.content.lowSeasonLabel}</strong>{bungalow.lowSeasonPrice} / {t.pricing.perNight}</p>
                 <p><strong>{t.content.highSeasonLabel}</strong>{bungalow.highSeasonPrice} / {t.pricing.perNight}</p>
               </div>
-            ) : (
-              <div class="bungalow-types__prices">
-                <p><strong>{t.content.priceFromLabel}</strong>{bungalow.startingPrice} / {t.pricing.perNight}</p>
-              </div>
-            )}
-            {bungalow.note && <p class="bungalow-types__note">{bungalow.note}</p>}
-            {bungalow.requiresConfirmation && <small>{t.content.bungalowConfirm}</small>}
+            ) : null}
           </article>
         ))}
       </div>
@@ -566,6 +565,16 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   margin: 0;
   color: rgba(255,255,255,.78);
   line-height: 1.75;
+}
+
+.operational-info__maps-note {
+  margin-top: 18px !important;
+  padding: 16px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(143,224,180,.22);
+  background: rgba(143,224,180,.10);
+  color: rgba(255,255,255,.86) !important;
+  font-weight: 850;
 }
 
 .operational-info__arrival small {

@@ -37,7 +37,6 @@ const localizedPricingConfig = {
   stayTypes: pricingConfig.stayTypes.map((type) => ({
     ...type,
     label: getStayTypeLabel(type.id, type.label),
-    ...('note' in type ? { note: pricingText.familyNotice } : {}),
   })),
   addons: pricingConfig.addons.map((addon) => ({
     ...addon,
@@ -49,9 +48,7 @@ const defaultAdults = 2;
 const defaultNights = 1;
 const defaultAccommodationPerNight = 'seasonalPrices' in defaultStayType
   ? defaultStayType.seasonalPrices.low
-  : 'startingPrice' in defaultStayType
-    ? defaultStayType.startingPrice
-    : defaultStayType.price;
+  : defaultStayType.price;
 const defaultPeoplePerNight = defaultStayType.category === 'bungalow'
   ? 0
   : defaultAdults * localizedPricingConfig.people.adults.price;
@@ -68,7 +65,6 @@ const stayTypeIcons: Record<string, string> = {
   'bungalow-2': 'bungalow',
   'bungalow-3': 'bungalow',
   'bungalow-4': 'bungalow',
-  'bungalow-family': 'family',
 };
 const addonIcons: Record<string, string> = {
   electricity: 'electricity',
@@ -116,9 +112,7 @@ const addonIcons: Record<string, string> = {
             {pricingConfig.stayTypes.map((type, index) => {
               const price = 'seasonalPrices' in type
                 ? `${pricingText.from} ${type.seasonalPrices.low} PLN`
-                : 'startingPrice' in type
-                  ? `${pricingText.from} ${type.startingPrice} PLN`
-                  : formatPrice(type.price);
+                : formatPrice(type.price);
               return (
                 <label class="pricing-calculator__option">
                   <input type="radio" name="stayType" value={type.id} checked={index === 0} />
@@ -129,7 +123,6 @@ const addonIcons: Record<string, string> = {
                     <span class="pricing-calculator__option-copy">
                       <strong>{getStayTypeLabel(type.id, type.label)}</strong>
                       <small>{price} / {pricingText.perNight}</small>
-                      {'note' in type && <em>{pricingText.familyNotice}</em>}
                     </span>
                   </span>
                 </label>
@@ -138,9 +131,6 @@ const addonIcons: Record<string, string> = {
           </div>
           <div class="pricing-calculator__notice" data-summer-notice hidden>
             {pricingText.summerNotice}
-          </div>
-          <div class="pricing-calculator__notice pricing-calculator__notice--confirmation" data-family-notice hidden>
-            {pricingText.familyNotice}
           </div>
         </fieldset>
 
@@ -297,7 +287,6 @@ const addonIcons: Record<string, string> = {
     const departureInput = root.querySelector('[data-departure]');
     const nightsLabel = root.querySelector('[data-nights-label]');
     const notice = root.querySelector('[data-summer-notice]');
-    const familyNotice = root.querySelector('[data-family-notice]');
     const totalEl = root.querySelector('[data-total]');
     const summaryDates = root.querySelector('[data-summary-dates]');
     const summaryNights = root.querySelector('[data-summary-nights]');
@@ -392,9 +381,6 @@ const addonIcons: Record<string, string> = {
       if ('seasonalPrices' in type) {
         return isHighSeason(date) ? type.seasonalPrices.high : type.seasonalPrices.low;
       }
-      if ('startingPrice' in type) {
-        return type.startingPrice;
-      }
       return type.price;
     };
     const getSeasonSummary = (nightDates) => {
@@ -405,8 +391,6 @@ const addonIcons: Record<string, string> = {
       return pricingText.mixedSeason;
     };
     const getRateSummary = (type, nightDates) => {
-      if ('startingPrice' in type) return `${pricingText.from} ${formatMoney(type.startingPrice)} / ${pricingText.perNight}`;
-
       const rates = nightDates.map((date) => getStayRate(type, date));
       const uniqueRates = Array.from(new Set(rates)).sort((a, b) => a - b);
       if (!uniqueRates.length) return `${formatMoney(getStayRate(type, new Date()))} / ${pricingText.perNight}`;
@@ -423,7 +407,6 @@ const addonIcons: Record<string, string> = {
     const getTranslatedStayLabel = (type) => pricingText.stayTypes?.[type.id] ?? type.label;
     const getTranslatedAddonLabel = (addon) => pricingText.addons?.[addon.id] ?? addon.label;
     const getAddonsSummary = (addons) => addons.length ? addons.map(getTranslatedAddonLabel).join(', ') : pricingText.noAddons;
-    const isConfirmationStay = (type) => Boolean(type.requiresConfirmation);
     const animateMoney = (element, nextValue, approximate = false) => {
       if (!element) return;
       if (reduceMotion) {
@@ -507,20 +490,17 @@ const addonIcons: Record<string, string> = {
       const total = accommodationTotal + peopleTotal + addonsTotal;
       const nightlyTotal = nights > 0 ? total / nights : total;
       const hasSummerCamping = type.category === 'camping' && nightDates.some(isSummerNoticeMonth);
-      const requiresConfirmation = isConfirmationStay(type);
       const datesSummary = arrival && departure ? `${formatDateDisplay(arrival)} - ${formatDateDisplay(departure)}` : pricingText.toComplete;
       const nightsSummary = formatNightsText(nights);
       const seasonSummary = getSeasonSummary(nightDates);
       const peopleSummary = getPeopleSummary({ adults, children, toddlers });
       const addonsSummary = getAddonsSummary(selectedAddonItems);
-      const rateSummary = `${requiresConfirmation ? `${pricingText.from} ` : ''}${formatMoney(nightlyTotal)} / ${pricingText.perNight}`;
+      const rateSummary = `${formatMoney(nightlyTotal)} / ${pricingText.perNight}`;
 
       const breakdown = [
         {
           label: `${getTranslatedStayLabel(type)} x ${nightsSummary}`,
           amount: accommodationTotal,
-          approximate: requiresConfirmation,
-          note: requiresConfirmation ? pricingText.familyNotice : '',
         },
       ];
 
@@ -545,14 +525,11 @@ const addonIcons: Record<string, string> = {
       setText(mobileAddons, addonsSummary);
       setText(mobileRate, rateSummary);
       if (notice) notice.hidden = !hasSummerCamping;
-      if (familyNotice) familyNotice.hidden = !requiresConfirmation;
       if (summaryFootnote) {
-        summaryFootnote.textContent = requiresConfirmation
-          ? pricingText.familyFootnote
-          : pricingText.summaryFootnote;
+        summaryFootnote.textContent = pricingText.summaryFootnote;
       }
-      animateMoney(totalEl, total, requiresConfirmation);
-      animateMoney(mobileTotal, total, requiresConfirmation);
+      animateMoney(totalEl, total);
+      animateMoney(mobileTotal, total);
       renderBreakdown(breakdown);
     };
 

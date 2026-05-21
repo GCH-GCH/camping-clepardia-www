@@ -147,7 +147,7 @@ export const requiredAssets: RequiredAsset[] = [
   { key: 'bungalows.exterior', path: siteAssets.bungalows.exterior, group: 'bungalows', label: 'Domek z zewnątrz', recommendedSize: '1600x1000', format: 'webp', priority: 'required' },
   { key: 'bungalows.room', path: siteAssets.bungalows.room, group: 'bungalows', label: 'Pokój w domku', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
   { key: 'bungalows.terrace', path: siteAssets.bungalows.terrace, group: 'bungalows', label: 'Taras domku', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
-  { key: 'bungalows.family', path: siteAssets.bungalows.family, group: 'bungalows', label: 'Domek rodzinny', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
+  { key: 'bungalows.family', path: siteAssets.bungalows.family, group: 'bungalows', label: 'Domki dla rodzin', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
   { key: 'sanitary.building', path: siteAssets.sanitary.building, group: 'sanitary', label: 'Budynek sanitarny', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
   { key: 'sanitary.showers', path: siteAssets.sanitary.showers, group: 'sanitary', label: 'Prysznice', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
   { key: 'sanitary.kitchen', path: siteAssets.sanitary.kitchen, group: 'sanitary', label: 'Kuchnia turystyczna', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },

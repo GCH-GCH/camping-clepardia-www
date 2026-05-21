@@ -23,7 +23,6 @@ const stayOptions = [
   { id: 'bungalow-2', label: pricingText.stayTypes['bungalow-2'], category: 'bungalow' },
   { id: 'bungalow-3', label: pricingText.stayTypes['bungalow-3'], category: 'bungalow' },
   { id: 'bungalow-4', label: pricingText.stayTypes['bungalow-4'], category: 'bungalow' },
-  { id: 'bungalow-family', label: pricingText.stayTypes['bungalow-family'], category: 'bungalow' },
 ] as const;
 
 const inquiryAddonIds = ['electricity', 'dog', 'extra-car', 'motorcycle', 'cargo-trailer'] as const;
@@ -173,6 +172,16 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
         <div class="reservation-inquiry__season-notice" data-season-banner hidden>
           {formText.summerNotice}
         </div>
+
+        <div class="reservation-inquiry__rule-notice">
+          {formText.quietRule}
+        </div>
+
+        <label class="reservation-inquiry__consent" data-field="quietConsent">
+          <input id="quietConsent" name="quietConsent" type="checkbox" required data-required aria-describedby="quietConsentError">
+          <span>{formText.quietConsent}</span>
+        </label>
+        <small class="reservation-inquiry__field-error" id="quietConsentError" data-field-error="quietConsent"></small>
 
         <label class="reservation-inquiry__consent" data-field="consent">
           <input id="consent" name="consent" type="checkbox" required data-required aria-describedby="consentError">
@@ -436,8 +445,9 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
       const departure = parseDate(departureInput?.value);
       const stay = getSelectedStay();
       const consent = getInput('consent');
+      const quietConsent = getInput('quietConsent');
 
-      ['fullName', 'email', 'arrival', 'departure', 'consent'].forEach((name) => setFieldError(name));
+      ['fullName', 'email', 'arrival', 'departure', 'quietConsent', 'consent'].forEach((name) => setFieldError(name));
       setStayError();
 
       if (!fullName) {
@@ -465,6 +475,10 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
       if (!stay) {
         errors.push(formText.validation.stayType);
         setStayError(formText.validation.stayType);
+      }
+      if (!(quietConsent instanceof HTMLInputElement) || !quietConsent.checked) {
+        errors.push(formText.validation.quietConsent);
+        setFieldError('quietConsent', formText.validation.quietConsent);
       }
       if (!(consent instanceof HTMLInputElement) || !consent.checked) {
         errors.push(formText.validation.consent);
@@ -500,6 +514,7 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
         addons: addons.map((addon) => addon.label),
         message: getInput('message')?.value.trim() ?? '',
         summerNotice: hasSummerCampingNotice(),
+        quietConsent: Boolean(getInput('quietConsent')?.checked),
         consent: Boolean(getInput('consent')?.checked),
         website: getInput('website')?.value.trim() ?? '',
         source: 'website',
@@ -525,6 +540,7 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
       `${formText.mailLabels.addons}: ${payload.addons.length ? payload.addons.join(', ') : formText.mailLabels.none}`,
       '',
       `${formText.mailLabels.summerNotice}: ${payload.summerNotice ? summerNotice : formText.mailLabels.notApplicable}`,
+      `${formText.mailLabels.quietConsent}: ${payload.quietConsent ? formText.mailLabels.accepted : formText.mailLabels.notApplicable}`,
       '',
       `${formText.mailLabels.message}: ${payload.message || formText.mailLabels.none}`,
     ].join('\n');
@@ -912,6 +928,18 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
   border: 1px solid rgba(238,174,99,.36);
   background: rgba(255,247,232,.92);
   color: #775321;
+}
+
+.reservation-inquiry__rule-notice {
+  padding: 16px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(60,179,113,.26);
+  background:
+    radial-gradient(circle at 14% 0%, rgba(60,179,113,.12), transparent 34%),
+    rgba(232,249,240,.94);
+  color: #24553a;
+  line-height: 1.62;
+  font-weight: 900;
 }
 
 .reservation-inquiry__success {

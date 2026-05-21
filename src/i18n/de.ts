@@ -81,14 +81,14 @@ export const de = {
   },
   chat: {
     ...en.chat,
-    open: 'Clepek öffnen',
+    open: 'CAMPY öffnen',
     close: 'Chat schließen',
-    title: 'Clepek — Helfer von Camping Clepardia',
+    title: 'CAMPY — Camping Clepardia Helfer',
     status: 'Bereit zu helfen',
     intro:
-      'Hallo! 👋 Ich bin Clepek, der Helfer von Camping Clepardia. Ich helfe schnell mit Preisen, Bungalows, der Straßenbahn ins Zentrum und dem Kontakt zur Rezeption.',
+      'Hallo! 👋 Ich bin CAMPY, Ihr Helfer von Camping Clepardia. Ich helfe schnell mit Preisen, Bungalows, Straßenbahn ins Zentrum, Aufenthaltsregeln und Kontakt zur Rezeption.',
     notice:
-      'Antworten dienen zur Information. Buchungen und Verfügbarkeit werden von der Rezeption bestätigt.',
+      'Antworten dienen zur Information. Buchungen und Verfügbarkeit werden immer von der Rezeption bestätigt.',
     quickLabel: 'Schnelle Themen',
     inputLabel: 'Nachricht schreiben',
     inputPlaceholder: 'Nachricht schreiben...',
@@ -98,20 +98,26 @@ export const de = {
       directions: 'Wie komme ich hin?',
       bungalow: 'Bungalow anfragen',
       reception: 'Kontakt zur Rezeption',
+      quiet: 'Nachtruhe',
+      maps: 'Google Maps',
     },
     answers: {
       pricing:
         'Orientierungspreise: Wohnmobil 80 PLN / Nacht, Wohnwagen 60 PLN / Nacht, Van 75 PLN / Nacht, Strom 25 PLN / Nacht, Hund kostenlos. Den vollständigen Rechner finden Sie auf der Preisseite.',
       directions:
-        'Am bequemsten ist es, Auto oder Camper auf dem Campingplatz zu lassen und mit der Straßenbahn Richtung Zentrum von Krakau zu fahren. Adresse: Henryka Pachońskiego 28A, 31-322 Krakau.',
+        'Am bequemsten ist es, Auto oder Camper auf dem Campingplatz zu lassen und mit der Straßenbahn Richtung Zentrum von Krakau zu fahren. Für die Navigation empfehlen wir Google Maps. Die Einfahrt / Zufahrt wurde 2022 geändert, ältere Navigationssysteme können falsch führen.',
       bungalows:
-        'Bungalows haben separate Verfügbarkeit. 2-Personen: 200/220 PLN, 3-Personen: 250/300 PLN, 4-Personen: 400/450 PLN je nach Saison. Familienbungalows benötigen Bestätigung der Rezeption.',
+        'Bungalows haben separate Verfügbarkeit. Es gibt nur 2-, 3- und 4-Personen-Bungalows. Preise: 200/220 PLN, 250/300 PLN und 400/450 PLN je nach Saison.',
       reception:
         'Rezeption: +48 795 294 486, E-Mail: clepardia@gmail.com. Am schnellsten bestätigen Sie die Verfügbarkeit per Telefon oder E-Mail.',
       camping:
-        'Camping Clepardia nimmt Wohnmobile, Vans, Wohnwagen, Zelte und Autos mit Dachzelt auf. Im Juni, Juli und August kann die Verfügbarkeit eingeschränkt sein.',
+        'Camping Clepardia nimmt Wohnmobile, Vans, Wohnwagen, Zelte und Autos mit Dachzelt auf. Wohnmobilstellplätze sind meist Betonplatten. Vans, Lkw, Busse und schwere Fahrzeuge stellen wir auf Asphalt, damit sie nicht stecken bleiben, mit Zugang zur Wiese.',
+      quiet:
+        'Camping Clepardia ist kein Partyort. Die Nachtruhe gilt von 22:00 bis 07:00. Wenn Sie feiern möchten, wählen Sie bitte einen anderen Ort.',
+      maps:
+        'Für die Navigation empfehlen wir Google Maps. Die Einfahrt / Zufahrt wurde 2022 geändert, ältere Navigationssysteme können falsch führen.',
       fallback:
-        'Am sichersten ist der Kontakt mit der Rezeption von Camping Clepardia: +48 795 294 486 oder clepardia@gmail.com. Clepek gibt kurze Hinweise, die Buchung bestätigt die Rezeption.',
+        'Am sichersten ist der Kontakt mit der Rezeption von Camping Clepardia: +48 795 294 486 oder clepardia@gmail.com. CAMPY gibt kurze Hinweise, die Buchung bestätigt die Rezeption.',
     },
   },
   content: {
@@ -136,7 +142,7 @@ export const de = {
     bungalowKicker: 'Bungalowpreise',
     bungalowTitle: 'Bungalowtypen',
     bungalowCopy:
-      'Bungalowpreise hängen von Saison und Aufenthaltskonfiguration ab. Ein Familienbungalow erfordert Bestätigung der Verfügbarkeit und des Endpreises durch die Rezeption.',
+      'Bungalowpreise hängen von der Saison ab. Verfügbar sind 2-, 3- und 4-Personen-Bungalows.',
     lowSeasonLabel: 'Nebensaison',
     highSeasonLabel: 'Hochsaison',
     priceFromLabel: 'Preis ab',
@@ -163,8 +169,6 @@ export const de = {
     perNight: 'Nacht',
     summerNotice:
       'In der Sommersaison können Reservierungen für Campingplätze eingeschränkt sein. Kontaktieren Sie die Rezeption wegen Verfügbarkeit.',
-    familyNotice:
-      'Der Preis des Familienbungalows hängt von der Konfiguration ab und muss von der Rezeption bestätigt werden.',
     people: 'Personen',
     adults: 'Erwachsene',
     children: 'Kinder 4-14',
@@ -184,8 +188,6 @@ export const de = {
     confirmPrice: 'zu bestätigen',
     summaryFootnote:
       'Dies ist eine Orientierungskalkulation. Die Rezeption bestätigt Verfügbarkeit, Saison und Aufenthaltsdetails.',
-    familyFootnote:
-      'Für den Familienbungalow zeigt der Rechner einen Richtwert ab dem Basispreis. Verfügbarkeit und Endpreis bestätigt die Rezeption.',
     mobileTotal: 'Gesamtsumme',
     increment: 'Erhöhen',
     decrement: 'Verringern',
@@ -205,7 +207,6 @@ export const de = {
       'bungalow-2': '2-Personen-Bungalow',
       'bungalow-3': '3-Personen-Bungalow',
       'bungalow-4': '4-Personen-Bungalow',
-      'bungalow-family': 'Familienbungalow',
     },
     addons: {
       electricity: 'Strom',
@@ -244,6 +245,10 @@ export const de = {
     message: 'Nachricht',
     messagePlaceholder:
       'Schreiben Sie, was Sie benötigen: Ankunftszeit, Fahrzeugtyp, Fragen zum Bungalow oder weitere Informationen.',
+    quietRule:
+      'Camping Clepardia ist kein Partyort. Die Nachtruhe gilt von 22:00 bis 07:00. Wenn Sie feiern möchten, wählen Sie bitte einen anderen Ort.',
+    quietConsent:
+      'Ich verstehe, dass Camping Clepardia kein Partyort ist und die Nachtruhe von 22:00 bis 07:00 gilt.',
     consent: 'Ich akzeptiere die Rückkontaktaufnahme zu meiner Anfrage.',
     submit: 'Anfrage senden',
     homeCtaButton: 'Zum Formular',
@@ -274,6 +279,7 @@ export const de = {
       departure: 'Geben Sie das Abreisedatum ein.',
       departureAfterArrival: 'Das Abreisedatum muss nach dem Anreisedatum liegen.',
       stayType: 'Wählen Sie die Aufenthaltsart.',
+      quietConsent: 'Bestätigen Sie die Nachtruhe und den Nicht-Party-Charakter des Campingplatzes.',
       consent: 'Akzeptieren Sie die Rückkontaktaufnahme zur Anfrage.',
     },
     mailLabels: {
@@ -292,6 +298,8 @@ export const de = {
       addons: 'Extras',
       none: 'keine',
       summerNotice: 'Saisonhinweis',
+      quietConsent: 'Bestätigung der Nachtruhe',
+      accepted: 'akzeptiert',
       notApplicable: 'nicht zutreffend',
       message: 'Nachricht',
     },
@@ -311,6 +319,7 @@ export const de = {
         { title: 'Wohnmobile und Vans', copy: 'Praktischer Raum für Gäste mit Wohnmobil, Van oder Reisefahrzeug.' },
         { title: 'Wohnwagen und Zelte', copy: 'Klassische Campingplätze mit Zugang zur grundlegenden Infrastruktur.' },
         { title: 'Nah am Nahverkehr', copy: 'Bequeme Straßenbahnverbindung zur Altstadt ohne Parkplatzsuche im Zentrum.' },
+        { title: 'Betonplatten und Asphalt', copy: 'Wohnmobilstellplätze sind meist Betonplatten, Vans, Lkw, Busse und schwere Fahrzeuge stellen wir auf Asphalt mit Zugang zur Wiese.' },
       ],
       cta: {
         title: 'Campingaufenthalt planen',
@@ -424,6 +433,7 @@ export const de = {
         { title: 'Bungalows', copy: 'Bungalows haben separate Verfügbarkeit.' },
         { title: 'Bestätigung', copy: 'Endpreis und Verfügbarkeit werden von der Rezeption bestätigt.' },
         { title: 'Schnellster Kontakt', copy: 'Der schnellste Kontakt ist per Telefon oder E-Mail.' },
+        { title: 'Google Maps', copy: 'Wir empfehlen Google Maps, weil die Einfahrt / Zufahrt 2022 geändert wurde.' },
       ],
       cta: {
         title: 'An die Rezeption schreiben',

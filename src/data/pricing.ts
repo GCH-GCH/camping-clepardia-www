@@ -44,14 +44,6 @@ export const pricingConfig = {
       category: 'bungalow',
       seasonalPrices: { low: 400, high: 450 },
     },
-    {
-      id: 'bungalow-family',
-      label: 'Domek rodzinny',
-      category: 'bungalow',
-      startingPrice: 300,
-      requiresConfirmation: true,
-      note: 'Cena domku rodzinnego zależy od konfiguracji i wymaga potwierdzenia przez recepcję.',
-    },
   ],
   addons: [
     { id: 'electricity', label: 'Prąd', price: 25 },

@@ -29,6 +29,7 @@ export interface ReservationInquiryPayload {
   addons?: string[];
   message?: string;
   summerNotice?: boolean;
+  quietConsent?: boolean;
   consent?: boolean;
   website?: string;
   source?: string;
@@ -54,6 +55,7 @@ export interface NormalizedReservationInquiry extends ReservationInquiryPayload 
   addons: string[];
   message: string;
   summerNotice: boolean;
+  quietConsent: boolean;
   consent: boolean;
   website: string;
   source: 'website';
@@ -83,6 +85,7 @@ export interface CcSystemLeadDraft {
     people: InquiryPeople;
     addons: string[];
     summerNotice: boolean;
+    quietConsent: boolean;
   };
   notes: string;
   createdAt: string;

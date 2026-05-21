@@ -99,6 +99,7 @@ export const normalizeReservationInquiry = (rawPayload: unknown) => {
     errors.departure = 'Data wyjazdu musi byc po dacie przyjazdu.';
   }
   if (!stayType) errors.stayType = 'Wybierz typ pobytu.';
+  if (!payload.quietConsent) errors.quietConsent = 'Potwierdz zasady ciszy nocnej.';
   if (!payload.consent) errors.consent = 'Zaakceptuj kontakt zwrotny.';
 
   const nightsFromDates = arrival && departure ? Math.max(1, Math.round((departure.getTime() - arrival.getTime()) / DAY)) : 0;
@@ -128,6 +129,7 @@ export const normalizeReservationInquiry = (rawPayload: unknown) => {
     addons,
     message,
     summerNotice: Boolean(payload.summerNotice),
+    quietConsent: Boolean(payload.quietConsent),
     consent: Boolean(payload.consent),
     website,
     source: 'website',
@@ -161,6 +163,7 @@ export const createCcSystemLeadDraft = (inquiry: NormalizedReservationInquiry): 
     people: inquiry.people,
     addons: inquiry.addons,
     summerNotice: inquiry.summerNotice,
+    quietConsent: inquiry.quietConsent,
   },
   notes: inquiry.message,
   createdAt: inquiry.submittedAt,

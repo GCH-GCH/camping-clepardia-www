@@ -7,8 +7,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  // TODO: Replace with the final production domain before launch.
-  site: 'https://twojadomena.pl',
+  site: 'https://www.clepardia.com.pl',
   integrations: [
     sitemap({
       i18n: {

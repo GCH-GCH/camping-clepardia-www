@@ -73,14 +73,14 @@ export const pl = {
     camperCost: 'Oblicz koszt pobytu',
   },
   chat: {
-    open: 'Otwórz pomocnika Clepek',
+    open: 'Otwórz pomocnika CAMPY',
     close: 'Zamknij chat',
-    title: 'Clepek — pomocnik Camping Clepardia',
+    title: 'CAMPY — pomocnik Camping Clepardia',
     status: 'Gotowy do pomocy',
     intro:
-      'Cześć! 👋 Jestem Clepek, mały pomocnik Camping Clepardia. Mogę szybko podpowiedzieć Ci coś o cenniku, domkach, dojeździe tramwajem do centrum albo kontakcie z recepcją.',
+      'Cześć! 👋 Jestem CAMPY, Twój pomocnik Camping Clepardia. Pomogę Ci szybko znaleźć informacje o cenniku, domkach, dojeździe tramwajem do centrum, zasadach pobytu i kontakcie z recepcją.',
     notice:
-      'Odpowiedzi są informacyjne. Rezerwacje i dostępność potwierdza recepcja.',
+      'Odpowiedzi są informacyjne. Rezerwacje i dostępność zawsze potwierdza recepcja.',
     quickLabel: 'Szybkie tematy',
     inputLabel: 'Napisz wiadomość',
     inputPlaceholder: 'Napisz wiadomość...',
@@ -90,20 +90,26 @@ export const pl = {
       directions: 'Jak dojechać?',
       bungalow: 'Zapytaj o domek',
       reception: 'Kontakt z recepcją',
+      quiet: 'Zasady ciszy',
+      maps: 'Google Maps',
     },
     answers: {
       pricing:
         'Orientacyjnie: kamper 80 PLN / noc, przyczepa 60 PLN / noc, van 75 PLN / noc, prąd 25 PLN / noc, pies bezpłatnie. Pełny kalkulator znajdziesz na stronie Cennik.',
       directions:
-        'Najwygodniej zostawić auto lub kampera na campingu i pojechać tramwajem w stronę centrum Krakowa. Adres: Henryka Pachońskiego 28A, 31-322 Kraków.',
+        'Najwygodniej zostawić auto lub kampera na campingu i pojechać tramwajem w stronę centrum Krakowa. Do nawigacji zalecamy używać Google Maps. Wjazd / trasa dojazdu zmieniła się w 2022 roku, dlatego starsze nawigacje mogą prowadzić nieprawidłowo.',
       bungalows:
-        'Domki mają osobną dostępność. Domek 2-os. kosztuje 200/220 PLN, 3-os. 250/300 PLN, 4-os. 400/450 PLN zależnie od sezonu. Domek rodzinny wymaga potwierdzenia recepcji.',
+        'Domki mają osobną dostępność. Dostępne są tylko domki 2-os., 3-os. i 4-os. Ceny: 200/220 PLN, 250/300 PLN oraz 400/450 PLN zależnie od sezonu.',
       reception:
         'Recepcja: +48 795 294 486, email: clepardia@gmail.com. Najszybszy kontakt w sprawie dostępności to telefon lub wiadomość email.',
       camping:
-        'Camping Clepardia przyjmuje kampery, vany, przyczepy, namioty i auta z namiotem dachowym. W czerwcu, lipcu i sierpniu dostępność pola może być ograniczona.',
+        'Camping Clepardia przyjmuje kampery, vany, przyczepy, namioty i auta z namiotem dachowym. Miejsca dla kamperów znajdują się głównie na płytach betonowych. Busy, trucki, autobusy i ciężkie pojazdy ustawiamy na asfalcie, aby uniknąć zakopania się pojazdu, z możliwością wyjścia na trawę.',
+      quiet:
+        'Camping Clepardia nie jest miejscem imprezowym. Cisza nocna obowiązuje od 22:00 do 07:00. Jeśli planujesz imprezować, wybierz inne miejsce.',
+      maps:
+        'Do nawigacji zalecamy używać Google Maps. Wjazd / trasa dojazdu zmieniła się w 2022 roku, dlatego starsze nawigacje mogą prowadzić nieprawidłowo.',
       fallback:
-        'Najpewniej pomoże recepcja Camping Clepardia: +48 795 294 486 lub clepardia@gmail.com. Clepek podpowiada najważniejsze informacje, a rezerwacje potwierdza recepcja.',
+        'Najpewniej pomoże recepcja Camping Clepardia: +48 795 294 486 lub clepardia@gmail.com. CAMPY podpowiada najważniejsze informacje, a rezerwacje potwierdza recepcja.',
     },
   },
   content: {
@@ -127,7 +133,7 @@ export const pl = {
     bungalowKicker: 'Cennik domków',
     bungalowTitle: 'Rodzaje domków',
     bungalowCopy:
-      'Ceny domków zależą od sezonu i konfiguracji pobytu. Domek rodzinny wymaga potwierdzenia dostępności oraz finalnej ceny przez recepcję.',
+      'Ceny domków zależą od sezonu. Dostępne są domki 2-osobowe, 3-osobowe i 4-osobowe.',
     lowSeasonLabel: 'niski sezon',
     highSeasonLabel: 'wysoki sezon',
     priceFromLabel: 'cena od',
@@ -153,8 +159,6 @@ export const pl = {
     perNight: 'noc',
     summerNotice:
       'W sezonie letnim rezerwacje pola campingowego mogą być ograniczone. Skontaktuj się z recepcją w sprawie dostępności.',
-    familyNotice:
-      'Cena domku rodzinnego zależy od konfiguracji i wymaga potwierdzenia przez recepcję.',
     people: 'Osoby',
     adults: 'Dorośli',
     children: 'Dzieci 4-14',
@@ -174,8 +178,6 @@ export const pl = {
     confirmPrice: 'do potwierdzenia',
     summaryFootnote:
       'To orientacyjna kalkulacja. Recepcja potwierdza dostępność, sezon i szczegóły pobytu.',
-    familyFootnote:
-      'Dla domku rodzinnego kalkulator pokazuje wartość orientacyjną od ceny bazowej. Dostępność i finalną cenę potwierdza recepcja.',
     mobileTotal: 'Suma pobytu',
     increment: 'Zwiększ',
     decrement: 'Zmniejsz',
@@ -195,7 +197,6 @@ export const pl = {
       'bungalow-2': 'Domek 2-os.',
       'bungalow-3': 'Domek 3-os.',
       'bungalow-4': 'Domek 4-os.',
-      'bungalow-family': 'Domek rodzinny',
     },
     addons: {
       electricity: 'Prąd',
@@ -233,6 +234,10 @@ export const pl = {
     message: 'Wiadomość',
     messagePlaceholder:
       'Napisz, czego potrzebujesz: godzina przyjazdu, typ sprzętu, pytania o domek lub dodatkowe informacje.',
+    quietRule:
+      'Camping Clepardia nie jest miejscem imprezowym. Cisza nocna obowiązuje od 22:00 do 07:00. Jeśli planujesz imprezować, wybierz inne miejsce.',
+    quietConsent:
+      'Rozumiem, że Camping Clepardia nie jest miejscem imprezowym, a cisza nocna obowiązuje od 22:00 do 07:00.',
     consent: 'Akceptuję kontakt zwrotny w sprawie mojego zapytania.',
     submit: 'Wyślij zapytanie',
     homeCtaButton: 'Przejdź do formularza',
@@ -263,6 +268,7 @@ export const pl = {
       departure: 'Podaj datę wyjazdu.',
       departureAfterArrival: 'Data wyjazdu musi być po dacie przyjazdu.',
       stayType: 'Wybierz typ pobytu.',
+      quietConsent: 'Potwierdź zasady ciszy nocnej i nieimprezowy charakter campingu.',
       consent: 'Zaakceptuj kontakt zwrotny w sprawie zapytania.',
     },
     mailTitle: 'Zapytanie rezerwacyjne Camping Clepardia',
@@ -282,6 +288,8 @@ export const pl = {
       addons: 'Dodatki',
       none: 'brak',
       summerNotice: 'Komunikat sezonowy',
+      quietConsent: 'Potwierdzenie ciszy nocnej',
+      accepted: 'zaakceptowano',
       notApplicable: 'nie dotyczy',
       message: 'Wiadomość',
     },

@@ -29,7 +29,6 @@ const getAddon = (id: string) => {
 const formatStayTypePrice = (id: string) => {
   const stayType = getStayType(id);
   if ('seasonalPrices' in stayType) return `${t.pricing.from} ${formatPrice(stayType.seasonalPrices.low)}`;
-  if ('startingPrice' in stayType) return `${t.pricing.from} ${formatPrice(stayType.startingPrice)}`;
   return formatPrice(stayType.price);
 };
 
@@ -44,7 +43,6 @@ const prices = [
   { label: t.pricing.stayTypes['bungalow-2'], price: formatStayTypePrice('bungalow-2'), icon: 'bungalow' },
   { label: t.pricing.stayTypes['bungalow-3'], price: formatStayTypePrice('bungalow-3'), icon: 'bungalow' },
   { label: t.pricing.stayTypes['bungalow-4'], price: formatStayTypePrice('bungalow-4'), icon: 'bungalow' },
-  { label: t.pricing.stayTypes['bungalow-family'], price: formatStayTypePrice('bungalow-family'), icon: 'family' },
   { label: t.pricing.addons.electricity, price: formatPrice(getAddon('electricity').price), icon: 'electricity' },
   { label: t.pricing.addons.dog, price: formatPrice(getAddon('dog').price), icon: 'dog' },
   { label: t.pricing.addons.bus, price: formatPrice(getAddon('bus').price), icon: 'truck' },

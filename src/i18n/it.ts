@@ -81,14 +81,14 @@ export const it = {
   },
   chat: {
     ...en.chat,
-    open: 'Apri Clepek',
+    open: 'Apri CAMPY',
     close: 'Chiudi chat',
-    title: 'Clepek — assistente di Camping Clepardia',
+    title: 'CAMPY — assistente Camping Clepardia',
     status: 'Pronto ad aiutare',
     intro:
-      'Ciao! 👋 Sono Clepek, il tuo assistente di Camping Clepardia. Posso aiutarti rapidamente con prezzi, bungalow, tram per il centro o contatto con la reception.',
+      'Ciao! 👋 Sono CAMPY, il tuo assistente Camping Clepardia. Posso aiutarti rapidamente con prezzi, bungalow, tram per il centro, regole del soggiorno e contatto con la reception.',
     notice:
-      'Le risposte sono informative. Prenotazioni e disponibilità sono confermate dalla reception.',
+      'Le risposte sono informative. Prenotazioni e disponibilità sono sempre confermate dalla reception.',
     quickLabel: 'Temi rapidi',
     inputLabel: 'Scrivi un messaggio',
     inputPlaceholder: 'Scrivi un messaggio...',
@@ -98,20 +98,26 @@ export const it = {
       directions: 'Come arrivare?',
       bungalow: 'Chiedi un bungalow',
       reception: 'Contatto reception',
+      quiet: 'Silenzio notturno',
+      maps: 'Google Maps',
     },
     answers: {
       pricing:
         'Indicativamente: camper 80 PLN / notte, roulotte 60 PLN / notte, van 75 PLN / notte, elettricità 25 PLN / notte, cane gratuito. Il calcolatore completo è nella pagina Prezzi.',
       directions:
-        'La soluzione più comoda è lasciare auto o camper al campeggio e prendere il tram verso il centro di Cracovia. Indirizzo: Henryka Pachońskiego 28A, 31-322 Kraków.',
+        'La soluzione più comoda è lasciare auto o camper al campeggio e prendere il tram verso il centro di Cracovia. Per la navigazione consigliamo Google Maps. L’ingresso / percorso di accesso è cambiato nel 2022, quindi i navigatori più vecchi possono indicare una strada sbagliata.',
       bungalows:
-        'I bungalow hanno disponibilità separata. 2 persone: 200/220 PLN, 3 persone: 250/300 PLN, 4 persone: 400/450 PLN secondo la stagione. Il bungalow familiare richiede conferma della reception.',
+        'I bungalow hanno disponibilità separata. Sono disponibili solo bungalow da 2, 3 e 4 persone. Prezzi: 200/220 PLN, 250/300 PLN e 400/450 PLN secondo la stagione.',
       reception:
         'Reception: +48 795 294 486, email: clepardia@gmail.com. Il modo più rapido per confermare disponibilità è telefono o email.',
       camping:
-        'Camping Clepardia accoglie camper, van, roulotte, tende e auto con tenda da tetto. A giugno, luglio e agosto la disponibilità può essere limitata.',
+        'Camping Clepardia accoglie camper, van, roulotte, tende e auto con tenda da tetto. Le piazzole camper sono principalmente su lastre di cemento. Van, camion, bus e veicoli pesanti vengono posizionati sull’asfalto per evitare che si blocchino, con accesso all’erba.',
+      quiet:
+        'Camping Clepardia non è un luogo per feste. Il silenzio notturno è dalle 22:00 alle 07:00. Se vuoi fare festa, scegli un altro posto.',
+      maps:
+        'Per la navigazione consigliamo Google Maps. L’ingresso / percorso di accesso è cambiato nel 2022, quindi i navigatori più vecchi possono indicare una strada sbagliata.',
       fallback:
-        'La scelta più sicura è contattare la reception di Camping Clepardia: +48 795 294 486 o clepardia@gmail.com. Clepek offre indicazioni rapide, la reception conferma le prenotazioni.',
+        'La scelta più sicura è contattare la reception di Camping Clepardia: +48 795 294 486 o clepardia@gmail.com. CAMPY offre indicazioni rapide, la reception conferma le prenotazioni.',
     },
   },
   content: {
@@ -136,7 +142,7 @@ export const it = {
     bungalowKicker: 'Prezzi bungalow',
     bungalowTitle: 'Tipi di bungalow',
     bungalowCopy:
-      'I prezzi dei bungalow dipendono dalla stagione e dalla configurazione del soggiorno. Il bungalow familiare richiede conferma di disponibilità e prezzo finale dalla reception.',
+      'I prezzi dei bungalow dipendono dalla stagione. Sono disponibili bungalow da 2, 3 e 4 persone.',
     lowSeasonLabel: 'bassa stagione',
     highSeasonLabel: 'alta stagione',
     priceFromLabel: 'prezzo da',
@@ -163,8 +169,6 @@ export const it = {
     perNight: 'notte',
     summerNotice:
       'In estate le prenotazioni delle piazzole possono essere limitate. Contatta la reception per la disponibilità.',
-    familyNotice:
-      'Il prezzo del bungalow familiare dipende dalla configurazione e richiede conferma della reception.',
     people: 'Persone',
     adults: 'Adulti',
     children: 'Bambini 4-14',
@@ -184,8 +188,6 @@ export const it = {
     confirmPrice: 'da confermare',
     summaryFootnote:
       'Questo è un calcolo indicativo. La reception conferma disponibilità, stagione e dettagli del soggiorno.',
-    familyFootnote:
-      'Per il bungalow familiare il calcolatore mostra un valore indicativo dal prezzo base. Disponibilità e prezzo finale sono confermati dalla reception.',
     mobileTotal: 'Totale soggiorno',
     increment: 'Aumenta',
     decrement: 'Diminuisci',
@@ -205,7 +207,6 @@ export const it = {
       'bungalow-2': 'Bungalow 2 persone',
       'bungalow-3': 'Bungalow 3 persone',
       'bungalow-4': 'Bungalow 4 persone',
-      'bungalow-family': 'Bungalow familiare',
     },
     addons: {
       electricity: 'Elettricità',
@@ -244,6 +245,10 @@ export const it = {
     message: 'Messaggio',
     messagePlaceholder:
       'Scrivi cosa ti serve: ora di arrivo, tipo di mezzo, domande sui bungalow o altre informazioni.',
+    quietRule:
+      'Camping Clepardia non è un luogo per feste. Il silenzio notturno è dalle 22:00 alle 07:00. Se vuoi fare festa, scegli un altro posto.',
+    quietConsent:
+      'Capisco che Camping Clepardia non è un luogo per feste e che il silenzio notturno è dalle 22:00 alle 07:00.',
     consent: 'Accetto di essere ricontattato in merito alla mia richiesta.',
     submit: 'Invia richiesta',
     homeCtaButton: 'Vai al modulo',
@@ -274,6 +279,7 @@ export const it = {
       departure: 'Inserisci la data di partenza.',
       departureAfterArrival: 'La data di partenza deve essere dopo la data di arrivo.',
       stayType: 'Scegli il tipo di soggiorno.',
+      quietConsent: 'Conferma il silenzio notturno e la regola del campeggio non festaiolo.',
       consent: 'Accetta il contatto di risposta per la richiesta.',
     },
     mailLabels: {
@@ -292,6 +298,8 @@ export const it = {
       addons: 'Extra',
       none: 'nessuno',
       summerNotice: 'Avviso stagionale',
+      quietConsent: 'Conferma silenzio notturno',
+      accepted: 'accettato',
       notApplicable: 'non applicabile',
       message: 'Messaggio',
     },
@@ -311,6 +319,7 @@ export const it = {
         { title: 'Camper e van', copy: 'Uno spazio pratico per chi viaggia in camper, van o veicolo turistico.' },
         { title: 'Roulotte e tende', copy: 'Piazzole classiche con accesso ai servizi essenziali.' },
         { title: 'Vicino ai trasporti', copy: 'Comodo tram verso la Città Vecchia senza cercare parcheggio in centro.' },
+        { title: 'Lastre di cemento e asfalto', copy: 'Le piazzole camper sono principalmente su lastre di cemento; van, camion, bus e veicoli pesanti vengono posizionati sull’asfalto con accesso all’erba.' },
       ],
       cta: {
         title: 'Pianifica il soggiorno in camping',
@@ -424,6 +433,7 @@ export const it = {
         { title: 'Bungalow', copy: 'I bungalow hanno disponibilità separata.' },
         { title: 'Conferma', copy: 'Prezzo finale e disponibilità vengono confermati dalla reception.' },
         { title: 'Contatto più rapido', copy: 'Il contatto più rapido è telefono o email.' },
+        { title: 'Google Maps', copy: 'Consigliamo Google Maps perché l’ingresso / percorso di accesso è cambiato nel 2022.' },
       ],
       cta: {
         title: 'Scrivi alla reception',

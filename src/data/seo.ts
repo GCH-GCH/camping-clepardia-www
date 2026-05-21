@@ -1,6 +1,6 @@
 import { publicAssetExists, siteAssets } from './assets';
 
-export const siteUrl = 'https://twojadomena.pl';
+export const siteUrl = 'https://www.clepardia.com.pl';
 export const siteName = 'Camping Clepardia';
 export const defaultOgImage = siteAssets.seo.ogHomePl;
 export const fallbackOgImage = siteAssets.seo.ogFallback;

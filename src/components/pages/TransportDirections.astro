@@ -53,6 +53,8 @@ const transportTextByLanguage = {
     carTitle: 'Dojazd samochodem lub kamperem',
     carCopy:
       'W nawigacji wpisz Camping Clepardia albo adres: Henryka Pachońskiego 28A, Kraków. Po przyjeździe kieruj się do recepcji lub zgodnie z instrukcjami otrzymanymi od obsługi.',
+    mapsNotice:
+      'Do nawigacji zalecamy używać Google Maps. Wjazd / trasa dojazdu zmieniła się w 2022 roku, dlatego starsze nawigacje mogą prowadzić nieprawidłowo.',
     arrivalKicker: 'Przyjazd na camping',
     arrivalTitle: 'Zatrzymaj się przy recepcji',
     arrivalCopy:
@@ -105,6 +107,8 @@ const transportTextByLanguage = {
     carTitle: 'Arriving by car or motorhome',
     carCopy:
       'Enter Camping Clepardia or the address Henryka Pachońskiego 28A, Krakow in navigation. After arrival, go to reception or follow instructions from staff.',
+    mapsNotice:
+      'For navigation we recommend Google Maps. The entrance / access route changed in 2022, so older navigation systems may lead incorrectly.',
     arrivalKicker: 'Arrival at the campsite',
     arrivalTitle: 'Stop near reception after arrival',
     arrivalCopy:
@@ -157,6 +161,8 @@ const transportTextByLanguage = {
     carTitle: 'Anfahrt mit Auto oder Wohnmobil',
     carCopy:
       'Geben Sie Camping Clepardia oder Henryka Pachońskiego 28A, Krakau in die Navigation ein. Nach Ankunft gehen Sie zur Rezeption oder folgen den Anweisungen des Personals.',
+    mapsNotice:
+      'Für die Navigation empfehlen wir Google Maps. Die Einfahrt / Zufahrt wurde 2022 geändert, ältere Navigationssysteme können falsch führen.',
     arrivalKicker: 'Ankunft auf dem Campingplatz',
     arrivalTitle: 'Bitte halten Sie nahe der Rezeption',
     arrivalCopy:
@@ -209,6 +215,8 @@ const transportTextByLanguage = {
     carTitle: 'Arrivo in auto o camper',
     carCopy:
       'Inserisci Camping Clepardia o l’indirizzo Henryka Pachońskiego 28A, Cracovia nel navigatore. All’arrivo vai in reception o segui le indicazioni dello staff.',
+    mapsNotice:
+      'Per la navigazione consigliamo Google Maps. L’ingresso / percorso di accesso è cambiato nel 2022, quindi i navigatori più vecchi possono indicare una strada sbagliata.',
     arrivalKicker: 'Arrivo al camping',
     arrivalTitle: 'Fermati vicino alla reception',
     arrivalCopy:
@@ -329,6 +337,9 @@ const ticketIcons = ['ticket', 'receipt', 'route', 'map'] as const;
       <h2>{transportText.carTitle}</h2>
       <p>
         {transportText.carCopy}
+      </p>
+      <p class="transport-car__maps-notice">
+        {transportText.mapsNotice}
       </p>
 
       <div class="transport-car__actions">
@@ -639,6 +650,16 @@ const ticketIcons = ['ticket', 'receipt', 'route', 'map'] as const;
   max-width: 740px;
   margin: 0;
   line-height: 1.75;
+}
+
+.transport-car__maps-notice {
+  margin-top: 18px !important;
+  padding: 16px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(143,224,180,.24);
+  background: rgba(143,224,180,.10);
+  color: rgba(255,255,255,.88) !important;
+  font-weight: 880;
 }
 
 .transport-car__actions,

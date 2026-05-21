@@ -11,6 +11,8 @@ const quickActions = [
   { key: 'directions', icon: 'tram', label: chatTexts.actions.directions },
   { key: 'bungalow', icon: 'bungalow', label: chatTexts.actions.bungalow },
   { key: 'reception', icon: 'phone', label: chatTexts.actions.reception },
+  { key: 'quiet', icon: 'moon', label: chatTexts.actions.quiet },
+  { key: 'maps', icon: 'map', label: chatTexts.actions.maps },
 ];
 ---
 
@@ -40,7 +42,7 @@ const quickActions = [
   >
     <header class="floating-chat__header">
       <span class="floating-chat__avatar" aria-hidden="true">
-        <Icon name="camping" size={23} strokeWidth={1.9} />
+        <Icon name="sparkle" size={23} strokeWidth={1.9} />
       </span>
       <div class="floating-chat__identity">
         <span>{chatTexts.title}</span>
@@ -162,13 +164,19 @@ const quickActions = [
       if (rawPrompt === chatTexts.actions.directions) return chatTexts.answers.directions;
       if (rawPrompt === chatTexts.actions.bungalow) return chatTexts.answers.bungalows;
       if (rawPrompt === chatTexts.actions.reception) return chatTexts.answers.reception;
+      if (rawPrompt === chatTexts.actions.quiet) return chatTexts.answers.quiet;
+      if (rawPrompt === chatTexts.actions.maps) return chatTexts.answers.maps;
 
       if (prompt.includes('cennik') || prompt.includes('cena') || prompt.includes('koszt')) {
         return chatTexts.answers.pricing;
       }
 
-      if (prompt.includes('dojaz') || prompt.includes('tram') || prompt.includes('jak dojecha')) {
+      if (prompt.includes('dojaz') || prompt.includes('tram') || prompt.includes('jak dojecha') || prompt.includes('maps') || prompt.includes('map') || prompt.includes('nawig')) {
         return chatTexts.answers.directions;
+      }
+
+      if (prompt.includes('cisza') || prompt.includes('imprez') || prompt.includes('quiet') || prompt.includes('party') || prompt.includes('ruhe')) {
+        return chatTexts.answers.quiet;
       }
 
       if (prompt.includes('domek') || prompt.includes('domki')) {

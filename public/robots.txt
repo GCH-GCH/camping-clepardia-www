@@ -1,5 +1,4 @@
-# TODO: Replace https://twojadomena.pl with the final production domain before launch.
 User-agent: *
 Allow: /
 
-Sitemap: https://twojadomena.pl/sitemap-index.xml
+Sitemap: https://www.clepardia.com.pl/sitemap-index.xml

@@ -78,14 +78,14 @@ export const en = {
     camperCost: 'Calculate stay cost',
   },
   chat: {
-    open: 'Open Clepek helper',
+    open: 'Open CAMPY helper',
     close: 'Close chat',
-    title: 'Clepek — Camping Clepardia helper',
+    title: 'CAMPY — Camping Clepardia helper',
     status: 'Ready to help',
     intro:
-      'Hi! 👋 I’m Clepek, your Camping Clepardia helper. I can quickly help with prices, bungalows, tram access to the city centre or reception contact.',
+      'Hi! 👋 I’m CAMPY, your Camping Clepardia helper. I can quickly help with prices, bungalows, tram access to the city centre, stay rules and reception contact.',
     notice:
-      'Answers are informational. Bookings and availability are confirmed by reception.',
+      'Answers are informational. Bookings and availability are always confirmed by reception.',
     quickLabel: 'Quick topics',
     inputLabel: 'Write a message',
     inputPlaceholder: 'Write a message...',
@@ -95,20 +95,26 @@ export const en = {
       directions: 'How to get here?',
       bungalow: 'Ask about a bungalow',
       reception: 'Contact reception',
+      quiet: 'Quiet hours',
+      maps: 'Google Maps',
     },
     answers: {
       pricing:
         'As a guide: motorhome 80 PLN / night, caravan 60 PLN / night, van 75 PLN / night, electricity 25 PLN / night and dogs stay free. The full calculator is on the Prices page.',
       directions:
-        'The easiest way is to leave your car or camper at the campsite and take the tram towards the centre of Krakow. Address: Henryka Pachońskiego 28A, 31-322 Krakow.',
+        'The easiest way is to leave your car or camper at the campsite and take the tram towards the centre of Krakow. For navigation we recommend Google Maps: the entrance route changed in 2022, so older navigation systems may lead incorrectly.',
       bungalows:
-        'Bungalows have separate availability. 2-person: 200/220 PLN, 3-person: 250/300 PLN, 4-person: 400/450 PLN depending on season. Family bungalows require reception confirmation.',
+        'Bungalows have separate availability. 2-person: 200/220 PLN, 3-person: 250/300 PLN, 4-person: 400/450 PLN depending on season.',
       reception:
         'Reception: +48 795 294 486, email: clepardia@gmail.com. The fastest way to confirm availability is by phone or email.',
       camping:
-        'Camping Clepardia welcomes motorhomes, vans, caravans, tents and cars with rooftop tents. Availability may be limited in June, July and August.',
+        'Camping Clepardia welcomes motorhomes, vans, caravans, tents and cars with rooftop tents. Camper pitches are mostly concrete slabs. Vans, trucks, buses and heavy vehicles are placed on asphalt to avoid getting stuck, with access to grass.',
+      quiet:
+        'Camping Clepardia is not a party place. Quiet hours are from 22:00 to 07:00. If you plan to party, please choose another place.',
+      maps:
+        'For navigation we recommend Google Maps. The entrance / access route changed in 2022, so older navigation systems may lead incorrectly.',
       fallback:
-        'The safest next step is to contact Camping Clepardia reception: +48 795 294 486 or clepardia@gmail.com. Clepek shares key information, and reception confirms bookings.',
+        'The safest next step is to contact Camping Clepardia reception: +48 795 294 486 or clepardia@gmail.com. CAMPY shares key information, and reception confirms bookings.',
     },
   },
   pages: {
@@ -135,6 +141,11 @@ export const en = {
           title: 'Close to public transport',
           copy:
             'Convenient tram access to the Old Town without looking for parking in the centre.',
+        },
+        {
+          title: 'Concrete slabs and asphalt',
+          copy:
+            'Camper pitches are mostly concrete slabs, while vans, trucks, buses and heavy vehicles are placed on asphalt with access to grass.',
         },
       ],
       cta: {
@@ -307,6 +318,10 @@ export const en = {
         {
           title: 'Fastest contact',
           copy: 'The fastest contact method is phone or email.',
+        },
+        {
+          title: 'Google Maps',
+          copy: 'We recommend Google Maps because the entrance / access route changed in 2022.',
         },
       ],
       cta: {
@@ -556,7 +571,7 @@ export const en = {
     bungalowKicker: 'Bungalow prices',
     bungalowTitle: 'Bungalow types',
     bungalowCopy:
-      'Bungalow prices depend on season and stay configuration. A family bungalow requires availability and final price confirmation by reception.',
+      'Bungalow prices depend on season. Available types are 2-person, 3-person and 4-person bungalows.',
     lowSeasonLabel: 'low season',
     highSeasonLabel: 'high season',
     priceFromLabel: 'price from',
@@ -582,8 +597,6 @@ export const en = {
     perNight: 'night',
     summerNotice:
       'In the summer season, camping pitch reservations may be limited. Contact reception about availability.',
-    familyNotice:
-      'The family bungalow price depends on configuration and requires confirmation by reception.',
     people: 'People',
     adults: 'Adults',
     children: 'Children 4-14',
@@ -603,8 +616,6 @@ export const en = {
     confirmPrice: 'to confirm',
     summaryFootnote:
       'This is an indicative calculation. Reception confirms availability, season and stay details.',
-    familyFootnote:
-      'For a family bungalow, the calculator shows an indicative value from the base price. Availability and final price are confirmed by reception.',
     mobileTotal: 'Stay total',
     increment: 'Increase',
     decrement: 'Decrease',
@@ -624,7 +635,6 @@ export const en = {
       'bungalow-2': '2-person bungalow',
       'bungalow-3': '3-person bungalow',
       'bungalow-4': '4-person bungalow',
-      'bungalow-family': 'Family bungalow',
     },
     addons: {
       electricity: 'Electricity',
@@ -662,6 +672,10 @@ export const en = {
     message: 'Message',
     messagePlaceholder:
       'Write what you need: arrival time, equipment type, bungalow questions or additional information.',
+    quietRule:
+      'Camping Clepardia is not a party place. Quiet hours are from 22:00 to 07:00. If you plan to party, please choose another place.',
+    quietConsent:
+      'I understand that Camping Clepardia is not a party place and quiet hours are from 22:00 to 07:00.',
     consent: 'I agree to be contacted back about my enquiry.',
     submit: 'Send enquiry',
     homeCtaButton: 'Go to the form',
@@ -692,6 +706,7 @@ export const en = {
       departure: 'Enter the departure date.',
       departureAfterArrival: 'Departure date must be after arrival date.',
       stayType: 'Choose a stay type.',
+      quietConsent: 'Confirm the quiet hours and non-party campsite rule.',
       consent: 'Accept contact back about your enquiry.',
     },
     mailTitle: 'Camping Clepardia reservation enquiry',
@@ -711,6 +726,8 @@ export const en = {
       addons: 'Extras',
       none: 'none',
       summerNotice: 'Summer notice',
+      quietConsent: 'Quiet hours confirmation',
+      accepted: 'accepted',
       notApplicable: 'not applicable',
       message: 'Message',
     },

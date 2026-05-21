@@ -20,7 +20,7 @@ const htmlRow = (label: string, value: unknown) => `
 `;
 
 export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailMessage => {
-  const from = env('MAIL_FROM', 'Camping Clepardia WWW <no-reply@twojadomena.pl>');
+  const from = env('MAIL_FROM', 'Camping Clepardia WWW <no-reply@clepardia.com.pl>');
   const to = env('MAIL_TO', 'clepardia@gmail.com');
   const subject = `[WWW] Zapytanie rezerwacyjne - ${inquiry.fullName} - ${inquiry.arrival}`;
   const addons = inquiry.addons.length ? inquiry.addons.join(', ') : 'brak';
@@ -51,6 +51,7 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
     peopleSummary(inquiry),
     line('Dodatki', addons),
     line('Komunikat sezonowy', summerNotice),
+    line('Potwierdzenie ciszy nocnej', inquiry.quietConsent ? 'Tak' : 'Nie'),
     '',
     'WIADOMOSC',
     inquiry.message || 'brak',
@@ -84,6 +85,7 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
           ${htmlRow('Dzieci do 4', inquiry.people.toddlers)}
           ${htmlRow('Dodatki', addons)}
           ${htmlRow('Komunikat sezonowy', summerNotice)}
+          ${htmlRow('Potwierdzenie ciszy nocnej', inquiry.quietConsent ? 'Tak' : 'Nie')}
         </table>
         <div style="padding:24px 28px;">
           <h2 style="margin:0 0 10px;font-size:18px;">Wiadomosc klienta</h2>
@@ -97,7 +99,7 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
 };
 
 export const buildAutoresponderMail = (inquiry: NormalizedReservationInquiry): MailMessage => {
-  const from = env('MAIL_FROM', 'Camping Clepardia <no-reply@twojadomena.pl>');
+  const from = env('MAIL_FROM', 'Camping Clepardia <no-reply@clepardia.com.pl>');
   const subject = 'Camping Clepardia - otrzymalismy Twoje zapytanie';
   const text = [
     `Dzien dobry ${inquiry.fullName},`,
