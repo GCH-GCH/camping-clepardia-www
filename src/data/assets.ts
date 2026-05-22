@@ -188,13 +188,13 @@ export const getMissingRequiredAssets = () =>
 export const logoMain = siteAssets.logo.mainSvg;
 export const logoMainPng = siteAssets.logo.mainPng;
 const loaderLogoCandidates = [
-  siteAssets.logo.mainSvg,
-  siteAssets.logo.mainPng,
   siteAssets.logo.whiteSvg,
+  siteAssets.logo.mainSvg,
   siteAssets.logo.icon,
   siteAssets.motion.loaderLogoWhite,
   siteAssets.logo.loader,
   siteAssets.motion.loaderLogo,
+  siteAssets.logo.mainPng,
 ];
 export const loaderLogo = loaderLogoCandidates.find((asset) => publicAssetExists(asset)) ?? logoMain;
 export const loaderLogoFallback = publicAssetExists(siteAssets.logo.mainSvg)

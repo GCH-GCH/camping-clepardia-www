@@ -704,8 +704,10 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 .gallery-card__mood {
   position: absolute;
   inset: 0;
+  max-width: 100%;
   overflow: hidden;
   pointer-events: none;
+  contain: paint;
 }
 
 .gallery-card__mood::before {

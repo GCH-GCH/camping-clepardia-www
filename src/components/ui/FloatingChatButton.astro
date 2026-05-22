@@ -46,6 +46,7 @@ const quickActions = [
     aria-label={chatTexts.title}
     aria-hidden="true"
     hidden
+    inert
   >
     <header class="floating-chat__header">
       <span class="floating-chat__avatar" aria-hidden="true">
@@ -59,28 +60,21 @@ const quickActions = [
         )}
       </span>
       <div class="floating-chat__identity">
-        <span>{chatTexts.title}</span>
-        <strong><i aria-hidden="true"></i> {chatTexts.status}</strong>
+        <span data-chat-title-node></span>
+        <strong><i aria-hidden="true"></i><span data-chat-status-node></span></strong>
       </div>
       <button type="button" data-chat-close aria-label={chatTexts.close}>
         <Icon name="close" size={20} strokeWidth={2} />
       </button>
     </header>
 
-    <div class="floating-chat__messages" data-chat-messages aria-live="polite">
-      <div class="floating-chat__message floating-chat__message--bot">
-        {chatTexts.intro}
-      </div>
-      <div class="floating-chat__notice">
-        {chatTexts.notice}
-      </div>
-    </div>
+    <div class="floating-chat__messages" data-chat-messages aria-live="polite"></div>
 
     <div class="floating-chat__quick" aria-label={chatTexts.quickLabel}>
       {quickActions.map((action) => (
-        <button type="button" data-chat-prompt={action.label}>
+        <button type="button" data-chat-prompt={action.label} aria-label={action.label}>
           <Icon name={action.icon} size={16} strokeWidth={1.9} />
-          <span>{action.label}</span>
+          <span data-chat-quick-label></span>
         </button>
       ))}
     </div>
@@ -106,12 +100,28 @@ const quickActions = [
     const form = root.querySelector('[data-chat-form]');
     const input = root.querySelector('[data-chat-input]');
     const messages = root.querySelector('[data-chat-messages]');
-    const quickActions = root.querySelectorAll('[data-chat-prompt]');
+    const quickActionButtons = root.querySelectorAll('[data-chat-prompt]');
+    const titleNode = root.querySelector('[data-chat-title-node]');
+    const statusNode = root.querySelector('[data-chat-status-node]');
 
     if (!(toggle instanceof HTMLButtonElement) || !(panel instanceof HTMLElement) || !(messages instanceof HTMLElement)) return;
 
     let open = false;
     let hideTimer = 0;
+    let panelHydrated = false;
+
+    const hydratePanelCopy = () => {
+      if (panelHydrated) return;
+      if (titleNode instanceof HTMLElement) titleNode.textContent = chatTexts.title;
+      if (statusNode instanceof HTMLElement) statusNode.textContent = chatTexts.status;
+      quickActionButtons.forEach((button) => {
+        if (!(button instanceof HTMLElement)) return;
+        const label = button.dataset.chatPrompt ?? '';
+        const labelNode = button.querySelector('[data-chat-quick-label]');
+        if (labelNode instanceof HTMLElement) labelNode.textContent = label;
+      });
+      panelHydrated = true;
+    };
 
     const updateMobileAvailability = () => {
       const available = window.innerWidth > 640 || window.scrollY > 320 || open;
@@ -139,6 +149,9 @@ const quickActions = [
 
       if (open) {
         panel.hidden = false;
+        panel.removeAttribute('inert');
+        hydratePanelCopy();
+        initializeMessages();
         root.classList.add('is-open');
         window.setTimeout(() => {
           if (input instanceof HTMLInputElement) input.focus({ preventScroll: true });
@@ -147,6 +160,7 @@ const quickActions = [
       }
 
       root.classList.remove('is-open');
+      panel.setAttribute('inert', '');
       hideTimer = window.setTimeout(() => {
         panel.hidden = true;
       }, 260);
@@ -160,6 +174,16 @@ const quickActions = [
       messages.appendChild(bubble);
       messages.scrollTop = messages.scrollHeight;
       return bubble;
+    };
+
+    const initializeMessages = () => {
+      if (messages.dataset.initialized === 'true') return;
+      appendMessage(chatTexts.intro, 'bot');
+      const notice = document.createElement('div');
+      notice.className = 'floating-chat__notice';
+      notice.textContent = chatTexts.notice;
+      messages.appendChild(notice);
+      messages.dataset.initialized = 'true';
     };
 
     const appendTyping = () => {
@@ -240,7 +264,7 @@ const quickActions = [
       button.addEventListener('click', () => setOpen(false));
     });
 
-    quickActions.forEach((button) => {
+    quickActionButtons.forEach((button) => {
       button.addEventListener('click', () => {
         if (!(button instanceof HTMLButtonElement)) return;
         submitPrompt(button.dataset.chatPrompt ?? button.textContent ?? '');
@@ -291,6 +315,8 @@ body.has-floating-chat-open {
   inset: auto max(24px, env(safe-area-inset-right)) max(96px, calc(96px + env(safe-area-inset-bottom))) auto;
   z-index: 1250;
   pointer-events: none;
+  max-width: calc(100vw - 24px);
+  contain: layout style paint;
 }
 
 .floating-chat.is-open {
@@ -315,6 +341,7 @@ body.has-floating-chat-open {
     0 0 0 8px rgba(60,179,113,.08),
     inset 0 1px 0 rgba(255,255,255,.30);
   pointer-events: auto;
+  overflow: hidden;
   transition:
     opacity .26s cubic-bezier(.22, 1, .36, 1),
     transform .26s cubic-bezier(.22, 1, .36, 1),
@@ -427,6 +454,10 @@ body.has-floating-chat-open {
   transition:
     opacity .28s cubic-bezier(.22, 1, .36, 1),
     transform .28s cubic-bezier(.22, 1, .36, 1);
+}
+
+.floating-chat__panel[hidden] {
+  display: none !important;
 }
 
 .floating-chat.is-open .floating-chat__panel {

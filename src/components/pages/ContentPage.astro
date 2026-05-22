@@ -894,8 +894,40 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 
 @media (max-width: 640px) {
   .page-mini-hero {
-    min-height: 62svh;
-    padding: 116px 0 58px;
+    min-height: auto;
+    padding: 112px 0 54px;
+  }
+
+  .page-mini-hero__inner {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .breadcrumbs {
+    min-width: 0;
+    font-size: .76rem;
+    line-height: 1.45;
+  }
+
+  .breadcrumbs > * {
+    min-width: 0;
+  }
+
+  .page-mini-hero h1 {
+    max-width: 100%;
+    font-size: clamp(2.05rem, 10.5vw, 3rem);
+    line-height: 1.04;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .page-mini-hero p {
+    max-width: 100%;
+    font-size: .98rem;
+    line-height: 1.62;
+    overflow-wrap: break-word;
   }
 
   .page-cta__actions {
@@ -904,6 +936,12 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 
   .page-cta__actions a {
     width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .page-mini-hero h1 {
+    font-size: clamp(1.95rem, 10vw, 2.62rem);
   }
 }
 </style>

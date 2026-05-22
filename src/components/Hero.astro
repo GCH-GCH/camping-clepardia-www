@@ -951,6 +951,11 @@ const heroStyle = [
 }
 
 @media (max-width: 860px) {
+  .hero__parallax {
+    inset: 0;
+    transform: translate3d(0, 0, 0) scale(1.02);
+  }
+
   .hero--mobile-image .hero__parallax {
     background-image:
       var(--hero-bg-mobile),
@@ -1018,10 +1023,29 @@ const heroStyle = [
     min-width: 0;
   }
   .hero__badge { font-size: .68rem; letter-spacing: .1em; }
+  .hero__headline {
+    max-width: 100%;
+    font-size: clamp(2.45rem, 11.5vw, 3.25rem);
+    line-height: .96;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+  .hero__headline-line {
+    overflow: visible;
+  }
+  .hero__badge,
+  .hero__subheadline,
+  .hero__description {
+    max-width: 100%;
+  }
+  .hero__badge {
+    white-space: normal;
+  }
   .hero__subheadline {
     font-size: clamp(1.08rem, 6vw, 1.28rem);
     line-height: 1.35;
     white-space: normal;
+    overflow-wrap: break-word;
     word-break: normal;
   }
   .hero__description {
@@ -1067,7 +1091,7 @@ const heroStyle = [
   }
 
   .hero__headline {
-    font-size: clamp(2.45rem, 17vw, 3.15rem);
+    font-size: clamp(2.25rem, 13vw, 2.9rem);
   }
 
 }
