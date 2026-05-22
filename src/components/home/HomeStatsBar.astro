@@ -41,23 +41,36 @@ const icons = ['map', 'tram', 'camping', 'leaf'] as const;
 }
 
 .home-stats__panel {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 14px;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,.16);
-  border-radius: 34px;
-  padding: 12px;
+  border-radius: 38px;
+  padding: clamp(12px, 2vw, 18px);
   background:
-    linear-gradient(135deg, rgba(10,30,20,.74), rgba(18,48,31,.54)),
-    radial-gradient(circle at 88% 10%, rgba(242,192,120,.12), transparent 34%),
-    radial-gradient(circle at 10% 92%, rgba(60,179,113,.12), transparent 32%);
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.22), transparent 34%),
+    radial-gradient(circle at 88% 10%, rgba(242,192,120,.15), transparent 34%),
+    linear-gradient(135deg, rgba(10,30,20,.66), rgba(18,48,31,.42));
   box-shadow:
-    0 28px 86px rgba(0,0,0,.20),
-    0 0 42px rgba(60,179,113,.08),
+    0 30px 92px rgba(0,0,0,.18),
+    0 0 46px rgba(60,179,113,.12),
     inset 0 1px 0 rgba(255,255,255,.14);
   backdrop-filter: blur(24px) saturate(150%);
   -webkit-backdrop-filter: blur(24px) saturate(150%);
+}
+
+.home-stats__panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .34;
+  pointer-events: none;
+  background:
+    linear-gradient(110deg, transparent 0 20%, rgba(255,255,255,.08) 20.4% 20.8%, transparent 21.2% 100%),
+    radial-gradient(circle at 50% 110%, rgba(60,179,113,.18), transparent 45%);
+  mix-blend-mode: screen;
 }
 
 .home-stats__item {
@@ -72,8 +85,12 @@ const icons = ['map', 'tram', 'camping', 'leaf'] as const;
   background:
     linear-gradient(180deg, rgba(255,255,255,.095), rgba(255,255,255,.04)),
     radial-gradient(circle at 18% 14%, rgba(143,224,180,.12), transparent 34%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 18px 46px rgba(0,0,0,.08);
   overflow: hidden;
+  transform: translateY(0);
+  transition: transform .34s cubic-bezier(.22, 1, .36, 1), border-color .34s ease, box-shadow .34s ease, background .34s ease;
+  animation: homeStatFloat 7.2s ease-in-out infinite;
+  animation-delay: calc(var(--reveal-delay, 0ms) * 2);
 }
 
 .home-stats__item::before {
@@ -91,6 +108,16 @@ const icons = ['map', 'tram', 'camping', 'leaf'] as const;
   opacity: 1;
 }
 
+.home-stats__item:hover {
+  animation-play-state: paused;
+  transform: translateY(-7px);
+  border-color: rgba(143,224,180,.34);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.06)),
+    radial-gradient(circle at 18% 14%, rgba(60,179,113,.22), transparent 36%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 26px 64px rgba(0,0,0,.12), 0 0 34px rgba(60,179,113,.16);
+}
+
 .home-stats__item small,
 .home-stats__item h2,
 .home-stats__item p,
@@ -106,10 +133,12 @@ const icons = ['map', 'tram', 'camping', 'leaf'] as const;
   place-items: center;
   margin-bottom: 8px;
   border-radius: 999px;
-  color: #b7f3d0;
-  border: 1px solid rgba(143,224,180,.24);
-  background: rgba(60,179,113,.12);
-  box-shadow: 0 12px 28px rgba(60,179,113,.12);
+  color: #f4fff8;
+  border: 1px solid rgba(143,224,180,.34);
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255,255,255,.24), transparent 34%),
+    linear-gradient(135deg, rgba(60,179,113,.34), rgba(60,179,113,.13));
+  box-shadow: 0 14px 34px rgba(60,179,113,.18), 0 0 26px rgba(60,179,113,.10);
 }
 
 .home-stats__item small {
@@ -162,6 +191,18 @@ const icons = ['map', 'tram', 'camping', 'leaf'] as const;
   .home-stats__item {
     min-height: 148px;
     border-radius: 22px;
+  }
+}
+
+@keyframes homeStatFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-stats__item {
+    animation: none;
+    transition-duration: .01ms;
   }
 }
 </style>

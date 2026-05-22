@@ -31,6 +31,7 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
     'photo-frame',
     'asset-frame',
     imageExists ? 'asset-frame--image' : 'asset-frame--fallback',
+    !imageExists && `asset-frame--fallback-${fallbackIcon}`,
     portrait && 'asset-frame--portrait',
     className,
   ]}
@@ -270,6 +271,43 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
   min-height: 240px;
   border-color: rgba(143,224,180,.38);
   box-shadow: 0 30px 88px rgba(17,40,28,.22), 0 0 44px rgba(60,179,113,.16);
+}
+
+.asset-frame--fallback-camper .asset-frame__fallback-scene {
+  background:
+    radial-gradient(circle at 78% 20%, rgba(242,192,120,.34), transparent 26%),
+    radial-gradient(circle at 18% 76%, rgba(60,179,113,.34), transparent 38%),
+    linear-gradient(145deg, #4f7b5e, #1b422d 58%, #102117);
+}
+
+.asset-frame--fallback-bungalow .asset-frame__fallback-scene {
+  background:
+    radial-gradient(circle at 24% 18%, rgba(242,192,120,.30), transparent 30%),
+    radial-gradient(circle at 82% 76%, rgba(143,224,180,.26), transparent 36%),
+    linear-gradient(145deg, #55705b, #22452f 58%, #102117);
+}
+
+.asset-frame--fallback-tram .asset-frame__fallback-scene {
+  background:
+    radial-gradient(circle at 80% 18%, rgba(242,192,120,.28), transparent 30%),
+    linear-gradient(135deg, rgba(60,179,113,.32), transparent 38%),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.055) 0 2px, transparent 2px 22px),
+    linear-gradient(145deg, #496f63, #1c4234 58%, #102117);
+}
+
+.asset-frame--fallback-attractions .asset-frame__fallback-scene {
+  background:
+    radial-gradient(circle at 72% 18%, rgba(242,192,120,.38), transparent 26%),
+    radial-gradient(circle at 20% 80%, rgba(60,179,113,.30), transparent 38%),
+    linear-gradient(145deg, #5d7560, #203f2d 58%, #102117);
+}
+
+.asset-frame--fallback-electricity .asset-frame__fallback-scene,
+.asset-frame--fallback-sanitary .asset-frame__fallback-scene {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(143,224,180,.32), transparent 30%),
+    radial-gradient(circle at 82% 78%, rgba(242,192,120,.22), transparent 34%),
+    linear-gradient(145deg, #486f66, #183f31 58%, #102117);
 }
 
 @media (max-width: 680px) {

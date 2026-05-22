@@ -1,5 +1,6 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
+import Icon from '@/components/ui/Icon.astro';
 import { siteAssets } from '@/data/assets';
 import { getTranslations } from '@/i18n/config';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
@@ -15,46 +16,396 @@ const activeLanguage = languageCode ?? pathContext.languageCode;
 const t = getTranslations(activeLanguage);
 const page = t.pages.atrakcje;
 
+const ctaLabel = activeLanguage === 'de'
+  ? 'Attraktionen ansehen'
+  : activeLanguage === 'it'
+    ? 'Vedi attrazioni'
+    : activeLanguage === 'pl'
+      ? 'Zobacz atrakcje'
+      : 'See attractions';
+
 const attractions = [
   {
     name: activeLanguage === 'de' ? 'Altstadt' : activeLanguage === 'it' ? 'Città Vecchia' : activeLanguage === 'pl' ? 'Stare Miasto' : 'Old Town',
+    description: activeLanguage === 'de'
+      ? 'Klassische Route durch Krakau: Markt, Tuchhallen, Marienkirche und Spaziergang Richtung Wawel.'
+      : activeLanguage === 'it'
+        ? 'Il percorso classico di Cracovia: piazza del mercato, Sukiennice, chiesa di Santa Maria e passeggiata verso il Wawel.'
+        : activeLanguage === 'pl'
+          ? 'Klasyczna trasa po Krakowie: Rynek, Sukiennice, kościół Mariacki i spacer w stronę Wawelu.'
+          : 'The classic Kraków route: Main Square, Cloth Hall, St. Mary’s Basilica and a walk toward Wawel.',
     image: siteAssets.attractions.oldTown,
-    alt: activeLanguage === 'de' ? 'Altstadt von Krakau' : activeLanguage === 'it' ? 'Città Vecchia di Cracovia' : activeLanguage === 'pl' ? 'Stare Miasto w Krakowie' : 'Krakow Old Town',
+    alt: activeLanguage === 'de' ? 'Altstadt von Krakau' : activeLanguage === 'it' ? 'Città Vecchia di Cracovia' : activeLanguage === 'pl' ? 'Stare Miasto w Krakowie' : 'Kraków Old Town',
+    icon: 'landmark',
+    variant: 'old-town',
   },
-  { name: 'Wieliczka', image: siteAssets.attractions.wieliczka, alt: 'Kopalnia Soli Wieliczka' },
-  { name: 'Auschwitz', image: siteAssets.attractions.auschwitz, alt: 'Muzeum Auschwitz' },
-  { name: 'Schindler’s Factory', image: siteAssets.attractions.schindler, alt: 'Fabryka Schindlera w Krakowie' },
-  { name: 'Energylandia', image: siteAssets.attractions.energylandia, alt: 'Energylandia' },
-  { name: 'Zakopane', image: siteAssets.attractions.zakopane, alt: 'Zakopane i Tatry' },
+  {
+    name: 'Wieliczka',
+    description: activeLanguage === 'pl' ? 'Kopalnia soli i jedna z najbardziej rozpoznawalnych wycieczek z Krakowa.' : 'Salt mine and one of the most recognisable trips from Kraków.',
+    image: siteAssets.attractions.wieliczka,
+    alt: 'Kopalnia Soli Wieliczka',
+    icon: 'map',
+    variant: 'wieliczka',
+  },
+  {
+    name: 'Auschwitz-Birkenau',
+    description: activeLanguage === 'pl' ? 'Ważne miejsce pamięci, które warto zaplanować z wyprzedzeniem.' : 'An important memorial site worth planning in advance.',
+    image: siteAssets.attractions.auschwitz,
+    alt: 'Muzeum Auschwitz-Birkenau',
+    icon: 'shield',
+    variant: 'auschwitz',
+  },
+  {
+    name: activeLanguage === 'pl' ? 'Fabryka Schindlera' : 'Schindler’s Factory',
+    description: activeLanguage === 'pl' ? 'Muzeum historii Krakowa i okupacji, blisko Kazimierza i Podgórza.' : 'A museum about Kraków’s wartime history, close to Kazimierz and Podgórze.',
+    image: siteAssets.attractions.schindler,
+    alt: 'Fabryka Schindlera w Krakowie',
+    icon: 'info',
+    variant: 'schindler',
+  },
+  {
+    name: 'Energylandia',
+    description: activeLanguage === 'pl' ? 'Całodniowa wycieczka dla rodzin i osób szukających mocniejszych wrażeń.' : 'A full-day trip for families and guests looking for stronger thrills.',
+    image: siteAssets.attractions.energylandia,
+    alt: 'Energylandia',
+    icon: 'sparkle',
+    variant: 'energylandia',
+  },
+  {
+    name: activeLanguage === 'pl' ? 'Ojców / Zakopane' : 'Ojców / Zakopane',
+    description: activeLanguage === 'pl' ? 'Dobre kierunki na jednodniową wycieczkę poza miasto.' : 'Good options for a day trip outside the city.',
+    image: siteAssets.attractions.zakopane,
+    alt: 'Ojców, Zakopane i okolice Krakowa',
+    icon: 'leaf',
+    variant: 'nature',
+  },
 ];
+
+const featured = attractions[0];
+const secondary = attractions.slice(1);
 ---
 
 <section class="site-section attractions reveal-section" id="atrakcje">
   <div class="container">
-    <span class="section-kicker">{page.overline}</span>
-    <h2 class="section-title">{page.title}</h2>
-    <div class="attractions__grid">
-      {attractions.map((attraction) => (
-        <ImageFrame
-          src={attraction.image}
-          alt={attraction.alt}
-          label={attraction.name}
-          className="attractions__card"
-        />
-      ))}
+    <div class="attractions__head">
+      <span class="section-kicker">{page.overline}</span>
+      <h2 class="section-title">{page.title}</h2>
     </div>
-    <a class="btn btn-primary premium-button attractions__cta" href={getLocalizedPath(explicitLanguage, 'atrakcje')}>{t.nav.items.atrakcje}</a>
+
+    <div class="attractions__layout">
+      <article class="attractions__feature reveal-section">
+        <ImageFrame
+          src={featured.image}
+          alt={featured.alt}
+          label={featured.name}
+          className={`attractions__media attractions__media--feature attractions__media--${featured.variant}`}
+        />
+        <div class="attractions__feature-copy">
+          <span class="attractions__feature-icon" aria-hidden="true">
+            <Icon name={featured.icon} size={28} strokeWidth={1.8} />
+          </span>
+          <p>{activeLanguage === 'pl' ? 'Najbliżej Krakowa' : 'Closest to Kraków'}</p>
+          <h3>{featured.name}</h3>
+          <span>{featured.description}</span>
+        </div>
+      </article>
+
+      <div class="attractions__stack">
+        {secondary.map((attraction, index) => (
+          <article class:list={['attractions__mini', `attractions__mini--${index + 1}`, 'reveal-section']} style={`--reveal-delay: ${(index + 1) * 80}ms`}>
+            <ImageFrame
+              src={attraction.image}
+              alt={attraction.alt}
+              label={attraction.name}
+              className={`attractions__media attractions__media--mini attractions__media--${attraction.variant}`}
+            />
+            <div class="attractions__mini-copy">
+              <span aria-hidden="true">
+                <Icon name={attraction.icon} size={18} strokeWidth={1.9} />
+              </span>
+              <h3>{attraction.name}</h3>
+              <p>{attraction.description}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+
+    <a class="btn btn-primary premium-button attractions__cta" href={getLocalizedPath(explicitLanguage, 'atrakcje')}>
+      {ctaLabel}
+    </a>
   </div>
 </section>
 
 <style>
-.attractions { background: #f6f8f2; }
-.attractions__grid { margin-top: 42px; display: grid; grid-template-columns: 1fr; gap: 16px; }
-:global(.attractions__card) { min-height: 240px; align-items: end; transition: transform .28s ease, box-shadow .28s ease; }
-:global(.attractions__card:hover) { transform: translateY(-5px); }
-:global(.attractions__card figcaption),
-:global(.attractions__card .asset-frame__fallback-content span:last-child) { color: #fff; font-size: 1rem; }
-.attractions__cta { margin-top: 30px; }
-@media (min-width: 700px) { .attractions__grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1080px) { .attractions__grid { grid-template-columns: repeat(3, 1fr); } }
+.attractions {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(60,179,113,.12), transparent 30%),
+    radial-gradient(circle at 88% 8%, rgba(242,192,120,.12), transparent 32%),
+    linear-gradient(180deg, #f7f8f1 0%, #eef5eb 100%);
+}
+
+.attractions::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .18;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 22% 26%, rgba(60,179,113,.26) 0 1px, transparent 1px 8px),
+    radial-gradient(circle at 78% 40%, rgba(242,192,120,.22) 0 1px, transparent 1px 12px);
+  background-size: 16px 16px, 24px 24px;
+}
+
+.attractions__head {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+}
+
+.attractions__layout {
+  position: relative;
+  z-index: 1;
+  margin-top: clamp(32px, 5vw, 58px);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(18px, 2.6vw, 28px);
+}
+
+.attractions__feature {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  border-radius: 34px;
+  overflow: hidden;
+  box-shadow: 0 30px 84px rgba(17,40,28,.15), 0 0 38px rgba(60,179,113,.10);
+}
+
+:global(.attractions__media) {
+  min-height: 260px;
+}
+
+:global(.attractions__media--feature) {
+  aspect-ratio: 16 / 10;
+  min-height: clamp(360px, 46vw, 560px);
+  border-radius: 34px;
+}
+
+.attractions__feature-copy {
+  position: absolute;
+  left: clamp(20px, 4vw, 42px);
+  right: clamp(20px, 4vw, 42px);
+  bottom: clamp(20px, 4vw, 42px);
+  z-index: 3;
+  max-width: 560px;
+  display: grid;
+  gap: 12px;
+  color: #fff;
+}
+
+.attractions__feature-icon,
+.attractions__mini-copy > span {
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(143,224,180,.34);
+  color: #f4fff8;
+  background:
+    radial-gradient(circle at 32% 18%, rgba(255,255,255,.28), transparent 36%),
+    linear-gradient(135deg, rgba(60,179,113,.50), rgba(60,179,113,.18));
+  box-shadow: 0 18px 44px rgba(60,179,113,.22), inset 0 1px 0 rgba(255,255,255,.16);
+}
+
+.attractions__feature-icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 24px;
+}
+
+.attractions__feature-copy p {
+  margin: 0;
+  color: #8fe0b4;
+  font-size: .78rem;
+  font-weight: 950;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+
+.attractions__feature-copy h3 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.2rem, 5vw, 4.5rem);
+  line-height: .96;
+  letter-spacing: 0;
+  text-shadow: 0 18px 42px rgba(0,0,0,.32);
+}
+
+.attractions__feature-copy > span:last-child {
+  max-width: 520px;
+  color: rgba(255,255,255,.78);
+  font-size: clamp(1rem, 1.4vw, 1.14rem);
+  line-height: 1.65;
+}
+
+.attractions__stack {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.attractions__mini {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 22px 62px rgba(17,40,28,.12);
+  transition: transform .28s cubic-bezier(.22, 1, .36, 1), box-shadow .28s ease;
+}
+
+.attractions__mini:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 30px 78px rgba(17,40,28,.17), 0 0 30px rgba(60,179,113,.13);
+}
+
+:global(.attractions__media--mini) {
+  aspect-ratio: 4 / 3;
+  min-height: 220px;
+  border-radius: 28px;
+}
+
+.attractions__mini-copy {
+  position: absolute;
+  inset: auto 16px 16px 16px;
+  z-index: 3;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 22px;
+  color: #fff;
+  background: rgba(7,20,15,.34);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+}
+
+.attractions__mini-copy > span {
+  width: 38px;
+  height: 38px;
+  border-radius: 15px;
+}
+
+.attractions__mini-copy h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.08rem;
+  line-height: 1.1;
+}
+
+.attractions__mini-copy p {
+  margin: 0;
+  color: rgba(255,255,255,.72);
+  font-size: .9rem;
+  line-height: 1.5;
+}
+
+.attractions__cta {
+  position: relative;
+  z-index: 1;
+  margin-top: 30px;
+}
+
+:global(.attractions__media--old-town.asset-frame--fallback .asset-frame__fallback-scene) {
+  background:
+    radial-gradient(circle at 70% 18%, rgba(242,192,120,.38), transparent 26%),
+    radial-gradient(circle at 18% 76%, rgba(60,179,113,.28), transparent 34%),
+    linear-gradient(145deg, #5f765d, #1e3f2b 58%, #102117);
+}
+
+:global(.attractions__media--wieliczka.asset-frame--fallback .asset-frame__fallback-scene) {
+  background:
+    radial-gradient(circle at 22% 18%, rgba(242,192,120,.32), transparent 30%),
+    linear-gradient(145deg, #556d67, #244438 56%, #111e1a);
+}
+
+:global(.attractions__media--auschwitz.asset-frame--fallback .asset-frame__fallback-scene) {
+  background:
+    radial-gradient(circle at 78% 18%, rgba(143,224,180,.22), transparent 30%),
+    linear-gradient(145deg, #596760, #25362f 56%, #101b17);
+}
+
+:global(.attractions__media--schindler.asset-frame--fallback .asset-frame__fallback-scene) {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(60,179,113,.28), transparent 30%),
+    radial-gradient(circle at 84% 78%, rgba(242,192,120,.22), transparent 34%),
+    linear-gradient(145deg, #3f6f5a, #1d3d2f 58%, #102117);
+}
+
+:global(.attractions__media--energylandia.asset-frame--fallback .asset-frame__fallback-scene) {
+  background:
+    radial-gradient(circle at 74% 20%, rgba(242,192,120,.40), transparent 28%),
+    radial-gradient(circle at 20% 82%, rgba(60,179,113,.34), transparent 36%),
+    linear-gradient(145deg, #477c5d, #183927 60%, #102117);
+}
+
+:global(.attractions__media--nature.asset-frame--fallback .asset-frame__fallback-scene) {
+  background:
+    radial-gradient(circle at 76% 18%, rgba(242,192,120,.30), transparent 30%),
+    radial-gradient(circle at 18% 80%, rgba(143,224,180,.34), transparent 38%),
+    linear-gradient(145deg, #527b56, #1f4c2f 58%, #102117);
+}
+
+@media (min-width: 760px) {
+  .attractions__stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1120px) {
+  .attractions__layout {
+    grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr);
+    align-items: stretch;
+  }
+
+  .attractions__stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: stretch;
+  }
+
+  .attractions__mini--1,
+  .attractions__mini--4 {
+    transform: translateY(18px);
+  }
+
+  .attractions__mini--1:hover,
+  .attractions__mini--4:hover {
+    transform: translateY(10px);
+  }
+}
+
+@media (max-width: 640px) {
+  .attractions__layout {
+    margin-top: 28px;
+  }
+
+  :global(.attractions__media--feature) {
+    min-height: 420px;
+  }
+
+  .attractions__feature {
+    border-radius: 28px;
+  }
+
+  .attractions__feature-copy {
+    left: 18px;
+    right: 18px;
+    bottom: 18px;
+  }
+
+  .attractions__mini-copy {
+    inset: auto 12px 12px 12px;
+  }
+}
 </style>

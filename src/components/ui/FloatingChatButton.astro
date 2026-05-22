@@ -8,6 +8,7 @@ const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
 const chatTexts = t.chat;
 const hasCampyIcon = publicAssetExists(campyIcon);
+const chatConfigEncoded = Buffer.from(JSON.stringify(chatTexts), 'utf8').toString('base64');
 const quickActions = [
   { key: 'pricing', icon: 'pricing', label: chatTexts.actions.pricing },
   { key: 'transit', icon: 'tram', label: chatTexts.actions.transit ?? chatTexts.actions.directions },
@@ -80,19 +81,32 @@ const quickActions = [
     </div>
 
     <form class="floating-chat__form" data-chat-form>
-      <label class="sr-only" for="floatingChatInput">{chatTexts.inputLabel}</label>
-      <input id="floatingChatInput" data-chat-input type="text" autocomplete="off" placeholder={chatTexts.inputPlaceholder} />
-      <button type="submit" aria-label={chatTexts.send}>
+      <label class="sr-only" for="floatingChatInput" data-chat-input-label></label>
+      <input id="floatingChatInput" data-chat-input type="text" autocomplete="off" placeholder="" />
+      <button type="submit" data-chat-send aria-label="">
         <Icon name="send" size={20} strokeWidth={2} />
       </button>
     </form>
   </section>
 </div>
 
-<script define:vars={{ chatTexts }}>
+<script define:vars={{ chatConfigEncoded }}>
   (() => {
     const root = document.querySelector('[data-floating-chat]');
     if (!(root instanceof HTMLElement)) return;
+
+    const decodeChatTexts = () => {
+      try {
+        const binary = window.atob(chatConfigEncoded);
+        const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+        return JSON.parse(new TextDecoder().decode(bytes));
+      } catch {
+        return null;
+      }
+    };
+
+    const chatTexts = decodeChatTexts();
+    if (!chatTexts) return;
 
     const toggle = root.querySelector('[data-chat-toggle]');
     const panel = root.querySelector('[data-chat-panel]');
@@ -103,6 +117,8 @@ const quickActions = [
     const quickActionButtons = root.querySelectorAll('[data-chat-prompt]');
     const titleNode = root.querySelector('[data-chat-title-node]');
     const statusNode = root.querySelector('[data-chat-status-node]');
+    const inputLabel = root.querySelector('[data-chat-input-label]');
+    const sendButton = root.querySelector('[data-chat-send]');
 
     if (!(toggle instanceof HTMLButtonElement) || !(panel instanceof HTMLElement) || !(messages instanceof HTMLElement)) return;
 
@@ -114,6 +130,9 @@ const quickActions = [
       if (panelHydrated) return;
       if (titleNode instanceof HTMLElement) titleNode.textContent = chatTexts.title;
       if (statusNode instanceof HTMLElement) statusNode.textContent = chatTexts.status;
+      if (inputLabel instanceof HTMLElement) inputLabel.textContent = chatTexts.inputLabel;
+      if (input instanceof HTMLInputElement) input.placeholder = chatTexts.inputPlaceholder;
+      if (sendButton instanceof HTMLButtonElement) sendButton.setAttribute('aria-label', chatTexts.send);
       quickActionButtons.forEach((button) => {
         if (!(button instanceof HTMLElement)) return;
         const label = button.dataset.chatPrompt ?? '';
@@ -316,7 +335,7 @@ body.has-floating-chat-open {
   z-index: 1250;
   pointer-events: none;
   max-width: calc(100vw - 24px);
-  contain: layout style paint;
+  contain: style;
 }
 
 .floating-chat.is-open {
@@ -326,10 +345,14 @@ body.has-floating-chat-open {
 .floating-chat__button {
   position: relative;
   z-index: 1;
-  width: 78px;
-  height: 78px;
+  width: 76px;
+  height: 76px;
+  aspect-ratio: 1;
+  flex: 0 0 auto;
   display: grid;
   place-items: center;
+  min-width: 0;
+  padding: 0;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,.22);
   color: #fff;
@@ -377,11 +400,12 @@ body.has-floating-chat-open {
 .floating-chat__button-image {
   position: relative;
   z-index: 1;
-  width: 62px;
-  height: 62px;
+  width: 64px;
+  height: 64px;
   display: block;
-  object-fit: contain;
+  object-fit: cover;
   border-radius: 999px;
+  clip-path: circle(50% at 50% 50%);
   filter:
     drop-shadow(0 10px 22px rgba(0,0,0,.22))
     drop-shadow(0 0 16px rgba(255,255,255,.18));
@@ -853,17 +877,15 @@ html[data-theme="light"] .floating-chat__quick button {
   .floating-chat {
     inset: auto max(16px, env(safe-area-inset-right)) max(84px, calc(84px + env(safe-area-inset-bottom))) auto;
     max-width: calc(100vw - 24px);
-    opacity: 0;
-    transform: translateY(10px) scale(.96);
-    transition:
-      opacity .24s cubic-bezier(.22, 1, .36, 1),
-      transform .24s cubic-bezier(.22, 1, .36, 1);
+    opacity: 1;
+    transform: none;
+    transition: opacity .24s cubic-bezier(.22, 1, .36, 1);
   }
 
   .floating-chat.is-available,
   .floating-chat.is-open {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: none;
   }
 
   .floating-chat.is-raised {
@@ -871,13 +893,13 @@ html[data-theme="light"] .floating-chat__quick button {
   }
 
   .floating-chat__button {
-    width: 68px;
-    height: 68px;
+    width: 66px;
+    height: 66px;
   }
 
   .floating-chat__button-image {
-    width: 54px;
-    height: 54px;
+    width: 56px;
+    height: 56px;
   }
 
   .floating-chat__panel {
