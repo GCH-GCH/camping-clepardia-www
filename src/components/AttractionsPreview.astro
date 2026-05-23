@@ -34,6 +34,8 @@ const attractions = [
         : activeLanguage === 'pl'
           ? 'Klasyczna trasa po Krakowie: Rynek, Sukiennice, kościół Mariacki i spacer w stronę Wawelu.'
           : 'The classic Kraków route: Main Square, Cloth Hall, St. Mary’s Basilica and a walk toward Wawel.',
+    meta: activeLanguage === 'pl' ? 'Tram + spacer' : activeLanguage === 'de' ? 'Tram + Spaziergang' : activeLanguage === 'it' ? 'Tram + passeggiata' : 'Tram + walk',
+    metaIcon: 'tram',
     image: siteAssets.attractions.oldTown,
     alt: activeLanguage === 'de' ? 'Altstadt von Krakau' : activeLanguage === 'it' ? 'Città Vecchia di Cracovia' : activeLanguage === 'pl' ? 'Stare Miasto w Krakowie' : 'Kraków Old Town',
     icon: 'landmark',
@@ -42,6 +44,8 @@ const attractions = [
   {
     name: 'Wieliczka',
     description: activeLanguage === 'pl' ? 'Kopalnia soli i jedna z najbardziej rozpoznawalnych wycieczek z Krakowa.' : 'Salt mine and one of the most recognisable trips from Kraków.',
+    meta: activeLanguage === 'pl' ? 'Wycieczka poza miasto' : 'Day trip',
+    metaIcon: 'route',
     image: siteAssets.attractions.wieliczka,
     alt: 'Kopalnia Soli Wieliczka',
     icon: 'map',
@@ -50,6 +54,8 @@ const attractions = [
   {
     name: 'Auschwitz-Birkenau',
     description: activeLanguage === 'pl' ? 'Ważne miejsce pamięci, które warto zaplanować z wyprzedzeniem.' : 'An important memorial site worth planning in advance.',
+    meta: activeLanguage === 'pl' ? 'Samochód / bus' : 'Car / tour bus',
+    metaIcon: 'bus',
     image: siteAssets.attractions.auschwitz,
     alt: 'Muzeum Auschwitz-Birkenau',
     icon: 'shield',
@@ -58,6 +64,8 @@ const attractions = [
   {
     name: activeLanguage === 'pl' ? 'Fabryka Schindlera' : 'Schindler’s Factory',
     description: activeLanguage === 'pl' ? 'Muzeum historii Krakowa i okupacji, blisko Kazimierza i Podgórza.' : 'A museum about Kraków’s wartime history, close to Kazimierz and Podgórze.',
+    meta: activeLanguage === 'pl' ? 'Miasto + muzeum' : 'City + museum',
+    metaIcon: 'ticket',
     image: siteAssets.attractions.schindler,
     alt: 'Fabryka Schindlera w Krakowie',
     icon: 'info',
@@ -66,6 +74,8 @@ const attractions = [
   {
     name: 'Energylandia',
     description: activeLanguage === 'pl' ? 'Całodniowa wycieczka dla rodzin i osób szukających mocniejszych wrażeń.' : 'A full-day trip for families and guests looking for stronger thrills.',
+    meta: activeLanguage === 'pl' ? 'Cały dzień' : 'Full-day trip',
+    metaIcon: 'car',
     image: siteAssets.attractions.energylandia,
     alt: 'Energylandia',
     icon: 'sparkle',
@@ -74,6 +84,8 @@ const attractions = [
   {
     name: activeLanguage === 'pl' ? 'Ojców / Zakopane' : 'Ojców / Zakopane',
     description: activeLanguage === 'pl' ? 'Dobre kierunki na jednodniową wycieczkę poza miasto.' : 'Good options for a day trip outside the city.',
+    meta: activeLanguage === 'pl' ? 'Natura / góry' : 'Nature / mountains',
+    metaIcon: 'leaf',
     image: siteAssets.attractions.zakopane,
     alt: 'Ojców, Zakopane i okolice Krakowa',
     icon: 'leaf',
@@ -104,6 +116,10 @@ const secondary = attractions.slice(1);
           <span class="attractions__feature-icon" aria-hidden="true">
             <Icon name={featured.icon} size={28} strokeWidth={1.8} />
           </span>
+          <span class="attractions__trip-label">
+            <Icon name={featured.metaIcon} size={14} strokeWidth={2} />
+            {featured.meta}
+          </span>
           <p>{activeLanguage === 'pl' ? 'Najbliżej Krakowa' : 'Closest to Kraków'}</p>
           <h3>{featured.name}</h3>
           <span>{featured.description}</span>
@@ -123,6 +139,10 @@ const secondary = attractions.slice(1);
               <span aria-hidden="true">
                 <Icon name={attraction.icon} size={18} strokeWidth={1.9} />
               </span>
+              <small class="attractions__trip-label">
+                <Icon name={attraction.metaIcon} size={13} strokeWidth={2} />
+                {attraction.meta}
+              </small>
               <h3>{attraction.name}</h3>
               <p>{attraction.description}</p>
             </div>
@@ -311,6 +331,33 @@ const secondary = attractions.slice(1);
   line-height: 1.5;
 }
 
+.attractions__trip-label {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border: 1px solid rgba(143,224,180,.26);
+  border-radius: 999px;
+  color: #e9fff1;
+  background:
+    linear-gradient(135deg, rgba(60,179,113,.20), rgba(255,255,255,.075)),
+    rgba(7, 20, 15, .24);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+  font-size: .7rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.attractions__mini-copy .attractions__trip-label {
+  margin-bottom: 2px;
+  font-size: .64rem;
+  color: rgba(233,255,241,.86);
+}
+
 .attractions__cta {
   position: relative;
   z-index: 1;
@@ -406,6 +453,82 @@ const secondary = attractions.slice(1);
 
   .attractions__mini-copy {
     inset: auto 12px 12px 12px;
+  }
+}
+
+/* Task 55: luxury-travel editorial rhythm for the homepage attractions. */
+.attractions__feature,
+.attractions__mini {
+  isolation: isolate;
+}
+
+.attractions__feature::after,
+.attractions__mini::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(4, 14, 9, .02) 0%, transparent 42%, rgba(4,14,9,.50) 100%),
+    radial-gradient(circle at 86% 12%, rgba(242,192,120,.18), transparent 34%),
+    radial-gradient(circle at 16% 86%, rgba(60,179,113,.16), transparent 34%);
+}
+
+.attractions__feature:hover,
+.attractions__mini:hover {
+  box-shadow:
+    0 34px 92px rgba(17,40,28,.18),
+    0 0 42px rgba(60,179,113,.16);
+}
+
+.attractions__feature:hover :global(.asset-frame img),
+.attractions__mini:hover :global(.asset-frame img) {
+  transform: scale(1.065);
+}
+
+@media (min-width: 1120px) {
+  .attractions__layout {
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr);
+  }
+
+  .attractions__stack {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-auto-rows: minmax(158px, auto);
+  }
+
+  .attractions__mini {
+    min-height: 0;
+  }
+
+  .attractions__mini--1,
+  .attractions__mini--2 {
+    grid-column: span 3;
+    grid-row: span 2;
+  }
+
+  .attractions__mini--3,
+  .attractions__mini--4,
+  .attractions__mini--5 {
+    grid-column: span 2;
+  }
+
+  .attractions__mini--1,
+  .attractions__mini--4,
+  .attractions__mini--1:hover,
+  .attractions__mini--4:hover {
+    transform: none;
+  }
+
+  :global(.attractions__mini--1 .attractions__media--mini),
+  :global(.attractions__mini--2 .attractions__media--mini) {
+    min-height: 330px;
+  }
+
+  :global(.attractions__mini--3 .attractions__media--mini),
+  :global(.attractions__mini--4 .attractions__media--mini),
+  :global(.attractions__mini--5 .attractions__media--mini) {
+    min-height: 210px;
   }
 }
 </style>

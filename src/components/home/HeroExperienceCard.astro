@@ -207,10 +207,16 @@ const copy = {
 
 <aside class="hero-experience-slider" data-hero-experience-slider aria-label={copy.aria}>
   <span class="hero-experience-slider__glow" aria-hidden="true"></span>
+  <span class="hero-experience-slider__particle hero-experience-slider__particle--one" aria-hidden="true"></span>
+  <span class="hero-experience-slider__particle hero-experience-slider__particle--two" aria-hidden="true"></span>
+  <span class="hero-experience-slider__particle hero-experience-slider__particle--three" aria-hidden="true"></span>
   <div class="hero-experience-slider__top">
     <span data-hero-slide-index>01</span>
     <small>{copy.of} {String(copy.slides.length).padStart(2, '0')}</small>
   </div>
+  <span class="hero-experience-slider__progress" aria-hidden="true">
+    <i data-hero-slide-progress></i>
+  </span>
 
   <div class="hero-experience-slider__slides">
     {copy.slides.map((slide, index) => (
@@ -254,6 +260,7 @@ const copy = {
       const slides = Array.from(slider.querySelectorAll('[data-hero-slide]')).filter((slide): slide is HTMLElement => slide instanceof HTMLElement);
       const dots = Array.from(slider.querySelectorAll('[data-hero-slide-dot]')).filter((dot): dot is HTMLElement => dot instanceof HTMLElement);
       const indexLabel = slider.querySelector('[data-hero-slide-index]');
+      const progress = slider.querySelector('[data-hero-slide-progress]');
       const prev = slider.querySelector('[data-hero-slide-prev]');
       const next = slider.querySelector('[data-hero-slide-next]');
       let active = 0;
@@ -266,6 +273,11 @@ const copy = {
         slides[active]?.classList.add('is-active');
         dots[active]?.classList.add('is-active');
         if (indexLabel) indexLabel.textContent = String(active + 1).padStart(2, '0');
+        if (progress instanceof HTMLElement) {
+          progress.style.animation = 'none';
+          progress.offsetHeight;
+          progress.style.animation = '';
+        }
       };
 
       const stop = () => {
@@ -349,6 +361,18 @@ const copy = {
     radial-gradient(circle at 74% 82%, rgba(60,179,113,.18), transparent 38%);
 }
 
+.hero-experience-slider::after {
+  content: '';
+  position: absolute;
+  inset: -40% -30%;
+  z-index: -1;
+  background:
+    conic-gradient(from 120deg at 50% 50%, transparent 0 18%, rgba(143,224,180,.16) 24%, transparent 34%, rgba(242,192,120,.12) 48%, transparent 62% 100%);
+  filter: blur(18px);
+  opacity: .46;
+  animation: heroExperienceLight 11s linear infinite;
+}
+
 .hero-experience-slider__glow {
   position: absolute;
   right: -88px;
@@ -359,6 +383,42 @@ const copy = {
   background: radial-gradient(circle, rgba(242,192,120,.28), rgba(60,179,113,.14) 44%, transparent 72%);
   filter: blur(8px);
   pointer-events: none;
+}
+
+.hero-experience-slider__particle {
+  position: absolute;
+  z-index: 1;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(143,224,180,.76);
+  box-shadow: 0 0 20px rgba(143,224,180,.48);
+  pointer-events: none;
+  opacity: .58;
+  animation: heroExperienceParticle 8s ease-in-out infinite;
+}
+
+.hero-experience-slider__particle--one {
+  right: 22%;
+  top: 18%;
+}
+
+.hero-experience-slider__particle--two {
+  left: 18%;
+  top: 54%;
+  width: 5px;
+  height: 5px;
+  animation-delay: -2.4s;
+}
+
+.hero-experience-slider__particle--three {
+  right: 13%;
+  bottom: 24%;
+  width: 4px;
+  height: 4px;
+  background: rgba(242,192,120,.72);
+  box-shadow: 0 0 18px rgba(242,192,120,.44);
+  animation-delay: -4.1s;
 }
 
 .hero-experience-slider__top {
@@ -372,6 +432,32 @@ const copy = {
   font-weight: 950;
   letter-spacing: .16em;
   text-transform: uppercase;
+}
+
+.hero-experience-slider__progress {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.hero-experience-slider__progress i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  transform-origin: left center;
+  background: linear-gradient(90deg, rgba(143,224,180,.86), #3CB371, rgba(242,192,120,.72));
+  box-shadow: 0 0 20px rgba(60,179,113,.42);
+  animation: heroSlideProgress 3.6s linear infinite;
+}
+
+.hero-experience-slider:hover .hero-experience-slider__progress i {
+  animation-play-state: paused;
 }
 
 .hero-experience-slider__top span {
@@ -401,6 +487,14 @@ const copy = {
   transform: translateY(0) scale(1);
   filter: blur(0);
   pointer-events: auto;
+}
+
+.hero-experience-slider:hover {
+  transform: translateY(-6px) scale(1.012);
+  box-shadow:
+    0 42px 118px rgba(0,0,0,.34),
+    0 0 82px rgba(60,179,113,.24),
+    inset 0 1px 0 rgba(255,255,255,.20);
 }
 
 .hero-experience-slider__icon {
@@ -533,6 +627,21 @@ const copy = {
   50% { transform: translate3d(0, -10px, 0); }
 }
 
+@keyframes heroExperienceLight {
+  from { transform: rotate(0deg) scale(1); }
+  to { transform: rotate(360deg) scale(1.04); }
+}
+
+@keyframes heroExperienceParticle {
+  0%, 100% { transform: translate3d(0, 0, 0); opacity: .34; }
+  50% { transform: translate3d(10px, -14px, 0); opacity: .78; }
+}
+
+@keyframes heroSlideProgress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
 @media (max-width: 1120px) {
   .hero-experience-slider {
     justify-self: start;
@@ -571,7 +680,9 @@ const copy = {
   .hero-experience-slider,
   .hero-experience-slider__slide,
   .hero-experience-slider__dots span,
-  .hero-experience-slider__controls button {
+  .hero-experience-slider__controls button,
+  .hero-experience-slider__progress i,
+  .hero-experience-slider__particle {
     animation: none !important;
     transition-duration: .01ms !important;
   }

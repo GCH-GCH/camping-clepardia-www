@@ -1,5 +1,5 @@
 ---
-import { getTranslations } from '@/i18n/config';
+import { resolveContentLanguage } from '@/i18n/config';
 import { getPathContext } from '@/utils/localizedLinks';
 import Icon from '@/components/ui/Icon.astro';
 
@@ -9,18 +9,50 @@ interface Props {
 
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
-const t = getTranslations(languageCode ?? pathContext.languageCode);
-const stats = t.home.stats;
-const icons = ['map', 'tram', 'camping', 'leaf'] as const;
+const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode);
+const copy = {
+  pl: [
+    { value: '9 przystanków', label: 'Do centrum Krakowa', copy: 'Tramwaj do Starego Kleparza / centrum, ok. 14 minut jazdy.', icon: 'tram', variant: 'featured' },
+    { value: 'Od 2022', label: 'Google Maps', copy: 'Zalecamy Google Maps, bo dojazd do campingu zmienił się w 2022 roku.', icon: 'map', variant: 'tall' },
+    { value: '22:00–07:00', label: 'Cisza nocna', copy: 'Camping Clepardia nie jest miejscem imprezowym.', icon: 'moon', variant: 'quiet' },
+    { value: '2/3/4-os.', label: 'Kampery + domki', copy: 'Pola campingowe oraz domki tylko 2-, 3- i 4-osobowe.', icon: 'bungalow', variant: 'wide' },
+    { value: '0 PLN', label: 'Przyjazny zwierzętom', copy: 'Pies jest bezpłatny, prosimy tylko o opiekę i sprzątanie.', icon: 'dog', variant: 'pet' },
+    { value: '10A', label: 'Prąd na miejscu', copy: 'Przyłącze campingowe według cennika, bez ładowania aut EV.', icon: 'electricity', variant: 'power' },
+  ],
+  en: [
+    { value: '9 stops', label: 'To Kraków centre', copy: 'Tram to Stary Kleparz / centre, about 14 minutes.', icon: 'tram', variant: 'featured' },
+    { value: 'Since 2022', label: 'Google Maps', copy: 'We recommend Google Maps because the access route changed in 2022.', icon: 'map', variant: 'tall' },
+    { value: '22:00–07:00', label: 'Quiet hours', copy: 'Camping Clepardia is not a party campsite.', icon: 'moon', variant: 'quiet' },
+    { value: '2/3/4-person', label: 'Camping + bungalows', copy: 'Camping pitches and only 2-, 3- and 4-person bungalows.', icon: 'bungalow', variant: 'wide' },
+    { value: '0 PLN', label: 'Pet friendly', copy: 'Dogs are free of charge; please keep them under control.', icon: 'dog', variant: 'pet' },
+    { value: '10A', label: 'Power hook-up', copy: 'Camping electricity according to the price list, no EV charging.', icon: 'electricity', variant: 'power' },
+  ],
+  de: [
+    { value: '9 Haltestellen', label: 'Ins Zentrum', copy: 'Straßenbahn bis Stary Kleparz / Zentrum, etwa 14 Minuten.', icon: 'tram', variant: 'featured' },
+    { value: 'Seit 2022', label: 'Google Maps', copy: 'Wir empfehlen Google Maps, weil sich die Zufahrt 2022 geändert hat.', icon: 'map', variant: 'tall' },
+    { value: '22:00–07:00', label: 'Nachtruhe', copy: 'Camping Clepardia ist kein Party-Campingplatz.', icon: 'moon', variant: 'quiet' },
+    { value: '2/3/4 Pers.', label: 'Camping + Bungalows', copy: 'Stellplätze und nur 2-, 3- und 4-Personen-Bungalows.', icon: 'bungalow', variant: 'wide' },
+    { value: '0 PLN', label: 'Hundefreundlich', copy: 'Hunde sind kostenlos, bitte unter Kontrolle halten.', icon: 'dog', variant: 'pet' },
+    { value: '10A', label: 'Stromanschluss', copy: 'Campingstrom laut Preisliste, kein Laden von Elektroautos.', icon: 'electricity', variant: 'power' },
+  ],
+  it: [
+    { value: '9 fermate', label: 'Verso il centro', copy: 'Tram per Stary Kleparz / centro, circa 14 minuti.', icon: 'tram', variant: 'featured' },
+    { value: 'Dal 2022', label: 'Google Maps', copy: 'Consigliamo Google Maps perché l’accesso è cambiato nel 2022.', icon: 'map', variant: 'tall' },
+    { value: '22:00–07:00', label: 'Silenzio notturno', copy: 'Camping Clepardia non è un campeggio per feste.', icon: 'moon', variant: 'quiet' },
+    { value: '2/3/4 pers.', label: 'Camping + bungalow', copy: 'Piazzole e bungalow solo da 2, 3 e 4 persone.', icon: 'bungalow', variant: 'wide' },
+    { value: '0 PLN', label: 'Pet friendly', copy: 'Il cane è gratuito, chiediamo solo cura e controllo.', icon: 'dog', variant: 'pet' },
+    { value: '10A', label: 'Allaccio elettrico', copy: 'Elettricità camping secondo listino, senza ricarica EV.', icon: 'electricity', variant: 'power' },
+  ],
+}[lang];
 ---
 
 <section class="home-stats reveal-section" id="after-hero" aria-label="Camping Clepardia">
   <div class="container">
     <div class="home-stats__panel">
-      {stats.map((item, index) => (
-        <article class="home-stats__item reveal-section" style={`--reveal-delay: ${index * 70}ms`}>
+      {copy.map((item, index) => (
+        <article class:list={['home-stats__item', `home-stats__item--${item.variant}`, 'reveal-section']} style={`--reveal-delay: ${index * 70}ms`}>
           <span class="home-stats__icon" aria-hidden="true">
-            <Icon name={icons[index] ?? 'check'} size={24} strokeWidth={1.8} />
+            <Icon name={item.icon} size={24} strokeWidth={1.8} />
           </span>
           <small>{item.value}</small>
           <h2>{item.label}</h2>
@@ -44,7 +76,7 @@ const icons = ['map', 'tram', 'camping', 'leaf'] as const;
   position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 14px;
+  gap: clamp(14px, 2vw, 18px);
   overflow: hidden;
   border: 1px solid rgba(255,255,255,.16);
   border-radius: 38px;
@@ -91,6 +123,28 @@ const icons = ['map', 'tram', 'camping', 'leaf'] as const;
   transition: transform .34s cubic-bezier(.22, 1, .36, 1), border-color .34s ease, box-shadow .34s ease, background .34s ease;
   animation: homeStatFloat 7.2s ease-in-out infinite;
   animation-delay: calc(var(--reveal-delay, 0ms) * 2);
+}
+
+.home-stats__item--featured {
+  min-height: 260px;
+  background:
+    radial-gradient(circle at 24% 16%, rgba(143,224,180,.24), transparent 34%),
+    radial-gradient(circle at 88% 84%, rgba(242,192,120,.14), transparent 40%),
+    linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.052));
+}
+
+.home-stats__item--wide {
+  min-height: 210px;
+}
+
+.home-stats__item--tall {
+  min-height: 240px;
+}
+
+.home-stats__item--quiet {
+  background:
+    radial-gradient(circle at 20% 18%, rgba(242,192,120,.14), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.038));
 }
 
 .home-stats__item::before {
@@ -173,7 +227,36 @@ const icons = ['map', 'tram', 'camping', 'leaf'] as const;
 
 @media (min-width: 1080px) {
   .home-stats__panel {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-auto-rows: minmax(116px, auto);
+    align-items: stretch;
+  }
+
+  .home-stats__item {
+    min-height: 0;
+  }
+
+  .home-stats__item--featured {
+    grid-column: span 5;
+    grid-row: span 2;
+  }
+
+  .home-stats__item--tall {
+    grid-column: span 4;
+    grid-row: span 2;
+  }
+
+  .home-stats__item--quiet {
+    grid-column: span 3;
+  }
+
+  .home-stats__item--wide {
+    grid-column: span 5;
+  }
+
+  .home-stats__item--pet,
+  .home-stats__item--power {
+    grid-column: span 2;
   }
 }
 

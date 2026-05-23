@@ -196,11 +196,27 @@ const mediaLabels = {
 .bungalows-section__media {
   position: relative;
   min-height: clamp(520px, 52vw, 680px);
+  isolation: isolate;
+}
+
+.bungalows-section__media::before {
+  content: '';
+  position: absolute;
+  inset: 12% -4% auto auto;
+  z-index: -1;
+  width: 58%;
+  aspect-ratio: 1;
+  border-radius: 44% 56% 48% 52%;
+  background:
+    radial-gradient(circle at 36% 28%, rgba(242,192,120,.22), transparent 34%),
+    radial-gradient(circle at 68% 72%, rgba(60,179,113,.16), transparent 42%);
+  filter: blur(4px);
 }
 
 :global(.bungalows-section__main-photo) {
   min-height: clamp(440px, 46vw, 610px);
-  border-radius: 28px;
+  border-radius: 34px 54px 30px 44px;
+  transform: rotate(1deg);
 }
 
 .bungalows-section__floating {
@@ -217,11 +233,13 @@ const mediaLabels = {
 .bungalows-section__floating--one {
   right: -12px;
   top: 42px;
+  transform: rotate(2.4deg);
 }
 
 .bungalows-section__floating--two {
   left: -18px;
   bottom: 72px;
+  transform: rotate(-2deg);
 }
 
 @media (min-width: 760px) {
@@ -259,11 +277,18 @@ const mediaLabels = {
   .bungalows-section__floating {
     position: static;
     width: 100%;
+    transform: none;
   }
 
   :global(.bungalows-section__main-photo),
   .bungalows-section__floating :global(.asset-frame) {
     min-height: 240px;
+    transform: none;
+    border-radius: 24px;
+  }
+
+  .bungalows-section__media::before {
+    display: none;
   }
 }
 </style>

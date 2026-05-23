@@ -206,11 +206,40 @@ const mediaLabels = {
 .camping-section__media {
   position: relative;
   min-height: clamp(520px, 52vw, 680px);
+  isolation: isolate;
+}
+
+.camping-section__media::before,
+.camping-section__media::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  border-radius: 999px;
+}
+
+.camping-section__media::before {
+  inset: 8% auto auto -7%;
+  width: 46%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(60,179,113,.18), transparent 68%);
+  filter: blur(8px);
+  z-index: -1;
+}
+
+.camping-section__media::after {
+  right: 4%;
+  bottom: 4%;
+  width: 38%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(60,179,113,.16);
+  background: radial-gradient(circle, rgba(242,192,120,.14), transparent 70%);
+  z-index: -1;
 }
 
 :global(.camping-section__main-photo) {
   min-height: clamp(440px, 46vw, 610px);
-  border-radius: 28px;
+  border-radius: 42px 26px 38px 28px;
+  transform: rotate(-1.2deg);
 }
 
 .camping-section__floating {
@@ -227,17 +256,20 @@ const mediaLabels = {
 .camping-section__floating--one {
   left: -18px;
   bottom: 64px;
+  transform: rotate(2.2deg);
 }
 
 .camping-section__floating--two {
   right: -12px;
   top: 36px;
+  transform: rotate(-2.8deg);
 }
 
 .camping-section__floating--three {
   right: 26px;
   bottom: 10px;
   width: min(38%, 224px);
+  transform: rotate(1.6deg);
 }
 
 @media (min-width: 760px) {
@@ -271,11 +303,19 @@ const mediaLabels = {
   .camping-section__floating {
     position: static;
     width: 100%;
+    transform: none;
   }
 
   :global(.camping-section__main-photo),
   .camping-section__floating :global(.asset-frame) {
     min-height: 240px;
+    transform: none;
+    border-radius: 24px;
+  }
+
+  .camping-section__media::before,
+  .camping-section__media::after {
+    display: none;
   }
 }
 </style>

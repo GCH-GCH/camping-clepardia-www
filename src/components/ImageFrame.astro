@@ -267,6 +267,13 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
   box-shadow: 0 18px 46px rgba(0,0,0,.22);
 }
 
+.asset-frame__tent::before,
+.asset-frame__tent::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
 .asset-frame--fallback.photo-frame {
   min-height: 240px;
   border-color: rgba(143,224,180,.38);
@@ -280,11 +287,36 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
     linear-gradient(145deg, #4f7b5e, #1b422d 58%, #102117);
 }
 
+.asset-frame--fallback-camper .asset-frame__tent {
+  left: 13%;
+  bottom: 24%;
+  width: clamp(130px, 20vw, 210px);
+  height: clamp(58px, 8vw, 86px);
+  clip-path: none;
+  border-radius: 18px 24px 12px 12px;
+  background:
+    radial-gradient(circle at 22% 102%, rgba(8, 26, 17, .92) 0 9px, transparent 10px),
+    radial-gradient(circle at 76% 102%, rgba(8, 26, 17, .92) 0 9px, transparent 10px),
+    linear-gradient(135deg, rgba(242,192,120,.62), rgba(143,224,180,.58));
+}
+
 .asset-frame--fallback-bungalow .asset-frame__fallback-scene {
   background:
     radial-gradient(circle at 24% 18%, rgba(242,192,120,.30), transparent 30%),
     radial-gradient(circle at 82% 76%, rgba(143,224,180,.26), transparent 36%),
     linear-gradient(145deg, #55705b, #22452f 58%, #102117);
+}
+
+.asset-frame--fallback-bungalow .asset-frame__tent {
+  left: 16%;
+  bottom: 23%;
+  width: clamp(118px, 18vw, 194px);
+  height: clamp(82px, 12vw, 126px);
+  clip-path: polygon(50% 0, 100% 42%, 100% 100%, 0 100%, 0 42%);
+  border-radius: 12px;
+  background:
+    linear-gradient(90deg, transparent 46%, rgba(255,255,255,.16) 47% 49%, transparent 50%),
+    linear-gradient(135deg, rgba(242,192,120,.56), rgba(60,179,113,.50));
 }
 
 .asset-frame--fallback-tram .asset-frame__fallback-scene {
@@ -295,11 +327,37 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
     linear-gradient(145deg, #496f63, #1c4234 58%, #102117);
 }
 
+.asset-frame--fallback-tram .asset-frame__tent {
+  left: 13%;
+  bottom: 26%;
+  width: clamp(128px, 20vw, 210px);
+  height: clamp(58px, 8vw, 84px);
+  clip-path: none;
+  border-radius: 22px 22px 12px 12px;
+  background:
+    radial-gradient(circle at 26% 108%, rgba(8, 26, 17, .88) 0 8px, transparent 9px),
+    radial-gradient(circle at 74% 108%, rgba(8, 26, 17, .88) 0 8px, transparent 9px),
+    linear-gradient(180deg, rgba(255,255,255,.18), transparent 48%),
+    linear-gradient(135deg, rgba(143,224,180,.72), rgba(60,179,113,.42));
+}
+
 .asset-frame--fallback-attractions .asset-frame__fallback-scene {
   background:
     radial-gradient(circle at 72% 18%, rgba(242,192,120,.38), transparent 26%),
     radial-gradient(circle at 20% 80%, rgba(60,179,113,.30), transparent 38%),
     linear-gradient(145deg, #5d7560, #203f2d 58%, #102117);
+}
+
+.asset-frame--fallback-attractions .asset-frame__tent {
+  left: 15%;
+  bottom: 22%;
+  width: clamp(104px, 16vw, 174px);
+  height: clamp(96px, 14vw, 148px);
+  clip-path: polygon(50% 0, 92% 30%, 92% 100%, 8% 100%, 8% 30%);
+  border-radius: 10px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.16) 0 8px, transparent 8px 22px),
+    linear-gradient(135deg, rgba(242,192,120,.56), rgba(60,179,113,.46));
 }
 
 .asset-frame--fallback-electricity .asset-frame__fallback-scene,
@@ -308,6 +366,32 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
     radial-gradient(circle at 18% 18%, rgba(143,224,180,.32), transparent 30%),
     radial-gradient(circle at 82% 78%, rgba(242,192,120,.22), transparent 34%),
     linear-gradient(145deg, #486f66, #183f31 58%, #102117);
+}
+
+.asset-frame--fallback-electricity .asset-frame__tent,
+.asset-frame--fallback-sanitary .asset-frame__tent {
+  left: 16%;
+  bottom: 25%;
+  width: clamp(82px, 13vw, 132px);
+  height: clamp(82px, 13vw, 132px);
+  clip-path: none;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255,255,255,.26), transparent 32%),
+    linear-gradient(135deg, rgba(143,224,180,.64), rgba(60,179,113,.42));
+}
+
+.asset-frame--fallback-electricity .asset-frame__tent {
+  rotate: -8deg;
+}
+
+.asset-frame--fallback .asset-frame__fallback-scene {
+  transition: transform .8s cubic-bezier(.2,.8,.2,1), filter .8s ease;
+}
+
+.asset-frame--fallback:hover .asset-frame__fallback-scene {
+  transform: scale(1.035);
+  filter: saturate(1.06);
 }
 
 @media (max-width: 680px) {

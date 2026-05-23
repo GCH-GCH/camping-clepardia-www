@@ -70,7 +70,7 @@ const navMessages = {
           aria-expanded="false"
           aria-controls="mainNavbarLangMenu"
         >
-          <span class:list={['main-navbar-flag', 'fi', currentLanguage.flagClass]} data-code={currentLanguage.code.toUpperCase()} aria-hidden="true"></span>
+          <span class:list={['flag-icon', 'main-navbar-flag', 'fi', currentLanguage.flagClass]} data-code={currentLanguage.code.toUpperCase()} aria-hidden="true"></span>
           <span>{currentLanguage.code.toUpperCase()}</span>
           <Icon name="chevronDown" size={15} strokeWidth={2.4} />
         </button>
@@ -83,7 +83,7 @@ const navMessages = {
               role="menuitem"
               aria-current={language.active ? 'page' : undefined}
             >
-              <span class:list={['main-navbar-flag', 'fi', language.flagClass]} data-code={language.code.toUpperCase()} aria-hidden="true"></span>
+              <span class:list={['flag-icon', 'main-navbar-flag', 'fi', language.flagClass]} data-code={language.code.toUpperCase()} aria-hidden="true"></span>
               <span>{language.name}</span>
               <strong>{language.code.toUpperCase()}</strong>
             </a>
@@ -174,7 +174,7 @@ const navMessages = {
               aria-label={`${language.name} ${language.code.toUpperCase()}`}
               aria-current={language.active ? 'page' : undefined}
             >
-              <span class:list={['main-navbar-flag', 'fi', language.flagClass]} data-code={language.code.toUpperCase()} aria-hidden="true"></span>
+              <span class:list={['flag-icon', 'main-navbar-flag', 'fi', language.flagClass]} data-code={language.code.toUpperCase()} aria-hidden="true"></span>
               <span>{language.code.toUpperCase()}</span>
             </a>
           ))}
@@ -472,11 +472,12 @@ body.has-main-navbar-open {
   flex: 0 0 auto;
   border-radius: 5px;
   border: 1px solid rgba(143,224,180,.30);
-  background-color: rgba(255,255,255,.12);
+  background-color: transparent;
   box-shadow: 0 5px 14px rgba(0,0,0,.22), 0 0 0 3px rgba(60,179,113,.06);
   overflow: hidden;
-  background-size: cover;
+  background-size: cover !important;
   background-position: center;
+  background-repeat: no-repeat !important;
 }
 
 .main-navbar-flag::before {
@@ -486,13 +487,13 @@ body.has-main-navbar-open {
 }
 
 .main-navbar-lang__toggle .main-navbar-flag {
-  width: 28px;
-  height: 20px;
+  width: 18px;
+  height: 14px;
 }
 
 .main-navbar-lang__item .main-navbar-flag {
-  width: 28px;
-  height: 20px;
+  width: 18px;
+  height: 14px;
 }
 
 .main-navbar-lang__toggle svg {
@@ -541,7 +542,7 @@ body.has-main-navbar-open {
 
 .main-navbar-lang__item {
   display: grid;
-  grid-template-columns: 28px 1fr auto;
+  grid-template-columns: 18px 1fr auto;
   align-items: center;
   gap: 10px;
   padding: 11px 12px;
@@ -1114,11 +1115,6 @@ html[data-theme="light"] .main-navbar-mobile__close {
     inset 0 1px 0 rgba(255,255,255,.12);
 }
 
-.main-navbar-mobile__language .main-navbar-flag {
-  width: 30px;
-  height: 22px;
-}
-
 .main-navbar-flag:not([class*="fi-"])::after {
   content: attr(data-code);
   display: grid;
@@ -1135,8 +1131,31 @@ html[data-theme="light"] .main-navbar-mobile__close {
 .main-navbar-lang__toggle .main-navbar-flag,
 .main-navbar-lang__item .main-navbar-flag,
 .main-navbar-mobile__language .main-navbar-flag {
-  border-radius: 5px;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.22), 0 8px 18px rgba(0,0,0,.16);
+  width: 18px;
+  height: 14px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.24), 0 8px 18px rgba(0,0,0,.14);
+  background-color: transparent;
+  background-size: cover !important;
+  background-position: 50% 50% !important;
+  background-repeat: no-repeat !important;
+}
+
+.main-navbar .flag-icon,
+.main-navbar-mobile .flag-icon {
+  width: 18px;
+  height: 14px;
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.main-navbar-flag::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .main-navbar-lang__menu {
