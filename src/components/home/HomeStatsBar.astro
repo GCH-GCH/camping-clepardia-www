@@ -12,51 +12,44 @@ const pathContext = getPathContext(Astro.url.pathname);
 const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode);
 const copy = {
   pl: [
-    { value: '9 przystanków', label: 'Do centrum Krakowa', copy: 'Tramwaj do Starego Kleparza / centrum, ok. 14 minut jazdy.', icon: 'tram', variant: 'featured' },
-    { value: 'Od 2022', label: 'Google Maps', copy: 'Zalecamy Google Maps, bo dojazd do campingu zmienił się w 2022 roku.', icon: 'map', variant: 'tall' },
-    { value: '22:00–07:00', label: 'Cisza nocna', copy: 'Camping Clepardia nie jest miejscem imprezowym.', icon: 'moon', variant: 'quiet' },
-    { value: '2/3/4-os.', label: 'Kampery + domki', copy: 'Pola campingowe oraz domki tylko 2-, 3- i 4-osobowe.', icon: 'bungalow', variant: 'wide' },
-    { value: '0 PLN', label: 'Przyjazny zwierzętom', copy: 'Pies jest bezpłatny, prosimy tylko o opiekę i sprzątanie.', icon: 'dog', variant: 'pet' },
-    { value: '10A', label: 'Prąd na miejscu', copy: 'Przyłącze campingowe według cennika, bez ładowania aut EV.', icon: 'electricity', variant: 'power' },
+    { value: '9 przystanków', label: 'Do centrum', icon: 'tram' },
+    { value: 'Google Maps', label: 'Dojazd po zmianie 2022', icon: 'map' },
+    { value: '22:00-07:00', label: 'Cisza nocna', icon: 'moon' },
+    { value: '2/3/4-os.', label: 'Domki bez kategorii rodzinnej', icon: 'bungalow' },
   ],
   en: [
-    { value: '9 stops', label: 'To Kraków centre', copy: 'Tram to Stary Kleparz / centre, about 14 minutes.', icon: 'tram', variant: 'featured' },
-    { value: 'Since 2022', label: 'Google Maps', copy: 'We recommend Google Maps because the access route changed in 2022.', icon: 'map', variant: 'tall' },
-    { value: '22:00–07:00', label: 'Quiet hours', copy: 'Camping Clepardia is not a party campsite.', icon: 'moon', variant: 'quiet' },
-    { value: '2/3/4-person', label: 'Camping + bungalows', copy: 'Camping pitches and only 2-, 3- and 4-person bungalows.', icon: 'bungalow', variant: 'wide' },
-    { value: '0 PLN', label: 'Pet friendly', copy: 'Dogs are free of charge; please keep them under control.', icon: 'dog', variant: 'pet' },
-    { value: '10A', label: 'Power hook-up', copy: 'Camping electricity according to the price list, no EV charging.', icon: 'electricity', variant: 'power' },
+    { value: '9 stops', label: 'To the city centre', icon: 'tram' },
+    { value: 'Google Maps', label: 'Access route changed in 2022', icon: 'map' },
+    { value: '22:00-07:00', label: 'Quiet hours', icon: 'moon' },
+    { value: '2/3/4-person', label: 'Bungalows only', icon: 'bungalow' },
   ],
   de: [
-    { value: '9 Haltestellen', label: 'Ins Zentrum', copy: 'Straßenbahn bis Stary Kleparz / Zentrum, etwa 14 Minuten.', icon: 'tram', variant: 'featured' },
-    { value: 'Seit 2022', label: 'Google Maps', copy: 'Wir empfehlen Google Maps, weil sich die Zufahrt 2022 geändert hat.', icon: 'map', variant: 'tall' },
-    { value: '22:00–07:00', label: 'Nachtruhe', copy: 'Camping Clepardia ist kein Party-Campingplatz.', icon: 'moon', variant: 'quiet' },
-    { value: '2/3/4 Pers.', label: 'Camping + Bungalows', copy: 'Stellplätze und nur 2-, 3- und 4-Personen-Bungalows.', icon: 'bungalow', variant: 'wide' },
-    { value: '0 PLN', label: 'Hundefreundlich', copy: 'Hunde sind kostenlos, bitte unter Kontrolle halten.', icon: 'dog', variant: 'pet' },
-    { value: '10A', label: 'Stromanschluss', copy: 'Campingstrom laut Preisliste, kein Laden von Elektroautos.', icon: 'electricity', variant: 'power' },
+    { value: '9 Haltestellen', label: 'Ins Zentrum', icon: 'tram' },
+    { value: 'Google Maps', label: 'Zufahrt seit 2022 geändert', icon: 'map' },
+    { value: '22:00-07:00', label: 'Nachtruhe', icon: 'moon' },
+    { value: '2/3/4 Pers.', label: 'Nur diese Bungalows', icon: 'bungalow' },
   ],
   it: [
-    { value: '9 fermate', label: 'Verso il centro', copy: 'Tram per Stary Kleparz / centro, circa 14 minuti.', icon: 'tram', variant: 'featured' },
-    { value: 'Dal 2022', label: 'Google Maps', copy: 'Consigliamo Google Maps perché l’accesso è cambiato nel 2022.', icon: 'map', variant: 'tall' },
-    { value: '22:00–07:00', label: 'Silenzio notturno', copy: 'Camping Clepardia non è un campeggio per feste.', icon: 'moon', variant: 'quiet' },
-    { value: '2/3/4 pers.', label: 'Camping + bungalow', copy: 'Piazzole e bungalow solo da 2, 3 e 4 persone.', icon: 'bungalow', variant: 'wide' },
-    { value: '0 PLN', label: 'Pet friendly', copy: 'Il cane è gratuito, chiediamo solo cura e controllo.', icon: 'dog', variant: 'pet' },
-    { value: '10A', label: 'Allaccio elettrico', copy: 'Elettricità camping secondo listino, senza ricarica EV.', icon: 'electricity', variant: 'power' },
+    { value: '9 fermate', label: 'Verso il centro', icon: 'tram' },
+    { value: 'Google Maps', label: 'Accesso cambiato nel 2022', icon: 'map' },
+    { value: '22:00-07:00', label: 'Silenzio notturno', icon: 'moon' },
+    { value: '2/3/4 pers.', label: 'Solo questi bungalow', icon: 'bungalow' },
   ],
 }[lang];
 ---
 
-<section class="home-stats reveal-section" id="after-hero" aria-label="Camping Clepardia">
+<section class="home-stats reveal-section" id="after-hero" aria-label="Camping Clepardia quick facts">
   <div class="container">
     <div class="home-stats__panel">
       {copy.map((item, index) => (
-        <article class:list={['home-stats__item', `home-stats__item--${item.variant}`, 'reveal-section']} style={`--reveal-delay: ${index * 70}ms`}>
+        <article class="home-stats__item reveal-section" style={`--reveal-delay: ${index * 55}ms`}>
           <span class="home-stats__icon" aria-hidden="true">
-            <Icon name={item.icon} size={24} strokeWidth={1.8} />
+            <Icon name={item.icon} size={19} strokeWidth={1.9} />
           </span>
-          <small>{item.value}</small>
-          <h2>{item.label}</h2>
-          <p>{item.copy}</p>
+          <div>
+            <strong>{item.value}</strong>
+            <span>{item.label}</span>
+          </div>
         </article>
       ))}
     </div>
@@ -67,225 +60,103 @@ const copy = {
 .home-stats {
   position: relative;
   z-index: 4;
-  margin-top: clamp(18px, 2.4vw, 34px);
-  padding: 0 0 clamp(66px, 8vw, 112px);
+  margin-top: clamp(14px, 2vw, 24px);
+  padding: 0 0 clamp(38px, 5vw, 64px);
   scroll-margin-top: 96px;
 }
 
 .home-stats__panel {
-  position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  gap: clamp(14px, 2vw, 18px);
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,.16);
-  border-radius: 38px;
-  padding: clamp(12px, 2vw, 18px);
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 999px;
   background:
-    radial-gradient(circle at 12% 0%, rgba(60,179,113,.22), transparent 34%),
-    radial-gradient(circle at 88% 10%, rgba(242,192,120,.15), transparent 34%),
-    linear-gradient(135deg, rgba(10,30,20,.66), rgba(18,48,31,.42));
-  box-shadow:
-    0 30px 92px rgba(0,0,0,.18),
-    0 0 46px rgba(60,179,113,.12),
-    inset 0 1px 0 rgba(255,255,255,.14);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
-}
-
-.home-stats__panel::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: .34;
-  pointer-events: none;
-  background:
-    linear-gradient(110deg, transparent 0 20%, rgba(255,255,255,.08) 20.4% 20.8%, transparent 21.2% 100%),
-    radial-gradient(circle at 50% 110%, rgba(60,179,113,.18), transparent 45%);
-  mix-blend-mode: screen;
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.16), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.055));
+  box-shadow: 0 20px 56px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.12);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
 }
 
 .home-stats__item {
-  position: relative;
-  min-height: 166px;
-  display: grid;
-  align-content: end;
-  gap: 10px;
-  padding: clamp(22px, 3vw, 34px);
-  border: 1px solid rgba(255,255,255,.105);
-  border-radius: 26px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.095), rgba(255,255,255,.04)),
-    radial-gradient(circle at 18% 14%, rgba(143,224,180,.12), transparent 34%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 18px 46px rgba(0,0,0,.08);
-  overflow: hidden;
-  transform: translateY(0);
-  transition: transform .34s cubic-bezier(.22, 1, .36, 1), border-color .34s ease, box-shadow .34s ease, background .34s ease;
-  animation: homeStatFloat 7.2s ease-in-out infinite;
-  animation-delay: calc(var(--reveal-delay, 0ms) * 2);
-}
-
-.home-stats__item--featured {
-  min-height: 260px;
-  background:
-    radial-gradient(circle at 24% 16%, rgba(143,224,180,.24), transparent 34%),
-    radial-gradient(circle at 88% 84%, rgba(242,192,120,.14), transparent 40%),
-    linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.052));
-}
-
-.home-stats__item--wide {
-  min-height: 210px;
-}
-
-.home-stats__item--tall {
-  min-height: 240px;
-}
-
-.home-stats__item--quiet {
-  background:
-    radial-gradient(circle at 20% 18%, rgba(242,192,120,.14), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.038));
-}
-
-.home-stats__item::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 22% 18%, rgba(143,224,180,.16), transparent 36%),
-    linear-gradient(180deg, rgba(255,255,255,.07), transparent);
-  opacity: 0;
-  transition: opacity .32s cubic-bezier(.22, 1, .36, 1);
-}
-
-.home-stats__item:hover::before {
-  opacity: 1;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 999px;
+  color: #f4fff8;
+  background: rgba(255,255,255,.055);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  transition: transform .25s ease, border-color .25s ease, background .25s ease;
 }
 
 .home-stats__item:hover {
-  animation-play-state: paused;
-  transform: translateY(-7px);
+  transform: translateY(-2px);
   border-color: rgba(143,224,180,.34);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.06)),
-    radial-gradient(circle at 18% 14%, rgba(60,179,113,.22), transparent 36%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 26px 64px rgba(0,0,0,.12), 0 0 34px rgba(60,179,113,.16);
-}
-
-.home-stats__item small,
-.home-stats__item h2,
-.home-stats__item p,
-.home-stats__icon {
-  position: relative;
-  z-index: 1;
+  background: rgba(60,179,113,.10);
 }
 
 .home-stats__icon {
-  width: 44px;
-  height: 44px;
   display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
   place-items: center;
-  margin-bottom: 8px;
   border-radius: 999px;
-  color: #f4fff8;
-  border: 1px solid rgba(143,224,180,.34);
+  color: #f8fff9;
   background:
-    radial-gradient(circle at 30% 18%, rgba(255,255,255,.24), transparent 34%),
-    linear-gradient(135deg, rgba(60,179,113,.34), rgba(60,179,113,.13));
-  box-shadow: 0 14px 34px rgba(60,179,113,.18), 0 0 26px rgba(60,179,113,.10);
+    radial-gradient(circle at 28% 18%, rgba(255,255,255,.28), transparent 34%),
+    linear-gradient(135deg, rgba(60,179,113,.74), rgba(42,133,83,.52));
+  box-shadow: 0 10px 24px rgba(60,179,113,.22);
 }
 
-.home-stats__item small {
-  color: #8fe0b4;
-  font-size: .74rem;
-  font-weight: 950;
-  letter-spacing: .16em;
-  text-transform: uppercase;
+.home-stats__item div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
 }
 
-.home-stats__item h2 {
-  max-width: 270px;
+.home-stats__item strong {
   color: #fff;
-  font-size: clamp(1.18rem, 2vw, 1.52rem);
-  line-height: 1.08;
-  font-weight: 950;
-  letter-spacing: 0;
+  font-size: .94rem;
+  line-height: 1.1;
 }
 
-.home-stats__item p {
-  max-width: 310px;
-  color: rgba(255,255,255,.70);
-  font-size: .95rem;
-  line-height: 1.6;
+.home-stats__item span {
+  color: rgba(244,251,246,.68);
+  font-size: .78rem;
+  line-height: 1.25;
 }
 
-@media (min-width: 680px) {
+@media (min-width: 700px) {
   .home-stats__panel {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-radius: 34px;
   }
 }
 
-@media (min-width: 1080px) {
+@media (min-width: 1120px) {
   .home-stats__panel {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    grid-auto-rows: minmax(116px, auto);
-    align-items: stretch;
-  }
-
-  .home-stats__item {
-    min-height: 0;
-  }
-
-  .home-stats__item--featured {
-    grid-column: span 5;
-    grid-row: span 2;
-  }
-
-  .home-stats__item--tall {
-    grid-column: span 4;
-    grid-row: span 2;
-  }
-
-  .home-stats__item--quiet {
-    grid-column: span 3;
-  }
-
-  .home-stats__item--wide {
-    grid-column: span 5;
-  }
-
-  .home-stats__item--pet,
-  .home-stats__item--power {
-    grid-column: span 2;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-radius: 999px;
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 520px) {
   .home-stats {
-    margin-top: 16px;
-    padding-bottom: 54px;
+    padding-bottom: 36px;
   }
 
   .home-stats__panel {
     border-radius: 26px;
-    padding: 10px;
   }
 
   .home-stats__item {
-    min-height: 148px;
     border-radius: 22px;
-  }
-}
-
-@keyframes homeStatFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home-stats__item {
-    animation: none;
-    transition-duration: .01ms;
   }
 }
 </style>
