@@ -1,0 +1,148 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+---
+
+<div class="camper-scroll-progress" data-camper-scroll-progress aria-hidden="true">
+  <span class="camper-scroll-progress__track">
+    <span class="camper-scroll-progress__fill" data-camper-scroll-fill></span>
+  </span>
+  <span class="camper-scroll-progress__marker" data-camper-scroll-marker>
+    <Icon name="camper" size={22} strokeWidth={2} />
+  </span>
+</div>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector('[data-camper-scroll-progress]');
+    const marker = document.querySelector('[data-camper-scroll-marker]');
+    const fill = document.querySelector('[data-camper-scroll-fill]');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    if (!(root instanceof HTMLElement) || !(marker instanceof HTMLElement) || reduceMotion.matches) {
+      root?.setAttribute('hidden', '');
+      return;
+    }
+
+    let ticking = false;
+
+    const update = () => {
+      ticking = false;
+      const documentHeight = Math.max(
+        document.documentElement.scrollHeight,
+        document.body?.scrollHeight || 0
+      );
+      const maxScroll = Math.max(1, documentHeight - window.innerHeight);
+      const progress = Math.max(0, Math.min(1, window.scrollY / maxScroll));
+      const trackHeight = Math.max(0, root.getBoundingClientRect().height - marker.offsetHeight);
+      const y = Math.round(trackHeight * progress);
+
+      marker.style.transform = `translate3d(-50%, ${y}px, 0)`;
+      if (fill instanceof HTMLElement) {
+        fill.style.transform = `scaleY(${progress})`;
+      }
+    };
+
+    const requestUpdate = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(update);
+    };
+
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate, { passive: true });
+    window.addEventListener('load', requestUpdate, { once: true });
+    requestUpdate();
+  })();
+</script>
+
+<style>
+.camper-scroll-progress {
+  position: fixed;
+  z-index: 930;
+  left: 18px;
+  top: 120px;
+  bottom: 90px;
+  width: 34px;
+  pointer-events: none;
+  opacity: .92;
+  contain: layout paint;
+}
+
+.camper-scroll-progress__track {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.18), rgba(60,179,113,.20)),
+    rgba(255,255,255,.10);
+  box-shadow:
+    0 0 0 1px rgba(60,179,113,.12),
+    0 0 24px rgba(60,179,113,.16);
+  overflow: hidden;
+}
+
+.camper-scroll-progress__fill {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 100%;
+  transform: scaleY(0);
+  transform-origin: top center;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #8fe0b4, #3CB371 58%, rgba(242,192,120,.72));
+  box-shadow: 0 0 22px rgba(60,179,113,.42);
+  transition: transform .12s linear;
+}
+
+.camper-scroll-progress__marker {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(143,224,180,.46);
+  border-radius: 999px;
+  color: #f8fff9;
+  background:
+    radial-gradient(circle at 32% 18%, rgba(255,255,255,.36), transparent 34%),
+    linear-gradient(135deg, rgba(60,179,113,.96), rgba(28,110,67,.86));
+  box-shadow:
+    0 16px 34px rgba(60,179,113,.30),
+    0 0 26px rgba(60,179,113,.28),
+    inset 0 1px 0 rgba(255,255,255,.28);
+  transform: translate3d(-50%, 0, 0);
+  will-change: transform;
+}
+
+html[data-theme="light"] .camper-scroll-progress__track {
+  background: rgba(20, 54, 34, .12);
+  box-shadow:
+    0 0 0 1px rgba(60,179,113,.15),
+    0 0 24px rgba(60,179,113,.12);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .camper-scroll-progress__marker {
+    animation: camper-scroll-bob 2.6s ease-in-out infinite;
+  }
+}
+
+@media (max-width: 920px), (prefers-reduced-motion: reduce) {
+  .camper-scroll-progress {
+    display: none;
+  }
+}
+
+@keyframes camper-scroll-bob {
+  0%,
+  100% {
+    margin-left: 0;
+  }
+  50% {
+    margin-left: 2px;
+  }
+}
+</style>

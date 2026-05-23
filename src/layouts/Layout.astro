@@ -6,6 +6,7 @@ import Footer from '@/components/Footer.astro';
 import MotionFoundation from '@/components/MotionFoundation.astro';
 import ScrollToTopButton from '@/components/ui/ScrollToTopButton.astro';
 import FloatingChatButton from '@/components/ui/FloatingChatButton.astro';
+import CamperScrollProgress from '@/components/ui/CamperScrollProgress.astro';
 import { logoMain, logoMainPng, publicAssetExists, siteAssets } from '@/data/assets';
 import { getCampgroundJsonLd, homeSeo, resolveOgImage, siteName } from '@/data/seo';
 import { getSeoLanguageMeta, withOrigin } from '@/utils/localizedLinks';
@@ -52,8 +53,8 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		<meta name="description" content={description} />
 		<meta name="robots" content="index, follow" />
 		<meta name="theme-color" content="#3CB371" />
-		<meta name="clepardia-build" content="TASK-56-seekrakow-tours" />
-		<meta name="clepardia-commit" content="task-56" />
+		<meta name="clepardia-build" content="TASK-57-tours-booking-camper-scroll" />
+		<meta name="clepardia-commit" content="task-57" />
 		
 		<!-- Open Graph / Social Media -->
 		<meta property="og:type" content="website" />
@@ -136,6 +137,7 @@ const campgroundJsonLd = getCampgroundJsonLd({
 			<slot />
 		</main>
 		
+		<CamperScrollProgress />
 		<FloatingChatButton />
 		<Footer />
 		<ScrollToTopButton />

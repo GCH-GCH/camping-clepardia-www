@@ -77,6 +77,20 @@ export const en = {
     maps: 'Open in Google Maps',
     camperCost: 'Calculate stay cost',
   },
+  toursBooking: {
+    reserve: 'Book',
+    reserveTitle: 'Book a SeeKrakow tour',
+    reserveDescription:
+      'Check current tours, availability and booking details. Camping Clepardia is a convenient base for exploring Krakow and Lesser Poland.',
+    sellingText:
+      'Choose a ready-made tour and return after a day of sightseeing to the calm green base of Camping Clepardia.',
+    chips: {
+      transport: 'Transport from the campsite',
+      guides: 'Local guides',
+      popular: 'Most popular attractions',
+      return: 'Calm return to the campsite',
+    },
+  },
   chat: {
     open: 'Open CAMPY helper',
     close: 'Close chat',

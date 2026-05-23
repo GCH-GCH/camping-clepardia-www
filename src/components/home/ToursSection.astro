@@ -2,8 +2,8 @@
 import ImageFrame from '@/components/ImageFrame.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { siteAssets } from '@/data/assets';
-import { resolveContentLanguage } from '@/i18n/config';
-import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getTranslations, resolveContentLanguage } from '@/i18n/config';
+import { getPathContext } from '@/utils/localizedLinks';
 
 interface Props {
   languageCode?: string;
@@ -16,10 +16,6 @@ type Copy = {
   featuredLabel: string;
   durationLabel: string;
   transportLabel: string;
-  qrTitle: string;
-  qrCopy: string;
-  qrCta: string;
-  qrPlaceholder: string;
   powered: string;
   cardsAria: string;
   benefitsTitle: string;
@@ -50,11 +46,6 @@ const copyByLanguage: Record<string, Copy> = {
     featuredLabel: 'Polecana wycieczka',
     durationLabel: 'Czas',
     transportLabel: 'Transport',
-    qrTitle: 'Zeskanuj i sprawdź dostępne wycieczki',
-    qrCopy:
-      'Zeskanuj kod QR i sprawdź aktualne wycieczki, dostępność oraz możliwość rezerwacji.',
-    qrCta: 'Zapytaj recepcje',
-    qrPlaceholder: 'Miejsce na przyszły kod QR SeeKrakow',
     powered: 'Powered by SeeKrakow',
     cardsAria: 'Lista polecanych wycieczek z Krakowa',
     benefitsTitle: 'Wygodne zwiedzanie bez tracenia campingowego spokoju.',
@@ -147,10 +138,6 @@ const copyByLanguage: Record<string, Copy> = {
     featuredLabel: 'Featured tour',
     durationLabel: 'Duration',
     transportLabel: 'Transport',
-    qrTitle: 'Scan and explore available tours',
-    qrCopy: 'Scan the QR code to explore current tours and availability.',
-    qrCta: 'Ask reception',
-    qrPlaceholder: 'Space reserved for the future SeeKrakow QR code',
     powered: 'Powered by SeeKrakow',
     cardsAria: 'Recommended tours from Krakow',
     benefitsTitle: 'Easy sightseeing with a calm camping base to return to.',
@@ -243,11 +230,6 @@ const copyByLanguage: Record<string, Copy> = {
     featuredLabel: 'Empfohlener Ausflug',
     durationLabel: 'Dauer',
     transportLabel: 'Transport',
-    qrTitle: 'Scannen und verfügbare Ausflüge ansehen',
-    qrCopy:
-      'Scannen Sie den QR-Code, um aktuelle Ausflüge, Verfügbarkeit und Buchungsmöglichkeiten zu prüfen.',
-    qrCta: 'Rezeption fragen',
-    qrPlaceholder: 'Platz für den kommenden SeeKrakow QR-Code',
     powered: 'Powered by SeeKrakow',
     cardsAria: 'Empfohlene Ausflüge ab Krakau',
     benefitsTitle: 'Bequemes Sightseeing mit einem ruhigen Campingplatz als Basis.',
@@ -340,10 +322,6 @@ const copyByLanguage: Record<string, Copy> = {
     featuredLabel: 'Tour consigliato',
     durationLabel: 'Durata',
     transportLabel: 'Trasporto',
-    qrTitle: 'Scansiona e scopri i tour disponibili',
-    qrCopy: 'Scansiona il codice QR per scoprire tour aggiornati e disponibilità.',
-    qrCta: 'Chiedi alla reception',
-    qrPlaceholder: 'Spazio per il futuro QR code SeeKrakow',
     powered: 'Powered by SeeKrakow',
     cardsAria: 'Tour consigliati da Cracovia',
     benefitsTitle: 'Visite comode con un campeggio tranquillo dove tornare.',
@@ -431,12 +409,13 @@ const copyByLanguage: Record<string, Copy> = {
 };
 
 const { languageCode } = Astro.props as Props;
-const lang = resolveContentLanguage(languageCode);
-const copy = copyByLanguage[lang] ?? copyByLanguage.en;
 const pathContext = getPathContext(Astro.url.pathname);
-const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
-const contactHref = getLocalizedPath(explicitLanguage, 'kontakt');
-const qrCells = Array.from({ length: 25 }, (_, index) => index);
+const activeLanguage = languageCode ?? pathContext.languageCode;
+const lang = resolveContentLanguage(activeLanguage);
+const copy = copyByLanguage[lang] ?? copyByLanguage.en;
+const bookingText = getTranslations(activeLanguage).toursBooking;
+const bookingUrl = 'https://qr.codes/vksKBT';
+const bookingChips = Object.values(bookingText.chips);
 const featuredTour = copy.tours.find((tour) => tour.featured) ?? copy.tours[0];
 const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
 ---
@@ -480,27 +459,31 @@ const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
               <dd><Icon name="route" size={16} /> {featuredTour.transport}</dd>
             </div>
           </dl>
+          <a class="btn btn-primary tours-section__book-link tours-section__book-link--featured" href={bookingUrl} target="_blank" rel="noopener noreferrer">
+            <Icon name="CalendarCheck" size={18} />
+            {bookingText.reserve}
+            <Icon name="ArrowUpRight" size={16} />
+          </a>
         </div>
       </article>
 
-      <aside class="tours-section__qr premium-card reveal-section" style="--reveal-delay: 160ms" aria-labelledby="tours-qr-title">
+      <aside class="tours-section__booking premium-card reveal-section" style="--reveal-delay: 160ms" aria-labelledby="tours-booking-title">
         <span class="tours-section__powered">{copy.powered}</span>
-        <div class="tours-section__qr-code" role="img" aria-label={copy.qrPlaceholder}>
-          {qrCells.map((cell) => (
-            <span class:list={[
-              'tours-section__qr-cell',
-              cell % 4 === 0 && 'is-strong',
-              cell === 6 && 'is-empty',
-              cell === 18 && 'is-empty',
-            ]}></span>
-          ))}
-          <strong>QR</strong>
+        <div class="tours-section__booking-icon" aria-hidden="true">
+          <Icon name="TicketCheck" size={34} />
         </div>
-        <h3 id="tours-qr-title">{copy.qrTitle}</h3>
-        <p>{copy.qrCopy}</p>
-        <a class="btn btn-secondary tours-section__qr-cta" href={contactHref}>
-          <Icon name="contact" size={18} />
-          {copy.qrCta}
+        <h3 id="tours-booking-title">{bookingText.reserveTitle}</h3>
+        <p>{bookingText.reserveDescription}</p>
+        <p class="tours-section__booking-selling">{bookingText.sellingText}</p>
+        <div class="tours-section__booking-chips" aria-label={bookingText.reserveTitle}>
+          {bookingChips.map((chip) => (
+            <span><Icon name="check" size={14} /> {chip}</span>
+          ))}
+        </div>
+        <a class="btn btn-primary tours-section__booking-cta" href={bookingUrl} target="_blank" rel="noopener noreferrer">
+          <Icon name="CalendarCheck" size={18} />
+          {bookingText.reserve}
+          <Icon name="ArrowUpRight" size={16} />
         </a>
       </aside>
 
@@ -526,6 +509,10 @@ const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
                 <span><Icon name="clock" size={14} /> {tour.duration}</span>
                 <span><Icon name="route" size={14} /> {tour.transport}</span>
               </div>
+              <a class="tours-section__card-cta" href={bookingUrl} target="_blank" rel="noopener noreferrer">
+                {bookingText.reserve}
+                <Icon name="ArrowUpRight" size={14} />
+              </a>
             </div>
           </article>
         ))}
@@ -609,14 +596,14 @@ html[data-theme="dark"] .tours-section {
   display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr);
   grid-template-areas:
-    "featured qr"
+    "featured booking"
     "cards cards";
   gap: clamp(18px, 3vw, 28px);
   align-items: stretch;
 }
 
 .tours-section__featured,
-.tours-section__qr,
+.tours-section__booking,
 .tours-section__card,
 .tours-section__benefit {
   border-color: rgba(143,224,180,.28);
@@ -627,7 +614,7 @@ html[data-theme="dark"] .tours-section {
 }
 
 html[data-theme="dark"] .tours-section__featured,
-html[data-theme="dark"] .tours-section__qr,
+html[data-theme="dark"] .tours-section__booking,
 html[data-theme="dark"] .tours-section__card,
 html[data-theme="dark"] .tours-section__benefit {
   background:
@@ -766,20 +753,35 @@ html[data-theme="dark"] .tours-section__meta dd {
   color: #f4fbf6;
 }
 
-.tours-section__qr {
-  grid-area: qr;
+.tours-section__book-link,
+.tours-section__booking-cta {
+  width: fit-content;
+  gap: 9px;
+  border: 0;
+  background: linear-gradient(135deg, #63d99c, #3CB371 52%, #24794e);
+  box-shadow: 0 18px 52px rgba(60,179,113,.34), inset 0 1px 0 rgba(255,255,255,.22);
+}
+
+.tours-section__book-link:hover,
+.tours-section__booking-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 70px rgba(60,179,113,.42), 0 0 34px rgba(60,179,113,.20);
+}
+
+.tours-section__booking {
+  grid-area: booking;
   position: relative;
   display: flex;
   min-width: 0;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: center;
-  gap: 16px;
+  justify-content: space-between;
+  gap: 18px;
   padding: clamp(20px, 3vw, 30px);
   overflow: hidden;
 }
 
-.tours-section__qr::before {
+.tours-section__booking::before {
   content: '';
   position: absolute;
   inset: auto -20% -34% 24%;
@@ -805,65 +807,64 @@ html[data-theme="dark"] .tours-section__meta dd {
   text-transform: uppercase;
 }
 
-.tours-section__qr-code {
+.tours-section__booking-icon {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 7px;
-  width: min(100%, 184px);
+  width: 82px;
   aspect-ratio: 1;
-  padding: 18px;
-  border: 1px solid rgba(143,224,180,.36);
-  border-radius: 28px;
-  background:
-    radial-gradient(circle at 34% 22%, rgba(255,255,255,.52), transparent 28%),
-    linear-gradient(145deg, rgba(255,255,255,.76), rgba(60,179,113,.14));
-  box-shadow: 0 24px 70px rgba(60,179,113,.18), inset 0 1px 0 rgba(255,255,255,.64);
-}
-
-html[data-theme="dark"] .tours-section__qr-code {
-  background:
-    radial-gradient(circle at 34% 22%, rgba(255,255,255,.20), transparent 28%),
-    linear-gradient(145deg, rgba(255,255,255,.10), rgba(60,179,113,.18));
-}
-
-.tours-section__qr-cell {
-  border-radius: 5px;
-  background: rgba(11, 42, 26, .22);
-}
-
-.tours-section__qr-cell.is-strong {
-  background: #3CB371;
-  box-shadow: 0 0 18px rgba(60,179,113,.26);
-}
-
-.tours-section__qr-cell.is-empty {
-  opacity: .18;
-}
-
-.tours-section__qr-code strong {
-  position: absolute;
-  inset: 50% auto auto 50%;
-  transform: translate(-50%, -50%);
-  display: grid;
-  width: 56px;
-  height: 56px;
   place-items: center;
-  border: 1px solid rgba(255,255,255,.44);
-  border-radius: 18px;
   color: #fff;
-  background: linear-gradient(135deg, #3CB371, #287d50);
-  box-shadow: 0 18px 42px rgba(60,179,113,.28);
-  font-size: .9rem;
-  letter-spacing: .08em;
+  border: 1px solid rgba(143,224,180,.38);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255,255,255,.38), transparent 32%),
+    radial-gradient(circle at 78% 78%, rgba(242,192,120,.28), transparent 38%),
+    linear-gradient(135deg, rgba(60,179,113,.96), rgba(34,128,78,.82));
+  box-shadow: 0 28px 78px rgba(60,179,113,.26), inset 0 1px 0 rgba(255,255,255,.30);
 }
 
-.tours-section__qr h3 {
+.tours-section__booking h3 {
   font-size: clamp(1.32rem, 2vw, 1.8rem);
 }
 
-.tours-section__qr-cta {
+.tours-section__booking-selling {
+  position: relative;
+  z-index: 1;
+  padding: 14px 16px;
+  border: 1px solid rgba(60,179,113,.18);
+  border-radius: 20px;
+  background: rgba(60,179,113,.08);
+  font-weight: 760;
+}
+
+.tours-section__booking-chips {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tours-section__booking-chips span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: 999px;
+  color: var(--color-text, #102116);
+  background: rgba(60,179,113,.08);
+  font-size: .77rem;
+  font-weight: 900;
+}
+
+html[data-theme="dark"] .tours-section__booking-chips span {
+  color: rgba(244,251,246,.90);
+  background: rgba(255,255,255,.06);
+}
+
+.tours-section__booking-cta {
   position: relative;
   z-index: 1;
   margin-top: 4px;
@@ -951,6 +952,29 @@ html[data-theme="dark"] .tours-section__chips span {
   background: rgba(255,255,255,.055);
 }
 
+.tours-section__card-cta {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 7px;
+  margin-top: 2px;
+  padding: 9px 12px;
+  border: 1px solid rgba(60,179,113,.28);
+  border-radius: 999px;
+  color: var(--color-accent, #3CB371);
+  background: rgba(60,179,113,.09);
+  font-size: .82rem;
+  font-weight: 950;
+  text-decoration: none;
+  transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+}
+
+.tours-section__card-cta:hover {
+  transform: translateY(-2px);
+  background: rgba(60,179,113,.15);
+  box-shadow: 0 14px 34px rgba(60,179,113,.18);
+}
+
 .tours-section__benefits {
   display: grid;
   grid-template-columns: minmax(260px, .9fr) repeat(3, minmax(0, 1fr));
@@ -1021,7 +1045,7 @@ html[data-theme="dark"] .tours-section__benefit h4 {
     grid-template-columns: 1fr;
     grid-template-areas:
       "featured"
-      "qr"
+      "booking"
       "cards";
   }
 
@@ -1078,7 +1102,7 @@ html[data-theme="dark"] .tours-section__benefit h4 {
 
 @media (max-width: 560px) {
   .tours-section__featured,
-  .tours-section__qr {
+  .tours-section__booking {
     border-radius: 24px;
   }
 
@@ -1094,16 +1118,16 @@ html[data-theme="dark"] .tours-section__benefit h4 {
     grid-template-columns: 1fr;
   }
 
-  .tours-section__qr {
+  .tours-section__booking {
     align-items: stretch;
   }
 
-  .tours-section__qr-code {
-    width: min(100%, 168px);
+  .tours-section__booking-icon {
     align-self: center;
   }
 
-  .tours-section__qr-cta {
+  .tours-section__booking-cta,
+  .tours-section__book-link {
     width: 100%;
     justify-content: center;
   }
@@ -1111,11 +1135,11 @@ html[data-theme="dark"] .tours-section__benefit h4 {
 
 @media (prefers-reduced-motion: no-preference) {
   .tours-section__featured,
-  .tours-section__qr {
+  .tours-section__booking {
     animation: tours-soft-float 8s ease-in-out infinite;
   }
 
-  .tours-section__qr {
+  .tours-section__booking {
     animation-delay: -3s;
   }
 

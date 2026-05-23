@@ -79,6 +79,20 @@ export const de = {
     maps: 'In Google Maps öffnen',
     camperCost: 'Aufenthaltskosten berechnen',
   },
+  toursBooking: {
+    reserve: 'Buchen',
+    reserveTitle: 'SeeKrakow-Ausflug buchen',
+    reserveDescription:
+      'Prüfen Sie aktuelle Ausflüge, Verfügbarkeit und Buchungsdetails. Camping Clepardia ist ein bequemer Ausgangspunkt für Krakau und Małopolska.',
+    sellingText:
+      'Wählen Sie einen fertigen Ausflug und kehren Sie nach dem Sightseeing in die ruhige, grüne Basis Camping Clepardia zurück.',
+    chips: {
+      transport: 'Transport vom Campingplatz',
+      guides: 'Lokale Guides',
+      popular: 'Beliebte Attraktionen',
+      return: 'Ruhige Rückkehr zum Campingplatz',
+    },
+  },
   chat: {
     ...en.chat,
     open: 'CAMPY öffnen',

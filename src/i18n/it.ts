@@ -79,6 +79,20 @@ export const it = {
     maps: 'Apri in Google Maps',
     camperCost: 'Calcola il costo del soggiorno',
   },
+  toursBooking: {
+    reserve: 'Prenota',
+    reserveTitle: 'Prenota un tour con SeeKrakow',
+    reserveDescription:
+      'Controlla i tour attuali, la disponibilità e i dettagli di prenotazione. Camping Clepardia è una base comoda per visitare Cracovia e la Małopolska.',
+    sellingText:
+      'Scegli un tour pronto e, dopo una giornata di visite, torna a rilassarti nella tranquilla base verde di Camping Clepardia.',
+    chips: {
+      transport: 'Trasporto dal campeggio',
+      guides: 'Guide locali',
+      popular: 'Attrazioni più popolari',
+      return: 'Ritorno tranquillo al campeggio',
+    },
+  },
   chat: {
     ...en.chat,
     open: 'Apri CAMPY',
