@@ -1,0 +1,1145 @@
+---
+import ImageFrame from '@/components/ImageFrame.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { siteAssets } from '@/data/assets';
+import { resolveContentLanguage } from '@/i18n/config';
+import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+type Copy = {
+  kicker: string;
+  title: string;
+  lead: string;
+  featuredLabel: string;
+  durationLabel: string;
+  transportLabel: string;
+  qrTitle: string;
+  qrCopy: string;
+  qrCta: string;
+  qrPlaceholder: string;
+  powered: string;
+  cardsAria: string;
+  benefitsTitle: string;
+  tours: Array<{
+    key: keyof typeof siteAssets.attractions;
+    title: string;
+    eyebrow: string;
+    duration: string;
+    transport: string;
+    description: string;
+    alt: string;
+    icon: string;
+    featured?: boolean;
+  }>;
+  benefits: Array<{
+    title: string;
+    text: string;
+    icon: string;
+  }>;
+};
+
+const copyByLanguage: Record<string, Copy> = {
+  pl: {
+    kicker: 'SeeKrakow experiences',
+    title: 'Wycieczki i atrakcje z Krakowa',
+    lead:
+      'Camping Clepardia to dobra baza wypadowa do zwiedzania Krakowa i Małopolski. Z recepcji szybko zaplanujesz wycieczki do Wieliczki, Auschwitz-Birkenau, Zakopanego, Energylandii i centrum Krakowa.',
+    featuredLabel: 'Polecana wycieczka',
+    durationLabel: 'Czas',
+    transportLabel: 'Transport',
+    qrTitle: 'Zeskanuj i sprawdź dostępne wycieczki',
+    qrCopy:
+      'Zeskanuj kod QR i sprawdź aktualne wycieczki, dostępność oraz możliwość rezerwacji.',
+    qrCta: 'Zapytaj recepcje',
+    qrPlaceholder: 'Miejsce na przyszły kod QR SeeKrakow',
+    powered: 'Powered by SeeKrakow',
+    cardsAria: 'Lista polecanych wycieczek z Krakowa',
+    benefitsTitle: 'Wygodne zwiedzanie bez tracenia campingowego spokoju.',
+    tours: [
+      {
+        key: 'auschwitz',
+        title: 'Auschwitz-Birkenau',
+        eyebrow: 'Miejsce pamieci',
+        duration: 'Całodniowo',
+        transport: 'Transport + przewodnik',
+        description: 'Całodniowa wycieczka z transportem i przewodnikiem.',
+        alt: 'Auschwitz-Birkenau - wycieczka z Krakowa',
+        icon: 'shield',
+        featured: true,
+      },
+      {
+        key: 'wieliczka',
+        title: 'Wieliczka Salt Mine',
+        eyebrow: 'Pod ziemia',
+        duration: 'Pół dnia',
+        transport: 'Transfer / bus',
+        description: 'Podziemne trasy i historia kopalni soli.',
+        alt: 'Kopalnia soli Wieliczka - wycieczka z Krakowa',
+        icon: 'landmark',
+      },
+      {
+        key: 'oldTown',
+        title: 'Krakow Old Town',
+        eyebrow: 'Centrum miasta',
+        duration: '2-4 godz.',
+        transport: 'Tramwaj + spacer',
+        description: 'Spacer po centrum Krakowa i najważniejszych zabytkach.',
+        alt: 'Stare Miasto w Krakowie',
+        icon: 'tram',
+      },
+      {
+        key: 'energylandia',
+        title: 'Energylandia',
+        eyebrow: 'Park rozrywki',
+        duration: 'Całodniowo',
+        transport: 'Auto / transfer',
+        description: 'Największy park rozrywki w Polsce.',
+        alt: 'Energylandia - wycieczka z Krakowa',
+        icon: 'sparkle',
+      },
+      {
+        key: 'schindler',
+        title: 'Schindler’s Factory',
+        eyebrow: 'Historia',
+        duration: '2-3 godz.',
+        transport: 'Tramwaj + spacer',
+        description: 'Historia Krakowa i II wojny światowej.',
+        alt: 'Fabryka Schindlera w Krakowie',
+        icon: 'ticket',
+      },
+      {
+        key: 'zakopane',
+        title: 'Zakopane / Ojców',
+        eyebrow: 'Poza miasto',
+        duration: 'Całodniowo',
+        transport: 'Bus / auto',
+        description: 'Góry, widoki i całodniowa wycieczka.',
+        alt: 'Zakopane i Ojców - wycieczki z Krakowa',
+        icon: 'route',
+      },
+    ],
+    benefits: [
+      {
+        title: 'Transport z campingu',
+        text: 'Bez stresu związanego z dojazdem i parkingiem.',
+        icon: 'bus',
+      },
+      {
+        title: 'Lokalni przewodnicy',
+        text: 'Sprawdzone wycieczki i doświadczeni przewodnicy.',
+        icon: 'users',
+      },
+      {
+        title: 'Relaks po powrocie',
+        text: 'Po całym dniu zwiedzania odpocznij na spokojnym campingu.',
+        icon: 'leaf',
+      },
+    ],
+  },
+  en: {
+    kicker: 'SeeKrakow experiences',
+    title: 'Tours and attractions from Krakow',
+    lead:
+      'Camping Clepardia is a comfortable base for exploring Krakow and Lesser Poland. From reception you can plan trips to Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia and Krakow city centre.',
+    featuredLabel: 'Featured tour',
+    durationLabel: 'Duration',
+    transportLabel: 'Transport',
+    qrTitle: 'Scan and explore available tours',
+    qrCopy: 'Scan the QR code to explore current tours and availability.',
+    qrCta: 'Ask reception',
+    qrPlaceholder: 'Space reserved for the future SeeKrakow QR code',
+    powered: 'Powered by SeeKrakow',
+    cardsAria: 'Recommended tours from Krakow',
+    benefitsTitle: 'Easy sightseeing with a calm camping base to return to.',
+    tours: [
+      {
+        key: 'auschwitz',
+        title: 'Auschwitz-Birkenau',
+        eyebrow: 'Memorial site',
+        duration: 'Full day',
+        transport: 'Transport + guide',
+        description: 'A full-day trip with transport and a guide.',
+        alt: 'Auschwitz-Birkenau tour from Krakow',
+        icon: 'shield',
+        featured: true,
+      },
+      {
+        key: 'wieliczka',
+        title: 'Wieliczka Salt Mine',
+        eyebrow: 'Underground',
+        duration: 'Half day',
+        transport: 'Transfer / bus',
+        description: 'Underground routes and the history of the salt mine.',
+        alt: 'Wieliczka Salt Mine tour from Krakow',
+        icon: 'landmark',
+      },
+      {
+        key: 'oldTown',
+        title: 'Krakow Old Town',
+        eyebrow: 'City centre',
+        duration: '2-4 hours',
+        transport: 'Tram + walk',
+        description: 'A walk through Krakow centre and its key monuments.',
+        alt: 'Krakow Old Town',
+        icon: 'tram',
+      },
+      {
+        key: 'energylandia',
+        title: 'Energylandia',
+        eyebrow: 'Theme park',
+        duration: 'Full day',
+        transport: 'Car / transfer',
+        description: 'The largest amusement park in Poland.',
+        alt: 'Energylandia trip from Krakow',
+        icon: 'sparkle',
+      },
+      {
+        key: 'schindler',
+        title: 'Schindler’s Factory',
+        eyebrow: 'History',
+        duration: '2-3 hours',
+        transport: 'Tram + walk',
+        description: 'Krakow history and the Second World War.',
+        alt: 'Schindler’s Factory in Krakow',
+        icon: 'ticket',
+      },
+      {
+        key: 'zakopane',
+        title: 'Zakopane / Ojców',
+        eyebrow: 'Outside the city',
+        duration: 'Full day',
+        transport: 'Bus / car',
+        description: 'Mountains, views and a full-day trip.',
+        alt: 'Zakopane and Ojców tours from Krakow',
+        icon: 'route',
+      },
+    ],
+    benefits: [
+      {
+        title: 'Transport from the campsite',
+        text: 'Less stress with routes, parking and transfers.',
+        icon: 'bus',
+      },
+      {
+        title: 'Local guides',
+        text: 'Proven tours and experienced guides.',
+        icon: 'users',
+      },
+      {
+        title: 'Relax after returning',
+        text: 'After a day of sightseeing, come back to a calm green campsite.',
+        icon: 'leaf',
+      },
+    ],
+  },
+  de: {
+    kicker: 'SeeKrakow experiences',
+    title: 'Ausflüge und Attraktionen ab Krakau',
+    lead:
+      'Camping Clepardia ist ein guter Ausgangspunkt für Krakau und Małopolska. An der Rezeption können Sie Ausflüge nach Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia und ins Zentrum von Krakau planen.',
+    featuredLabel: 'Empfohlener Ausflug',
+    durationLabel: 'Dauer',
+    transportLabel: 'Transport',
+    qrTitle: 'Scannen und verfügbare Ausflüge ansehen',
+    qrCopy:
+      'Scannen Sie den QR-Code, um aktuelle Ausflüge, Verfügbarkeit und Buchungsmöglichkeiten zu prüfen.',
+    qrCta: 'Rezeption fragen',
+    qrPlaceholder: 'Platz für den kommenden SeeKrakow QR-Code',
+    powered: 'Powered by SeeKrakow',
+    cardsAria: 'Empfohlene Ausflüge ab Krakau',
+    benefitsTitle: 'Bequemes Sightseeing mit einem ruhigen Campingplatz als Basis.',
+    tours: [
+      {
+        key: 'auschwitz',
+        title: 'Auschwitz-Birkenau',
+        eyebrow: 'Gedenkstatte',
+        duration: 'Ganztagig',
+        transport: 'Transport + Guide',
+        description: 'Ganztagiger Ausflug mit Transport und Guide.',
+        alt: 'Auschwitz-Birkenau Ausflug ab Krakau',
+        icon: 'shield',
+        featured: true,
+      },
+      {
+        key: 'wieliczka',
+        title: 'Wieliczka Salt Mine',
+        eyebrow: 'Unter Tage',
+        duration: 'Halber Tag',
+        transport: 'Transfer / Bus',
+        description: 'Unterirdische Routen und Geschichte des Salzbergwerks.',
+        alt: 'Salzbergwerk Wieliczka Ausflug ab Krakau',
+        icon: 'landmark',
+      },
+      {
+        key: 'oldTown',
+        title: 'Krakow Old Town',
+        eyebrow: 'Stadtzentrum',
+        duration: '2-4 Std.',
+        transport: 'Tram + Spaziergang',
+        description: 'Spaziergang durch das Zentrum und die wichtigsten Sehenswurdigkeiten.',
+        alt: 'Altstadt von Krakau',
+        icon: 'tram',
+      },
+      {
+        key: 'energylandia',
+        title: 'Energylandia',
+        eyebrow: 'Freizeitpark',
+        duration: 'Ganztagig',
+        transport: 'Auto / Transfer',
+        description: 'Der grosste Freizeitpark in Polen.',
+        alt: 'Energylandia Ausflug ab Krakau',
+        icon: 'sparkle',
+      },
+      {
+        key: 'schindler',
+        title: 'Schindler’s Factory',
+        eyebrow: 'Geschichte',
+        duration: '2-3 Std.',
+        transport: 'Tram + Spaziergang',
+        description: 'Geschichte Krakaus und des Zweiten Weltkriegs.',
+        alt: 'Schindlers Fabrik in Krakau',
+        icon: 'ticket',
+      },
+      {
+        key: 'zakopane',
+        title: 'Zakopane / Ojców',
+        eyebrow: 'Ausserhalb der Stadt',
+        duration: 'Ganztagig',
+        transport: 'Bus / Auto',
+        description: 'Berge, Ausblicke und ein ganztagiger Ausflug.',
+        alt: 'Zakopane und Ojców Ausflüge ab Krakau',
+        icon: 'route',
+      },
+    ],
+    benefits: [
+      {
+        title: 'Transport vom Campingplatz',
+        text: 'Weniger Stress mit Anfahrt und Parken.',
+        icon: 'bus',
+      },
+      {
+        title: 'Lokale Guides',
+        text: 'Geprüfte Ausflüge und erfahrene Guides.',
+        icon: 'users',
+      },
+      {
+        title: 'Entspannung nach der Rückkehr',
+        text: 'Nach dem Sightseeing zuruck auf den ruhigen Campingplatz.',
+        icon: 'leaf',
+      },
+    ],
+  },
+  it: {
+    kicker: 'SeeKrakow experiences',
+    title: 'Tour ed attrazioni da Cracovia',
+    lead:
+      'Camping Clepardia è una base comoda per visitare Cracovia e la Małopolska. Alla reception puoi organizzare tour verso Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia e il centro di Cracovia.',
+    featuredLabel: 'Tour consigliato',
+    durationLabel: 'Durata',
+    transportLabel: 'Trasporto',
+    qrTitle: 'Scansiona e scopri i tour disponibili',
+    qrCopy: 'Scansiona il codice QR per scoprire tour aggiornati e disponibilità.',
+    qrCta: 'Chiedi alla reception',
+    qrPlaceholder: 'Spazio per il futuro QR code SeeKrakow',
+    powered: 'Powered by SeeKrakow',
+    cardsAria: 'Tour consigliati da Cracovia',
+    benefitsTitle: 'Visite comode con un campeggio tranquillo dove tornare.',
+    tours: [
+      {
+        key: 'auschwitz',
+        title: 'Auschwitz-Birkenau',
+        eyebrow: 'Memoriale',
+        duration: 'Giornata intera',
+        transport: 'Trasporto + guida',
+        description: 'Tour di un giorno con trasporto e guida.',
+        alt: 'Tour Auschwitz-Birkenau da Cracovia',
+        icon: 'shield',
+        featured: true,
+      },
+      {
+        key: 'wieliczka',
+        title: 'Wieliczka Salt Mine',
+        eyebrow: 'Sotterraneo',
+        duration: 'Mezza giornata',
+        transport: 'Transfer / bus',
+        description: 'Percorsi sotterranei e storia della miniera di sale.',
+        alt: 'Tour Miniera di Sale Wieliczka da Cracovia',
+        icon: 'landmark',
+      },
+      {
+        key: 'oldTown',
+        title: 'Krakow Old Town',
+        eyebrow: 'Centro città',
+        duration: '2-4 ore',
+        transport: 'Tram + passeggiata',
+        description: 'Passeggiata nel centro di Cracovia e nei luoghi principali.',
+        alt: 'Centro storico di Cracovia',
+        icon: 'tram',
+      },
+      {
+        key: 'energylandia',
+        title: 'Energylandia',
+        eyebrow: 'Parco divertimenti',
+        duration: 'Giornata intera',
+        transport: 'Auto / transfer',
+        description: 'Il più grande parco divertimenti in Polonia.',
+        alt: 'Energylandia tour da Cracovia',
+        icon: 'sparkle',
+      },
+      {
+        key: 'schindler',
+        title: 'Schindler’s Factory',
+        eyebrow: 'Storia',
+        duration: '2-3 ore',
+        transport: 'Tram + passeggiata',
+        description: 'Storia di Cracovia e della Seconda guerra mondiale.',
+        alt: 'Fabbrica di Schindler a Cracovia',
+        icon: 'ticket',
+      },
+      {
+        key: 'zakopane',
+        title: 'Zakopane / Ojców',
+        eyebrow: 'Fuori città',
+        duration: 'Giornata intera',
+        transport: 'Bus / auto',
+        description: 'Montagne, panorami e un tour di un giorno.',
+        alt: 'Tour Zakopane e Ojców da Cracovia',
+        icon: 'route',
+      },
+    ],
+    benefits: [
+      {
+        title: 'Trasporto dal campeggio',
+        text: 'Meno stress per spostamenti e parcheggio.',
+        icon: 'bus',
+      },
+      {
+        title: 'Guide locali',
+        text: 'Tour verificati e guide esperte.',
+        icon: 'users',
+      },
+      {
+        title: 'Relax al ritorno',
+        text: 'Dopo una giornata di visite, torna in un campeggio tranquillo.',
+        icon: 'leaf',
+      },
+    ],
+  },
+};
+
+const { languageCode } = Astro.props as Props;
+const lang = resolveContentLanguage(languageCode);
+const copy = copyByLanguage[lang] ?? copyByLanguage.en;
+const pathContext = getPathContext(Astro.url.pathname);
+const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
+const contactHref = getLocalizedPath(explicitLanguage, 'kontakt');
+const qrCells = Array.from({ length: 25 }, (_, index) => index);
+const featuredTour = copy.tours.find((tour) => tour.featured) ?? copy.tours[0];
+const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
+---
+
+<section class="site-section tours-section reveal-section" id="wycieczki" aria-labelledby="tours-title">
+  <div class="tours-section__glow tours-section__glow--green" aria-hidden="true"></div>
+  <div class="tours-section__glow tours-section__glow--gold" aria-hidden="true"></div>
+
+  <div class="container tours-section__container">
+    <div class="tours-section__intro">
+      <span class="section-kicker">{copy.kicker}</span>
+      <h2 class="section-title" id="tours-title">{copy.title}</h2>
+      <p class="section-copy">{copy.lead}</p>
+    </div>
+
+    <div class="tours-section__layout">
+      <article class="tours-section__featured premium-card reveal-section" style="--reveal-delay: 80ms">
+        <div class="tours-section__featured-media">
+          <ImageFrame
+            src={siteAssets.attractions[featuredTour.key]}
+            alt={featuredTour.alt}
+            label={featuredTour.title}
+            className="tours-section__media tours-section__media--featured"
+          />
+          <span class="tours-section__floating-badge">
+            <Icon name={featuredTour.icon} size={16} />
+            {copy.featuredLabel}
+          </span>
+        </div>
+        <div class="tours-section__featured-content">
+          <span class="tours-section__eyebrow">{featuredTour.eyebrow}</span>
+          <h3>{featuredTour.title}</h3>
+          <p>{featuredTour.description}</p>
+          <dl class="tours-section__meta">
+            <div>
+              <dt>{copy.durationLabel}</dt>
+              <dd><Icon name="clock" size={16} /> {featuredTour.duration}</dd>
+            </div>
+            <div>
+              <dt>{copy.transportLabel}</dt>
+              <dd><Icon name="route" size={16} /> {featuredTour.transport}</dd>
+            </div>
+          </dl>
+        </div>
+      </article>
+
+      <aside class="tours-section__qr premium-card reveal-section" style="--reveal-delay: 160ms" aria-labelledby="tours-qr-title">
+        <span class="tours-section__powered">{copy.powered}</span>
+        <div class="tours-section__qr-code" role="img" aria-label={copy.qrPlaceholder}>
+          {qrCells.map((cell) => (
+            <span class:list={[
+              'tours-section__qr-cell',
+              cell % 4 === 0 && 'is-strong',
+              cell === 6 && 'is-empty',
+              cell === 18 && 'is-empty',
+            ]}></span>
+          ))}
+          <strong>QR</strong>
+        </div>
+        <h3 id="tours-qr-title">{copy.qrTitle}</h3>
+        <p>{copy.qrCopy}</p>
+        <a class="btn btn-secondary tours-section__qr-cta" href={contactHref}>
+          <Icon name="contact" size={18} />
+          {copy.qrCta}
+        </a>
+      </aside>
+
+      <div class="tours-section__cards" aria-label={copy.cardsAria}>
+        {secondaryTours.map((tour, index) => (
+          <article class="tours-section__card premium-card reveal-section" style={`--reveal-delay: ${220 + index * 70}ms`}>
+            <ImageFrame
+              src={siteAssets.attractions[tour.key]}
+              alt={tour.alt}
+              label={tour.title}
+              className={`tours-section__media tours-section__media--${index + 1}`}
+            />
+            <div class="tours-section__card-content">
+              <span class="tours-section__card-icon" aria-hidden="true">
+                <Icon name={tour.icon} size={20} />
+              </span>
+              <div>
+                <span class="tours-section__eyebrow">{tour.eyebrow}</span>
+                <h3>{tour.title}</h3>
+                <p>{tour.description}</p>
+              </div>
+              <div class="tours-section__chips" aria-label={`${copy.durationLabel}: ${tour.duration}. ${copy.transportLabel}: ${tour.transport}.`}>
+                <span><Icon name="clock" size={14} /> {tour.duration}</span>
+                <span><Icon name="route" size={14} /> {tour.transport}</span>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+
+    <div class="tours-section__benefits" aria-label={copy.benefitsTitle}>
+      <div class="tours-section__benefit-heading">
+        <span class="section-kicker">Travel support</span>
+        <h3>{copy.benefitsTitle}</h3>
+      </div>
+      {copy.benefits.map((benefit, index) => (
+        <article class="tours-section__benefit reveal-section" style={`--reveal-delay: ${index * 90}ms`}>
+          <span class="tours-section__benefit-icon" aria-hidden="true">
+            <Icon name={benefit.icon} size={22} />
+          </span>
+          <div>
+            <h4>{benefit.title}</h4>
+            <p>{benefit.text}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+.tours-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(60,179,113,.18), transparent 30%),
+    radial-gradient(circle at 86% 12%, rgba(242,192,120,.16), transparent 30%),
+    linear-gradient(180deg, rgba(245,248,241,.58), rgba(255,255,255,.18));
+}
+
+html[data-theme="dark"] .tours-section {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(60,179,113,.16), transparent 30%),
+    radial-gradient(circle at 86% 12%, rgba(242,192,120,.12), transparent 31%),
+    linear-gradient(180deg, rgba(16,33,23,.94), rgba(9,26,19,.78));
+}
+
+.tours-section__glow {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(42px);
+  opacity: .72;
+}
+
+.tours-section__glow--green {
+  left: -10%;
+  top: 18%;
+  width: min(38vw, 520px);
+  aspect-ratio: 1;
+  background: rgba(60,179,113,.20);
+}
+
+.tours-section__glow--gold {
+  right: -8%;
+  bottom: 12%;
+  width: min(34vw, 460px);
+  aspect-ratio: 1;
+  background: rgba(242,192,120,.15);
+}
+
+.tours-section__container {
+  position: relative;
+  display: grid;
+  gap: clamp(28px, 5vw, 58px);
+}
+
+.tours-section__intro {
+  max-width: 860px;
+}
+
+.tours-section__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr);
+  grid-template-areas:
+    "featured qr"
+    "cards cards";
+  gap: clamp(18px, 3vw, 28px);
+  align-items: stretch;
+}
+
+.tours-section__featured,
+.tours-section__qr,
+.tours-section__card,
+.tours-section__benefit {
+  border-color: rgba(143,224,180,.28);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.78), rgba(255,255,255,.54)),
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.12), transparent 36%);
+  box-shadow: 0 28px 90px rgba(18,42,29,.12), inset 0 1px 0 rgba(255,255,255,.60);
+}
+
+html[data-theme="dark"] .tours-section__featured,
+html[data-theme="dark"] .tours-section__qr,
+html[data-theme="dark"] .tours-section__card,
+html[data-theme="dark"] .tours-section__benefit {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.045)),
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.18), transparent 38%);
+  box-shadow: 0 28px 92px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.10);
+}
+
+.tours-section__featured {
+  grid-area: featured;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr);
+  gap: clamp(18px, 3vw, 30px);
+  padding: clamp(16px, 2.4vw, 24px);
+  overflow: hidden;
+}
+
+.tours-section__featured-media {
+  position: relative;
+  min-width: 0;
+}
+
+:global(.tours-section__media.photo-frame) {
+  width: 100%;
+  height: 100%;
+  min-height: 250px;
+}
+
+:global(.tours-section__media--featured.photo-frame) {
+  min-height: clamp(320px, 32vw, 440px);
+}
+
+.tours-section__floating-badge {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 36px);
+  padding: 9px 13px;
+  border: 1px solid rgba(242,192,120,.42);
+  border-radius: 999px;
+  color: #fffdf4;
+  background:
+    linear-gradient(135deg, rgba(242,192,120,.28), rgba(60,179,113,.18)),
+    rgba(8,28,18,.54);
+  box-shadow: 0 18px 48px rgba(0,0,0,.18), 0 0 34px rgba(242,192,120,.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: .75rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.tours-section__featured-content {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  padding: clamp(4px, 1vw, 10px);
+}
+
+.tours-section__eyebrow {
+  color: var(--color-accent, #3CB371);
+  font-size: .74rem;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.tours-section h3 {
+  margin: 0;
+  color: var(--color-text, #102116);
+  font-size: clamp(1.3rem, 2.4vw, 2.12rem);
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+html[data-theme="dark"] .tours-section h3 {
+  color: #f4fbf6;
+}
+
+.tours-section p {
+  margin: 0;
+  color: var(--color-muted, rgba(16,33,22,.68));
+  line-height: 1.7;
+}
+
+html[data-theme="dark"] .tours-section p {
+  color: rgba(244,251,246,.76);
+}
+
+.tours-section__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 8px 0 0;
+}
+
+.tours-section__meta div {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid rgba(60,179,113,.18);
+  border-radius: 18px;
+  background: rgba(60,179,113,.075);
+}
+
+html[data-theme="dark"] .tours-section__meta div {
+  background: rgba(255,255,255,.055);
+}
+
+.tours-section__meta dt {
+  color: var(--color-muted, rgba(16,33,22,.62));
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.tours-section__meta dd {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--color-text, #102116);
+  font-size: .9rem;
+  font-weight: 850;
+}
+
+html[data-theme="dark"] .tours-section__meta dd {
+  color: #f4fbf6;
+}
+
+.tours-section__qr {
+  grid-area: qr;
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+  padding: clamp(20px, 3vw, 30px);
+  overflow: hidden;
+}
+
+.tours-section__qr::before {
+  content: '';
+  position: absolute;
+  inset: auto -20% -34% 24%;
+  height: 58%;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(60,179,113,.22), transparent 70%);
+  pointer-events: none;
+}
+
+.tours-section__powered {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  width: fit-content;
+  padding: 7px 10px;
+  border: 1px solid rgba(60,179,113,.24);
+  border-radius: 999px;
+  color: var(--color-accent, #3CB371);
+  background: rgba(60,179,113,.10);
+  font-size: .69rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.tours-section__qr-code {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
+  width: min(100%, 184px);
+  aspect-ratio: 1;
+  padding: 18px;
+  border: 1px solid rgba(143,224,180,.36);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 34% 22%, rgba(255,255,255,.52), transparent 28%),
+    linear-gradient(145deg, rgba(255,255,255,.76), rgba(60,179,113,.14));
+  box-shadow: 0 24px 70px rgba(60,179,113,.18), inset 0 1px 0 rgba(255,255,255,.64);
+}
+
+html[data-theme="dark"] .tours-section__qr-code {
+  background:
+    radial-gradient(circle at 34% 22%, rgba(255,255,255,.20), transparent 28%),
+    linear-gradient(145deg, rgba(255,255,255,.10), rgba(60,179,113,.18));
+}
+
+.tours-section__qr-cell {
+  border-radius: 5px;
+  background: rgba(11, 42, 26, .22);
+}
+
+.tours-section__qr-cell.is-strong {
+  background: #3CB371;
+  box-shadow: 0 0 18px rgba(60,179,113,.26);
+}
+
+.tours-section__qr-cell.is-empty {
+  opacity: .18;
+}
+
+.tours-section__qr-code strong {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.44);
+  border-radius: 18px;
+  color: #fff;
+  background: linear-gradient(135deg, #3CB371, #287d50);
+  box-shadow: 0 18px 42px rgba(60,179,113,.28);
+  font-size: .9rem;
+  letter-spacing: .08em;
+}
+
+.tours-section__qr h3 {
+  font-size: clamp(1.32rem, 2vw, 1.8rem);
+}
+
+.tours-section__qr-cta {
+  position: relative;
+  z-index: 1;
+  margin-top: 4px;
+}
+
+.tours-section__cards {
+  grid-area: cards;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 18px);
+}
+
+.tours-section__card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 12px;
+  overflow: hidden;
+  transition:
+    transform .35s cubic-bezier(.2,.8,.2,1),
+    border-color .35s ease,
+    box-shadow .35s ease;
+}
+
+.tours-section__card:hover {
+  transform: translateY(-7px);
+  border-color: rgba(60,179,113,.42);
+  box-shadow: 0 34px 92px rgba(17,40,28,.18), 0 0 34px rgba(60,179,113,.12);
+}
+
+:global(.tours-section__card .tours-section__media.photo-frame) {
+  min-height: 180px;
+  border-radius: 20px;
+}
+
+.tours-section__card-content {
+  display: grid;
+  gap: 12px;
+  padding: 16px 6px 4px;
+}
+
+.tours-section__card-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(143,224,180,.34);
+  border-radius: 16px;
+  color: #f9fff9;
+  background: linear-gradient(135deg, rgba(60,179,113,.92), rgba(44,137,85,.74));
+  box-shadow: 0 16px 36px rgba(60,179,113,.26);
+}
+
+.tours-section__card h3 {
+  margin-top: 5px;
+  font-size: clamp(1.04rem, 1.5vw, 1.24rem);
+}
+
+.tours-section__card p {
+  font-size: .91rem;
+  line-height: 1.58;
+}
+
+.tours-section__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.tours-section__chips span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border: 1px solid rgba(60,179,113,.20);
+  border-radius: 999px;
+  color: var(--color-text, #102116);
+  background: rgba(60,179,113,.075);
+  font-size: .76rem;
+  font-weight: 800;
+}
+
+html[data-theme="dark"] .tours-section__chips span {
+  color: rgba(244,251,246,.88);
+  background: rgba(255,255,255,.055);
+}
+
+.tours-section__benefits {
+  display: grid;
+  grid-template-columns: minmax(260px, .9fr) repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+
+.tours-section__benefit-heading {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  padding: clamp(20px, 3vw, 28px);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(60,179,113,.18), transparent 34%),
+    linear-gradient(135deg, rgba(60,179,113,.12), rgba(242,192,120,.10));
+}
+
+.tours-section__benefit-heading h3 {
+  font-size: clamp(1.22rem, 2vw, 1.62rem);
+}
+
+.tours-section__benefit {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: clamp(18px, 2.5vw, 24px);
+  border-radius: 28px;
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), border-color .35s ease;
+}
+
+.tours-section__benefit:hover {
+  transform: translateY(-5px);
+  border-color: rgba(60,179,113,.38);
+}
+
+.tours-section__benefit-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(143,224,180,.32);
+  border-radius: 18px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255,255,255,.34), transparent 34%),
+    linear-gradient(135deg, rgba(60,179,113,.96), rgba(32,118,70,.82));
+  box-shadow: 0 18px 42px rgba(60,179,113,.26);
+}
+
+.tours-section__benefit h4 {
+  margin: 0 0 6px;
+  color: var(--color-text, #102116);
+  font-size: 1rem;
+}
+
+html[data-theme="dark"] .tours-section__benefit h4 {
+  color: #f4fbf6;
+}
+
+.tours-section__benefit p {
+  font-size: .9rem;
+}
+
+@media (max-width: 1160px) {
+  .tours-section__layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "featured"
+      "qr"
+      "cards";
+  }
+
+  .tours-section__cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tours-section__benefits {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tours-section__benefit-heading {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 820px) {
+  .tours-section__featured {
+    grid-template-columns: 1fr;
+  }
+
+  .tours-section__cards {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    gap: 14px;
+    margin-inline: 0;
+    padding: 2px 2px 14px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-padding-left: 2px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tours-section__cards::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .tours-section__cards::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(60,179,113,.36);
+  }
+
+  .tours-section__card {
+    flex: 0 0 min(84vw, 330px);
+    scroll-snap-align: start;
+  }
+
+  .tours-section__benefits {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .tours-section__featured,
+  .tours-section__qr {
+    border-radius: 24px;
+  }
+
+  .tours-section__featured {
+    padding: 12px;
+  }
+
+  :global(.tours-section__media--featured.photo-frame) {
+    min-height: 270px;
+  }
+
+  .tours-section__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .tours-section__qr {
+    align-items: stretch;
+  }
+
+  .tours-section__qr-code {
+    width: min(100%, 168px);
+    align-self: center;
+  }
+
+  .tours-section__qr-cta {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tours-section__featured,
+  .tours-section__qr {
+    animation: tours-soft-float 8s ease-in-out infinite;
+  }
+
+  .tours-section__qr {
+    animation-delay: -3s;
+  }
+
+  .tours-section__glow {
+    animation: tours-glow-drift 12s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes tours-soft-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes tours-glow-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(18px, -12px, 0) scale(1.05);
+  }
+}
+</style>
