@@ -12,6 +12,7 @@ import ToursSection from '@/components/home/ToursSection.astro';
 import TrustSection from '@/components/TrustSection.astro';
 import BookingCTA from '@/components/BookingCTA.astro';
 import HomeFinalCTA from '@/components/home/HomeFinalCTA.astro';
+import ArrivalFlowSection from '@/components/home/ArrivalFlowSection.astro';
 
 interface Props {
   languageCode?: string;
@@ -28,6 +29,7 @@ const { languageCode } = Astro.props as Props;
 <BungalowsSection languageCode={languageCode} />
 <PricingPreview languageCode={languageCode} />
 <TransportSection languageCode={languageCode} />
+<ArrivalFlowSection languageCode={languageCode} />
 <AttractionsPreview languageCode={languageCode} />
 <ToursSection languageCode={languageCode} />
 <TrustSection languageCode={languageCode} />

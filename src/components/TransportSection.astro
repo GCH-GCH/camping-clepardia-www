@@ -1,5 +1,6 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
+import Icon from '@/components/ui/Icon.astro';
 import { siteAssets } from '@/data/assets';
 import { getTranslations } from '@/i18n/config';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
@@ -49,6 +50,39 @@ const imageLabels = activeLanguage === 'de'
           map: 'Directions map',
           app: 'Jakdojade',
         };
+const smartTram = activeLanguage === 'de'
+  ? {
+      title: 'Smart Tram Assistant',
+      copy: 'Die Haltestelle liegt ca. 40 m vom Tor entfernt. Zum Stary Kleparz / Zentrum sind es ca. 9 Haltestellen und etwa 14 Minuten Fahrt.',
+      points: ['Google Maps empfohlen', 'Jakdojade für Route und Tickets', 'Tickets in Automaten oder Apps'],
+      maps: 'Route in Google Maps prüfen',
+      jakdojade: 'Jakdojade öffnen',
+    }
+  : activeLanguage === 'it'
+    ? {
+        title: 'Smart Tram Assistant',
+        copy: 'La fermata è a circa 40 m dal cancello. Verso Stary Kleparz / centro sono circa 9 fermate e circa 14 minuti in tram.',
+        points: ['Google Maps consigliato', 'Jakdojade per percorso e biglietti', 'Biglietti in macchine o app'],
+        maps: 'Controlla su Google Maps',
+        jakdojade: 'Apri Jakdojade',
+      }
+    : activeLanguage === 'pl'
+      ? {
+          title: 'Smart Tram Assistant',
+          copy: 'Przystanek jest ok. 40 m od bramy. Do Starego Kleparza / centrum jest ok. 9 przystanków i ok. 14 minut jazdy tramwajem.',
+          points: ['Google Maps zalecane', 'Jakdojade do trasy i biletów', 'Bilety w automatach lub aplikacjach'],
+          maps: 'Sprawdź trasę w Google Maps',
+          jakdojade: 'Otwórz Jakdojade',
+        }
+      : {
+          title: 'Smart Tram Assistant',
+          copy: 'The stop is about 40 m from the gate. It is about 9 stops and around 14 minutes by tram to Stary Kleparz / the city centre.',
+          points: ['Google Maps recommended', 'Jakdojade for routes and tickets', 'Tickets in machines or apps'],
+          maps: 'Check route in Google Maps',
+          jakdojade: 'Open Jakdojade',
+        };
+const mapsRouteHref = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
+const jakdojadeHref = 'https://jakdojade.pl/krakow';
 ---
 
 <section class="site-section transport reveal-section" id="dojazd">
@@ -62,6 +96,22 @@ const imageLabels = activeLanguage === 'de'
       <div class="transport__timeline">
         <span>Camping</span><i></i><span>{timeline.tram}</span><i></i><span>{timeline.center}</span>
       </div>
+      <article class="transport__assistant premium-card">
+        <span class="transport__assistant-icon" aria-hidden="true">
+          <Icon name="tram" size={23} />
+        </span>
+        <div>
+          <h3>{smartTram.title}</h3>
+          <p>{smartTram.copy}</p>
+          <div class="transport__assistant-points">
+            {smartTram.points.map((point) => <span>{point}</span>)}
+          </div>
+          <div class="transport__assistant-actions">
+            <a href={mapsRouteHref} target="_blank" rel="noopener noreferrer">{smartTram.maps}</a>
+            <a href={jakdojadeHref} target="_blank" rel="noopener noreferrer">{smartTram.jakdojade}</a>
+          </div>
+        </div>
+      </article>
       <a class="transport__link" href={getLocalizedPath(explicitLanguage, 'dojazd')}>{t.cta.directions}</a>
     </div>
     <div class="premium-card transport__panel">
@@ -104,6 +154,56 @@ const imageLabels = activeLanguage === 'de'
 .transport__timeline { margin-top: 34px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; color: #fff; font-weight: 900; }
 .transport__timeline span { padding: 13px 16px; border-radius: 999px; background: rgba(255,255,255,.11); border: 1px solid rgba(255,255,255,.14); }
 .transport__timeline i { width: 34px; height: 2px; background: rgba(143,224,180,.7); }
+.transport__assistant {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+  padding: 20px;
+  border-color: rgba(143,224,180,.18);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.22), transparent 34%),
+    rgba(255,255,255,.10);
+  color: #fff;
+}
+.transport__assistant-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 18px;
+  color: #fff;
+  background: linear-gradient(135deg, rgba(60,179,113,.95), rgba(36,121,78,.72));
+  box-shadow: 0 16px 36px rgba(60,179,113,.24);
+}
+.transport__assistant h3 { margin: 0 0 8px; color: #fff; font-size: 1.18rem; font-weight: 950; }
+.transport__assistant p { margin: 0; color: rgba(255,255,255,.76); line-height: 1.62; font-weight: 760; }
+.transport__assistant-points { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.transport__assistant-points span {
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(143,224,180,.20);
+  background: rgba(255,255,255,.07);
+  color: rgba(255,255,255,.82);
+  font-size: .78rem;
+  font-weight: 900;
+}
+.transport__assistant-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.transport__assistant-actions a {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: #092016;
+  background: #8fe0b4;
+  font-size: .82rem;
+  font-weight: 950;
+}
+.transport__assistant-actions a + a {
+  color: #fff;
+  background: rgba(255,255,255,.12);
+}
 .transport__link { display: inline-flex; margin-top: 24px; color: #8fe0b4; font-weight: 950; }
 .transport__link:hover { color: #fff; }
 .transport__panel { min-width: 0; padding: 34px; background: linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.055)); border-color: rgba(255,255,255,.14); color: #fff; overflow: hidden; }

@@ -106,23 +106,39 @@ export const en = {
     send: 'Send message',
     actions: {
       pricing: 'Check prices',
+      camperPrice: 'How much is a motorhome?',
       directions: 'How to get here?',
+      centerTransit: 'How do I get to the centre?',
       transit: 'Tram to the centre',
+      dog: 'Can I bring a dog?',
+      campingBooking: 'Can I book camping?',
       bungalow: 'Bungalows',
+      arrival: 'What happens after arrival?',
       reception: 'Contact reception',
       quiet: 'Quiet hours',
       maps: 'Google Maps directions',
+      sctEtoll: 'SCT / e-TOLL',
       attractions: 'Attractions',
     },
     answers: {
+      camperPrice:
+        'A motorhome costs 80 PLN per night. Guests are added separately: adult 35 PLN, child 4-14 years 20 PLN. Electricity: 25 PLN, dog: 0 PLN.',
       pricing:
         'As a guide: motorhome 80 PLN / night, truck / bus 160 PLN / night, electricity 25 PLN / night and dog 0 PLN. The full calculator is on the Prices page.',
+      centerTransit:
+        'The stop is about 40 m from the gate. It is about 9 stops and around 14 minutes by tram to Stary Kleparz / the city centre.',
       directions:
         'The easiest way is to leave your car or camper at the campsite and take the tram towards the centre of Krakow. For navigation we recommend Google Maps: the entrance route changed in 2022, so older navigation systems may lead incorrectly.',
       transit:
         'The easiest way to reach the city centre is by tram: the stop is about 40 m from the gate, Stary Kleparz / the centre is about 9 stops away and the ride takes around 14 minutes.',
       bungalows:
         'Bungalows have separate availability. 2-person: 200/220 PLN, 3-person: 250/300 PLN, 4-person: 400/450 PLN depending on season.',
+      dog:
+        'Yes, dogs are 0 PLN. Please clean up after your dog and keep it under control around the campsite.',
+      campingBooking:
+        'You can send an enquiry through the form. In the summer season, camping pitch reservations may be limited, so reception always confirms availability.',
+      arrival:
+        'After arrival, please stop near reception. Staff will come to you, show your place and guide you around the campsite. Registration is completed afterwards.',
       reception:
         'Reception: +48 795 294 486, email: clepardia@gmail.com. The fastest way to confirm availability is by phone or email.',
       camping:
@@ -131,6 +147,8 @@ export const en = {
         'Camping Clepardia is not a party place. Quiet hours are from 22:00 to 07:00. If you plan to party, please choose another place.',
       maps:
         'For navigation we recommend Google Maps. The entrance / access route changed in 2022, so older navigation systems may lead incorrectly.',
+      sctEtoll:
+        'Before arriving, check the current Krakow Clean Transport Zone rules. If you travel with a larger vehicle or vehicle set, also check whether e-TOLL applies to your route.',
       attractions:
         'Clepardia is a convenient base for Krakow, Wieliczka, Kazimierz, Ojców and Energylandia. Stay in the green base, then head out for easy Małopolska trips.',
       fallback:

@@ -7,6 +7,8 @@ import MotionFoundation from '@/components/MotionFoundation.astro';
 import ScrollToTopButton from '@/components/ui/ScrollToTopButton.astro';
 import FloatingChatButton from '@/components/ui/FloatingChatButton.astro';
 import CamperScrollProgress from '@/components/ui/CamperScrollProgress.astro';
+import AmbientBackground from '@/components/ui/AmbientBackground.astro';
+import PageScrollHint from '@/components/ui/PageScrollHint.astro';
 import { logoMain, logoMainPng, publicAssetExists, siteAssets } from '@/data/assets';
 import { getCampgroundJsonLd, homeSeo, resolveOgImage, siteName } from '@/data/seo';
 import { getSeoLanguageMeta, withOrigin } from '@/utils/localizedLinks';
@@ -53,8 +55,8 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		<meta name="description" content={description} />
 		<meta name="robots" content="index, follow" />
 		<meta name="theme-color" content="#3CB371" />
-		<meta name="clepardia-build" content="TASK-59-camper-attractions-homepage" />
-		<meta name="clepardia-commit" content="task-59" />
+		<meta name="clepardia-build" content="TASK-61-final-ux" />
+		<meta name="clepardia-commit" content="task-61" />
 		
 		<!-- Open Graph / Social Media -->
 		<meta property="og:type" content="website" />
@@ -131,6 +133,7 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		<title>{title}</title>
 	</head>
 	<body>
+		<AmbientBackground />
 		<MainNavbar />
 		
 		<main class="main-content" id="main-content">
@@ -138,6 +141,7 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		</main>
 		
 		<CamperScrollProgress />
+		<PageScrollHint />
 		<FloatingChatButton />
 		<Footer />
 		<ScrollToTopButton />

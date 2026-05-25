@@ -109,23 +109,39 @@ export const de = {
     send: 'Nachricht senden',
     actions: {
       pricing: 'Preise prüfen',
+      camperPrice: 'Was kostet ein Wohnmobil?',
       directions: 'Wie komme ich hin?',
+      centerTransit: 'Wie komme ich ins Zentrum?',
       transit: 'Straßenbahn ins Zentrum',
+      dog: 'Darf ich mit Hund kommen?',
+      campingBooking: 'Kann ich Camping buchen?',
       bungalow: 'Bungalows',
+      arrival: 'Wie läuft die Ankunft ab?',
       reception: 'Kontakt zur Rezeption',
       quiet: 'Nachtruhe',
       maps: 'Google Maps Anfahrt',
+      sctEtoll: 'SCT / e-TOLL',
       attractions: 'Attraktionen',
     },
     answers: {
+      camperPrice:
+        'Ein Wohnmobil kostet 80 PLN pro Nacht. Personen werden separat berechnet: Erwachsener 35 PLN, Kind 4-14 Jahre 20 PLN. Strom: 25 PLN, Hund: 0 PLN.',
       pricing:
         'Orientierungspreise: Wohnmobil 80 PLN / Nacht, Lkw / Bus 160 PLN / Nacht, Strom 25 PLN / Nacht, Hund 0 PLN. Den vollständigen Rechner finden Sie auf der Preisseite.',
+      centerTransit:
+        'Die Haltestelle liegt ca. 40 m vom Tor entfernt. Zum Stary Kleparz / Zentrum sind es ca. 9 Haltestellen und etwa 14 Minuten mit der Straßenbahn.',
       directions:
         'Am bequemsten ist es, Auto oder Camper auf dem Campingplatz zu lassen und mit der Straßenbahn Richtung Zentrum von Krakau zu fahren. Für die Navigation empfehlen wir Google Maps. Die Einfahrt / Zufahrt wurde 2022 geändert, ältere Navigationssysteme können falsch führen.',
       transit:
         'Ins Zentrum kommen Sie am bequemsten mit der Straßenbahn: Die Haltestelle ist ca. 40 m vom Tor entfernt, bis Stary Kleparz / Zentrum sind es ca. 9 Haltestellen und rund 14 Minuten Fahrt.',
       bungalows:
         'Bungalows haben separate Verfügbarkeit. Es gibt nur 2-, 3- und 4-Personen-Bungalows. Preise: 200/220 PLN, 250/300 PLN und 400/450 PLN je nach Saison.',
+      dog:
+        'Ja, Hunde kosten 0 PLN. Bitte räumen Sie nach dem Hund auf und halten Sie ihn auf dem Campingplatz unter Kontrolle.',
+      campingBooking:
+        'Sie können eine Anfrage über das Formular senden. Im Sommer kann die Reservierung von Campingplätzen begrenzt sein, die Verfügbarkeit bestätigt immer die Rezeption.',
+      arrival:
+        'Nach der Ankunft halten Sie bitte bei der Rezeption. Das Personal kommt zu Ihnen, zeigt den Platz und erklärt den Campingplatz. Die Anmeldung erfolgt danach.',
       reception:
         'Rezeption: +48 795 294 486, E-Mail: clepardia@gmail.com. Am schnellsten bestätigen Sie die Verfügbarkeit per Telefon oder E-Mail.',
       camping:
@@ -134,6 +150,8 @@ export const de = {
         'Camping Clepardia ist kein Partyort. Die Nachtruhe gilt von 22:00 bis 07:00. Wenn Sie feiern möchten, wählen Sie bitte einen anderen Ort.',
       maps:
         'Für die Navigation empfehlen wir Google Maps. Die Einfahrt / Zufahrt wurde 2022 geändert, ältere Navigationssysteme können falsch führen.',
+      sctEtoll:
+        'Prüfen Sie vor der Anreise die aktuellen Regeln der Krakauer Umweltzone. Wenn Sie mit einem größeren Fahrzeug oder Gespann fahren, prüfen Sie auch, ob e-TOLL für Ihre Route gilt.',
       attractions:
         'Clepardia ist eine bequeme Basis für Krakau, Wieliczka, Kazimierz, Ojców und Energylandia. Erst entspannen im Grünen, dann einfach Małopolska entdecken.',
       fallback:

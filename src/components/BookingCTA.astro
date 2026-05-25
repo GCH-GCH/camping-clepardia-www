@@ -1,6 +1,6 @@
 ---
-import { getTranslations } from '@/i18n/config';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { resolveContentLanguage } from '@/i18n/config';
 import Icon from '@/components/ui/Icon.astro';
 
 interface Props {
@@ -9,112 +9,432 @@ interface Props {
 
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
-const t = getTranslations(languageCode ?? pathContext.languageCode);
-const contactHref = getLocalizedPath(pathContext.explicitLanguage, 'kontakt');
-const lang = languageCode ?? pathContext.languageCode;
-const bookingCopy = {
+const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
+const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode);
+const contactHref = getLocalizedPath(explicitLanguage, 'kontakt');
+const copy = {
   pl: {
+    kicker: 'Szybkie zapytanie',
     title: 'Zapytaj o dostępność pobytu',
-    copy: 'Wybierz termin i typ pobytu w formularzu kontaktowym. Recepcja Camping Clepardia potwierdzi dostępność, cenę i szczegóły przyjazdu.',
-    steps: [
-      { icon: 'calendar', label: 'Wybierz termin' },
-      { icon: 'camping', label: 'Podaj typ pobytu' },
-      { icon: 'message', label: 'Otrzymaj potwierdzenie' },
-    ],
+    lead: 'Ustaw najważniejsze informacje, a pełny formularz kontaktowy otworzy się już z przygotowanym kontekstem.',
+    categories: {
+      camping: { title: 'Camping', copy: 'Kamper, namiot, przyczepa, van lub auto z namiotem dachowym.' },
+      bungalow: { title: 'Domki', copy: 'Domki 2-, 3- i 4-osobowe.' },
+    },
+    arrival: 'Data przyjazdu',
+    departure: 'Data wyjazdu',
+    stayType: 'Typ pobytu',
+    adults: 'Dorośli',
+    electricity: 'Prąd',
+    dog: 'Pies',
+    yes: 'Tak',
     button: 'Przejdź do formularza',
   },
   en: {
-    title: 'Ask about availability',
-    copy: 'Choose your dates and stay type in the contact form. Camping Clepardia reception will confirm availability, price and arrival details.',
-    steps: [
-      { icon: 'calendar', label: 'Choose dates' },
-      { icon: 'camping', label: 'Add stay type' },
-      { icon: 'message', label: 'Receive confirmation' },
-    ],
+    kicker: 'Quick enquiry',
+    title: 'Ask about stay availability',
+    lead: 'Set the key details and open the full contact form with the context already prepared.',
+    categories: {
+      camping: { title: 'Camping', copy: 'Motorhome, tent, caravan, van or car with rooftop tent.' },
+      bungalow: { title: 'Bungalows', copy: '2-, 3- and 4-person bungalows.' },
+    },
+    arrival: 'Arrival date',
+    departure: 'Departure date',
+    stayType: 'Stay type',
+    adults: 'Adults',
+    electricity: 'Electricity',
+    dog: 'Dog',
+    yes: 'Yes',
     button: 'Go to the form',
   },
   de: {
+    kicker: 'Schnelle Anfrage',
     title: 'Verfügbarkeit anfragen',
-    copy: 'Wählen Sie Termin und Aufenthaltsart im Kontaktformular. Die Rezeption von Camping Clepardia bestätigt Verfügbarkeit, Preis und Anreiseinformationen.',
-    steps: [
-      { icon: 'calendar', label: 'Termin wählen' },
-      { icon: 'camping', label: 'Aufenthalt angeben' },
-      { icon: 'message', label: 'Bestätigung erhalten' },
-    ],
+    lead: 'Wählen Sie die wichtigsten Angaben und öffnen Sie das Kontaktformular mit vorbereitetem Kontext.',
+    categories: {
+      camping: { title: 'Camping', copy: 'Wohnmobil, Zelt, Wohnwagen, Van oder Auto mit Dachzelt.' },
+      bungalow: { title: 'Bungalows', copy: 'Bungalows für 2, 3 und 4 Personen.' },
+    },
+    arrival: 'Anreise',
+    departure: 'Abreise',
+    stayType: 'Aufenthaltsart',
+    adults: 'Erwachsene',
+    electricity: 'Strom',
+    dog: 'Hund',
+    yes: 'Ja',
     button: 'Zum Formular',
   },
   it: {
+    kicker: 'Richiesta rapida',
     title: 'Richiedi disponibilità',
-    copy: 'Scegli date e tipo di soggiorno nel modulo contatti. La reception di Camping Clepardia confermerà disponibilità, prezzo e dettagli di arrivo.',
-    steps: [
-      { icon: 'calendar', label: 'Scegli le date' },
-      { icon: 'camping', label: 'Indica il soggiorno' },
-      { icon: 'message', label: 'Ricevi conferma' },
-    ],
+    lead: 'Imposta i dettagli principali e apri il modulo completo con il contesto già pronto.',
+    categories: {
+      camping: { title: 'Camping', copy: 'Camper, tenda, roulotte, van o auto con tenda da tetto.' },
+      bungalow: { title: 'Bungalow', copy: 'Bungalow da 2, 3 e 4 persone.' },
+    },
+    arrival: 'Arrivo',
+    departure: 'Partenza',
+    stayType: 'Tipo di soggiorno',
+    adults: 'Adulti',
+    electricity: 'Elettricità',
+    dog: 'Cane',
+    yes: 'Sì',
     button: 'Vai al modulo',
   },
-}[lang] ?? {
-  title: 'Ask about availability',
-  copy: 'Choose your dates and stay type in the contact form. Camping Clepardia reception will confirm availability, price and arrival details.',
-  steps: [
-    { icon: 'calendar', label: 'Choose dates' },
-    { icon: 'camping', label: 'Add stay type' },
-    { icon: 'message', label: 'Receive confirmation' },
+}[lang];
+
+const stayOptions = {
+  camping: [
+    ['camper', lang === 'pl' ? 'Kamper' : lang === 'de' ? 'Wohnmobil' : lang === 'it' ? 'Camper' : 'Motorhome'],
+    ['van', 'Van'],
+    ['caravan', lang === 'pl' ? 'Przyczepa' : lang === 'de' ? 'Wohnwagen' : lang === 'it' ? 'Roulotte' : 'Caravan'],
+    ['tent-small', lang === 'pl' ? 'Namiot 1-2 os.' : lang === 'de' ? 'Zelt 1-2 Pers.' : lang === 'it' ? 'Tenda 1-2 pers.' : 'Tent 1-2 pers.'],
+    ['tent-large', lang === 'pl' ? 'Namiot 3-4 os.' : lang === 'de' ? 'Zelt 3-4 Pers.' : lang === 'it' ? 'Tenda 3-4 pers.' : 'Tent 3-4 pers.'],
+    ['rooftop-tent', lang === 'pl' ? 'Auto + namiot dachowy' : lang === 'de' ? 'Auto + Dachzelt' : lang === 'it' ? 'Auto + tenda da tetto' : 'Car + rooftop tent'],
+    ['bus', lang === 'pl' ? 'Bus / ciężarówka' : lang === 'de' ? 'Lkw / Bus' : lang === 'it' ? 'Camion / bus' : 'Truck / bus'],
   ],
-  button: 'Go to the form',
+  bungalow: [
+    ['bungalow-2', lang === 'pl' ? 'Domek 2-os.' : lang === 'de' ? '2-Personen-Bungalow' : lang === 'it' ? 'Bungalow 2 persone' : '2-person bungalow'],
+    ['bungalow-3', lang === 'pl' ? 'Domek 3-os.' : lang === 'de' ? '3-Personen-Bungalow' : lang === 'it' ? 'Bungalow 3 persone' : '3-person bungalow'],
+    ['bungalow-4', lang === 'pl' ? 'Domek 4-os.' : lang === 'de' ? '4-Personen-Bungalow' : lang === 'it' ? 'Bungalow 4 persone' : '4-person bungalow'],
+  ],
 };
 ---
 
 <section class="site-section booking reveal-section" id="rezerwacja">
   <div class="container">
-    <div class="booking__panel">
+    <div class="booking__panel" data-home-booking data-contact-href={contactHref}>
       <div class="booking__content">
-        <span class="section-kicker">{t.form.kicker}</span>
-        <h2 class="section-title">{bookingCopy.title}</h2>
-        <p class="section-copy">{bookingCopy.copy}</p>
+        <span class="section-kicker">{copy.kicker}</span>
+        <h2 class="section-title">{copy.title}</h2>
+        <p class="section-copy">{copy.lead}</p>
       </div>
 
-      <div class="home-inquiry-card" aria-label={t.form.kicker}>
-        <div class="home-inquiry-grid" role="list" aria-label={t.form.kicker}>
-          {bookingCopy.steps.map((step, index) => (
-            <div class="home-inquiry-field" role="listitem">
-              <span class="home-inquiry-field__icon" aria-hidden="true">
-                <Icon name={step.icon} size={21} strokeWidth={1.9} />
+      <form class="home-inquiry-card" data-home-inquiry-form>
+        <div class="home-inquiry-category" role="radiogroup" aria-label={copy.stayType}>
+          {(['camping', 'bungalow'] as const).map((category) => (
+            <label class="home-inquiry-category__card">
+              <input type="radio" name="stay" value={category} checked={category === 'camping'} data-home-category>
+              <span class="home-inquiry-category__icon" aria-hidden="true">
+                <Icon name={category === 'camping' ? 'camping' : 'bungalow'} size={22} strokeWidth={1.9} />
               </span>
-              <span class="home-inquiry-field__number">{String(index + 1).padStart(2, '0')}</span>
-              <strong>{step.label}</strong>
-            </div>
+              <strong>{copy.categories[category].title}</strong>
+              <small>{copy.categories[category].copy}</small>
+            </label>
           ))}
         </div>
-        <a class="btn btn-primary premium-button home-inquiry-submit" href={contactHref}>
-          <span>{bookingCopy.button}</span>
+
+        <div class="home-inquiry-grid">
+          <label class="home-inquiry-field">
+            <span>{copy.arrival}</span>
+            <input type="date" name="arrival" data-home-arrival>
+          </label>
+          <label class="home-inquiry-field">
+            <span>{copy.departure}</span>
+            <input type="date" name="departure" data-home-departure>
+          </label>
+          <label class="home-inquiry-field">
+            <span>{copy.stayType}</span>
+            <select name="type" data-home-stay-type>
+              {stayOptions.camping.map(([value, label]) => <option value={value} data-category="camping">{label}</option>)}
+              {stayOptions.bungalow.map(([value, label]) => <option value={value} data-category="bungalow">{label}</option>)}
+            </select>
+          </label>
+          <label class="home-inquiry-field home-inquiry-field--compact">
+            <span>{copy.adults}</span>
+            <input type="number" name="adults" min="1" value="2" inputmode="numeric" data-home-adults>
+          </label>
+        </div>
+
+        <div class="home-inquiry-toggles">
+          <label data-electricity-toggle>
+            <input type="checkbox" name="electricity" value="1">
+            <span><Icon name="electricity" size={16} />{copy.electricity}</span>
+          </label>
+          <label>
+            <input type="checkbox" name="dog" value="1">
+            <span><Icon name="dog" size={16} />{copy.dog}</span>
+          </label>
+        </div>
+
+        <a class="btn btn-primary premium-button home-inquiry-submit" href={contactHref} data-home-submit>
+          <span>{copy.button}</span>
           <Icon name="ArrowUpRight" size={17} />
         </a>
-      </div>
+      </form>
     </div>
   </div>
 </section>
 
+<script>
+  (() => {
+    const root = document.querySelector('[data-home-booking]');
+    if (!(root instanceof HTMLElement)) return;
+    const form = root.querySelector('[data-home-inquiry-form]');
+    const select = root.querySelector('[data-home-stay-type]');
+    const submit = root.querySelector('[data-home-submit]');
+    const electricityToggle = root.querySelector('[data-electricity-toggle]');
+    const contactHref = root.dataset.contactHref || '/kontakt';
+    if (!(form instanceof HTMLFormElement) || !(select instanceof HTMLSelectElement) || !(submit instanceof HTMLAnchorElement)) return;
+
+    const getCategory = () => {
+      const input = form.querySelector('input[name="stay"]:checked');
+      return input instanceof HTMLInputElement ? input.value : 'camping';
+    };
+
+    const syncOptions = () => {
+      const category = getCategory();
+      Array.from(select.options).forEach((option) => {
+        const visible = option.dataset.category === category;
+        option.hidden = !visible;
+        option.disabled = !visible;
+      });
+      if (select.selectedOptions[0]?.disabled) {
+        const first = Array.from(select.options).find((option) => !option.disabled);
+        if (first) select.value = first.value;
+      }
+      if (electricityToggle instanceof HTMLElement) electricityToggle.hidden = category !== 'camping';
+      syncHref();
+    };
+
+    const syncHref = () => {
+      const params = new URLSearchParams();
+      const category = getCategory();
+      const arrival = form.querySelector('[data-home-arrival]');
+      const departure = form.querySelector('[data-home-departure]');
+      const adults = form.querySelector('[data-home-adults]');
+      params.set('stay', category);
+      params.set('type', select.value);
+      if (arrival instanceof HTMLInputElement && arrival.value) params.set('arrival', arrival.value);
+      if (departure instanceof HTMLInputElement && departure.value) params.set('departure', departure.value);
+      if (adults instanceof HTMLInputElement && adults.value) params.set('adults', adults.value);
+      if (form.elements.namedItem('electricity') instanceof HTMLInputElement && form.elements.namedItem('electricity').checked) params.set('electricity', '1');
+      if (form.elements.namedItem('dog') instanceof HTMLInputElement && form.elements.namedItem('dog').checked) params.set('dog', '1');
+      submit.href = `${contactHref}?${params.toString()}`;
+    };
+
+    form.addEventListener('input', syncHref);
+    form.addEventListener('change', syncOptions);
+    syncOptions();
+  })();
+</script>
+
 <style>
-.booking { background: #fffaf2; }
-.booking__panel { position: relative; width: 100%; min-width: 0; display: grid; gap: clamp(28px, 4vw, 46px); padding: clamp(28px, 5vw, 60px); border-radius: 38px; overflow: hidden; background: radial-gradient(circle at 84% 12%, rgba(242,192,120,.22), transparent 34%), radial-gradient(circle at 14% 80%, rgba(60,179,113,.22), transparent 34%), linear-gradient(135deg, rgba(10,29,19,.97), rgba(22,62,40,.94)); color: #fff; box-shadow: 0 34px 100px rgba(13,34,23,.24), 0 0 54px rgba(60,179,113,.14); }
-.booking__panel::before { content: ''; position: absolute; inset: 1px; border-radius: inherit; pointer-events: none; background: linear-gradient(115deg, rgba(255,255,255,.14), transparent 28%, transparent 72%, rgba(143,224,180,.12)); mask-image: linear-gradient(#000, transparent 64%); }
+.booking {
+  background:
+    radial-gradient(circle at 16% 0%, rgba(60,179,113,.13), transparent 32%),
+    radial-gradient(circle at 82% 12%, rgba(242,192,120,.13), transparent 30%),
+    #fffaf2;
+}
+
+.booking__panel {
+  position: relative;
+  display: grid;
+  gap: clamp(26px, 4vw, 46px);
+  padding: clamp(24px, 5vw, 58px);
+  border-radius: 38px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 84% 12%, rgba(242,192,120,.22), transparent 34%),
+    radial-gradient(circle at 14% 80%, rgba(60,179,113,.22), transparent 34%),
+    linear-gradient(135deg, rgba(10,29,19,.97), rgba(22,62,40,.94));
+  color: #fff;
+  box-shadow: 0 34px 100px rgba(13,34,23,.24), 0 0 54px rgba(60,179,113,.14);
+}
+
 .booking__content,
-.home-inquiry-card { position: relative; z-index: 1; }
-.booking__content { max-width: 720px; }
+.home-inquiry-card {
+  position: relative;
+  z-index: 1;
+}
+
+.booking__content {
+  max-width: 720px;
+}
+
 .booking .section-title { color: #fff; }
 .booking .section-copy { color: rgba(255,255,255,.78); }
 .booking .section-kicker { color: #8fe0b4; }
-.home-inquiry-card { width: 100%; max-width: 100%; min-width: 0; display: grid; gap: 18px; padding: clamp(18px, 3vw, 26px); border-radius: 30px; border: 1px solid rgba(143,224,180,.24); background: radial-gradient(circle at 12% 0%, rgba(60,179,113,.20), transparent 36%), linear-gradient(145deg, rgba(255,255,255,.125), rgba(255,255,255,.065)); box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 20px 58px rgba(0,0,0,.14), 0 0 28px rgba(60,179,113,.10); box-sizing: border-box; }
-.home-inquiry-grid { width: 100%; max-width: 100%; min-width: 0; display: grid; grid-template-columns: 1fr; gap: 14px; }
-.home-inquiry-field { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "icon number" "icon label"; gap: 5px 14px; min-width: 0; width: 100%; margin: 0; padding: 17px; border: 1px solid rgba(255,255,255,.13); border-radius: 22px; background: rgba(255,255,255,.075); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); transition: transform .28s cubic-bezier(.22,1,.36,1), border-color .28s ease, background .28s ease; }
-.home-inquiry-field:hover { transform: translateY(-3px); border-color: rgba(143,224,180,.34); background: rgba(255,255,255,.105); }
-.home-inquiry-field__icon { grid-area: icon; display: grid; width: 48px; height: 48px; place-items: center; border: 1px solid rgba(143,224,180,.34); border-radius: 18px; color: #fff; background: linear-gradient(135deg, rgba(60,179,113,.92), rgba(35,119,73,.70)); box-shadow: 0 14px 34px rgba(60,179,113,.24); }
-.home-inquiry-field__number { grid-area: number; color: rgba(143,224,180,.86); font-size: .68rem; font-weight: 950; letter-spacing: .14em; }
-.home-inquiry-field strong { grid-area: label; display: block; color: #fff; font-size: clamp(1rem, 1.3vw, 1.14rem); font-weight: 950; line-height: 1.18; letter-spacing: 0; }
-.home-inquiry-submit { min-height: 62px; justify-self: start; gap: 9px; border-radius: 999px; background: linear-gradient(135deg, #63d99c, #3CB371 48%, #24794e); color: #fff; font-weight: 950; letter-spacing: .04em; text-transform: none; box-shadow: 0 18px 48px rgba(60,179,113,.32); white-space: normal; }
-@media (min-width: 760px) { .home-inquiry-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (min-width: 1080px) { .booking__panel { grid-template-columns: minmax(0, .82fr) minmax(470px, 1fr); align-items: center; } }
-@media (max-width: 899px) { .booking__panel { padding: 24px; border-radius: 30px; } .home-inquiry-card { border-radius: 24px; } }
-@media (max-width: 520px) { .booking__panel { padding: 20px; } .home-inquiry-submit { width: 100%; min-height: 58px; white-space: normal; } }
+
+.home-inquiry-card {
+  display: grid;
+  gap: 18px;
+  padding: clamp(18px, 3vw, 26px);
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.20), transparent 36%),
+    linear-gradient(145deg, rgba(255,255,255,.125), rgba(255,255,255,.065));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 20px 58px rgba(0,0,0,.14);
+}
+
+.home-inquiry-category {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.home-inquiry-category__card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 14px;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 22px;
+  background: rgba(255,255,255,.075);
+  cursor: pointer;
+  transition: transform .24s ease, border-color .24s ease, background .24s ease;
+}
+
+.home-inquiry-category__card input {
+  position: absolute;
+  opacity: 0;
+}
+
+.home-inquiry-category__card:has(input:checked),
+.home-inquiry-category__card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(143,224,180,.42);
+  background: rgba(255,255,255,.12);
+}
+
+.home-inquiry-category__icon {
+  grid-row: span 2;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(60,179,113,.92), rgba(35,119,73,.70));
+  box-shadow: 0 14px 34px rgba(60,179,113,.24);
+}
+
+.home-inquiry-category__card strong {
+  color: #fff;
+  font-weight: 950;
+  line-height: 1.15;
+}
+
+.home-inquiry-category__card small {
+  color: rgba(255,255,255,.70);
+  line-height: 1.45;
+  font-weight: 750;
+}
+
+.home-inquiry-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.home-inquiry-field {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.home-inquiry-field span {
+  color: rgba(255,255,255,.82);
+  font-size: .78rem;
+  font-weight: 950;
+}
+
+.home-inquiry-field input,
+.home-inquiry-field select {
+  display: block;
+  width: 100%;
+  min-height: 54px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 17px;
+  padding: 0 14px;
+  background: rgba(255,255,255,.11);
+  color: #fff;
+  font: inherit;
+  font-weight: 850;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.home-inquiry-field option {
+  color: #102018;
+}
+
+.home-inquiry-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.home-inquiry-toggles label {
+  cursor: pointer;
+}
+
+.home-inquiry-toggles input {
+  position: absolute;
+  opacity: 0;
+}
+
+.home-inquiry-toggles span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.84);
+  font-weight: 900;
+}
+
+.home-inquiry-toggles input:checked + span {
+  border-color: rgba(143,224,180,.44);
+  background: rgba(60,179,113,.20);
+  color: #fff;
+}
+
+.home-inquiry-submit {
+  min-height: 62px;
+  justify-self: start;
+  gap: 9px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #63d99c, #3CB371 48%, #24794e);
+  color: #fff;
+  font-weight: 950;
+  box-shadow: 0 18px 48px rgba(60,179,113,.32);
+}
+
+@media (min-width: 760px) {
+  .home-inquiry-category {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-inquiry-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(110px, .55fr);
+    align-items: end;
+  }
+}
+
+@media (min-width: 1080px) {
+  .booking__panel {
+    grid-template-columns: minmax(0, .78fr) minmax(540px, 1fr);
+    align-items: center;
+  }
+}
+
+@media (max-width: 620px) {
+  .booking__panel {
+    padding: 20px;
+    border-radius: 30px;
+  }
+
+  .home-inquiry-card {
+    border-radius: 24px;
+  }
+
+  .home-inquiry-submit {
+    width: 100%;
+    justify-content: center;
+  }
+}
 </style>

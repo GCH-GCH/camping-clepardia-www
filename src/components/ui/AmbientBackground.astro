@@ -1,0 +1,87 @@
+<div class="ambient-background" aria-hidden="true">
+  <span class="ambient-background__glow ambient-background__glow--green"></span>
+  <span class="ambient-background__glow ambient-background__glow--warm"></span>
+  <span class="ambient-background__glow ambient-background__glow--deep"></span>
+  <span class="ambient-background__grain"></span>
+</div>
+
+<style is:global>
+.ambient-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--theme-body-background, var(--color-bg-primary));
+  contain: strict;
+}
+
+.ambient-background__glow {
+  position: absolute;
+  width: min(42vw, 560px);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  filter: blur(46px);
+  opacity: .55;
+  transform: translate3d(0, 0, 0);
+  animation: ambientFloat 18s ease-in-out infinite;
+}
+
+.ambient-background__glow--green {
+  left: -8%;
+  top: 8%;
+  background: radial-gradient(circle, rgba(60,179,113,.28), transparent 68%);
+}
+
+.ambient-background__glow--warm {
+  right: -10%;
+  top: 22%;
+  background: radial-gradient(circle, rgba(242,192,120,.20), transparent 70%);
+  animation-delay: -6s;
+  animation-duration: 22s;
+}
+
+.ambient-background__glow--deep {
+  left: 28%;
+  bottom: -16%;
+  background: radial-gradient(circle, rgba(60,179,113,.18), transparent 72%);
+  animation-delay: -11s;
+  animation-duration: 26s;
+}
+
+.ambient-background__grain {
+  position: absolute;
+  inset: 0;
+  opacity: .045;
+  background-image:
+    linear-gradient(90deg, rgba(255,255,255,.22) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255,255,255,.16) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: radial-gradient(circle at 50% 22%, #000, transparent 74%);
+}
+
+@keyframes ambientFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  45% { transform: translate3d(24px, 18px, 0) scale(1.06); }
+  70% { transform: translate3d(-18px, 30px, 0) scale(.98); }
+}
+
+@media (max-width: 760px) {
+  .ambient-background__glow {
+    width: 78vw;
+    filter: blur(34px);
+    opacity: .36;
+  }
+
+  .ambient-background__glow--warm,
+  .ambient-background__glow--deep {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-background__glow {
+    animation: none !important;
+  }
+}
+</style>

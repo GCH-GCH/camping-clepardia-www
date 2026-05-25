@@ -101,23 +101,39 @@ export const pl = {
     send: 'Wyślij wiadomość',
     actions: {
       pricing: 'Sprawdź cennik',
+      camperPrice: 'Ile kosztuje kamper?',
       directions: 'Jak dojechać?',
+      centerTransit: 'Jak dojadę do centrum?',
       transit: 'Tramwaj do centrum',
+      dog: 'Czy można z psem?',
+      campingBooking: 'Czy mogę zarezerwować camping?',
       bungalow: 'Domki',
+      arrival: 'Jak wygląda przyjazd?',
       reception: 'Kontakt z recepcją',
       quiet: 'Zasady ciszy',
       maps: 'Dojazd Google Maps',
+      sctEtoll: 'SCT / e-TOLL',
       attractions: 'Atrakcje',
     },
     answers: {
+      camperPrice:
+        'Kamper kosztuje 80 PLN za noc. Do tego doliczane są osoby: dorosły 35 PLN, dziecko 4–14 lat 20 PLN. Prąd: 25 PLN, pies: 0 PLN.',
       pricing:
         'Orientacyjnie: kamper 80 PLN / noc, bus / ciężarówka 160 PLN / noc, prąd 25 PLN / noc, pies 0 PLN. Pełny kalkulator znajdziesz na stronie Cennik.',
+      centerTransit:
+        'Przystanek jest ok. 40 m od bramy. Do Starego Kleparza / centrum jest ok. 9 przystanków i ok. 14 minut jazdy tramwajem.',
       directions:
         'Najwygodniej zostawić auto lub kampera na campingu i pojechać tramwajem w stronę centrum Krakowa. Do nawigacji zalecamy używać Google Maps. Wjazd / trasa dojazdu zmieniła się w 2022 roku, dlatego starsze nawigacje mogą prowadzić nieprawidłowo.',
       transit:
         'Do centrum najwygodniej pojechać tramwajem: przystanek jest ok. 40 m od bramy, do Starego Kleparza / centrum jest ok. 9 przystanków i ok. 14 minut jazdy.',
       bungalows:
         'Domki mają osobną dostępność. Dostępne są tylko domki 2-os., 3-os. i 4-os. Ceny: 200/220 PLN, 250/300 PLN oraz 400/450 PLN zależnie od sezonu.',
+      dog:
+        'Tak, pies ma stawkę 0 PLN. Prosimy sprzątać po psie i trzymać go pod kontrolą na terenie campingu.',
+      campingBooking:
+        'Możesz wysłać zapytanie przez formularz. W sezonie letnim rezerwacje pola mogą być ograniczone, dlatego dostępność zawsze potwierdza recepcja.',
+      arrival:
+        'Po przyjeździe zatrzymaj się przy recepcji. Personel podejdzie, wskaże miejsce i oprowadzi po campingu. Rejestracja odbywa się później.',
       reception:
         'Recepcja: +48 795 294 486, email: clepardia@gmail.com. Najszybszy kontakt w sprawie dostępności to telefon lub wiadomość email.',
       camping:
@@ -126,6 +142,8 @@ export const pl = {
         'Camping Clepardia nie jest miejscem imprezowym. Cisza nocna obowiązuje od 22:00 do 07:00. Jeśli planujesz imprezować, wybierz inne miejsce.',
       maps:
         'Do nawigacji zalecamy używać Google Maps. Wjazd / trasa dojazdu zmieniła się w 2022 roku, dlatego starsze nawigacje mogą prowadzić nieprawidłowo.',
+      sctEtoll:
+        'Przed przyjazdem sprawdź aktualne zasady SCT w Krakowie. Jeśli jedziesz większym pojazdem lub zestawem, sprawdź też, czy dotyczą Cię zasady e-TOLL.',
       attractions:
         'Clepardia jest dobrą bazą do zwiedzania Krakowa, Wieliczki, Kazimierza, Ojcowa i Energylandii. Najpierw odpoczynek w zielonej bazie, potem wygodny wypad w Małopolskę.',
       fallback:

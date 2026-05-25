@@ -1,0 +1,205 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { publicAssetExists, siteAssets } from '@/data/assets';
+import { resolveContentLanguage } from '@/i18n/config';
+import { getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode);
+const guideExists = publicAssetExists(siteAssets.documents.campingGuidePdf);
+const copy = {
+  pl: {
+    kicker: 'Przyjazd bez stresu',
+    title: 'Jak wygląda przyjazd?',
+    lead: 'Przyjedź spokojnie i zatrzymaj się przy recepcji lub parkingu. Obsługa przeprowadzi Cię przez pierwsze kroki na miejscu.',
+    steps: [
+      { title: 'Zatrzymaj się przy recepcji', copy: 'Po przyjeździe stań w pobliżu recepcji lub parkingu.' },
+      { title: 'Obsługa wskaże miejsce', copy: 'Personel podejdzie, wskaże miejsce i oprowadzi po campingu.' },
+      { title: 'Rejestracja po ustawieniu', copy: 'Po ustawieniu pojazdu albo dojściu do domku odbywa się rejestracja.' },
+    ],
+    maps: 'Zalecamy Google Maps, ponieważ dojazd zmienił się w 2022 roku.',
+    guideReady: 'Pobierz Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — w przygotowaniu.',
+  },
+  en: {
+    kicker: 'Easy arrival',
+    title: 'What happens after arrival?',
+    lead: 'Arrive calmly and stop near reception or the parking area. Staff will guide you through the first steps on site.',
+    steps: [
+      { title: 'Stop near reception', copy: 'After arrival, please stop near reception or the parking area.' },
+      { title: 'Staff will show your place', copy: 'Reception staff will come to you, show your place and guide you around.' },
+      { title: 'Registration comes afterwards', copy: 'Registration is completed after you set up or reach your bungalow.' },
+    ],
+    maps: 'We recommend Google Maps because the access route changed in 2022.',
+    guideReady: 'Download Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — coming soon.',
+  },
+  de: {
+    kicker: 'Anreise ohne Stress',
+    title: 'Wie läuft die Ankunft ab?',
+    lead: 'Kommen Sie in Ruhe an und halten Sie nahe der Rezeption oder am Parkplatz. Das Team begleitet Sie durch die ersten Schritte.',
+    steps: [
+      { title: 'Bei der Rezeption halten', copy: 'Bitte halten Sie nach der Ankunft nahe der Rezeption oder am Parkplatz.' },
+      { title: 'Das Team zeigt den Platz', copy: 'Die Rezeption kommt zu Ihnen, zeigt den Platz und erklärt den Campingplatz.' },
+      { title: 'Anmeldung danach', copy: 'Die Anmeldung erfolgt nach dem Aufstellen oder nach dem Erreichen des Bungalows.' },
+    ],
+    maps: 'Wir empfehlen Google Maps, da die Zufahrt 2022 geändert wurde.',
+    guideReady: 'Camping Guide PDF herunterladen',
+    guidePending: 'Camping Guide PDF — in Vorbereitung.',
+  },
+  it: {
+    kicker: 'Arrivo senza stress',
+    title: 'Come funziona l’arrivo?',
+    lead: 'Arriva con calma e fermati vicino alla reception o al parcheggio. Il personale ti guiderà nei primi passaggi.',
+    steps: [
+      { title: 'Fermati alla reception', copy: 'All’arrivo fermati vicino alla reception o nell’area parcheggio.' },
+      { title: 'Lo staff indica il posto', copy: 'La reception verrà da te, ti indicherà la piazzola e ti accompagnerà.' },
+      { title: 'Registrazione dopo', copy: 'La registrazione viene completata dopo la sistemazione del veicolo o del bungalow.' },
+    ],
+    maps: 'Consigliamo Google Maps perché il percorso di accesso è cambiato nel 2022.',
+    guideReady: 'Scarica Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — in preparazione.',
+  },
+}[lang];
+---
+
+<section class="site-section arrival-flow reveal-section" data-after-hero>
+  <div class="container arrival-flow__grid">
+    <div class="arrival-flow__intro">
+      <span class="section-kicker">{copy.kicker}</span>
+      <h2 class="section-title">{copy.title}</h2>
+      <p class="section-copy">{copy.lead}</p>
+      <p class="arrival-flow__maps"><Icon name="map" size={18} />{copy.maps}</p>
+      {guideExists ? (
+        <a class="btn btn-glass arrival-flow__guide" href={siteAssets.documents.campingGuidePdf} target="_blank" rel="noopener noreferrer">
+          <Icon name="ticket" size={17} />
+          <span>{copy.guideReady}</span>
+        </a>
+      ) : (
+        <small class="arrival-flow__guide-pending">{copy.guidePending}</small>
+      )}
+    </div>
+
+    <div class="arrival-flow__steps">
+      {copy.steps.map((step, index) => (
+        <article class="premium-card arrival-flow__step reveal-section" style={`--reveal-delay: ${index * 80}ms`}>
+          <span>{String(index + 1).padStart(2, '0')}</span>
+          <h3>{step.title}</h3>
+          <p>{step.copy}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+.arrival-flow {
+  background:
+    radial-gradient(circle at 18% 10%, rgba(60,179,113,.13), transparent 32%),
+    radial-gradient(circle at 86% 18%, rgba(242,192,120,.12), transparent 32%),
+    var(--theme-section-background, #f7fbf4);
+}
+
+.arrival-flow__grid {
+  display: grid;
+  gap: clamp(28px, 4vw, 52px);
+  align-items: center;
+}
+
+.arrival-flow__intro {
+  max-width: 720px;
+}
+
+.arrival-flow__maps {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 22px 0 0;
+  padding: 12px 15px;
+  border-radius: 999px;
+  border: 1px solid rgba(60,179,113,.22);
+  background: rgba(60,179,113,.09);
+  color: var(--theme-heading, #102018);
+  font-weight: 900;
+}
+
+.arrival-flow__guide {
+  margin-top: 18px;
+}
+
+.arrival-flow__guide-pending {
+  display: block;
+  margin-top: 18px;
+  color: var(--theme-copy, #536359);
+  font-weight: 850;
+}
+
+.arrival-flow__steps {
+  display: grid;
+  gap: 16px;
+}
+
+.arrival-flow__step {
+  position: relative;
+  min-height: 180px;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.arrival-flow__step::after {
+  content: '';
+  position: absolute;
+  right: -44px;
+  bottom: -52px;
+  width: 150px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(60,179,113,.16), transparent 68%);
+}
+
+.arrival-flow__step span {
+  color: #3CB371;
+  font-weight: 1000;
+  letter-spacing: .12em;
+}
+
+.arrival-flow__step h3 {
+  margin: 14px 0 10px;
+  color: var(--theme-heading, #102018);
+  font-size: 1.24rem;
+  font-weight: 950;
+}
+
+.arrival-flow__step p {
+  margin: 0;
+  color: var(--theme-copy, #536359);
+  line-height: 1.68;
+  font-weight: 760;
+}
+
+@media (min-width: 980px) {
+  .arrival-flow__grid {
+    grid-template-columns: minmax(0, .86fr) minmax(420px, 1fr);
+  }
+
+  .arrival-flow__steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .arrival-flow__step:nth-child(2) {
+    transform: translateY(18px);
+  }
+}
+
+@media (max-width: 620px) {
+  .arrival-flow__maps {
+    align-items: flex-start;
+    border-radius: 18px;
+  }
+}
+</style>

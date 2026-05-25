@@ -9,6 +9,7 @@ import GalleryPage from './GalleryPage.astro';
 import CampersPage from './CampersPage.astro';
 import FamiliesPage from './FamiliesPage.astro';
 import LegalPage from './LegalPage.astro';
+import ArrivalFlowSection from '@/components/home/ArrivalFlowSection.astro';
 import { publicAssetExists, siteAssets } from '@/data/assets';
 import { pricingConfig } from '@/data/pricing';
 import type { SitePage } from '@/data/sitePages';
@@ -169,6 +170,8 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
     <p>{page.lead}</p>
   </div>
 </section>
+
+{(page.slug === 'kontakt' || page.slug === 'dojazd') && <ArrivalFlowSection languageCode={contentLanguage} />}
 
 {page.slug !== 'cennik' && page.slug !== 'kontakt' && page.slug !== 'dojazd' && page.slug !== 'atrakcje' && page.slug !== 'faq' && page.slug !== 'galeria' && page.slug !== 'dla-kamperow' && page.slug !== 'dla-rodzin' && page.slug !== 'regulamin' && page.slug !== 'polityka-prywatnosci' && (
 <section class="site-section page-detail reveal-section">

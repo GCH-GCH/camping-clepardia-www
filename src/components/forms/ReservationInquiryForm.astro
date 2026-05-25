@@ -1,7 +1,7 @@
 ---
 import { languages } from '@/data/languages';
-import { pricingConfig } from '@/data/pricing';
-import { getTranslations } from '@/i18n/config';
+import { countries } from '@/data/countries';
+import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 import Icon from '@/components/ui/Icon.astro';
 
 interface Props {
@@ -9,69 +9,116 @@ interface Props {
 }
 
 const { languageCode } = Astro.props as Props;
-const activeLanguageCode = languages.some((language) => language.code === languageCode) ? languageCode : 'pl';
-const t = getTranslations(activeLanguageCode);
-const formText = t.form;
+const lang = resolveContentLanguage(languageCode);
+const t = getTranslations(lang);
 const pricingText = t.pricing;
 const apiEndpoint = '/api/reservation-inquiry';
-
+const formText = t.form;
 const stayOptions = [
-  { id: 'camper', label: pricingText.stayTypes.camper, category: 'camping' },
-  { id: 'caravan', label: pricingText.stayTypes.caravan, category: 'camping' },
-  { id: 'tent', label: pricingText.stayTypes['tent-small'], category: 'camping' },
-  { id: 'van', label: pricingText.stayTypes.van, category: 'camping' },
-  { id: 'rooftop-tent', label: pricingText.stayTypes['rooftop-tent'], category: 'camping' },
-  { id: 'bungalow-2', label: pricingText.stayTypes['bungalow-2'], category: 'bungalow' },
-  { id: 'bungalow-3', label: pricingText.stayTypes['bungalow-3'], category: 'bungalow' },
-  { id: 'bungalow-4', label: pricingText.stayTypes['bungalow-4'], category: 'bungalow' },
+  { id: 'camper', category: 'camping', label: pricingText.stayTypes.camper },
+  { id: 'van', category: 'camping', label: pricingText.stayTypes.van },
+  { id: 'caravan', category: 'camping', label: pricingText.stayTypes.caravan },
+  { id: 'tent-small', category: 'camping', label: pricingText.stayTypes['tent-small'] },
+  { id: 'tent-large', category: 'camping', label: pricingText.stayTypes['tent-large'] },
+  { id: 'rooftop-tent', category: 'camping', label: pricingText.stayTypes['rooftop-tent'] },
+  { id: 'bus', category: 'camping', label: pricingText.stayTypes.bus },
+  { id: 'bungalow-2', category: 'bungalow', label: pricingText.stayTypes['bungalow-2'] },
+  { id: 'bungalow-3', category: 'bungalow', label: pricingText.stayTypes['bungalow-3'] },
+  { id: 'bungalow-4', category: 'bungalow', label: pricingText.stayTypes['bungalow-4'] },
 ] as const;
 
-const inquiryAddonIds = ['electricity', 'dog', 'extra-car', 'motorcycle', 'cargo-trailer'] as const;
-const addonOptions = inquiryAddonIds
-  .map((id) => pricingConfig.addons.find((addon) => addon.id === id))
-  .filter((addon): addon is (typeof pricingConfig.addons)[number] => Boolean(addon));
-const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as keyof typeof pricingText.addons] ?? fallback;
-const summaryNotes = {
-  pl: [
-    { icon: 'map', text: 'Do nawigacji zalecamy Google Maps. Dojazd zmienił się w 2022 roku.' },
-    { icon: 'check', text: 'Recepcja potwierdza dostępność, cenę i szczegóły przyjazdu.' },
-    { icon: 'warning', text: 'Camping Clepardia nie jest miejscem imprezowym.' },
-    { icon: 'clock', text: 'Check-in: camping 12:00, domki 16:00. Check-out: camping 12:00, domki 11:00.' },
-  ],
-  en: [
-    { icon: 'map', text: 'We recommend Google Maps. The access route changed in 2022.' },
-    { icon: 'check', text: 'Reception confirms availability, price and arrival details.' },
-    { icon: 'warning', text: 'Camping Clepardia is not a party campsite.' },
-    { icon: 'clock', text: 'Check-in: camping 12:00, bungalows 16:00. Check-out: camping 12:00, bungalows 11:00.' },
-  ],
-  de: [
-    { icon: 'map', text: 'Wir empfehlen Google Maps. Die Zufahrt wurde 2022 geändert.' },
-    { icon: 'check', text: 'Die Rezeption bestätigt Verfügbarkeit, Preis und Anreisedetails.' },
-    { icon: 'warning', text: 'Camping Clepardia ist kein Party-Campingplatz.' },
-    { icon: 'clock', text: 'Check-in: Camping 12:00, Bungalows 16:00. Check-out: Camping 12:00, Bungalows 11:00.' },
-  ],
-  it: [
-    { icon: 'map', text: 'Consigliamo Google Maps. L’accesso è cambiato nel 2022.' },
-    { icon: 'check', text: 'La reception conferma disponibilità, prezzo e dettagli di arrivo.' },
-    { icon: 'warning', text: 'Camping Clepardia non è un campeggio per feste.' },
-    { icon: 'clock', text: 'Check-in: camping 12:00, bungalow 16:00. Check-out: camping 12:00, bungalow 11:00.' },
-  ],
-}[activeLanguageCode] ?? [
-  { icon: 'map', text: 'We recommend Google Maps. The access route changed in 2022.' },
-  { icon: 'check', text: 'Reception confirms availability, price and arrival details.' },
-  { icon: 'warning', text: 'Camping Clepardia is not a party campsite.' },
-  { icon: 'clock', text: 'Check-in: camping 12:00, bungalows 16:00. Check-out: camping 12:00, bungalows 11:00.' },
-];
+const copy = {
+  pl: {
+    title: 'Premium zapytanie o pobyt',
+    lead: 'Najpierw wybierz Camping albo Domki. Formularz pokaże tylko te pola, które są potrzebne do konkretnego pobytu.',
+    steps: ['Wybierz Camping/Domki', 'Termin i osoby', 'Szczegóły pobytu', 'Dane kontaktowe', 'Zgody i wysyłka'],
+    camping: 'Camping',
+    campingCopy: 'Kamper, namiot, przyczepa, van lub auto z namiotem dachowym.',
+    bungalow: 'Domki',
+    bungalowCopy: 'Domki 2-, 3- i 4-osobowe.',
+    countrySearch: 'Wpisz kraj, np. de, ge, niem',
+    countryHelp: 'Wyszukiwanie działa po kodzie, nazwie i popularnych skrótach.',
+    specialNeeds: 'Osoba z niepełnosprawnością / specjalne potrzeby',
+    specialNeedsDetails: 'Napisz, czego potrzebujesz, abyśmy mogli lepiej przygotować pobyt.',
+    specialNeedsSummary: 'Zgłoszono specjalne potrzeby',
+    categorySummary: 'Rodzaj pobytu',
+    mapsInfo: 'Do nawigacji zalecamy Google Maps. Dojazd zmienił się w 2022 roku.',
+    availabilityInfo: 'Recepcja potwierdza dostępność, cenę i szczegóły przyjazdu.',
+    partyInfo: 'Camping Clepardia nie jest miejscem imprezowym.',
+    hoursInfo: 'Check-in: camping 12:00, domki 16:00. Check-out: camping 12:00, domki 11:00.',
+  },
+  en: {
+    title: 'Premium stay enquiry',
+    lead: 'Start with Camping or Bungalows. The form then shows only the fields needed for that stay type.',
+    steps: ['Choose Camping/Bungalows', 'Dates and guests', 'Stay details', 'Contact details', 'Consents and send'],
+    camping: 'Camping',
+    campingCopy: 'Motorhome, tent, caravan, van or car with rooftop tent.',
+    bungalow: 'Bungalows',
+    bungalowCopy: '2-, 3- and 4-person bungalows.',
+    countrySearch: 'Type a country, e.g. de, ge, niem',
+    countryHelp: 'Search works by code, name and common shortcuts.',
+    specialNeeds: 'Guest with a disability / special needs',
+    specialNeedsDetails: 'Tell us what you need so we can better prepare your stay.',
+    specialNeedsSummary: 'Special needs submitted',
+    categorySummary: 'Stay group',
+    mapsInfo: 'We recommend Google Maps. The access route changed in 2022.',
+    availabilityInfo: 'Reception confirms availability, price and arrival details.',
+    partyInfo: 'Camping Clepardia is not a party campsite.',
+    hoursInfo: 'Check-in: camping 12:00, bungalows 16:00. Check-out: camping 12:00, bungalows 11:00.',
+  },
+  de: {
+    title: 'Premium Anfrage für den Aufenthalt',
+    lead: 'Wählen Sie zuerst Camping oder Bungalows. Das Formular zeigt danach nur die passenden Felder.',
+    steps: ['Camping/Bungalows wählen', 'Termin und Personen', 'Aufenthaltsdetails', 'Kontaktdaten', 'Zustimmungen und Senden'],
+    camping: 'Camping',
+    campingCopy: 'Wohnmobil, Zelt, Wohnwagen, Van oder Auto mit Dachzelt.',
+    bungalow: 'Bungalows',
+    bungalowCopy: 'Bungalows für 2, 3 und 4 Personen.',
+    countrySearch: 'Land eingeben, z.B. de, ge, niem',
+    countryHelp: 'Suche nach Code, Name und gängigen Abkürzungen.',
+    specialNeeds: 'Gast mit Behinderung / besondere Bedürfnisse',
+    specialNeedsDetails: 'Schreiben Sie, was Sie benötigen, damit wir den Aufenthalt besser vorbereiten können.',
+    specialNeedsSummary: 'Besondere Bedürfnisse gemeldet',
+    categorySummary: 'Aufenthaltsgruppe',
+    mapsInfo: 'Wir empfehlen Google Maps. Die Zufahrt wurde 2022 geändert.',
+    availabilityInfo: 'Die Rezeption bestätigt Verfügbarkeit, Preis und Anreisedetails.',
+    partyInfo: 'Camping Clepardia ist kein Party-Campingplatz.',
+    hoursInfo: 'Check-in: Camping 12:00, Bungalows 16:00. Check-out: Camping 12:00, Bungalows 11:00.',
+  },
+  it: {
+    title: 'Richiesta premium di soggiorno',
+    lead: 'Inizia scegliendo Camping o Bungalow. Il modulo mostra solo i campi necessari.',
+    steps: ['Scegli Camping/Bungalow', 'Date e ospiti', 'Dettagli soggiorno', 'Dati di contatto', 'Consensi e invio'],
+    camping: 'Camping',
+    campingCopy: 'Camper, tenda, roulotte, van o auto con tenda da tetto.',
+    bungalow: 'Bungalow',
+    bungalowCopy: 'Bungalow da 2, 3 e 4 persone.',
+    countrySearch: 'Scrivi un paese, es. de, ge, niem',
+    countryHelp: 'La ricerca funziona per codice, nome e abbreviazioni comuni.',
+    specialNeeds: 'Ospite con disabilità / esigenze speciali',
+    specialNeedsDetails: 'Scrivi cosa ti serve per prepararci meglio al tuo soggiorno.',
+    specialNeedsSummary: 'Esigenze speciali indicate',
+    categorySummary: 'Gruppo soggiorno',
+    mapsInfo: 'Consigliamo Google Maps. L’accesso è cambiato nel 2022.',
+    availabilityInfo: 'La reception conferma disponibilità, prezzo e dettagli di arrivo.',
+    partyInfo: 'Camping Clepardia non è un campeggio per feste.',
+    hoursInfo: 'Check-in: camping 12:00, bungalow 16:00. Check-out: camping 12:00, bungalow 11:00.',
+  },
+}[lang];
+
+const formConfig = {
+  copy,
+  countries,
+  lang,
+};
 ---
 
 <section class="site-section reservation-inquiry reveal-section" data-reservation-inquiry>
   <div class="container">
     <div class="reservation-inquiry__head">
       <span class="section-kicker">{formText.kicker}</span>
-      <h2 class="section-title">{formText.title}</h2>
-      <p class="section-copy">
-        {formText.lead}
-      </p>
+      <h2 class="section-title">{copy.title}</h2>
+      <p class="section-copy">{copy.lead}</p>
     </div>
 
     <div class="reservation-inquiry__layout">
@@ -83,8 +130,101 @@ const summaryNotes = {
 
         <div class="reservation-inquiry__errors" data-form-errors role="alert" hidden></div>
 
-        <fieldset class="reservation-inquiry__group reveal-section" style="--reveal-delay: 0ms">
-          <legend>{formText.data}</legend>
+        <nav class="reservation-inquiry__steps" aria-label={formText.kicker}>
+          {copy.steps.map((step, index) => (
+            <span><strong>{String(index + 1).padStart(2, '0')}</strong>{step}</span>
+          ))}
+        </nav>
+
+        <fieldset class="reservation-inquiry__group reservation-inquiry__group--choice reveal-section" data-booking-category-group>
+          <legend>{copy.steps[0]}</legend>
+          <div class="reservation-inquiry__category-options">
+            <label class="reservation-inquiry__category-card">
+              <input type="radio" name="bookingCategory" value="camping" checked data-booking-category>
+              <span><Icon name="camping" size={24} /></span>
+              <strong>{copy.camping}</strong>
+              <small>{copy.campingCopy}</small>
+            </label>
+            <label class="reservation-inquiry__category-card">
+              <input type="radio" name="bookingCategory" value="bungalow" data-booking-category>
+              <span><Icon name="bungalow" size={24} /></span>
+              <strong>{copy.bungalow}</strong>
+              <small>{copy.bungalowCopy}</small>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="reservation-inquiry__group reveal-section">
+          <legend>{copy.steps[1]}</legend>
+          <div class="reservation-inquiry__fields">
+            <label class="reservation-inquiry__field" data-field="arrival">
+              <span>{formText.arrival} *</span>
+              <input id="arrival" name="arrival" type="date" required data-arrival data-required aria-describedby="arrivalError">
+              <small id="arrivalError" data-field-error="arrival"></small>
+            </label>
+
+            <label class="reservation-inquiry__field" data-field="departure">
+              <span>{formText.departure} *</span>
+              <input id="departure" name="departure" type="date" required data-departure data-required aria-describedby="departureError">
+              <small id="departureError" data-field-error="departure"></small>
+            </label>
+          </div>
+          <p class="reservation-inquiry__nights">{formText.nights}: <strong data-nights-label>{formText.completeDates}</strong></p>
+
+          <div class="reservation-inquiry__counters">
+            {[
+              ['adults', formText.adults, '2'],
+              ['children', formText.children, '0'],
+              ['toddlers', formText.toddlers, '0'],
+            ].map(([name, label, value]) => (
+              <div class="reservation-counter">
+                <label for={name}>{label}</label>
+                <div>
+                  <button type="button" data-counter={name} data-delta="-1" aria-label={`${pricingText.decrement} ${label}`}>-</button>
+                  <input id={name} name={name} type="number" min="0" value={value} inputmode="numeric" data-counter-input={name}>
+                  <button type="button" data-counter={name} data-delta="1" aria-label={`${pricingText.increment} ${label}`}>+</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset class="reservation-inquiry__group reveal-section" data-stay-group>
+          <legend>{copy.steps[2]}</legend>
+          <div class="reservation-inquiry__options">
+            {stayOptions.map((option, index) => (
+              <label class="reservation-inquiry__option" data-stay-option-category={option.category}>
+                <input type="radio" name="stayType" value={option.id} required checked={index === 0} data-category={option.category} data-label={option.label} aria-describedby="stayTypeError">
+                <span>{option.label}</span>
+              </label>
+            ))}
+          </div>
+          <small class="reservation-inquiry__field-error" id="stayTypeError" data-field-error="stayType"></small>
+
+          <div class="reservation-inquiry__addons">
+            <label class="reservation-inquiry__addon" data-addon-id="electricity">
+              <input type="checkbox" name="addons" value="electricity" data-label={pricingText.addons.electricity}>
+              <span><Icon name="electricity" size={17} />{pricingText.addons.electricity}</span>
+            </label>
+            <label class="reservation-inquiry__addon" data-addon-id="dog">
+              <input type="checkbox" name="addons" value="dog" data-label={pricingText.addons.dog}>
+              <span><Icon name="dog" size={17} />{pricingText.addons.dog}</span>
+            </label>
+          </div>
+
+          <label class="reservation-inquiry__consent reservation-inquiry__consent--soft" data-field="specialNeeds">
+            <input id="specialNeeds" name="specialNeeds" type="checkbox" data-special-needs>
+            <span>{copy.specialNeeds}</span>
+          </label>
+
+          <label class="reservation-inquiry__field reservation-inquiry__field--textarea reservation-inquiry__special-details" data-special-needs-details hidden>
+            <span>{copy.specialNeedsDetails}</span>
+            <textarea id="specialNeedsDetails" name="specialNeedsDetails" rows="3" placeholder={copy.specialNeedsDetails}></textarea>
+          </label>
+        </fieldset>
+
+        <fieldset class="reservation-inquiry__group reveal-section">
+          <legend>{copy.steps[3]}</legend>
           <div class="reservation-inquiry__fields">
             <label class="reservation-inquiry__field" data-field="fullName">
               <span>{formText.fullName} *</span>
@@ -103,163 +243,85 @@ const summaryNotes = {
               <input id="phone" name="phone" type="tel" autocomplete="tel">
             </label>
 
-            <label class="reservation-inquiry__field" data-field="country">
-              <span>{formText.country}</span>
-              <input id="country" name="country" type="text" autocomplete="country-name">
-            </label>
+            <div class="reservation-inquiry__field reservation-country" data-field="country" data-country-combobox>
+              <label for="countrySearch">{formText.country}</label>
+              <div class="reservation-country__control">
+                <Icon name="search" size={17} />
+                <input id="countrySearch" name="countrySearch" type="text" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="countryOptions" placeholder={copy.countrySearch} data-country-search>
+                <input id="country" name="country" type="hidden" data-country-code>
+              </div>
+              <div class="reservation-country__list" id="countryOptions" role="listbox" data-country-list hidden></div>
+              <small>{copy.countryHelp}</small>
+            </div>
 
             <label class="reservation-inquiry__field" data-field="contactLanguage">
               <span>{formText.contactLanguage}</span>
               <select id="contactLanguage" name="contactLanguage">
                 {languages.map((language) => (
-                  <option value={language.code} selected={language.code === activeLanguageCode}>
-                    {language.name}
-                  </option>
+                  <option value={language.code} selected={language.code === lang}>{language.name}</option>
                 ))}
               </select>
             </label>
           </div>
         </fieldset>
 
-        <fieldset class="reservation-inquiry__group reveal-section" style="--reveal-delay: 80ms">
-          <legend>{formText.dates}</legend>
-          <div class="reservation-inquiry__fields">
-            <label class="reservation-inquiry__field" data-field="arrival">
-              <span>{formText.arrival} *</span>
-              <input id="arrival" name="arrival" type="date" required data-arrival data-required aria-describedby="arrivalError">
-              <small id="arrivalError" data-field-error="arrival"></small>
-            </label>
+        <fieldset class="reservation-inquiry__group reveal-section">
+          <legend>{copy.steps[4]}</legend>
+          <label class="reservation-inquiry__field reservation-inquiry__field--textarea" data-field="message">
+            <span>{formText.message}</span>
+            <textarea id="message" name="message" rows="5" placeholder={formText.messagePlaceholder}></textarea>
+          </label>
 
-            <label class="reservation-inquiry__field" data-field="departure">
-              <span>{formText.departure} *</span>
-              <input id="departure" name="departure" type="date" required data-departure data-required aria-describedby="departureError">
-              <small id="departureError" data-field-error="departure"></small>
-            </label>
-          </div>
-          <p class="reservation-inquiry__nights">{formText.nights}: <strong data-nights-label>{formText.completeDates}</strong></p>
+          <div class="reservation-inquiry__season-notice" data-season-banner hidden>{formText.summerNotice}</div>
+          <div class="reservation-inquiry__rule-notice">{formText.quietRule}</div>
+
+          <label class="reservation-inquiry__consent" data-field="quietConsent">
+            <input id="quietConsent" name="quietConsent" type="checkbox" required data-required aria-describedby="quietConsentError">
+            <span>{formText.quietConsent}</span>
+          </label>
+          <small class="reservation-inquiry__field-error" id="quietConsentError" data-field-error="quietConsent"></small>
+
+          <label class="reservation-inquiry__consent" data-field="consent">
+            <input id="consent" name="consent" type="checkbox" required data-required aria-describedby="consentError">
+            <span>{formText.consent}</span>
+          </label>
+          <small class="reservation-inquiry__field-error" id="consentError" data-field-error="consent"></small>
         </fieldset>
 
-        <fieldset class="reservation-inquiry__group reveal-section" data-stay-group style="--reveal-delay: 160ms">
-          <legend>{formText.stayType} *</legend>
-          <div class="reservation-inquiry__options">
-            {stayOptions.map((option) => (
-              <label class="reservation-inquiry__option">
-                <input type="radio" name="stayType" value={option.id} required data-category={option.category} data-label={option.label} aria-describedby="stayTypeError">
-                <span>{option.label}</span>
-              </label>
-            ))}
-          </div>
-          <small class="reservation-inquiry__field-error" id="stayTypeError" data-field-error="stayType"></small>
-        </fieldset>
-
-        <fieldset class="reservation-inquiry__group reveal-section" style="--reveal-delay: 240ms">
-          <legend>{formText.people}</legend>
-          <div class="reservation-inquiry__counters">
-            <div class="reservation-counter">
-              <label for="adults">{formText.adults}</label>
-              <div>
-                <button type="button" data-counter="adults" data-delta="-1" aria-label={`${pricingText.decrement} ${formText.adults}`}>-</button>
-                <input id="adults" name="adults" type="number" min="0" value="2" inputmode="numeric" data-counter-input="adults">
-                <button type="button" data-counter="adults" data-delta="1" aria-label={`${pricingText.increment} ${formText.adults}`}>+</button>
-              </div>
-            </div>
-
-            <div class="reservation-counter">
-              <label for="children">{formText.children}</label>
-              <div>
-                <button type="button" data-counter="children" data-delta="-1" aria-label={`${pricingText.decrement} ${formText.children}`}>-</button>
-                <input id="children" name="children" type="number" min="0" value="0" inputmode="numeric" data-counter-input="children">
-                <button type="button" data-counter="children" data-delta="1" aria-label={`${pricingText.increment} ${formText.children}`}>+</button>
-              </div>
-            </div>
-
-            <div class="reservation-counter">
-              <label for="toddlers">{formText.toddlers}</label>
-              <div>
-                <button type="button" data-counter="toddlers" data-delta="-1" aria-label={`${pricingText.decrement} ${formText.toddlers}`}>-</button>
-                <input id="toddlers" name="toddlers" type="number" min="0" value="0" inputmode="numeric" data-counter-input="toddlers">
-                <button type="button" data-counter="toddlers" data-delta="1" aria-label={`${pricingText.increment} ${formText.toddlers}`}>+</button>
-              </div>
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset class="reservation-inquiry__group reveal-section" style="--reveal-delay: 320ms">
-          <legend>{formText.extras}</legend>
-          <div class="reservation-inquiry__addons">
-            {addonOptions.map((addon) => (
-              <label class="reservation-inquiry__addon">
-                <input type="checkbox" name="addons" value={addon.id} data-label={getAddonLabel(addon.id, addon.label)}>
-                <span>{getAddonLabel(addon.id, addon.label)}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <label class="reservation-inquiry__field reservation-inquiry__field--textarea reveal-section" data-field="message" style="--reveal-delay: 400ms">
-          <span>{formText.message}</span>
-          <textarea id="message" name="message" rows="5" placeholder={formText.messagePlaceholder}></textarea>
-        </label>
-
-        <div class="reservation-inquiry__season-notice" data-season-banner hidden>
-          {formText.summerNotice}
-        </div>
-
-        <div class="reservation-inquiry__rule-notice">
-          {formText.quietRule}
-        </div>
-
-        <label class="reservation-inquiry__consent" data-field="quietConsent">
-          <input id="quietConsent" name="quietConsent" type="checkbox" required data-required aria-describedby="quietConsentError">
-          <span>{formText.quietConsent}</span>
-        </label>
-        <small class="reservation-inquiry__field-error" id="quietConsentError" data-field-error="quietConsent"></small>
-
-        <label class="reservation-inquiry__consent" data-field="consent">
-          <input id="consent" name="consent" type="checkbox" required data-required aria-describedby="consentError">
-          <span>{formText.consent}</span>
-        </label>
-        <small class="reservation-inquiry__field-error" id="consentError" data-field-error="consent"></small>
-
-        <button
-          class="btn btn-primary reservation-inquiry__submit"
-          type="submit"
-          data-submit-button
-          data-default-label={formText.submit}
-          data-loading-label={formText.loading}
-        >
+        <button class="btn btn-primary reservation-inquiry__submit" type="submit" data-submit-button data-default-label={formText.submit} data-loading-label={formText.loading}>
           {formText.submit}
         </button>
 
-        <div class="reservation-inquiry__success" data-success role="status" tabindex="-1" hidden>
-          {formText.success}
-        </div>
+        <div class="reservation-inquiry__success" data-success role="status" tabindex="-1" hidden>{formText.success}</div>
       </form>
 
       <aside class="premium-card reservation-inquiry__summary" aria-live="polite">
         <span class="section-kicker">{formText.summary}</span>
         <h3>{formText.summary}</h3>
-        <p data-summary-empty>
-          {formText.summaryEmpty}
-        </p>
+        <p data-summary-empty>{formText.summaryEmpty}</p>
 
         <div class="reservation-inquiry__summary-details" data-summary-details hidden>
+          <div><span>{copy.categorySummary}</span><strong data-summary-category>{copy.camping}</strong></div>
           <div><span>{formText.term}</span><strong data-summary-dates>{formText.toComplete}</strong></div>
           <div><span>{formText.nights}</span><strong data-summary-nights>{formText.toComplete}</strong></div>
           <div><span>{formText.stayType}</span><strong data-summary-stay>{formText.toComplete}</strong></div>
           <div><span>{formText.people}</span><strong data-summary-people>2 {formText.adults}</strong></div>
           <div><span>{formText.extras}</span><strong data-summary-addons>{formText.noAddons}</strong></div>
+          <div><span>{copy.specialNeeds}</span><strong data-summary-special>{formText.noAddons}</strong></div>
           <div><span>{formText.countrySummary}</span><strong data-summary-country>{formText.toComplete}</strong></div>
-          <div><span>{formText.language}</span><strong data-summary-language>{activeLanguageCode.toUpperCase()}</strong></div>
+          <div><span>{formText.language}</span><strong data-summary-language>{lang.toUpperCase()}</strong></div>
           <div><span>{formText.season}</span><strong data-summary-season>{formText.toComplete}</strong></div>
         </div>
 
-        <p class="reservation-inquiry__summary-notice" data-summary-notice hidden>
-          {formText.summerNotice}
-        </p>
+        <p class="reservation-inquiry__summary-notice" data-summary-notice hidden>{formText.summerNotice}</p>
 
         <div class="reservation-inquiry__summary-info" aria-label={formText.summary}>
-          {summaryNotes.map((note) => (
+          {[
+            { icon: 'map', text: copy.mapsInfo },
+            { icon: 'check', text: copy.availabilityInfo },
+            { icon: 'warning', text: copy.partyInfo },
+            { icon: 'clock', text: copy.hoursInfo },
+          ].map((note) => (
             <div>
               <span aria-hidden="true"><Icon name={note.icon} size={17} /></span>
               <p>{note.text}</p>
@@ -271,7 +333,7 @@ const summaryNotes = {
   </div>
 </section>
 
-<script define:vars={{ formText, pricingText, apiEndpoint }}>
+<script define:vars={{ formText, pricingText, apiEndpoint, formConfig }}>
   (() => {
     const root = document.querySelector('[data-reservation-inquiry]');
     if (!root) return;
@@ -287,31 +349,60 @@ const summaryNotes = {
     const summaryEmpty = root.querySelector('[data-summary-empty]');
     const summaryDetails = root.querySelector('[data-summary-details]');
     const summaryNotice = root.querySelector('[data-summary-notice]');
+    const countrySearch = root.querySelector('[data-country-search]');
+    const countryCode = root.querySelector('[data-country-code]');
+    const countryList = root.querySelector('[data-country-list]');
+    const specialNeeds = root.querySelector('[data-special-needs]');
+    const specialDetails = root.querySelector('[data-special-needs-details]');
     const DAY = 24 * 60 * 60 * 1000;
     const summerNotice = formText.summerNotice;
+    const countries = formConfig.countries || [];
+    const lang = formConfig.lang || 'en';
+    const copy = formConfig.copy || {};
     let isSubmitting = false;
     let lastSubmitAt = 0;
+    let activeCountryIndex = -1;
+    let countryMatches = [];
 
     const summary = {
+      category: root.querySelector('[data-summary-category]'),
       dates: root.querySelector('[data-summary-dates]'),
       nights: root.querySelector('[data-summary-nights]'),
       stay: root.querySelector('[data-summary-stay]'),
       people: root.querySelector('[data-summary-people]'),
       addons: root.querySelector('[data-summary-addons]'),
+      special: root.querySelector('[data-summary-special]'),
       country: root.querySelector('[data-summary-country]'),
       language: root.querySelector('[data-summary-language]'),
       season: root.querySelector('[data-summary-season]'),
     };
 
-    const setText = (element, value) => {
-      if (element) element.textContent = value;
+    const normalize = (value = '') => value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/ł/g, 'l')
+      .trim();
+    const setText = (element, value) => { if (element) element.textContent = value; };
+    const getField = (name) => form?.elements.namedItem(name);
+    const getInput = (name) => {
+      const field = getField(name);
+      return field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement ? field : null;
+    };
+    const getErrorElement = (name) => root.querySelector(`[data-field-error="${name}"]`);
+    const setFieldError = (name, message = '') => {
+      const field = getInput(name);
+      const errorElement = getErrorElement(name);
+      const wrapper = root.querySelector(`[data-field="${name}"]`);
+      if (field) field.setAttribute('aria-invalid', message ? 'true' : 'false');
+      if (wrapper) wrapper.classList.toggle('is-invalid', Boolean(message));
+      setText(errorElement, message);
     };
     const setErrorBox = (errors) => {
       if (!errorBox) return;
       errorBox.replaceChildren();
       errorBox.hidden = errors.length === 0;
       if (!errors.length) return;
-
       const heading = document.createElement('strong');
       heading.textContent = formText.errorHeading;
       const list = document.createElement('ul');
@@ -332,57 +423,21 @@ const summaryNotes = {
           : submitButton.dataset.defaultLabel || formText.submit;
       }
     };
-    const getField = (name) => form?.elements.namedItem(name);
-    const getInput = (name) => {
-      const field = getField(name);
-      return field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement ? field : null;
-    };
-    const getErrorElement = (name) => root.querySelector(`[data-field-error="${name}"]`);
-    const setFieldError = (name, message = '') => {
-      const field = getInput(name);
-      const errorElement = getErrorElement(name);
-      const wrapper = root.querySelector(`[data-field="${name}"]`);
-      if (field) field.setAttribute('aria-invalid', message ? 'true' : 'false');
-      if (wrapper) wrapper.classList.toggle('is-invalid', Boolean(message));
-      setText(errorElement, message);
-    };
-    const setStayError = (message = '') => {
-      const stayGroup = root.querySelector('[data-stay-group]');
-      root.querySelectorAll('input[name="stayType"]').forEach((input) => input.setAttribute('aria-invalid', message ? 'true' : 'false'));
-      stayGroup?.classList.toggle('is-invalid', Boolean(message));
-      setText(getErrorElement('stayType'), message);
-    };
     const parseDate = (value) => {
       if (!value) return null;
       const parts = value.split('-').map(Number);
       if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) return null;
       const date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
-      if (date.getUTCFullYear() !== parts[0] || date.getUTCMonth() !== parts[1] - 1 || date.getUTCDate() !== parts[2]) return null;
-      return date;
+      return date.getUTCFullYear() === parts[0] && date.getUTCMonth() === parts[1] - 1 && date.getUTCDate() === parts[2] ? date : null;
     };
     const addDays = (date, days) => new Date(date.getTime() + days * DAY);
-    const toDateValue = (date) => {
-      const year = date.getUTCFullYear();
-      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-      const day = String(date.getUTCDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-    const formatDate = (date) => {
-      const day = String(date.getUTCDate()).padStart(2, '0');
-      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-      return `${day}.${month}.${date.getUTCFullYear()}`;
-    };
-    const formatNights = (nights) => {
-      const mod10 = nights % 10;
-      const mod100 = nights % 100;
-      return nights === 1
-        ? pricingText.night.one
-        : pricingText.night.other.replace('{count}', String(nights));
-    };
+    const toDateValue = (date) => `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+    const formatDate = (date) => `${String(date.getUTCDate()).padStart(2, '0')}.${String(date.getUTCMonth() + 1).padStart(2, '0')}.${date.getUTCFullYear()}`;
     const normalizeCounterValue = (value) => {
       const numericValue = Number(value);
       return Number.isFinite(numericValue) ? Math.max(0, numericValue) : 0;
     };
+    const formatNights = (nights) => nights === 1 ? pricingText.night.one : pricingText.night.other.replace('{count}', String(nights));
     const getNights = () => {
       const arrival = parseDate(arrivalInput?.value);
       const departure = parseDate(departureInput?.value);
@@ -400,14 +455,15 @@ const summaryNotes = {
       return dates;
     };
     const isSummerDate = (date) => [6, 7, 8].includes(date.getUTCMonth() + 1);
+    const getBookingCategory = () => {
+      const selected = root.querySelector('input[name="bookingCategory"]:checked');
+      return selected instanceof HTMLInputElement ? selected.value : 'camping';
+    };
+    const getCategoryLabel = () => getBookingCategory() === 'bungalow' ? copy.bungalow : copy.camping;
     const getSelectedStay = () => {
       const selected = root.querySelector('input[name="stayType"]:checked');
       if (!(selected instanceof HTMLInputElement)) return null;
-      return {
-        id: selected.value,
-        label: selected.dataset.label || selected.value,
-        category: selected.dataset.category || 'camping',
-      };
+      return { id: selected.value, label: selected.dataset.label || selected.value, category: selected.dataset.category || 'camping' };
     };
     const getSelectedAddons = () =>
       Array.from(root.querySelectorAll('input[name="addons"]:checked')).map((input) => ({
@@ -426,6 +482,11 @@ const summaryNotes = {
       if (people.toddlers > 0) parts.push(`${people.toddlers} ${formText.toddlers}`);
       return parts.length ? parts.join(', ') : formText.noPeople;
     };
+    const getLanguageLabel = () => {
+      const language = getInput('contactLanguage');
+      if (!(language instanceof HTMLSelectElement)) return lang.toUpperCase();
+      return language.selectedOptions[0]?.textContent?.trim() || language.value;
+    };
     const hasSummerCampingNotice = () => {
       const stay = getSelectedStay();
       const arrival = parseDate(arrivalInput?.value);
@@ -433,48 +494,146 @@ const summaryNotes = {
       if (!stay || stay.category !== 'camping') return false;
       return getRangeDates(arrival, departure).some(isSummerDate);
     };
-    const getLanguageLabel = () => {
-      const language = getInput('contactLanguage');
-      if (!(language instanceof HTMLSelectElement)) return 'Polski';
-      return language.selectedOptions[0]?.textContent?.trim() || language.value;
-    };
+    const getCountryLabel = () => countrySearch instanceof HTMLInputElement ? countrySearch.value.trim() : '';
+    const hasSpecialNeeds = () => specialNeeds instanceof HTMLInputElement && specialNeeds.checked;
     const hasAnySummaryData = () => {
-      const fields = ['fullName', 'email', 'phone', 'country', 'arrival', 'departure', 'message'];
-      return fields.some((name) => Boolean(getInput(name)?.value.trim())) || Boolean(getSelectedStay()) || getSelectedAddons().length > 0;
+      const fields = ['fullName', 'email', 'phone', 'arrival', 'departure', 'message'];
+      return fields.some((name) => Boolean(getInput(name)?.value.trim())) || Boolean(getSelectedStay()) || getSelectedAddons().length > 0 || Boolean(getCountryLabel()) || hasSpecialNeeds();
+    };
+    const setStayError = (message = '') => {
+      const stayGroup = root.querySelector('[data-stay-group]');
+      root.querySelectorAll('input[name="stayType"]').forEach((input) => input.setAttribute('aria-invalid', message ? 'true' : 'false'));
+      stayGroup?.classList.toggle('is-invalid', Boolean(message));
+      setText(getErrorElement('stayType'), message);
+    };
+    const syncStayCategory = () => {
+      const category = getBookingCategory();
+      root.dataset.bookingCategory = category;
+      root.querySelectorAll('[data-stay-option-category]').forEach((option) => {
+        const visible = option.dataset.stayOptionCategory === category;
+        option.hidden = !visible;
+        const input = option.querySelector('input');
+        if (input instanceof HTMLInputElement) {
+          input.disabled = !visible;
+          if (!visible) input.checked = false;
+        }
+      });
+      const checked = root.querySelector('input[name="stayType"]:checked');
+      if (!(checked instanceof HTMLInputElement)) {
+        const first = root.querySelector(`input[name="stayType"][data-category="${category}"]`);
+        if (first instanceof HTMLInputElement) first.checked = true;
+      }
+      const electricity = root.querySelector('[data-addon-id="electricity"]');
+      if (electricity instanceof HTMLElement) {
+        electricity.hidden = category !== 'camping';
+        const input = electricity.querySelector('input');
+        if (input instanceof HTMLInputElement && category !== 'camping') input.checked = false;
+      }
+    };
+    const renderCountries = (matches) => {
+      if (!(countryList instanceof HTMLElement) || !(countrySearch instanceof HTMLInputElement)) return;
+      countryList.replaceChildren();
+      countrySearch.setAttribute('aria-expanded', matches.length ? 'true' : 'false');
+      countryList.hidden = matches.length === 0;
+      matches.forEach((country, index) => {
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.role = 'option';
+        option.className = 'reservation-country__option';
+        option.dataset.countryIndex = String(index);
+        option.setAttribute('aria-selected', String(index === activeCountryIndex));
+        const flag = document.createElement('span');
+        flag.className = `reservation-country__flag ${country.flagClass}`;
+        const label = document.createElement('strong');
+        label.textContent = country.names[lang] || country.names.en;
+        const code = document.createElement('small');
+        code.textContent = country.code;
+        option.append(flag, label, code);
+        option.addEventListener('click', () => selectCountry(country));
+        countryList.appendChild(option);
+      });
+    };
+    const findCountries = (query) => {
+      const normalized = normalize(query);
+      if (!normalized) return countries.slice(0, 8);
+      return countries
+        .map((country) => {
+          const values = [
+            country.code,
+            country.names.pl,
+            country.names.en,
+            country.names.de,
+            country.names.it,
+            ...(country.aliases || []),
+          ].map(normalize);
+          const exact = values.some((value) => value === normalized);
+          const starts = values.some((value) => value.startsWith(normalized));
+          const includes = values.some((value) => value.includes(normalized));
+          return { country, score: exact ? 3 : starts ? 2 : includes ? 1 : 0 };
+        })
+        .filter((item) => item.score > 0)
+        .sort((a, b) => b.score - a.score || a.country.names.en.localeCompare(b.country.names.en))
+        .slice(0, 8)
+        .map((item) => item.country);
+    };
+    const selectCountry = (country) => {
+      if (countrySearch instanceof HTMLInputElement) {
+        countrySearch.value = country.names[lang] || country.names.en;
+        countrySearch.setAttribute('aria-expanded', 'false');
+      }
+      if (countryCode instanceof HTMLInputElement) countryCode.value = country.code;
+      activeCountryIndex = -1;
+      countryMatches = [];
+      renderCountries([]);
+      updateSummary();
+    };
+    const syncCountrySearch = () => {
+      if (!(countrySearch instanceof HTMLInputElement)) return;
+      const value = countrySearch.value.trim();
+      if (countryCode instanceof HTMLInputElement) countryCode.value = '';
+      countryMatches = findCountries(value);
+      activeCountryIndex = countryMatches.length ? 0 : -1;
+      renderCountries(countryMatches);
+      updateSummary();
     };
     const updateSummary = () => {
+      syncStayCategory();
       const arrival = parseDate(arrivalInput?.value);
       const departure = parseDate(departureInput?.value);
       const nights = getNights();
       const stay = getSelectedStay();
       const people = getPeople();
       const addons = getSelectedAddons();
-      const country = getInput('country')?.value.trim();
       const hasNotice = hasSummerCampingNotice();
 
-      if (arrivalInput) {
+      if (arrivalInput instanceof HTMLInputElement) {
         const today = new Date();
         const todayUtc = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
         arrivalInput.min = toDateValue(todayUtc);
       }
-      if (departureInput && arrival) departureInput.min = toDateValue(addDays(arrival, 1));
+      if (departureInput instanceof HTMLInputElement && arrival) departureInput.min = toDateValue(addDays(arrival, 1));
+      if (specialDetails instanceof HTMLElement) specialDetails.hidden = !hasSpecialNeeds();
 
       setText(nightsLabel, nights > 0 ? formatNights(nights) : formText.completeDates);
-      seasonBanner.hidden = !hasNotice;
-      summaryNotice.hidden = !hasNotice;
-      if (!summaryNotice.hidden) setText(summaryNotice, summerNotice);
+      if (seasonBanner instanceof HTMLElement) seasonBanner.hidden = !hasNotice;
+      if (summaryNotice instanceof HTMLElement) {
+        summaryNotice.hidden = !hasNotice;
+        if (!summaryNotice.hidden) setText(summaryNotice, summerNotice);
+      }
 
       const hasData = hasAnySummaryData();
-      summaryEmpty.hidden = hasData;
-      summaryDetails.hidden = !hasData;
+      if (summaryEmpty instanceof HTMLElement) summaryEmpty.hidden = hasData;
+      if (summaryDetails instanceof HTMLElement) summaryDetails.hidden = !hasData;
       if (!hasData) return;
 
+      setText(summary.category, getCategoryLabel());
       setText(summary.dates, arrival && departure && nights > 0 ? `${formatDate(arrival)} - ${formatDate(departure)}` : formText.toComplete);
       setText(summary.nights, nights > 0 ? formatNights(nights) : formText.toComplete);
       setText(summary.stay, stay?.label ?? formText.toComplete);
       setText(summary.people, getPeopleSummary(people));
       setText(summary.addons, addons.length ? addons.map((addon) => addon.label).join(', ') : formText.noAddons);
-      setText(summary.country, country || formText.toComplete);
+      setText(summary.special, hasSpecialNeeds() ? copy.specialNeedsSummary : formText.noAddons);
+      setText(summary.country, getCountryLabel() || formText.toComplete);
       setText(summary.language, getLanguageLabel());
       setText(summary.season, hasNotice ? formText.summerSeason : arrival && departure ? formText.outsideSummer : formText.toComplete);
     };
@@ -487,14 +646,9 @@ const summaryNotes = {
       const stay = getSelectedStay();
       const consent = getInput('consent');
       const quietConsent = getInput('quietConsent');
-
       ['fullName', 'email', 'arrival', 'departure', 'quietConsent', 'consent'].forEach((name) => setFieldError(name));
       setStayError();
-
-      if (!fullName) {
-        errors.push(formText.validation.fullName);
-        setFieldError('fullName', formText.validation.fullName);
-      }
+      if (!fullName) { errors.push(formText.validation.fullName); setFieldError('fullName', formText.validation.fullName); }
       if (!email) {
         errors.push(formText.validation.email);
         setFieldError('email', formText.validation.email);
@@ -502,10 +656,7 @@ const summaryNotes = {
         errors.push(formText.validation.emailFormat);
         setFieldError('email', formText.validation.emailFormat);
       }
-      if (!arrival) {
-        errors.push(formText.validation.arrival);
-        setFieldError('arrival', formText.validation.arrival);
-      }
+      if (!arrival) { errors.push(formText.validation.arrival); setFieldError('arrival', formText.validation.arrival); }
       if (!departure) {
         errors.push(formText.validation.departure);
         setFieldError('departure', formText.validation.departure);
@@ -513,10 +664,7 @@ const summaryNotes = {
         errors.push(formText.validation.departureAfterArrival);
         setFieldError('departure', formText.validation.departureAfterArrival);
       }
-      if (!stay) {
-        errors.push(formText.validation.stayType);
-        setStayError(formText.validation.stayType);
-      }
+      if (!stay) { errors.push(formText.validation.stayType); setStayError(formText.validation.stayType); }
       if (!(quietConsent instanceof HTMLInputElement) || !quietConsent.checked) {
         errors.push(formText.validation.quietConsent);
         setFieldError('quietConsent', formText.validation.quietConsent);
@@ -525,9 +673,7 @@ const summaryNotes = {
         errors.push(formText.validation.consent);
         setFieldError('consent', formText.validation.consent);
       }
-
       setErrorBox(errors);
-
       return errors.length === 0;
     };
     const collectPayload = () => {
@@ -536,13 +682,14 @@ const summaryNotes = {
       const departure = parseDate(departureInput?.value);
       const stay = getSelectedStay();
       const addons = getSelectedAddons();
-
       return {
         fullName: getInput('fullName')?.value.trim() ?? '',
         email: getInput('email')?.value.trim() ?? '',
         phone: getInput('phone')?.value.trim() ?? '',
-        country: getInput('country')?.value.trim() ?? '',
+        country: getCountryLabel(),
+        countryCode: countryCode instanceof HTMLInputElement ? countryCode.value : '',
         contactLanguage: getLanguageLabel(),
+        bookingCategory: getBookingCategory(),
         arrivalIso: arrival ? toDateValue(arrival) : '',
         departureIso: departure ? toDateValue(departure) : '',
         arrival: arrival ? formatDate(arrival) : '',
@@ -553,6 +700,8 @@ const summaryNotes = {
         stayCategory: stay?.category ?? '',
         people,
         addons: addons.map((addon) => addon.label),
+        specialNeeds: hasSpecialNeeds(),
+        specialNeedsDetails: getInput('specialNeedsDetails')?.value.trim() ?? '',
         message: getInput('message')?.value.trim() ?? '',
         summerNotice: hasSummerCampingNotice(),
         quietConsent: Boolean(getInput('quietConsent')?.checked),
@@ -566,10 +715,11 @@ const summaryNotes = {
     const buildMailBody = (payload) => [
       formText.mailTitle,
       '',
+      `${copy.categorySummary}: ${payload.bookingCategory}`,
       `${formText.mailLabels.fullName}: ${payload.fullName}`,
       `${formText.mailLabels.email}: ${payload.email}`,
       `${formText.mailLabels.phone}: ${payload.phone || formText.mailLabels.notProvided}`,
-      `${formText.mailLabels.country}: ${payload.country || formText.mailLabels.notProvided}`,
+      `${formText.mailLabels.country}: ${payload.country || formText.mailLabels.notProvided} ${payload.countryCode ? `(${payload.countryCode})` : ''}`,
       `${formText.mailLabels.contactLanguage}: ${payload.contactLanguage}`,
       '',
       `${formText.mailLabels.term}: ${payload.arrival} - ${payload.departure}`,
@@ -579,26 +729,22 @@ const summaryNotes = {
       `${formText.mailLabels.children}: ${payload.people.children}`,
       `${formText.mailLabels.toddlers}: ${payload.people.toddlers}`,
       `${formText.mailLabels.addons}: ${payload.addons.length ? payload.addons.join(', ') : formText.mailLabels.none}`,
+      `${copy.specialNeeds}: ${payload.specialNeeds ? formText.mailLabels.accepted : formText.mailLabels.notApplicable}`,
+      `${copy.specialNeedsDetails}: ${payload.specialNeedsDetails || formText.mailLabels.none}`,
       '',
       `${formText.mailLabels.summerNotice}: ${payload.summerNotice ? summerNotice : formText.mailLabels.notApplicable}`,
       `${formText.mailLabels.quietConsent}: ${payload.quietConsent ? formText.mailLabels.accepted : formText.mailLabels.notApplicable}`,
       '',
       `${formText.mailLabels.message}: ${payload.message || formText.mailLabels.none}`,
     ].join('\n');
-
     const submitToBackend = async (payload) => {
       const response = await fetch(apiEndpoint, {
         method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          accept: 'application/json',
-        },
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
         body: JSON.stringify(payload),
       });
-
       const contentType = response.headers.get('content-type') || '';
       const data = contentType.includes('application/json') ? await response.json() : null;
-
       if (!response.ok || !data?.ok) {
         const backendErrors = data?.errors ? Object.values(data.errors) : [data?.message || formText.networkError];
         const error = new Error(backendErrors.join('\n'));
@@ -606,15 +752,42 @@ const summaryNotes = {
         error.status = response.status;
         throw error;
       }
-
       return data;
     };
-
     const showSuccess = () => {
       if (successBox) {
         successBox.hidden = false;
         successBox.focus({ preventScroll: true });
         successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+    const applyQueryParams = () => {
+      const params = new URLSearchParams(window.location.search);
+      const categoryParam = params.get('stay') || params.get('category');
+      if (categoryParam) {
+        const categoryInput = root.querySelector(`input[name="bookingCategory"][value="${categoryParam === 'domki' ? 'bungalow' : categoryParam}"]`);
+        if (categoryInput instanceof HTMLInputElement) categoryInput.checked = true;
+      }
+      syncStayCategory();
+      const type = params.get('type');
+      if (type) {
+        const typeInput = root.querySelector(`input[name="stayType"][value="${CSS.escape(type)}"]`);
+        if (typeInput instanceof HTMLInputElement && !typeInput.disabled) typeInput.checked = true;
+      }
+      ['arrival', 'departure', 'adults', 'children', 'toddlers'].forEach((name) => {
+        const value = params.get(name);
+        const input = getInput(name);
+        if (value && input instanceof HTMLInputElement) input.value = value;
+      });
+      ['electricity', 'dog'].forEach((id) => {
+        const value = params.get(id);
+        const input = root.querySelector(`input[name="addons"][value="${id}"]`);
+        if (input instanceof HTMLInputElement) input.checked = value === '1' || value === 'true';
+      });
+      const countryParam = params.get('country');
+      if (countryParam) {
+        const country = findCountries(countryParam)[0];
+        if (country) selectCountry(country);
       }
     };
 
@@ -630,12 +803,10 @@ const summaryNotes = {
         errorBox?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
-
       const payload = collectPayload();
       const mailBody = buildMailBody(payload);
       setSubmitting(true);
       setErrorBox([]);
-
       try {
         const result = await submitToBackend(payload);
         console.log('Zapytanie Camping Clepardia przyjete przez backend:', result);
@@ -647,34 +818,12 @@ const summaryNotes = {
           errorBox?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           return;
         }
-
         console.warn('Backend formularza niedostepny lub zwrocil blad. Uruchamiam lokalny fallback mock.', error);
         console.log('Gotowa tresc maila do recepcji Camping Clepardia:\n' + mailBody);
         console.log('Dane formularza zapytania Camping Clepardia:', payload);
         showSuccess();
       } finally {
         setSubmitting(false);
-      }
-    });
-
-    form?.addEventListener('submit:legacy-disabled', (event) => {
-      event.preventDefault();
-      updateSummary();
-      if (!validate()) {
-        const firstInvalid = form.querySelector('[aria-invalid="true"]');
-        if (firstInvalid instanceof HTMLElement) firstInvalid.focus({ preventScroll: true });
-        errorBox?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-      }
-
-      const payload = collectPayload();
-      const mailBody = buildMailBody(payload);
-      console.log('Gotowa treść maila do recepcji Camping Clepardia:\n' + mailBody);
-      console.log('Dane formularza zapytania Camping Clepardia:', payload);
-      if (successBox) {
-        successBox.hidden = false;
-        successBox.focus({ preventScroll: true });
-        successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     });
 
@@ -694,27 +843,52 @@ const summaryNotes = {
         const name = button.dataset.counter;
         const delta = Number(button.dataset.delta ?? 0);
         const input = root.querySelector(`[data-counter-input="${name}"]`);
-        if (input instanceof HTMLInputElement) {
-          input.value = String(Math.max(0, normalizeCounterValue(input.value || 0) + delta));
-        }
+        if (input instanceof HTMLInputElement) input.value = String(Math.max(0, normalizeCounterValue(input.value || 0) + delta));
         updateSummary();
-        if (errorBox && !errorBox.hidden) validate();
       });
     });
+    root.querySelectorAll('[data-booking-category]').forEach((input) => {
+      input.addEventListener('change', updateSummary);
+    });
+    specialNeeds?.addEventListener('change', updateSummary);
+    countrySearch?.addEventListener('input', syncCountrySearch);
+    countrySearch?.addEventListener('focus', syncCountrySearch);
+    countrySearch?.addEventListener('keydown', (event) => {
+      if (!countryMatches.length) return;
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        activeCountryIndex = Math.min(countryMatches.length - 1, activeCountryIndex + 1);
+        renderCountries(countryMatches);
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        activeCountryIndex = Math.max(0, activeCountryIndex - 1);
+        renderCountries(countryMatches);
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+        selectCountry(countryMatches[Math.max(0, activeCountryIndex)]);
+      } else if (event.key === 'Escape') {
+        renderCountries([]);
+      }
+    });
+    document.addEventListener('click', (event) => {
+      if (event.target instanceof Element && !event.target.closest('[data-country-combobox]')) renderCountries([]);
+    });
 
+    applyQueryParams();
     updateSummary();
   })();
 </script>
 
 <style>
 .reservation-inquiry {
+  position: relative;
   background:
     radial-gradient(circle at 14% 10%, rgba(60,179,113,.14), transparent 32%),
     linear-gradient(180deg, #f7fbf4, #eef6ef);
 }
 
 .reservation-inquiry__head {
-  max-width: 880px;
+  max-width: 900px;
   margin-bottom: clamp(34px, 5vw, 56px);
 }
 
@@ -727,13 +901,17 @@ const summaryNotes = {
 
 .reservation-inquiry__form,
 .reservation-inquiry__summary {
-  border-radius: 28px;
+  border-radius: 30px;
 }
 
 .reservation-inquiry__form {
   display: grid;
   gap: 20px;
   padding: clamp(20px, 3vw, 34px);
+  border-color: rgba(60,179,113,.16);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(60,179,113,.10), transparent 34%),
+    rgba(255,255,255,.84);
 }
 
 .reservation-inquiry__honeypot {
@@ -746,6 +924,30 @@ const summaryNotes = {
   white-space: nowrap;
 }
 
+.reservation-inquiry__steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reservation-inquiry__steps span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(60,179,113,.16);
+  border-radius: 999px;
+  color: #24553a;
+  background: rgba(60,179,113,.08);
+  font-size: .76rem;
+  font-weight: 900;
+}
+
+.reservation-inquiry__steps strong {
+  color: #3CB371;
+}
+
 .reservation-inquiry__group {
   border: 1px solid rgba(60,179,113,.14);
   margin: 0;
@@ -753,12 +955,13 @@ const summaryNotes = {
   border-radius: 24px;
   background:
     radial-gradient(circle at 96% 0%, rgba(60,179,113,.11), transparent 34%),
-    linear-gradient(145deg, rgba(255,255,255,.74), rgba(255,255,255,.56));
+    linear-gradient(145deg, rgba(255,255,255,.78), rgba(255,255,255,.58));
   box-shadow: 0 16px 48px rgba(17,40,28,.055), inset 0 1px 0 rgba(255,255,255,.60);
 }
 
 .reservation-inquiry__group legend,
 .reservation-inquiry__field > span,
+.reservation-country > label,
 .reservation-counter label {
   color: #13291d;
   font-weight: 950;
@@ -773,26 +976,29 @@ const summaryNotes = {
   background: rgba(60,179,113,.09);
   color: #236b45;
   font-size: .8rem;
-  letter-spacing: .11em;
-  text-transform: uppercase;
+  letter-spacing: .06em;
 }
 
 .reservation-inquiry__fields,
 .reservation-inquiry__counters,
 .reservation-inquiry__addons,
-.reservation-inquiry__options {
+.reservation-inquiry__options,
+.reservation-inquiry__category-options {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
 }
 
-.reservation-inquiry__field {
+.reservation-inquiry__field,
+.reservation-country {
+  position: relative;
   display: grid;
   gap: 8px;
   min-width: 0;
 }
 
 .reservation-inquiry__field > span,
+.reservation-country > label,
 .reservation-counter label {
   font-size: .84rem;
 }
@@ -808,11 +1014,11 @@ const summaryNotes = {
   min-height: 54px;
   border: 1px solid rgba(25,70,44,.14);
   border-radius: 17px;
-  background: rgba(255,255,255,.82);
+  background: rgba(255,255,255,.84);
   color: #102018;
   font: inherit;
-  font-weight: 800;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.72), 0 10px 28px rgba(17,40,28,.04);
+  font-weight: 820;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
   transition: border-color .22s ease, box-shadow .22s ease, background .22s ease, transform .22s ease;
 }
 
@@ -822,7 +1028,7 @@ const summaryNotes = {
 }
 
 .reservation-inquiry textarea {
-  min-height: 150px;
+  min-height: 140px;
   padding: 16px 14px;
   resize: vertical;
   line-height: 1.6;
@@ -838,37 +1044,30 @@ const summaryNotes = {
   box-shadow: 0 0 0 4px rgba(60,179,113,.16), 0 14px 38px rgba(17,40,28,.08);
 }
 
+.reservation-inquiry__field small,
+.reservation-inquiry__field-error,
+.reservation-country small {
+  min-height: 18px;
+  color: #6b7a70;
+  font-size: .78rem;
+  font-weight: 820;
+}
+
 .reservation-inquiry__field.is-invalid input,
 .reservation-inquiry__field.is-invalid select,
 .reservation-inquiry__field.is-invalid textarea {
-  border-color: rgba(197, 67, 67, .64);
+  border-color: rgba(197,67,67,.64);
   box-shadow: 0 0 0 4px rgba(197,67,67,.10);
 }
 
-.reservation-inquiry__field small,
-.reservation-inquiry__field-error {
-  min-height: 18px;
-  color: #a43e34;
-  font-size: .78rem;
-  font-weight: 850;
-}
-
-.reservation-inquiry__nights {
-  margin: 14px 0 0;
-  color: #536359;
-  font-weight: 850;
-}
-
-.reservation-inquiry__nights strong {
-  color: #143321;
-}
-
+.reservation-inquiry__category-card,
 .reservation-inquiry__option,
 .reservation-inquiry__addon {
   position: relative;
   cursor: pointer;
 }
 
+.reservation-inquiry__category-card input,
 .reservation-inquiry__option input,
 .reservation-inquiry__addon input {
   position: absolute;
@@ -876,11 +1075,63 @@ const summaryNotes = {
   pointer-events: none;
 }
 
+.reservation-inquiry__category-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px 14px;
+  padding: 18px;
+  border: 1px solid rgba(25,70,44,.12);
+  border-radius: 22px;
+  background: rgba(255,255,255,.70);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.62);
+  transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
+}
+
+.reservation-inquiry__category-card > span {
+  grid-row: span 2;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 19px;
+  color: #fff;
+  background: linear-gradient(135deg, rgba(60,179,113,.92), rgba(35,119,73,.70));
+  box-shadow: 0 14px 34px rgba(60,179,113,.24);
+}
+
+.reservation-inquiry__category-card strong {
+  color: #143321;
+  font-size: 1.05rem;
+  font-weight: 950;
+}
+
+.reservation-inquiry__category-card small {
+  color: #5c685f;
+  line-height: 1.45;
+  font-weight: 760;
+}
+
+.reservation-inquiry__category-card:hover,
+.reservation-inquiry__category-card:has(input:checked) {
+  transform: translateY(-2px);
+  border-color: rgba(60,179,113,.40);
+  background: #fff;
+  box-shadow: 0 16px 42px rgba(17,40,28,.10);
+}
+
+.reservation-inquiry__option[hidden],
+.reservation-inquiry__addon[hidden],
+.reservation-inquiry__special-details[hidden],
+.reservation-country__list[hidden] {
+  display: none !important;
+}
+
 .reservation-inquiry__option span,
 .reservation-inquiry__addon span {
   min-height: 62px;
-  display: grid;
-  place-items: center start;
+  display: flex;
+  align-items: center;
+  gap: 9px;
   padding: 16px 42px 16px 17px;
   border-radius: 18px;
   border: 1px solid rgba(25,70,44,.12);
@@ -917,6 +1168,16 @@ const summaryNotes = {
   box-shadow: 0 0 0 6px rgba(60,179,113,.14);
 }
 
+.reservation-inquiry__nights {
+  margin: 14px 0 0;
+  color: #536359;
+  font-weight: 850;
+}
+
+.reservation-inquiry__nights strong {
+  color: #143321;
+}
+
 .reservation-counter {
   padding: 16px;
   border-radius: 20px;
@@ -943,16 +1204,76 @@ const summaryNotes = {
   color: #1f7048;
   font-size: 1.2rem;
   font-weight: 950;
-  transition: transform .22s ease, background .22s ease;
-}
-
-.reservation-counter button:hover {
-  transform: translateY(-1px);
-  background: rgba(60,179,113,.20);
 }
 
 .reservation-counter input {
   text-align: center;
+}
+
+.reservation-country__control {
+  position: relative;
+}
+
+.reservation-country__control svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #3CB371;
+}
+
+.reservation-country__control input[type="text"] {
+  padding-left: 42px;
+}
+
+.reservation-country__list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% - 18px);
+  z-index: 30;
+  display: grid;
+  gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid rgba(60,179,113,.18);
+  border-radius: 18px;
+  background: rgba(255,255,255,.98);
+  box-shadow: 0 24px 64px rgba(17,40,28,.16);
+}
+
+.reservation-country__option {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #102018;
+  text-align: left;
+  cursor: pointer;
+}
+
+.reservation-country__option:hover,
+.reservation-country__option[aria-selected="true"] {
+  background: rgba(60,179,113,.11);
+}
+
+.reservation-country__flag {
+  width: 20px;
+  height: 15px;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.08);
+}
+
+.reservation-country__option small {
+  color: #3d6b4f;
+  font-weight: 950;
 }
 
 .reservation-inquiry__consent {
@@ -976,9 +1297,14 @@ const summaryNotes = {
   accent-color: #3CB371;
 }
 
+.reservation-inquiry__consent--soft {
+  margin-top: 12px;
+}
+
 .reservation-inquiry__season-notice,
 .reservation-inquiry__success,
-.reservation-inquiry__errors {
+.reservation-inquiry__errors,
+.reservation-inquiry__rule-notice {
   padding: 16px 18px;
   border-radius: 20px;
   line-height: 1.6;
@@ -991,16 +1317,13 @@ const summaryNotes = {
   color: #775321;
 }
 
-.reservation-inquiry__rule-notice {
-  padding: 16px 18px;
-  border-radius: 20px;
-  border: 1px solid rgba(60,179,113,.26);
+.reservation-inquiry__rule-notice,
+.reservation-inquiry__consent[data-field="quietConsent"] {
+  border-color: rgba(60,179,113,.34);
   background:
-    radial-gradient(circle at 14% 0%, rgba(60,179,113,.12), transparent 34%),
-    rgba(232,249,240,.94);
+    radial-gradient(circle at 8% 0%, rgba(60,179,113,.16), transparent 38%),
+    linear-gradient(145deg, rgba(232,249,240,.98), rgba(255,255,255,.82));
   color: #24553a;
-  line-height: 1.62;
-  font-weight: 900;
 }
 
 .reservation-inquiry__success {
@@ -1026,7 +1349,7 @@ const summaryNotes = {
 }
 
 .reservation-inquiry__submit {
-  min-height: 56px;
+  min-height: 62px;
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -1035,9 +1358,9 @@ const summaryNotes = {
   background: linear-gradient(135deg, #63d99c, #3CB371 48%, #24794e);
   color: #fff;
   font-weight: 950;
-  letter-spacing: .08em;
+  letter-spacing: .06em;
   text-transform: uppercase;
-  box-shadow: 0 18px 48px rgba(60,179,113,.32);
+  box-shadow: 0 22px 56px rgba(60,179,113,.30);
   transition: transform .22s ease, box-shadow .22s ease, filter .22s ease;
 }
 
@@ -1047,22 +1370,18 @@ const summaryNotes = {
   box-shadow: 0 22px 58px rgba(60,179,113,.40);
 }
 
-.reservation-inquiry__submit:disabled {
-  cursor: wait;
-  opacity: .72;
-  transform: none;
-  filter: saturate(82%);
-}
-
 .reservation-inquiry__summary {
   position: sticky;
   top: 104px;
+  overflow: hidden;
   padding: clamp(24px, 3vw, 32px);
   color: #fff;
+  border-color: rgba(143,224,180,.18);
   background:
-    linear-gradient(145deg, rgba(9,27,17,.94), rgba(16,38,26,.88)),
-    radial-gradient(circle at 82% 18%, rgba(60,179,113,.24), transparent 36%);
-  border-color: rgba(255,255,255,.14);
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.26), transparent 34%),
+    radial-gradient(circle at 92% 16%, rgba(242,192,120,.16), transparent 34%),
+    linear-gradient(145deg, rgba(9,28,18,.96), rgba(17,45,30,.91));
+  box-shadow: 0 30px 88px rgba(0,0,0,.22), 0 0 46px rgba(60,179,113,.18), inset 0 1px 0 rgba(255,255,255,.13);
 }
 
 .reservation-inquiry__summary .section-kicker {
@@ -1118,81 +1437,6 @@ const summaryNotes = {
   font-weight: 850;
 }
 
-@media (min-width: 760px) {
-  .reservation-inquiry__fields,
-  .reservation-inquiry__counters,
-  .reservation-inquiry__addons {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .reservation-inquiry__options {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 1080px) {
-  .reservation-inquiry__layout {
-    grid-template-columns: minmax(0, 1.85fr) minmax(360px, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
-  .reservation-inquiry__submit {
-    width: 100%;
-  }
-}
-
-/* Task 48: final form UX polish */
-.reservation-inquiry__form {
-  border-color: rgba(60,179,113,.16);
-  background:
-    radial-gradient(circle at 8% 0%, rgba(60,179,113,.10), transparent 34%),
-    rgba(255,255,255,.82);
-}
-
-.reservation-inquiry input[type="text"],
-.reservation-inquiry input[type="email"],
-.reservation-inquiry input[type="tel"],
-.reservation-inquiry input[type="date"],
-.reservation-inquiry input[type="number"],
-.reservation-inquiry select,
-.reservation-inquiry textarea {
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
-}
-
-.reservation-inquiry__option span,
-.reservation-inquiry__addon span,
-.reservation-counter,
-.reservation-inquiry__consent {
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.62), 0 10px 28px rgba(17,40,28,.045);
-}
-
-.reservation-inquiry__rule-notice,
-.reservation-inquiry__consent[data-field="quietConsent"] {
-  border-color: rgba(60,179,113,.34);
-  background:
-    radial-gradient(circle at 8% 0%, rgba(60,179,113,.16), transparent 38%),
-    linear-gradient(145deg, rgba(232,249,240,.98), rgba(255,255,255,.82));
-}
-
-.reservation-inquiry__submit {
-  min-height: 62px;
-  box-shadow: 0 22px 56px rgba(60,179,113,.30);
-}
-
-.reservation-inquiry__summary {
-  overflow: hidden;
-  border-color: rgba(143,224,180,.18);
-  background:
-    radial-gradient(circle at 18% 0%, rgba(60,179,113,.26), transparent 34%),
-    radial-gradient(circle at 92% 16%, rgba(242,192,120,.16), transparent 34%),
-    linear-gradient(145deg, rgba(9,28,18,.96), rgba(17,45,30,.91));
-  box-shadow:
-    0 30px 88px rgba(0,0,0,.22),
-    0 0 46px rgba(60,179,113,.18),
-    inset 0 1px 0 rgba(255,255,255,.13);
-}
-
 .reservation-inquiry__summary-info {
   display: grid;
   gap: 10px;
@@ -1231,6 +1475,28 @@ const summaryNotes = {
   font-weight: 760;
 }
 
+@media (min-width: 760px) {
+  .reservation-inquiry__fields,
+  .reservation-inquiry__counters,
+  .reservation-inquiry__addons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reservation-inquiry__options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .reservation-inquiry__category-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1080px) {
+  .reservation-inquiry__layout {
+    grid-template-columns: minmax(0, 1.85fr) minmax(360px, 1fr);
+  }
+}
+
 html[data-theme="dark"] .reservation-inquiry__form,
 html[data-theme="dark"] .reservation-inquiry__group {
   border-color: rgba(143,224,180,.16);
@@ -1240,9 +1506,10 @@ html[data-theme="dark"] .reservation-inquiry__group {
 }
 
 html[data-theme="dark"] .reservation-inquiry__group legend,
-html[data-theme="dark"] .reservation-inquiry__group legend,
 html[data-theme="dark"] .reservation-inquiry__field > span,
-html[data-theme="dark"] .reservation-counter label {
+html[data-theme="dark"] .reservation-country > label,
+html[data-theme="dark"] .reservation-counter label,
+html[data-theme="dark"] .reservation-inquiry__category-card strong {
   color: #e8f8ec;
 }
 
@@ -1256,10 +1523,36 @@ html[data-theme="dark"] .reservation-inquiry textarea,
 html[data-theme="dark"] .reservation-inquiry__option span,
 html[data-theme="dark"] .reservation-inquiry__addon span,
 html[data-theme="dark"] .reservation-counter,
-html[data-theme="dark"] .reservation-inquiry__consent {
+html[data-theme="dark"] .reservation-inquiry__consent,
+html[data-theme="dark"] .reservation-inquiry__category-card {
   border-color: rgba(143,224,180,.15);
   background: rgba(255,255,255,.07);
   color: #f4fbf6;
+}
+
+html[data-theme="dark"] .reservation-inquiry__category-card small,
+html[data-theme="dark"] .reservation-inquiry__nights,
+html[data-theme="dark"] .reservation-inquiry__field small,
+html[data-theme="dark"] .reservation-country small {
+  color: rgba(244,251,246,.72);
+}
+
+html[data-theme="dark"] .reservation-country__list {
+  background: rgba(13,32,24,.98);
+}
+
+html[data-theme="dark"] .reservation-country__option {
+  color: #f4fbf6;
+}
+
+@media (max-width: 640px) {
+  .reservation-inquiry__submit {
+    width: 100%;
+  }
+
+  .reservation-inquiry__summary {
+    position: static;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

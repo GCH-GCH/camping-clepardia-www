@@ -301,6 +301,17 @@ html[data-theme] body {
   background: var(--theme-body-background);
 }
 
+.main-content,
+.site-navbar,
+.footer,
+.scroll-to-top,
+.floating-chat,
+.camper-scroll-progress,
+.page-scroll-hint {
+  position: relative;
+  z-index: 1;
+}
+
 /* ==================== */
 /* TYPOGRAPHY STYLES */
 /* ==================== */

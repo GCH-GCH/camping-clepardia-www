@@ -10,13 +10,15 @@ const chatTexts = t.chat;
 const hasCampyIcon = publicAssetExists(campyIcon);
 const chatConfigEncoded = Buffer.from(JSON.stringify(chatTexts), 'utf8').toString('base64');
 const quickActions = [
-  { key: 'pricing', icon: 'pricing', label: chatTexts.actions.pricing },
-  { key: 'transit', icon: 'tram', label: chatTexts.actions.transit ?? chatTexts.actions.directions },
+  { key: 'camperPrice', icon: 'camper', label: chatTexts.actions.camperPrice ?? chatTexts.actions.pricing },
+  { key: 'centerTransit', icon: 'tram', label: chatTexts.actions.centerTransit ?? chatTexts.actions.transit ?? chatTexts.actions.directions },
+  { key: 'dog', icon: 'dog', label: chatTexts.actions.dog ?? 'Dog' },
+  { key: 'campingBooking', icon: 'calendar', label: chatTexts.actions.campingBooking ?? chatTexts.actions.pricing },
   { key: 'bungalow', icon: 'bungalow', label: chatTexts.actions.bungalow },
-  { key: 'maps', icon: 'map', label: chatTexts.actions.maps },
-  { key: 'reception', icon: 'phone', label: chatTexts.actions.reception },
+  { key: 'arrival', icon: 'route', label: chatTexts.actions.arrival ?? 'Arrival' },
   { key: 'quiet', icon: 'moon', label: chatTexts.actions.quiet },
-  { key: 'attractions', icon: 'attractions', label: chatTexts.actions.attractions ?? 'Atrakcje' },
+  { key: 'maps', icon: 'map', label: chatTexts.actions.maps },
+  { key: 'sctEtoll', icon: 'route', label: chatTexts.actions.sctEtoll ?? 'SCT / e-TOLL' },
 ];
 ---
 
@@ -217,20 +219,24 @@ const quickActions = [
     const resolveAnswer = (rawPrompt) => {
       const prompt = rawPrompt.toLowerCase();
 
-      if (rawPrompt === chatTexts.actions.pricing) return chatTexts.answers.pricing;
-      if (rawPrompt === chatTexts.actions.directions || rawPrompt === chatTexts.actions.transit) return chatTexts.answers.transit ?? chatTexts.answers.directions;
+      if (rawPrompt === chatTexts.actions.pricing || rawPrompt === chatTexts.actions.camperPrice) return chatTexts.answers.camperPrice ?? chatTexts.answers.pricing;
+      if (rawPrompt === chatTexts.actions.directions || rawPrompt === chatTexts.actions.transit || rawPrompt === chatTexts.actions.centerTransit) return chatTexts.answers.centerTransit ?? chatTexts.answers.transit ?? chatTexts.answers.directions;
+      if (rawPrompt === chatTexts.actions.dog) return chatTexts.answers.dog ?? chatTexts.answers.camping;
+      if (rawPrompt === chatTexts.actions.campingBooking) return chatTexts.answers.campingBooking ?? chatTexts.answers.camping;
       if (rawPrompt === chatTexts.actions.bungalow) return chatTexts.answers.bungalows;
+      if (rawPrompt === chatTexts.actions.arrival) return chatTexts.answers.arrival ?? chatTexts.answers.maps;
       if (rawPrompt === chatTexts.actions.reception) return chatTexts.answers.reception;
       if (rawPrompt === chatTexts.actions.quiet) return chatTexts.answers.quiet;
       if (rawPrompt === chatTexts.actions.maps) return chatTexts.answers.maps;
+      if (rawPrompt === chatTexts.actions.sctEtoll) return chatTexts.answers.sctEtoll ?? chatTexts.answers.maps;
       if (rawPrompt === chatTexts.actions.attractions) return chatTexts.answers.attractions ?? chatTexts.answers.fallback;
 
-      if (prompt.includes('cennik') || prompt.includes('cena') || prompt.includes('koszt')) {
-        return chatTexts.answers.pricing;
+      if (prompt.includes('kamper') || prompt.includes('camper') || prompt.includes('motorhome') || prompt.includes('cennik') || prompt.includes('cena') || prompt.includes('koszt')) {
+        return chatTexts.answers.camperPrice ?? chatTexts.answers.pricing;
       }
 
       if (prompt.includes('tram') || prompt.includes('centrum') || prompt.includes('transport')) {
-        return chatTexts.answers.transit ?? chatTexts.answers.directions;
+        return chatTexts.answers.centerTransit ?? chatTexts.answers.transit ?? chatTexts.answers.directions;
       }
 
       if (prompt.includes('dojaz') || prompt.includes('jak dojecha') || prompt.includes('maps') || prompt.includes('map') || prompt.includes('nawig')) {
@@ -239,6 +245,22 @@ const quickActions = [
 
       if (prompt.includes('atrakc') || prompt.includes('krak') || prompt.includes('wielicz') || prompt.includes('energy') || prompt.includes('zwiedz')) {
         return chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      }
+
+      if (prompt.includes('pies') || prompt.includes('psa') || prompt.includes('dog') || prompt.includes('hund') || prompt.includes('cane')) {
+        return chatTexts.answers.dog ?? chatTexts.answers.camping;
+      }
+
+      if (prompt.includes('przyjazd') || prompt.includes('arrival') || prompt.includes('ankunft') || prompt.includes('arrivo')) {
+        return chatTexts.answers.arrival ?? chatTexts.answers.maps;
+      }
+
+      if (prompt.includes('rezerw') || prompt.includes('booking') || prompt.includes('reserve') || prompt.includes('reserv')) {
+        return chatTexts.answers.campingBooking ?? chatTexts.answers.reception;
+      }
+
+      if (prompt.includes('sct') || prompt.includes('e-toll') || prompt.includes('etoll')) {
+        return chatTexts.answers.sctEtoll ?? chatTexts.answers.maps;
       }
 
       if (prompt.includes('cisza') || prompt.includes('imprez') || prompt.includes('quiet') || prompt.includes('party') || prompt.includes('ruhe')) {

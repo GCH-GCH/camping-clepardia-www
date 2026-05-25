@@ -86,11 +86,6 @@ const heroStyle = [
   <div class="hero__floating-badges" aria-label="Camping Clepardia">
     {t.home.hero.badges.map((badge) => <span>{badge}</span>)}
   </div>
-
-  <a href="#after-hero" class="hero__scroll-indicator" aria-label={t.home.hero.scroll}>
-    <span class="hero__mouse" aria-hidden="true"><i></i></span>
-    <span class="hero__scroll-text">{t.home.hero.scroll}</span>
-  </a>
 </section>
 
 <script>
@@ -122,21 +117,6 @@ const heroStyle = [
     window.addEventListener('scroll', requestUpdate, { passive: true });
     window.addEventListener('resize', requestUpdate, { passive: true });
     updateHeroParallax();
-  }
-
-  const scrollIndicator = document.querySelector('.hero__scroll-indicator');
-  if (scrollIndicator instanceof HTMLAnchorElement) {
-    scrollIndicator.addEventListener('click', (event) => {
-      const target = document.getElementById('after-hero') ?? document.getElementById('dlaczego');
-      if (!(target instanceof HTMLElement)) return;
-
-      event.preventDefault();
-      event.stopPropagation();
-      const offset = window.innerWidth >= 1080 ? 86 : 76;
-      const top = Math.max(0, target.getBoundingClientRect().top + window.scrollY - offset);
-      window.scrollTo({ top, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
-      history.pushState(null, '', '#after-hero');
-    });
   }
 </script>
 

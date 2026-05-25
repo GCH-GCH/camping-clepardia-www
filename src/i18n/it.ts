@@ -109,23 +109,39 @@ export const it = {
     send: 'Invia messaggio',
     actions: {
       pricing: 'Controlla i prezzi',
+      camperPrice: 'Quanto costa il camper?',
       directions: 'Come arrivare?',
+      centerTransit: 'Come arrivo al centro?',
       transit: 'Tram per il centro',
+      dog: 'Posso venire con il cane?',
+      campingBooking: 'Posso prenotare il camping?',
       bungalow: 'Bungalow',
+      arrival: 'Come funziona l’arrivo?',
       reception: 'Contatto reception',
       quiet: 'Silenzio notturno',
       maps: 'Indicazioni Google Maps',
+      sctEtoll: 'SCT / e-TOLL',
       attractions: 'Attrazioni',
     },
     answers: {
+      camperPrice:
+        'Il camper costa 80 PLN a notte. Le persone si aggiungono a parte: adulto 35 PLN, bambino 4-14 anni 20 PLN. Elettricità: 25 PLN, cane: 0 PLN.',
       pricing:
         'Indicativamente: camper 80 PLN / notte, camion / bus 160 PLN / notte, elettricità 25 PLN / notte, cane 0 PLN. Il calcolatore completo è nella pagina Prezzi.',
+      centerTransit:
+        'La fermata è a circa 40 m dal cancello. Verso Stary Kleparz / centro sono circa 9 fermate e circa 14 minuti in tram.',
       directions:
         'La soluzione più comoda è lasciare auto o camper al campeggio e prendere il tram verso il centro di Cracovia. Per la navigazione consigliamo Google Maps. L’ingresso / percorso di accesso è cambiato nel 2022, quindi i navigatori più vecchi possono indicare una strada sbagliata.',
       transit:
         'Il modo più comodo per raggiungere il centro è il tram: la fermata è a circa 40 m dal cancello, Stary Kleparz / centro dista circa 9 fermate e il viaggio dura circa 14 minuti.',
       bungalows:
         'I bungalow hanno disponibilità separata. Sono disponibili solo bungalow da 2, 3 e 4 persone. Prezzi: 200/220 PLN, 250/300 PLN e 400/450 PLN secondo la stagione.',
+      dog:
+        'Sì, il cane costa 0 PLN. Ti chiediamo di raccogliere e tenere il cane sotto controllo nel campeggio.',
+      campingBooking:
+        'Puoi inviare una richiesta tramite il modulo. In estate le prenotazioni delle piazzole possono essere limitate, quindi la reception conferma sempre la disponibilità.',
+      arrival:
+        'All’arrivo fermati vicino alla reception. Il personale verrà da te, ti indicherà il posto e ti accompagnerà nel camping. La registrazione viene completata dopo.',
       reception:
         'Reception: +48 795 294 486, email: clepardia@gmail.com. Il modo più rapido per confermare disponibilità è telefono o email.',
       camping:
@@ -134,6 +150,8 @@ export const it = {
         'Camping Clepardia non è un luogo per feste. Il silenzio notturno è dalle 22:00 alle 07:00. Se vuoi fare festa, scegli un altro posto.',
       maps:
         'Per la navigazione consigliamo Google Maps. L’ingresso / percorso di accesso è cambiato nel 2022, quindi i navigatori più vecchi possono indicare una strada sbagliata.',
+      sctEtoll:
+        'Prima dell’arrivo controlla le regole attuali della Zona di Trasporto Pulito di Cracovia. Se viaggi con un veicolo più grande o un complesso, verifica anche se e-TOLL riguarda il tuo percorso.',
       attractions:
         'Clepardia è una base comoda per Cracovia, Wieliczka, Kazimierz, Ojców ed Energylandia. Prima relax nel verde, poi gite facili in Małopolska.',
       fallback:
