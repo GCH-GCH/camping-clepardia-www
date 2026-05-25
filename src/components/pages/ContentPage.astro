@@ -61,6 +61,7 @@ const bungalowCards = pricingConfig.stayTypes
 const highSeasonRange = `${formatSeasonDate(pricingConfig.seasons.high.start)}–${formatSeasonDate(pricingConfig.seasons.high.end)}`;
 const dogAddon = pricingConfig.addons.find((addon) => addon.id === 'dog');
 const electricityAddon = pricingConfig.addons.find((addon) => addon.id === 'electricity');
+const googleMapsHref = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
 const pricingInfoBarItems = [
   { label: t.content.highSeason, value: highSeasonRange },
   { label: t.content.lowSeason, value: t.content.remainingDates },
@@ -208,14 +209,29 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   <section class="site-section contact-cards reveal-section" aria-label={t.content.contactAria}>
     <div class="container contact-cards__grid">
       {contactCards.map((item, index) => (
-        <article class="premium-card reveal-section contact-cards__card" style={`--reveal-delay: ${index * 80}ms`}>
-          <span>{item.label}</span>
-          {item.href ? (
-            <a href={item.href}>{item.value}</a>
-          ) : (
+        index === 2 ? (
+          <a
+            class="premium-card reveal-section contact-cards__card contact-cards__card--link"
+            href={googleMapsHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Otwórz Camping Clepardia w Google Maps"
+            style={`--reveal-delay: ${index * 80}ms`}
+          >
+            <span>{item.label}</span>
             <strong>{item.value}</strong>
-          )}
-        </article>
+            <small><Icon name="map" size={16} /> Google Maps <Icon name="ArrowUpRight" size={14} /></small>
+          </a>
+        ) : (
+          <article class="premium-card reveal-section contact-cards__card" style={`--reveal-delay: ${index * 80}ms`}>
+            <span>{item.label}</span>
+            {item.href ? (
+              <a href={item.href}>{item.value}</a>
+            ) : (
+              <strong>{item.value}</strong>
+            )}
+          </article>
+        )
       ))}
     </div>
   </section>
@@ -512,6 +528,21 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   border-radius: 24px;
 }
 
+:global(a.contact-cards__card) {
+  text-decoration: none;
+}
+
+:global(.contact-cards__card--link) {
+  cursor: pointer;
+  transition: transform .28s cubic-bezier(.22, 1, .36, 1), border-color .28s ease, box-shadow .28s ease;
+}
+
+:global(.contact-cards__card--link:hover) {
+  transform: translateY(-4px);
+  border-color: rgba(60,179,113,.36);
+  box-shadow: 0 24px 70px rgba(17,40,28,.14), 0 0 28px rgba(60,179,113,.13);
+}
+
 :global(.contact-cards__card span) {
   color: #3CB371;
   font-size: .74rem;
@@ -530,6 +561,20 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 
 :global(.contact-cards__card a:hover) {
   color: #2f9d63;
+}
+
+:global(.contact-cards__card small) {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid rgba(60,179,113,.20);
+  border-radius: 999px;
+  color: #2f9d63;
+  background: rgba(60,179,113,.09);
+  font-size: .78rem;
+  font-weight: 950;
 }
 
 .contact-guidance {

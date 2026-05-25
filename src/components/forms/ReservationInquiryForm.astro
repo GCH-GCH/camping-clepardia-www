@@ -2,6 +2,7 @@
 import { languages } from '@/data/languages';
 import { pricingConfig } from '@/data/pricing';
 import { getTranslations } from '@/i18n/config';
+import Icon from '@/components/ui/Icon.astro';
 
 interface Props {
   languageCode?: string;
@@ -30,6 +31,37 @@ const addonOptions = inquiryAddonIds
   .map((id) => pricingConfig.addons.find((addon) => addon.id === id))
   .filter((addon): addon is (typeof pricingConfig.addons)[number] => Boolean(addon));
 const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as keyof typeof pricingText.addons] ?? fallback;
+const summaryNotes = {
+  pl: [
+    { icon: 'map', text: 'Do nawigacji zalecamy Google Maps. Dojazd zmienił się w 2022 roku.' },
+    { icon: 'check', text: 'Recepcja potwierdza dostępność, cenę i szczegóły przyjazdu.' },
+    { icon: 'warning', text: 'Camping Clepardia nie jest miejscem imprezowym.' },
+    { icon: 'clock', text: 'Check-in: camping 12:00, domki 16:00. Check-out: camping 12:00, domki 11:00.' },
+  ],
+  en: [
+    { icon: 'map', text: 'We recommend Google Maps. The access route changed in 2022.' },
+    { icon: 'check', text: 'Reception confirms availability, price and arrival details.' },
+    { icon: 'warning', text: 'Camping Clepardia is not a party campsite.' },
+    { icon: 'clock', text: 'Check-in: camping 12:00, bungalows 16:00. Check-out: camping 12:00, bungalows 11:00.' },
+  ],
+  de: [
+    { icon: 'map', text: 'Wir empfehlen Google Maps. Die Zufahrt wurde 2022 geändert.' },
+    { icon: 'check', text: 'Die Rezeption bestätigt Verfügbarkeit, Preis und Anreisedetails.' },
+    { icon: 'warning', text: 'Camping Clepardia ist kein Party-Campingplatz.' },
+    { icon: 'clock', text: 'Check-in: Camping 12:00, Bungalows 16:00. Check-out: Camping 12:00, Bungalows 11:00.' },
+  ],
+  it: [
+    { icon: 'map', text: 'Consigliamo Google Maps. L’accesso è cambiato nel 2022.' },
+    { icon: 'check', text: 'La reception conferma disponibilità, prezzo e dettagli di arrivo.' },
+    { icon: 'warning', text: 'Camping Clepardia non è un campeggio per feste.' },
+    { icon: 'clock', text: 'Check-in: camping 12:00, bungalow 16:00. Check-out: camping 12:00, bungalow 11:00.' },
+  ],
+}[activeLanguageCode] ?? [
+  { icon: 'map', text: 'We recommend Google Maps. The access route changed in 2022.' },
+  { icon: 'check', text: 'Reception confirms availability, price and arrival details.' },
+  { icon: 'warning', text: 'Camping Clepardia is not a party campsite.' },
+  { icon: 'clock', text: 'Check-in: camping 12:00, bungalows 16:00. Check-out: camping 12:00, bungalows 11:00.' },
+];
 ---
 
 <section class="site-section reservation-inquiry reveal-section" data-reservation-inquiry>
@@ -225,6 +257,15 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
         <p class="reservation-inquiry__summary-notice" data-summary-notice hidden>
           {formText.summerNotice}
         </p>
+
+        <div class="reservation-inquiry__summary-info" aria-label={formText.summary}>
+          {summaryNotes.map((note) => (
+            <div>
+              <span aria-hidden="true"><Icon name={note.icon} size={17} /></span>
+              <p>{note.text}</p>
+            </div>
+          ))}
+        </div>
       </aside>
     </div>
   </div>
@@ -706,9 +747,14 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
 }
 
 .reservation-inquiry__group {
-  border: 0;
+  border: 1px solid rgba(60,179,113,.14);
   margin: 0;
-  padding: 0;
+  padding: clamp(18px, 2.4vw, 24px);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 96% 0%, rgba(60,179,113,.11), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,.74), rgba(255,255,255,.56));
+  box-shadow: 0 16px 48px rgba(17,40,28,.055), inset 0 1px 0 rgba(255,255,255,.60);
 }
 
 .reservation-inquiry__group legend,
@@ -719,8 +765,16 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
 }
 
 .reservation-inquiry__group legend {
-  margin-bottom: 16px;
-  font-size: 1rem;
+  width: fit-content;
+  margin-bottom: 18px;
+  padding: 8px 12px;
+  border: 1px solid rgba(60,179,113,.18);
+  border-radius: 999px;
+  background: rgba(60,179,113,.09);
+  color: #236b45;
+  font-size: .8rem;
+  letter-spacing: .11em;
+  text-transform: uppercase;
 }
 
 .reservation-inquiry__fields,
@@ -735,6 +789,7 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
 .reservation-inquiry__field {
   display: grid;
   gap: 8px;
+  min-width: 0;
 }
 
 .reservation-inquiry__field > span,
@@ -757,7 +812,8 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
   color: #102018;
   font: inherit;
   font-weight: 800;
-  transition: border-color .22s ease, box-shadow .22s ease, background .22s ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72), 0 10px 28px rgba(17,40,28,.04);
+  transition: border-color .22s ease, box-shadow .22s ease, background .22s ease, transform .22s ease;
 }
 
 .reservation-inquiry input,
@@ -778,7 +834,8 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
 .reservation-inquiry button:focus-visible {
   outline: 0;
   border-color: rgba(60,179,113,.66);
-  box-shadow: 0 0 0 4px rgba(60,179,113,.16);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(60,179,113,.16), 0 14px 38px rgba(17,40,28,.08);
 }
 
 .reservation-inquiry__field.is-invalid input,
@@ -824,10 +881,12 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
   min-height: 62px;
   display: grid;
   place-items: center start;
-  padding: 15px 17px;
+  padding: 16px 42px 16px 17px;
   border-radius: 18px;
   border: 1px solid rgba(25,70,44,.12);
-  background: rgba(255,255,255,.68);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(60,179,113,.10), transparent 34%),
+    rgba(255,255,255,.72);
   color: #163121;
   font-weight: 900;
   line-height: 1.3;
@@ -861,7 +920,9 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
 .reservation-counter {
   padding: 16px;
   border-radius: 20px;
-  background: rgba(255,255,255,.62);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(60,179,113,.08), transparent 34%),
+    rgba(255,255,255,.68);
   border: 1px solid rgba(25,70,44,.10);
 }
 
@@ -1115,7 +1176,7 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
 }
 
 .reservation-inquiry__submit {
-  min-height: 58px;
+  min-height: 62px;
   box-shadow: 0 22px 56px rgba(60,179,113,.30);
 }
 
@@ -1130,6 +1191,75 @@ const getAddonLabel = (id: string, fallback: string) => pricingText.addons[id as
     0 30px 88px rgba(0,0,0,.22),
     0 0 46px rgba(60,179,113,.18),
     inset 0 1px 0 rgba(255,255,255,.13);
+}
+
+.reservation-inquiry__summary-info {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,.11);
+}
+
+.reservation-inquiry__summary-info div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 11px;
+  align-items: start;
+  padding: 13px;
+  border: 1px solid rgba(143,224,180,.16);
+  border-radius: 18px;
+  background: rgba(255,255,255,.065);
+}
+
+.reservation-inquiry__summary-info span {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 12px;
+  color: #fff;
+  background: linear-gradient(135deg, rgba(60,179,113,.88), rgba(37,126,78,.68));
+  box-shadow: 0 12px 28px rgba(60,179,113,.20);
+}
+
+.reservation-inquiry__summary-info p {
+  margin: 0;
+  color: rgba(255,255,255,.76);
+  font-size: .88rem;
+  line-height: 1.55;
+  font-weight: 760;
+}
+
+html[data-theme="dark"] .reservation-inquiry__form,
+html[data-theme="dark"] .reservation-inquiry__group {
+  border-color: rgba(143,224,180,.16);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(60,179,113,.12), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.045));
+}
+
+html[data-theme="dark"] .reservation-inquiry__group legend,
+html[data-theme="dark"] .reservation-inquiry__group legend,
+html[data-theme="dark"] .reservation-inquiry__field > span,
+html[data-theme="dark"] .reservation-counter label {
+  color: #e8f8ec;
+}
+
+html[data-theme="dark"] .reservation-inquiry input[type="text"],
+html[data-theme="dark"] .reservation-inquiry input[type="email"],
+html[data-theme="dark"] .reservation-inquiry input[type="tel"],
+html[data-theme="dark"] .reservation-inquiry input[type="date"],
+html[data-theme="dark"] .reservation-inquiry input[type="number"],
+html[data-theme="dark"] .reservation-inquiry select,
+html[data-theme="dark"] .reservation-inquiry textarea,
+html[data-theme="dark"] .reservation-inquiry__option span,
+html[data-theme="dark"] .reservation-inquiry__addon span,
+html[data-theme="dark"] .reservation-counter,
+html[data-theme="dark"] .reservation-inquiry__consent {
+  border-color: rgba(143,224,180,.15);
+  background: rgba(255,255,255,.07);
+  color: #f4fbf6;
 }
 
 @media (prefers-reduced-motion: reduce) {

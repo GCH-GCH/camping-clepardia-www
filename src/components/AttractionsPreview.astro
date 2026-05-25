@@ -182,7 +182,7 @@ const secondary = attractions.slice(1);
 .attractions__head {
   position: relative;
   z-index: 1;
-  max-width: 760px;
+  max-width: 920px;
 }
 
 .attractions__layout {
@@ -465,13 +465,20 @@ html[data-theme="dark"] .attractions__mini-copy .attractions__trip-label {
 
 @media (min-width: 1120px) {
   .attractions__layout {
-    grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: clamp(24px, 3vw, 36px);
     align-items: stretch;
   }
 
+  .attractions__feature {
+    grid-column: span 6;
+  }
+
   .attractions__stack {
+    grid-column: span 6;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-content: stretch;
+    gap: 24px;
   }
 
   .attractions__mini--1,
@@ -576,7 +583,28 @@ html[data-theme="dark"] .attractions__mini-copy .attractions__trip-label {
   :global(.attractions__mini--3 .attractions__media--mini),
   :global(.attractions__mini--4 .attractions__media--mini),
   :global(.attractions__mini--5 .attractions__media--mini) {
-    min-height: 200px;
+    min-height: 185px;
+  }
+}
+
+@media (min-width: 1320px) {
+  .attractions__feature {
+    grid-column: span 7;
+  }
+
+  .attractions__stack {
+    grid-column: span 5;
+  }
+
+  .attractions__mini-copy {
+    min-height: 188px;
+  }
+}
+
+@media (max-width: 1119px) {
+  .attractions__feature-copy,
+  .attractions__mini-copy {
+    max-width: 100%;
   }
 }
 </style>

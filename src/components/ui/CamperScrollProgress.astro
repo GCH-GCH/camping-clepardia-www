@@ -130,25 +130,9 @@ html[data-theme="light"] .camper-scroll-progress__track {
     0 0 24px rgba(60,179,113,.12);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .camper-scroll-progress__marker {
-    animation: camper-scroll-bob 2.6s ease-in-out infinite;
-  }
-}
-
 @media (max-width: 920px), (prefers-reduced-motion: reduce) {
   .camper-scroll-progress {
     display: none;
-  }
-}
-
-@keyframes camper-scroll-bob {
-  0%,
-  100% {
-    margin-left: 0;
-  }
-  50% {
-    margin-left: 2px;
   }
 }
 </style>
