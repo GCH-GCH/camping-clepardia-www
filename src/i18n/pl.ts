@@ -114,6 +114,8 @@ export const pl = {
       maps: 'Dojazd Google Maps',
       sctEtoll: 'SCT / e-TOLL',
       attractions: 'Atrakcje',
+      dayPlan: 'Zaplanuj dzień w Krakowie',
+      familyAttractions: 'Co zwiedzić z dziećmi?',
     },
     answers: {
       camperPrice:
@@ -146,6 +148,10 @@ export const pl = {
         'Przed przyjazdem sprawdź aktualne zasady SCT w Krakowie. Jeśli jedziesz większym pojazdem lub zestawem, sprawdź też, czy dotyczą Cię zasady e-TOLL.',
       attractions:
         'Clepardia jest dobrą bazą do zwiedzania Krakowa, Wieliczki, Kazimierza, Ojcowa i Energylandii. Najpierw odpoczynek w zielonej bazie, potem wygodny wypad w Małopolskę.',
+      dayPlan:
+        'Jasne, zaplanujmy dzień. Powiedz proszę: ile macie czasu, czy jedziecie z dziećmi, wolicie spokojny czy intensywny plan i czy chcecie jechać tramwajem czy autem?',
+      familyAttractions:
+        'Z dziećmi najczęściej sprawdza się spokojny spacer po centrum, Wawel, Ojców, Energylandia albo Wieliczka. Najwygodniej zaplanować start tramwajem z przystanku ok. 40 m od bramy.',
       fallback:
         'Najpewniej pomoże recepcja Camping Clepardia: +48 795 294 486 lub clepardia@gmail.com. CAMPY podpowiada najważniejsze informacje, a rezerwacje potwierdza recepcja.',
     },

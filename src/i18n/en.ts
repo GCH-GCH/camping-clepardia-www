@@ -119,6 +119,8 @@ export const en = {
       maps: 'Google Maps directions',
       sctEtoll: 'SCT / e-TOLL',
       attractions: 'Attractions',
+      dayPlan: 'Plan a day in Krakow',
+      familyAttractions: 'What to visit with children?',
     },
     answers: {
       camperPrice:
@@ -151,6 +153,10 @@ export const en = {
         'Before arriving, check the current Krakow Clean Transport Zone rules. If you travel with a larger vehicle or vehicle set, also check whether e-TOLL applies to your route.',
       attractions:
         'Clepardia is a convenient base for Krakow, Wieliczka, Kazimierz, Ojców and Energylandia. Stay in the green base, then head out for easy Małopolska trips.',
+      dayPlan:
+        'Sure, let’s sketch a day. Tell me how much time you have, whether you travel with children, if you prefer a calm or intensive plan, and whether you want tram or car.',
+      familyAttractions:
+        'With children, guests often choose a relaxed Old Town walk, Wawel, Ojców, Energylandia or Wieliczka. The tram stop is about 40 m from the gate for an easy start.',
       fallback:
         'The safest next step is to contact Camping Clepardia reception: +48 795 294 486 or clepardia@gmail.com. CAMPY shares key information, and reception confirms bookings.',
     },

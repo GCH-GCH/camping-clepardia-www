@@ -10,15 +10,15 @@ const chatTexts = t.chat;
 const hasCampyIcon = publicAssetExists(campyIcon);
 const chatConfigEncoded = Buffer.from(JSON.stringify(chatTexts), 'utf8').toString('base64');
 const quickActions = [
-  { key: 'camperPrice', icon: 'camper', label: chatTexts.actions.camperPrice ?? chatTexts.actions.pricing },
+  { key: 'dayPlan', icon: 'map', label: chatTexts.actions.dayPlan ?? chatTexts.actions.attractions },
   { key: 'centerTransit', icon: 'tram', label: chatTexts.actions.centerTransit ?? chatTexts.actions.transit ?? chatTexts.actions.directions },
-  { key: 'dog', icon: 'dog', label: chatTexts.actions.dog ?? 'Dog' },
-  { key: 'campingBooking', icon: 'calendar', label: chatTexts.actions.campingBooking ?? chatTexts.actions.pricing },
-  { key: 'bungalow', icon: 'bungalow', label: chatTexts.actions.bungalow },
-  { key: 'arrival', icon: 'route', label: chatTexts.actions.arrival ?? 'Arrival' },
-  { key: 'quiet', icon: 'moon', label: chatTexts.actions.quiet },
+  { key: 'familyAttractions', icon: 'landmark', label: chatTexts.actions.familyAttractions ?? chatTexts.actions.attractions },
   { key: 'maps', icon: 'map', label: chatTexts.actions.maps },
   { key: 'sctEtoll', icon: 'route', label: chatTexts.actions.sctEtoll ?? 'SCT / e-TOLL' },
+  { key: 'reception', icon: 'message', label: chatTexts.actions.reception },
+  { key: 'camperPrice', icon: 'camper', label: chatTexts.actions.camperPrice ?? chatTexts.actions.pricing },
+  { key: 'dog', icon: 'dog', label: chatTexts.actions.dog ?? 'Dog' },
+  { key: 'bungalow', icon: 'bungalow', label: chatTexts.actions.bungalow },
 ];
 ---
 
@@ -230,6 +230,8 @@ const quickActions = [
       if (rawPrompt === chatTexts.actions.maps) return chatTexts.answers.maps;
       if (rawPrompt === chatTexts.actions.sctEtoll) return chatTexts.answers.sctEtoll ?? chatTexts.answers.maps;
       if (rawPrompt === chatTexts.actions.attractions) return chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.dayPlan) return chatTexts.answers.dayPlan ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.familyAttractions) return chatTexts.answers.familyAttractions ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
 
       if (prompt.includes('kamper') || prompt.includes('camper') || prompt.includes('motorhome') || prompt.includes('cennik') || prompt.includes('cena') || prompt.includes('koszt')) {
         return chatTexts.answers.camperPrice ?? chatTexts.answers.pricing;
@@ -241,6 +243,14 @@ const quickActions = [
 
       if (prompt.includes('dojaz') || prompt.includes('jak dojecha') || prompt.includes('maps') || prompt.includes('map') || prompt.includes('nawig')) {
         return chatTexts.answers.maps ?? chatTexts.answers.directions;
+      }
+
+      if (prompt.includes('planuj') || prompt.includes('plan') || prompt.includes('dzień') || prompt.includes('day')) {
+        return chatTexts.answers.dayPlan ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      }
+
+      if (prompt.includes('dzieck') || prompt.includes('children') || prompt.includes('kids') || prompt.includes('kind')) {
+        return chatTexts.answers.familyAttractions ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       }
 
       if (prompt.includes('atrakc') || prompt.includes('krak') || prompt.includes('wielicz') || prompt.includes('energy') || prompt.includes('zwiedz')) {

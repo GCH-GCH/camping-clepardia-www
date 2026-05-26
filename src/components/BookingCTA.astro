@@ -12,212 +12,85 @@ const pathContext = getPathContext(Astro.url.pathname);
 const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
 const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode);
 const contactHref = getLocalizedPath(explicitLanguage, 'kontakt');
+
 const copy = {
   pl: {
     kicker: 'Szybkie zapytanie',
     title: 'Zapytaj o dostępność pobytu',
-    lead: 'Ustaw najważniejsze informacje, a pełny formularz kontaktowy otworzy się już z przygotowanym kontekstem.',
-    categories: {
-      camping: { title: 'Camping', copy: 'Kamper, namiot, przyczepa, van lub auto z namiotem dachowym.' },
-      bungalow: { title: 'Domki', copy: 'Domki 2-, 3- i 4-osobowe.' },
-    },
-    arrival: 'Data przyjazdu',
-    departure: 'Data wyjazdu',
-    stayType: 'Typ pobytu',
-    adults: 'Dorośli',
-    electricity: 'Prąd',
-    dog: 'Pies',
-    yes: 'Tak',
+    lead: 'Wybierz ścieżkę pobytu. Pełny formularz otworzy się już z dopasowanymi polami, a recepcja potwierdzi dostępność, cenę i szczegóły przyjazdu.',
     button: 'Przejdź do formularza',
+    choices: {
+      camping: { title: 'Camping', text: 'Kamper, przyczepa, namiot, van albo auto z namiotem dachowym.', icon: 'camping' },
+      bungalow: { title: 'Domki', text: 'Domki 2-, 3- i 4-osobowe. Bez domku rodzinnego i bez tarasów.', icon: 'bungalow' },
+      combined: { title: 'Razem', text: 'Domek oraz miejsce campingowe w jednym zapytaniu.', icon: 'UsersRound' },
+    },
   },
   en: {
     kicker: 'Quick enquiry',
     title: 'Ask about stay availability',
-    lead: 'Set the key details and open the full contact form with the context already prepared.',
-    categories: {
-      camping: { title: 'Camping', copy: 'Motorhome, tent, caravan, van or car with rooftop tent.' },
-      bungalow: { title: 'Bungalows', copy: '2-, 3- and 4-person bungalows.' },
-    },
-    arrival: 'Arrival date',
-    departure: 'Departure date',
-    stayType: 'Stay type',
-    adults: 'Adults',
-    electricity: 'Electricity',
-    dog: 'Dog',
-    yes: 'Yes',
+    lead: 'Choose your stay path. The full form opens with the right fields, and reception confirms availability, price and arrival details.',
     button: 'Go to the form',
+    choices: {
+      camping: { title: 'Camping', text: 'Motorhome, caravan, tent, van or car with rooftop tent.', icon: 'camping' },
+      bungalow: { title: 'Bungalows', text: '2-, 3- and 4-person bungalows only.', icon: 'bungalow' },
+      combined: { title: 'Combined', text: 'A bungalow and a camping pitch in one enquiry.', icon: 'UsersRound' },
+    },
   },
   de: {
     kicker: 'Schnelle Anfrage',
     title: 'Verfügbarkeit anfragen',
-    lead: 'Wählen Sie die wichtigsten Angaben und öffnen Sie das Kontaktformular mit vorbereitetem Kontext.',
-    categories: {
-      camping: { title: 'Camping', copy: 'Wohnmobil, Zelt, Wohnwagen, Van oder Auto mit Dachzelt.' },
-      bungalow: { title: 'Bungalows', copy: 'Bungalows für 2, 3 und 4 Personen.' },
-    },
-    arrival: 'Anreise',
-    departure: 'Abreise',
-    stayType: 'Aufenthaltsart',
-    adults: 'Erwachsene',
-    electricity: 'Strom',
-    dog: 'Hund',
-    yes: 'Ja',
+    lead: 'Wählen Sie die passende Aufenthaltsart. Das vollständige Formular öffnet mit passenden Feldern, die Rezeption bestätigt Verfügbarkeit, Preis und Anreise.',
     button: 'Zum Formular',
+    choices: {
+      camping: { title: 'Camping', text: 'Wohnmobil, Wohnwagen, Zelt, Van oder Auto mit Dachzelt.', icon: 'camping' },
+      bungalow: { title: 'Bungalows', text: 'Nur Bungalows für 2, 3 und 4 Personen.', icon: 'bungalow' },
+      combined: { title: 'Kombiniert', text: 'Bungalow und Campingplatz in einer Anfrage.', icon: 'UsersRound' },
+    },
   },
   it: {
     kicker: 'Richiesta rapida',
     title: 'Richiedi disponibilità',
-    lead: 'Imposta i dettagli principali e apri il modulo completo con il contesto già pronto.',
-    categories: {
-      camping: { title: 'Camping', copy: 'Camper, tenda, roulotte, van o auto con tenda da tetto.' },
-      bungalow: { title: 'Bungalow', copy: 'Bungalow da 2, 3 e 4 persone.' },
-    },
-    arrival: 'Arrivo',
-    departure: 'Partenza',
-    stayType: 'Tipo di soggiorno',
-    adults: 'Adulti',
-    electricity: 'Elettricità',
-    dog: 'Cane',
-    yes: 'Sì',
+    lead: 'Scegli il tipo di soggiorno. Il modulo completo si apre con i campi giusti e la reception conferma disponibilità, prezzo e arrivo.',
     button: 'Vai al modulo',
+    choices: {
+      camping: { title: 'Camping', text: 'Camper, roulotte, tenda, van o auto con tenda da tetto.', icon: 'camping' },
+      bungalow: { title: 'Bungalow', text: 'Solo bungalow da 2, 3 e 4 persone.', icon: 'bungalow' },
+      combined: { title: 'Combinato', text: 'Bungalow e piazzola camping in una richiesta.', icon: 'UsersRound' },
+    },
   },
 }[lang];
 
-const stayOptions = {
-  camping: [
-    ['camper', lang === 'pl' ? 'Kamper' : lang === 'de' ? 'Wohnmobil' : lang === 'it' ? 'Camper' : 'Motorhome'],
-    ['van', 'Van'],
-    ['caravan', lang === 'pl' ? 'Przyczepa' : lang === 'de' ? 'Wohnwagen' : lang === 'it' ? 'Roulotte' : 'Caravan'],
-    ['tent-small', lang === 'pl' ? 'Namiot 1-2 os.' : lang === 'de' ? 'Zelt 1-2 Pers.' : lang === 'it' ? 'Tenda 1-2 pers.' : 'Tent 1-2 pers.'],
-    ['tent-large', lang === 'pl' ? 'Namiot 3-4 os.' : lang === 'de' ? 'Zelt 3-4 Pers.' : lang === 'it' ? 'Tenda 3-4 pers.' : 'Tent 3-4 pers.'],
-    ['rooftop-tent', lang === 'pl' ? 'Auto + namiot dachowy' : lang === 'de' ? 'Auto + Dachzelt' : lang === 'it' ? 'Auto + tenda da tetto' : 'Car + rooftop tent'],
-    ['bus', lang === 'pl' ? 'Bus / ciężarówka' : lang === 'de' ? 'Lkw / Bus' : lang === 'it' ? 'Camion / bus' : 'Truck / bus'],
-  ],
-  bungalow: [
-    ['bungalow-2', lang === 'pl' ? 'Domek 2-os.' : lang === 'de' ? '2-Personen-Bungalow' : lang === 'it' ? 'Bungalow 2 persone' : '2-person bungalow'],
-    ['bungalow-3', lang === 'pl' ? 'Domek 3-os.' : lang === 'de' ? '3-Personen-Bungalow' : lang === 'it' ? 'Bungalow 3 persone' : '3-person bungalow'],
-    ['bungalow-4', lang === 'pl' ? 'Domek 4-os.' : lang === 'de' ? '4-Personen-Bungalow' : lang === 'it' ? 'Bungalow 4 persone' : '4-person bungalow'],
-  ],
-};
+const choices = [
+  ['camping', copy.choices.camping],
+  ['bungalow', copy.choices.bungalow],
+  ['combined', copy.choices.combined],
+] as const;
 ---
 
 <section class="site-section booking reveal-section" id="rezerwacja">
   <div class="container">
-    <div class="booking__panel" data-home-booking data-contact-href={contactHref}>
+    <div class="booking__panel">
       <div class="booking__content">
         <span class="section-kicker">{copy.kicker}</span>
         <h2 class="section-title">{copy.title}</h2>
         <p class="section-copy">{copy.lead}</p>
       </div>
 
-      <form class="home-inquiry-card" data-home-inquiry-form>
-        <div class="home-inquiry-category" role="radiogroup" aria-label={copy.stayType}>
-          {(['camping', 'bungalow'] as const).map((category) => (
-            <label class="home-inquiry-category__card">
-              <input type="radio" name="stay" value={category} checked={category === 'camping'} data-home-category>
-              <span class="home-inquiry-category__icon" aria-hidden="true">
-                <Icon name={category === 'camping' ? 'camping' : 'bungalow'} size={22} strokeWidth={1.9} />
-              </span>
-              <strong>{copy.categories[category].title}</strong>
-              <small>{copy.categories[category].copy}</small>
-            </label>
-          ))}
-        </div>
-
-        <div class="home-inquiry-grid">
-          <label class="home-inquiry-field">
-            <span>{copy.arrival}</span>
-            <input type="date" name="arrival" data-home-arrival>
-          </label>
-          <label class="home-inquiry-field">
-            <span>{copy.departure}</span>
-            <input type="date" name="departure" data-home-departure>
-          </label>
-          <label class="home-inquiry-field">
-            <span>{copy.stayType}</span>
-            <select name="type" data-home-stay-type>
-              {stayOptions.camping.map(([value, label]) => <option value={value} data-category="camping">{label}</option>)}
-              {stayOptions.bungalow.map(([value, label]) => <option value={value} data-category="bungalow">{label}</option>)}
-            </select>
-          </label>
-          <label class="home-inquiry-field home-inquiry-field--compact">
-            <span>{copy.adults}</span>
-            <input type="number" name="adults" min="1" value="2" inputmode="numeric" data-home-adults>
-          </label>
-        </div>
-
-        <div class="home-inquiry-toggles">
-          <label data-electricity-toggle>
-            <input type="checkbox" name="electricity" value="1">
-            <span><Icon name="electricity" size={16} />{copy.electricity}</span>
-          </label>
-          <label>
-            <input type="checkbox" name="dog" value="1">
-            <span><Icon name="dog" size={16} />{copy.dog}</span>
-          </label>
-        </div>
-
-        <a class="btn btn-primary premium-button home-inquiry-submit" href={contactHref} data-home-submit>
-          <span>{copy.button}</span>
-          <Icon name="ArrowUpRight" size={17} />
-        </a>
-      </form>
+      <div class="home-inquiry-card" aria-label={copy.title}>
+        {choices.map(([stay, item]) => (
+          <a class="home-inquiry-choice" href={`${contactHref}?stay=${stay}`}>
+            <span class="home-inquiry-choice__icon" aria-hidden="true">
+              <Icon name={item.icon} size={24} strokeWidth={1.9} />
+            </span>
+            <strong>{item.title}</strong>
+            <small>{item.text}</small>
+            <em>{copy.button}<Icon name="ArrowUpRight" size={16} /></em>
+          </a>
+        ))}
+      </div>
     </div>
   </div>
 </section>
-
-<script>
-  (() => {
-    const root = document.querySelector('[data-home-booking]');
-    if (!(root instanceof HTMLElement)) return;
-    const form = root.querySelector('[data-home-inquiry-form]');
-    const select = root.querySelector('[data-home-stay-type]');
-    const submit = root.querySelector('[data-home-submit]');
-    const electricityToggle = root.querySelector('[data-electricity-toggle]');
-    const contactHref = root.dataset.contactHref || '/kontakt';
-    if (!(form instanceof HTMLFormElement) || !(select instanceof HTMLSelectElement) || !(submit instanceof HTMLAnchorElement)) return;
-
-    const getCategory = () => {
-      const input = form.querySelector('input[name="stay"]:checked');
-      return input instanceof HTMLInputElement ? input.value : 'camping';
-    };
-
-    const syncOptions = () => {
-      const category = getCategory();
-      Array.from(select.options).forEach((option) => {
-        const visible = option.dataset.category === category;
-        option.hidden = !visible;
-        option.disabled = !visible;
-      });
-      if (select.selectedOptions[0]?.disabled) {
-        const first = Array.from(select.options).find((option) => !option.disabled);
-        if (first) select.value = first.value;
-      }
-      if (electricityToggle instanceof HTMLElement) electricityToggle.hidden = category !== 'camping';
-      syncHref();
-    };
-
-    const syncHref = () => {
-      const params = new URLSearchParams();
-      const category = getCategory();
-      const arrival = form.querySelector('[data-home-arrival]');
-      const departure = form.querySelector('[data-home-departure]');
-      const adults = form.querySelector('[data-home-adults]');
-      params.set('stay', category);
-      params.set('type', select.value);
-      if (arrival instanceof HTMLInputElement && arrival.value) params.set('arrival', arrival.value);
-      if (departure instanceof HTMLInputElement && departure.value) params.set('departure', departure.value);
-      if (adults instanceof HTMLInputElement && adults.value) params.set('adults', adults.value);
-      if (form.elements.namedItem('electricity') instanceof HTMLInputElement && form.elements.namedItem('electricity').checked) params.set('electricity', '1');
-      if (form.elements.namedItem('dog') instanceof HTMLInputElement && form.elements.namedItem('dog').checked) params.set('dog', '1');
-      submit.href = `${contactHref}?${params.toString()}`;
-    };
-
-    form.addEventListener('input', syncHref);
-    form.addEventListener('change', syncOptions);
-    syncOptions();
-  })();
-</script>
 
 <style>
 .booking {
@@ -258,7 +131,8 @@ const stayOptions = {
 
 .home-inquiry-card {
   display: grid;
-  gap: 18px;
+  grid-template-columns: 1fr;
+  gap: 14px;
   padding: clamp(18px, 3vw, 26px);
   border: 1px solid rgba(143,224,180,.24);
   border-radius: 30px;
@@ -268,156 +142,78 @@ const stayOptions = {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 20px 58px rgba(0,0,0,.14);
 }
 
-.home-inquiry-category {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-
-.home-inquiry-category__card {
+.home-inquiry-choice {
   position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 4px 14px;
-  padding: 16px;
-  border: 1px solid rgba(255,255,255,.13);
-  border-radius: 22px;
-  background: rgba(255,255,255,.075);
-  cursor: pointer;
-  transition: transform .24s ease, border-color .24s ease, background .24s ease;
+  gap: 5px 14px;
+  min-height: 168px;
+  padding: clamp(18px, 3vw, 24px);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 96% 0%, rgba(60,179,113,.16), transparent 34%),
+    rgba(255,255,255,.075);
+  color: #fff;
+  text-decoration: none;
+  transition: transform .24s ease, border-color .24s ease, background .24s ease, box-shadow .24s ease;
 }
 
-.home-inquiry-category__card input {
-  position: absolute;
-  opacity: 0;
-}
-
-.home-inquiry-category__card:has(input:checked),
-.home-inquiry-category__card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(143,224,180,.42);
-  background: rgba(255,255,255,.12);
-}
-
-.home-inquiry-category__icon {
+.home-inquiry-choice__icon {
   grid-row: span 2;
   display: grid;
-  width: 48px;
-  height: 48px;
+  width: 54px;
+  height: 54px;
   place-items: center;
-  border-radius: 18px;
-  background: linear-gradient(135deg, rgba(60,179,113,.92), rgba(35,119,73,.70));
-  box-shadow: 0 14px 34px rgba(60,179,113,.24);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(99,217,156,.96), rgba(60,179,113,.86) 52%, rgba(36,121,78,.82));
+  box-shadow: 0 16px 38px rgba(60,179,113,.26);
 }
 
-.home-inquiry-category__card strong {
+.home-inquiry-choice strong {
+  align-self: end;
   color: #fff;
-  font-weight: 950;
-  line-height: 1.15;
-}
-
-.home-inquiry-category__card small {
-  color: rgba(255,255,255,.70);
-  line-height: 1.45;
-  font-weight: 750;
-}
-
-.home-inquiry-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-}
-
-.home-inquiry-field {
-  display: grid;
-  gap: 8px;
-  min-width: 0;
-}
-
-.home-inquiry-field span {
-  color: rgba(255,255,255,.82);
-  font-size: .78rem;
+  font-size: 1.18rem;
   font-weight: 950;
 }
 
-.home-inquiry-field input,
-.home-inquiry-field select {
-  display: block;
-  width: 100%;
-  min-height: 54px;
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 17px;
-  padding: 0 14px;
-  background: rgba(255,255,255,.11);
-  color: #fff;
-  font: inherit;
-  font-weight: 850;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+.home-inquiry-choice small {
+  color: rgba(255,255,255,.72);
+  line-height: 1.48;
+  font-weight: 760;
 }
 
-.home-inquiry-field option {
-  color: #102018;
-}
-
-.home-inquiry-toggles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.home-inquiry-toggles label {
-  cursor: pointer;
-}
-
-.home-inquiry-toggles input {
-  position: absolute;
-  opacity: 0;
-}
-
-.home-inquiry-toggles span {
+.home-inquiry-choice em {
+  grid-column: 1 / -1;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 42px;
-  padding: 0 14px;
+  width: fit-content;
+  margin-top: 12px;
+  padding: 10px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.08);
-  color: rgba(255,255,255,.84);
-  font-weight: 900;
-}
-
-.home-inquiry-toggles input:checked + span {
-  border-color: rgba(143,224,180,.44);
-  background: rgba(60,179,113,.20);
-  color: #fff;
-}
-
-.home-inquiry-submit {
-  min-height: 62px;
-  justify-self: start;
-  gap: 9px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #63d99c, #3CB371 48%, #24794e);
-  color: #fff;
+  background: rgba(60,179,113,.18);
+  color: #9af0bf;
+  font-style: normal;
   font-weight: 950;
-  box-shadow: 0 18px 48px rgba(60,179,113,.32);
+}
+
+.home-inquiry-choice:hover {
+  transform: translateY(-4px);
+  border-color: rgba(143,224,180,.44);
+  background: rgba(255,255,255,.12);
+  box-shadow: 0 22px 64px rgba(60,179,113,.20);
 }
 
 @media (min-width: 760px) {
-  .home-inquiry-category {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .home-inquiry-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(110px, .55fr);
-    align-items: end;
+  .home-inquiry-card {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 1080px) {
   .booking__panel {
-    grid-template-columns: minmax(0, .78fr) minmax(540px, 1fr);
+    grid-template-columns: minmax(0, .78fr) minmax(560px, 1fr);
     align-items: center;
   }
 }
@@ -432,9 +228,8 @@ const stayOptions = {
     border-radius: 24px;
   }
 
-  .home-inquiry-submit {
-    width: 100%;
-    justify-content: center;
+  .home-inquiry-choice {
+    min-height: 146px;
   }
 }
 </style>

@@ -122,6 +122,8 @@ export const de = {
       maps: 'Google Maps Anfahrt',
       sctEtoll: 'SCT / e-TOLL',
       attractions: 'Attraktionen',
+      dayPlan: 'Tag in Krakau planen',
+      familyAttractions: 'Was mit Kindern besuchen?',
     },
     answers: {
       camperPrice:
@@ -154,6 +156,10 @@ export const de = {
         'Prüfen Sie vor der Anreise die aktuellen Regeln der Krakauer Umweltzone. Wenn Sie mit einem größeren Fahrzeug oder Gespann fahren, prüfen Sie auch, ob e-TOLL für Ihre Route gilt.',
       attractions:
         'Clepardia ist eine bequeme Basis für Krakau, Wieliczka, Kazimierz, Ojców und Energylandia. Erst entspannen im Grünen, dann einfach Małopolska entdecken.',
+      dayPlan:
+        'Gern, planen wir den Tag. Sagen Sie bitte: wie viel Zeit Sie haben, ob Kinder dabei sind, ob der Tag ruhig oder intensiv sein soll und ob Sie Tram oder Auto bevorzugen.',
+      familyAttractions:
+        'Mit Kindern passen oft ein ruhiger Spaziergang durch die Altstadt, Wawel, Ojców, Energylandia oder Wieliczka. Die Tramhaltestelle ist ca. 40 m vom Tor entfernt.',
       fallback:
         'Am sichersten ist der Kontakt mit der Rezeption von Camping Clepardia: +48 795 294 486 oder clepardia@gmail.com. CAMPY gibt kurze Hinweise, die Buchung bestätigt die Rezeption.',
     },

@@ -79,7 +79,11 @@ const googleMapsHref = footerSocialLinks[1].href;
     </div>
     <div>
       <h3>{t.footer.contact}</h3>
-      <p><strong>{t.footer.addressLabel}</strong><br /><span set:html={t.footer.contactPlace} /></p>
+      <a class="footer__address-link" href={googleMapsHref} target="_blank" rel="noopener noreferrer" aria-label="Otwórz Camping Clepardia w Google Maps">
+        <strong>{t.footer.addressLabel}</strong>
+        <span set:html={t.footer.contactPlace} />
+        <small>{t.footer.mapsLabel}</small>
+      </a>
       <a href="tel:+48795294486">{t.footer.phoneLabel}: +48 795 294 486</a>
       <a href="mailto:clepardia@gmail.com">{t.footer.emailLabel}: clepardia@gmail.com</a>
       <p>{t.footer.receptionHoursLabel}: {t.footer.reception}</p>
@@ -114,6 +118,12 @@ const googleMapsHref = footerSocialLinks[1].href;
 .footer p strong { color: rgba(255,255,255,.88); }
 .footer a { display: block; margin: 8px 0; overflow-wrap: anywhere; }
 .footer a:hover { color: #8fe0b4; }
+.footer__address-link { padding: 12px 14px; border: 1px solid rgba(143,224,180,.16); border-radius: 18px; background: rgba(255,255,255,.045); transition: border-color .22s ease, background .22s ease, transform .22s ease; }
+.footer__address-link strong,
+.footer__address-link span,
+.footer__address-link small { display: block; }
+.footer__address-link small { margin-top: 6px; color: #8fe0b4; font-weight: 900; }
+.footer__address-link:hover { transform: translateY(-2px); border-color: rgba(60,179,113,.42); background: rgba(60,179,113,.10); }
 .footer__brand p { max-width: 520px; }
 .footer__langs { display: flex; flex-wrap: wrap; gap: 8px; max-width: 100%; margin-top: 24px; }
 .footer__langs a { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); color: #fff; font-weight: 900; }

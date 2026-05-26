@@ -30,12 +30,18 @@ const stayOptions = [
 const copy = {
   pl: {
     title: 'Premium zapytanie o pobyt',
-    lead: 'Najpierw wybierz Camping albo Domki. Formularz pokaże tylko te pola, które są potrzebne do konkretnego pobytu.',
-    steps: ['Wybierz Camping/Domki', 'Termin i osoby', 'Szczegóły pobytu', 'Dane kontaktowe', 'Zgody i wysyłka'],
+    lead: 'Najpierw wybierz Camping, Domki albo Razem. Formularz pokaże tylko te pola, które są potrzebne do konkretnego pobytu.',
+    steps: ['Wybierz typ pobytu', 'Termin i osoby', 'Szczegóły pobytu', 'Dane kontaktowe', 'Zgody i wysyłka'],
     camping: 'Camping',
-    campingCopy: 'Kamper, namiot, przyczepa, van lub auto z namiotem dachowym.',
+    campingCopy: 'Kamper, przyczepa, namiot, van lub auto z namiotem dachowym.',
     bungalow: 'Domki',
     bungalowCopy: 'Domki 2-, 3- i 4-osobowe.',
+    combined: 'Razem',
+    combinedCopy: 'Domek oraz miejsce campingowe w jednym zapytaniu, np. rodzina w domku i kamper obok.',
+    selected: 'Wybrano',
+    changeChoice: 'Zmień wybór',
+    choiceTitle: 'Jakiego pobytu dotyczy zapytanie?',
+    choiceLead: 'Wybierz typ pobytu, a formularz dopasuje pola do Twoich potrzeb.',
     countrySearch: 'Wpisz kraj, np. de, ge, niem',
     countryHelp: 'Wyszukiwanie działa po kodzie, nazwie i popularnych skrótach.',
     specialNeeds: 'Osoba z niepełnosprawnością / specjalne potrzeby',
@@ -46,15 +52,29 @@ const copy = {
     availabilityInfo: 'Recepcja potwierdza dostępność, cenę i szczegóły przyjazdu.',
     partyInfo: 'Camping Clepardia nie jest miejscem imprezowym.',
     hoursInfo: 'Check-in: camping 12:00, domki 16:00. Check-out: camping 12:00, domki 11:00.',
+    campingInfo: 'Miejsca dla kamperów są głównie na płytach betonowych. Busy, trucki, autobusy i ciężkie pojazdy ustawiamy na asfalcie, aby uniknąć zakopania się pojazdu.',
+    bungalowInfo: 'Check-in domki od 16:00, check-out do 11:00. Dostępność domków 2-, 3- i 4-osobowych potwierdza recepcja.',
+    combinedInfo: 'Ten wariant jest dla sytuacji, gdy np. część rodziny śpi w domku, a część przyjeżdża kamperem.',
+    combinedBungalowSection: 'Część domkowa',
+    combinedCampingSection: 'Część campingowa',
+    bungalowPeople: 'Osoby w domku',
+    campingPeople: 'Osoby przy campingu',
+    bungalowCount: 'Liczba domków',
   },
   en: {
     title: 'Premium stay enquiry',
-    lead: 'Start with Camping or Bungalows. The form then shows only the fields needed for that stay type.',
-    steps: ['Choose Camping/Bungalows', 'Dates and guests', 'Stay details', 'Contact details', 'Consents and send'],
+    lead: 'Start with Camping, Bungalows or Combined. The form then shows only the fields needed for that stay type.',
+    steps: ['Choose stay type', 'Dates and guests', 'Stay details', 'Contact details', 'Consents and send'],
     camping: 'Camping',
-    campingCopy: 'Motorhome, tent, caravan, van or car with rooftop tent.',
+    campingCopy: 'Motorhome, caravan, tent, van or car with rooftop tent.',
     bungalow: 'Bungalows',
     bungalowCopy: '2-, 3- and 4-person bungalows.',
+    combined: 'Combined',
+    combinedCopy: 'A bungalow and a camping pitch in one enquiry, for example family in a bungalow and camper nearby.',
+    selected: 'Selected',
+    changeChoice: 'Change choice',
+    choiceTitle: 'What type of stay is your enquiry about?',
+    choiceLead: 'Choose a stay type and the form will adapt the fields to your needs.',
     countrySearch: 'Type a country, e.g. de, ge, niem',
     countryHelp: 'Search works by code, name and common shortcuts.',
     specialNeeds: 'Guest with a disability / special needs',
@@ -65,15 +85,29 @@ const copy = {
     availabilityInfo: 'Reception confirms availability, price and arrival details.',
     partyInfo: 'Camping Clepardia is not a party campsite.',
     hoursInfo: 'Check-in: camping 12:00, bungalows 16:00. Check-out: camping 12:00, bungalows 11:00.',
+    campingInfo: 'Camper pitches are mostly concrete slabs. Vans, trucks, buses and heavy vehicles are placed on asphalt to avoid getting stuck.',
+    bungalowInfo: 'Bungalow check-in from 16:00, check-out until 11:00. Reception confirms availability for 2-, 3- and 4-person bungalows.',
+    combinedInfo: 'This variant is for situations where part of the group sleeps in a bungalow and part arrives with a camper.',
+    combinedBungalowSection: 'Bungalow part',
+    combinedCampingSection: 'Camping part',
+    bungalowPeople: 'Guests in bungalow',
+    campingPeople: 'Guests at camping',
+    bungalowCount: 'Number of bungalows',
   },
   de: {
     title: 'Premium Anfrage für den Aufenthalt',
-    lead: 'Wählen Sie zuerst Camping oder Bungalows. Das Formular zeigt danach nur die passenden Felder.',
-    steps: ['Camping/Bungalows wählen', 'Termin und Personen', 'Aufenthaltsdetails', 'Kontaktdaten', 'Zustimmungen und Senden'],
+    lead: 'Wählen Sie zuerst Camping, Bungalows oder Kombiniert. Das Formular zeigt danach nur die passenden Felder.',
+    steps: ['Aufenthaltsart wählen', 'Termin und Personen', 'Aufenthaltsdetails', 'Kontaktdaten', 'Zustimmungen und Senden'],
     camping: 'Camping',
     campingCopy: 'Wohnmobil, Zelt, Wohnwagen, Van oder Auto mit Dachzelt.',
     bungalow: 'Bungalows',
     bungalowCopy: 'Bungalows für 2, 3 und 4 Personen.',
+    combined: 'Kombiniert',
+    combinedCopy: 'Bungalow und Campingplatz in einer Anfrage, z.B. Familie im Bungalow und Wohnmobil daneben.',
+    selected: 'Ausgewählt',
+    changeChoice: 'Auswahl ändern',
+    choiceTitle: 'Welche Art von Aufenthalt betrifft Ihre Anfrage?',
+    choiceLead: 'Wählen Sie die Aufenthaltsart, das Formular passt die Felder an.',
     countrySearch: 'Land eingeben, z.B. de, ge, niem',
     countryHelp: 'Suche nach Code, Name und gängigen Abkürzungen.',
     specialNeeds: 'Gast mit Behinderung / besondere Bedürfnisse',
@@ -84,15 +118,29 @@ const copy = {
     availabilityInfo: 'Die Rezeption bestätigt Verfügbarkeit, Preis und Anreisedetails.',
     partyInfo: 'Camping Clepardia ist kein Party-Campingplatz.',
     hoursInfo: 'Check-in: Camping 12:00, Bungalows 16:00. Check-out: Camping 12:00, Bungalows 11:00.',
+    campingInfo: 'Wohnmobilplätze liegen hauptsächlich auf Betonplatten. Vans, Lkw, Busse und schwere Fahrzeuge stellen wir auf Asphalt, damit sie nicht stecken bleiben.',
+    bungalowInfo: 'Bungalow Check-in ab 16:00, Check-out bis 11:00. Die Rezeption bestätigt die Verfügbarkeit für 2-, 3- und 4-Personen-Bungalows.',
+    combinedInfo: 'Diese Variante ist für Situationen, in denen ein Teil der Gruppe im Bungalow schläft und ein Teil mit dem Wohnmobil anreist.',
+    combinedBungalowSection: 'Bungalow-Teil',
+    combinedCampingSection: 'Camping-Teil',
+    bungalowPeople: 'Personen im Bungalow',
+    campingPeople: 'Personen beim Camping',
+    bungalowCount: 'Anzahl der Bungalows',
   },
   it: {
     title: 'Richiesta premium di soggiorno',
-    lead: 'Inizia scegliendo Camping o Bungalow. Il modulo mostra solo i campi necessari.',
-    steps: ['Scegli Camping/Bungalow', 'Date e ospiti', 'Dettagli soggiorno', 'Dati di contatto', 'Consensi e invio'],
+    lead: 'Inizia scegliendo Camping, Bungalow o Combinato. Il modulo mostra solo i campi necessari.',
+    steps: ['Scegli tipo di soggiorno', 'Date e ospiti', 'Dettagli soggiorno', 'Dati di contatto', 'Consensi e invio'],
     camping: 'Camping',
     campingCopy: 'Camper, tenda, roulotte, van o auto con tenda da tetto.',
     bungalow: 'Bungalow',
     bungalowCopy: 'Bungalow da 2, 3 e 4 persone.',
+    combined: 'Combinato',
+    combinedCopy: 'Bungalow e piazzola camping in un’unica richiesta, per esempio famiglia in bungalow e camper accanto.',
+    selected: 'Selezionato',
+    changeChoice: 'Cambia scelta',
+    choiceTitle: 'A quale soggiorno si riferisce la richiesta?',
+    choiceLead: 'Scegli il tipo di soggiorno e il modulo adatterà i campi.',
     countrySearch: 'Scrivi un paese, es. de, ge, niem',
     countryHelp: 'La ricerca funziona per codice, nome e abbreviazioni comuni.',
     specialNeeds: 'Ospite con disabilità / esigenze speciali',
@@ -103,6 +151,14 @@ const copy = {
     availabilityInfo: 'La reception conferma disponibilità, prezzo e dettagli di arrivo.',
     partyInfo: 'Camping Clepardia non è un campeggio per feste.',
     hoursInfo: 'Check-in: camping 12:00, bungalow 16:00. Check-out: camping 12:00, bungalow 11:00.',
+    campingInfo: 'Le piazzole camper sono principalmente su piastre in cemento. Van, camion, autobus e veicoli pesanti vengono posizionati sull’asfalto per evitare problemi.',
+    bungalowInfo: 'Check-in bungalow dalle 16:00, check-out entro le 11:00. La reception conferma la disponibilità per bungalow da 2, 3 e 4 persone.',
+    combinedInfo: 'Questa variante è per situazioni in cui una parte del gruppo dorme in bungalow e una parte arriva in camper.',
+    combinedBungalowSection: 'Parte bungalow',
+    combinedCampingSection: 'Parte camping',
+    bungalowPeople: 'Ospiti nel bungalow',
+    campingPeople: 'Ospiti al camping',
+    bungalowCount: 'Numero di bungalow',
   },
 }[lang];
 
@@ -121,8 +177,36 @@ const formConfig = {
       <p class="section-copy">{copy.lead}</p>
     </div>
 
+    <div class="contact-choice-overlay" data-contact-choice-overlay role="dialog" aria-modal="true" aria-labelledby="contactChoiceTitle" aria-describedby="contactChoiceLead">
+      <div class="contact-choice-overlay__ambient" aria-hidden="true"></div>
+      <div class="contact-choice-overlay__panel">
+        <img src="/brand/logo/clepardia-logo-white.svg" alt="Camping Clepardia" width="190" height="58" loading="eager" decoding="async" />
+        <span class="section-kicker">{formText.kicker}</span>
+        <h2 id="contactChoiceTitle">{copy.choiceTitle}</h2>
+        <p id="contactChoiceLead">{copy.choiceLead}</p>
+        <div class="contact-choice-overlay__grid">
+          {[
+            { value: 'camping', title: copy.camping, text: copy.campingCopy, icon: 'camping' },
+            { value: 'bungalow', title: copy.bungalow, text: copy.bungalowCopy, icon: 'bungalow' },
+            { value: 'combined', title: copy.combined, text: copy.combinedCopy, icon: 'UsersRound' },
+          ].map((choice) => (
+            <a href={`?stay=${choice.value}`} class="contact-choice-card" data-contact-choice={choice.value}>
+              <span aria-hidden="true"><Icon name={choice.icon} size={26} /></span>
+              <strong>{choice.title}</strong>
+              <small>{choice.text}</small>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+
     <div class="reservation-inquiry__layout">
       <form class="premium-card reservation-inquiry__form" data-reservation-form novalidate>
+        <div class="reservation-inquiry__choice-bar">
+          <span><strong>{copy.selected}:</strong> <b data-selected-choice>{copy.camping}</b></span>
+          <button type="button" data-change-choice>{copy.changeChoice}</button>
+        </div>
+
         <label class="reservation-inquiry__honeypot" aria-hidden="true" tabindex="-1">
           <span>{formText.honeypotLabel}</span>
           <input name="website" type="text" autocomplete="off" tabindex="-1" data-honeypot>
@@ -151,6 +235,12 @@ const formConfig = {
               <strong>{copy.bungalow}</strong>
               <small>{copy.bungalowCopy}</small>
             </label>
+            <label class="reservation-inquiry__category-card">
+              <input type="radio" name="bookingCategory" value="combined" data-booking-category>
+              <span><Icon name="UsersRound" size={24} /></span>
+              <strong>{copy.combined}</strong>
+              <small>{copy.combinedCopy}</small>
+            </label>
           </div>
         </fieldset>
 
@@ -171,7 +261,7 @@ const formConfig = {
           </div>
           <p class="reservation-inquiry__nights">{formText.nights}: <strong data-nights-label>{formText.completeDates}</strong></p>
 
-          <div class="reservation-inquiry__counters">
+          <div class="reservation-inquiry__counters" data-common-counters>
             {[
               ['adults', formText.adults, '2'],
               ['children', formText.children, '0'],
@@ -191,7 +281,7 @@ const formConfig = {
 
         <fieldset class="reservation-inquiry__group reveal-section" data-stay-group>
           <legend>{copy.steps[2]}</legend>
-          <div class="reservation-inquiry__options">
+          <div class="reservation-inquiry__options" data-standard-stay-options>
             {stayOptions.map((option, index) => (
               <label class="reservation-inquiry__option" data-stay-option-category={option.category}>
                 <input type="radio" name="stayType" value={option.id} required checked={index === 0} data-category={option.category} data-label={option.label} aria-describedby="stayTypeError">
@@ -199,7 +289,50 @@ const formConfig = {
               </label>
             ))}
           </div>
+          <div class="reservation-inquiry__combined-fields" data-combined-fields hidden>
+            <p>{copy.combinedInfo}</p>
+            <div class="reservation-inquiry__combined-section">
+              <h3>{copy.combinedBungalowSection}</h3>
+              <div class="reservation-inquiry__options reservation-inquiry__options--compact">
+                {stayOptions.filter((option) => option.category === 'bungalow').map((option, index) => (
+                  <label class="reservation-inquiry__option">
+                    <input type="radio" name="combinedBungalowType" value={option.id} checked={index === 0} data-combined-field-input data-label={option.label}>
+                    <span>{option.label}</span>
+                  </label>
+                ))}
+              </div>
+              <div class="reservation-inquiry__fields">
+                <label class="reservation-inquiry__field">
+                  <span>{copy.bungalowPeople}</span>
+                  <input type="number" name="combinedBungalowPeople" min="0" value="2" inputmode="numeric" data-combined-field-input>
+                </label>
+                <label class="reservation-inquiry__field">
+                  <span>{copy.bungalowCount}</span>
+                  <input type="number" name="combinedBungalowCount" min="1" value="1" inputmode="numeric" data-combined-field-input>
+                </label>
+              </div>
+            </div>
+            <div class="reservation-inquiry__combined-section">
+              <h3>{copy.combinedCampingSection}</h3>
+              <div class="reservation-inquiry__options reservation-inquiry__options--compact">
+                {stayOptions.filter((option) => option.category === 'camping').map((option, index) => (
+                  <label class="reservation-inquiry__option">
+                    <input type="radio" name="combinedCampingType" value={option.id} checked={index === 0} data-combined-field-input data-label={option.label}>
+                    <span>{option.label}</span>
+                  </label>
+                ))}
+              </div>
+              <label class="reservation-inquiry__field">
+                <span>{copy.campingPeople}</span>
+                <input type="number" name="combinedCampingPeople" min="0" value="2" inputmode="numeric" data-combined-field-input>
+              </label>
+            </div>
+          </div>
           <small class="reservation-inquiry__field-error" id="stayTypeError" data-field-error="stayType"></small>
+
+          <div class="reservation-inquiry__variant-info" data-variant-info="camping">{copy.campingInfo}</div>
+          <div class="reservation-inquiry__variant-info" data-variant-info="bungalow" hidden>{copy.bungalowInfo}</div>
+          <div class="reservation-inquiry__variant-info" data-variant-info="combined" hidden>{copy.combinedInfo}</div>
 
           <div class="reservation-inquiry__addons">
             <label class="reservation-inquiry__addon" data-addon-id="electricity">
@@ -354,6 +487,12 @@ const formConfig = {
     const countryList = root.querySelector('[data-country-list]');
     const specialNeeds = root.querySelector('[data-special-needs]');
     const specialDetails = root.querySelector('[data-special-needs-details]');
+    const choiceOverlay = root.querySelector('[data-contact-choice-overlay]');
+    const selectedChoice = root.querySelector('[data-selected-choice]');
+    const changeChoiceButton = root.querySelector('[data-change-choice]');
+    const standardStayOptions = root.querySelector('[data-standard-stay-options]');
+    const commonCounters = root.querySelector('[data-common-counters]');
+    const combinedFields = root.querySelector('[data-combined-fields]');
     const DAY = 24 * 60 * 60 * 1000;
     const summerNotice = formText.summerNotice;
     const countries = formConfig.countries || [];
@@ -363,6 +502,7 @@ const formConfig = {
     let lastSubmitAt = 0;
     let activeCountryIndex = -1;
     let countryMatches = [];
+    let choiceMade = false;
 
     const summary = {
       category: root.querySelector('[data-summary-category]'),
@@ -413,6 +553,37 @@ const formConfig = {
       });
       errorBox.append(heading, list);
     };
+    const normalizeCategoryParam = (value) => {
+      const normalizedValue = normalize(value || '');
+      if (['bungalow', 'bungalows', 'domki', 'domek'].includes(normalizedValue)) return 'bungalow';
+      if (['combined', 'razem', 'combo'].includes(normalizedValue)) return 'combined';
+      return 'camping';
+    };
+    const setChoiceOverlay = (open) => {
+      if (!(choiceOverlay instanceof HTMLElement)) return;
+      choiceOverlay.hidden = !open;
+      choiceOverlay.setAttribute('aria-hidden', open ? 'false' : 'true');
+      document.body.classList.toggle('has-contact-choice-open', open);
+    };
+    const updateStayQuery = (category) => {
+      const url = new URL(window.location.href);
+      url.searchParams.set('stay', category);
+      window.history.replaceState({}, '', url);
+    };
+    const chooseCategory = (category, options = {}) => {
+      const normalizedCategory = normalizeCategoryParam(category);
+      const categoryInput = root.querySelector(`input[name="bookingCategory"][value="${normalizedCategory}"]`);
+      if (categoryInput instanceof HTMLInputElement) categoryInput.checked = true;
+      choiceMade = true;
+      syncStayCategory();
+      updateSummary();
+      if (options.updateUrl !== false) updateStayQuery(normalizedCategory);
+      setChoiceOverlay(false);
+      if (options.scroll !== false) {
+        const firstField = root.querySelector('[data-field="arrival"] input');
+        if (firstField instanceof HTMLElement) firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
     const setSubmitting = (submitting) => {
       isSubmitting = submitting;
       if (submitButton instanceof HTMLButtonElement) {
@@ -459,8 +630,32 @@ const formConfig = {
       const selected = root.querySelector('input[name="bookingCategory"]:checked');
       return selected instanceof HTMLInputElement ? selected.value : 'camping';
     };
-    const getCategoryLabel = () => getBookingCategory() === 'bungalow' ? copy.bungalow : copy.camping;
+    const getCategoryLabel = () => ({
+      camping: copy.camping,
+      bungalow: copy.bungalow,
+      combined: copy.combined,
+    })[getBookingCategory()] || copy.camping;
+    const getCheckedLabel = (name) => {
+      const selected = root.querySelector(`input[name="${name}"]:checked`);
+      return selected instanceof HTMLInputElement ? selected.dataset.label || selected.value : '';
+    };
+    const getCombinedDetails = () => ({
+      bungalowType: getCheckedLabel('combinedBungalowType'),
+      campingType: getCheckedLabel('combinedCampingType'),
+      bungalowPeople: normalizeCounterValue(getInput('combinedBungalowPeople')?.value ?? 0),
+      campingPeople: normalizeCounterValue(getInput('combinedCampingPeople')?.value ?? 0),
+      bungalowCount: Math.max(1, normalizeCounterValue(getInput('combinedBungalowCount')?.value ?? 1)),
+    });
     const getSelectedStay = () => {
+      if (getBookingCategory() === 'combined') {
+        const details = getCombinedDetails();
+        return {
+          id: 'combined',
+          label: `${details.bungalowType || copy.bungalow} + ${details.campingType || copy.camping}`,
+          category: 'combined',
+          details,
+        };
+      }
       const selected = root.querySelector('input[name="stayType"]:checked');
       if (!(selected instanceof HTMLInputElement)) return null;
       return { id: selected.value, label: selected.dataset.label || selected.value, category: selected.dataset.category || 'camping' };
@@ -476,6 +671,10 @@ const formConfig = {
       toddlers: normalizeCounterValue(getInput('toddlers')?.value ?? 0),
     });
     const getPeopleSummary = (people) => {
+      if (getBookingCategory() === 'combined') {
+        const details = getCombinedDetails();
+        return `${copy.bungalow}: ${details.bungalowPeople}, ${copy.camping}: ${details.campingPeople}, ${copy.bungalowCount}: ${details.bungalowCount}`;
+      }
       const parts = [];
       if (people.adults > 0) parts.push(`${people.adults} ${formText.adults}`);
       if (people.children > 0) parts.push(`${people.children} ${formText.children}`);
@@ -491,7 +690,7 @@ const formConfig = {
       const stay = getSelectedStay();
       const arrival = parseDate(arrivalInput?.value);
       const departure = parseDate(departureInput?.value);
-      if (!stay || stay.category !== 'camping') return false;
+      if (!stay || !['camping', 'combined'].includes(stay.category)) return false;
       return getRangeDates(arrival, departure).some(isSummerDate);
     };
     const getCountryLabel = () => countrySearch instanceof HTMLInputElement ? countrySearch.value.trim() : '';
@@ -508,9 +707,19 @@ const formConfig = {
     };
     const syncStayCategory = () => {
       const category = getBookingCategory();
+      const isCombined = category === 'combined';
       root.dataset.bookingCategory = category;
+      setText(selectedChoice, getCategoryLabel());
+      if (standardStayOptions instanceof HTMLElement) standardStayOptions.hidden = isCombined;
+      if (commonCounters instanceof HTMLElement) commonCounters.hidden = isCombined;
+      if (combinedFields instanceof HTMLElement) combinedFields.hidden = !isCombined;
+      root.querySelectorAll('[data-combined-field-input]').forEach((input) => {
+        if (input instanceof HTMLInputElement || input instanceof HTMLSelectElement || input instanceof HTMLTextAreaElement) {
+          input.disabled = !isCombined;
+        }
+      });
       root.querySelectorAll('[data-stay-option-category]').forEach((option) => {
-        const visible = option.dataset.stayOptionCategory === category;
+        const visible = !isCombined && option.dataset.stayOptionCategory === category;
         option.hidden = !visible;
         const input = option.querySelector('input');
         if (input instanceof HTMLInputElement) {
@@ -519,16 +728,19 @@ const formConfig = {
         }
       });
       const checked = root.querySelector('input[name="stayType"]:checked');
-      if (!(checked instanceof HTMLInputElement)) {
+      if (!isCombined && !(checked instanceof HTMLInputElement)) {
         const first = root.querySelector(`input[name="stayType"][data-category="${category}"]`);
         if (first instanceof HTMLInputElement) first.checked = true;
       }
       const electricity = root.querySelector('[data-addon-id="electricity"]');
       if (electricity instanceof HTMLElement) {
-        electricity.hidden = category !== 'camping';
+        electricity.hidden = category === 'bungalow';
         const input = electricity.querySelector('input');
-        if (input instanceof HTMLInputElement && category !== 'camping') input.checked = false;
+        if (input instanceof HTMLInputElement && category === 'bungalow') input.checked = false;
       }
+      root.querySelectorAll('[data-variant-info]').forEach((item) => {
+        if (item instanceof HTMLElement) item.hidden = item.dataset.variantInfo !== category;
+      });
     };
     const renderCountries = (matches) => {
       if (!(countryList instanceof HTMLElement) || !(countrySearch instanceof HTMLInputElement)) return;
@@ -698,6 +910,7 @@ const formConfig = {
         stayType: stay?.label ?? '',
         stayTypeId: stay?.id ?? '',
         stayCategory: stay?.category ?? '',
+        combinedDetails: getBookingCategory() === 'combined' ? getCombinedDetails() : null,
         people,
         addons: addons.map((addon) => addon.label),
         specialNeeds: hasSpecialNeeds(),
@@ -725,6 +938,8 @@ const formConfig = {
       `${formText.mailLabels.term}: ${payload.arrival} - ${payload.departure}`,
       `${formText.mailLabels.nights}: ${payload.nights}`,
       `${formText.mailLabels.stayType}: ${payload.stayType}`,
+      `${copy.combinedBungalowSection}: ${payload.combinedDetails ? `${payload.combinedDetails.bungalowType}, ${copy.bungalowPeople}: ${payload.combinedDetails.bungalowPeople}, ${copy.bungalowCount}: ${payload.combinedDetails.bungalowCount}` : formText.mailLabels.notApplicable}`,
+      `${copy.combinedCampingSection}: ${payload.combinedDetails ? `${payload.combinedDetails.campingType}, ${copy.campingPeople}: ${payload.combinedDetails.campingPeople}` : formText.mailLabels.notApplicable}`,
       `${formText.mailLabels.adults}: ${payload.people.adults}`,
       `${formText.mailLabels.children}: ${payload.people.children}`,
       `${formText.mailLabels.toddlers}: ${payload.people.toddlers}`,
@@ -765,8 +980,9 @@ const formConfig = {
       const params = new URLSearchParams(window.location.search);
       const categoryParam = params.get('stay') || params.get('category');
       if (categoryParam) {
-        const categoryInput = root.querySelector(`input[name="bookingCategory"][value="${categoryParam === 'domki' ? 'bungalow' : categoryParam}"]`);
-        if (categoryInput instanceof HTMLInputElement) categoryInput.checked = true;
+        chooseCategory(normalizeCategoryParam(categoryParam), { updateUrl: false, scroll: false });
+      } else {
+        setChoiceOverlay(true);
       }
       syncStayCategory();
       const type = params.get('type');
@@ -848,7 +1064,21 @@ const formConfig = {
       });
     });
     root.querySelectorAll('[data-booking-category]').forEach((input) => {
-      input.addEventListener('change', updateSummary);
+      input.addEventListener('change', () => {
+        chooseCategory(input.value, { scroll: false });
+      });
+    });
+    root.querySelectorAll('[data-contact-choice]').forEach((choice) => {
+      choice.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (choice instanceof HTMLElement) chooseCategory(choice.dataset.contactChoice || 'camping');
+      });
+    });
+    changeChoiceButton?.addEventListener('click', () => setChoiceOverlay(true));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && choiceMade && choiceOverlay instanceof HTMLElement && !choiceOverlay.hidden) {
+        setChoiceOverlay(false);
+      }
     });
     specialNeeds?.addEventListener('change', updateSummary);
     countrySearch?.addEventListener('input', syncCountrySearch);
@@ -897,6 +1127,186 @@ const formConfig = {
   grid-template-columns: 1fr;
   gap: clamp(18px, 3vw, 30px);
   align-items: start;
+}
+
+body.has-contact-choice-open {
+  overflow: hidden;
+}
+
+.contact-choice-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1700;
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 4vw, 46px);
+  background:
+    radial-gradient(circle at 16% 16%, rgba(60,179,113,.30), transparent 34%),
+    radial-gradient(circle at 86% 22%, rgba(242,192,120,.22), transparent 32%),
+    linear-gradient(145deg, rgba(7,20,15,.96), rgba(15,38,26,.94));
+  backdrop-filter: blur(18px);
+}
+
+.contact-choice-overlay[hidden] {
+  display: none !important;
+}
+
+.contact-choice-overlay__ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.contact-choice-overlay__ambient::before,
+.contact-choice-overlay__ambient::after {
+  content: '';
+  position: absolute;
+  width: 32vmin;
+  height: 32vmin;
+  border-radius: 999px;
+  filter: blur(34px);
+  opacity: .52;
+}
+
+.contact-choice-overlay__ambient::before {
+  left: 10%;
+  bottom: 12%;
+  background: rgba(60,179,113,.28);
+}
+
+.contact-choice-overlay__ambient::after {
+  right: 8%;
+  top: 10%;
+  background: rgba(242,192,120,.20);
+}
+
+.contact-choice-overlay__panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 980px);
+  max-height: min(92dvh, 820px);
+  overflow-y: auto;
+  padding: clamp(24px, 5vw, 48px);
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: clamp(26px, 4vw, 42px);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(60,179,113,.22), transparent 38%),
+    linear-gradient(145deg, rgba(255,255,255,.115), rgba(255,255,255,.055));
+  box-shadow: 0 34px 100px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.16);
+  color: #fff;
+  text-align: center;
+}
+
+.contact-choice-overlay__panel img {
+  display: block;
+  width: min(190px, 48vw);
+  height: auto;
+  margin: 0 auto 18px;
+  filter: drop-shadow(0 18px 38px rgba(60,179,113,.32));
+}
+
+.contact-choice-overlay__panel .section-kicker {
+  color: #8fe0b4;
+}
+
+.contact-choice-overlay__panel h2 {
+  margin: 12px auto 12px;
+  max-width: 760px;
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 4.1rem);
+  line-height: .98;
+  font-weight: 950;
+}
+
+.contact-choice-overlay__panel p {
+  max-width: 680px;
+  margin: 0 auto 28px;
+  color: rgba(244,251,246,.78);
+  line-height: 1.7;
+  font-weight: 760;
+}
+
+.contact-choice-overlay__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.contact-choice-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px 16px;
+  min-height: 150px;
+  padding: clamp(18px, 3vw, 24px);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(60,179,113,.17), transparent 36%),
+    rgba(255,255,255,.075);
+  color: #fff;
+  text-align: left;
+  text-decoration: none;
+  transition: transform .24s ease, border-color .24s ease, background .24s ease, box-shadow .24s ease;
+}
+
+.contact-choice-card > span {
+  grid-row: span 2;
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border-radius: 21px;
+  background: linear-gradient(135deg, #63d99c, #3CB371 52%, #24794e);
+  box-shadow: 0 18px 44px rgba(60,179,113,.30);
+}
+
+.contact-choice-card strong {
+  align-self: end;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 950;
+}
+
+.contact-choice-card small {
+  color: rgba(244,251,246,.74);
+  line-height: 1.55;
+  font-weight: 760;
+}
+
+.contact-choice-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(143,224,180,.52);
+  background: rgba(255,255,255,.12);
+  box-shadow: 0 22px 64px rgba(60,179,113,.20);
+}
+
+.reservation-inquiry__choice-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1px solid rgba(60,179,113,.22);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(60,179,113,.13), transparent 34%),
+    rgba(232,249,240,.82);
+  color: #173c28;
+  font-weight: 900;
+}
+
+.reservation-inquiry__choice-bar button {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(60,179,113,.26);
+  border-radius: 999px;
+  background: rgba(60,179,113,.12);
+  color: #17663f;
+  font: inherit;
+  font-weight: 950;
+  cursor: pointer;
 }
 
 .reservation-inquiry__form,
@@ -1122,8 +1532,50 @@ const formConfig = {
 .reservation-inquiry__option[hidden],
 .reservation-inquiry__addon[hidden],
 .reservation-inquiry__special-details[hidden],
+.reservation-inquiry__combined-fields[hidden],
+.reservation-inquiry__variant-info[hidden],
 .reservation-country__list[hidden] {
   display: none !important;
+}
+
+.reservation-inquiry__combined-fields {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.reservation-inquiry__combined-fields > p,
+.reservation-inquiry__variant-info {
+  margin: 0;
+  padding: 15px 17px;
+  border: 1px solid rgba(60,179,113,.20);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(60,179,113,.13), transparent 34%),
+    rgba(232,249,240,.72);
+  color: #24553a;
+  line-height: 1.6;
+  font-weight: 840;
+}
+
+.reservation-inquiry__combined-section {
+  display: grid;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid rgba(25,70,44,.10);
+  border-radius: 22px;
+  background: rgba(255,255,255,.62);
+}
+
+.reservation-inquiry__combined-section h3 {
+  margin: 0;
+  color: #143321;
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.reservation-inquiry__options--compact {
+  grid-template-columns: 1fr;
 }
 
 .reservation-inquiry__option span,
@@ -1487,7 +1939,15 @@ const formConfig = {
   }
 
   .reservation-inquiry__category-options {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .contact-choice-overlay__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .reservation-inquiry__options--compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1524,10 +1984,19 @@ html[data-theme="dark"] .reservation-inquiry__option span,
 html[data-theme="dark"] .reservation-inquiry__addon span,
 html[data-theme="dark"] .reservation-counter,
 html[data-theme="dark"] .reservation-inquiry__consent,
-html[data-theme="dark"] .reservation-inquiry__category-card {
+html[data-theme="dark"] .reservation-inquiry__category-card,
+html[data-theme="dark"] .reservation-inquiry__combined-section,
+html[data-theme="dark"] .reservation-inquiry__choice-bar {
   border-color: rgba(143,224,180,.15);
   background: rgba(255,255,255,.07);
   color: #f4fbf6;
+}
+
+html[data-theme="dark"] .reservation-inquiry__combined-fields > p,
+html[data-theme="dark"] .reservation-inquiry__variant-info {
+  border-color: rgba(143,224,180,.18);
+  background: rgba(60,179,113,.10);
+  color: rgba(244,251,246,.82);
 }
 
 html[data-theme="dark"] .reservation-inquiry__category-card small,
@@ -1546,6 +2015,28 @@ html[data-theme="dark"] .reservation-country__option {
 }
 
 @media (max-width: 640px) {
+  .contact-choice-overlay {
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .contact-choice-overlay__panel {
+    min-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .contact-choice-card {
+    min-height: 132px;
+  }
+
+  .reservation-inquiry__choice-bar {
+    align-items: stretch;
+  }
+
+  .reservation-inquiry__choice-bar button {
+    width: 100%;
+  }
+
   .reservation-inquiry__submit {
     width: 100%;
   }
