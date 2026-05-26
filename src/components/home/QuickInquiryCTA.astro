@@ -1,0 +1,351 @@
+---
+import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { resolveContentLanguage } from '@/i18n/config';
+import Icon from '@/components/ui/Icon.astro';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
+const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode);
+const contactHref = getLocalizedPath(explicitLanguage, 'kontakt');
+
+const copy = {
+  pl: {
+    kicker: 'Szybkie zapytanie',
+    title: 'Zapytaj o dostępność pobytu',
+    lead: 'Wybierz wariant pobytu, a pełny formularz otworzy się z przygotowanym kontekstem.',
+    button: 'Przejdź do formularza',
+    cardCta: 'Otwórz formularz',
+    choices: {
+      camping: {
+        title: 'Camping',
+        text: 'Kamper, przyczepa, namiot, van lub auto z namiotem dachowym.',
+        icon: 'camping',
+      },
+      bungalow: {
+        title: 'Domki',
+        text: 'Domki 2-, 3- i 4-osobowe.',
+        icon: 'bungalow',
+      },
+      combined: {
+        title: 'Razem',
+        text: 'Domek oraz miejsce campingowe w jednym zapytaniu.',
+        icon: 'UsersRound',
+      },
+    },
+  },
+  en: {
+    kicker: 'Quick enquiry',
+    title: 'Ask about stay availability',
+    lead: 'Choose your stay type and the full form opens with prepared context.',
+    button: 'Go to the form',
+    cardCta: 'Open form',
+    choices: {
+      camping: {
+        title: 'Camping',
+        text: 'Motorhome, caravan, tent, van or car with rooftop tent.',
+        icon: 'camping',
+      },
+      bungalow: {
+        title: 'Bungalows',
+        text: '2-, 3- and 4-person bungalows.',
+        icon: 'bungalow',
+      },
+      combined: {
+        title: 'Combined',
+        text: 'A bungalow and a camping pitch in one enquiry.',
+        icon: 'UsersRound',
+      },
+    },
+  },
+  de: {
+    kicker: 'Schnelle Anfrage',
+    title: 'Verfügbarkeit anfragen',
+    lead: 'Wählen Sie die Aufenthaltsart, das vollständige Formular öffnet mit vorbereitetem Kontext.',
+    button: 'Zum Formular',
+    cardCta: 'Formular öffnen',
+    choices: {
+      camping: {
+        title: 'Camping',
+        text: 'Wohnmobil, Wohnwagen, Zelt, Van oder Auto mit Dachzelt.',
+        icon: 'camping',
+      },
+      bungalow: {
+        title: 'Bungalows',
+        text: 'Bungalows für 2, 3 und 4 Personen.',
+        icon: 'bungalow',
+      },
+      combined: {
+        title: 'Kombiniert',
+        text: 'Bungalow und Campingplatz in einer Anfrage.',
+        icon: 'UsersRound',
+      },
+    },
+  },
+  it: {
+    kicker: 'Richiesta rapida',
+    title: 'Richiedi disponibilità',
+    lead: 'Scegli il tipo di soggiorno: il modulo completo si apre con il contesto già pronto.',
+    button: 'Vai al modulo',
+    cardCta: 'Apri modulo',
+    choices: {
+      camping: {
+        title: 'Camping',
+        text: 'Camper, roulotte, tenda, van o auto con tenda da tetto.',
+        icon: 'camping',
+      },
+      bungalow: {
+        title: 'Bungalow',
+        text: 'Bungalow da 2, 3 e 4 persone.',
+        icon: 'bungalow',
+      },
+      combined: {
+        title: 'Combinato',
+        text: 'Bungalow e piazzola camping in un’unica richiesta.',
+        icon: 'UsersRound',
+      },
+    },
+  },
+}[lang];
+
+const choices = [
+  ['camping', copy.choices.camping],
+  ['bungalow', copy.choices.bungalow],
+  ['combined', copy.choices.combined],
+] as const;
+---
+
+<section class="site-section quick-inquiry reveal-section" id="szybkie-zapytanie">
+  <div class="container">
+    <div class="quick-inquiry__panel">
+      <div class="quick-inquiry__content">
+        <span class="section-kicker">{copy.kicker}</span>
+        <h2 class="section-title">{copy.title}</h2>
+        <p class="section-copy">{copy.lead}</p>
+      </div>
+
+      <div class="quick-inquiry__choices" aria-label={copy.title}>
+        {choices.map(([stay, item]) => (
+          <a class="quick-inquiry__choice" href={`${contactHref}?stay=${stay}`}>
+            <span class="quick-inquiry__choice-icon" aria-hidden="true">
+              <Icon name={item.icon} size={24} strokeWidth={1.9} />
+            </span>
+            <strong>{item.title}</strong>
+            <small>{item.text}</small>
+            <em>{copy.cardCta}<Icon name="ArrowUpRight" size={16} /></em>
+          </a>
+        ))}
+      </div>
+
+      <a class="quick-inquiry__main-cta" href={contactHref}>
+        <span>{copy.button}</span>
+        <Icon name="ArrowUpRight" size={18} strokeWidth={2.2} />
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+.quick-inquiry {
+  background:
+    radial-gradient(circle at 14% 0%, rgba(60,179,113,.13), transparent 32%),
+    radial-gradient(circle at 84% 14%, rgba(242,192,120,.13), transparent 30%),
+    #fffaf2;
+}
+
+.quick-inquiry__panel {
+  position: relative;
+  display: grid;
+  gap: clamp(24px, 4vw, 42px);
+  padding: clamp(24px, 5vw, 58px);
+  border: 1px solid rgba(60,179,113,.22);
+  border-radius: 38px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 84% 12%, rgba(242,192,120,.22), transparent 34%),
+    radial-gradient(circle at 14% 82%, rgba(60,179,113,.22), transparent 34%),
+    linear-gradient(135deg, rgba(10,29,19,.97), rgba(22,62,40,.94));
+  color: #fff;
+  box-shadow: 0 34px 100px rgba(13,34,23,.24), 0 0 54px rgba(60,179,113,.14);
+}
+
+.quick-inquiry__panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(120deg, rgba(255,255,255,.14), transparent 34%),
+    radial-gradient(circle at 50% 100%, rgba(60,179,113,.18), transparent 34%);
+  opacity: .58;
+}
+
+.quick-inquiry__content,
+.quick-inquiry__choices,
+.quick-inquiry__main-cta {
+  position: relative;
+  z-index: 1;
+}
+
+.quick-inquiry__content {
+  max-width: 700px;
+}
+
+.quick-inquiry .section-title {
+  color: #fff;
+}
+
+.quick-inquiry .section-copy {
+  max-width: 660px;
+  color: rgba(255,255,255,.78);
+}
+
+.quick-inquiry .section-kicker {
+  color: #8fe0b4;
+}
+
+.quick-inquiry__choices {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  padding: clamp(16px, 3vw, 24px);
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.20), transparent 36%),
+    linear-gradient(145deg, rgba(255,255,255,.125), rgba(255,255,255,.065));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 20px 58px rgba(0,0,0,.14);
+}
+
+.quick-inquiry__choice {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px 14px;
+  min-height: 164px;
+  padding: clamp(18px, 3vw, 24px);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 96% 0%, rgba(60,179,113,.16), transparent 34%),
+    rgba(255,255,255,.075);
+  color: #fff;
+  text-decoration: none;
+  transition: transform .24s ease, border-color .24s ease, background .24s ease, box-shadow .24s ease;
+}
+
+.quick-inquiry__choice-icon {
+  grid-row: span 2;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(99,217,156,.96), rgba(60,179,113,.86) 52%, rgba(36,121,78,.82));
+  box-shadow: 0 16px 38px rgba(60,179,113,.26);
+}
+
+.quick-inquiry__choice strong {
+  align-self: end;
+  color: #fff;
+  font-size: 1.18rem;
+  font-weight: 950;
+}
+
+.quick-inquiry__choice small {
+  color: rgba(255,255,255,.72);
+  line-height: 1.48;
+  font-weight: 760;
+}
+
+.quick-inquiry__choice em {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(60,179,113,.18);
+  color: #9af0bf;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.quick-inquiry__choice:hover {
+  transform: translateY(-4px);
+  border-color: rgba(143,224,180,.44);
+  background: rgba(255,255,255,.12);
+  box-shadow: 0 22px 64px rgba(60,179,113,.20);
+}
+
+.quick-inquiry__main-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: fit-content;
+  min-height: 52px;
+  padding: 14px 22px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #4bd186, #3CB371 55%, #2f8f5e);
+  color: #062014;
+  text-decoration: none;
+  font-weight: 950;
+  box-shadow: 0 18px 46px rgba(60,179,113,.28);
+  transition: transform .22s ease, box-shadow .22s ease;
+}
+
+.quick-inquiry__main-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 58px rgba(60,179,113,.36);
+}
+
+@media (min-width: 760px) {
+  .quick-inquiry__choices {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1080px) {
+  .quick-inquiry__panel {
+    grid-template-columns: minmax(0, .72fr) minmax(580px, 1fr);
+    align-items: center;
+  }
+
+  .quick-inquiry__main-cta {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 620px) {
+  .quick-inquiry__panel {
+    padding: 20px;
+    border-radius: 30px;
+  }
+
+  .quick-inquiry__choices {
+    border-radius: 24px;
+  }
+
+  .quick-inquiry__choice {
+    min-height: 142px;
+  }
+
+  .quick-inquiry__main-cta {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quick-inquiry__choice,
+  .quick-inquiry__main-cta {
+    transition: none;
+  }
+}
+</style>
