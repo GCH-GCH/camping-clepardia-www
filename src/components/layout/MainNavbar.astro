@@ -1,6 +1,6 @@
 ---
 import { logoMain, logoMainPng } from '@/data/assets';
-import { getLanguageSwitchLinks, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getBookingLocalizedPath, getLanguageSwitchLinks, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import { getTranslations } from '@/i18n/config';
 import Icon from '@/components/ui/Icon.astro';
 
@@ -22,7 +22,7 @@ const currentSlug = pathContext.slug;
 const activeLanguagePrefix = pathContext.explicitLanguage;
 
 const homeHref = getLocalizedPath(activeLanguagePrefix, '');
-const contactHref = getLocalizedPath(activeLanguagePrefix, 'kontakt');
+const bookingHref = getBookingLocalizedPath(pathContext.languageCode);
 const localizedNavItems = navItems.map((item) => ({
   ...item,
   href: getLocalizedPath(activeLanguagePrefix, item.slug),
@@ -106,7 +106,7 @@ const navMessages = {
         </span>
       </button>
 
-      <a href={contactHref} class="main-navbar__cta">{t.nav.cta}</a>
+      <a href={bookingHref} class="main-navbar__cta">{t.nav.cta}</a>
     </div>
 
     <button
@@ -179,7 +179,7 @@ const navMessages = {
             </a>
           ))}
         </div>
-        <a href={contactHref} class="main-navbar__cta main-navbar__cta--mobile">{t.nav.cta}</a>
+        <a href={bookingHref} class="main-navbar__cta main-navbar__cta--mobile">{t.nav.cta}</a>
       </div>
     </div>
   </div>

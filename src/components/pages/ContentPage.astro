@@ -1,6 +1,5 @@
 ---
 import PricingCalculator from '@/components/pricing/PricingCalculator.astro';
-import ReservationInquiryForm from '@/components/forms/ReservationInquiryForm.astro';
 import Icon from '@/components/ui/Icon.astro';
 import TransportDirections from './TransportDirections.astro';
 import AttractionsPage from './AttractionsPage.astro';
@@ -13,7 +12,7 @@ import ArrivalFlowSection from '@/components/home/ArrivalFlowSection.astro';
 import { publicAssetExists, siteAssets } from '@/data/assets';
 import { pricingConfig } from '@/data/pricing';
 import type { SitePage } from '@/data/sitePages';
-import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 import { getCurrentYear } from '@/utils/currentYear';
 
@@ -36,8 +35,36 @@ const pricingOverlineByLanguage = {
   de: `Camping Clepardia Preisliste ${currentYear}`,
   it: `Prezzi Camping Clepardia ${currentYear}`,
 };
-const displayOverline = page.slug === 'cennik' ? pricingOverlineByLanguage[resolvedContentLanguage] : page.overline;
-const displayTitle = page.title;
+const contactHeroTextByLanguage = {
+  pl: {
+    overline: 'Kontakt',
+    title: 'Kontakt z Camping Clepardia',
+    lead: 'Telefon, email, adres, Google Maps i szybki dostęp do rezerwacji pobytu.',
+  },
+  en: {
+    overline: 'Contact',
+    title: 'Contact Camping Clepardia',
+    lead: 'Phone, email, address, Google Maps and a fast path to the booking flow.',
+  },
+  de: {
+    overline: 'Kontakt',
+    title: 'Kontakt zu Camping Clepardia',
+    lead: 'Telefon, E-Mail, Adresse, Google Maps und schneller Zugang zur Buchung.',
+  },
+  it: {
+    overline: 'Contatto',
+    title: 'Contatta Camping Clepardia',
+    lead: 'Telefono, email, indirizzo, Google Maps e accesso rapido alla prenotazione.',
+  },
+};
+const contactHeroText = contactHeroTextByLanguage[resolvedContentLanguage];
+const displayOverline = page.slug === 'kontakt'
+  ? contactHeroText.overline
+  : page.slug === 'cennik'
+    ? pricingOverlineByLanguage[resolvedContentLanguage]
+    : page.overline;
+const displayTitle = page.slug === 'kontakt' ? contactHeroText.title : page.title;
+const displayLead = page.slug === 'kontakt' ? contactHeroText.lead : page.lead;
 const localizeHref = (href: string) => href.startsWith('/') ? getLocalizedPath(linkLanguage, href) : href;
 const homeHref = getLocalizedPath(linkLanguage, '');
 const breadcrumbHome = languageName ? `Camping Clepardia ${languageName}` : 'Camping Clepardia';
@@ -63,6 +90,7 @@ const highSeasonRange = `${formatSeasonDate(pricingConfig.seasons.high.start)}�
 const dogAddon = pricingConfig.addons.find((addon) => addon.id === 'dog');
 const electricityAddon = pricingConfig.addons.find((addon) => addon.id === 'electricity');
 const googleMapsHref = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
+const bookingHref = getBookingLocalizedPath(contentLanguage);
 const pricingInfoBarItems = [
   { label: t.content.highSeason, value: highSeasonRange },
   { label: t.content.lowSeason, value: t.content.remainingDates },
@@ -75,6 +103,45 @@ const contactCards = [
   { label: t.content.contactCards.address, value: 'Henryka Pachońskiego 28A, 31-322 Kraków' },
   { label: t.content.contactCards.receptionHours, value: '9:00–20:00' },
 ];
+const contactActionTextByLanguage = {
+  pl: {
+    kicker: 'Kontakt i rezerwacja',
+    title: 'Potrzebujesz konkretnej odpowiedzi?',
+    copy: 'Najprościej: zadzwoń, napisz maila albo przejdź do dedykowanego flow rezerwacji. Formularz pobytu przenieśliśmy na osobną podstronę, żeby /kontakt był szybki i czytelny.',
+    booking: 'Zarezerwuj pobyt',
+    call: 'Zadzwoń',
+    maps: 'Google Maps',
+    email: 'Email',
+  },
+  en: {
+    kicker: 'Contact and booking',
+    title: 'Need a clear next step?',
+    copy: 'Call, email or open the dedicated booking flow. The stay enquiry form now lives on a separate page so contact stays fast and readable.',
+    booking: 'Book your stay',
+    call: 'Call',
+    maps: 'Google Maps',
+    email: 'Email',
+  },
+  de: {
+    kicker: 'Kontakt und Buchung',
+    title: 'Brauchen Sie den nächsten Schritt?',
+    copy: 'Rufen Sie an, schreiben Sie eine E-Mail oder öffnen Sie den Buchungsflow. Die Aufenthaltsanfrage ist jetzt auf einer eigenen Seite.',
+    booking: 'Aufenthalt buchen',
+    call: 'Anrufen',
+    maps: 'Google Maps',
+    email: 'E-Mail',
+  },
+  it: {
+    kicker: 'Contatto e prenotazione',
+    title: 'Hai bisogno del passo successivo?',
+    copy: 'Chiama, scrivi una email o apri il flow di prenotazione dedicato. La richiesta di soggiorno ora è in una pagina separata.',
+    booking: 'Prenota soggiorno',
+    call: 'Chiama',
+    maps: 'Google Maps',
+    email: 'Email',
+  },
+};
+const contactActionText = contactActionTextByLanguage[resolvedContentLanguage];
 const campingGuideExists = publicAssetExists(siteAssets.documents.campingGuidePdf);
 const operationalTextByLanguage = {
   pl: {
@@ -167,7 +234,7 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 
     <span class="section-kicker">{displayOverline}</span>
     <h1>{displayTitle}</h1>
-    <p>{page.lead}</p>
+    <p>{displayLead}</p>
   </div>
 </section>
 
@@ -236,6 +303,38 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
           </article>
         )
       ))}
+    </div>
+  </section>
+)}
+
+{page.slug === 'kontakt' && (
+  <section class="site-section contact-action-hub reveal-section">
+    <div class="container">
+      <div class="contact-action-hub__panel premium-card">
+        <div>
+          <span class="section-kicker">{contactActionText.kicker}</span>
+          <h2>{contactActionText.title}</h2>
+          <p>{contactActionText.copy}</p>
+        </div>
+        <div class="contact-action-hub__actions">
+          <a class="contact-action-hub__button contact-action-hub__button--primary" href={bookingHref}>
+            <Icon name="CalendarCheck" size={19} />
+            {contactActionText.booking}
+          </a>
+          <a class="contact-action-hub__button" href="tel:+48795294486">
+            <Icon name="phone" size={18} />
+            {contactActionText.call}
+          </a>
+          <a class="contact-action-hub__button" href={googleMapsHref} target="_blank" rel="noopener noreferrer">
+            <Icon name="map" size={18} />
+            {contactActionText.maps}
+          </a>
+          <a class="contact-action-hub__button" href="mailto:clepardia@gmail.com">
+            <Icon name="mail" size={18} />
+            {contactActionText.email}
+          </a>
+        </div>
+      </div>
     </div>
   </section>
 )}
@@ -310,8 +409,6 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 )}
 
 {page.slug === 'cennik' && <PricingCalculator languageCode={contentLanguage} />}
-
-{page.slug === 'kontakt' && <ReservationInquiryForm languageCode={contentLanguage} />}
 
 {page.slug === 'dojazd' && <TransportDirections languageCode={contentLanguage} />}
 
@@ -584,6 +681,83 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   background:
     radial-gradient(circle at 14% 12%, rgba(60,179,113,.15), transparent 34%),
     linear-gradient(180deg, #eef6ef, #fbfbf7);
+}
+
+.contact-action-hub {
+  padding: clamp(20px, 4vw, 48px) 0 clamp(54px, 7vw, 88px);
+  background:
+    radial-gradient(circle at 16% 10%, rgba(60,179,113,.14), transparent 32%),
+    linear-gradient(180deg, #f2f7f0, #eef6ef);
+}
+
+.contact-action-hub__panel {
+  display: grid;
+  gap: clamp(24px, 4vw, 42px);
+  padding: clamp(26px, 5vw, 50px);
+  border-radius: 30px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(242,192,120,.18), transparent 32%),
+    radial-gradient(circle at 14% 86%, rgba(60,179,113,.20), transparent 34%),
+    linear-gradient(135deg, rgba(9,26,17,.94), rgba(18,48,31,.88));
+  border-color: rgba(255,255,255,.14);
+  box-shadow: 0 30px 90px rgba(17,40,28,.20), 0 0 42px rgba(60,179,113,.12);
+}
+
+.contact-action-hub__panel h2 {
+  margin: 12px 0 14px;
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  line-height: 1;
+  font-weight: 950;
+}
+
+.contact-action-hub__panel p {
+  max-width: 720px;
+  margin: 0;
+  color: rgba(255,255,255,.76);
+  line-height: 1.72;
+}
+
+.contact-action-hub__actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.contact-action-hub__button {
+  display: inline-flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 18px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 18px;
+  color: #fff;
+  background: rgba(255,255,255,.08);
+  text-decoration: none;
+  font-weight: 950;
+  transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
+}
+
+.contact-action-hub__button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(143,224,180,.42);
+  background: rgba(255,255,255,.12);
+  box-shadow: 0 18px 42px rgba(60,179,113,.16);
+}
+
+.contact-action-hub__button--primary {
+  color: #082016;
+  background: linear-gradient(135deg, #a8f0c7, #3CB371 58%, #2c8f5c);
+  border-color: rgba(143,224,180,.54);
+  box-shadow: 0 20px 50px rgba(60,179,113,.28);
+}
+
+.contact-action-hub__button--primary:hover {
+  color: #082016;
+  background: linear-gradient(135deg, #c0f8d6, #42bf7a 58%, #2c8f5c);
 }
 
 .operational-info {
@@ -923,6 +1097,15 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   .page-cta__panel {
     grid-template-columns: 1fr auto;
     align-items: end;
+  }
+
+  .contact-action-hub__panel {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, .64fr);
+    align-items: center;
+  }
+
+  .contact-action-hub__actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

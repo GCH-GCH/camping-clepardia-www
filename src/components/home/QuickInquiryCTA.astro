@@ -1,5 +1,5 @@
 ---
-import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getBookingLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import { resolveContentLanguage } from '@/i18n/config';
 import Icon from '@/components/ui/Icon.astro';
 
@@ -9,9 +9,9 @@ interface Props {
 
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
-const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
 const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode);
-const contactHref = getLocalizedPath(explicitLanguage, 'kontakt');
+const bookingLanguage = languageCode ?? pathContext.languageCode;
+const bookingHref = getBookingLocalizedPath(bookingLanguage);
 
 const copy = {
   pl: {
@@ -130,7 +130,7 @@ const choices = [
 
       <div class="quick-inquiry__choices" aria-label={copy.title}>
         {choices.map(([stay, item]) => (
-          <a class="quick-inquiry__choice" href={`${contactHref}?stay=${stay}`}>
+          <a class="quick-inquiry__choice" href={getBookingLocalizedPath(bookingLanguage, stay)}>
             <span class="quick-inquiry__choice-icon" aria-hidden="true">
               <Icon name={item.icon} size={24} strokeWidth={1.9} />
             </span>
@@ -141,7 +141,7 @@ const choices = [
         ))}
       </div>
 
-      <a class="quick-inquiry__main-cta" href={contactHref}>
+      <a class="quick-inquiry__main-cta" href={bookingHref}>
         <span>{copy.button}</span>
         <Icon name="ArrowUpRight" size={18} strokeWidth={2.2} />
       </a>

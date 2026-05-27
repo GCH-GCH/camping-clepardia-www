@@ -1,5 +1,5 @@
 ---
-import { getTranslations } from '@/i18n/config';
+import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 import { getPathContext } from '@/utils/localizedLinks';
 import Icon from '@/components/ui/Icon.astro';
 
@@ -10,65 +10,76 @@ interface Props {
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(languageCode ?? pathContext.languageCode);
+const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode);
 
-const benefits = [
-  {
-    title: t.home.why.benefits[0].title,
-    copy: t.home.why.benefits[0].copy,
-    icon: 'tram',
-    delay: 0,
-  },
-  {
-    title: t.home.why.benefits[1].title,
-    copy: t.home.why.benefits[1].copy,
-    icon: 'camper',
-    delay: 80,
-  },
-  {
-    title: t.home.why.benefits[2].title,
-    copy: t.home.why.benefits[2].copy,
-    icon: 'bungalow',
-    delay: 160,
-  },
-  {
-    title: t.home.why.benefits[3].title,
-    copy: t.home.why.benefits[3].copy,
-    icon: 'leaf',
-    delay: 240,
-  },
-  {
-    title: t.home.why.benefits[4].title,
-    copy: t.home.why.benefits[4].copy,
-    icon: 'shower',
-    delay: 320,
-  },
-  {
-    title: t.home.why.benefits[5].title,
-    copy: t.home.why.benefits[5].copy,
-    icon: 'map',
-    delay: 400,
-  },
-];
+const copyByLanguage = {
+  pl: [
+    { title: 'Blisko centrum', copy: 'Zostaw auto na campingu i jedź tramwajem w stronę Starego Miasta.', icon: 'MapPinned', tone: 'hero' },
+    { title: 'Tramwaj 9 przystanków', copy: 'Przystanek ok. 40 m od bramy, do Starego Kleparza ok. 14 minut.', icon: 'tram', tone: 'wide' },
+    { title: 'Domki 2/3/4-os.', copy: 'Proste warianty domków bez sztucznych kategorii rodzinnych.', icon: 'bungalow', tone: 'compact' },
+    { title: 'Kampery i vany', copy: 'Płyty betonowe dla kamperów, cięższe pojazdy ustawiamy na asfalcie.', icon: 'camper', tone: 'tall' },
+    { title: 'Cisza 22:00-07:00', copy: 'To spokojny camping, nie miejsce imprezowe.', icon: 'moon', tone: 'compact' },
+    { title: 'Google Maps 2022', copy: 'Dojazd zmienił się w 2022 roku, dlatego polecamy Google Maps.', icon: 'map', tone: 'wide' },
+    { title: 'Zwierzęta mile widziane', copy: 'Pies: 0 PLN. Prosimy tylko o opiekę i sprzątanie po pupilu.', icon: 'dog', tone: 'compact' },
+    { title: 'Prąd 10A', copy: 'Przyłącze dla kamperów i przyczep, bez ładowania aut elektrycznych.', icon: 'plug', tone: 'compact' },
+    { title: 'Baza na Małopolskę', copy: 'Kraków, Wieliczka, Ojców, Zakopane i Energylandia w zasięgu planu dnia.', icon: 'landmark', tone: 'wide' },
+  ],
+  en: [
+    { title: 'Close to the centre', copy: 'Leave the car at the campsite and take the tram toward the Old Town.', icon: 'MapPinned', tone: 'hero' },
+    { title: '9 tram stops', copy: 'Stop about 40 m from the gate, around 14 minutes to Stary Kleparz.', icon: 'tram', tone: 'wide' },
+    { title: '2/3/4-person bungalows', copy: 'Clear bungalow options without artificial family categories.', icon: 'bungalow', tone: 'compact' },
+    { title: 'Motorhomes and vans', copy: 'Concrete slabs for campers, heavier vehicles placed on asphalt.', icon: 'camper', tone: 'tall' },
+    { title: 'Quiet 22:00-07:00', copy: 'A calm campsite, not a party place.', icon: 'moon', tone: 'compact' },
+    { title: 'Google Maps 2022', copy: 'Access changed in 2022, so we recommend Google Maps.', icon: 'map', tone: 'wide' },
+    { title: 'Pet friendly', copy: 'Dog: 0 PLN. Please keep pets under control and clean up after them.', icon: 'dog', tone: 'compact' },
+    { title: '10A electricity', copy: 'Connection for campers and caravans, no EV/hybrid charging.', icon: 'plug', tone: 'compact' },
+    { title: 'Lesser Poland base', copy: 'Krakow, Wieliczka, Ojców, Zakopane and Energylandia within trip plans.', icon: 'landmark', tone: 'wide' },
+  ],
+  de: [
+    { title: 'Nah am Zentrum', copy: 'Auto auf dem Campingplatz lassen und mit der Straßenbahn in die Altstadt fahren.', icon: 'MapPinned', tone: 'hero' },
+    { title: '9 Haltestellen', copy: 'Haltestelle ca. 40 m vom Tor, etwa 14 Minuten bis Stary Kleparz.', icon: 'tram', tone: 'wide' },
+    { title: 'Bungalows 2/3/4 Pers.', copy: 'Klare Bungalow-Varianten ohne künstliche Familienkategorie.', icon: 'bungalow', tone: 'compact' },
+    { title: 'Camper und Vans', copy: 'Betonplatten für Camper, schwere Fahrzeuge auf Asphalt.', icon: 'camper', tone: 'tall' },
+    { title: 'Ruhe 22:00-07:00', copy: 'Ein ruhiger Campingplatz, kein Party-Ort.', icon: 'moon', tone: 'compact' },
+    { title: 'Google Maps 2022', copy: 'Die Zufahrt wurde 2022 geändert, deshalb empfehlen wir Google Maps.', icon: 'map', tone: 'wide' },
+    { title: 'Haustiere willkommen', copy: 'Hund: 0 PLN. Bitte unter Kontrolle halten und aufräumen.', icon: 'dog', tone: 'compact' },
+    { title: 'Strom 10A', copy: 'Anschluss für Camper und Wohnwagen, kein Laden von Elektroautos.', icon: 'plug', tone: 'compact' },
+    { title: 'Basis für Małopolska', copy: 'Krakau, Wieliczka, Ojców, Zakopane und Energylandia gut planbar.', icon: 'landmark', tone: 'wide' },
+  ],
+  it: [
+    { title: 'Vicino al centro', copy: 'Lascia l’auto al camping e prendi il tram verso il centro storico.', icon: 'MapPinned', tone: 'hero' },
+    { title: '9 fermate di tram', copy: 'Fermata a circa 40 m dal cancello, circa 14 minuti fino a Stary Kleparz.', icon: 'tram', tone: 'wide' },
+    { title: 'Bungalow 2/3/4 persone', copy: 'Opzioni chiare senza categorie familiari artificiali.', icon: 'bungalow', tone: 'compact' },
+    { title: 'Camper e van', copy: 'Piastre in cemento per camper, veicoli pesanti su asfalto.', icon: 'camper', tone: 'tall' },
+    { title: 'Silenzio 22:00-07:00', copy: 'Un camping tranquillo, non un luogo per feste.', icon: 'moon', tone: 'compact' },
+    { title: 'Google Maps 2022', copy: 'L’accesso è cambiato nel 2022, consigliamo Google Maps.', icon: 'map', tone: 'wide' },
+    { title: 'Animali benvenuti', copy: 'Cane: 0 PLN. Chiediamo controllo e pulizia.', icon: 'dog', tone: 'compact' },
+    { title: 'Elettricità 10A', copy: 'Allaccio per camper e roulotte, non per caricare auto elettriche.', icon: 'plug', tone: 'compact' },
+    { title: 'Base per Małopolska', copy: 'Cracovia, Wieliczka, Ojców, Zakopane ed Energylandia in programma.', icon: 'landmark', tone: 'wide' },
+  ],
+};
+
+const cards = copyByLanguage[lang];
 ---
 
-<section class="site-section why reveal-section" id="dlaczego">
+<section class="site-section why reveal-section" id="dlaczego" data-why-clepardia>
+  <div class="why__ambient" aria-hidden="true"><span></span><span></span></div>
   <div class="container">
     <div class="why__header">
       <span class="section-kicker">{t.home.why.overline}</span>
       <h2 class="section-title">{t.home.why.title}</h2>
-      <p class="section-copy">
-        {t.home.why.lead}
-      </p>
+      <p class="section-copy">{t.home.why.lead}</p>
     </div>
 
-    <div class="why__grid">
-      {benefits.map((benefit) => (
-        <article class="premium-card reveal-section why__card" style={`--reveal-delay: ${benefit.delay}ms`}>
-          <div class="why__icon" aria-hidden="true">
-            <Icon name={benefit.icon} size={34} strokeWidth={1.8} />
-          </div>
-          <h3>{benefit.title}</h3>
-          <p>{benefit.copy}</p>
+    <div class="why__mosaic">
+      {cards.map((card, index) => (
+        <article class:list={['premium-card reveal-section why__card', `why__card--${card.tone}`]} style={`--reveal-delay: ${index * 70}ms`}>
+          <span class="why__icon" aria-hidden="true">
+            <Icon name={card.icon} size={26} strokeWidth={1.85} />
+          </span>
+          <strong>{String(index + 1).padStart(2, '0')}</strong>
+          <h3>{card.title}</h3>
+          <p>{card.copy}</p>
         </article>
       ))}
     </div>
@@ -77,71 +88,107 @@ const benefits = [
 
 <style>
 .why {
+  position: relative;
+  overflow: hidden;
   background:
-    radial-gradient(circle at 12% 4%, rgba(60,179,113,.16), transparent 34%),
-    radial-gradient(circle at 86% 12%, rgba(238,174,99,.14), transparent 30%),
-    linear-gradient(180deg, #fbfbf7 0%, #f1f7f0 100%);
+    radial-gradient(circle at 12% 8%, rgba(60,179,113,.16), transparent 32%),
+    radial-gradient(circle at 86% 12%, rgba(242,192,120,.16), transparent 30%),
+    linear-gradient(180deg, #fbfbf7 0%, #eef6ef 100%);
+}
+
+.why__ambient span {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(16px);
+  opacity: .55;
+  animation: whyFloat 18s ease-in-out infinite;
+}
+
+.why__ambient span:first-child {
+  width: 360px;
+  height: 360px;
+  left: -120px;
+  top: 18%;
+  background: rgba(60,179,113,.16);
+}
+
+.why__ambient span:last-child {
+  width: 300px;
+  height: 300px;
+  right: -90px;
+  bottom: 10%;
+  background: rgba(242,192,120,.16);
+  animation-delay: -8s;
 }
 
 .why__header {
-  max-width: 850px;
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
 }
 
-.why__grid {
-  margin-top: clamp(34px, 5vw, 56px);
+.why__mosaic {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 18px;
+  gap: 16px;
+  margin-top: clamp(34px, 5vw, 58px);
 }
 
 .why__card {
   position: relative;
-  min-height: 286px;
-  padding: clamp(24px, 3vw, 32px);
-  border-radius: 24px;
+  min-height: 230px;
+  display: grid;
+  align-content: end;
+  gap: 10px;
+  padding: clamp(22px, 3vw, 32px);
+  border-radius: 28px;
+  overflow: hidden;
   border-color: rgba(60,179,113,.16);
   background:
-    linear-gradient(145deg, rgba(255,255,255,.86), rgba(255,255,255,.62)),
-    radial-gradient(circle at 86% 12%, rgba(60,179,113,.12), transparent 34%);
-  box-shadow: 0 24px 74px rgba(17, 40, 28, .09);
-  overflow: hidden;
+    linear-gradient(145deg, rgba(255,255,255,.88), rgba(255,255,255,.60)),
+    radial-gradient(circle at 84% 8%, rgba(60,179,113,.14), transparent 34%);
+  box-shadow: 0 24px 74px rgba(17,40,28,.09);
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1), border-color .3s ease, box-shadow .3s ease;
 }
 
 .why__card::before {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(135deg, rgba(255,255,255,.58), transparent 42%);
-  opacity: .82;
+  background:
+    linear-gradient(130deg, rgba(255,255,255,.58), transparent 36%),
+    repeating-linear-gradient(120deg, transparent 0 30px, rgba(60,179,113,.035) 31px 32px);
 }
 
 .why__card::after {
   content: '';
   position: absolute;
-  right: -44px;
-  bottom: -44px;
-  width: 138px;
-  height: 138px;
+  right: -58px;
+  top: -58px;
+  width: 160px;
+  height: 160px;
   border-radius: 999px;
-  background: rgba(60,179,113,.10);
-  filter: blur(4px);
-  transition: transform .28s ease, opacity .28s ease;
+  background: rgba(60,179,113,.12);
+  transition: transform .3s ease, opacity .3s ease;
 }
 
 .why__card:hover {
   transform: translateY(-6px);
-  border-color: rgba(60,179,113,.32);
-  box-shadow: 0 32px 94px rgba(17, 40, 28, .14);
+  border-color: rgba(60,179,113,.34);
+  box-shadow: 0 34px 96px rgba(17,40,28,.15), 0 0 34px rgba(60,179,113,.10);
 }
 
 .why__card:hover::after {
-  transform: scale(1.08);
+  transform: scale(1.14);
   opacity: .9;
 }
 
 .why__icon,
+.why__card strong,
 .why__card h3,
 .why__card p {
   position: relative;
@@ -149,60 +196,119 @@ const benefits = [
 }
 
 .why__icon {
-  width: 66px;
-  height: 66px;
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  width: 58px;
+  height: 58px;
   display: grid;
   place-items: center;
-  margin-bottom: 34px;
-  border-radius: 22px;
-  border: 1px solid rgba(60,179,113,.20);
-  background:
-    linear-gradient(145deg, rgba(255,255,255,.92), rgba(255,255,255,.58)),
-    radial-gradient(circle at 70% 24%, rgba(60,179,113,.22), transparent 42%);
-  box-shadow: 0 16px 38px rgba(17, 40, 28, .10);
+  border: 1px solid rgba(60,179,113,.22);
+  border-radius: 20px;
+  color: #2f9b62;
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 14px 34px rgba(17,40,28,.10);
 }
 
-.why__icon :global(svg) {
-  color: #2f9b62;
-  filter: drop-shadow(0 8px 18px rgba(60,179,113,.16));
+.why__card strong {
+  width: fit-content;
+  color: #3CB371;
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .16em;
 }
 
 .why__card h3 {
   max-width: 360px;
-  margin: 0 0 14px;
-  color: #12271c;
-  font-size: clamp(1.18rem, 1.8vw, 1.42rem);
-  line-height: 1.16;
-  font-weight: 900;
-  letter-spacing: 0;
+  margin: 0;
+  color: #102018;
+  font-size: clamp(1.2rem, 2vw, 1.62rem);
+  line-height: 1.1;
+  font-weight: 950;
 }
 
 .why__card p {
+  max-width: 460px;
   margin: 0;
   color: #536359;
-  line-height: 1.72;
-  font-size: 1rem;
+  line-height: 1.66;
+  font-weight: 720;
 }
 
 @media (min-width: 760px) {
-  .why__grid {
-    grid-template-columns: repeat(2, 1fr);
+  .why__mosaic {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .why__card {
+    grid-column: span 3;
+  }
+
+  .why__card--hero {
+    grid-column: span 4;
+    min-height: 340px;
+  }
+
+  .why__card--wide {
+    grid-column: span 3;
+    min-height: 270px;
+  }
+
+  .why__card--tall {
+    grid-column: span 2;
+    min-height: 340px;
+  }
+
+  .why__card--compact {
+    grid-column: span 2;
+    min-height: 240px;
   }
 }
 
-@media (min-width: 1120px) {
-  .why__grid {
-    grid-template-columns: repeat(3, 1fr);
+@media (min-width: 1180px) {
+  .why__mosaic {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-auto-flow: dense;
+  }
+
+  .why__card--hero {
+    grid-column: span 5;
+  }
+
+  .why__card--wide {
+    grid-column: span 4;
+  }
+
+  .why__card--tall,
+  .why__card--compact {
+    grid-column: span 3;
   }
 }
 
 @media (max-width: 560px) {
   .why__card {
-    min-height: auto;
+    min-height: 220px;
+    border-radius: 24px;
   }
 
   .why__icon {
-    margin-bottom: 28px;
+    top: 18px;
+    right: 18px;
+    width: 52px;
+    height: 52px;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .why__ambient span,
+  .why__card {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@keyframes whyFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(24px, -20px, 0) scale(1.08); }
 }
 </style>

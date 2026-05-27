@@ -22,6 +22,26 @@ export const isLanguageCode = (value?: string): value is LanguageCode =>
 
 export const normalizeSlug = (slug = '') => slug.replace(/^\/+|\/+$/g, '');
 
+export const bookingSlugByLanguage: Partial<Record<LanguageCode, string>> = {
+  pl: 'rezerwacja',
+  en: 'booking',
+  de: 'buchung',
+  it: 'prenotazione',
+};
+
+const bookingSlugSet = new Set(Object.values(bookingSlugByLanguage));
+
+export const isBookingSlug = (slug = '') => bookingSlugSet.has(normalizeSlug(slug));
+
+export const getBookingLocalizedPath = (languageCode?: string, stay?: string) => {
+  const normalizedLanguage = isLanguageCode(languageCode) ? languageCode : defaultLanguage.code;
+  const bookingLanguage = bookingSlugByLanguage[normalizedLanguage] ? normalizedLanguage : 'en';
+  const slug = bookingSlugByLanguage[bookingLanguage] ?? 'booking';
+  const path = bookingLanguage === defaultLanguage.code ? `/${slug}` : `/${bookingLanguage}/${slug}`;
+
+  return stay ? `${path}?stay=${encodeURIComponent(stay)}` : path;
+};
+
 export const normalizePathname = (pathname: string) => {
   const [pathOnly] = pathname.split(/[?#]/);
   const withLeadingSlash = pathOnly.startsWith('/') ? pathOnly : `/${pathOnly}`;
@@ -59,10 +79,11 @@ export const getPathContext = (pathname: string) => {
 
 export const getLanguageSwitchLinks = (pathname: string) => {
   const { languageCode, slug } = getPathContext(pathname);
+  const isBookingPage = isBookingSlug(slug);
 
   return languages.map((language) => ({
     ...language,
-    href: getLocalizedPath(language.code, slug),
+    href: isBookingPage ? getBookingLocalizedPath(language.code) : getLocalizedPath(language.code, slug),
     active: language.code === languageCode,
   }));
 };
@@ -78,7 +99,10 @@ export const withOrigin = (href: string, origin?: string) => {
 
 export const getSeoLanguageMeta = (pathname: string, origin?: string, canonicalOverride?: string) => {
   const context = getPathContext(pathname);
-  const currentPath = context.explicitLanguage
+  const isBookingPage = isBookingSlug(context.slug);
+  const currentPath = isBookingPage
+    ? getBookingLocalizedPath(context.languageCode)
+    : context.explicitLanguage
     ? getLocalizedPath(context.explicitLanguage, context.slug)
     : getLocalizedPath(undefined, context.slug);
 
@@ -89,11 +113,11 @@ export const getSeoLanguageMeta = (pathname: string, origin?: string, canonicalO
     alternateLinks: [
       ...languages.map((language) => ({
         hrefLang: language.code,
-        href: withOrigin(getLocalizedPath(language.code, context.slug), origin),
+        href: withOrigin(isBookingPage ? getBookingLocalizedPath(language.code) : getLocalizedPath(language.code, context.slug), origin),
       })),
       {
         hrefLang: 'x-default',
-        href: withOrigin(getLocalizedPath(undefined, context.slug), origin),
+        href: withOrigin(isBookingPage ? getBookingLocalizedPath(defaultLanguage.code) : getLocalizedPath(undefined, context.slug), origin),
       },
     ],
   };

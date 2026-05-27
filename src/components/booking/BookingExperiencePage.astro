@@ -1,0 +1,1816 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { countries } from '@/data/countries';
+import { pricingConfig } from '@/data/pricing';
+import { getPathContext } from '@/utils/localizedLinks';
+import { resolveContentLanguage } from '@/i18n/config';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode);
+
+const copyByLanguage = {
+  pl: {
+    meta: {
+      kicker: 'Rezerwacja pobytu',
+      title: 'Zarezerwuj pobyt w Camping Clepardia',
+      lead: 'Wybierz typ pobytu, a przygotujemy odpowiedni formularz.',
+      chooseTitle: 'Jakiego pobytu dotyczy zapytanie?',
+      chooseLead: 'To nie jest automatyczna rezerwacja. Recepcja potwierdzi dostępność, cenę i szczegóły przyjazdu.',
+      note: 'Camping Clepardia czeka na Was',
+    },
+    stay: {
+      camping: { title: 'Camping', text: 'Kamper, van, namiot, przyczepa.', icon: 'Tent' },
+      bungalow: { title: 'Domki', text: 'Domki 2-, 3- i 4-osobowe.', icon: 'House' },
+      combined: { title: 'Razem', text: 'Domek + miejsce campingowe.', icon: 'Blend' },
+    },
+    steps: ['Typ pobytu', 'Termin', 'Goście', 'Usługi', 'Dane', 'Podsumowanie'],
+    messages: ['Świetny wybór 🌿', 'Jeszcze chwila i gotowe', 'Recepcja przygotuje najlepszą opcję pobytu'],
+    fields: {
+      arrival: 'Data przyjazdu',
+      departure: 'Data wyjazdu',
+      nights: 'Liczba nocy',
+      adults: 'Dorośli',
+      children: 'Dzieci 4-14',
+      toddlers: 'Dzieci do 4',
+      people: 'Liczba osób',
+      campingType: 'Typ pobytu campingowego',
+      bungalowType: 'Typ domku',
+      bungalowCount: 'Liczba domków',
+      campingPeople: 'Osoby przy campingu',
+      bungalowPeople: 'Osoby w domku',
+      electricity: 'Prąd 10A',
+      dog: 'Pies',
+      car: 'Auto',
+      vehicleRegistration: 'Rejestracja pojazdu',
+      vehicleHint: 'Jeśli przyjeżdżasz przyczepą z autem, wpisz rejestrację auta. Jeśli kamperem — wpisz rejestrację kampera.',
+      country: 'Kraj',
+      countryPlaceholder: 'Wpisz np. de, ge, niem, Germany...',
+      contactLanguage: 'Język kontaktu',
+      fullName: 'Imię i nazwisko',
+      email: 'Email',
+      phone: 'Telefon',
+      message: 'Wiadomość',
+      specialNeeds: 'Osoba z niepełnosprawnością / specjalne potrzeby',
+      specialNeedsDetails: 'Napisz, czego potrzebujesz, abyśmy mogli lepiej przygotować pobyt.',
+      quiet: 'Camping Clepardia nie jest miejscem imprezowym, cisza nocna 22:00-07:00.',
+      consent: 'Wyrażam zgodę na kontakt w sprawie zapytania.',
+    },
+    info: {
+      camping: 'Miejsca dla kamperów są głównie na płytach betonowych. Busy, trucki, autobusy i ciężkie pojazdy ustawiamy na asfalcie, aby uniknąć zakopania się pojazdu.',
+      bungalow: 'Check-in domki od 16:00, check-out do 11:00.',
+      combined: 'Ten wariant jest dla sytuacji, gdy np. część rodziny śpi w domku, a część przyjeżdża kamperem.',
+      campingHours: 'Camping: 12:00 → 12:00',
+      bungalowHours: 'Domki: 16:00 → 11:00',
+    },
+    options: {
+      camper: 'Kamper',
+      van: 'Van',
+      caravan: 'Przyczepa',
+      tentSmall: 'Namiot 1-2 os.',
+      tentLarge: 'Namiot 3-4 os.',
+      rooftop: 'Auto + namiot dachowy',
+      bus: 'Bus / ciężarówka',
+      bungalow2: 'Domek 2-os.',
+      bungalow3: 'Domek 3-os.',
+      bungalow4: 'Domek 4-os.',
+    },
+    actions: {
+      continue: 'Dalej',
+      back: 'Wstecz',
+      send: 'Wyślij zapytanie do recepcji',
+      restart: 'Zmień typ pobytu',
+      openSummary: 'Pokaż podsumowanie',
+      closeSummary: 'Zamknij podsumowanie',
+    },
+    summary: {
+      title: 'Podsumowanie pobytu',
+      empty: 'Wybierz typ pobytu, termin i usługi.',
+      stay: 'Typ',
+      dates: 'Termin',
+      nights: 'Noce',
+      services: 'Usługi',
+      country: 'Kraj',
+      language: 'Język',
+      price: 'Cena orientacyjna',
+      specialNeeds: 'Zgłoszono specjalne potrzeby',
+      availability: 'Finalną dostępność i warunki potwierdza recepcja.',
+      success: 'Dziękujemy. Zapytanie zostało przygotowane w widoku strony — finalną wysyłkę/obsługę potwierdza recepcja.',
+      required: 'Zaznacz wymagane zgody, aby przygotować zapytanie.',
+    },
+  },
+  en: {
+    meta: {
+      kicker: 'Stay booking',
+      title: 'Book your stay at Camping Clepardia',
+      lead: 'Choose your stay type and we will prepare the right form.',
+      chooseTitle: 'What stay is your enquiry about?',
+      chooseLead: 'This is not an automatic booking. Reception confirms availability, price and arrival details.',
+      note: 'Camping Clepardia is ready for you',
+    },
+    stay: {
+      camping: { title: 'Camping', text: 'Motorhome, van, tent or caravan.', icon: 'Tent' },
+      bungalow: { title: 'Bungalows', text: '2-, 3- and 4-person bungalows.', icon: 'House' },
+      combined: { title: 'Combined', text: 'Bungalow + camping pitch.', icon: 'Blend' },
+    },
+    steps: ['Stay type', 'Dates', 'Guests', 'Services', 'Details', 'Summary'],
+    messages: ['Great choice 🌿', 'Almost there', 'Reception will prepare the best stay option'],
+    fields: {
+      arrival: 'Arrival date',
+      departure: 'Departure date',
+      nights: 'Nights',
+      adults: 'Adults',
+      children: 'Children 4-14',
+      toddlers: 'Children under 4',
+      people: 'Guests',
+      campingType: 'Camping stay type',
+      bungalowType: 'Bungalow type',
+      bungalowCount: 'Number of bungalows',
+      campingPeople: 'Camping guests',
+      bungalowPeople: 'Bungalow guests',
+      electricity: '10A electricity',
+      dog: 'Dog',
+      car: 'Car',
+      vehicleRegistration: 'Vehicle registration',
+      vehicleHint: 'If you arrive with a caravan and car, enter the car plate. If by motorhome, enter the motorhome plate.',
+      country: 'Country',
+      countryPlaceholder: 'Type e.g. de, ge, niem, Germany...',
+      contactLanguage: 'Contact language',
+      fullName: 'Full name',
+      email: 'Email',
+      phone: 'Phone',
+      message: 'Message',
+      specialNeeds: 'Guest with a disability / special needs',
+      specialNeedsDetails: 'Tell us what you need so we can better prepare your stay.',
+      quiet: 'Camping Clepardia is not a party campsite. Quiet hours are 22:00-07:00.',
+      consent: 'I agree to be contacted about this enquiry.',
+    },
+    info: {
+      camping: 'Camper pitches are mostly concrete slabs. Vans, trucks, buses and heavy vehicles are placed on asphalt to avoid getting stuck.',
+      bungalow: 'Bungalow check-in from 16:00, check-out by 11:00.',
+      combined: 'This option is for situations where part of the group sleeps in a bungalow and part arrives with a camper.',
+      campingHours: 'Camping: 12:00 → 12:00',
+      bungalowHours: 'Bungalows: 16:00 → 11:00',
+    },
+    options: {
+      camper: 'Motorhome',
+      van: 'Van',
+      caravan: 'Caravan',
+      tentSmall: 'Tent 1-2 people',
+      tentLarge: 'Tent 3-4 people',
+      rooftop: 'Car + rooftop tent',
+      bus: 'Bus / truck',
+      bungalow2: '2-person bungalow',
+      bungalow3: '3-person bungalow',
+      bungalow4: '4-person bungalow',
+    },
+    actions: {
+      continue: 'Continue',
+      back: 'Back',
+      send: 'Send enquiry to reception',
+      restart: 'Change stay type',
+      openSummary: 'Show summary',
+      closeSummary: 'Close summary',
+    },
+    summary: {
+      title: 'Stay summary',
+      empty: 'Choose stay type, dates and services.',
+      stay: 'Type',
+      dates: 'Dates',
+      nights: 'Nights',
+      services: 'Services',
+      country: 'Country',
+      language: 'Language',
+      price: 'Estimated price',
+      specialNeeds: 'Special needs reported',
+      availability: 'Final availability and terms are confirmed by reception.',
+      success: 'Thank you. The enquiry has been prepared in the page view — final sending/handling is confirmed by reception.',
+      required: 'Please tick the required consents to prepare the enquiry.',
+    },
+  },
+  de: {
+    meta: {
+      kicker: 'Buchungsanfrage',
+      title: 'Buchen Sie Ihren Aufenthalt im Camping Clepardia',
+      lead: 'Wählen Sie die Aufenthaltsart, wir bereiten das passende Formular vor.',
+      chooseTitle: 'Worum geht es bei Ihrer Anfrage?',
+      chooseLead: 'Dies ist keine automatische Buchung. Die Rezeption bestätigt Verfügbarkeit, Preis und Anreisedetails.',
+      note: 'Camping Clepardia wartet auf Sie',
+    },
+    stay: {
+      camping: { title: 'Camping', text: 'Wohnmobil, Van, Zelt oder Wohnwagen.', icon: 'Tent' },
+      bungalow: { title: 'Bungalows', text: 'Bungalows für 2, 3 und 4 Personen.', icon: 'House' },
+      combined: { title: 'Kombiniert', text: 'Bungalow + Campingplatz.', icon: 'Blend' },
+    },
+    steps: ['Aufenthalt', 'Termin', 'Gäste', 'Services', 'Daten', 'Zusammenfassung'],
+    messages: ['Gute Wahl 🌿', 'Nur noch ein Moment', 'Die Rezeption bereitet die beste Option vor'],
+    fields: {
+      arrival: 'Anreise',
+      departure: 'Abreise',
+      nights: 'Nächte',
+      adults: 'Erwachsene',
+      children: 'Kinder 4-14',
+      toddlers: 'Kinder unter 4',
+      people: 'Personen',
+      campingType: 'Campingtyp',
+      bungalowType: 'Bungalowtyp',
+      bungalowCount: 'Anzahl Bungalows',
+      campingPeople: 'Personen Camping',
+      bungalowPeople: 'Personen Bungalow',
+      electricity: 'Strom 10A',
+      dog: 'Hund',
+      car: 'Auto',
+      vehicleRegistration: 'Kennzeichen',
+      vehicleHint: 'Wenn Sie mit Wohnwagen und Auto anreisen, geben Sie das Autokennzeichen ein. Beim Wohnmobil das Wohnmobilkennzeichen.',
+      country: 'Land',
+      countryPlaceholder: 'z.B. de, ge, niem, Germany...',
+      contactLanguage: 'Kontaktsprache',
+      fullName: 'Name und Nachname',
+      email: 'E-Mail',
+      phone: 'Telefon',
+      message: 'Nachricht',
+      specialNeeds: 'Gast mit Behinderung / besondere Bedürfnisse',
+      specialNeedsDetails: 'Schreiben Sie, was Sie benötigen, damit wir den Aufenthalt besser vorbereiten können.',
+      quiet: 'Camping Clepardia ist kein Party-Campingplatz. Nachtruhe 22:00-07:00.',
+      consent: 'Ich stimme der Kontaktaufnahme zu dieser Anfrage zu.',
+    },
+    info: {
+      camping: 'Camperplätze befinden sich überwiegend auf Betonplatten. Vans, LKW, Busse und schwere Fahrzeuge stellen wir auf Asphalt ab.',
+      bungalow: 'Bungalow Check-in ab 16:00, Check-out bis 11:00.',
+      combined: 'Diese Option ist für Gruppen, bei denen ein Teil im Bungalow schläft und ein Teil mit Camper anreist.',
+      campingHours: 'Camping: 12:00 → 12:00',
+      bungalowHours: 'Bungalows: 16:00 → 11:00',
+    },
+    options: {
+      camper: 'Wohnmobil',
+      van: 'Van',
+      caravan: 'Wohnwagen',
+      tentSmall: 'Zelt 1-2 Personen',
+      tentLarge: 'Zelt 3-4 Personen',
+      rooftop: 'Auto + Dachzelt',
+      bus: 'Bus / LKW',
+      bungalow2: 'Bungalow 2 Personen',
+      bungalow3: 'Bungalow 3 Personen',
+      bungalow4: 'Bungalow 4 Personen',
+    },
+    actions: {
+      continue: 'Weiter',
+      back: 'Zurück',
+      send: 'Anfrage an die Rezeption senden',
+      restart: 'Aufenthaltsart ändern',
+      openSummary: 'Zusammenfassung anzeigen',
+      closeSummary: 'Zusammenfassung schließen',
+    },
+    summary: {
+      title: 'Zusammenfassung',
+      empty: 'Wählen Sie Aufenthalt, Termin und Services.',
+      stay: 'Typ',
+      dates: 'Termin',
+      nights: 'Nächte',
+      services: 'Services',
+      country: 'Land',
+      language: 'Sprache',
+      price: 'Orientierungspreis',
+      specialNeeds: 'Besondere Bedürfnisse gemeldet',
+      availability: 'Endgültige Verfügbarkeit und Bedingungen bestätigt die Rezeption.',
+      success: 'Danke. Die Anfrage wurde in der Seitenansicht vorbereitet — endgültiger Versand/Service wird von der Rezeption bestätigt.',
+      required: 'Bitte markieren Sie die erforderlichen Zustimmungen.',
+    },
+  },
+  it: {
+    meta: {
+      kicker: 'Richiesta di prenotazione',
+      title: 'Prenota il tuo soggiorno al Camping Clepardia',
+      lead: 'Scegli il tipo di soggiorno e prepareremo il modulo giusto.',
+      chooseTitle: 'A quale soggiorno si riferisce la richiesta?',
+      chooseLead: 'Non è una prenotazione automatica. La reception conferma disponibilità, prezzo e dettagli di arrivo.',
+      note: 'Camping Clepardia vi aspetta',
+    },
+    stay: {
+      camping: { title: 'Camping', text: 'Camper, van, tenda o roulotte.', icon: 'Tent' },
+      bungalow: { title: 'Bungalow', text: 'Bungalow da 2, 3 e 4 persone.', icon: 'House' },
+      combined: { title: 'Combinato', text: 'Bungalow + piazzola camping.', icon: 'Blend' },
+    },
+    steps: ['Tipo', 'Date', 'Ospiti', 'Servizi', 'Dati', 'Riepilogo'],
+    messages: ['Ottima scelta 🌿', 'Ancora un attimo', 'La reception preparerà la migliore opzione'],
+    fields: {
+      arrival: 'Arrivo',
+      departure: 'Partenza',
+      nights: 'Notti',
+      adults: 'Adulti',
+      children: 'Bambini 4-14',
+      toddlers: 'Bambini fino a 4',
+      people: 'Persone',
+      campingType: 'Tipo camping',
+      bungalowType: 'Tipo bungalow',
+      bungalowCount: 'Numero bungalow',
+      campingPeople: 'Persone camping',
+      bungalowPeople: 'Persone bungalow',
+      electricity: 'Elettricità 10A',
+      dog: 'Cane',
+      car: 'Auto',
+      vehicleRegistration: 'Targa veicolo',
+      vehicleHint: 'Se arrivi con roulotte e auto, inserisci la targa dell’auto. Se arrivi in camper, la targa del camper.',
+      country: 'Paese',
+      countryPlaceholder: 'Scrivi es. de, ge, niem, Germany...',
+      contactLanguage: 'Lingua di contatto',
+      fullName: 'Nome e cognome',
+      email: 'Email',
+      phone: 'Telefono',
+      message: 'Messaggio',
+      specialNeeds: 'Ospite con disabilità / esigenze speciali',
+      specialNeedsDetails: 'Scrivi cosa ti serve, così possiamo preparare meglio il soggiorno.',
+      quiet: 'Camping Clepardia non è un campeggio per feste. Silenzio notturno 22:00-07:00.',
+      consent: 'Accetto di essere contattato per questa richiesta.',
+    },
+    info: {
+      camping: 'Le piazzole camper sono per lo più su piastre di cemento. Van, camion, autobus e veicoli pesanti vengono posizionati su asfalto.',
+      bungalow: 'Check-in bungalow dalle 16:00, check-out entro le 11:00.',
+      combined: 'Questa opzione è per gruppi in cui una parte dorme in bungalow e una parte arriva in camper.',
+      campingHours: 'Camping: 12:00 → 12:00',
+      bungalowHours: 'Bungalow: 16:00 → 11:00',
+    },
+    options: {
+      camper: 'Camper',
+      van: 'Van',
+      caravan: 'Roulotte',
+      tentSmall: 'Tenda 1-2 persone',
+      tentLarge: 'Tenda 3-4 persone',
+      rooftop: 'Auto + tenda da tetto',
+      bus: 'Bus / camion',
+      bungalow2: 'Bungalow 2 persone',
+      bungalow3: 'Bungalow 3 persone',
+      bungalow4: 'Bungalow 4 persone',
+    },
+    actions: {
+      continue: 'Avanti',
+      back: 'Indietro',
+      send: 'Invia richiesta alla reception',
+      restart: 'Cambia tipo di soggiorno',
+      openSummary: 'Mostra riepilogo',
+      closeSummary: 'Chiudi riepilogo',
+    },
+    summary: {
+      title: 'Riepilogo soggiorno',
+      empty: 'Scegli tipo, date e servizi.',
+      stay: 'Tipo',
+      dates: 'Date',
+      nights: 'Notti',
+      services: 'Servizi',
+      country: 'Paese',
+      language: 'Lingua',
+      price: 'Prezzo indicativo',
+      specialNeeds: 'Esigenze speciali segnalate',
+      availability: 'Disponibilità e condizioni finali sono confermate dalla reception.',
+      success: 'Grazie. La richiesta è stata preparata nella pagina — invio/gestione finale confermati dalla reception.',
+      required: 'Seleziona i consensi richiesti.',
+    },
+  },
+};
+
+const copy = copyByLanguage[lang];
+const stayChoices = [
+  ['camping', copy.stay.camping],
+  ['bungalow', copy.stay.bungalow],
+  ['combined', copy.stay.combined],
+] as const;
+
+const campingTypes = [
+  ['camper', copy.options.camper, pricingConfig.stayTypes.find((item) => item.id === 'camper')?.price ?? 80],
+  ['van', copy.options.van, pricingConfig.stayTypes.find((item) => item.id === 'van')?.price ?? 75],
+  ['caravan', copy.options.caravan, pricingConfig.stayTypes.find((item) => item.id === 'caravan')?.price ?? 60],
+  ['tent-small', copy.options.tentSmall, pricingConfig.stayTypes.find((item) => item.id === 'tent-small')?.price ?? 30],
+  ['tent-large', copy.options.tentLarge, pricingConfig.stayTypes.find((item) => item.id === 'tent-large')?.price ?? 40],
+  ['rooftop-tent', copy.options.rooftop, pricingConfig.stayTypes.find((item) => item.id === 'rooftop-tent')?.price ?? 50],
+  ['bus', copy.options.bus, pricingConfig.addons.find((item) => item.id === 'bus')?.price ?? 160],
+] as const;
+
+const bungalowTypes = [
+  ['bungalow-2', copy.options.bungalow2],
+  ['bungalow-3', copy.options.bungalow3],
+  ['bungalow-4', copy.options.bungalow4],
+] as const;
+
+const bookingConfigEncoded = Buffer.from(JSON.stringify({
+  lang,
+  copy,
+  countries,
+  pricing: {
+    currency: pricingConfig.currency,
+    adults: 35,
+    children: 20,
+    toddlers: 0,
+    electricity: pricingConfig.addons.find((item) => item.id === 'electricity')?.price ?? 25,
+    dog: pricingConfig.addons.find((item) => item.id === 'dog')?.price ?? 0,
+    car: pricingConfig.addons.find((item) => item.id === 'parking')?.price ?? 35,
+    campingTypes: Object.fromEntries(campingTypes.map(([id, label, price]) => [id, { label, price }])),
+    bungalowTypes: Object.fromEntries(
+      pricingConfig.stayTypes
+        .filter((item) => item.category === 'bungalow' && 'seasonalPrices' in item)
+        .map((item) => [item.id, { label: bungalowTypes.find(([id]) => id === item.id)?.[1] ?? item.label, prices: item.seasonalPrices }])
+    ),
+    highSeason: pricingConfig.seasons.high,
+  },
+}), 'utf8').toString('base64');
+---
+
+<section class="booking-experience" data-booking-experience data-config={bookingConfigEncoded} data-after-hero>
+  <div class="booking-experience__ambient" aria-hidden="true">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <div class="container booking-experience__shell">
+    <div class="booking-experience__intro">
+      <span class="section-kicker">{copy.meta.kicker}</span>
+      <h1>{copy.meta.title}</h1>
+      <p>{copy.meta.lead}</p>
+    </div>
+
+    <div class="booking-start premium-card" data-booking-start>
+      <div class="booking-start__head">
+        <span>{copy.meta.note}</span>
+        <h2>{copy.meta.chooseTitle}</h2>
+        <p>{copy.meta.chooseLead}</p>
+      </div>
+
+      <div class="booking-start__choices">
+        {stayChoices.map(([key, item]) => (
+          <button class="booking-stay-card" type="button" data-start-choice={key}>
+            <span class="booking-stay-card__icon"><Icon name={item.icon} size={30} strokeWidth={1.8} /></span>
+            <strong>{item.title}</strong>
+            <small>{item.text}</small>
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <div class="booking-flow" data-booking-flow hidden>
+      <div class="booking-flow__progress" aria-label={copy.meta.title}>
+        {copy.steps.map((step, index) => (
+          <button type="button" data-step-jump={index}>
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <strong>{step}</strong>
+          </button>
+        ))}
+      </div>
+
+      <div class="booking-flow__layout">
+        <form class="booking-form premium-card" data-booking-form novalidate>
+          <div class="booking-form__message" data-booking-message>{copy.messages[0]}</div>
+
+          <section class="booking-step" data-booking-step="0">
+            <div class="booking-step__head">
+              <span>{copy.steps[0]}</span>
+              <h2>{copy.meta.chooseTitle}</h2>
+            </div>
+            <div class="booking-choice-grid">
+              {stayChoices.map(([key, item]) => (
+                <button class="booking-choice" type="button" data-flow-choice={key}>
+                  <span><Icon name={item.icon} size={24} strokeWidth={1.8} /></span>
+                  <strong>{item.title}</strong>
+                  <small>{item.text}</small>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section class="booking-step" data-booking-step="1" hidden>
+            <div class="booking-step__head">
+              <span>{copy.steps[1]}</span>
+              <h2>{copy.fields.arrival} / {copy.fields.departure}</h2>
+            </div>
+            <div class="booking-grid booking-grid--two">
+              <label class="booking-field">
+                <span>{copy.fields.arrival}</span>
+                <input type="date" data-arrival />
+              </label>
+              <label class="booking-field">
+                <span>{copy.fields.departure}</span>
+                <input type="date" data-departure />
+              </label>
+            </div>
+            <div class="booking-info-row">
+              <strong>{copy.fields.nights}: <span data-nights-output>0</span></strong>
+              <span data-hours-output>{copy.info.campingHours}</span>
+            </div>
+          </section>
+
+          <section class="booking-step" data-booking-step="2" hidden>
+            <div class="booking-step__head">
+              <span>{copy.steps[2]}</span>
+              <h2>{copy.fields.people}</h2>
+            </div>
+
+            <div class="booking-variant" data-variant-panel="camping">
+              <div class="booking-counter-grid">
+                <div class="booking-counter" data-counter="adults" data-default="2">
+                  <span>{copy.fields.adults}</span>
+                  <div><button type="button" data-counter-action="minus">-</button><input value="2" inputmode="numeric" /><button type="button" data-counter-action="plus">+</button></div>
+                </div>
+                <div class="booking-counter" data-counter="children" data-default="0">
+                  <span>{copy.fields.children}</span>
+                  <div><button type="button" data-counter-action="minus">-</button><input value="0" inputmode="numeric" /><button type="button" data-counter-action="plus">+</button></div>
+                </div>
+                <div class="booking-counter" data-counter="toddlers" data-default="0">
+                  <span>{copy.fields.toddlers}</span>
+                  <div><button type="button" data-counter-action="minus">-</button><input value="0" inputmode="numeric" /><button type="button" data-counter-action="plus">+</button></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="booking-variant" data-variant-panel="bungalow" hidden>
+              <div class="booking-counter-grid">
+                <div class="booking-counter" data-counter="people" data-default="2">
+                  <span>{copy.fields.people}</span>
+                  <div><button type="button" data-counter-action="minus">-</button><input value="2" inputmode="numeric" /><button type="button" data-counter-action="plus">+</button></div>
+                </div>
+                <div class="booking-counter" data-counter="children" data-default="0">
+                  <span>{copy.fields.children}</span>
+                  <div><button type="button" data-counter-action="minus">-</button><input value="0" inputmode="numeric" /><button type="button" data-counter-action="plus">+</button></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="booking-variant" data-variant-panel="combined" hidden>
+              <div class="booking-split">
+                <article>
+                  <h3>{copy.stay.bungalow.title}</h3>
+                  <div class="booking-counter" data-counter="bungalowPeople" data-default="2">
+                    <span>{copy.fields.bungalowPeople}</span>
+                    <div><button type="button" data-counter-action="minus">-</button><input value="2" inputmode="numeric" /><button type="button" data-counter-action="plus">+</button></div>
+                  </div>
+                </article>
+                <article>
+                  <h3>{copy.stay.camping.title}</h3>
+                  <div class="booking-counter" data-counter="campingPeople" data-default="2">
+                    <span>{copy.fields.campingPeople}</span>
+                    <div><button type="button" data-counter-action="minus">-</button><input value="2" inputmode="numeric" /><button type="button" data-counter-action="plus">+</button></div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section class="booking-step" data-booking-step="3" hidden>
+            <div class="booking-step__head">
+              <span>{copy.steps[3]}</span>
+              <h2>{copy.fields.campingType} / {copy.fields.bungalowType}</h2>
+            </div>
+
+            <div class="booking-variant" data-variant-panel="camping">
+              <h3>{copy.fields.campingType}</h3>
+              <div class="booking-option-grid">
+                {campingTypes.map(([id, label, price]) => (
+                  <label class="booking-option">
+                    <input type="radio" name="campingType" value={id} checked={id === 'camper'} />
+                    <span>{label}</span>
+                    <small>{price} PLN</small>
+                  </label>
+                ))}
+              </div>
+              <p class="booking-note">{copy.info.camping}</p>
+            </div>
+
+            <div class="booking-variant" data-variant-panel="bungalow" hidden>
+              <h3>{copy.fields.bungalowType}</h3>
+              <div class="booking-option-grid">
+                {bungalowTypes.map(([id, label]) => (
+                  <label class="booking-option">
+                    <input type="radio" name="bungalowType" value={id} checked={id === 'bungalow-2'} />
+                    <span>{label}</span>
+                  </label>
+                ))}
+              </div>
+              <p class="booking-note">{copy.info.bungalow}</p>
+            </div>
+
+            <div class="booking-variant" data-variant-panel="combined" hidden>
+              <div class="booking-split">
+                <article>
+                  <h3>{copy.fields.bungalowType}</h3>
+                  <div class="booking-option-grid booking-option-grid--compact">
+                    {bungalowTypes.map(([id, label]) => (
+                      <label class="booking-option">
+                        <input type="radio" name="combinedBungalowType" value={id} checked={id === 'bungalow-2'} />
+                        <span>{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <div class="booking-counter" data-counter="bungalowCount" data-default="1">
+                    <span>{copy.fields.bungalowCount}</span>
+                    <div><button type="button" data-counter-action="minus">-</button><input value="1" inputmode="numeric" /><button type="button" data-counter-action="plus">+</button></div>
+                  </div>
+                </article>
+                <article>
+                  <h3>{copy.fields.campingType}</h3>
+                  <div class="booking-option-grid booking-option-grid--compact">
+                    {campingTypes.map(([id, label]) => (
+                      <label class="booking-option">
+                        <input type="radio" name="combinedCampingType" value={id} checked={id === 'camper'} />
+                        <span>{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </article>
+              </div>
+              <p class="booking-note">{copy.info.combined}</p>
+            </div>
+
+            <div class="booking-toggles">
+              <label><input type="checkbox" data-addon="electricity" /> <span>{copy.fields.electricity}</span></label>
+              <label><input type="checkbox" data-addon="dog" /> <span>{copy.fields.dog}</span></label>
+              <label data-car-toggle><input type="checkbox" data-addon="car" /> <span>{copy.fields.car}</span></label>
+            </div>
+
+            <label class="booking-field">
+              <span>{copy.fields.vehicleRegistration}</span>
+              <input type="text" data-vehicle-registration placeholder="KR 12345" />
+              <small>{copy.fields.vehicleHint}</small>
+            </label>
+          </section>
+
+          <section class="booking-step" data-booking-step="4" hidden>
+            <div class="booking-step__head">
+              <span>{copy.steps[4]}</span>
+              <h2>{copy.fields.fullName}</h2>
+            </div>
+            <div class="booking-grid booking-grid--two">
+              <label class="booking-field"><span>{copy.fields.fullName}</span><input type="text" data-full-name autocomplete="name" /></label>
+              <label class="booking-field"><span>{copy.fields.email}</span><input type="email" data-email autocomplete="email" /></label>
+              <label class="booking-field"><span>{copy.fields.phone}</span><input type="tel" data-phone autocomplete="tel" /></label>
+              <label class="booking-field"><span>{copy.fields.contactLanguage}</span><select data-contact-language><option>PL</option><option>EN</option><option>DE</option><option>IT</option></select></label>
+            </div>
+
+            <div class="booking-country" data-country-combobox>
+              <label class="booking-field">
+                <span>{copy.fields.country}</span>
+                <input type="text" data-country-input autocomplete="off" placeholder={copy.fields.countryPlaceholder} aria-autocomplete="list" aria-expanded="false" />
+                <input type="hidden" data-country-code name="country" value="" />
+              </label>
+              <div class="booking-country__list" data-country-list hidden></div>
+            </div>
+
+            <label class="booking-check booking-check--wide">
+              <input type="checkbox" data-special-needs />
+              <span>{copy.fields.specialNeeds}</span>
+            </label>
+            <label class="booking-field booking-special-details" data-special-details hidden>
+              <span>{copy.fields.specialNeedsDetails}</span>
+              <textarea rows="3" data-special-needs-text></textarea>
+            </label>
+
+            <label class="booking-field booking-field--full">
+              <span>{copy.fields.message}</span>
+              <textarea rows="5" data-message></textarea>
+            </label>
+          </section>
+
+          <section class="booking-step" data-booking-step="5" hidden>
+            <div class="booking-step__head">
+              <span>{copy.steps[5]}</span>
+              <h2>{copy.summary.title}</h2>
+            </div>
+            <div class="booking-final-summary" data-final-summary></div>
+            <label class="booking-check booking-check--wide"><input type="checkbox" data-quiet-consent /> <span>{copy.fields.quiet}</span></label>
+            <label class="booking-check booking-check--wide"><input type="checkbox" data-contact-consent /> <span>{copy.fields.consent}</span></label>
+            <p class="booking-form__status" data-form-status aria-live="polite"></p>
+          </section>
+
+          <div class="booking-form__nav">
+            <button type="button" class="booking-btn booking-btn--ghost" data-booking-prev>{copy.actions.back}</button>
+            <button type="button" class="booking-btn booking-btn--primary" data-booking-next>{copy.actions.continue}</button>
+            <button type="submit" class="booking-btn booking-btn--primary" data-booking-submit hidden>{copy.actions.send}</button>
+          </div>
+        </form>
+
+        <aside class="booking-summary premium-card" data-summary>
+          <button type="button" class="booking-summary__mobile-toggle" data-summary-toggle>{copy.actions.openSummary}</button>
+          <div class="booking-summary__content" data-summary-content>
+            <span>{copy.summary.title}</span>
+            <h2 data-summary-price>0 PLN</h2>
+            <div class="booking-summary__list" data-summary-list>
+              <p>{copy.summary.empty}</p>
+            </div>
+            <small>{copy.summary.availability}</small>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ bookingConfigEncoded }}>
+  (() => {
+    const root = document.querySelector('[data-booking-experience]');
+    if (!(root instanceof HTMLElement)) return;
+
+    const decodeConfig = () => {
+      try {
+        const binary = window.atob(bookingConfigEncoded);
+        const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+        return JSON.parse(new TextDecoder().decode(bytes));
+      } catch {
+        return null;
+      }
+    };
+
+    const config = decodeConfig();
+    if (!config) return;
+
+    const start = root.querySelector('[data-booking-start]');
+    const flow = root.querySelector('[data-booking-flow]');
+    const form = root.querySelector('[data-booking-form]');
+    const stepNodes = Array.from(root.querySelectorAll('[data-booking-step]'));
+    const progressButtons = Array.from(root.querySelectorAll('[data-step-jump]'));
+    const prevButton = root.querySelector('[data-booking-prev]');
+    const nextButton = root.querySelector('[data-booking-next]');
+    const submitButton = root.querySelector('[data-booking-submit]');
+    const messageNode = root.querySelector('[data-booking-message]');
+    const summaryList = root.querySelector('[data-summary-list]');
+    const summaryPrice = root.querySelector('[data-summary-price]');
+    const finalSummary = root.querySelector('[data-final-summary]');
+    const nightsOutput = root.querySelector('[data-nights-output]');
+    const hoursOutput = root.querySelector('[data-hours-output]');
+    const formStatus = root.querySelector('[data-form-status]');
+    const summary = root.querySelector('[data-summary]');
+    const summaryToggle = root.querySelector('[data-summary-toggle]');
+    const countryInput = root.querySelector('[data-country-input]');
+    const countryList = root.querySelector('[data-country-list]');
+    const countryCode = root.querySelector('[data-country-code]');
+    const specialNeeds = root.querySelector('[data-special-needs]');
+    const specialDetails = root.querySelector('[data-special-details]');
+
+    if (!(start instanceof HTMLElement) || !(flow instanceof HTMLElement) || !(form instanceof HTMLFormElement)) return;
+
+    const normalize = (value) => String(value ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+
+    const state = {
+      category: 'camping',
+      step: 0,
+      country: '',
+      countryLabel: '',
+      countryIndex: -1,
+      countryMatches: [],
+    };
+
+    const formatMoney = (value) => `${Math.max(0, Math.round(value))} ${config.pricing.currency}`;
+    const bySelector = (selector) => root.querySelector(selector);
+    const getInputValue = (selector) => {
+      const node = bySelector(selector);
+      return node instanceof HTMLInputElement || node instanceof HTMLSelectElement || node instanceof HTMLTextAreaElement ? node.value : '';
+    };
+    const getChecked = (selector) => {
+      const node = bySelector(selector);
+      return node instanceof HTMLInputElement && node.checked;
+    };
+    const getNumber = (counterName) => {
+      const node = root.querySelector(`[data-counter="${counterName}"] input`);
+      const value = node instanceof HTMLInputElement ? Number.parseInt(node.value, 10) : 0;
+      return Number.isFinite(value) ? Math.max(0, value) : 0;
+    };
+    const getRadioValue = (name) => {
+      const node = root.querySelector(`input[name="${name}"]:checked`);
+      return node instanceof HTMLInputElement ? node.value : '';
+    };
+
+    const getNights = () => {
+      const arrival = getInputValue('[data-arrival]');
+      const departure = getInputValue('[data-departure]');
+      if (!arrival || !departure) return 0;
+      const startDate = new Date(`${arrival}T12:00:00`);
+      const endDate = new Date(`${departure}T12:00:00`);
+      const diff = Math.round((endDate.getTime() - startDate.getTime()) / 86400000);
+      return Math.max(0, diff);
+    };
+
+    const isHighSeason = () => {
+      const arrival = getInputValue('[data-arrival]');
+      if (!arrival) return false;
+      const [, month, day] = arrival.split('-');
+      const value = `${month}-${day}`;
+      return value >= config.pricing.highSeason.start && value <= config.pricing.highSeason.end;
+    };
+
+    const getBungalowPrice = (id) => {
+      const option = config.pricing.bungalowTypes[id] ?? config.pricing.bungalowTypes['bungalow-2'];
+      return isHighSeason() ? option.prices.high : option.prices.low;
+    };
+
+    const getCampingPrice = (id) => config.pricing.campingTypes[id]?.price ?? 0;
+
+    const calculatePrice = () => {
+      const nights = getNights();
+      if (!nights) return 0;
+
+      const addonPrice =
+        (getChecked('[data-addon="electricity"]') ? config.pricing.electricity : 0) +
+        (getChecked('[data-addon="dog"]') ? config.pricing.dog : 0) +
+        (getChecked('[data-addon="car"]') ? config.pricing.car : 0);
+
+      if (state.category === 'bungalow') {
+        return nights * (getBungalowPrice(getRadioValue('bungalowType')) + addonPrice);
+      }
+
+      if (state.category === 'combined') {
+        const bungalowTotal = getBungalowPrice(getRadioValue('combinedBungalowType')) * Math.max(1, getNumber('bungalowCount'));
+        const campingTotal = getCampingPrice(getRadioValue('combinedCampingType')) + (getNumber('campingPeople') * config.pricing.adults);
+        return nights * (bungalowTotal + campingTotal + addonPrice);
+      }
+
+      const peopleTotal =
+        (getNumber('adults') * config.pricing.adults) +
+        (getNumber('children') * config.pricing.children);
+      return nights * (getCampingPrice(getRadioValue('campingType')) + peopleTotal + addonPrice);
+    };
+
+    const getSelectedServices = () => {
+      const services = [];
+      if (state.category === 'camping') services.push(config.pricing.campingTypes[getRadioValue('campingType')]?.label);
+      if (state.category === 'bungalow') services.push(config.pricing.bungalowTypes[getRadioValue('bungalowType')]?.label);
+      if (state.category === 'combined') {
+        services.push(config.pricing.bungalowTypes[getRadioValue('combinedBungalowType')]?.label);
+        services.push(config.pricing.campingTypes[getRadioValue('combinedCampingType')]?.label);
+      }
+      if (getChecked('[data-addon="electricity"]')) services.push(config.copy.fields.electricity);
+      if (getChecked('[data-addon="dog"]')) services.push(config.copy.fields.dog);
+      if (getChecked('[data-addon="car"]')) services.push(config.copy.fields.car);
+      if (getChecked('[data-special-needs]')) services.push(config.copy.summary.specialNeeds);
+      return services.filter(Boolean);
+    };
+
+    const updateVariantPanels = () => {
+      root.dataset.stay = state.category;
+      root.querySelectorAll('[data-variant-panel]').forEach((panel) => {
+        if (!(panel instanceof HTMLElement)) return;
+        panel.hidden = panel.dataset.variantPanel !== state.category;
+      });
+      root.querySelectorAll('[data-start-choice], [data-flow-choice]').forEach((button) => {
+        if (!(button instanceof HTMLElement)) return;
+        button.classList.toggle('is-active', button.dataset.startChoice === state.category || button.dataset.flowChoice === state.category);
+      });
+      if (hoursOutput instanceof HTMLElement) {
+        hoursOutput.textContent = state.category === 'bungalow' ? config.copy.info.bungalowHours : config.copy.info.campingHours;
+      }
+    };
+
+    const setStep = (step) => {
+      state.step = Math.max(0, Math.min(config.copy.steps.length - 1, step));
+      stepNodes.forEach((node) => {
+        if (!(node instanceof HTMLElement)) return;
+        node.hidden = Number(node.dataset.bookingStep) !== state.step;
+      });
+      progressButtons.forEach((button, index) => {
+        if (!(button instanceof HTMLElement)) return;
+        button.classList.toggle('is-active', index === state.step);
+        button.classList.toggle('is-complete', index < state.step);
+      });
+      if (prevButton instanceof HTMLButtonElement) prevButton.hidden = state.step === 0;
+      if (nextButton instanceof HTMLButtonElement) nextButton.hidden = state.step === config.copy.steps.length - 1;
+      if (submitButton instanceof HTMLButtonElement) submitButton.hidden = state.step !== config.copy.steps.length - 1;
+      if (messageNode instanceof HTMLElement) messageNode.textContent = config.copy.messages[state.step % config.copy.messages.length];
+      updateSummary();
+    };
+
+    const startFlow = (category, step = 1) => {
+      state.category = category;
+      start.hidden = true;
+      flow.hidden = false;
+      updateVariantPanels();
+      setStep(step);
+      const url = new URL(window.location.href);
+      url.searchParams.set('stay', category);
+      window.history.replaceState({}, '', url);
+      window.setTimeout(() => {
+        const navbar = document.querySelector('[data-main-navbar], #mainNavbarShell, #mainNavbar');
+        const offset = navbar instanceof HTMLElement ? navbar.getBoundingClientRect().height + 18 : 92;
+        const top = Math.max(0, flow.getBoundingClientRect().top + window.scrollY - offset);
+        window.scrollTo({
+          top,
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        });
+      }, 60);
+    };
+
+    const updateSummary = () => {
+      const nights = getNights();
+      const arrival = getInputValue('[data-arrival]');
+      const departure = getInputValue('[data-departure]');
+      const services = getSelectedServices();
+      const price = calculatePrice();
+      const stayLabel = config.copy.stay[state.category]?.title ?? state.category;
+      const rows = [
+        [config.copy.summary.stay, stayLabel],
+        [config.copy.summary.dates, arrival && departure ? `${arrival} → ${departure}` : '-'],
+        [config.copy.summary.nights, String(nights)],
+        [config.copy.summary.services, services.length ? services.join(', ') : '-'],
+        [config.copy.summary.country, state.countryLabel || '-'],
+        [config.copy.summary.language, getInputValue('[data-contact-language]') || '-'],
+      ];
+
+      if (nightsOutput instanceof HTMLElement) nightsOutput.textContent = String(nights);
+      if (summaryPrice instanceof HTMLElement) summaryPrice.textContent = formatMoney(price);
+
+      const summaryHtml = rows.map(([label, value]) => `<dl><dt>${label}</dt><dd>${value}</dd></dl>`).join('');
+      if (summaryList instanceof HTMLElement) summaryList.innerHTML = summaryHtml;
+      if (finalSummary instanceof HTMLElement) finalSummary.innerHTML = summaryHtml + `<strong>${config.copy.summary.price}: ${formatMoney(price)}</strong>`;
+    };
+
+    const renderCountryMatches = () => {
+      if (!(countryList instanceof HTMLElement) || !(countryInput instanceof HTMLInputElement)) return;
+      countryList.innerHTML = '';
+      const query = normalize(countryInput.value);
+      state.countryMatches = query
+        ? config.countries.filter((country) => {
+          const label = country.names[config.lang] ?? country.names.en;
+          return [label, country.code, ...country.aliases].some((value) => normalize(value).includes(query));
+        }).slice(0, 8)
+        : config.countries.slice(0, 6);
+
+      countryList.hidden = state.countryMatches.length === 0;
+      countryInput.setAttribute('aria-expanded', String(!countryList.hidden));
+
+      state.countryMatches.forEach((country, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'booking-country__option';
+        button.dataset.countryIndex = String(index);
+        button.innerHTML = `<span class="${country.flagClass}"></span><strong>${country.names[config.lang] ?? country.names.en}</strong><small>${country.code}</small>`;
+        button.addEventListener('click', () => selectCountry(country));
+        countryList.appendChild(button);
+      });
+    };
+
+    const selectCountry = (country) => {
+      if (!(countryInput instanceof HTMLInputElement)) return;
+      const label = country.names[config.lang] ?? country.names.en;
+      countryInput.value = label;
+      state.country = country.code;
+      state.countryLabel = label;
+      if (countryCode instanceof HTMLInputElement) countryCode.value = country.code;
+      if (countryList instanceof HTMLElement) countryList.hidden = true;
+      countryInput.setAttribute('aria-expanded', 'false');
+      updateSummary();
+    };
+
+    root.querySelectorAll('[data-start-choice]').forEach((button) => {
+      button.addEventListener('click', () => {
+        if (button instanceof HTMLElement) startFlow(button.dataset.startChoice ?? 'camping', 1);
+      });
+    });
+
+    root.querySelectorAll('[data-flow-choice]').forEach((button) => {
+      button.addEventListener('click', () => {
+        if (!(button instanceof HTMLElement)) return;
+        state.category = button.dataset.flowChoice ?? 'camping';
+        updateVariantPanels();
+        updateSummary();
+      });
+    });
+
+    progressButtons.forEach((button, index) => button.addEventListener('click', () => setStep(index)));
+    prevButton?.addEventListener('click', () => setStep(state.step - 1));
+    nextButton?.addEventListener('click', () => setStep(state.step + 1));
+
+    root.querySelectorAll('[data-counter]').forEach((counter) => {
+      const input = counter.querySelector('input');
+      counter.querySelectorAll('[data-counter-action]').forEach((button) => {
+        button.addEventListener('click', () => {
+          if (!(input instanceof HTMLInputElement) || !(button instanceof HTMLElement)) return;
+          const next = Number.parseInt(input.value || '0', 10) + (button.dataset.counterAction === 'plus' ? 1 : -1);
+          input.value = String(Math.max(0, next));
+          updateSummary();
+        });
+      });
+      input?.addEventListener('input', updateSummary);
+    });
+
+    root.querySelectorAll('input, select, textarea').forEach((field) => {
+      field.addEventListener('input', updateSummary);
+      field.addEventListener('change', updateSummary);
+    });
+
+    if (countryInput instanceof HTMLInputElement) {
+      countryInput.addEventListener('focus', renderCountryMatches);
+      countryInput.addEventListener('input', () => {
+        state.country = '';
+        state.countryLabel = '';
+        state.countryIndex = -1;
+        renderCountryMatches();
+      });
+      countryInput.addEventListener('keydown', (event) => {
+        if (!state.countryMatches.length) return;
+        if (event.key === 'Escape') {
+          if (countryList instanceof HTMLElement) countryList.hidden = true;
+          return;
+        }
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+          event.preventDefault();
+          state.countryIndex = event.key === 'ArrowDown'
+            ? Math.min(state.countryMatches.length - 1, state.countryIndex + 1)
+            : Math.max(0, state.countryIndex - 1);
+          countryList?.querySelectorAll('button').forEach((button, index) => button.classList.toggle('is-active', index === state.countryIndex));
+        }
+        if (event.key === 'Enter' && state.countryIndex >= 0) {
+          event.preventDefault();
+          selectCountry(state.countryMatches[state.countryIndex]);
+        }
+      });
+    }
+
+    specialNeeds?.addEventListener('change', () => {
+      if (specialDetails instanceof HTMLElement && specialNeeds instanceof HTMLInputElement) specialDetails.hidden = !specialNeeds.checked;
+      updateSummary();
+    });
+
+    summaryToggle?.addEventListener('click', () => {
+      if (!(summary instanceof HTMLElement) || !(summaryToggle instanceof HTMLButtonElement)) return;
+      const open = !summary.classList.contains('is-open');
+      summary.classList.toggle('is-open', open);
+      summaryToggle.textContent = open ? config.copy.actions.closeSummary : config.copy.actions.openSummary;
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const quiet = getChecked('[data-quiet-consent]');
+      const consent = getChecked('[data-contact-consent]');
+      if (!(formStatus instanceof HTMLElement)) return;
+      if (!quiet || !consent) {
+        formStatus.textContent = config.copy.summary.required;
+        formStatus.classList.add('is-error');
+        return;
+      }
+      formStatus.textContent = config.copy.summary.success;
+      formStatus.classList.remove('is-error');
+      formStatus.classList.add('is-success');
+    });
+
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof Node) || !countryList?.contains(target) && target !== countryInput) {
+        if (countryList instanceof HTMLElement) countryList.hidden = true;
+      }
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    const stay = params.get('stay');
+    if (stay === 'camping' || stay === 'bungalow' || stay === 'combined') {
+      startFlow(stay, 1);
+    } else {
+      updateVariantPanels();
+      setStep(0);
+    }
+  })();
+</script>
+
+<style>
+.booking-experience {
+  position: relative;
+  min-height: 100svh;
+  padding: clamp(118px, 13vw, 156px) 0 clamp(76px, 10vw, 120px);
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(60,179,113,.22), transparent 34%),
+    radial-gradient(circle at 82% 12%, rgba(242,192,120,.16), transparent 32%),
+    linear-gradient(135deg, #07140f 0%, #0b1a14 48%, #18321f 100%);
+}
+
+.booking-experience,
+.booking-experience * {
+  box-sizing: border-box;
+}
+
+:global(.motion-ready) .booking-experience .motion-reveal,
+:global(.motion-ready) .booking-experience .premium-card.motion-reveal {
+  opacity: 1;
+  transform: none;
+  transition: border-color .22s ease, box-shadow .22s ease, background .22s ease, transform .22s ease;
+}
+
+.booking-experience__ambient span {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+  filter: blur(8px);
+  opacity: .55;
+  animation: bookingOrb 16s ease-in-out infinite;
+}
+
+.booking-experience__ambient span:nth-child(1) {
+  width: 360px;
+  height: 360px;
+  left: -100px;
+  top: 24%;
+  background: rgba(60,179,113,.20);
+}
+
+.booking-experience__ambient span:nth-child(2) {
+  width: 280px;
+  height: 280px;
+  right: 5%;
+  top: 8%;
+  background: rgba(242,192,120,.13);
+  animation-delay: -5s;
+}
+
+.booking-experience__ambient span:nth-child(3) {
+  width: 240px;
+  height: 240px;
+  right: 18%;
+  bottom: 4%;
+  background: rgba(60,179,113,.16);
+  animation-delay: -9s;
+}
+
+.booking-experience__shell {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: clamp(28px, 5vw, 48px);
+  padding-left: clamp(92px, 7vw, 122px);
+}
+
+.booking-experience__intro {
+  max-width: 920px;
+}
+
+.booking-experience__intro h1 {
+  margin: 12px 0 18px;
+  color: #fff;
+  font-size: clamp(2.55rem, 7.2vw, 6.2rem);
+  line-height: .92;
+  font-weight: 950;
+}
+
+.booking-experience__intro p,
+.booking-start__head p {
+  margin: 0;
+  max-width: 760px;
+  color: rgba(244,251,246,.76);
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  line-height: 1.7;
+}
+
+.booking-start,
+.booking-form,
+.booking-summary {
+  border: 1px solid rgba(143,224,180,.18);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.18), transparent 35%),
+    linear-gradient(145deg, rgba(255,255,255,.11), rgba(255,255,255,.055));
+  box-shadow:
+    0 34px 98px rgba(0,0,0,.28),
+    0 0 48px rgba(60,179,113,.12),
+    inset 0 1px 0 rgba(255,255,255,.14);
+  backdrop-filter: blur(26px) saturate(140%);
+  -webkit-backdrop-filter: blur(26px) saturate(140%);
+}
+
+.booking-start {
+  display: grid;
+  gap: clamp(24px, 4vw, 38px);
+  padding: clamp(24px, 5vw, 56px);
+  border-radius: 36px;
+}
+
+.booking-start__head span,
+.booking-step__head span,
+.booking-summary > div > span,
+.booking-form__message {
+  color: #8fe0b4;
+  font-size: .78rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.booking-start__head h2,
+.booking-step__head h2 {
+  margin: 10px 0 12px;
+  color: #fff;
+  font-size: clamp(1.9rem, 4vw, 3.6rem);
+  line-height: 1;
+  font-weight: 950;
+}
+
+.booking-start__choices,
+.booking-choice-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.booking-stay-card,
+.booking-choice {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  min-height: 230px;
+  padding: clamp(22px, 3vw, 30px);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 30px;
+  color: #fff;
+  text-align: left;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(60,179,113,.20), transparent 36%),
+    rgba(255,255,255,.075);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+  cursor: pointer;
+  transition: transform .26s cubic-bezier(.22, 1, .36, 1), border-color .26s ease, box-shadow .26s ease, background .26s ease;
+}
+
+.booking-stay-card:hover,
+.booking-choice:hover,
+.booking-stay-card.is-active,
+.booking-choice.is-active {
+  transform: translateY(-5px);
+  border-color: rgba(143,224,180,.48);
+  background: rgba(60,179,113,.13);
+  box-shadow: 0 26px 70px rgba(60,179,113,.20), inset 0 1px 0 rgba(255,255,255,.14);
+}
+
+.booking-stay-card__icon,
+.booking-choice > span {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  color: #082016;
+  background: linear-gradient(135deg, #b7f4d0, #3CB371);
+  box-shadow: 0 18px 42px rgba(60,179,113,.24);
+}
+
+.booking-stay-card strong,
+.booking-choice strong {
+  color: #fff;
+  font-size: clamp(1.35rem, 2vw, 1.78rem);
+  font-weight: 950;
+}
+
+.booking-stay-card small,
+.booking-choice small {
+  color: rgba(244,251,246,.72);
+  line-height: 1.55;
+  font-weight: 760;
+}
+
+.booking-flow__progress {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 10px;
+  border: 1px solid rgba(143,224,180,.16);
+  border-radius: 24px;
+  background: rgba(255,255,255,.055);
+  backdrop-filter: blur(18px);
+}
+
+.booking-flow__progress button {
+  min-width: 0;
+  min-height: 56px;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 17px;
+  color: rgba(244,251,246,.66);
+  background: rgba(255,255,255,.05);
+}
+
+.booking-flow__progress span {
+  display: block;
+  color: #8fe0b4;
+  font-size: .68rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+}
+
+.booking-flow__progress strong {
+  display: block;
+  margin-top: 4px;
+  font-size: .78rem;
+  line-height: 1.15;
+  font-weight: 900;
+}
+
+.booking-flow__progress button.is-active,
+.booking-flow__progress button.is-complete {
+  color: #fff;
+  border-color: rgba(143,224,180,.36);
+  background: linear-gradient(135deg, rgba(60,179,113,.24), rgba(60,179,113,.10));
+  box-shadow: 0 0 28px rgba(60,179,113,.13);
+}
+
+.booking-flow__layout {
+  display: grid;
+  gap: 20px;
+}
+
+.booking-form {
+  display: grid;
+  gap: 26px;
+  padding: clamp(22px, 4vw, 42px);
+  border-radius: 34px;
+}
+
+.booking-step {
+  display: grid;
+  gap: 22px;
+}
+
+.booking-grid,
+.booking-counter-grid,
+.booking-option-grid,
+.booking-toggles,
+.booking-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.booking-field {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.booking-field > span,
+.booking-counter > span,
+.booking-variant h3 {
+  color: rgba(244,251,246,.86);
+  font-size: .82rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+
+.booking-field input,
+.booking-field select,
+.booking-field textarea,
+.booking-counter input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 18px;
+  color: #fff;
+  background: rgba(255,255,255,.075);
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.booking-field input,
+.booking-field select,
+.booking-counter input {
+  height: 54px;
+  padding: 0 15px;
+}
+
+.booking-field textarea {
+  min-height: 118px;
+  resize: vertical;
+  padding: 14px 15px;
+}
+
+.booking-field input:focus,
+.booking-field select:focus,
+.booking-field textarea:focus,
+.booking-counter input:focus {
+  border-color: rgba(143,224,180,.58);
+  box-shadow: 0 0 0 4px rgba(60,179,113,.16), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.booking-field small,
+.booking-note {
+  color: rgba(244,251,246,.64);
+  line-height: 1.55;
+}
+
+.booking-info-row,
+.booking-note {
+  padding: 16px 18px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 20px;
+  background: rgba(60,179,113,.10);
+}
+
+.booking-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.booking-info-row strong {
+  color: #fff;
+}
+
+.booking-counter {
+  display: grid;
+  gap: 9px;
+}
+
+.booking-counter > div {
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  gap: 8px;
+}
+
+.booking-counter button {
+  border-radius: 16px;
+  color: #082016;
+  background: #8fe0b4;
+  font-size: 1.25rem;
+  font-weight: 950;
+}
+
+.booking-counter input {
+  text-align: center;
+  font-weight: 950;
+}
+
+.booking-option {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  min-height: 62px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 20px;
+  background: rgba(255,255,255,.06);
+  cursor: pointer;
+  transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+
+.booking-option:hover,
+.booking-option:has(input:checked) {
+  transform: translateY(-2px);
+  border-color: rgba(143,224,180,.42);
+  background: rgba(60,179,113,.14);
+}
+
+.booking-option input,
+.booking-toggles input,
+.booking-check input {
+  accent-color: #3CB371;
+}
+
+.booking-option span {
+  color: #fff;
+  font-weight: 900;
+}
+
+.booking-option small {
+  color: #8fe0b4;
+  font-weight: 950;
+}
+
+.booking-toggles {
+  margin-top: 4px;
+}
+
+.booking-toggles label,
+.booking-check {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  min-height: 54px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  color: rgba(244,251,246,.86);
+  background: rgba(255,255,255,.06);
+  font-weight: 850;
+}
+
+.booking-split article {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 24px;
+  background: rgba(255,255,255,.055);
+}
+
+.booking-country {
+  position: relative;
+}
+
+.booking-country__list {
+  position: absolute;
+  z-index: 8;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  display: grid;
+  gap: 6px;
+  max-height: 280px;
+  padding: 8px;
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: 18px;
+  overflow-y: auto;
+  background: rgba(8, 24, 17, .98);
+  box-shadow: 0 24px 60px rgba(0,0,0,.28);
+}
+
+.booking-country__option {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 11px 12px;
+  border-radius: 13px;
+  color: #fff;
+  text-align: left;
+  background: transparent;
+}
+
+.booking-country__option span {
+  width: 20px;
+  height: 15px;
+  border-radius: 2px;
+}
+
+.booking-country__option:hover,
+.booking-country__option.is-active {
+  background: rgba(60,179,113,.16);
+}
+
+.booking-form__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.booking-btn {
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-weight: 950;
+}
+
+.booking-btn--primary {
+  color: #082016;
+  background: linear-gradient(135deg, #b7f4d0, #3CB371);
+  box-shadow: 0 18px 44px rgba(60,179,113,.26);
+}
+
+.booking-btn--ghost {
+  color: #fff;
+  border: 1px solid rgba(143,224,180,.20);
+  background: rgba(255,255,255,.08);
+}
+
+.booking-summary {
+  position: sticky;
+  top: 108px;
+  align-self: start;
+  padding: clamp(20px, 3vw, 28px);
+  border-radius: 30px;
+}
+
+.booking-summary h2 {
+  margin: 10px 0 18px;
+  color: #fff;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+  font-weight: 950;
+}
+
+.booking-summary__list,
+.booking-final-summary {
+  display: grid;
+  gap: 10px;
+}
+
+.booking-summary dl,
+.booking-final-summary dl {
+  display: grid;
+  grid-template-columns: .72fr 1fr;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+
+.booking-summary dt,
+.booking-final-summary dt {
+  color: rgba(244,251,246,.56);
+  font-weight: 850;
+}
+
+.booking-summary dd,
+.booking-final-summary dd {
+  margin: 0;
+  color: #fff;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.booking-summary small {
+  display: block;
+  margin-top: 18px;
+  color: rgba(244,251,246,.64);
+  line-height: 1.55;
+}
+
+.booking-summary__mobile-toggle {
+  display: none;
+}
+
+.booking-final-summary strong {
+  display: block;
+  margin-top: 10px;
+  color: #8fe0b4;
+  font-size: 1.2rem;
+}
+
+.booking-form__status {
+  min-height: 24px;
+  margin: 0;
+  color: #8fe0b4;
+  font-weight: 900;
+}
+
+.booking-form__status.is-error {
+  color: #ffca8a;
+}
+
+@media (min-width: 760px) {
+  .booking-start__choices,
+  .booking-choice-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .booking-grid--two,
+  .booking-counter-grid,
+  .booking-toggles,
+  .booking-split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .booking-option-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1080px) {
+  .booking-flow__layout {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    align-items: start;
+  }
+}
+
+@media (max-width: 820px) {
+  .booking-flow__progress {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  .booking-experience__shell {
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .booking-experience {
+    padding-top: 108px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .booking-experience__shell {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .booking-experience__intro,
+  .booking-start__head,
+  .booking-step__head {
+    max-width: min(100%, 340px);
+  }
+
+  .booking-experience__intro h1 {
+    font-size: clamp(1.86rem, 10.4vw, 2.36rem);
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+
+  .booking-start__head h2,
+  .booking-step__head h2 {
+    font-size: clamp(1.58rem, 7.7vw, 2rem);
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+  }
+
+  .booking-experience__intro p,
+  .booking-start__head p {
+    max-width: 100%;
+    font-size: .98rem;
+    overflow-wrap: break-word;
+  }
+
+  .booking-start,
+  .booking-form {
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: 28px;
+    padding: 20px;
+  }
+
+  .booking-stay-card,
+  .booking-choice {
+    min-height: 168px;
+    border-radius: 24px;
+  }
+
+  .booking-flow__progress {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+
+  .booking-flow__progress button {
+    flex: 0 0 138px;
+    scroll-snap-align: start;
+  }
+
+  .booking-summary {
+    position: fixed;
+    z-index: 900;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    top: auto;
+    max-height: min(72dvh, 560px);
+    overflow: hidden;
+    padding: 10px;
+    border-radius: 24px;
+  }
+
+  .booking-summary__mobile-toggle {
+    display: flex;
+    width: 100%;
+    min-height: 48px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    color: #082016;
+    background: #8fe0b4;
+    font-weight: 950;
+  }
+
+  .booking-summary__content {
+    display: none;
+    max-height: calc(72dvh - 70px);
+    overflow-y: auto;
+    padding: 14px 8px 8px;
+  }
+
+  .booking-summary.is-open .booking-summary__content {
+    display: block;
+  }
+
+  .booking-form__nav {
+    padding-bottom: 70px;
+  }
+
+  .booking-btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .booking-experience__ambient span,
+  .booking-stay-card,
+  .booking-choice,
+  .booking-option {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@keyframes bookingOrb {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(18px, -22px, 0) scale(1.08); }
+}
+</style>

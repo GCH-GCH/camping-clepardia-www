@@ -1,6 +1,6 @@
 ---
 import { getTranslations } from '@/i18n/config';
-import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
 interface Props {
   languageCode?: string;
@@ -12,7 +12,7 @@ const t = getTranslations(languageCode ?? pathContext.languageCode);
 const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
 const actions = [
   { label: t.cta.pricing, href: getLocalizedPath(explicitLanguage, 'cennik'), primary: true },
-  { label: t.cta.availability, href: getLocalizedPath(explicitLanguage, 'kontakt') },
+  { label: t.cta.availability, href: getBookingLocalizedPath(languageCode ?? pathContext.languageCode) },
   { label: t.cta.gallery, href: getLocalizedPath(explicitLanguage, 'galeria') },
 ];
 ---

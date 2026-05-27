@@ -8,17 +8,122 @@ const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
 const chatTexts = t.chat;
 const hasCampyIcon = publicAssetExists(campyIcon);
-const chatConfigEncoded = Buffer.from(JSON.stringify(chatTexts), 'utf8').toString('base64');
+const campyUxCopy = {
+  pl: {
+    actions: {
+      todayAttractions: 'Atrakcje na dziś',
+      tramRoute: 'Trasa tramwajem',
+      etoll: 'e-TOLL',
+      energylandia: 'Energylandia',
+      wieliczka: 'Wieliczka',
+      auschwitz: 'Auschwitz',
+      weather: 'Pogoda',
+      rain: 'Co zwiedzić przy deszczu?',
+    },
+    answers: {
+      todayAttractions: 'Dziś najlepiej zacząć lekko: tramwaj do centrum, Stare Miasto, kawa lub obiad, a potem spokojny powrót do zielonej bazy Clepardii. Jeśli chcecie coś większego, sprawdźcie Wieliczkę, Fabrykę Schindlera albo SeeKrakow.',
+      tramRoute: 'Przystanek jest ok. 40 m od bramy. Do Starego Kleparza / centrum jest ok. 9 przystanków i ok. 14 minut jazdy tramwajem. Do trasy i biletów polecam Jakdojade oraz Google Maps.',
+      etoll: 'Jeśli jedziesz większym pojazdem lub zestawem, sprawdź przed trasą zasady e-TOLL. CAMPY nie podaje limitów bez źródła, ale warto to zweryfikować przed wyjazdem.',
+      energylandia: 'Energylandia to całodniowa wyprawa poza Kraków. Najwygodniej potraktować ją jako osobny dzień i po powrocie odpocząć na campingu.',
+      wieliczka: 'Wieliczka to klasyczna wycieczka z Krakowa: podziemne trasy i historia kopalni soli. Warto sprawdzić aktualne godziny i dostępność przed wyjazdem.',
+      auschwitz: 'Auschwitz-Birkenau to poważna, całodniowa wycieczka. Najlepiej wcześniej sprawdzić bilety, zasady zwiedzania i transport.',
+      weather: 'Nie mam jeszcze podpiętej pogody live. Najpewniej sprawdź aktualną prognozę w aplikacji pogodowej, a ja podpowiem plan: centrum tramwajem przy dobrej pogodzie, muzea i Fabryka Schindlera przy deszczu.',
+      rain: 'Na deszczowy dzień wybierz Fabrykę Schindlera, muzea, kawiarnie na Starym Mieście albo Wieliczkę. Tramwaj pozwala zostawić auto na campingu.',
+    },
+  },
+  en: {
+    actions: {
+      todayAttractions: 'Today’s attractions',
+      tramRoute: 'Tram route',
+      etoll: 'e-TOLL',
+      energylandia: 'Energylandia',
+      wieliczka: 'Wieliczka',
+      auschwitz: 'Auschwitz',
+      weather: 'Weather',
+      rain: 'Rainy day ideas',
+    },
+    answers: {
+      todayAttractions: 'Start light: tram to the centre, Old Town, coffee or lunch, then return to the calm green base at Clepardia. For a bigger trip, check Wieliczka, Schindler’s Factory or SeeKrakow.',
+      tramRoute: 'The tram stop is about 40 m from the gate. It is about 9 stops and around 14 minutes to Stary Kleparz / the city centre. Use Jakdojade and Google Maps for routes and tickets.',
+      etoll: 'If you travel with a larger vehicle or combination, check e-TOLL rules before the route. CAMPY does not quote limits without a source.',
+      energylandia: 'Energylandia is a full-day trip outside Krakow. Treat it as a separate day and return to rest at the campsite.',
+      wieliczka: 'Wieliczka is a classic Krakow-area tour with underground routes and salt mine history. Check current hours and availability before leaving.',
+      auschwitz: 'Auschwitz-Birkenau is a serious full-day visit. Check tickets, visitor rules and transport in advance.',
+      weather: 'I do not have live weather connected yet. Check your weather app; I can suggest Old Town on sunny days and museums or Schindler’s Factory when it rains.',
+      rain: 'For rain, choose Schindler’s Factory, museums, Old Town cafés or Wieliczka. The tram lets you leave the car at the campsite.',
+    },
+  },
+  de: {
+    actions: {
+      todayAttractions: 'Attraktionen heute',
+      tramRoute: 'Straßenbahnroute',
+      etoll: 'e-TOLL',
+      energylandia: 'Energylandia',
+      wieliczka: 'Wieliczka',
+      auschwitz: 'Auschwitz',
+      weather: 'Wetter',
+      rain: 'Ideen bei Regen',
+    },
+    answers: {
+      todayAttractions: 'Starten Sie entspannt: Straßenbahn ins Zentrum, Altstadt, Kaffee oder Mittagessen und danach zurück zur grünen Basis Clepardia. Für größere Ausflüge: Wieliczka, Schindler-Fabrik oder SeeKrakow.',
+      tramRoute: 'Die Haltestelle ist ca. 40 m vom Tor entfernt. Zum Stary Kleparz / Zentrum sind es ca. 9 Haltestellen und etwa 14 Minuten. Nutzen Sie Jakdojade und Google Maps.',
+      etoll: 'Wenn Sie mit größerem Fahrzeug oder Gespann reisen, prüfen Sie vor der Route e-TOLL. CAMPY nennt keine Grenzen ohne Quelle.',
+      energylandia: 'Energylandia ist ein Tagesausflug außerhalb von Krakau. Planen Sie ihn als eigenen Tag und erholen Sie sich danach auf dem Campingplatz.',
+      wieliczka: 'Wieliczka ist ein klassischer Ausflug mit unterirdischen Routen und Salzbergwerk-Geschichte. Prüfen Sie Zeiten und Verfügbarkeit.',
+      auschwitz: 'Auschwitz-Birkenau ist ein ernster Tagesausflug. Tickets, Regeln und Transport bitte vorab prüfen.',
+      weather: 'Live-Wetter ist noch nicht angebunden. Prüfen Sie die Wetter-App; bei Regen empfehle ich Museen oder die Schindler-Fabrik.',
+      rain: 'Bei Regen: Schindler-Fabrik, Museen, Cafés in der Altstadt oder Wieliczka. Mit der Straßenbahn bleibt das Auto auf dem Campingplatz.',
+    },
+  },
+  it: {
+    actions: {
+      todayAttractions: 'Attrazioni oggi',
+      tramRoute: 'Percorso tram',
+      etoll: 'e-TOLL',
+      energylandia: 'Energylandia',
+      wieliczka: 'Wieliczka',
+      auschwitz: 'Auschwitz',
+      weather: 'Meteo',
+      rain: 'Idee con pioggia',
+    },
+    answers: {
+      todayAttractions: 'Inizia leggero: tram per il centro, Città Vecchia, caffè o pranzo, poi ritorno alla base verde Clepardia. Per una gita più grande: Wieliczka, Fabbrica di Schindler o SeeKrakow.',
+      tramRoute: 'La fermata è a circa 40 m dal cancello. Sono circa 9 fermate e 14 minuti fino a Stary Kleparz / centro. Usa Jakdojade e Google Maps.',
+      etoll: 'Se viaggi con un veicolo grande o un insieme, controlla le regole e-TOLL prima del percorso. CAMPY non indica limiti senza fonte.',
+      energylandia: 'Energylandia è una gita di un’intera giornata fuori Cracovia. Pianificala come giorno separato e poi rilassati al camping.',
+      wieliczka: 'Wieliczka è una gita classica con percorsi sotterranei e storia della miniera di sale. Controlla orari e disponibilità.',
+      auschwitz: 'Auschwitz-Birkenau è una visita seria di un’intera giornata. Controlla biglietti, regole e trasporto in anticipo.',
+      weather: 'Non ho ancora il meteo live collegato. Controlla l’app meteo; con pioggia consiglio musei o Fabbrica di Schindler.',
+      rain: 'Con pioggia scegli Fabbrica di Schindler, musei, caffè nel centro storico o Wieliczka. Il tram permette di lasciare l’auto al camping.',
+    },
+  },
+};
+const campyEnhancement = campyUxCopy[pathContext.languageCode as keyof typeof campyUxCopy] ?? campyUxCopy.en;
+const enhancedChatTexts = {
+  ...chatTexts,
+  actions: {
+    ...chatTexts.actions,
+    ...campyEnhancement.actions,
+  },
+  answers: {
+    ...chatTexts.answers,
+    ...campyEnhancement.answers,
+  },
+};
+const chatConfigEncoded = Buffer.from(JSON.stringify(enhancedChatTexts), 'utf8').toString('base64');
 const quickActions = [
-  { key: 'dayPlan', icon: 'map', label: chatTexts.actions.dayPlan ?? chatTexts.actions.attractions },
-  { key: 'centerTransit', icon: 'tram', label: chatTexts.actions.centerTransit ?? chatTexts.actions.transit ?? chatTexts.actions.directions },
-  { key: 'familyAttractions', icon: 'landmark', label: chatTexts.actions.familyAttractions ?? chatTexts.actions.attractions },
-  { key: 'maps', icon: 'map', label: chatTexts.actions.maps },
-  { key: 'sctEtoll', icon: 'route', label: chatTexts.actions.sctEtoll ?? 'SCT / e-TOLL' },
-  { key: 'reception', icon: 'message', label: chatTexts.actions.reception },
-  { key: 'camperPrice', icon: 'camper', label: chatTexts.actions.camperPrice ?? chatTexts.actions.pricing },
-  { key: 'dog', icon: 'dog', label: chatTexts.actions.dog ?? 'Dog' },
-  { key: 'bungalow', icon: 'bungalow', label: chatTexts.actions.bungalow },
+  { key: 'dayPlan', icon: 'map', label: enhancedChatTexts.actions.dayPlan ?? enhancedChatTexts.actions.attractions },
+  { key: 'todayAttractions', icon: 'Sparkles', label: enhancedChatTexts.actions.todayAttractions },
+  { key: 'tramRoute', icon: 'tram', label: enhancedChatTexts.actions.tramRoute },
+  { key: 'maps', icon: 'map', label: enhancedChatTexts.actions.maps },
+  { key: 'sctEtoll', icon: 'route', label: enhancedChatTexts.actions.sctEtoll ?? 'SCT / e-TOLL' },
+  { key: 'etoll', icon: 'Truck', label: enhancedChatTexts.actions.etoll },
+  { key: 'energylandia', icon: 'FerrisWheel', label: enhancedChatTexts.actions.energylandia },
+  { key: 'wieliczka', icon: 'Mountain', label: enhancedChatTexts.actions.wieliczka },
+  { key: 'auschwitz', icon: 'landmark', label: enhancedChatTexts.actions.auschwitz },
+  { key: 'weather', icon: 'CloudSun', label: enhancedChatTexts.actions.weather },
+  { key: 'rain', icon: 'CloudRain', label: enhancedChatTexts.actions.rain },
+  { key: 'reception', icon: 'message', label: enhancedChatTexts.actions.reception },
 ];
 ---
 
@@ -121,6 +226,7 @@ const quickActions = [
     const statusNode = root.querySelector('[data-chat-status-node]');
     const inputLabel = root.querySelector('[data-chat-input-label]');
     const sendButton = root.querySelector('[data-chat-send]');
+    const quickRail = root.querySelector('.floating-chat__quick');
 
     if (!(toggle instanceof HTMLButtonElement) || !(panel instanceof HTMLElement) || !(messages instanceof HTMLElement)) return;
 
@@ -232,13 +338,21 @@ const quickActions = [
       if (rawPrompt === chatTexts.actions.attractions) return chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.dayPlan) return chatTexts.answers.dayPlan ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.familyAttractions) return chatTexts.answers.familyAttractions ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.todayAttractions) return chatTexts.answers.todayAttractions ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.tramRoute) return chatTexts.answers.tramRoute ?? chatTexts.answers.centerTransit ?? chatTexts.answers.transit ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.etoll) return chatTexts.answers.etoll ?? chatTexts.answers.sctEtoll ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.energylandia) return chatTexts.answers.energylandia ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.wieliczka) return chatTexts.answers.wieliczka ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.auschwitz) return chatTexts.answers.auschwitz ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.weather) return chatTexts.answers.weather ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.rain) return chatTexts.answers.rain ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
 
       if (prompt.includes('kamper') || prompt.includes('camper') || prompt.includes('motorhome') || prompt.includes('cennik') || prompt.includes('cena') || prompt.includes('koszt')) {
         return chatTexts.answers.camperPrice ?? chatTexts.answers.pricing;
       }
 
       if (prompt.includes('tram') || prompt.includes('centrum') || prompt.includes('transport')) {
-        return chatTexts.answers.centerTransit ?? chatTexts.answers.transit ?? chatTexts.answers.directions;
+        return chatTexts.answers.tramRoute ?? chatTexts.answers.centerTransit ?? chatTexts.answers.transit ?? chatTexts.answers.directions;
       }
 
       if (prompt.includes('dojaz') || prompt.includes('jak dojecha') || prompt.includes('maps') || prompt.includes('map') || prompt.includes('nawig')) {
@@ -253,8 +367,14 @@ const quickActions = [
         return chatTexts.answers.familyAttractions ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       }
 
-      if (prompt.includes('atrakc') || prompt.includes('krak') || prompt.includes('wielicz') || prompt.includes('energy') || prompt.includes('zwiedz')) {
-        return chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (prompt.includes('pogod') || prompt.includes('weather')) return chatTexts.answers.weather ?? chatTexts.answers.fallback;
+      if (prompt.includes('deszcz') || prompt.includes('rain')) return chatTexts.answers.rain ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (prompt.includes('energy')) return chatTexts.answers.energylandia ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (prompt.includes('wielicz')) return chatTexts.answers.wieliczka ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (prompt.includes('auschwitz') || prompt.includes('birkenau')) return chatTexts.answers.auschwitz ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+
+      if (prompt.includes('atrakc') || prompt.includes('krak') || prompt.includes('zwiedz')) {
+        return chatTexts.answers.todayAttractions ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       }
 
       if (prompt.includes('pies') || prompt.includes('psa') || prompt.includes('dog') || prompt.includes('hund') || prompt.includes('cane')) {
@@ -321,6 +441,45 @@ const quickActions = [
         submitPrompt(button.dataset.chatPrompt ?? button.textContent ?? '');
       });
     });
+
+    if (quickRail instanceof HTMLElement) {
+      let dragging = false;
+      let startX = 0;
+      let startScroll = 0;
+
+      quickRail.addEventListener('wheel', (event) => {
+        if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+        event.preventDefault();
+        quickRail.scrollLeft += event.deltaY;
+      }, { passive: false });
+
+      quickRail.addEventListener('pointerdown', (event) => {
+        dragging = true;
+        startX = event.clientX;
+        startScroll = quickRail.scrollLeft;
+        quickRail.classList.add('is-dragging');
+        quickRail.setPointerCapture?.(event.pointerId);
+      });
+
+      quickRail.addEventListener('pointermove', (event) => {
+        if (!dragging) return;
+        event.preventDefault();
+        quickRail.scrollLeft = startScroll - (event.clientX - startX);
+      });
+
+      const stopDrag = (event) => {
+        dragging = false;
+        quickRail.classList.remove('is-dragging');
+        if ('pointerId' in event) quickRail.releasePointerCapture?.(event.pointerId);
+      };
+
+      quickRail.addEventListener('pointerup', stopDrag);
+      quickRail.addEventListener('pointercancel', stopDrag);
+      quickRail.addEventListener('mouseleave', () => {
+        dragging = false;
+        quickRail.classList.remove('is-dragging');
+      });
+    }
 
     form?.addEventListener('submit', (event) => {
       event.preventDefault();
@@ -704,10 +863,20 @@ body.has-floating-chat-open {
   gap: 8px;
   padding: 0 16px 14px;
   overflow-x: auto;
+  cursor: grab;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  user-select: none;
+}
+
+.floating-chat__quick.is-dragging {
+  cursor: grabbing;
 }
 
 .floating-chat__quick button {
   flex: 0 0 auto;
+  min-width: 128px;
   min-height: 38px;
   display: inline-flex;
   align-items: center;
@@ -722,6 +891,7 @@ body.has-floating-chat-open {
   font-size: .78rem;
   font-weight: 850;
   white-space: nowrap;
+  scroll-snap-align: start;
   transition: transform .2s ease, background .2s ease, border-color .2s ease, color .2s ease;
 }
 
