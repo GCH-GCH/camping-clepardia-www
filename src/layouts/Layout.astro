@@ -57,8 +57,8 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		<meta name="description" content={description} />
 		<meta name="robots" content="index, follow" />
 		<meta name="theme-color" content="#3CB371" />
-		<meta name="clepardia-build" content="TASK-67-master-booking-polish" />
-		<meta name="clepardia-commit" content="task-67" />
+		<meta name="clepardia-build" content="TASK-68-reservation-booking-game" />
+		<meta name="clepardia-commit" content="task-68" />
 		
 		<!-- Open Graph / Social Media -->
 		<meta property="og:type" content="website" />
@@ -134,7 +134,7 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		
 		<title>{title}</title>
 	</head>
-	<body class:list={[isBookingExperiencePage && 'is-booking-experience-page']}>
+	<body class:list={[isBookingExperiencePage && 'is-booking-experience-page', isBookingExperiencePage && 'booking-app-page']}>
 		<AmbientBackground />
 		<MainNavbar />
 		
