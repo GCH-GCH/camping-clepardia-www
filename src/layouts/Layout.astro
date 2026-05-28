@@ -11,7 +11,7 @@ import AmbientBackground from '@/components/ui/AmbientBackground.astro';
 import PageScrollHint from '@/components/ui/PageScrollHint.astro';
 import { logoMain, logoMainPng, publicAssetExists, siteAssets } from '@/data/assets';
 import { getCampgroundJsonLd, homeSeo, resolveOgImage, siteName } from '@/data/seo';
-import { getSeoLanguageMeta, withOrigin } from '@/utils/localizedLinks';
+import { getPathContext, getSeoLanguageMeta, isBookingSlug, withOrigin } from '@/utils/localizedLinks';
 
 interface Props {
   title?: string;
@@ -34,6 +34,8 @@ const {
 const shouldPreloadHero = publicAssetExists(siteAssets.hero.desktop);
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
 const seoLanguageMeta = getSeoLanguageMeta(Astro.url.pathname, siteOrigin, canonical);
+const pathContext = getPathContext(Astro.url.pathname);
+const isBookingExperiencePage = isBookingSlug(pathContext.slug);
 const ogUrl = withOrigin(seoLanguageMeta.canonicalHref, siteOrigin ?? Astro.url.origin);
 const resolvedOgTitle = ogTitle ?? title;
 const resolvedOgDescription = ogDescription ?? description;
@@ -55,8 +57,8 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		<meta name="description" content={description} />
 		<meta name="robots" content="index, follow" />
 		<meta name="theme-color" content="#3CB371" />
-		<meta name="clepardia-build" content="TASK-66-booking-experience" />
-		<meta name="clepardia-commit" content="task-66" />
+		<meta name="clepardia-build" content="TASK-67-master-booking-polish" />
+		<meta name="clepardia-commit" content="task-67" />
 		
 		<!-- Open Graph / Social Media -->
 		<meta property="og:type" content="website" />
@@ -132,7 +134,7 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		
 		<title>{title}</title>
 	</head>
-	<body>
+	<body class:list={[isBookingExperiencePage && 'is-booking-experience-page']}>
 		<AmbientBackground />
 		<MainNavbar />
 		
@@ -140,11 +142,11 @@ const campgroundJsonLd = getCampgroundJsonLd({
 			<slot />
 		</main>
 		
-		<CamperScrollProgress />
-		<PageScrollHint />
+		{!isBookingExperiencePage && <CamperScrollProgress />}
+		{!isBookingExperiencePage && <PageScrollHint />}
 		<FloatingChatButton />
-		<Footer />
-		<ScrollToTopButton />
+		{!isBookingExperiencePage && <Footer />}
+		{!isBookingExperiencePage && <ScrollToTopButton />}
 		<MotionFoundation />
 	</body>
 </html>

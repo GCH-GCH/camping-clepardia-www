@@ -1,10 +1,16 @@
 ---
 import { logoMain, logoMainPng } from '@/data/assets';
-import { getLanguageSwitchLinks, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getBookingLocalizedPath, getLanguageSwitchLinks, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import { getTranslations } from '@/i18n/config';
 
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
+const bookingFooterLabels = {
+  pl: 'Rezerwacja',
+  en: 'Booking',
+  de: 'Buchung',
+  it: 'Prenotazione',
+};
 const footerNavItems = [
   { slug: '', label: t.nav.items.start },
   { slug: 'camping', label: t.nav.items.camping },
@@ -13,12 +19,15 @@ const footerNavItems = [
   { slug: 'dojazd', label: t.nav.items.dojazd },
   { slug: 'atrakcje', label: t.nav.items.atrakcje },
   { slug: 'galeria', label: t.nav.items.galeria },
+  { slug: '__booking__', label: bookingFooterLabels[pathContext.languageCode as keyof typeof bookingFooterLabels] ?? bookingFooterLabels.en },
   { slug: 'kontakt', label: t.nav.items.kontakt },
 ];
 
 const footerNavLinks = footerNavItems.map((item) => ({
   ...item,
-  href: getLocalizedPath(pathContext.explicitLanguage, item.slug),
+  href: item.slug === '__booking__'
+    ? getBookingLocalizedPath(pathContext.languageCode)
+    : getLocalizedPath(pathContext.explicitLanguage, item.slug),
 }));
 const footerLegalLabels = {
   pl: { rules: 'Regulamin', privacy: 'Polityka prywatności', faq: 'FAQ' },

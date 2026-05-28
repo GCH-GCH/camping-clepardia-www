@@ -109,19 +109,36 @@ const navMessages = {
       <a href={bookingHref} class="main-navbar__cta">{t.nav.cta}</a>
     </div>
 
-    <button
-      class="main-navbar__hamburger"
-      id="mainNavbarToggle"
-      type="button"
-      data-mobile-toggle
-      aria-label={t.nav.openMenu}
-      aria-expanded="false"
-      aria-controls="mainNavbarMobile"
-    >
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
+    <div class="main-navbar__mobile-controls" aria-label={t.nav.mobileMenu}>
+      <button
+        class="main-navbar-theme main-navbar-theme--compact"
+        type="button"
+        data-theme-toggle
+        aria-label={t.nav.changeTheme}
+        aria-pressed="false"
+      >
+        <span class="main-navbar-theme__icon main-navbar-theme__icon--sun" aria-hidden="true">
+          <Icon name="sun" size={18} strokeWidth={2} />
+        </span>
+        <span class="main-navbar-theme__icon main-navbar-theme__icon--moon" aria-hidden="true">
+          <Icon name="moon" size={18} strokeWidth={2} />
+        </span>
+      </button>
+
+      <button
+        class="main-navbar__hamburger"
+        id="mainNavbarToggle"
+        type="button"
+        data-mobile-toggle
+        aria-label={t.nav.openMenu}
+        aria-expanded="false"
+        aria-controls="mainNavbarMobile"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
   </nav>
 
   <div class="main-navbar-mobile" id="mainNavbarMobile" aria-hidden="true">
@@ -697,6 +714,23 @@ html[data-theme="light"] .main-navbar-theme__icon--moon {
   transition: background .22s ease, border-color .22s ease;
 }
 
+.main-navbar__mobile-controls {
+  display: none;
+  justify-self: end;
+  align-items: center;
+  gap: 8px;
+}
+
+.main-navbar__mobile-controls .main-navbar__hamburger {
+  display: grid;
+}
+
+.main-navbar-theme--compact {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+}
+
 .main-navbar__hamburger span {
   display: block;
   width: 23px;
@@ -1022,6 +1056,7 @@ html[data-theme="light"] .main-navbar-mobile__close {
     height: 68px;
     margin-top: 12px;
     grid-template-columns: auto 1fr auto;
+    gap: 8px;
     border-radius: 24px;
     padding: 0 14px;
   }
@@ -1033,7 +1068,7 @@ html[data-theme="light"] .main-navbar-mobile__close {
 
   .main-navbar__logo {
     height: 46px;
-    max-width: min(190px, calc(100vw - 108px));
+    max-width: min(178px, calc(100vw - 206px));
   }
 
   .main-navbar-shell.is-scrolled .main-navbar__logo {
@@ -1045,8 +1080,12 @@ html[data-theme="light"] .main-navbar-mobile__close {
     display: none;
   }
 
-  .main-navbar__hamburger {
-    display: grid;
+  .main-navbar > .main-navbar__hamburger {
+    display: none;
+  }
+
+  .main-navbar__mobile-controls {
+    display: flex;
   }
 }
 
@@ -1065,11 +1104,12 @@ html[data-theme="light"] .main-navbar-mobile__close {
     width: calc(100% - 20px);
     max-width: calc(100vw - 20px);
     padding-inline: 12px;
+    gap: 6px;
   }
 
   .main-navbar__logo {
     height: 42px;
-    max-width: calc(100vw - 104px);
+    max-width: min(150px, calc(100vw - 220px));
   }
 
   .main-navbar-mobile__link {

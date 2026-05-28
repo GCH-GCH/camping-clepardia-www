@@ -173,9 +173,8 @@ const addonIcons: Record<string, string> = {
           <legend>{pricingText.extras}</legend>
           <div class="pricing-calculator__addons">
             {pricingConfig.addons.map((addon) => (
-              <label class="pricing-calculator__addon">
-                <input type="checkbox" name="addons" value={addon.id} />
-                <span>
+              <div class="pricing-calculator__addon pricing-calculator__addon--stepper" data-addon-stepper>
+                <span class="pricing-calculator__addon-copy">
                   <i class="pricing-calculator__option-icon" aria-hidden="true">
                     <Icon name={addonIcons[addon.id] ?? 'check'} size={21} strokeWidth={1.9} />
                   </i>
@@ -184,7 +183,12 @@ const addonIcons: Record<string, string> = {
                     <small>{formatPrice(addon.price)} / {pricingText.perNight}</small>
                   </span>
                 </span>
-              </label>
+                <span class="pricing-addon-stepper">
+                  <button type="button" data-addon-counter={addon.id} data-delta="-1" aria-label={`${pricingText.decrement} ${getAddonLabel(addon.id, addon.label)}`}>-</button>
+                  <input type="number" min="0" value="0" inputmode="numeric" data-addon-input={addon.id} data-addon-label={getAddonLabel(addon.id, addon.label)} data-addon-price={addon.price} />
+                  <button type="button" data-addon-counter={addon.id} data-delta="1" aria-label={`${pricingText.increment} ${getAddonLabel(addon.id, addon.label)}`}>+</button>
+                </span>
+              </div>
             ))}
           </div>
         </fieldset>
@@ -472,7 +476,14 @@ const addonIcons: Record<string, string> = {
       const adults = getCounterValue('adults');
       const children = getCounterValue('children');
       const toddlers = getCounterValue('toddlers');
-      const selectedAddons = Array.from(root.querySelectorAll('input[name="addons"]:checked')).map((input) => input.value);
+      const selectedAddonItems = Array.from(root.querySelectorAll('[data-addon-input]'))
+        .map((input) => {
+          const quantity = normalizeCounterValue(input.value ?? 0);
+          const id = input.dataset.addonInput;
+          const addon = config.addons.find((item) => item.id === id);
+          return addon && quantity > 0 ? { ...addon, quantity } : null;
+        })
+        .filter(Boolean);
       const chargePeople = type.category !== 'bungalow';
       const accommodationTotal = nightDates.length
         ? nightDates.reduce((sum, date) => sum + getStayRate(type, date), 0)
@@ -483,8 +494,7 @@ const addonIcons: Record<string, string> = {
             children * config.people.children.price +
             toddlers * config.people.toddlers.price
           : 0;
-      const selectedAddonItems = config.addons.filter((addon) => selectedAddons.includes(addon.id));
-      const addonsPerNight = selectedAddonItems.reduce((sum, addon) => sum + addon.price, 0);
+      const addonsPerNight = selectedAddonItems.reduce((sum, addon) => sum + addon.price * addon.quantity, 0);
       const peopleTotal = peoplePerNight * nights;
       const addonsTotal = addonsPerNight * nights;
       const total = accommodationTotal + peopleTotal + addonsTotal;
@@ -494,7 +504,9 @@ const addonIcons: Record<string, string> = {
       const nightsSummary = formatNightsText(nights);
       const seasonSummary = getSeasonSummary(nightDates);
       const peopleSummary = getPeopleSummary({ adults, children, toddlers });
-      const addonsSummary = getAddonsSummary(selectedAddonItems);
+      const addonsSummary = selectedAddonItems.length
+        ? selectedAddonItems.map((addon) => `${getTranslatedAddonLabel(addon)} x ${addon.quantity}`).join(', ')
+        : pricingText.noAddons;
       const rateSummary = `${formatMoney(nightlyTotal)} / ${pricingText.perNight}`;
 
       const breakdown = [
@@ -507,7 +519,7 @@ const addonIcons: Record<string, string> = {
       if (chargePeople && adults > 0) breakdown.push({ label: `${pricingText.adults} x ${adults} x ${nightsSummary}`, amount: adults * config.people.adults.price * nights });
       if (chargePeople && children > 0) breakdown.push({ label: `${pricingText.children} x ${children} x ${nightsSummary}`, amount: children * config.people.children.price * nights });
       if (chargePeople && toddlers > 0) breakdown.push({ label: `${pricingText.toddlers} x ${toddlers} x ${nightsSummary}`, amount: 0 });
-      selectedAddonItems.forEach((addon) => breakdown.push({ label: `${getTranslatedAddonLabel(addon)} x ${nightsSummary}`, amount: addon.price * nights }));
+      selectedAddonItems.forEach((addon) => breakdown.push({ label: `${getTranslatedAddonLabel(addon)} x ${addon.quantity} x ${nightsSummary}`, amount: addon.price * addon.quantity * nights }));
 
       setText(nightsLabel, nightsSummary);
       setText(summaryDates, datesSummary);
@@ -547,6 +559,24 @@ const addonIcons: Record<string, string> = {
       });
     });
     root.querySelectorAll('[data-counter-input]').forEach((input) => {
+      input.addEventListener('input', () => {
+        input.value = String(normalizeCounterValue(input.value || 0));
+        update();
+      });
+    });
+    root.querySelectorAll('[data-addon-counter]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const name = button.dataset.addonCounter;
+        const delta = Number(button.dataset.delta ?? 0);
+        const input = root.querySelector(`[data-addon-input="${name}"]`);
+        const value = Math.max(0, normalizeCounterValue(input?.value ?? 0) + delta);
+        if (input) input.value = String(value);
+        button.closest('[data-addon-stepper]')?.classList.add('is-bumped');
+        window.setTimeout(() => button.closest('[data-addon-stepper]')?.classList.remove('is-bumped'), 180);
+        update();
+      });
+    });
+    root.querySelectorAll('[data-addon-input]').forEach((input) => {
       input.addEventListener('input', () => {
         input.value = String(normalizeCounterValue(input.value || 0));
         update();
@@ -660,15 +690,22 @@ const addonIcons: Record<string, string> = {
   cursor: pointer;
 }
 
+.pricing-calculator__addon--stepper {
+  display: grid;
+  gap: 12px;
+  cursor: default;
+}
+
 .pricing-calculator__option input,
-.pricing-calculator__addon input {
+.pricing-calculator__addon > input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
 
 .pricing-calculator__option > span,
-.pricing-calculator__addon > span {
+.pricing-calculator__addon > .pricing-calculator__addon-copy,
+.pricing-calculator__addon > span:not(.pricing-addon-stepper) {
   min-height: 74px;
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr);
@@ -729,7 +766,7 @@ const addonIcons: Record<string, string> = {
 }
 
 .pricing-calculator__option:hover > span,
-.pricing-calculator__addon:hover > span,
+.pricing-calculator__addon:hover > .pricing-calculator__addon-copy,
 .pricing-calculator__option input:checked + span,
 .pricing-calculator__addon input:checked + span {
   transform: translateY(-2px);
@@ -749,6 +786,50 @@ const addonIcons: Record<string, string> = {
     linear-gradient(135deg, #55d293, #3CB371);
   box-shadow: 0 16px 38px rgba(60,179,113,.28), inset 0 1px 0 rgba(255,255,255,.30);
   transform: translateY(-1px);
+}
+
+.pricing-addon-stepper {
+  display: grid;
+  grid-template-columns: 46px 1fr 46px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(25,70,44,.10);
+  background: rgba(255,255,255,.58);
+}
+
+.pricing-addon-stepper button {
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  border: 1px solid rgba(60,179,113,.20);
+  color: #1f7048;
+  background: rgba(60,179,113,.13);
+  font-size: 1.25rem;
+  font-weight: 950;
+  transition: transform .2s ease, background .2s ease;
+}
+
+.pricing-addon-stepper button:hover {
+  transform: translateY(-1px);
+  background: rgba(60,179,113,.22);
+}
+
+.pricing-addon-stepper input {
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  border: 1px solid rgba(25,70,44,.12);
+  border-radius: 15px;
+  color: #102018;
+  background: rgba(255,255,255,.78);
+  text-align: center;
+  font-weight: 950;
+}
+
+.pricing-calculator__addon.is-bumped .pricing-addon-stepper {
+  box-shadow: 0 0 0 4px rgba(60,179,113,.13);
 }
 
 .pricing-calculator__option input:checked + span::before,
@@ -1047,7 +1128,8 @@ const addonIcons: Record<string, string> = {
 
 @media (max-width: 560px) {
   .pricing-calculator__option > span,
-  .pricing-calculator__addon > span {
+  .pricing-calculator__addon > .pricing-calculator__addon-copy,
+  .pricing-calculator__addon > span:not(.pricing-addon-stepper) {
     min-height: 68px;
     grid-template-columns: 46px minmax(0, 1fr);
     gap: 11px;
@@ -1069,13 +1151,15 @@ const addonIcons: Record<string, string> = {
 }
 
 .pricing-calculator__option > span,
-.pricing-calculator__addon > span {
+.pricing-calculator__addon > .pricing-calculator__addon-copy,
+.pricing-calculator__addon > span:not(.pricing-addon-stepper) {
   position: relative;
   overflow: hidden;
 }
 
 .pricing-calculator__option > span::after,
-.pricing-calculator__addon > span::after {
+.pricing-calculator__addon > .pricing-calculator__addon-copy::after,
+.pricing-calculator__addon > span:not(.pricing-addon-stepper)::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -1086,7 +1170,7 @@ const addonIcons: Record<string, string> = {
 }
 
 .pricing-calculator__option:hover > span::after,
-.pricing-calculator__addon:hover > span::after,
+.pricing-calculator__addon:hover > .pricing-calculator__addon-copy::after,
 .pricing-calculator__option input:checked + span::after,
 .pricing-calculator__addon input:checked + span::after {
   opacity: 1;

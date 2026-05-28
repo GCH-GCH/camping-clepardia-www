@@ -373,6 +373,77 @@ const copyByLanguage = {
 };
 
 const copy = copyByLanguage[lang];
+const extraCopyByLanguage = {
+  pl: {
+    servicesTitle: 'Wybierz usługi i ilości',
+    unitPrice: 'Cena / noc',
+    lineTotal: 'Suma / noc',
+    parking: 'Samochód / parking',
+    motorcycle: 'Motocykl',
+    cargoTrailer: 'Przyczepa bagażowa',
+    campingPeople: 'Osoby przy campingu',
+    bungalowAdults: 'Osoby dorosłe',
+    lateCheckout: 'Chciałbym zapytać o późniejszy wyjazd / późniejsze wymeldowanie.',
+    lateCheckoutTime: 'Preferowana godzina wyjazdu',
+    lateCheckoutInfo: 'Możesz zaznaczyć preferowaną godzinę wyjazdu. Recepcja potwierdzi możliwość, miejsce, instrukcje i ewentualny koszt po przyjeździe — zależnie od typu pojazdu, liczby dodatkowych godzin, dostępności miejsc campingowych i parkingowych oraz rezerwacji.',
+    summerNotice: 'W lipcu i sierpniu rezerwujemy głównie domki. Miejsca campingowe są dostępne według kolejności przyjazdu — najlepiej przyjechać krótko po 12:00, gdy część gości wyjeżdża.',
+    payloadReady: 'Zapytanie przygotowane dla recepcji',
+    translatedSummaryPl: 'Podsumowanie PL',
+    originalMessage: 'Oryginalna wiadomość klienta',
+  },
+  en: {
+    servicesTitle: 'Choose services and quantities',
+    unitPrice: 'Price / night',
+    lineTotal: 'Total / night',
+    parking: 'Car / parking',
+    motorcycle: 'Motorcycle',
+    cargoTrailer: 'Cargo trailer',
+    campingPeople: 'Camping guests',
+    bungalowAdults: 'Adults',
+    lateCheckout: 'I would like to ask about a later departure / late check-out.',
+    lateCheckoutTime: 'Preferred departure time',
+    lateCheckoutInfo: 'You can mark a preferred departure time. Reception will confirm possibility, place, instructions and any cost after arrival, depending on vehicle type, extra hours, pitch/parking availability and bookings.',
+    summerNotice: 'In July and August we mainly reserve bungalows. Camping pitches are available on arrival order — it is best to arrive shortly after 12:00 when some guests leave.',
+    payloadReady: 'Enquiry prepared for reception',
+    translatedSummaryPl: 'PL summary',
+    originalMessage: 'Original customer message',
+  },
+  de: {
+    servicesTitle: 'Services und Mengen wählen',
+    unitPrice: 'Preis / Nacht',
+    lineTotal: 'Summe / Nacht',
+    parking: 'Auto / Parkplatz',
+    motorcycle: 'Motorrad',
+    cargoTrailer: 'Gepäckanhänger',
+    campingPeople: 'Camping-Gäste',
+    bungalowAdults: 'Erwachsene',
+    lateCheckout: 'Ich möchte nach späterer Abreise / späterem Check-out fragen.',
+    lateCheckoutTime: 'Gewünschte Abreisezeit',
+    lateCheckoutInfo: 'Sie können eine bevorzugte Abreisezeit angeben. Die Rezeption bestätigt Möglichkeit, Platz, Hinweise und eventuelle Kosten nach der Ankunft.',
+    summerNotice: 'Im Juli und August reservieren wir hauptsächlich Bungalows. Campingplätze sind nach Ankunftsreihenfolge verfügbar — am besten kurz nach 12:00 anreisen.',
+    payloadReady: 'Anfrage für die Rezeption vorbereitet',
+    translatedSummaryPl: 'PL-Zusammenfassung',
+    originalMessage: 'Originalnachricht des Gastes',
+  },
+  it: {
+    servicesTitle: 'Scegli servizi e quantità',
+    unitPrice: 'Prezzo / notte',
+    lineTotal: 'Totale / notte',
+    parking: 'Auto / parcheggio',
+    motorcycle: 'Moto',
+    cargoTrailer: 'Rimorchio bagagli',
+    campingPeople: 'Ospiti camping',
+    bungalowAdults: 'Adulti',
+    lateCheckout: 'Vorrei chiedere una partenza / check-out più tardi.',
+    lateCheckoutTime: 'Orario di partenza preferito',
+    lateCheckoutInfo: 'Puoi indicare un orario preferito. La reception confermerà possibilità, posto, istruzioni ed eventuale costo dopo l’arrivo.',
+    summerNotice: 'A luglio e agosto prenotiamo principalmente bungalow. Le piazzole camping sono disponibili in ordine di arrivo — meglio arrivare poco dopo le 12:00.',
+    payloadReady: 'Richiesta preparata per la reception',
+    translatedSummaryPl: 'Riepilogo PL',
+    originalMessage: 'Messaggio originale del cliente',
+  },
+};
+const extraCopy = extraCopyByLanguage[lang] ?? extraCopyByLanguage.en;
 const stayChoices = [
   ['camping', copy.stay.camping],
   ['bungalow', copy.stay.bungalow],
@@ -395,6 +466,41 @@ const bungalowTypes = [
   ['bungalow-4', copy.options.bungalow4],
 ] as const;
 
+const getStayTypePrice = (id: string) => {
+  const stayType = pricingConfig.stayTypes.find((item) => item.id === id);
+  return stayType && 'price' in stayType ? stayType.price : 0;
+};
+
+const getAddonPrice = (id: string) => pricingConfig.addons.find((item) => item.id === id)?.price ?? 0;
+const getBungalowLowPrice = (id: string) => {
+  const stayType = pricingConfig.stayTypes.find((item) => item.id === id);
+  return stayType && 'seasonalPrices' in stayType ? stayType.seasonalPrices.low : 0;
+};
+
+const serviceItems = {
+  camping: [
+    { id: 'camper', label: copy.options.camper, price: getStayTypePrice('camper'), defaultValue: 1 },
+    { id: 'van', label: copy.options.van, price: getStayTypePrice('van'), defaultValue: 0 },
+    { id: 'caravan', label: copy.options.caravan, price: getStayTypePrice('caravan'), defaultValue: 0 },
+    { id: 'tent-small', label: copy.options.tentSmall, price: getStayTypePrice('tent-small'), defaultValue: 0 },
+    { id: 'tent-large', label: copy.options.tentLarge, price: getStayTypePrice('tent-large'), defaultValue: 0 },
+    { id: 'rooftop-tent', label: copy.options.rooftop, price: getStayTypePrice('rooftop-tent'), defaultValue: 0 },
+    { id: 'parking', label: extraCopy.parking, price: getAddonPrice('parking'), defaultValue: 0 },
+    { id: 'motorcycle', label: extraCopy.motorcycle, price: getAddonPrice('motorcycle'), defaultValue: 0 },
+    { id: 'cargo-trailer', label: extraCopy.cargoTrailer, price: getAddonPrice('cargo-trailer'), defaultValue: 0 },
+    { id: 'bus', label: copy.options.bus, price: getAddonPrice('bus'), defaultValue: 0 },
+    { id: 'electricity', label: copy.fields.electricity, price: getAddonPrice('electricity'), defaultValue: 0 },
+    { id: 'dog', label: copy.fields.dog, price: getAddonPrice('dog'), defaultValue: 0 },
+  ],
+  bungalow: [
+    { id: 'bungalow-2', label: copy.options.bungalow2, priceKey: 'bungalow-2', defaultValue: 1 },
+    { id: 'bungalow-3', label: copy.options.bungalow3, priceKey: 'bungalow-3', defaultValue: 0 },
+    { id: 'bungalow-4', label: copy.options.bungalow4, priceKey: 'bungalow-4', defaultValue: 0 },
+    { id: 'parking', label: extraCopy.parking, price: getAddonPrice('parking'), defaultValue: 0 },
+    { id: 'dog', label: copy.fields.dog, price: getAddonPrice('dog'), defaultValue: 0 },
+  ],
+};
+
 const bookingConfigEncoded = Buffer.from(JSON.stringify({
   lang,
   copy,
@@ -414,7 +520,9 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
         .map((item) => [item.id, { label: bungalowTypes.find(([id]) => id === item.id)?.[1] ?? item.label, prices: item.seasonalPrices }])
     ),
     highSeason: pricingConfig.seasons.high,
+    services: serviceItems,
   },
+  extraCopy,
 }), 'utf8').toString('base64');
 ---
 
@@ -499,6 +607,7 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
               <strong>{copy.fields.nights}: <span data-nights-output>0</span></strong>
               <span data-hours-output>{copy.info.campingHours}</span>
             </div>
+            <p class="booking-note booking-note--summer" data-summer-booking-notice hidden>{extraCopy.summerNotice}</p>
           </section>
 
           <section class="booking-step" data-booking-step="2" hidden>
@@ -527,11 +636,15 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
             <div class="booking-variant" data-variant-panel="bungalow" hidden>
               <div class="booking-counter-grid">
                 <div class="booking-counter" data-counter="people" data-default="2">
-                  <span>{copy.fields.people}</span>
+                  <span>{extraCopy.bungalowAdults}</span>
                   <div><button type="button" data-counter-action="minus">-</button><input value="2" inputmode="numeric" /><button type="button" data-counter-action="plus">+</button></div>
                 </div>
                 <div class="booking-counter" data-counter="children" data-default="0">
                   <span>{copy.fields.children}</span>
+                  <div><button type="button" data-counter-action="minus">-</button><input value="0" inputmode="numeric" /><button type="button" data-counter-action="plus">+</button></div>
+                </div>
+                <div class="booking-counter" data-counter="toddlers" data-default="0">
+                  <span>{copy.fields.toddlers}</span>
                   <div><button type="button" data-counter-action="minus">-</button><input value="0" inputmode="numeric" /><button type="button" data-counter-action="plus">+</button></div>
                 </div>
               </div>
@@ -560,18 +673,24 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
           <section class="booking-step" data-booking-step="3" hidden>
             <div class="booking-step__head">
               <span>{copy.steps[3]}</span>
-              <h2>{copy.fields.campingType} / {copy.fields.bungalowType}</h2>
+              <h2>{extraCopy.servicesTitle}</h2>
             </div>
 
             <div class="booking-variant" data-variant-panel="camping">
               <h3>{copy.fields.campingType}</h3>
-              <div class="booking-option-grid">
-                {campingTypes.map(([id, label, price]) => (
-                  <label class="booking-option">
-                    <input type="radio" name="campingType" value={id} checked={id === 'camper'} />
-                    <span>{label}</span>
-                    <small>{price} PLN</small>
-                  </label>
+              <div class="booking-service-grid">
+                {serviceItems.camping.map((item) => (
+                  <div class="booking-service" data-service-counter>
+                    <div class="booking-service__copy">
+                      <strong>{item.label}</strong>
+                      <small>{extraCopy.unitPrice}: {item.price} PLN</small>
+                    </div>
+                    <div class="booking-service__stepper">
+                      <button type="button" data-service-action="minus" aria-label={`- ${item.label}`}>-</button>
+                      <input value={item.defaultValue} inputmode="numeric" data-service-qty={item.id} data-service-scope="camping" data-service-label={item.label} data-service-price={item.price} />
+                      <button type="button" data-service-action="plus" aria-label={`+ ${item.label}`}>+</button>
+                    </div>
+                  </div>
                 ))}
               </div>
               <p class="booking-note">{copy.info.camping}</p>
@@ -579,12 +698,19 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
 
             <div class="booking-variant" data-variant-panel="bungalow" hidden>
               <h3>{copy.fields.bungalowType}</h3>
-              <div class="booking-option-grid">
-                {bungalowTypes.map(([id, label]) => (
-                  <label class="booking-option">
-                    <input type="radio" name="bungalowType" value={id} checked={id === 'bungalow-2'} />
-                    <span>{label}</span>
-                  </label>
+              <div class="booking-service-grid">
+                {serviceItems.bungalow.map((item) => (
+                  <div class="booking-service" data-service-counter>
+                    <div class="booking-service__copy">
+                      <strong>{item.label}</strong>
+                      <small>{extraCopy.unitPrice}: {'priceKey' in item ? `${getBungalowLowPrice(item.priceKey)}+ PLN` : `${item.price} PLN`}</small>
+                    </div>
+                    <div class="booking-service__stepper">
+                      <button type="button" data-service-action="minus" aria-label={`- ${item.label}`}>-</button>
+                      <input value={item.defaultValue} inputmode="numeric" data-service-qty={item.id} data-service-scope="bungalow" data-service-label={item.label} data-service-price={'price' in item ? item.price : 0} data-service-price-key={'priceKey' in item ? item.priceKey : ''} />
+                      <button type="button" data-service-action="plus" aria-label={`+ ${item.label}`}>+</button>
+                    </div>
+                  </div>
                 ))}
               </div>
               <p class="booking-note">{copy.info.bungalow}</p>
@@ -594,27 +720,37 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
               <div class="booking-split">
                 <article>
                   <h3>{copy.fields.bungalowType}</h3>
-                  <div class="booking-option-grid booking-option-grid--compact">
-                    {bungalowTypes.map(([id, label]) => (
-                      <label class="booking-option">
-                        <input type="radio" name="combinedBungalowType" value={id} checked={id === 'bungalow-2'} />
-                        <span>{label}</span>
-                      </label>
+                  <div class="booking-service-grid booking-service-grid--compact">
+                    {serviceItems.bungalow.map((item) => (
+                      <div class="booking-service" data-service-counter>
+                        <div class="booking-service__copy">
+                          <strong>{item.label}</strong>
+                          <small>{extraCopy.unitPrice}: {'priceKey' in item ? `${getBungalowLowPrice(item.priceKey)}+ PLN` : `${item.price} PLN`}</small>
+                        </div>
+                        <div class="booking-service__stepper">
+                          <button type="button" data-service-action="minus" aria-label={`- ${item.label}`}>-</button>
+                          <input value={item.defaultValue} inputmode="numeric" data-service-qty={item.id} data-service-scope="combined-bungalow" data-service-label={item.label} data-service-price={'price' in item ? item.price : 0} data-service-price-key={'priceKey' in item ? item.priceKey : ''} />
+                          <button type="button" data-service-action="plus" aria-label={`+ ${item.label}`}>+</button>
+                        </div>
+                      </div>
                     ))}
-                  </div>
-                  <div class="booking-counter" data-counter="bungalowCount" data-default="1">
-                    <span>{copy.fields.bungalowCount}</span>
-                    <div><button type="button" data-counter-action="minus">-</button><input value="1" inputmode="numeric" /><button type="button" data-counter-action="plus">+</button></div>
                   </div>
                 </article>
                 <article>
                   <h3>{copy.fields.campingType}</h3>
-                  <div class="booking-option-grid booking-option-grid--compact">
-                    {campingTypes.map(([id, label]) => (
-                      <label class="booking-option">
-                        <input type="radio" name="combinedCampingType" value={id} checked={id === 'camper'} />
-                        <span>{label}</span>
-                      </label>
+                  <div class="booking-service-grid booking-service-grid--compact">
+                    {serviceItems.camping.map((item) => (
+                      <div class="booking-service" data-service-counter>
+                        <div class="booking-service__copy">
+                          <strong>{item.label}</strong>
+                          <small>{extraCopy.unitPrice}: {item.price} PLN</small>
+                        </div>
+                        <div class="booking-service__stepper">
+                          <button type="button" data-service-action="minus" aria-label={`- ${item.label}`}>-</button>
+                          <input value={item.defaultValue} inputmode="numeric" data-service-qty={item.id} data-service-scope="combined-camping" data-service-label={item.label} data-service-price={item.price} />
+                          <button type="button" data-service-action="plus" aria-label={`+ ${item.label}`}>+</button>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </article>
@@ -622,17 +758,30 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
               <p class="booking-note">{copy.info.combined}</p>
             </div>
 
-            <div class="booking-toggles">
-              <label><input type="checkbox" data-addon="electricity" /> <span>{copy.fields.electricity}</span></label>
-              <label><input type="checkbox" data-addon="dog" /> <span>{copy.fields.dog}</span></label>
-              <label data-car-toggle><input type="checkbox" data-addon="car" /> <span>{copy.fields.car}</span></label>
-            </div>
-
             <label class="booking-field">
               <span>{copy.fields.vehicleRegistration}</span>
               <input type="text" data-vehicle-registration placeholder="KR 12345" />
               <small>{copy.fields.vehicleHint}</small>
             </label>
+
+            <label class="booking-check booking-check--wide">
+              <input type="checkbox" data-late-checkout />
+              <span>{extraCopy.lateCheckout}</span>
+            </label>
+            <div class="booking-late-checkout" data-late-checkout-details hidden>
+              <label class="booking-field">
+                <span>{extraCopy.lateCheckoutTime}</span>
+                <select data-late-checkout-time>
+                  <option value="">--</option>
+                  <option value="13:00">13:00</option>
+                  <option value="14:00">14:00</option>
+                  <option value="15:00">15:00</option>
+                  <option value="16:00">16:00</option>
+                  <option value="17:00">17:00</option>
+                </select>
+              </label>
+              <p class="booking-note">{extraCopy.lateCheckoutInfo}</p>
+            </div>
           </section>
 
           <section class="booking-step" data-booking-step="4" hidden>
@@ -679,6 +828,7 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
             <div class="booking-final-summary" data-final-summary></div>
             <label class="booking-check booking-check--wide"><input type="checkbox" data-quiet-consent /> <span>{copy.fields.quiet}</span></label>
             <label class="booking-check booking-check--wide"><input type="checkbox" data-contact-consent /> <span>{copy.fields.consent}</span></label>
+            <textarea name="bookingPayload" data-booking-payload hidden></textarea>
             <p class="booking-form__status" data-form-status aria-live="polite"></p>
           </section>
 
@@ -745,6 +895,10 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
     const countryCode = root.querySelector('[data-country-code]');
     const specialNeeds = root.querySelector('[data-special-needs]');
     const specialDetails = root.querySelector('[data-special-details]');
+    const lateCheckout = root.querySelector('[data-late-checkout]');
+    const lateCheckoutDetails = root.querySelector('[data-late-checkout-details]');
+    const summerBookingNotice = root.querySelector('[data-summer-booking-notice]');
+    const bookingPayload = root.querySelector('[data-booking-payload]');
 
     if (!(start instanceof HTMLElement) || !(flow instanceof HTMLElement) || !(form instanceof HTMLFormElement)) return;
 
@@ -774,14 +928,30 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
       return node instanceof HTMLInputElement && node.checked;
     };
     const getNumber = (counterName) => {
-      const node = root.querySelector(`[data-counter="${counterName}"] input`);
+      const nodes = Array.from(root.querySelectorAll(`[data-counter="${counterName}"] input`));
+      const node = nodes.find((input) => input instanceof HTMLInputElement && !input.closest('[hidden]'));
       const value = node instanceof HTMLInputElement ? Number.parseInt(node.value, 10) : 0;
       return Number.isFinite(value) ? Math.max(0, value) : 0;
     };
-    const getRadioValue = (name) => {
-      const node = root.querySelector(`input[name="${name}"]:checked`);
-      return node instanceof HTMLInputElement ? node.value : '';
+    const getServiceInputs = (scope) => Array.from(root.querySelectorAll(`[data-service-scope="${scope}"]`))
+      .filter((node) => node instanceof HTMLInputElement);
+    const getServiceLinePrice = (input) => {
+      if (!(input instanceof HTMLInputElement)) return 0;
+      const priceKey = input.dataset.servicePriceKey;
+      if (priceKey) return getBungalowPrice(priceKey);
+      const price = Number.parseFloat(input.dataset.servicePrice ?? '0');
+      return Number.isFinite(price) ? price : 0;
     };
+    const getServicesForScope = (scope) => getServiceInputs(scope).map((input) => {
+      const quantity = Math.max(0, Number.parseInt(input.value || '0', 10) || 0);
+      return {
+        id: input.dataset.serviceQty ?? '',
+        label: input.dataset.serviceLabel ?? '',
+        quantity,
+        price: getServiceLinePrice(input),
+      };
+    }).filter((service) => service.quantity > 0);
+    const sumServices = (scope) => getServicesForScope(scope).reduce((sum, service) => sum + (service.price * service.quantity), 0);
 
     const getNights = () => {
       const arrival = getInputValue('[data-arrival]');
@@ -801,6 +971,14 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
       return value >= config.pricing.highSeason.start && value <= config.pricing.highSeason.end;
     };
 
+    const isSummerBookingWindow = () => {
+      const values = [getInputValue('[data-arrival]'), getInputValue('[data-departure]')].filter(Boolean);
+      return values.some((value) => {
+        const month = Number.parseInt(String(value).split('-')[1] ?? '0', 10);
+        return month === 7 || month === 8;
+      });
+    };
+
     const getBungalowPrice = (id) => {
       const option = config.pricing.bungalowTypes[id] ?? config.pricing.bungalowTypes['bungalow-2'];
       return isHighSeason() ? option.prices.high : option.prices.low;
@@ -812,40 +990,41 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
       const nights = getNights();
       if (!nights) return 0;
 
-      const addonPrice =
-        (getChecked('[data-addon="electricity"]') ? config.pricing.electricity : 0) +
-        (getChecked('[data-addon="dog"]') ? config.pricing.dog : 0) +
-        (getChecked('[data-addon="car"]') ? config.pricing.car : 0);
-
       if (state.category === 'bungalow') {
-        return nights * (getBungalowPrice(getRadioValue('bungalowType')) + addonPrice);
+        return nights * sumServices('bungalow');
       }
 
       if (state.category === 'combined') {
-        const bungalowTotal = getBungalowPrice(getRadioValue('combinedBungalowType')) * Math.max(1, getNumber('bungalowCount'));
-        const campingTotal = getCampingPrice(getRadioValue('combinedCampingType')) + (getNumber('campingPeople') * config.pricing.adults);
-        return nights * (bungalowTotal + campingTotal + addonPrice);
+        const bungalowTotal = sumServices('combined-bungalow');
+        const campingTotal = sumServices('combined-camping') + (getNumber('campingPeople') * config.pricing.adults);
+        return nights * (bungalowTotal + campingTotal);
       }
 
       const peopleTotal =
         (getNumber('adults') * config.pricing.adults) +
         (getNumber('children') * config.pricing.children);
-      return nights * (getCampingPrice(getRadioValue('campingType')) + peopleTotal + addonPrice);
+      return nights * (sumServices('camping') + peopleTotal);
     };
 
     const getSelectedServices = () => {
-      const services = [];
-      if (state.category === 'camping') services.push(config.pricing.campingTypes[getRadioValue('campingType')]?.label);
-      if (state.category === 'bungalow') services.push(config.pricing.bungalowTypes[getRadioValue('bungalowType')]?.label);
+      let scopedServices = [];
+      if (state.category === 'camping') scopedServices = getServicesForScope('camping');
+      if (state.category === 'bungalow') scopedServices = getServicesForScope('bungalow');
       if (state.category === 'combined') {
-        services.push(config.pricing.bungalowTypes[getRadioValue('combinedBungalowType')]?.label);
-        services.push(config.pricing.campingTypes[getRadioValue('combinedCampingType')]?.label);
+        scopedServices = [...getServicesForScope('combined-bungalow'), ...getServicesForScope('combined-camping')];
       }
-      if (getChecked('[data-addon="electricity"]')) services.push(config.copy.fields.electricity);
-      if (getChecked('[data-addon="dog"]')) services.push(config.copy.fields.dog);
-      if (getChecked('[data-addon="car"]')) services.push(config.copy.fields.car);
+      const services = scopedServices.map((service) => `${service.label} x ${service.quantity}`);
+      if (getChecked('[data-late-checkout]')) services.push(`${config.extraCopy.lateCheckout}${getInputValue('[data-late-checkout-time]') ? ` (${getInputValue('[data-late-checkout-time]')})` : ''}`);
       if (getChecked('[data-special-needs]')) services.push(config.copy.summary.specialNeeds);
       return services.filter(Boolean);
+    };
+
+    const getServiceBreakdown = () => {
+      let scopedServices = [];
+      if (state.category === 'camping') scopedServices = getServicesForScope('camping');
+      if (state.category === 'bungalow') scopedServices = getServicesForScope('bungalow');
+      if (state.category === 'combined') scopedServices = [...getServicesForScope('combined-bungalow'), ...getServicesForScope('combined-camping')];
+      return scopedServices;
     };
 
     const updateVariantPanels = () => {
@@ -860,6 +1039,9 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
       });
       if (hoursOutput instanceof HTMLElement) {
         hoursOutput.textContent = state.category === 'bungalow' ? config.copy.info.bungalowHours : config.copy.info.campingHours;
+      }
+      if (summerBookingNotice instanceof HTMLElement) {
+        summerBookingNotice.hidden = !isSummerBookingWindow();
       }
     };
 
@@ -906,8 +1088,11 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
       const arrival = getInputValue('[data-arrival]');
       const departure = getInputValue('[data-departure]');
       const services = getSelectedServices();
+      const serviceBreakdown = getServiceBreakdown();
       const price = calculatePrice();
       const stayLabel = config.copy.stay[state.category]?.title ?? state.category;
+      const lateCheckoutRequested = getChecked('[data-late-checkout]');
+      const lateCheckoutTime = getInputValue('[data-late-checkout-time]');
       const rows = [
         [config.copy.summary.stay, stayLabel],
         [config.copy.summary.dates, arrival && departure ? `${arrival} → ${departure}` : '-'],
@@ -916,13 +1101,39 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
         [config.copy.summary.country, state.countryLabel || '-'],
         [config.copy.summary.language, getInputValue('[data-contact-language]') || '-'],
       ];
+      if (lateCheckoutRequested) rows.push([config.extraCopy.lateCheckoutTime, lateCheckoutTime || '-']);
 
       if (nightsOutput instanceof HTMLElement) nightsOutput.textContent = String(nights);
+      if (summerBookingNotice instanceof HTMLElement) summerBookingNotice.hidden = !isSummerBookingWindow();
       if (summaryPrice instanceof HTMLElement) summaryPrice.textContent = formatMoney(price);
 
       const summaryHtml = rows.map(([label, value]) => `<dl><dt>${label}</dt><dd>${value}</dd></dl>`).join('');
-      if (summaryList instanceof HTMLElement) summaryList.innerHTML = summaryHtml;
-      if (finalSummary instanceof HTMLElement) finalSummary.innerHTML = summaryHtml + `<strong>${config.copy.summary.price}: ${formatMoney(price)}</strong>`;
+      const serviceHtml = serviceBreakdown.length
+        ? `<div class="booking-summary__services">${serviceBreakdown.map((service) => `<p><span>${service.label} x ${service.quantity}</span><strong>${formatMoney(service.price * service.quantity * Math.max(1, nights))}</strong></p>`).join('')}</div>`
+        : '';
+      if (summaryList instanceof HTMLElement) summaryList.innerHTML = summaryHtml + serviceHtml;
+      if (finalSummary instanceof HTMLElement) finalSummary.innerHTML = summaryHtml + serviceHtml + `<strong>${config.copy.summary.price}: ${formatMoney(price)}</strong>`;
+
+      const payload = {
+        customerLanguage: getInputValue('[data-contact-language]') || config.lang,
+        country: state.country || '',
+        translatedSummaryPl: rows.map(([label, value]) => `${label}: ${value}`).join('\n'),
+        originalMessage: getInputValue('[data-message]'),
+        selectedStayType: state.category,
+        services: serviceBreakdown.map((service) => ({
+          id: service.id,
+          label: service.label,
+          quantity: service.quantity,
+          unitPrice: service.price,
+          lineTotal: service.price * service.quantity * Math.max(1, nights),
+        })),
+        estimatedTotal: price,
+        dates: { arrival, departure, nights },
+        vehicleRegistration: getInputValue('[data-vehicle-registration]'),
+        lateCheckout: lateCheckoutRequested ? { requested: true, preferredTime: lateCheckoutTime } : { requested: false },
+        specialNeeds: getChecked('[data-special-needs]') ? getInputValue('[data-special-needs-text]') : '',
+      };
+      if (bookingPayload instanceof HTMLTextAreaElement) bookingPayload.value = JSON.stringify(payload, null, 2);
     };
 
     const renderCountryMatches = () => {
@@ -994,6 +1205,24 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
       input?.addEventListener('input', updateSummary);
     });
 
+    root.querySelectorAll('[data-service-counter]').forEach((counter) => {
+      const input = counter.querySelector('[data-service-qty]');
+      counter.querySelectorAll('[data-service-action]').forEach((button) => {
+        button.addEventListener('click', () => {
+          if (!(input instanceof HTMLInputElement) || !(button instanceof HTMLElement)) return;
+          const next = Number.parseInt(input.value || '0', 10) + (button.dataset.serviceAction === 'plus' ? 1 : -1);
+          input.value = String(Math.max(0, next));
+          counter.classList.add('is-bumped');
+          window.setTimeout(() => counter.classList.remove('is-bumped'), 180);
+          updateSummary();
+        });
+      });
+      input?.addEventListener('input', () => {
+        if (input instanceof HTMLInputElement) input.value = String(Math.max(0, Number.parseInt(input.value || '0', 10) || 0));
+        updateSummary();
+      });
+    });
+
     root.querySelectorAll('input, select, textarea').forEach((field) => {
       field.addEventListener('input', updateSummary);
       field.addEventListener('change', updateSummary);
@@ -1029,6 +1258,11 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
 
     specialNeeds?.addEventListener('change', () => {
       if (specialDetails instanceof HTMLElement && specialNeeds instanceof HTMLInputElement) specialDetails.hidden = !specialNeeds.checked;
+      updateSummary();
+    });
+
+    lateCheckout?.addEventListener('change', () => {
+      if (lateCheckoutDetails instanceof HTMLElement && lateCheckout instanceof HTMLInputElement) lateCheckoutDetails.hidden = !lateCheckout.checked;
       updateSummary();
     });
 
@@ -1176,6 +1410,18 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
   -webkit-backdrop-filter: blur(26px) saturate(140%);
 }
 
+.booking-flow,
+.booking-start,
+.booking-form,
+.booking-summary,
+.booking-step,
+.booking-flow__progress,
+.booking-flow__layout {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
 .booking-start {
   display: grid;
   gap: clamp(24px, 4vw, 38px);
@@ -1269,6 +1515,9 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   margin-bottom: 18px;
   padding: 10px;
   border: 1px solid rgba(143,224,180,.16);
@@ -1314,6 +1563,9 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
 .booking-flow__layout {
   display: grid;
   gap: 20px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .booking-form {
@@ -1326,6 +1578,7 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
 .booking-step {
   display: grid;
   gap: 22px;
+  min-width: 0;
 }
 
 .booking-grid,
@@ -1336,6 +1589,7 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
   display: grid;
   grid-template-columns: 1fr;
   gap: 14px;
+  min-width: 0;
 }
 
 .booking-field {
@@ -1409,10 +1663,17 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
   gap: 12px 20px;
   align-items: center;
   justify-content: space-between;
+  min-width: 0;
 }
 
 .booking-info-row strong {
   color: #fff;
+}
+
+.booking-info-row span,
+.booking-info-row strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .booking-counter {
@@ -1473,6 +1734,83 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
 
 .booking-option small {
   color: #8fe0b4;
+  font-weight: 950;
+}
+
+.booking-service-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.booking-service {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(60,179,113,.10), transparent 34%),
+    rgba(255,255,255,.06);
+  transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.booking-service:hover,
+.booking-service.is-bumped {
+  transform: translateY(-2px);
+  border-color: rgba(143,224,180,.40);
+  background: rgba(60,179,113,.12);
+  box-shadow: 0 18px 44px rgba(60,179,113,.12);
+}
+
+.booking-service__copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.booking-service__copy strong {
+  color: #fff;
+  font-weight: 950;
+  overflow-wrap: anywhere;
+}
+
+.booking-service__copy small {
+  color: rgba(244,251,246,.62);
+  font-weight: 850;
+}
+
+.booking-service__stepper {
+  display: grid;
+  grid-template-columns: 42px 58px 42px;
+  gap: 7px;
+  align-items: center;
+}
+
+.booking-service__stepper button {
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+  color: #082016;
+  background: linear-gradient(135deg, #b7f4d0, #3CB371);
+  font-size: 1.22rem;
+  font-weight: 950;
+  box-shadow: 0 12px 28px rgba(60,179,113,.18);
+}
+
+.booking-service__stepper input {
+  width: 58px;
+  height: 42px;
+  min-width: 0;
+  padding: 0 6px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 15px;
+  color: #fff;
+  text-align: center;
+  background: rgba(255,255,255,.075);
   font-weight: 950;
 }
 
@@ -1599,6 +1937,28 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
   gap: 10px;
 }
 
+.booking-summary__services {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.booking-summary__services p {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  color: rgba(244,251,246,.72);
+  font-size: .85rem;
+}
+
+.booking-summary__services strong {
+  color: #fff;
+  white-space: nowrap;
+}
+
 .booking-summary dl,
 .booking-final-summary dl {
   display: grid;
@@ -1666,6 +2026,10 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
   }
 
   .booking-option-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .booking-service-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -1745,13 +2109,44 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
 
   .booking-flow__progress {
     display: flex;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     overflow-x: auto;
+    overflow-y: hidden;
     scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
   }
 
   .booking-flow__progress button {
-    flex: 0 0 138px;
+    flex: 0 0 min(132px, 42vw);
     scroll-snap-align: start;
+  }
+
+  .booking-flow__layout,
+  .booking-form,
+  .booking-step,
+  .booking-grid,
+  .booking-counter-grid,
+  .booking-option-grid,
+  .booking-toggles,
+  .booking-split {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .booking-service {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-service__stepper {
+    grid-template-columns: 1fr 1.2fr 1fr;
+  }
+
+  .booking-service__stepper button,
+  .booking-service__stepper input {
+    width: 100%;
   }
 
   .booking-summary {
