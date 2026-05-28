@@ -395,6 +395,22 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
     const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
     const money = (value) => `${Math.max(0, Math.round(value))} ${currency}`;
     const serviceId = (scope, id) => `${scope}:${id}`;
+    const decreaseLabel = config.lang === 'pl' ? 'Zmniejsz' : config.lang === 'de' ? 'Verringern' : config.lang === 'it' ? 'Diminuisci' : 'Decrease';
+    const increaseLabel = config.lang === 'pl' ? 'Zwieksz' : config.lang === 'de' ? 'Erhohen' : config.lang === 'it' ? 'Aumenta' : 'Increase';
+
+    const togglePane = (element, hidden) => {
+      if (!(element instanceof HTMLElement)) return;
+      element.hidden = hidden;
+      element.classList.toggle('is-hidden', hidden);
+      element.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+      if (hidden) {
+        element.setAttribute('inert', '');
+        element.style.display = 'none';
+      } else {
+        element.removeAttribute('inert');
+        element.style.display = '';
+      }
+    };
 
     const seedQuantities = () => {
       ['camping', 'bungalow'].forEach((scope) => {
@@ -480,6 +496,10 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
       if (state.mode === 'combined') return `${t.fields.bungalowGuests}: ${state.values.bungalowGuests}, ${t.fields.campingGuests}: ${state.values.campingGuests}`;
       return '-';
     };
+    const stayHoursInfo = () => {
+      if (state.mode === 'combined') return `${t.info.campingHours} ${t.info.bungalowHours}`;
+      return state.mode === 'bungalow' ? t.info.bungalowHours : t.info.campingHours;
+    };
 
     const showToast = (message) => {
       if (!(toast instanceof HTMLElement)) return;
@@ -494,20 +514,29 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
     };
 
     const renderProgress = () => {
-      const percent = Math.round((state.step / (steps.length - 1)) * 100);
+      const flowSteps = steps.slice(1);
+      const activeIndex = Math.max(0, state.step - 1);
+      const percent = Math.round((activeIndex / Math.max(1, flowSteps.length - 1)) * 100);
       progress.innerHTML = `
         <div class="booking-game-progress__mobile">
-          <span>${esc(steps[state.step])}</span>
-          <strong>${String(state.step + 1).padStart(2, '0')} / ${String(steps.length).padStart(2, '0')}</strong>
+          <span>Krok ${activeIndex + 1} z ${flowSteps.length}</span>
+          <strong>${esc(flowSteps[activeIndex])}</strong>
           <i style="--progress:${percent}%"></i>
         </div>
         <div class="booking-game-progress__rail" style="--progress:${percent}%">
-          ${steps.map((step, index) => `
-            <button type="button" data-jump-step="${index}" class="${index === state.step ? 'is-active' : ''} ${index < state.step ? 'is-complete' : ''}" ${index > state.step ? 'disabled' : ''}>
-              <span>${String(index + 1).padStart(2, '0')}</span>
+          ${flowSteps.map((step, index) => {
+            const stepNumber = index + 1;
+            const realStep = stepNumber;
+            return `
+            <button type="button" data-jump-step="${realStep}" class="${realStep === state.step ? 'is-active' : ''} ${realStep < state.step ? 'is-complete' : ''}" ${realStep > state.step ? 'disabled' : ''}>
+              <span>${String(stepNumber).padStart(2, '0')}</span>
               <strong>${esc(step)}</strong>
             </button>
-          `).join('')}
+          `}).join('')}
+        </div>
+        <div class="booking-game-selected-mode">
+          <span>${esc(t.summary.stay)}: <strong>${esc(modeTitle())}</strong></span>
+          <button type="button" data-change-mode>${esc(t.actions.change)}</button>
         </div>
       `;
     };
@@ -530,10 +559,10 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
     `;
 
     const renderDateStep = () => `
-      <div class="booking-game-step-head">
-        <span>${esc(t.steps[1])}</span>
-        <h2>${esc(t.sections.date)}</h2>
-        <p>${esc(state.mode === 'bungalow' ? t.info.bungalowHours : t.info.campingHours)}</p>
+        <div class="booking-game-step-head">
+          <span>${esc(t.steps[1])}</span>
+          <h2>${esc(t.sections.date)}</h2>
+          <p>${esc(stayHoursInfo())}</p>
       </div>
       <div class="booking-game-date-grid">
         <label class="booking-game-field">
@@ -549,7 +578,7 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
           <strong>${getNights()}</strong>
         </div>
       </div>
-      <p class="booking-game-note">${esc(state.mode === 'bungalow' ? t.info.bungalowHours : t.info.campingHours)}</p>
+      <p class="booking-game-note">${esc(stayHoursInfo())}</p>
       ${isSummer() ? `<p class="booking-game-note booking-game-note--warm">${esc(t.info.summer)}</p>` : ''}
     `;
 
@@ -563,9 +592,9 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
           </div>
         </div>
         <div class="booking-game-stepper__controls">
-          <button type="button" data-counter-minus="${esc(id)}" data-counter-scope="${esc(scope)}" ${value <= 0 ? 'disabled' : ''}>-</button>
+          <button type="button" data-counter-minus="${esc(id)}" data-counter-scope="${esc(scope)}" aria-label="${esc(`${decreaseLabel} ${label}`)}" ${value <= 0 ? 'disabled' : ''}>-</button>
           <input inputmode="numeric" value="${value}" data-counter-input="${esc(id)}" data-counter-scope="${esc(scope)}" aria-label="${esc(label)}" />
-          <button type="button" data-counter-plus="${esc(id)}" data-counter-scope="${esc(scope)}">+</button>
+          <button type="button" data-counter-plus="${esc(id)}" data-counter-scope="${esc(scope)}" aria-label="${esc(`${increaseLabel} ${label}`)}">+</button>
         </div>
       </article>
     `;
@@ -603,14 +632,14 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
             <span class="booking-game-stepper__icon">${esc(item.icon ?? '+')}</span>
             <div>
               <strong>${esc(item.label)}</strong>
-              <small>${money(price)} / noc</small>
-            </div>
+            <small>${money(price)} / noc</small>
           </div>
-          <div class="booking-game-service__bottom">
-            <div class="booking-game-stepper__controls">
-              <button type="button" data-service-minus="${esc(item.id)}" data-service-scope="${esc(scope)}" ${value <= 0 ? 'disabled' : ''}>-</button>
+        </div>
+        <div class="booking-game-service__bottom">
+          <div class="booking-game-stepper__controls">
+              <button type="button" data-service-minus="${esc(item.id)}" data-service-scope="${esc(scope)}" aria-label="${esc(`${decreaseLabel} ${item.label}`)}" ${value <= 0 ? 'disabled' : ''}>-</button>
               <input inputmode="numeric" value="${value}" data-service-input="${esc(item.id)}" data-service-scope="${esc(scope)}" aria-label="${esc(item.label)}" />
-              <button type="button" data-service-plus="${esc(item.id)}" data-service-scope="${esc(scope)}">+</button>
+              <button type="button" data-service-plus="${esc(item.id)}" data-service-scope="${esc(scope)}" aria-label="${esc(`${increaseLabel} ${item.label}`)}">+</button>
             </div>
             <small>${money(subtotal)}</small>
           </div>
@@ -807,7 +836,7 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
       renderProgress();
       updateSummary();
       bindStage();
-      if (backButton instanceof HTMLButtonElement) backButton.hidden = state.step === 0;
+      if (backButton instanceof HTMLButtonElement) backButton.hidden = state.step <= 1;
       if (nextButton instanceof HTMLButtonElement) nextButton.hidden = state.step === steps.length - 1;
       if (submitButton instanceof HTMLButtonElement) submitButton.hidden = state.step !== steps.length - 1;
       root.dataset.step = String(state.step);
@@ -826,19 +855,32 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
     };
 
     const setStep = (step) => {
-      state.step = Math.max(0, Math.min(steps.length - 1, step));
+      const minStep = state.mode ? 1 : 0;
+      state.step = Math.max(minStep, Math.min(steps.length - 1, step));
       showToast(t.messages[state.step % t.messages.length]);
       renderStage();
     };
 
     const startFlow = (mode, step = 1) => {
       state.mode = modeKeys.includes(mode) ? mode : 'camping';
-      start.hidden = true;
-      flow.hidden = false;
+      togglePane(start, true);
+      togglePane(flow, false);
       setStep(step);
       const url = new URL(window.location.href);
       url.searchParams.set('stay', state.mode);
       window.history.replaceState({}, '', url);
+    };
+
+    const resetToStart = () => {
+      state.mode = null;
+      state.step = 0;
+      togglePane(flow, true);
+      togglePane(start, false);
+      const url = new URL(window.location.href);
+      url.searchParams.delete('stay');
+      window.history.replaceState({}, '', url);
+      updateSummary();
+      window.requestAnimationFrame(() => root.scrollIntoView({ behavior: 'smooth', block: 'start' }));
     };
 
     const selectCountry = (country) => {
@@ -976,6 +1018,10 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
     progress.addEventListener('click', (event) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
+      if (target.closest('[data-change-mode]')) {
+        resetToStart();
+        return;
+      }
       const button = target.closest('[data-jump-step]');
       if (!(button instanceof HTMLElement)) return;
       const step = Number(button.dataset.jumpStep);
@@ -1026,18 +1072,25 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
     if (modeKeys.includes(stay)) {
       startFlow(stay, 1);
     } else {
-      flow.hidden = true;
+      togglePane(flow, true);
+      togglePane(start, false);
       updateSummary();
     }
   })();
 </script>
 
 <style>
+.booking-game [hidden],
+.booking-game .is-hidden {
+  display: none !important;
+}
+
 .booking-game {
   position: relative;
   min-height: 100svh;
   padding: clamp(112px, 12vw, 148px) 0 clamp(72px, 9vw, 108px);
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
   color: #fff;
   background:
     radial-gradient(circle at 10% 10%, rgba(60,179,113,.24), transparent 32%),
@@ -1254,7 +1307,7 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
 .booking-game-progress__rail {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
   padding: 10px;
   border: 1px solid rgba(143,224,180,.16);
@@ -1314,6 +1367,32 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
   border-color: rgba(143,224,180,.38);
   background: linear-gradient(135deg, rgba(60,179,113,.24), rgba(60,179,113,.10));
   box-shadow: 0 0 28px rgba(60,179,113,.13);
+}
+
+.booking-game-selected-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border: 1px solid rgba(143,224,180,.16);
+  border-radius: 22px;
+  color: rgba(244,251,246,.76);
+  background: rgba(255,255,255,.055);
+}
+
+.booking-game-selected-mode strong {
+  color: #fff;
+}
+
+.booking-game-selected-mode button {
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: #082016;
+  background: #8fe0b4;
+  font-weight: 950;
 }
 
 .booking-game-toast {
@@ -1858,14 +1937,10 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
   }
 
   .booking-game-summary {
-    position: fixed;
-    z-index: 900;
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
+    position: static;
     top: auto;
-    max-height: min(72dvh, 560px);
-    overflow: hidden;
+    max-height: none;
+    overflow: visible;
     padding: 10px;
     border-radius: 24px;
   }
@@ -1884,8 +1959,8 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
 
   .booking-game-summary__inner {
     display: none;
-    max-height: calc(72dvh - 70px);
-    overflow-y: auto;
+    max-height: none;
+    overflow-y: visible;
     padding: 14px 8px 8px;
   }
 
