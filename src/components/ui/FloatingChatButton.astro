@@ -178,9 +178,9 @@ const quickActions = [
 
     <div class="floating-chat__messages" data-chat-messages aria-live="polite"></div>
 
-    <div class="floating-chat__quick" aria-label={chatTexts.quickLabel}>
+    <div class="floating-chat__quick" data-chat-quick-rail tabindex="0" role="list" aria-label={chatTexts.quickLabel}>
       {quickActions.map((action) => (
-        <button type="button" data-chat-prompt={action.label} aria-label={action.label}>
+        <button type="button" data-chat-prompt={action.label} aria-label={action.label} role="listitem">
           <Icon name={action.icon} size={16} strokeWidth={1.9} />
           <span data-chat-quick-label></span>
         </button>
@@ -444,17 +444,25 @@ const quickActions = [
 
     if (quickRail instanceof HTMLElement) {
       let dragging = false;
+      let dragged = false;
       let startX = 0;
       let startScroll = 0;
+      const maxScroll = () => Math.max(0, quickRail.scrollWidth - quickRail.clientWidth);
 
       quickRail.addEventListener('wheel', (event) => {
-        if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+        const max = maxScroll();
+        if (max <= 0) return;
+        const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+        const next = Math.max(0, Math.min(max, quickRail.scrollLeft + delta));
+        if (next === quickRail.scrollLeft) return;
         event.preventDefault();
-        quickRail.scrollLeft += event.deltaY;
+        quickRail.scrollLeft = next;
       }, { passive: false });
 
       quickRail.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
         dragging = true;
+        dragged = false;
         startX = event.clientX;
         startScroll = quickRail.scrollLeft;
         quickRail.classList.add('is-dragging');
@@ -463,14 +471,17 @@ const quickActions = [
 
       quickRail.addEventListener('pointermove', (event) => {
         if (!dragging) return;
+        const delta = event.clientX - startX;
+        if (Math.abs(delta) > 4) dragged = true;
         event.preventDefault();
-        quickRail.scrollLeft = startScroll - (event.clientX - startX);
+        quickRail.scrollLeft = startScroll - delta;
       });
 
       const stopDrag = (event) => {
         dragging = false;
         quickRail.classList.remove('is-dragging');
         if ('pointerId' in event) quickRail.releasePointerCapture?.(event.pointerId);
+        window.setTimeout(() => { dragged = false; }, 0);
       };
 
       quickRail.addEventListener('pointerup', stopDrag);
@@ -478,6 +489,30 @@ const quickActions = [
       quickRail.addEventListener('mouseleave', () => {
         dragging = false;
         quickRail.classList.remove('is-dragging');
+      });
+      quickRail.addEventListener('click', (event) => {
+        if (!dragged) return;
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
+      quickRail.addEventListener('keydown', (event) => {
+        const step = event.shiftKey ? 240 : 120;
+        if (event.key === 'ArrowRight') {
+          event.preventDefault();
+          quickRail.scrollBy({ left: step, behavior: 'smooth' });
+        }
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault();
+          quickRail.scrollBy({ left: -step, behavior: 'smooth' });
+        }
+        if (event.key === 'Home') {
+          event.preventDefault();
+          quickRail.scrollTo({ left: 0, behavior: 'smooth' });
+        }
+        if (event.key === 'End') {
+          event.preventDefault();
+          quickRail.scrollTo({ left: maxScroll(), behavior: 'smooth' });
+        }
       });
     }
 
@@ -864,14 +899,26 @@ body.has-floating-chat-open {
   padding: 0 16px 14px;
   overflow-x: auto;
   cursor: grab;
-  scroll-snap-type: x proximity;
-  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  touch-action: pan-x;
   -webkit-overflow-scrolling: touch;
   user-select: none;
 }
 
+.floating-chat__quick::-webkit-scrollbar {
+  display: none;
+}
+
 .floating-chat__quick.is-dragging {
   cursor: grabbing;
+  scroll-snap-type: none;
+}
+
+.floating-chat__quick:focus-visible {
+  outline: 2px solid #8fe0b4;
+  outline-offset: 3px;
 }
 
 .floating-chat__quick button {
