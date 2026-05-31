@@ -394,30 +394,130 @@ const modeChipsCopy = {
 } as const;
 const modeChips = modeChipsCopy[lang] ?? modeChipsCopy.en;
 
+const uxCopy = {
+  pl: {
+    popularCountries: 'Popularne kraje',
+    suggestedCountries: 'Wyniki wyszukiwania',
+    noCountries: 'Wpisz min. 1 znak, np. de, ge albo niem.',
+    presetsTitle: 'Najpopularniejsze wybory',
+    presetsLead: 'Kliknij gotowy zestaw albo ustaw wszystko recznie.',
+    presetAdded: 'Dodano popularny zestaw \uD83C\uDF3F',
+    help: {
+      title: 'Pomoc',
+      open: 'Pomoc',
+      close: 'Zamknij pomoc',
+      sections: [
+        ['Camping, Domki czy Razem?', 'Camping to kamper, van, namiot lub przyczepa. Domki to nocleg 2-, 3- albo 4-osobowy. Razem wybierz, gdy czesc grupy spi w domku, a czesc przyjezdza kamperem lub z namiotem.'],
+        ['To zapytanie, nie automatyczna rezerwacja', 'Recepcja potwierdzi dostepnosc, cene i finalne warunki w odpowiedzi.'],
+        ['Cena orientacyjna', 'Liczymy noce, osoby i wybrane uslugi wedlug cennika. Finalne warunki potwierdza recepcja.'],
+        ['Prad 10A i pies', 'Prad 10A dodajemy wedlug cennika. Pies jest bezplatny.'],
+        ['Godziny pobytu', 'Camping: 12:00-12:00. Domki: check-in od 16:00, check-out do 11:00.'],
+        ['Dojazd', 'Zalecamy Google Maps, bo dojazd zmienil sie w 2022 roku.'],
+      ],
+      shortTitle: 'Nie chcesz uzupelniac wszystkich szczegolow?',
+      shortCta: 'Wyslij krotkie zapytanie',
+    },
+    simple: {
+      cta: 'Nie wiem co wybrac - pomozcie mi dobrac opcje',
+      title: 'Krotkie zapytanie',
+      desc: 'Opisz krotko, czym podrozujesz i czego potrzebujesz - recepcja pomoze dobrac najlepsza opcje.',
+    },
+    summary: {
+      statusLabel: 'Status zapytania',
+      status: 'Do potwierdzenia przez recepcje',
+      badge: 'Orientacyjna cena',
+      depositBungalow: 'Dla domkow moze byc wymagana zaliczka. Dane do zaliczki oraz potwierdzenie dostepnosci wyslemy w odpowiedzi mailowej.',
+      depositCombined: 'Zapytanie obejmuje domek, wiec recepcja moze poprosic o zaliczke za czesc noclegowa.',
+    },
+    success: {
+      title: 'Dziekujemy! \uD83C\uDF3F',
+      text: 'Twoje zapytanie zostalo przygotowane dla recepcji. Odpowiemy mozliwie szybko i potwierdzimy dostepnosc oraz szczegoly pobytu.',
+      bungalow: 'W przypadku domkow moze byc wymagana zaliczka. Dane do zaliczki oraz potwierdzenie dostepnosci wyslemy w odpowiedzi mailowej.',
+      camping: 'To zapytanie nie oznacza automatycznej rezerwacji. Recepcja potwierdzi dostepnosc i szczegoly pobytu.',
+      home: 'Wroc na strone glowna',
+      maps: 'Otworz Google Maps',
+      contact: 'Skontaktuj sie z recepcja',
+      again: 'Zrob nowe zapytanie',
+    },
+    summerCamping: 'W lipcu i sierpniu nie przyjmujemy standardowych rezerwacji miejsc campingowych. Najlepiej przyjechac krotko po 12:00, gdy czesc gosci wyjezdza. Mozesz wyslac zapytanie, a recepcja odpowie, jesli bedzie mozliwosc pomocy.',
+    summerBungalow: 'Domki w sezonie warto rezerwowac wczesniej.',
+  },
+  en: {
+    popularCountries: 'Popular countries',
+    suggestedCountries: 'Search results',
+    noCountries: 'Type at least 1 character, e.g. de, ge or Germany.',
+    presetsTitle: 'Popular choices',
+    presetsLead: 'Choose a ready-made set or adjust everything manually.',
+    presetAdded: 'Popular set added \uD83C\uDF3F',
+    help: {
+      title: 'Help',
+      open: 'Help',
+      close: 'Close help',
+      sections: [
+        ['Camping, bungalows or combined?', 'Camping is for a camper, van, tent or caravan. Bungalows are 2-, 3- or 4-person stays. Combined is for one bungalow plus a camping pitch.'],
+        ['This is an enquiry, not an automatic booking', 'Reception confirms availability, price and final conditions.'],
+        ['Estimated price', 'We count nights, guests and selected services according to the price list.'],
+        ['10A power and dog', '10A power is added according to the price list. Dogs are free.'],
+        ['Stay hours', 'Camping: 12:00-12:00. Bungalows: check-in from 16:00, check-out by 11:00.'],
+        ['Directions', 'We recommend Google Maps because access changed in 2022.'],
+      ],
+      shortTitle: 'Do not want to fill in all details?',
+      shortCta: 'Send a short enquiry',
+    },
+    simple: {
+      cta: 'I am not sure what to choose - help me pick',
+      title: 'Short enquiry',
+      desc: 'Briefly describe how you travel and what you need - reception will help choose the best option.',
+    },
+    summary: {
+      statusLabel: 'Enquiry status',
+      status: 'To be confirmed by reception',
+      badge: 'Estimated price',
+      depositBungalow: 'A deposit may be required for bungalows. Deposit details and availability confirmation will be sent by email.',
+      depositCombined: 'This enquiry includes a bungalow, so reception may ask for a deposit for the accommodation part.',
+    },
+    success: {
+      title: 'Thank you! \uD83C\uDF3F',
+      text: 'Your enquiry has been prepared for reception. We will reply as soon as possible and confirm availability and stay details.',
+      bungalow: 'A deposit may be required for bungalows. Deposit details and availability confirmation will be sent by email.',
+      camping: 'This enquiry is not an automatic booking. Reception will confirm availability and stay details.',
+      home: 'Back to homepage',
+      maps: 'Open Google Maps',
+      contact: 'Contact reception',
+      again: 'New enquiry',
+    },
+    summerCamping: 'In July and August we do not take standard camping pitch reservations. It is best to arrive shortly after 12:00 when some guests leave. You can send an enquiry and reception will reply if help is possible.',
+    summerBungalow: 'Bungalows in high season are best booked earlier.',
+  },
+  de: null,
+  it: null,
+} as const;
+const ux = uxCopy[lang] ?? uxCopy.en;
+
 const stayPrice = (id: string) => pricingConfig.stayTypes.find((item) => item.id === id) as any;
 const addonPrice = (id: string) => pricingConfig.addons.find((item) => item.id === id) as any;
 
 const campingServices = [
-  { id: 'camper', label: 'Kamper', icon: 'RV', price: stayPrice('camper')?.price ?? 0 },
-  { id: 'van', label: 'Van', icon: 'VAN', price: stayPrice('van')?.price ?? 0 },
-  { id: 'caravan', label: 'Przyczepa', icon: 'CAR', price: stayPrice('caravan')?.price ?? 0 },
-  { id: 'tent-small', label: 'Namiot 1-2 os.', icon: 'T1', price: stayPrice('tent-small')?.price ?? 0 },
-  { id: 'tent-large', label: 'Namiot 3-4 os.', icon: 'T2', price: stayPrice('tent-large')?.price ?? 0 },
-  { id: 'rooftop-tent', label: 'Auto + namiot dachowy', icon: 'RT', price: stayPrice('rooftop-tent')?.price ?? 0 },
-  { id: 'parking', label: 'Samochod / parking', icon: 'P', price: addonPrice('parking')?.price ?? 0 },
-  { id: 'motorcycle', label: 'Motocykl', icon: 'M', price: addonPrice('motorcycle')?.price ?? 0 },
-  { id: 'cargo-trailer', label: 'Przyczepa bagazowa', icon: 'BG', price: addonPrice('cargo-trailer')?.price ?? 0 },
-  { id: 'bus', label: 'Bus / ciezarowka', icon: 'BUS', price: addonPrice('bus')?.price ?? 0 },
-  { id: 'electricity', label: 'Prad 10A', icon: '10A', price: addonPrice('electricity')?.price ?? 0 },
-  { id: 'dog', label: 'Pies', icon: 'DOG', price: addonPrice('dog')?.price ?? 0 },
+  { id: 'camper', label: 'Kamper', price: stayPrice('camper')?.price ?? 0 },
+  { id: 'van', label: 'Van', price: stayPrice('van')?.price ?? 0 },
+  { id: 'caravan', label: 'Przyczepa', price: stayPrice('caravan')?.price ?? 0 },
+  { id: 'tent-small', label: 'Namiot 1-2 os.', price: stayPrice('tent-small')?.price ?? 0 },
+  { id: 'tent-large', label: 'Namiot 3-4 os.', price: stayPrice('tent-large')?.price ?? 0 },
+  { id: 'rooftop-tent', label: 'Auto + namiot dachowy', price: stayPrice('rooftop-tent')?.price ?? 0 },
+  { id: 'parking', label: 'Samochod / parking', price: addonPrice('parking')?.price ?? 0 },
+  { id: 'motorcycle', label: 'Motocykl', price: addonPrice('motorcycle')?.price ?? 0 },
+  { id: 'cargo-trailer', label: 'Przyczepa bagazowa', price: addonPrice('cargo-trailer')?.price ?? 0 },
+  { id: 'bus', label: 'Bus / ciezarowka', price: addonPrice('bus')?.price ?? 0 },
+  { id: 'electricity', label: 'Prad 10A', price: addonPrice('electricity')?.price ?? 0 },
+  { id: 'dog', label: 'Pies', price: addonPrice('dog')?.price ?? 0 },
 ];
 
 const bungalowServices = [
-  { id: 'bungalow-2', label: 'Domek 2-os.', icon: 'D2', seasonalPrices: stayPrice('bungalow-2')?.seasonalPrices ?? { low: 0, high: 0 } },
-  { id: 'bungalow-3', label: 'Domek 3-os.', icon: 'D3', seasonalPrices: stayPrice('bungalow-3')?.seasonalPrices ?? { low: 0, high: 0 } },
-  { id: 'bungalow-4', label: 'Domek 4-os.', icon: 'D4', seasonalPrices: stayPrice('bungalow-4')?.seasonalPrices ?? { low: 0, high: 0 } },
-  { id: 'parking', label: 'Samochod / parking', icon: 'P', price: addonPrice('parking')?.price ?? 0 },
-  { id: 'dog', label: 'Pies', icon: 'DOG', price: addonPrice('dog')?.price ?? 0 },
+  { id: 'bungalow-2', label: 'Domek 2-os.', seasonalPrices: stayPrice('bungalow-2')?.seasonalPrices ?? { low: 0, high: 0 } },
+  { id: 'bungalow-3', label: 'Domek 3-os.', seasonalPrices: stayPrice('bungalow-3')?.seasonalPrices ?? { low: 0, high: 0 } },
+  { id: 'bungalow-4', label: 'Domek 4-os.', seasonalPrices: stayPrice('bungalow-4')?.seasonalPrices ?? { low: 0, high: 0 } },
+  { id: 'parking', label: 'Samochod / parking', price: addonPrice('parking')?.price ?? 0 },
+  { id: 'dog', label: 'Pies', price: addonPrice('dog')?.price ?? 0 },
 ];
 
 const config = {
@@ -437,6 +537,7 @@ const config = {
     bungalow: bungalowServices,
   },
   modeChips,
+  ux,
   countries: countries.map((country) => ({
     code: country.code,
     flagClass: country.flagClass,
@@ -502,6 +603,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             </button>
           ))}
         </div>
+        <button class="reservation-simple-link" type="button" data-simple-start>{ux.simple.cta}</button>
         <p class="reservation-mini__note">{t.startLead}</p>
       </div>
     </div>
@@ -527,6 +629,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     }
 
     const { t, currency } = config;
+    const ui = config.ux;
     const steps = ['dates', 'guests', 'services', 'details', 'summary'];
     const stepTitles = t.steps;
     const stayModes = ['camping', 'bungalow', 'combined'];
@@ -538,6 +641,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       dates: { arrival: '', departure: '' },
       guests: { adults: 2, children: 0, toddlers: 0, bungalowGuests: 2, campingGuests: 0 },
       services: {},
+      simple: { people: 2 },
       details: {
         name: '',
         email: '',
@@ -556,6 +660,11 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         consent: false,
       },
       hint: '',
+      toast: '',
+      summaryPulse: false,
+      countryOpen: false,
+      countryActiveIndex: 0,
+      helpOpen: false,
       success: false,
     };
 
@@ -577,7 +686,13 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const countryMatches = () => {
       const query = normalize(state.details.countrySearch);
-      if (!query) return config.countries.slice(0, 6);
+      const popularCodes = ['PL', 'DE', 'NL', 'CZ', 'SK', 'SE'];
+      if (!state.countryOpen) return [];
+      if (!query) {
+        return config.countries
+          .filter((country) => popularCodes.includes(country.code))
+          .slice(0, 6);
+      }
       return config.countries
         .filter((country) => {
           const haystack = [country.code, country.name, ...(country.aliases || [])].map(normalize).join(' ');
@@ -622,6 +737,14 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       return month === 7 || month === 8;
     };
 
+    const seasonalHint = () => {
+      if (!touchesSummer()) return '';
+      if (state.mode === 'camping') return ui.summerCamping;
+      if (state.mode === 'bungalow') return ui.summerBungalow;
+      if (state.mode === 'combined') return `${ui.summerCamping} ${ui.summerBungalow}`;
+      return '';
+    };
+
     const servicePrice = (item) => {
       if (item.seasonalPrices) return highSeason() ? item.seasonalPrices.high : item.seasonalPrices.low;
       return Number(item.price || 0);
@@ -637,6 +760,28 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (state.services[key] === 0) delete state.services[key];
     };
 
+    const presets = {
+      camping: [
+        { id: 'camping-camper-power', label: '2 osoby + kamper + prad', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:camper': 1, 'camping:electricity': 1 } },
+        { id: 'camping-van', label: '2 osoby + van', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:van': 1 } },
+        { id: 'camping-caravan-power', label: '2 osoby + przyczepa + prad', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:caravan': 1, 'camping:electricity': 1 } },
+        { id: 'camping-tent', label: '2 osoby + namiot', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:tent-small': 1 } },
+        { id: 'camping-family', label: 'Rodzina: 2 doroslych + 2 dzieci + kamper + prad', guests: { adults: 2, children: 2, toddlers: 0 }, services: { 'camping:camper': 1, 'camping:electricity': 1 } },
+      ],
+      bungalow: [
+        { id: 'bungalow-2', label: 'Domek 2-os. dla 2 osob', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'bungalow:bungalow-2': 1 } },
+        { id: 'bungalow-3', label: 'Domek 3-os. dla 3 osob', guests: { adults: 3, children: 0, toddlers: 0 }, services: { 'bungalow:bungalow-3': 1 } },
+        { id: 'bungalow-4-family', label: 'Domek 4-os. dla rodziny', guests: { adults: 2, children: 2, toddlers: 0 }, services: { 'bungalow:bungalow-4': 1 } },
+        { id: 'bungalow-car', label: 'Domek + auto', services: { 'bungalow:bungalow-2': 1, 'bungalow:parking': 1 } },
+      ],
+      combined: [
+        { id: 'combined-small', label: 'Domek 2-os. + kamper + 2 osoby', guests: { bungalowGuests: 2, campingGuests: 2, children: 0, toddlers: 0 }, services: { 'bungalow:bungalow-2': 1, 'camping:camper': 1 } },
+        { id: 'combined-caravan', label: 'Domek 4-os. + przyczepa + prad', guests: { bungalowGuests: 4, campingGuests: 2, children: 0, toddlers: 0 }, services: { 'bungalow:bungalow-4': 1, 'camping:caravan': 1, 'camping:electricity': 1 } },
+        { id: 'combined-family', label: 'Rodzina: domek + kamper obok', guests: { bungalowGuests: 4, campingGuests: 2, children: 2, toddlers: 0 }, services: { 'bungalow:bungalow-4': 1, 'camping:camper': 1, 'camping:electricity': 1 } },
+      ],
+      simple: [],
+    };
+
     const visibleServiceGroups = () => {
       if (state.mode === 'camping') return [{ scope: 'camping', title: t.modes.camping[0], items: config.services.camping }];
       if (state.mode === 'bungalow') return [{ scope: 'bungalow', title: t.modes.bungalow[0], items: config.services.bungalow }];
@@ -647,6 +792,48 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       return [];
     };
 
+    const clearVisibleServices = () => {
+      const scopes = new Set(visibleServiceGroups().map((group) => group.scope));
+      Object.keys(state.services).forEach((key) => {
+        const scope = key.split(':')[0];
+        if (scopes.has(scope)) delete state.services[key];
+      });
+    };
+
+    const pulseSummary = () => {
+      state.summaryPulse = true;
+      render();
+      window.setTimeout(() => {
+        state.summaryPulse = false;
+        render();
+      }, 520);
+    };
+
+    const applyPreset = (id) => {
+      const preset = (presets[state.mode] || []).find((item) => item.id === id);
+      if (!preset) return;
+      if (preset.guests) {
+        Object.entries(preset.guests).forEach(([key, value]) => {
+          state.guests[key] = Number(value);
+        });
+      }
+      clearVisibleServices();
+      Object.entries(preset.services || {}).forEach(([key, value]) => {
+        const [scope, serviceId] = key.split(':');
+        setQty(scope, serviceId, Number(value));
+      });
+      state.toast = ui.presetAdded;
+      state.hint = '';
+      render();
+      pulseSummary();
+      window.setTimeout(() => {
+        if (state.toast === ui.presetAdded) {
+          state.toast = '';
+          render();
+        }
+      }, 1800);
+    };
+
     const selectedServices = () => visibleServiceGroups().flatMap((group) => group.items
       .map((item) => {
         const qty = getQty(group.scope, item.id);
@@ -655,6 +842,11 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       .filter(Boolean));
 
     const guestRows = () => {
+      if (state.mode === 'simple') return [
+        ['adults', t.guests.adults, 0],
+        ['children', t.guests.children, 0],
+        ['toddlers', t.guests.toddlers, 0],
+      ];
       if (state.mode === 'combined') return [
         ['bungalowGuests', t.guests.bungalowGuests, 0],
         ['campingGuests', t.guests.campingGuests, config.people.campingGuests.price],
@@ -669,7 +861,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     };
 
     const guestsTotal = () => {
-      if (state.mode === 'bungalow') return 0;
+      if (state.mode === 'bungalow' || state.mode === 'simple') return 0;
       return guestRows().reduce((sum, [key, , price]) => sum + Number(state.guests[key] || 0) * Number(price || 0), 0);
     };
 
@@ -682,6 +874,47 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const scrollToTop = () => {
       const top = Math.max(0, root.getBoundingClientRect().top + window.scrollY - 92);
       window.scrollTo({ top, behavior: 'smooth' });
+    };
+
+    const modeTitle = () => state.mode === 'simple' ? ui.simple.title : t.modes[state.mode]?.[0];
+    const modeDescription = () => state.mode === 'simple' ? ui.simple.desc : t.modes[state.mode]?.[1];
+
+    const inlineIcon = (path) => `<svg viewBox="0 0 48 48" focusable="false" aria-hidden="true">${path}</svg>`;
+
+    const serviceIcon = (id) => {
+      const icons = {
+        camper: '<path d="M7 29V16c0-3 2-5 5-5h15c3 0 5 5 5 5v13"/><path d="M32 21h5l5 6v8H7v-6h25z"/><path d="M14 17h8v7h-8z"/><circle cx="16" cy="35" r="4"/><circle cx="35" cy="35" r="4"/>',
+        van: '<path d="M8 18h24l8 9v8H8z"/><path d="M31 20v8h9"/><circle cx="16" cy="35" r="4"/><circle cx="34" cy="35" r="4"/>',
+        caravan: '<path d="M9 17h25v16H9z"/><path d="M34 29h6"/><circle cx="18" cy="34" r="4"/><path d="M14 22h8"/>',
+        'tent-small': '<path d="M24 11 8 37h32z"/><path d="M24 11v26"/><path d="M18 37l6-10 6 10"/>',
+        'tent-large': '<path d="M24 9 6 38h36z"/><path d="M24 9v29"/><path d="M15 38l9-15 9 15"/>',
+        'rooftop-tent': '<path d="M9 29h30v8H9z"/><path d="M16 29l8-14 8 14"/><path d="M12 37v4m24-4v4"/>',
+        parking: '<path d="M14 39V10h13c6 0 10 4 10 10s-4 10-10 10h-7v9z"/><path d="M20 16h7c3 0 5 2 5 4s-2 4-5 4h-7z"/>',
+        motorcycle: '<circle cx="14" cy="34" r="5"/><circle cx="34" cy="34" r="5"/><path d="M18 34h8l6-13h-7"/><path d="M24 21h-5l-5 13"/>',
+        'cargo-trailer': '<path d="M8 20h24v14H8z"/><path d="M32 29h8"/><circle cx="17" cy="35" r="4"/>',
+        bus: '<path d="M9 12h30v24H9z"/><path d="M14 17h20"/><path d="M14 25h20"/><circle cx="17" cy="37" r="3"/><circle cx="31" cy="37" r="3"/>',
+        electricity: '<path d="M27 5 14 27h10l-3 16 13-23H24z"/>',
+        dog: '<circle cx="18" cy="20" r="4"/><circle cx="30" cy="20" r="4"/><circle cx="15" cy="31" r="4"/><circle cx="33" cy="31" r="4"/><path d="M20 31c1-4 7-4 8 0l2 6H18z"/>',
+        'bungalow-2': '<path d="M7 25 24 10l17 15"/><path d="M12 22v16h24V22"/><path d="M20 38V27h8v11"/>',
+        'bungalow-3': '<path d="M7 25 24 10l17 15"/><path d="M12 22v16h24V22"/><path d="M17 31h14"/><path d="M17 38V27h14v11"/>',
+        'bungalow-4': '<path d="M7 25 24 10l17 15"/><path d="M12 22v16h24V22"/><path d="M18 27h12v11H18z"/><path d="M24 27v11"/>',
+      };
+      return inlineIcon(icons[id] || '<circle cx="24" cy="24" r="14"/><path d="M24 14v20M14 24h20"/>');
+    };
+
+    const guestIcon = (key) => inlineIcon(key === 'toddlers'
+      ? '<circle cx="24" cy="18" r="7"/><path d="M14 39c2-9 18-9 20 0"/><path d="M16 12h16"/>'
+      : '<circle cx="18" cy="17" r="6"/><circle cx="32" cy="20" r="5"/><path d="M8 39c2-10 18-10 20 0"/><path d="M24 39c1-7 13-7 16 0"/>');
+
+    const stepIcon = (index) => {
+      const icons = [
+        '<path d="M14 8v7M34 8v7"/><path d="M10 14h28v26H10z"/><path d="M10 22h28"/>',
+        '<circle cx="18" cy="17" r="6"/><circle cx="32" cy="20" r="5"/><path d="M8 39c2-10 18-10 20 0"/><path d="M24 39c1-7 13-7 16 0"/>',
+        '<path d="M10 15h28"/><path d="M10 24h28"/><path d="M10 33h28"/><circle cx="16" cy="15" r="3"/><circle cx="30" cy="24" r="3"/><circle cx="22" cy="33" r="3"/>',
+        '<path d="M12 10h24v28H12z"/><path d="M18 18h12"/><path d="M18 25h12"/><path d="M18 32h8"/>',
+        '<path d="M13 8h22v32H13z"/><path d="M18 16h12"/><path d="M18 24h12"/><path d="M18 32h8"/>',
+      ];
+      return inlineIcon(icons[index] || icons[0]);
     };
 
     const startTemplate = () => `
@@ -703,6 +936,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             </button>
           `).join('')}
         </div>
+        <button class="reservation-simple-link" type="button" data-simple-start>${esc(ui.simple.cta)}</button>
         <p class="reservation-mini__note">${esc(t.startLead)}</p>
       </div>
     `;
@@ -724,6 +958,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
               return `
                 <button type="button" data-step-jump="${no}" class="${active ? 'is-active' : ''} ${done ? 'is-done' : ''}" ${done || active ? '' : 'disabled'}>
                   <span>${no}</span>
+                  <i aria-hidden="true">${stepIcon(index)}</i>
                   <em>${esc(stepTitles[index])}</em>
                 </button>
               `;
@@ -778,7 +1013,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           ${(state.mode === 'camping' || state.mode === 'combined') ? `<p>${esc(t.info.campingHours)}</p>` : ''}
           ${(state.mode === 'bungalow' || state.mode === 'combined') ? `<p>${esc(t.info.bungalowHours)}</p>` : ''}
           ${state.mode === 'combined' ? `<p>${esc(t.info.combined)}</p>` : ''}
-          ${touchesSummer() ? `<p class="is-warm">${esc(t.info.summer)}</p>` : ''}
+          ${seasonalHint() ? `<p class="is-warm">${esc(seasonalHint())}</p>` : ''}
         </div>
       </section>
     `;
@@ -791,7 +1026,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <div class="reservation-card-grid">
           ${guestRows().map(([key, label, price]) => `
             <article class="reservation-item-card">
-              <span class="reservation-item-card__icon" aria-hidden="true">${key === 'toddlers' ? '0+' : 'G'}</span>
+              <span class="reservation-item-card__icon" aria-hidden="true">${guestIcon(key)}</span>
               <div>
                 <strong>${esc(label)}</strong>
                 <small>${Number(price) > 0 ? `${fmt(price)} / noc` : '0 PLN / noc'}</small>
@@ -809,6 +1044,28 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <h2>${esc(stepTitles[2])}</h2>
         <p>${esc(t.stepLead.services)}</p>
         ${state.hint ? `<div class="reservation-hint">${esc(state.hint)}</div>` : ''}
+        ${(presets[state.mode] || []).length ? `
+          <div class="reservation-presets">
+            <div>
+              <strong>${esc(ui.presetsTitle)}</strong>
+              <p>${esc(ui.presetsLead)}</p>
+            </div>
+            <div class="reservation-presets__grid">
+              ${presets[state.mode].map((preset) => `
+                <button type="button" data-preset="${esc(preset.id)}">
+                  <span aria-hidden="true">${serviceIcon(state.mode === 'bungalow' ? 'bungalow-2' : state.mode === 'combined' ? 'camper' : 'electricity')}</span>
+                  <strong>${esc(preset.label)}</strong>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+        ${state.mode === 'simple' ? `
+          <div class="reservation-simple-panel">
+            <strong>${esc(ui.simple.title)}</strong>
+            <p>${esc(ui.simple.desc)}</p>
+          </div>
+        ` : ''}
         <div class="reservation-service-groups">
           ${visibleServiceGroups().map((group) => `
             <div class="reservation-service-group">
@@ -819,7 +1076,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
                   const qty = getQty(group.scope, item.id);
                   return `
                     <article class="reservation-item-card">
-                      <span class="reservation-item-card__icon" aria-hidden="true">${esc(item.icon)}</span>
+                      <span class="reservation-item-card__icon" aria-hidden="true">${serviceIcon(item.id)}</span>
                       <div>
                         <strong>${esc(item.label)}</strong>
                         <small>${fmt(price)} / noc</small>
@@ -838,22 +1095,26 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const countryTemplate = () => {
       const matches = countryMatches();
+      const hasQuery = normalize(state.details.countrySearch).length > 0;
       return `
         <div class="reservation-country">
           <label class="reservation-field">
             <span>${esc(t.fields.country)}</span>
-            <input type="text" data-country-search value="${esc(state.details.countrySearch)}" placeholder="${esc(t.fields.countryPlaceholder)}" autocomplete="off" aria-autocomplete="list" />
+            <input type="text" data-country-search value="${esc(state.details.countrySearch)}" placeholder="${esc(t.fields.countryPlaceholder)}" autocomplete="off" aria-autocomplete="list" aria-expanded="${state.countryOpen ? 'true' : 'false'}" />
           </label>
           <input type="hidden" data-country-code value="${esc(state.details.countryCode)}" />
-          <div class="reservation-country__list" role="listbox">
-            ${matches.map((country) => `
-              <button type="button" data-country-pick="${esc(country.code)}" role="option">
-                <i class="${esc(country.flagClass)}" aria-hidden="true"></i>
-                <span>${esc(country.name)}</span>
-                <small>${esc(country.code)}</small>
-              </button>
-            `).join('')}
-          </div>
+          ${state.countryOpen ? `
+            <div class="reservation-country__list" role="listbox">
+              <p>${esc(hasQuery ? ui.suggestedCountries : ui.popularCountries)}</p>
+              ${matches.length ? matches.map((country, index) => `
+                <button type="button" data-country-pick="${esc(country.code)}" role="option" class="${index === state.countryActiveIndex ? 'is-active' : ''}">
+                  <i class="${esc(country.flagClass)}" aria-hidden="true"></i>
+                  <span>${esc(country.name)}</span>
+                  <small>${esc(country.code)}</small>
+                </button>
+              `).join('') : `<em>${esc(ui.noCountries)}</em>`}
+            </div>
+          ` : ''}
         </div>
       `;
     };
@@ -925,17 +1186,29 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const summaryContent = (full = false) => {
       const selected = selectedServices();
       const hasCostData = selected.length > 0;
+      const depositNote = state.mode === 'bungalow' ? ui.summary.depositBungalow : state.mode === 'combined' ? ui.summary.depositCombined : '';
       if (!hasCostData) {
         return `
+          <div class="reservation-summary__status">
+            <span>${esc(ui.summary.statusLabel)}</span>
+            <strong>${esc(ui.summary.status)}</strong>
+          </div>
           <h2>${esc(t.summary.title)}</h2>
+          <b class="reservation-summary__badge">${esc(ui.summary.badge)}</b>
           <p>${esc(t.summary.empty)}</p>
           <small>${esc(t.summary.confirm)}</small>
+          ${depositNote ? `<p class="reservation-summary__deposit">${esc(depositNote)}</p>` : ''}
         `;
       }
       return `
+        <div class="reservation-summary__status">
+          <span>${esc(ui.summary.statusLabel)}</span>
+          <strong>${esc(ui.summary.status)}</strong>
+        </div>
         <h2>${esc(t.summary.title)}</h2>
+        <b class="reservation-summary__badge">${esc(ui.summary.badge)}</b>
         <dl>
-          <div><dt>${esc(t.summary.stay)}</dt><dd>${esc(t.modes[state.mode][0])}</dd></div>
+          <div><dt>${esc(t.summary.stay)}</dt><dd>${esc(modeTitle())}</dd></div>
           <div><dt>${esc(t.summary.dates)}</dt><dd>${esc(state.dates.arrival || '-')} - ${esc(state.dates.departure || '-')} (${nights()} n.)</dd></div>
           <div><dt>${esc(t.summary.guests)}</dt><dd>${guestRows().map(([key, label]) => `${label}: ${Number(state.guests[key] || 0)}`).join(', ')}</dd></div>
           ${selected.length ? `<div><dt>${esc(t.summary.services)}</dt><dd>${selected.map((item) => `${item.label} x ${item.qty}`).join(', ')}</dd></div>` : ''}
@@ -949,13 +1222,14 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           <strong>${fmt(estimatedTotal())}</strong>
         </div>
         <small>${esc(t.summary.confirm)}</small>
+        ${depositNote ? `<p class="reservation-summary__deposit">${esc(depositNote)}</p>` : ''}
         ${state.success ? `<p class="reservation-success">${esc(t.summary.success)}</p>` : ''}
         ${full ? `<textarea name="reservationPayload" hidden>${esc(JSON.stringify(payload(), null, 2))}</textarea>` : ''}
       `;
     };
 
     const summaryTemplate = () => `
-      <aside class="reservation-summary" aria-live="polite">
+      <aside class="reservation-summary ${state.summaryPulse ? 'is-pulsing' : ''}" aria-live="polite">
         ${summaryContent(state.step === 5)}
       </aside>
     `;
@@ -988,25 +1262,89 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       </div>
     `;
 
+    const helpPanelTemplate = () => `
+      <div class="reservation-help" role="dialog" aria-modal="true" aria-label="${esc(ui.help.title)}">
+        <button class="reservation-help__scrim" type="button" data-help-close aria-label="${esc(ui.help.close)}"></button>
+        <aside class="reservation-help__panel">
+          <div class="reservation-help__head">
+            <span aria-hidden="true">${inlineIcon('<circle cx="24" cy="24" r="18"/><path d="M19 19a5 5 0 1 1 8 4c-2 1-3 2-3 5"/><path d="M24 35h.01"/>')}</span>
+            <div>
+              <p class="reservation-mini__kicker">${esc(ui.help.open)}</p>
+              <h2>${esc(ui.help.title)}</h2>
+            </div>
+            <button type="button" data-help-close aria-label="${esc(ui.help.close)}">x</button>
+          </div>
+          <div class="reservation-help__sections">
+            ${ui.help.sections.map(([title, text]) => `
+              <article>
+                <i aria-hidden="true">${inlineIcon('<path d="M12 24h24"/><path d="M24 12v24"/><circle cx="24" cy="24" r="18"/>')}</i>
+                <strong>${esc(title)}</strong>
+                <p>${esc(text)}</p>
+              </article>
+            `).join('')}
+          </div>
+          <div class="reservation-help__short">
+            <strong>${esc(ui.help.shortTitle)}</strong>
+            <button type="button" class="reservation-btn reservation-btn--primary" data-simple-start>${esc(ui.help.shortCta)}</button>
+          </div>
+        </aside>
+      </div>
+    `;
+
+    const successModalTemplate = () => {
+      const selected = selectedServices();
+      const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
+      const stayNote = state.mode === 'bungalow' || state.mode === 'combined' ? ui.success.bungalow : ui.success.camping;
+      return `
+        <div class="reservation-success-modal" role="dialog" aria-modal="true" aria-label="${esc(ui.success.title)}">
+          <div class="reservation-success-modal__card">
+            <span class="reservation-success-modal__mark" aria-hidden="true">${inlineIcon('<path d="M10 25l9 9 19-20"/><circle cx="24" cy="24" r="19"/>')}</span>
+            <h2>${esc(ui.success.title)}</h2>
+            <p>${esc(ui.success.text)}</p>
+            <dl>
+              <div><dt>${esc(t.summary.stay)}</dt><dd>${esc(modeTitle())}</dd></div>
+              <div><dt>${esc(t.summary.dates)}</dt><dd>${esc(state.dates.arrival || '-')} - ${esc(state.dates.departure || '-')} (${nights()} n.)</dd></div>
+              ${selected.length ? `<div><dt>${esc(t.summary.services)}</dt><dd>${selected.map((item) => `${item.label} x ${item.qty}`).join(', ')}</dd></div>` : ''}
+              <div><dt>${esc(t.summary.total)}</dt><dd>${selected.length ? fmt(estimatedTotal()) : '-'}</dd></div>
+              ${state.details.countryCode ? `<div><dt>${esc(t.summary.country)}</dt><dd>${esc(state.details.countryName)} (${esc(state.details.countryCode)})</dd></div>` : ''}
+              <div><dt>${esc(t.summary.language)}</dt><dd>${esc(state.details.language)}</dd></div>
+            </dl>
+            <p class="reservation-success-modal__note">${esc(stayNote)}</p>
+            <div class="reservation-success-modal__actions">
+              <a class="reservation-btn reservation-btn--ghost" href="/">${esc(ui.success.home)}</a>
+              <a class="reservation-btn reservation-btn--ghost" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">${esc(ui.success.maps)}</a>
+              <a class="reservation-btn reservation-btn--ghost" href="mailto:clepardia@gmail.com">${esc(ui.success.contact)}</a>
+              <button class="reservation-btn reservation-btn--primary" type="button" data-new-inquiry>${esc(ui.success.again)}</button>
+            </div>
+          </div>
+        </div>
+      `;
+    };
+
     const appTemplate = () => `
       <div class="reservation-mini__app">
         <div class="reservation-mini__top">
           <div>
             <p class="reservation-mini__kicker">${esc(t.kicker)}</p>
             <h1>${esc(t.title)}</h1>
-            <p>${esc(t.modes[state.mode][0])}: ${esc(t.modes[state.mode][1])}</p>
+            <p>${esc(modeTitle())}: ${esc(modeDescription())}</p>
           </div>
-          <button type="button" class="reservation-btn reservation-btn--ghost" data-change-mode>${esc(t.actions.change)}</button>
+          <div class="reservation-mini__top-actions">
+            <button type="button" class="reservation-btn reservation-btn--ghost" data-help-open>${esc(ui.help.open)}</button>
+            <button type="button" class="reservation-btn reservation-btn--ghost" data-change-mode>${esc(t.actions.change)}</button>
+          </div>
         </div>
         ${progressTemplate()}
         <div class="reservation-mini__layout">
           <div>
-            <div class="reservation-mini__toast" aria-live="polite">${esc(stepHints[state.step - 1])}</div>
+            <div class="reservation-mini__toast" aria-live="polite">${esc(state.toast || stepHints[state.step - 1])}</div>
             ${activeStepTemplate()}
             ${navTemplate()}
           </div>
           ${summaryTemplate()}
         </div>
+        ${state.helpOpen ? helpPanelTemplate() : ''}
+        ${state.success ? successModalTemplate() : ''}
       </div>
     `;
 
@@ -1035,8 +1373,23 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.mode = mode;
       state.step = 1;
       state.hint = '';
+      state.toast = '';
+      state.helpOpen = false;
       const url = new URL(window.location.href);
       url.searchParams.set('stay', mode);
+      window.history.replaceState({}, '', url);
+      render();
+      scrollToTop();
+    };
+
+    const startSimpleFlow = () => {
+      state.mode = 'simple';
+      state.step = 1;
+      state.hint = '';
+      state.toast = '';
+      state.helpOpen = false;
+      const url = new URL(window.location.href);
+      url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
       render();
       scrollToTop();
@@ -1046,6 +1399,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.mode = null;
       state.step = 0;
       state.hint = '';
+      state.toast = '';
+      state.helpOpen = false;
+      state.success = false;
       const url = new URL(window.location.href);
       url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
@@ -1061,7 +1417,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const validateBeforeNext = () => {
       state.hint = '';
-      if (state.step === 3 && !hasChosenService()) {
+      if (state.step === 3 && state.mode !== 'simple' && !hasChosenService()) {
         state.hint = t.hints.chooseService;
         return false;
       }
@@ -1076,7 +1432,16 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         return;
       }
       state.success = true;
+      state.toast = '';
       render();
+    };
+
+    const restoreCountryFocus = () => {
+      const input = mount.querySelector('[data-country-search]');
+      if (input instanceof HTMLInputElement) {
+        input.focus({ preventScroll: true });
+        input.setSelectionRange(input.value.length, input.value.length);
+      }
     };
 
     const pickCountry = (code) => {
@@ -1085,9 +1450,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.details.countryCode = country.code;
       state.details.countryName = country.name;
       state.details.countrySearch = `${country.name} (${country.code})`;
+      state.countryOpen = false;
+      state.countryActiveIndex = 0;
       render();
-      const input = mount.querySelector('[data-country-search]');
-      if (input instanceof HTMLInputElement) input.focus({ preventScroll: true });
+      restoreCountryFocus();
     };
 
     mount.addEventListener('click', (event) => {
@@ -1100,8 +1466,37 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         return;
       }
 
+      if (target.closest('[data-simple-start]')) {
+        startSimpleFlow();
+        return;
+      }
+
       if (target.closest('[data-change-mode]')) {
         resetFlow();
+        return;
+      }
+
+      if (target.closest('[data-help-open]')) {
+        state.helpOpen = true;
+        render();
+        return;
+      }
+
+      if (target.closest('[data-help-close]')) {
+        state.helpOpen = false;
+        render();
+        return;
+      }
+
+      if (target.closest('[data-new-inquiry]')) {
+        state.success = false;
+        resetFlow();
+        return;
+      }
+
+      const presetButton = target.closest('[data-preset]');
+      if (presetButton instanceof HTMLElement) {
+        applyPreset(presetButton.dataset.preset);
         return;
       }
 
@@ -1185,13 +1580,21 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         state.details.countrySearch = target.value;
         state.details.countryCode = '';
         state.details.countryName = '';
+        state.countryOpen = true;
+        state.countryActiveIndex = 0;
         render();
-        const input = mount.querySelector('[data-country-search]');
-        if (input instanceof HTMLInputElement) {
-          input.focus({ preventScroll: true });
-          input.setSelectionRange(input.value.length, input.value.length);
-        }
+        restoreCountryFocus();
       }
+    });
+
+    mount.addEventListener('focusin', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement) || !target.hasAttribute('data-country-search')) return;
+      if (state.countryOpen) return;
+      state.countryOpen = true;
+      state.countryActiveIndex = 0;
+      render();
+      restoreCountryFocus();
     });
 
     mount.addEventListener('change', (event) => {
@@ -1207,14 +1610,28 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const target = event.target;
       if (!(target instanceof HTMLInputElement) || !target.hasAttribute('data-country-search')) return;
       const results = countryMatches();
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        state.countryOpen = true;
+        state.countryActiveIndex = results.length ? Math.min(results.length - 1, state.countryActiveIndex + 1) : 0;
+        render();
+        restoreCountryFocus();
+        return;
+      }
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        state.countryOpen = true;
+        state.countryActiveIndex = Math.max(0, state.countryActiveIndex - 1);
+        render();
+        restoreCountryFocus();
+        return;
+      }
       if (event.key === 'Enter' && results[0]) {
         event.preventDefault();
-        pickCountry(results[0].code);
+        pickCountry((results[state.countryActiveIndex] || results[0]).code);
       }
       if (event.key === 'Escape') {
-        state.details.countrySearch = '';
-        state.details.countryCode = '';
-        state.details.countryName = '';
+        state.countryOpen = false;
         render();
       }
     });
@@ -1225,6 +1642,14 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.step = 1;
       render();
     }
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      if (state.helpOpen) {
+        state.helpOpen = false;
+        render();
+      }
+    });
   })();
 </script>
 
@@ -1285,7 +1710,7 @@ body.booking-app-page .main-content {
 .reservation-mini__ambient span:nth-child(3) { left: 38%; bottom: 4%; width: 190px; height: 190px; animation-delay: -8s; }
 
 .reservation-mini__wrap {
-  width: min(1180px, 100%);
+  width: min(1320px, 100%);
   margin: 0 auto;
 }
 
@@ -1550,6 +1975,25 @@ body.booking-app-page .main-content {
   font-size: .92rem;
 }
 
+.reservation-simple-link {
+  margin-top: 4px;
+  color: #dffff0;
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: 999px;
+  background: rgba(60,179,113,.11);
+  padding: 11px 16px;
+  font-weight: 900;
+  box-shadow: 0 14px 34px rgba(60,179,113,.10);
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+
+.reservation-simple-link:hover,
+.reservation-simple-link:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(143,224,180,.5);
+  background: rgba(60,179,113,.18);
+}
+
 .reservation-mini__top {
   display: flex;
   justify-content: space-between;
@@ -1562,6 +2006,13 @@ body.booking-app-page .main-content {
   max-width: 760px;
   margin: 6px 0 8px;
   font-size: clamp(2rem, 5vw, 4.2rem);
+}
+
+.reservation-mini__top-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .reservation-progress {
@@ -1621,7 +2072,8 @@ body.booking-app-page .main-content {
 
 .reservation-progress__desktop button {
   min-width: 0;
-  display: flex;
+  display: grid;
+  grid-template-columns: 30px 22px minmax(0, 1fr);
   align-items: center;
   gap: 10px;
   padding: 12px;
@@ -1640,6 +2092,28 @@ body.booking-app-page .main-content {
   background: rgba(255,255,255,.10);
   color: #fff;
   font-weight: 950;
+}
+
+.reservation-progress__desktop button i {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: currentColor;
+}
+
+.reservation-progress__desktop button i svg,
+.reservation-item-card__icon svg,
+.reservation-presets button svg,
+.reservation-help svg,
+.reservation-success-modal svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .reservation-progress__desktop button em {
@@ -1662,8 +2136,8 @@ body.booking-app-page .main-content {
 
 .reservation-mini__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 370px);
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: clamp(24px, 3vw, 34px);
   align-items: start;
 }
 
@@ -1765,6 +2239,70 @@ body.booking-app-page .main-content {
   background: rgba(242,192,120,.10);
 }
 
+.reservation-presets,
+.reservation-simple-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(143,224,180,.14), transparent 38%),
+    rgba(60,179,113,.08);
+}
+
+.reservation-presets > div:first-child strong,
+.reservation-simple-panel strong {
+  display: block;
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.reservation-presets > div:first-child p,
+.reservation-simple-panel p {
+  margin-top: 4px;
+  color: rgba(245,255,248,.68);
+}
+
+.reservation-presets__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.reservation-presets button {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 18px;
+  color: #f5fff8;
+  background: rgba(255,255,255,.075);
+  text-align: left;
+  font-weight: 900;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.reservation-presets button span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  color: #8fe0b4;
+}
+
+.reservation-presets button:hover,
+.reservation-presets button:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(143,224,180,.46);
+  background: rgba(60,179,113,.15);
+  box-shadow: 0 16px 38px rgba(60,179,113,.14);
+}
+
 .reservation-card-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1861,6 +2399,16 @@ body.booking-app-page .main-content {
   color: #fff;
   font-size: 1rem;
   font-weight: 1000;
+  transition: transform .18s ease, color .18s ease;
+}
+
+.reservation-item-card:has(.reservation-stepper button:active) {
+  box-shadow: 0 24px 80px rgba(60,179,113,.14), inset 0 1px 0 rgba(255,255,255,.16);
+}
+
+.reservation-item-card:has(.reservation-stepper button:active) .reservation-stepper strong {
+  transform: scale(1.12);
+  color: #8fe0b4;
 }
 
 .reservation-country {
@@ -1882,6 +2430,18 @@ body.booking-app-page .main-content {
   box-shadow: 0 20px 60px rgba(0,0,0,.28);
 }
 
+.reservation-country__list p,
+.reservation-country__list em {
+  display: block;
+  margin: 0;
+  padding: 8px 10px;
+  color: rgba(245,255,248,.58);
+  font-size: .78rem;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .reservation-country__list button {
   width: 100%;
   display: grid;
@@ -1895,7 +2455,8 @@ body.booking-app-page .main-content {
 }
 
 .reservation-country__list button:hover,
-.reservation-country__list button:focus-visible {
+.reservation-country__list button:focus-visible,
+.reservation-country__list button.is-active {
   background: rgba(60,179,113,.18);
 }
 
@@ -1957,13 +2518,51 @@ body.booking-app-page .main-content {
 
 .reservation-summary {
   position: sticky;
-  top: 104px;
+  top: 110px;
+}
+
+.reservation-summary.is-pulsing {
+  animation: reservationSummaryPulse .52s ease both;
 }
 
 .reservation-summary h2,
 .reservation-final-summary h2 {
   margin: 0 0 12px;
   color: #fff;
+}
+
+.reservation-summary__status {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 14px;
+  padding: 12px 13px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 16px;
+  background: rgba(60,179,113,.10);
+}
+
+.reservation-summary__status span {
+  color: rgba(245,255,248,.58);
+  font-size: .72rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.reservation-summary__status strong {
+  color: #dffff0;
+}
+
+.reservation-summary__badge {
+  width: fit-content;
+  display: inline-flex;
+  margin: 0 0 14px;
+  padding: 7px 10px;
+  border: 1px solid rgba(242,192,120,.24);
+  border-radius: 999px;
+  color: #ffe6ba;
+  background: rgba(242,192,120,.10);
+  font-size: .74rem;
+  font-weight: 950;
 }
 
 .reservation-summary dl,
@@ -2011,6 +2610,16 @@ body.booking-app-page .main-content {
   font-weight: 900;
 }
 
+.reservation-summary__deposit {
+  margin-top: 12px !important;
+  padding: 12px 13px;
+  border: 1px solid rgba(242,192,120,.24);
+  border-radius: 16px;
+  color: #ffe6ba !important;
+  background: rgba(242,192,120,.10);
+  font-size: .88rem;
+}
+
 .reservation-final-summary {
   margin-top: 20px;
 }
@@ -2055,6 +2664,177 @@ body.booking-app-page .main-content {
   background: rgba(255,255,255,.08);
 }
 
+.reservation-help,
+.reservation-success-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  pointer-events: auto;
+}
+
+.reservation-help__scrim,
+.reservation-success-modal::before {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 8, 5, .62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.reservation-help__panel,
+.reservation-success-modal__card {
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba(255,255,255,.14);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.18), transparent 34%),
+    linear-gradient(145deg, rgba(16,36,25,.96), rgba(6,18,13,.96));
+  box-shadow: 0 30px 110px rgba(0,0,0,.40);
+  color: #f5fff8;
+}
+
+.reservation-help__panel {
+  width: min(520px, calc(100vw - 24px));
+  min-height: 100%;
+  justify-self: end;
+  padding: clamp(20px, 4vw, 30px);
+  overflow-y: auto;
+  animation: reservationHelpIn .28s cubic-bezier(.22,1,.36,1) both;
+}
+
+.reservation-help__head {
+  display: grid;
+  grid-template-columns: 54px 1fr 42px;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.reservation-help__head > span,
+.reservation-success-modal__mark {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  color: #07140f;
+  background: linear-gradient(135deg, #8fe0b4, #3CB371);
+}
+
+.reservation-help__head h2,
+.reservation-success-modal__card h2 {
+  margin: 0;
+  color: #fff;
+}
+
+.reservation-help__head button {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255,255,255,.10);
+  font-weight: 950;
+}
+
+.reservation-help__sections {
+  display: grid;
+  gap: 12px;
+}
+
+.reservation-help__sections article,
+.reservation-help__short {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  background: rgba(255,255,255,.07);
+}
+
+.reservation-help__sections article i {
+  width: 28px;
+  height: 28px;
+  color: #8fe0b4;
+}
+
+.reservation-help__sections article strong,
+.reservation-help__short strong {
+  color: #fff;
+}
+
+.reservation-help__sections article p {
+  color: rgba(245,255,248,.72);
+}
+
+.reservation-help__short {
+  margin-top: 14px;
+  border-color: rgba(143,224,180,.20);
+  background: rgba(60,179,113,.10);
+}
+
+.reservation-success-modal {
+  place-items: center;
+  padding: 20px;
+}
+
+.reservation-success-modal__card {
+  width: min(760px, 100%);
+  max-height: min(760px, calc(100dvh - 40px));
+  overflow-y: auto;
+  padding: clamp(22px, 4vw, 34px);
+  border-radius: 30px;
+  animation: reservationStepIn .28s cubic-bezier(.22,1,.36,1) both;
+}
+
+.reservation-success-modal__mark {
+  margin-bottom: 14px;
+}
+
+.reservation-success-modal__card p {
+  color: rgba(245,255,248,.74);
+}
+
+.reservation-success-modal__card dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.reservation-success-modal__card dl div {
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 16px;
+  background: rgba(255,255,255,.06);
+}
+
+.reservation-success-modal__card dt {
+  color: rgba(245,255,248,.58);
+  font-size: .74rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.reservation-success-modal__card dd {
+  margin: 3px 0 0;
+  color: #fff;
+}
+
+.reservation-success-modal__note {
+  padding: 13px 14px;
+  border: 1px solid rgba(242,192,120,.22);
+  border-radius: 18px;
+  background: rgba(242,192,120,.10);
+}
+
+.reservation-success-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
 @media (max-width: 1080px) {
   .reservation-mini__layout {
     grid-template-columns: 1fr;
@@ -2079,6 +2859,10 @@ body.booking-app-page .main-content {
 
   .reservation-mini__top {
     display: grid;
+  }
+
+  .reservation-mini__top-actions {
+    justify-content: stretch;
   }
 
   .reservation-progress__desktop {
@@ -2115,6 +2899,19 @@ body.booking-app-page .main-content {
     grid-template-columns: 1fr;
   }
 
+  .reservation-presets__grid,
+  .reservation-success-modal__card dl {
+    grid-template-columns: 1fr;
+  }
+
+  .reservation-help__panel {
+    width: 100%;
+    min-height: auto;
+    align-self: end;
+    border-radius: 28px 28px 0 0;
+    max-height: calc(100dvh - 24px);
+  }
+
   .reservation-btn {
     width: 100%;
   }
@@ -2138,7 +2935,11 @@ html[data-theme="light"] .stay-choice-card,
 html[data-theme="light"] .reservation-step-card,
 html[data-theme="light"] .reservation-summary,
 html[data-theme="light"] .reservation-item-card,
-html[data-theme="light"] .reservation-final-summary {
+html[data-theme="light"] .reservation-final-summary,
+html[data-theme="light"] .reservation-presets,
+html[data-theme="light"] .reservation-simple-panel,
+html[data-theme="light"] .reservation-help__panel,
+html[data-theme="light"] .reservation-success-modal__card {
   color: #122319;
   border-color: rgba(22,56,36,.12);
   background:
@@ -2151,11 +2952,17 @@ html[data-theme="light"] .reservation-mini h1,
 html[data-theme="light"] .reservation-step-card h2,
 html[data-theme="light"] .reservation-summary h2,
 html[data-theme="light"] .reservation-final-summary h2,
+html[data-theme="light"] .reservation-help__head h2,
+html[data-theme="light"] .reservation-success-modal__card h2,
 html[data-theme="light"] .reservation-choice-card strong,
 html[data-theme="light"] .stay-choice-card strong,
+html[data-theme="light"] .reservation-presets strong,
+html[data-theme="light"] .reservation-help__sections article strong,
+html[data-theme="light"] .reservation-help__short strong,
 html[data-theme="light"] .reservation-item-card strong,
 html[data-theme="light"] .reservation-summary dd,
-html[data-theme="light"] .reservation-final-summary dd {
+html[data-theme="light"] .reservation-final-summary dd,
+html[data-theme="light"] .reservation-success-modal__card dd {
   color: #122319;
 }
 
@@ -2166,15 +2973,21 @@ html[data-theme="light"] .reservation-item-card small,
 html[data-theme="light"] .reservation-item-card em,
 html[data-theme="light"] .reservation-field small,
 html[data-theme="light"] .reservation-summary dt,
-html[data-theme="light"] .reservation-final-summary dt {
+html[data-theme="light"] .reservation-final-summary dt,
+html[data-theme="light"] .reservation-success-modal__card dt,
+html[data-theme="light"] .reservation-help__sections article p,
+html[data-theme="light"] .reservation-success-modal__card p {
   color: rgba(18,35,25,.68);
 }
 
 html[data-theme="light"] .reservation-choice-card__chips i,
 html[data-theme="light"] .reservation-mini__toast,
 html[data-theme="light"] .reservation-mini__note,
+html[data-theme="light"] .reservation-simple-link,
 html[data-theme="light"] .reservation-info-grid p,
 html[data-theme="light"] .reservation-hint,
+html[data-theme="light"] .reservation-summary__status,
+html[data-theme="light"] .reservation-summary__deposit,
 html[data-theme="light"] .reservation-consents > label {
   color: #1b5b3a;
   border-color: rgba(60,179,113,.20);
@@ -2192,10 +3005,24 @@ html[data-theme="light"] .reservation-field select,
 html[data-theme="light"] .reservation-field textarea,
 html[data-theme="light"] .reservation-pills button,
 html[data-theme="light"] .reservation-progress__desktop button,
-html[data-theme="light"] .reservation-progress__mobile {
+html[data-theme="light"] .reservation-progress__mobile,
+html[data-theme="light"] .reservation-presets button,
+html[data-theme="light"] .reservation-country__list {
   color: #122319;
   border-color: rgba(22,56,36,.14);
   background: rgba(255,255,255,.72);
+}
+
+html[data-theme="light"] .reservation-country__list p,
+html[data-theme="light"] .reservation-country__list em,
+html[data-theme="light"] .reservation-summary__status span {
+  color: rgba(18,35,25,.58);
+}
+
+html[data-theme="light"] .reservation-summary__status strong,
+html[data-theme="light"] .reservation-summary__badge,
+html[data-theme="light"] .reservation-summary__deposit {
+  color: #1b5b3a;
 }
 
 @keyframes reservationOrb {
@@ -2208,11 +3035,24 @@ html[data-theme="light"] .reservation-progress__mobile {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes reservationHelpIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes reservationSummaryPulse {
+  0% { box-shadow: 0 24px 80px rgba(0,0,0,.22), 0 0 0 0 rgba(60,179,113,.28); }
+  45% { box-shadow: 0 30px 95px rgba(60,179,113,.22), 0 0 0 8px rgba(60,179,113,.10); }
+  100% { box-shadow: 0 24px 80px rgba(0,0,0,.22), 0 0 0 0 rgba(60,179,113,0); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reservation-mini__ambient span,
   .reservation-step-card,
   .reservation-summary,
-  .reservation-final-summary {
+  .reservation-final-summary,
+  .reservation-help__panel,
+  .reservation-success-modal__card {
     animation: none;
   }
 
