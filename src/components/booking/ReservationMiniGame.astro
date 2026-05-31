@@ -26,6 +26,13 @@ const copy = {
       combined: ['Razem', 'Domek + miejsce campingowe w jednym zapytaniu.'],
     },
     steps: ['Termin', 'Goscie', 'Uslugi', 'Dane', 'Podsumowanie'],
+    progressHints: [
+      'Swietny wybor. Teraz wybierz termin pobytu.',
+      'Jeszcze tylko kilka informacji o gosciach.',
+      'Dodaj uslugi. Wszystko policzy sie na zywo.',
+      'Juz prawie gotowe. Zostaw dane dla recepcji.',
+      'Recepcja dostanie czytelne zapytanie.',
+    ],
     stepLead: {
       dates: 'Wybierz daty pobytu. Liczba nocy policzy sie automatycznie.',
       guests: 'Podaj orientacyjna liczbe gosci.',
@@ -107,6 +114,13 @@ const copy = {
       combined: ['Combined', 'Bungalow + camping pitch in one enquiry.'],
     },
     steps: ['Dates', 'Guests', 'Services', 'Details', 'Summary'],
+    progressHints: [
+      'Great choice. Now choose your dates.',
+      'Just a few guest details left.',
+      'Add services. The estimate updates live.',
+      'Almost done. Leave contact details for reception.',
+      'Reception will receive a clear enquiry.',
+    ],
     stepLead: {
       dates: 'Choose your dates. Nights are counted automatically.',
       guests: 'Add the approximate number of guests.',
@@ -188,6 +202,13 @@ const copy = {
       combined: ['Kombiniert', 'Bungalow + Campingplatz in einer Anfrage.'],
     },
     steps: ['Termin', 'Gaste', 'Services', 'Daten', 'Zusammenfassung'],
+    progressHints: [
+      'Gute Wahl. Wahlen Sie jetzt den Termin.',
+      'Nur noch ein paar Angaben zu den Gasten.',
+      'Wahlen Sie Services. Die Summe aktualisiert sich live.',
+      'Fast fertig. Hinterlassen Sie Kontaktdaten.',
+      'Die Rezeption erhalt eine klare Anfrage.',
+    ],
     stepLead: {
       dates: 'Wahlen Sie die Daten. Die Nachte werden automatisch gezahlt.',
       guests: 'Geben Sie die ungefähre Gästezahl an.',
@@ -269,6 +290,13 @@ const copy = {
       combined: ['Insieme', 'Bungalow + piazzola camping in una richiesta.'],
     },
     steps: ['Date', 'Ospiti', 'Servizi', 'Dati', 'Riepilogo'],
+    progressHints: [
+      'Ottima scelta. Ora scegli le date.',
+      'Mancano solo alcuni dettagli sugli ospiti.',
+      'Aggiungi servizi. Il totale si aggiorna live.',
+      'Quasi fatto. Lascia i dati per la reception.',
+      'La reception ricevera una richiesta chiara.',
+    ],
     stepLead: {
       dates: 'Scegli le date. Le notti vengono calcolate automaticamente.',
       guests: 'Indica il numero indicativo di ospiti.',
@@ -342,6 +370,29 @@ const copy = {
 } as const;
 
 const t = copy[lang] ?? copy.en;
+const modeChipsCopy = {
+  pl: {
+    camping: ['Kamper', 'Namiot', 'Prad 10A'],
+    bungalow: ['2-os.', '3-os.', '4-os.'],
+    combined: ['Domek', 'Kamper', 'Rodzina/grupa'],
+  },
+  en: {
+    camping: ['Camper', 'Tent', '10A power'],
+    bungalow: ['2-person', '3-person', '4-person'],
+    combined: ['Bungalow', 'Camper', 'Family/group'],
+  },
+  de: {
+    camping: ['Camper', 'Zelt', '10A Strom'],
+    bungalow: ['2 Pers.', '3 Pers.', '4 Pers.'],
+    combined: ['Bungalow', 'Camper', 'Familie/Gruppe'],
+  },
+  it: {
+    camping: ['Camper', 'Tenda', 'Corrente 10A'],
+    bungalow: ['2 pers.', '3 pers.', '4 pers.'],
+    combined: ['Bungalow', 'Camper', 'Famiglia/gruppo'],
+  },
+} as const;
+const modeChips = modeChipsCopy[lang] ?? modeChipsCopy.en;
 
 const stayPrice = (id: string) => pricingConfig.stayTypes.find((item) => item.id === id) as any;
 const addonPrice = (id: string) => pricingConfig.addons.find((item) => item.id === id) as any;
@@ -385,6 +436,7 @@ const config = {
     camping: campingServices,
     bungalow: bungalowServices,
   },
+  modeChips,
   countries: countries.map((country) => ({
     code: country.code,
     flagClass: country.flagClass,
@@ -412,9 +464,41 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <div class="reservation-mini__choices">
           {Object.entries(t.modes).map(([mode, [label, desc]]) => (
             <button class="stay-choice-card reservation-choice-card" type="button" data-start-mode={mode}>
-              <span aria-hidden="true">{mode === 'camping' ? 'RV' : mode === 'bungalow' ? 'D4' : 'R+'}</span>
-              <strong>{label}</strong>
-              <small>{desc}</small>
+              <span class:list={['reservation-choice-card__icon', `reservation-choice-card__icon--${mode}`]} aria-hidden="true">
+                {mode === 'camping' ? (
+                  <svg viewBox="0 0 48 48" focusable="false">
+                    <path d="M7 28V16c0-3 2-5 5-5h15c3 0 5 2 5 5v12" />
+                    <path d="M32 20h5l5 6v9H7v-7h25z" />
+                    <path d="M14 17h8v7h-8z" />
+                    <path d="M29 24h8" />
+                    <circle cx="16" cy="35" r="4" />
+                    <circle cx="35" cy="35" r="4" />
+                  </svg>
+                ) : mode === 'bungalow' ? (
+                  <svg viewBox="0 0 48 48" focusable="false">
+                    <path d="M7 25 24 10l17 15" />
+                    <path d="M12 22v16h24V22" />
+                    <path d="M20 38V27h8v11" />
+                    <path d="M31 15v-5h5v10" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 48 48" focusable="false">
+                    <path d="M12 31V19c0-2 2-4 4-4h10c2 0 4 2 4 4v12" />
+                    <path d="M30 22h4l4 5v8H12v-4h18z" />
+                    <circle cx="18" cy="35" r="3" />
+                    <circle cx="34" cy="35" r="3" />
+                    <path d="M35 12v8" />
+                    <path d="M31 16h8" />
+                  </svg>
+                )}
+              </span>
+              <span class="reservation-choice-card__content">
+                <strong>{label}</strong>
+                <small>{desc}</small>
+              </span>
+              <span class="reservation-choice-card__chips" aria-hidden="true">
+                {modeChips[mode as keyof typeof modeChips].map((chip) => <i>{chip}</i>)}
+              </span>
             </button>
           ))}
         </div>
@@ -446,6 +530,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const steps = ['dates', 'guests', 'services', 'details', 'summary'];
     const stepTitles = t.steps;
     const stayModes = ['camping', 'bungalow', 'combined'];
+    const modeChips = config.modeChips;
+    const stepHints = t.progressHints;
     const state = {
       mode: null,
       step: 0,
@@ -606,9 +692,14 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <div class="reservation-mini__choices">
           ${stayModes.map((mode) => `
             <button class="stay-choice-card reservation-choice-card" type="button" data-start-mode="${mode}">
-              <span aria-hidden="true">${mode === 'camping' ? 'RV' : mode === 'bungalow' ? 'D4' : 'R+'}</span>
-              <strong>${esc(t.modes[mode][0])}</strong>
-              <small>${esc(t.modes[mode][1])}</small>
+              <span class="reservation-choice-card__icon reservation-choice-card__icon--${mode}" aria-hidden="true">${modeIcon(mode)}</span>
+              <span class="reservation-choice-card__content">
+                <strong>${esc(t.modes[mode][0])}</strong>
+                <small>${esc(t.modes[mode][1])}</small>
+              </span>
+              <span class="reservation-choice-card__chips" aria-hidden="true">
+                ${modeChips[mode].map((chip) => `<i>${esc(chip)}</i>`).join('')}
+              </span>
             </button>
           `).join('')}
         </div>
@@ -640,6 +731,16 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           </div>
         </div>
       `;
+    };
+
+    const modeIcon = (mode) => {
+      if (mode === 'camping') {
+        return '<svg viewBox="0 0 48 48" focusable="false"><path d="M7 28V16c0-3 2-5 5-5h15c3 0 5 2 5 5v12"/><path d="M32 20h5l5 6v9H7v-7h25z"/><path d="M14 17h8v7h-8z"/><path d="M29 24h8"/><circle cx="16" cy="35" r="4"/><circle cx="35" cy="35" r="4"/></svg>';
+      }
+      if (mode === 'bungalow') {
+        return '<svg viewBox="0 0 48 48" focusable="false"><path d="M7 25 24 10l17 15"/><path d="M12 22v16h24V22"/><path d="M20 38V27h8v11"/><path d="M31 15v-5h5v10"/></svg>';
+      }
+      return '<svg viewBox="0 0 48 48" focusable="false"><path d="M12 31V19c0-2 2-4 4-4h10c2 0 4 2 4 4v12"/><path d="M30 22h4l4 5v8H12v-4h18z"/><circle cx="18" cy="35" r="3"/><circle cx="34" cy="35" r="3"/><path d="M35 12v8"/><path d="M31 16h8"/></svg>';
     };
 
     const stepperTemplate = ({ kind, key, scope = '', id = '', label, price = 0, value }) => {
@@ -900,6 +1001,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         ${progressTemplate()}
         <div class="reservation-mini__layout">
           <div>
+            <div class="reservation-mini__toast" aria-live="polite">${esc(stepHints[state.step - 1])}</div>
             ${activeStepTemplate()}
             ${navTemplate()}
           </div>
@@ -1131,13 +1233,32 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
   position: relative;
   isolation: isolate;
   min-height: calc(100svh - 82px);
-  padding: clamp(88px, 10vw, 132px) 20px 72px;
+  padding: clamp(88px, 9vw, 122px) 20px 86px;
   color: #f5fff8;
   background:
-    radial-gradient(circle at 12% 10%, rgba(60, 179, 113, .28), transparent 34%),
-    radial-gradient(circle at 86% 18%, rgba(242, 192, 120, .16), transparent 32%),
+    radial-gradient(circle at 11% 12%, rgba(60, 179, 113, .30), transparent 32%),
+    radial-gradient(circle at 86% 15%, rgba(242, 192, 120, .18), transparent 31%),
+    radial-gradient(circle at 48% 88%, rgba(80, 201, 137, .12), transparent 34%),
     linear-gradient(145deg, #07140f 0%, #10261b 48%, #07120d 100%);
   overflow-x: clip;
+  overflow-y: visible;
+}
+
+html:has(body.booking-app-page),
+body.booking-app-page {
+  overflow-y: auto !important;
+}
+
+body.booking-app-page {
+  overflow-x: clip;
+}
+
+body.booking-app-page.has-floating-chat-open {
+  overflow-y: auto !important;
+}
+
+body.booking-app-page .main-content {
+  overflow: visible;
 }
 
 .reservation-mini__ambient {
@@ -1156,11 +1277,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
   background: rgba(60, 179, 113, .18);
   filter: blur(34px);
   opacity: .75;
+  animation: reservationOrb 12s ease-in-out infinite;
 }
 
 .reservation-mini__ambient span:nth-child(1) { left: -80px; top: 12%; }
-.reservation-mini__ambient span:nth-child(2) { right: -70px; top: 20%; background: rgba(242, 192, 120, .13); }
-.reservation-mini__ambient span:nth-child(3) { left: 38%; bottom: 4%; width: 190px; height: 190px; }
+.reservation-mini__ambient span:nth-child(2) { right: -70px; top: 20%; background: rgba(242, 192, 120, .13); animation-delay: -4s; }
+.reservation-mini__ambient span:nth-child(3) { left: 38%; bottom: 4%; width: 190px; height: 190px; animation-delay: -8s; }
 
 .reservation-mini__wrap {
   width: min(1180px, 100%);
@@ -1173,10 +1295,53 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 }
 
 .reservation-mini__start {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: 18px;
+  padding: clamp(26px, 4vw, 52px);
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: clamp(28px, 4vw, 44px);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.055)),
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.18), transparent 36%),
+    rgba(4, 15, 10, .30);
+  box-shadow: 0 34px 120px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.13);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
   text-align: center;
+  overflow: hidden;
+}
+
+.reservation-mini__start::before,
+.reservation-mini__start::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.reservation-mini__start::before {
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(120deg, transparent 0 36%, rgba(255,255,255,.13) 48%, transparent 62%),
+    repeating-linear-gradient(135deg, transparent 0 24px, rgba(255,255,255,.025) 25px 26px);
+  opacity: .52;
+}
+
+.reservation-mini__start::after {
+  width: 240px;
+  height: 240px;
+  right: -96px;
+  bottom: -112px;
+  border-radius: 999px;
+  background: rgba(60,179,113,.18);
+  filter: blur(28px);
+}
+
+.reservation-mini__start > * {
+  position: relative;
+  z-index: 1;
 }
 
 .reservation-mini__kicker,
@@ -1211,8 +1376,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  margin-top: 20px;
+  gap: clamp(16px, 2.4vw, 24px);
+  margin-top: 24px;
 }
 
 .stay-choice-card,
@@ -1232,16 +1397,46 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
 .stay-choice-card,
 .reservation-choice-card {
-  min-height: 250px;
+  position: relative;
+  min-height: 286px;
   display: grid;
-  align-content: start;
-  gap: 14px;
-  padding: 26px;
-  border-radius: 28px;
+  grid-template-rows: auto 1fr auto;
+  align-content: stretch;
+  gap: 18px;
+  padding: clamp(24px, 2.6vw, 32px);
+  border-radius: 32px;
   color: #fff;
   text-align: left;
   cursor: pointer;
-  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+  overflow: hidden;
+  transform: translateZ(0);
+  transition: transform .26s cubic-bezier(.22, 1, .36, 1), border-color .26s ease, box-shadow .26s ease;
+}
+
+.stay-choice-card::before,
+.reservation-choice-card::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at var(--mx, 24%) var(--my, 18%), rgba(255,255,255,.18), transparent 30%),
+    linear-gradient(120deg, transparent 0 36%, rgba(143,224,180,.16) 48%, transparent 62%);
+  opacity: .52;
+  pointer-events: none;
+  transition: opacity .26s ease;
+}
+
+.stay-choice-card::after,
+.reservation-choice-card::after {
+  content: '';
+  position: absolute;
+  inset: auto 22px 0 22px;
+  height: 3px;
+  border-radius: 999px 999px 0 0;
+  background: linear-gradient(90deg, transparent, #8fe0b4, transparent);
+  opacity: .36;
+  pointer-events: none;
 }
 
 .stay-choice-card:hover,
@@ -1250,11 +1445,17 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 .reservation-choice-card:focus-visible {
   transform: translateY(-5px);
   border-color: rgba(143,224,180,.5);
-  box-shadow: 0 30px 96px rgba(60,179,113,.18), inset 0 1px 0 rgba(255,255,255,.18);
+  box-shadow: 0 34px 110px rgba(60,179,113,.21), 0 0 0 1px rgba(143,224,180,.16), inset 0 1px 0 rgba(255,255,255,.18);
 }
 
-.stay-choice-card span,
-.reservation-choice-card span,
+.stay-choice-card:hover::before,
+.stay-choice-card:focus-visible::before,
+.reservation-choice-card:hover::before,
+.reservation-choice-card:focus-visible::before {
+  opacity: .84;
+}
+
+.reservation-choice-card__icon,
 .reservation-item-card__icon {
   width: 58px;
   height: 58px;
@@ -1268,11 +1469,46 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
   box-shadow: 0 16px 36px rgba(60,179,113,.25);
 }
 
+.reservation-choice-card__icon {
+  position: relative;
+  z-index: 1;
+  width: 72px;
+  height: 72px;
+  border-radius: 24px;
+  font-size: 0;
+}
+
+.reservation-choice-card__icon svg {
+  width: 42px;
+  height: 42px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.reservation-choice-card__icon--bungalow {
+  background: linear-gradient(135deg, #ffe0a6, #8fe0b4 52%, #2f9b65);
+}
+
+.reservation-choice-card__icon--combined {
+  background: linear-gradient(135deg, #cfe8ff, #9fe8bd 46%, #3CB371);
+}
+
+.reservation-choice-card__content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 9px;
+  align-content: start;
+}
+
 .stay-choice-card strong,
 .reservation-choice-card strong {
   display: block;
   color: #fff;
-  font-size: clamp(1.45rem, 3vw, 2rem);
+  font-size: clamp(1.65rem, 3vw, 2.25rem);
 }
 
 .stay-choice-card small,
@@ -1282,9 +1518,32 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
   line-height: 1.55;
 }
 
+.reservation-choice-card__chips {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-self: end;
+}
+
+.reservation-choice-card__chips i {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 11px;
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: 999px;
+  color: #dffff0;
+  background: rgba(60,179,113,.12);
+  font-size: .76rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
 .reservation-mini__note {
   max-width: 760px;
-  padding: 12px 16px;
+  padding: 13px 18px;
   border: 1px solid rgba(143,224,180,.16);
   border-radius: 999px;
   background: rgba(60,179,113,.09);
@@ -1307,6 +1566,22 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
 .reservation-progress {
   margin-bottom: 22px;
+}
+
+.reservation-mini__toast {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: 999px;
+  color: #dffff0;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255,255,255,.10), transparent 34%),
+    rgba(60,179,113,.12);
+  font-size: .86rem;
+  font-weight: 850;
+  box-shadow: 0 14px 34px rgba(60,179,113,.10);
 }
 
 .reservation-progress__mobile {
@@ -1376,7 +1651,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 .reservation-progress__desktop button.is-active {
   border-color: rgba(143,224,180,.46);
   color: #fff;
-  box-shadow: 0 16px 46px rgba(60,179,113,.16);
+  box-shadow: 0 16px 46px rgba(60,179,113,.16), inset 0 1px 0 rgba(255,255,255,.12);
 }
 
 .reservation-progress__desktop button.is-active span,
@@ -1397,6 +1672,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 .reservation-final-summary {
   border-radius: 28px;
   padding: clamp(20px, 3vw, 30px);
+  animation: reservationStepIn .28s cubic-bezier(.22, 1, .36, 1) both;
 }
 
 .reservation-step-card h2 {
@@ -1543,8 +1819,11 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
   align-items: center;
   border: 1px solid rgba(255,255,255,.14);
   border-radius: 999px;
-  background: rgba(5,16,11,.45);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.02)),
+    rgba(5,16,11,.50);
   overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
 }
 
 .reservation-stepper button,
@@ -1788,7 +2067,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
 @media (max-width: 780px) {
   .reservation-mini {
-    padding: 82px 14px 42px;
+    min-height: auto;
+    padding: 82px 14px 96px;
   }
 
   .reservation-mini__choices,
@@ -1811,7 +2091,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
   .stay-choice-card,
   .reservation-choice-card {
-    min-height: 176px;
+    min-height: 220px;
   }
 
   .reservation-item-card {
@@ -1841,6 +2121,105 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
   .reservation-mini__note {
     border-radius: 20px;
+  }
+}
+
+html[data-theme="light"] .reservation-mini {
+  color: #122319;
+  background:
+    radial-gradient(circle at 11% 12%, rgba(60,179,113,.20), transparent 32%),
+    radial-gradient(circle at 86% 15%, rgba(242,192,120,.20), transparent 31%),
+    linear-gradient(145deg, #f7f8f1 0%, #eaf4e9 50%, #fbfbf6 100%);
+}
+
+html[data-theme="light"] .reservation-mini__start,
+html[data-theme="light"] .reservation-choice-card,
+html[data-theme="light"] .stay-choice-card,
+html[data-theme="light"] .reservation-step-card,
+html[data-theme="light"] .reservation-summary,
+html[data-theme="light"] .reservation-item-card,
+html[data-theme="light"] .reservation-final-summary {
+  color: #122319;
+  border-color: rgba(22,56,36,.12);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.84), rgba(255,255,255,.58)),
+    radial-gradient(circle at 14% 0%, rgba(60,179,113,.12), transparent 36%);
+  box-shadow: 0 24px 80px rgba(44,71,48,.14), inset 0 1px 0 rgba(255,255,255,.72);
+}
+
+html[data-theme="light"] .reservation-mini h1,
+html[data-theme="light"] .reservation-step-card h2,
+html[data-theme="light"] .reservation-summary h2,
+html[data-theme="light"] .reservation-final-summary h2,
+html[data-theme="light"] .reservation-choice-card strong,
+html[data-theme="light"] .stay-choice-card strong,
+html[data-theme="light"] .reservation-item-card strong,
+html[data-theme="light"] .reservation-summary dd,
+html[data-theme="light"] .reservation-final-summary dd {
+  color: #122319;
+}
+
+html[data-theme="light"] .reservation-mini p,
+html[data-theme="light"] .reservation-choice-card small,
+html[data-theme="light"] .stay-choice-card small,
+html[data-theme="light"] .reservation-item-card small,
+html[data-theme="light"] .reservation-item-card em,
+html[data-theme="light"] .reservation-field small,
+html[data-theme="light"] .reservation-summary dt,
+html[data-theme="light"] .reservation-final-summary dt {
+  color: rgba(18,35,25,.68);
+}
+
+html[data-theme="light"] .reservation-choice-card__chips i,
+html[data-theme="light"] .reservation-mini__toast,
+html[data-theme="light"] .reservation-mini__note,
+html[data-theme="light"] .reservation-info-grid p,
+html[data-theme="light"] .reservation-hint,
+html[data-theme="light"] .reservation-consents > label {
+  color: #1b5b3a;
+  border-color: rgba(60,179,113,.20);
+  background: rgba(60,179,113,.10);
+}
+
+html[data-theme="light"] .reservation-field,
+html[data-theme="light"] .reservation-pills button,
+html[data-theme="light"] .reservation-btn--ghost {
+  color: #122319;
+}
+
+html[data-theme="light"] .reservation-field input,
+html[data-theme="light"] .reservation-field select,
+html[data-theme="light"] .reservation-field textarea,
+html[data-theme="light"] .reservation-pills button,
+html[data-theme="light"] .reservation-progress__desktop button,
+html[data-theme="light"] .reservation-progress__mobile {
+  color: #122319;
+  border-color: rgba(22,56,36,.14);
+  background: rgba(255,255,255,.72);
+}
+
+@keyframes reservationOrb {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(20px, -16px, 0) scale(1.08); }
+}
+
+@keyframes reservationStepIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reservation-mini__ambient span,
+  .reservation-step-card,
+  .reservation-summary,
+  .reservation-final-summary {
+    animation: none;
+  }
+
+  .stay-choice-card,
+  .reservation-choice-card,
+  .reservation-btn {
+    transition: none;
   }
 }
 </style>

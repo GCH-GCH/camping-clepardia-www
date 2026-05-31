@@ -186,6 +186,9 @@ const quickActions = [
         </button>
       ))}
     </div>
+    <div class="floating-chat__quick-scrollbar" data-chat-quick-scrollbar aria-hidden="true">
+      <span data-chat-quick-scroll-thumb></span>
+    </div>
 
     <form class="floating-chat__form" data-chat-form>
       <label class="sr-only" for="floatingChatInput" data-chat-input-label></label>
@@ -227,12 +230,38 @@ const quickActions = [
     const inputLabel = root.querySelector('[data-chat-input-label]');
     const sendButton = root.querySelector('[data-chat-send]');
     const quickRail = root.querySelector('.floating-chat__quick');
+    const quickScrollbar = root.querySelector('[data-chat-quick-scrollbar]');
+    const quickThumb = root.querySelector('[data-chat-quick-scroll-thumb]');
 
     if (!(toggle instanceof HTMLButtonElement) || !(panel instanceof HTMLElement) || !(messages instanceof HTMLElement)) return;
 
     let open = false;
     let hideTimer = 0;
     let panelHydrated = false;
+    let quickThumbDragging = false;
+    let quickThumbStartX = 0;
+    let quickThumbStartScroll = 0;
+
+    const quickMaxScroll = () => quickRail instanceof HTMLElement
+      ? Math.max(0, quickRail.scrollWidth - quickRail.clientWidth)
+      : 0;
+
+    const updateQuickScrollbar = () => {
+      if (!(quickRail instanceof HTMLElement) || !(quickScrollbar instanceof HTMLElement) || !(quickThumb instanceof HTMLElement)) return;
+      const max = quickMaxScroll();
+      quickScrollbar.classList.toggle('is-hidden', max <= 4);
+      if (max <= 4) {
+        quickThumb.style.width = '100%';
+        quickThumb.style.transform = 'translateX(0)';
+        return;
+      }
+      const trackWidth = quickScrollbar.clientWidth;
+      const thumbWidth = Math.max(42, Math.round(trackWidth * (quickRail.clientWidth / quickRail.scrollWidth)));
+      const travel = Math.max(1, trackWidth - thumbWidth);
+      const left = Math.round((quickRail.scrollLeft / max) * travel);
+      quickThumb.style.width = `${thumbWidth}px`;
+      quickThumb.style.transform = `translateX(${left}px)`;
+    };
 
     const hydratePanelCopy = () => {
       if (panelHydrated) return;
@@ -280,6 +309,7 @@ const quickActions = [
         hydratePanelCopy();
         initializeMessages();
         root.classList.add('is-open');
+        window.setTimeout(updateQuickScrollbar, 80);
         window.setTimeout(() => {
           if (input instanceof HTMLInputElement) input.focus({ preventScroll: true });
         }, 140);
@@ -457,6 +487,7 @@ const quickActions = [
         if (next === quickRail.scrollLeft) return;
         event.preventDefault();
         quickRail.scrollLeft = next;
+        updateQuickScrollbar();
       }, { passive: false });
 
       quickRail.addEventListener('pointerdown', (event) => {
@@ -475,6 +506,7 @@ const quickActions = [
         if (Math.abs(delta) > 4) dragged = true;
         event.preventDefault();
         quickRail.scrollLeft = startScroll - delta;
+        updateQuickScrollbar();
       });
 
       const stopDrag = (event) => {
@@ -500,20 +532,70 @@ const quickActions = [
         if (event.key === 'ArrowRight') {
           event.preventDefault();
           quickRail.scrollBy({ left: step, behavior: 'smooth' });
+          window.setTimeout(updateQuickScrollbar, 180);
         }
         if (event.key === 'ArrowLeft') {
           event.preventDefault();
           quickRail.scrollBy({ left: -step, behavior: 'smooth' });
+          window.setTimeout(updateQuickScrollbar, 180);
         }
         if (event.key === 'Home') {
           event.preventDefault();
           quickRail.scrollTo({ left: 0, behavior: 'smooth' });
+          window.setTimeout(updateQuickScrollbar, 180);
         }
         if (event.key === 'End') {
           event.preventDefault();
           quickRail.scrollTo({ left: maxScroll(), behavior: 'smooth' });
+          window.setTimeout(updateQuickScrollbar, 180);
         }
       });
+      quickRail.addEventListener('scroll', updateQuickScrollbar, { passive: true });
+    }
+
+    if (quickScrollbar instanceof HTMLElement && quickRail instanceof HTMLElement) {
+      const scrollFromTrack = (event) => {
+        const max = quickMaxScroll();
+        if (max <= 0) return;
+        const rect = quickScrollbar.getBoundingClientRect();
+        const thumbWidth = quickThumb instanceof HTMLElement ? quickThumb.getBoundingClientRect().width : 42;
+        const travel = Math.max(1, rect.width - thumbWidth);
+        const x = Math.max(0, Math.min(travel, event.clientX - rect.left - thumbWidth / 2));
+        quickRail.scrollLeft = (x / travel) * max;
+        updateQuickScrollbar();
+      };
+
+      quickScrollbar.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        quickThumbDragging = true;
+        quickScrollbar.classList.add('is-dragging');
+        quickScrollbar.setPointerCapture?.(event.pointerId);
+        scrollFromTrack(event);
+        quickThumbStartX = event.clientX;
+        quickThumbStartScroll = quickRail.scrollLeft;
+        event.preventDefault();
+      });
+
+      quickScrollbar.addEventListener('pointermove', (event) => {
+        if (!quickThumbDragging) return;
+        const max = quickMaxScroll();
+        const rect = quickScrollbar.getBoundingClientRect();
+        const thumbWidth = quickThumb instanceof HTMLElement ? quickThumb.getBoundingClientRect().width : 42;
+        const travel = Math.max(1, rect.width - thumbWidth);
+        const delta = event.clientX - quickThumbStartX;
+        quickRail.scrollLeft = quickThumbStartScroll + (delta / travel) * max;
+        updateQuickScrollbar();
+        event.preventDefault();
+      });
+
+      const stopThumbDrag = (event) => {
+        quickThumbDragging = false;
+        quickScrollbar.classList.remove('is-dragging');
+        if ('pointerId' in event) quickScrollbar.releasePointerCapture?.(event.pointerId);
+      };
+
+      quickScrollbar.addEventListener('pointerup', stopThumbDrag);
+      quickScrollbar.addEventListener('pointercancel', stopThumbDrag);
     }
 
     form?.addEventListener('submit', (event) => {
@@ -526,7 +608,10 @@ const quickActions = [
     });
 
     window.addEventListener('scroll', updateMobileAvailability, { passive: true });
-    window.addEventListener('resize', updateStickyOffset, { passive: true });
+    window.addEventListener('resize', () => {
+      updateStickyOffset();
+      updateQuickScrollbar();
+    }, { passive: true });
     document.addEventListener('click', (event) => {
       const target = event.target;
       if (target instanceof Element && target.closest('[data-mobile-toggle]')) {
@@ -682,7 +767,7 @@ body.has-floating-chat-open {
   width: min(392px, calc(100vw - 32px));
   max-height: min(680px, calc(100svh - 132px));
   display: grid;
-  grid-template-rows: auto minmax(180px, 1fr) auto auto;
+  grid-template-rows: auto minmax(180px, 1fr) auto auto auto;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,.16);
   border-radius: 28px;
@@ -896,7 +981,7 @@ body.has-floating-chat-open {
 .floating-chat__quick {
   display: flex;
   gap: 8px;
-  padding: 0 16px 14px;
+  padding: 0 16px 10px;
   overflow-x: auto;
   cursor: grab;
   scroll-snap-type: x mandatory;
@@ -957,6 +1042,48 @@ body.has-floating-chat-open {
   background: rgba(60,179,113,.24);
   box-shadow: 0 12px 28px rgba(60,179,113,.18);
   transform: translateY(-1px);
+}
+
+.floating-chat__quick-scrollbar {
+  position: relative;
+  height: 12px;
+  margin: 0 18px 10px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.10), rgba(255,255,255,.045)),
+    rgba(7,20,15,.34);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  cursor: grab;
+  pointer-events: auto;
+  transition: opacity .2s ease, background .2s ease;
+}
+
+.floating-chat__quick-scrollbar.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.floating-chat__quick-scrollbar.is-dragging {
+  cursor: grabbing;
+}
+
+.floating-chat__quick-scrollbar:hover,
+.floating-chat__quick-scrollbar.is-dragging {
+  background:
+    linear-gradient(90deg, rgba(143,224,180,.16), rgba(255,255,255,.06)),
+    rgba(7,20,15,.42);
+}
+
+.floating-chat__quick-scrollbar span {
+  position: absolute;
+  inset-block: 2px;
+  left: 2px;
+  width: 42px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #8fe0b4, #3CB371);
+  box-shadow: 0 0 16px rgba(60,179,113,.34), inset 0 1px 0 rgba(255,255,255,.34);
+  transform: translateX(0);
+  transition: width .16s ease, box-shadow .16s ease;
 }
 
 .floating-chat__form {
@@ -1045,6 +1172,11 @@ html[data-theme="light"] .floating-chat__form input::placeholder {
 html[data-theme="light"] .floating-chat__quick button {
   color: #1f744b;
   background: rgba(60,179,113,.12);
+}
+
+html[data-theme="light"] .floating-chat__quick-scrollbar {
+  background: rgba(35,73,48,.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.80);
 }
 
 /* Task 48: CAMPY as a warmer brand mascot */
@@ -1216,6 +1348,20 @@ html[data-theme="light"] .floating-chat__quick button {
     inset 0 1px 0 rgba(255,255,255,.12);
 }
 
+body.booking-app-page .floating-chat {
+  inset-block-end: max(72px, calc(72px + env(safe-area-inset-bottom)));
+}
+
+body.booking-app-page .floating-chat__button {
+  width: 68px;
+  height: 68px;
+}
+
+body.booking-app-page .floating-chat__button-image {
+  width: 58px;
+  height: 58px;
+}
+
 .floating-chat__form {
   position: sticky;
   bottom: 0;
@@ -1321,6 +1467,10 @@ html[data-theme="light"] .floating-chat__quick button {
 
   .floating-chat__quick {
     padding-bottom: 12px;
+  }
+
+  .floating-chat__quick-scrollbar {
+    margin-bottom: 10px;
   }
 
   .floating-chat__scrim {

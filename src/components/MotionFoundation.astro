@@ -290,7 +290,7 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
   };
 
   const startLenis = () => {
-    if (lenis || reduceMotion.matches || window.innerWidth < 768) return;
+    if (lenis || reduceMotion.matches || window.innerWidth < 768 || document.body.classList.contains('booking-app-page')) return;
     lenis = new Lenis({
       duration: 1.08,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -310,7 +310,7 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
   };
 
   const syncLenis = () => {
-    if (reduceMotion.matches || window.innerWidth < 768) {
+    if (reduceMotion.matches || window.innerWidth < 768 || document.body.classList.contains('booking-app-page')) {
       stopLenis();
       return;
     }
