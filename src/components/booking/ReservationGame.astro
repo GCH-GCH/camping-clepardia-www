@@ -1,0 +1,1772 @@
+---
+import { countries } from '@/data/countries';
+import { pricingConfig } from '@/data/pricing';
+import { resolveContentLanguage } from '@/i18n/config';
+import { getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode);
+
+const copy = {
+  pl: {
+    kicker: 'Rezerwacja pobytu',
+    title: 'Zarezerwuj pobyt w Camping Clepardia',
+    lead: 'Wybierz typ pobytu, a formularz dopasuje się do Twoich potrzeb.',
+    startTitle: 'Jakiego pobytu dotyczy zapytanie?',
+    startLead: 'To nie jest automatyczna rezerwacja. Recepcja potwierdzi dostępność, cenę i szczegóły przyjazdu.',
+    modes: {
+      camping: ['Camping', 'Kamper, van, namiot, przyczepa, bus/ciężarówka.'],
+      bungalow: ['Domki', 'Domki 2-, 3- i 4-osobowe.'],
+      combined: ['Razem', 'Domek + miejsce campingowe w jednym zapytaniu.'],
+    },
+    steps: ['Termin', 'Goście', 'Usługi', 'Dane', 'Podsumowanie'],
+    stepLead: {
+      dates: 'Wybierz daty pobytu. Liczba nocy policzy się automatycznie.',
+      guests: 'Podaj orientacyjną liczbę osób.',
+      services: 'Wybierz usługi, których dotyczy zapytanie.',
+      details: 'Zostaw dane kontaktowe dla recepcji.',
+      summary: 'Sprawdź zapytanie przed wysłaniem.',
+    },
+    fields: {
+      arrival: 'Data przyjazdu',
+      departure: 'Data wyjazdu',
+      nights: 'Liczba nocy',
+      adults: 'Dorośli',
+      children: 'Dzieci 4–14',
+      toddlers: 'Dzieci do 4',
+      bungalowGuests: 'Osoby w domku',
+      campingGuests: 'Osoby przy campingu',
+      name: 'Imię i nazwisko',
+      email: 'Email',
+      phone: 'Telefon',
+      language: 'Język kontaktu',
+      country: 'Kraj',
+      countryPlaceholder: 'Wpisz np. de, ge, niem, Germany...',
+      plate: 'Numer rejestracyjny pojazdu',
+      plateHint: 'Opcjonalnie. Przy przyczepie wpisz rejestrację auta, przy kamperze rejestrację kampera.',
+      message: 'Wiadomość',
+      specialNeeds: 'Osoba z niepełnosprawnością / specjalne potrzeby',
+      specialNeedsText: 'Napisz, czego potrzebujesz, abyśmy mogli lepiej przygotować pobyt.',
+      lateCheckout: 'Chciałbym zapytać o późniejszy wyjazd / późniejsze wymeldowanie.',
+      lateTime: 'Preferowana godzina wyjazdu',
+      quiet: 'Rozumiem, że Camping Clepardia nie jest miejscem imprezowym, a cisza nocna obowiązuje od 22:00 do 07:00.',
+      consent: 'Wyrażam zgodę na kontakt w sprawie zapytania.',
+    },
+    info: {
+      campingHours: 'Doba campingowa: 12:00–12:00.',
+      bungalowHours: 'Domki: check-in od 16:00, check-out do 11:00.',
+      summer: 'W lipcu i sierpniu rezerwujemy głównie domki. Miejsca campingowe są dostępne według kolejności przyjazdu — najlepiej przyjechać krótko po 12:00.',
+      campingPitch: 'Miejsca dla kamperów są głównie na płytach betonowych. Busy, trucki, autobusy i ciężkie pojazdy ustawiamy na asfalcie.',
+      combined: 'Wariant dla sytuacji, gdy część osób śpi w domku, a część przyjeżdża kamperem lub z namiotem.',
+      lateCheckout: 'Recepcja potwierdzi możliwość, miejsce, instrukcje i ewentualny koszt po przyjeździe — zależnie od typu pojazdu, liczby dodatkowych godzin, dostępności miejsc campingowych i parkingowych oraz rezerwacji.',
+    },
+    summary: {
+      title: 'Podsumowanie',
+      empty: 'Wybierz termin i usługi, a tutaj zobaczysz orientacyjny koszt.',
+      total: 'Orientacyjna suma',
+      confirm: 'Finalną dostępność i warunki potwierdza recepcja.',
+      stay: 'Wariant',
+      dates: 'Termin',
+      guests: 'Goście',
+      services: 'Usługi',
+      country: 'Kraj',
+      language: 'Język',
+      specialNeeds: 'Specjalne potrzeby',
+      lateCheckout: 'Późniejszy wyjazd',
+      success: 'Dziękujemy! Zapytanie zostało przygotowane. Recepcja odpowie możliwie szybko.',
+    },
+    actions: {
+      back: 'Wstecz',
+      next: 'Dalej',
+      send: 'Wyślij zapytanie do recepcji',
+      change: 'Zmień wybór',
+      decrease: 'Zmniejsz',
+      increase: 'Zwiększ',
+    },
+    validation: {
+      campingService: 'Wybierz przynajmniej jedną opcję campingową.',
+      bungalowService: 'Wybierz przynajmniej jeden domek.',
+      combinedService: 'W wariancie Razem wybierz minimum jeden domek i jedną opcję campingową.',
+      consents: 'Zaznacz wymagane zgody.',
+    },
+  },
+  en: {
+    kicker: 'Booking enquiry',
+    title: 'Book your stay at Camping Clepardia',
+    lead: 'Choose your stay type and the form will adapt to your needs.',
+    startTitle: 'What stay is your enquiry about?',
+    startLead: 'This is not an automatic booking. Reception confirms availability, price and arrival details.',
+    modes: {
+      camping: ['Camping', 'Motorhome, van, tent, caravan, bus/truck.'],
+      bungalow: ['Bungalows', '2-, 3- and 4-person bungalows.'],
+      combined: ['Combined', 'Bungalow + camping pitch in one enquiry.'],
+    },
+    steps: ['Dates', 'Guests', 'Services', 'Details', 'Summary'],
+    stepLead: {
+      dates: 'Choose your stay dates. Nights are calculated automatically.',
+      guests: 'Add the approximate number of guests.',
+      services: 'Choose the services your enquiry is about.',
+      details: 'Leave contact details for reception.',
+      summary: 'Review the enquiry before sending.',
+    },
+    fields: {
+      arrival: 'Arrival date', departure: 'Departure date', nights: 'Nights', adults: 'Adults', children: 'Children 4–14', toddlers: 'Children under 4',
+      bungalowGuests: 'Bungalow guests', campingGuests: 'Camping guests', name: 'Full name', email: 'Email', phone: 'Phone', language: 'Contact language', country: 'Country',
+      countryPlaceholder: 'Type e.g. de, ge, niem, Germany...', plate: 'Vehicle registration number',
+      plateHint: 'Optional. For a caravan, enter the car plate. For a motorhome, enter the motorhome plate.',
+      message: 'Message', specialNeeds: 'Guest with a disability / special needs', specialNeedsText: 'Tell us what you need so we can better prepare your stay.',
+      lateCheckout: 'I would like to ask about later departure / late check-out.', lateTime: 'Preferred departure time',
+      quiet: 'I understand Camping Clepardia is not a party campsite and quiet hours are 22:00–07:00.',
+      consent: 'I agree to be contacted about this enquiry.',
+    },
+    info: {
+      campingHours: 'Camping day: 12:00–12:00.', bungalowHours: 'Bungalows: check-in from 16:00, check-out by 11:00.',
+      summer: 'In July and August we mainly reserve bungalows. Camping pitches are available by arrival order — it is best to arrive shortly after 12:00.',
+      campingPitch: 'Camper pitches are mostly concrete slabs. Vans, trucks, buses and heavy vehicles are placed on asphalt.',
+      combined: 'For groups where part sleeps in a bungalow and part arrives with a camper or tent.',
+      lateCheckout: 'Reception will confirm possibility, place, instructions and any cost after arrival, depending on vehicle type, extra hours, availability and bookings.',
+    },
+    summary: {
+      title: 'Summary', empty: 'Choose dates and services to see the estimated cost here.', total: 'Estimated total', confirm: 'Final availability and terms are confirmed by reception.',
+      stay: 'Variant', dates: 'Dates', guests: 'Guests', services: 'Services', country: 'Country', language: 'Language', specialNeeds: 'Special needs', lateCheckout: 'Late check-out',
+      success: 'Thank you! The enquiry has been prepared. Reception will reply as soon as possible.',
+    },
+    actions: { back: 'Back', next: 'Next', send: 'Send enquiry to reception', change: 'Change choice', decrease: 'Decrease', increase: 'Increase' },
+    validation: { campingService: 'Choose at least one camping option.', bungalowService: 'Choose at least one bungalow.', combinedService: 'For Combined, choose at least one bungalow and one camping option.', consents: 'Please tick the required consents.' },
+  },
+  de: {
+    kicker: 'Buchungsanfrage',
+    title: 'Buchen Sie Ihren Aufenthalt im Camping Clepardia',
+    lead: 'Wählen Sie die Aufenthaltsart, das Formular passt sich an.',
+    startTitle: 'Worum geht es bei Ihrer Anfrage?',
+    startLead: 'Dies ist keine automatische Buchung. Die Rezeption bestätigt Verfügbarkeit, Preis und Anreisedetails.',
+    modes: {
+      camping: ['Camping', 'Wohnmobil, Van, Zelt, Wohnwagen, Bus/LKW.'],
+      bungalow: ['Bungalows', 'Bungalows für 2, 3 und 4 Personen.'],
+      combined: ['Kombiniert', 'Bungalow + Campingplatz in einer Anfrage.'],
+    },
+    steps: ['Termin', 'Gäste', 'Services', 'Daten', 'Zusammenfassung'],
+    stepLead: {
+      dates: 'Wählen Sie die Reisedaten. Nächte werden automatisch berechnet.',
+      guests: 'Geben Sie die ungefähre Gästezahl an.',
+      services: 'Wählen Sie die gewünschten Services.',
+      details: 'Hinterlassen Sie Kontaktdaten für die Rezeption.',
+      summary: 'Prüfen Sie die Anfrage vor dem Senden.',
+    },
+    fields: {
+      arrival: 'Anreise', departure: 'Abreise', nights: 'Nächte', adults: 'Erwachsene', children: 'Kinder 4–14', toddlers: 'Kinder unter 4',
+      bungalowGuests: 'Bungalow-Gäste', campingGuests: 'Camping-Gäste', name: 'Name und Nachname', email: 'E-Mail', phone: 'Telefon', language: 'Kontaktsprache', country: 'Land',
+      countryPlaceholder: 'z.B. de, ge, niem, Germany...', plate: 'Kennzeichen', plateHint: 'Optional. Bei Wohnwagen bitte Autokennzeichen, bei Wohnmobil das Wohnmobilkennzeichen.',
+      message: 'Nachricht', specialNeeds: 'Gast mit Behinderung / besondere Bedürfnisse', specialNeedsText: 'Schreiben Sie, was Sie benötigen.',
+      lateCheckout: 'Ich möchte nach späterer Abreise / spätem Check-out fragen.', lateTime: 'Gewünschte Abreisezeit',
+      quiet: 'Ich verstehe, dass Camping Clepardia kein Party-Campingplatz ist und Nachtruhe von 22:00–07:00 gilt.',
+      consent: 'Ich stimme der Kontaktaufnahme zu dieser Anfrage zu.',
+    },
+    info: {
+      campingHours: 'Campingtag: 12:00–12:00.', bungalowHours: 'Bungalows: Check-in ab 16:00, Check-out bis 11:00.',
+      summer: 'Im Juli und August reservieren wir hauptsächlich Bungalows. Campingplätze sind nach Ankunftsreihenfolge verfügbar — am besten kurz nach 12:00 anreisen.',
+      campingPitch: 'Camperplätze befinden sich überwiegend auf Betonplatten. Schwere Fahrzeuge stellen wir auf Asphalt ab.',
+      combined: 'Für Gruppen, bei denen ein Teil im Bungalow schläft und ein Teil mit Camper oder Zelt anreist.',
+      lateCheckout: 'Die Rezeption bestätigt Möglichkeit, Platz, Hinweise und eventuelle Kosten nach der Ankunft.',
+    },
+    summary: {
+      title: 'Zusammenfassung', empty: 'Wählen Sie Termin und Services, um die geschätzten Kosten zu sehen.', total: 'Geschätzte Summe', confirm: 'Final bestätigt die Rezeption.',
+      stay: 'Variante', dates: 'Termin', guests: 'Gäste', services: 'Services', country: 'Land', language: 'Sprache', specialNeeds: 'Besondere Bedürfnisse', lateCheckout: 'Später Check-out',
+      success: 'Danke! Die Anfrage wurde vorbereitet. Die Rezeption antwortet möglichst schnell.',
+    },
+    actions: { back: 'Zurück', next: 'Weiter', send: 'Anfrage an Rezeption senden', change: 'Auswahl ändern', decrease: 'Verringern', increase: 'Erhöhen' },
+    validation: { campingService: 'Wählen Sie mindestens eine Campingoption.', bungalowService: 'Wählen Sie mindestens einen Bungalow.', combinedService: 'Wählen Sie mindestens einen Bungalow und eine Campingoption.', consents: 'Bitte bestätigen Sie die erforderlichen Zustimmungen.' },
+  },
+  it: {
+    kicker: 'Richiesta soggiorno',
+    title: 'Prenota il tuo soggiorno al Camping Clepardia',
+    lead: 'Scegli il tipo di soggiorno e il modulo si adatta alle tue esigenze.',
+    startTitle: 'Che soggiorno vuoi richiedere?',
+    startLead: 'Non è una prenotazione automatica. La reception conferma disponibilità, prezzo e dettagli di arrivo.',
+    modes: {
+      camping: ['Camping', 'Camper, van, tenda, roulotte, bus/camion.'],
+      bungalow: ['Bungalow', 'Bungalow da 2, 3 e 4 persone.'],
+      combined: ['Insieme', 'Bungalow + piazzola camping in una richiesta.'],
+    },
+    steps: ['Date', 'Ospiti', 'Servizi', 'Dati', 'Riepilogo'],
+    stepLead: {
+      dates: 'Scegli le date. Le notti si calcolano automaticamente.',
+      guests: 'Indica il numero indicativo di ospiti.',
+      services: 'Scegli i servizi della richiesta.',
+      details: 'Lascia i dati per la reception.',
+      summary: 'Controlla la richiesta prima di inviarla.',
+    },
+    fields: {
+      arrival: 'Arrivo', departure: 'Partenza', nights: 'Notti', adults: 'Adulti', children: 'Bambini 4–14', toddlers: 'Bambini sotto 4',
+      bungalowGuests: 'Ospiti bungalow', campingGuests: 'Ospiti camping', name: 'Nome e cognome', email: 'Email', phone: 'Telefono', language: 'Lingua di contatto', country: 'Paese',
+      countryPlaceholder: 'Scrivi es. de, ge, niem, Germany...', plate: 'Targa del veicolo', plateHint: 'Opzionale. Con roulotte inserisci la targa dell’auto, con camper la targa del camper.',
+      message: 'Messaggio', specialNeeds: 'Ospite con disabilità / esigenze speciali', specialNeedsText: 'Scrivi cosa ti serve per prepararci meglio.',
+      lateCheckout: 'Vorrei chiedere una partenza / check-out più tardi.', lateTime: 'Orario preferito',
+      quiet: 'Capisco che Camping Clepardia non è un campeggio per feste e il silenzio notturno è 22:00–07:00.',
+      consent: 'Accetto di essere contattato per questa richiesta.',
+    },
+    info: {
+      campingHours: 'Giornata camping: 12:00–12:00.', bungalowHours: 'Bungalow: check-in dalle 16:00, check-out entro 11:00.',
+      summer: 'A luglio e agosto prenotiamo principalmente bungalow. Le piazzole camping sono disponibili in ordine di arrivo — meglio arrivare poco dopo le 12:00.',
+      campingPitch: 'Le piazzole camper sono soprattutto su lastre di cemento. I veicoli pesanti sono posizionati su asfalto.',
+      combined: 'Per gruppi dove una parte dorme in bungalow e una parte arriva con camper o tenda.',
+      lateCheckout: 'La reception confermerà possibilità, posto, istruzioni ed eventuale costo dopo l’arrivo.',
+    },
+    summary: {
+      title: 'Riepilogo', empty: 'Scegli date e servizi per vedere il costo stimato.', total: 'Totale stimato', confirm: 'Disponibilità e condizioni finali sono confermate dalla reception.',
+      stay: 'Variante', dates: 'Date', guests: 'Ospiti', services: 'Servizi', country: 'Paese', language: 'Lingua', specialNeeds: 'Esigenze speciali', lateCheckout: 'Late check-out',
+      success: 'Grazie! La richiesta è stata preparata. La reception risponderà appena possibile.',
+    },
+    actions: { back: 'Indietro', next: 'Avanti', send: 'Invia richiesta alla reception', change: 'Cambia scelta', decrease: 'Diminuisci', increase: 'Aumenta' },
+    validation: { campingService: 'Scegli almeno un’opzione camping.', bungalowService: 'Scegli almeno un bungalow.', combinedService: 'Scegli almeno un bungalow e un’opzione camping.', consents: 'Seleziona i consensi richiesti.' },
+  },
+}[lang];
+
+const stayPrice = (id: string) => {
+  const item = pricingConfig.stayTypes.find((entry) => entry.id === id);
+  return item && 'price' in item ? item.price : 0;
+};
+const addonPrice = (id: string) => pricingConfig.addons.find((entry) => entry.id === id)?.price ?? 0;
+const bungalowPrices = (id: string) => {
+  const item = pricingConfig.stayTypes.find((entry) => entry.id === id);
+  return item && 'seasonalPrices' in item ? item.seasonalPrices : { low: 0, high: 0 };
+};
+
+const labels = {
+  pl: {
+    camper: 'Kamper', van: 'Van', caravan: 'Przyczepa', tentSmall: 'Namiot 1–2 os.', tentLarge: 'Namiot 3–4 os.', rooftop: 'Auto + namiot dachowy',
+    parking: 'Samochód / parking', motorcycle: 'Motocykl', cargo: 'Przyczepa bagażowa', bus: 'Bus / ciężarówka', electricity: 'Prąd 10A', dog: 'Pies',
+    bungalow2: 'Domek 2-os.', bungalow3: 'Domek 3-os.', bungalow4: 'Domek 4-os.',
+  },
+  en: {
+    camper: 'Motorhome', van: 'Van', caravan: 'Caravan', tentSmall: 'Tent 1–2', tentLarge: 'Tent 3–4', rooftop: 'Car + rooftop tent',
+    parking: 'Car / parking', motorcycle: 'Motorcycle', cargo: 'Cargo trailer', bus: 'Bus / truck', electricity: 'Electricity 10A', dog: 'Dog',
+    bungalow2: '2-person bungalow', bungalow3: '3-person bungalow', bungalow4: '4-person bungalow',
+  },
+  de: {
+    camper: 'Wohnmobil', van: 'Van', caravan: 'Wohnwagen', tentSmall: 'Zelt 1–2', tentLarge: 'Zelt 3–4', rooftop: 'Auto + Dachzelt',
+    parking: 'Auto / Parkplatz', motorcycle: 'Motorrad', cargo: 'Gepäckanhänger', bus: 'Bus / LKW', electricity: 'Strom 10A', dog: 'Hund',
+    bungalow2: 'Bungalow 2 Pers.', bungalow3: 'Bungalow 3 Pers.', bungalow4: 'Bungalow 4 Pers.',
+  },
+  it: {
+    camper: 'Camper', van: 'Van', caravan: 'Roulotte', tentSmall: 'Tenda 1–2', tentLarge: 'Tenda 3–4', rooftop: 'Auto + tenda tetto',
+    parking: 'Auto / parcheggio', motorcycle: 'Moto', cargo: 'Rimorchio bagagli', bus: 'Bus / camion', electricity: 'Elettricità 10A', dog: 'Cane',
+    bungalow2: 'Bungalow 2 pers.', bungalow3: 'Bungalow 3 pers.', bungalow4: 'Bungalow 4 pers.',
+  },
+}[lang];
+
+const campingServices = [
+  { id: 'camper', label: labels.camper, price: stayPrice('camper'), icon: 'RV', group: 'camping' },
+  { id: 'van', label: labels.van, price: stayPrice('van'), icon: 'VN', group: 'camping' },
+  { id: 'caravan', label: labels.caravan, price: stayPrice('caravan'), icon: 'CV', group: 'camping' },
+  { id: 'tent-small', label: labels.tentSmall, price: stayPrice('tent-small'), icon: 'T1', group: 'camping' },
+  { id: 'tent-large', label: labels.tentLarge, price: stayPrice('tent-large'), icon: 'T4', group: 'camping' },
+  { id: 'rooftop-tent', label: labels.rooftop, price: stayPrice('rooftop-tent'), icon: 'RT', group: 'camping' },
+  { id: 'parking', label: labels.parking, price: addonPrice('parking'), icon: 'PK', group: 'camping' },
+  { id: 'motorcycle', label: labels.motorcycle, price: addonPrice('motorcycle'), icon: 'MC', group: 'camping' },
+  { id: 'cargo-trailer', label: labels.cargo, price: addonPrice('cargo-trailer'), icon: 'TR', group: 'camping' },
+  { id: 'bus', label: labels.bus, price: addonPrice('bus'), icon: 'BUS', group: 'camping' },
+  { id: 'electricity', label: labels.electricity, price: addonPrice('electricity'), icon: '10A', group: 'camping' },
+  { id: 'dog', label: labels.dog, price: addonPrice('dog'), icon: 'DOG', group: 'camping' },
+];
+
+const combinedCampingServices = campingServices.filter((item) => !['motorcycle', 'cargo-trailer', 'parking'].includes(item.id));
+const bungalowServices = [
+  { id: 'bungalow-2', label: labels.bungalow2, seasonalPrices: bungalowPrices('bungalow-2'), icon: '2', group: 'bungalow' },
+  { id: 'bungalow-3', label: labels.bungalow3, seasonalPrices: bungalowPrices('bungalow-3'), icon: '3', group: 'bungalow' },
+  { id: 'bungalow-4', label: labels.bungalow4, seasonalPrices: bungalowPrices('bungalow-4'), icon: '4', group: 'bungalow' },
+  { id: 'parking', label: labels.parking, price: addonPrice('parking'), icon: 'PK', group: 'bungalow' },
+  { id: 'dog', label: labels.dog, price: addonPrice('dog'), icon: 'DOG', group: 'bungalow' },
+];
+
+const config = {
+  lang,
+  copy,
+  currency: pricingConfig.currency,
+  seasons: pricingConfig.seasons,
+  people: pricingConfig.people,
+  countries,
+  services: {
+    camping: campingServices,
+    bungalow: bungalowServices,
+    combinedCamping: combinedCampingServices,
+    combinedBungalow: bungalowServices,
+  },
+};
+const configEncoded = Buffer.from(JSON.stringify(config)).toString('base64');
+---
+
+<section class="reservation-game booking-app-page" data-reservation-game data-config={configEncoded} data-after-hero>
+  <div class="reservation-game__ambient" aria-hidden="true">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="container reservation-game__shell">
+    <div class="reservation-game__mount" data-rg-mount>
+      <div class="reservation-start">
+        <span class="reservation-kicker">{copy.kicker}</span>
+        <h1>{copy.title}</h1>
+        <p>{copy.lead}</p>
+        <div class="reservation-start__panel">
+          <div>
+            <span class="reservation-kicker">{copy.startTitle}</span>
+            <p>{copy.startLead}</p>
+          </div>
+          <div class="reservation-choice-grid">
+            {Object.entries(copy.modes).map(([mode, item]) => (
+              <button class="reservation-choice" type="button" data-start-mode={mode}>
+                <span>{mode === 'camping' ? 'RV' : mode === 'bungalow' ? '2/3/4' : 'MIX'}</span>
+                <strong>{item[0]}</strong>
+                <small>{item[1]}</small>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ configEncoded }}>
+  (() => {
+    const root = document.querySelector('[data-reservation-game]');
+    if (!(root instanceof HTMLElement)) return;
+
+    const mount = root.querySelector('[data-rg-mount]');
+    if (!(mount instanceof HTMLElement)) return;
+
+    const decodeConfig = () => {
+      try {
+        const binary = window.atob(configEncoded);
+        const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+        return JSON.parse(new TextDecoder().decode(bytes));
+      } catch {
+        return null;
+      }
+    };
+
+    const config = decodeConfig();
+    if (!config) return;
+
+    const t = config.copy;
+    const currency = config.currency;
+    const modeKeys = ['camping', 'bungalow', 'combined'];
+    const stepKeys = ['dates', 'guests', 'services', 'details', 'summary'];
+    const languageOptions = ['PL', 'EN', 'DE', 'IT'];
+
+    const state = {
+      mode: null,
+      step: 0,
+      values: {
+        arrival: '',
+        departure: '',
+        adults: 2,
+        children: 0,
+        toddlers: 0,
+        bungalowGuests: 2,
+        campingGuests: 2,
+        name: '',
+        email: '',
+        phone: '',
+        language: config.lang.toUpperCase(),
+        country: '',
+        countryCode: '',
+        plate: '',
+        message: '',
+        specialNeeds: false,
+        specialNeedsText: '',
+        lateCheckout: false,
+        lateCheckoutTime: '',
+        quiet: false,
+        consent: false,
+      },
+      quantities: {},
+      countryMatches: [],
+      countryIndex: -1,
+      status: '',
+      success: '',
+    };
+
+    const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;',
+    }[char]));
+    const normalize = (value) => String(value ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const intValue = (value) => Math.max(0, Number.parseInt(value || '0', 10) || 0);
+    const money = (value) => `${Math.max(0, Math.round(value))} ${currency}`;
+    const quantityKey = (scope, id) => `${scope}:${id}`;
+
+    const seedQuantities = () => {
+      ['camping', 'bungalow', 'combinedCamping', 'combinedBungalow'].forEach((scope) => {
+        (config.services[scope] ?? []).forEach((service) => {
+          state.quantities[quantityKey(scope, service.id)] = 0;
+        });
+      });
+    };
+    seedQuantities();
+
+    const getNights = () => {
+      if (!state.values.arrival || !state.values.departure) return 0;
+      const start = new Date(`${state.values.arrival}T12:00:00`);
+      const end = new Date(`${state.values.departure}T12:00:00`);
+      const diff = Math.round((end.getTime() - start.getTime()) / 86400000);
+      return Math.max(0, diff);
+    };
+
+    const isHighSeason = () => {
+      if (!state.values.arrival) return false;
+      const [, month, day] = state.values.arrival.split('-');
+      const token = `${month}-${day}`;
+      return token >= config.seasons.high.start && token <= config.seasons.high.end;
+    };
+
+    const touchesSummer = () => [state.values.arrival, state.values.departure].filter(Boolean).some((value) => {
+      const month = Number.parseInt(value.split('-')[1] || '0', 10);
+      return month === 7 || month === 8;
+    });
+
+    const servicePrice = (service) => {
+      if (service.seasonalPrices) return isHighSeason() ? service.seasonalPrices.high : service.seasonalPrices.low;
+      return Number(service.price ?? 0);
+    };
+
+    const servicesForScope = (scope) => config.services[scope] ?? [];
+    const selectedForScope = (scope) => servicesForScope(scope)
+      .map((service) => ({
+        ...service,
+        scope,
+        quantity: intValue(state.quantities[quantityKey(scope, service.id)]),
+        unitPrice: servicePrice(service),
+      }))
+      .filter((service) => service.quantity > 0);
+
+    const selectedServices = () => {
+      if (state.mode === 'camping') return selectedForScope('camping');
+      if (state.mode === 'bungalow') return selectedForScope('bungalow');
+      if (state.mode === 'combined') return [...selectedForScope('combinedBungalow'), ...selectedForScope('combinedCamping')];
+      return [];
+    };
+
+    const peopleCostPerNight = () => {
+      const adultPrice = Number(config.people.adults.price ?? 0);
+      const childPrice = Number(config.people.children.price ?? 0);
+      if (state.mode === 'camping') return (state.values.adults * adultPrice) + (state.values.children * childPrice);
+      if (state.mode === 'combined') return (state.values.campingGuests * adultPrice) + (state.values.children * childPrice);
+      return 0;
+    };
+
+    const estimatedTotal = () => {
+      const nights = getNights();
+      if (!nights) return 0;
+      const serviceTotal = selectedServices().reduce((sum, service) => sum + service.unitPrice * service.quantity, 0);
+      return nights * (serviceTotal + peopleCostPerNight());
+    };
+
+    const datesLabel = () => state.values.arrival && state.values.departure
+      ? `${state.values.arrival} → ${state.values.departure}`
+      : '-';
+
+    const guestsLabel = () => {
+      if (state.mode === 'combined') return `${t.fields.bungalowGuests}: ${state.values.bungalowGuests}, ${t.fields.campingGuests}: ${state.values.campingGuests}, ${t.fields.children}: ${state.values.children}, ${t.fields.toddlers}: ${state.values.toddlers}`;
+      return `${t.fields.adults}: ${state.values.adults}, ${t.fields.children}: ${state.values.children}, ${t.fields.toddlers}: ${state.values.toddlers}`;
+    };
+
+    const modeTitle = () => state.mode ? t.modes[state.mode][0] : '-';
+
+    const searchCountries = (query) => {
+      const needle = normalize(query);
+      const pool = config.countries ?? [];
+      state.countryMatches = needle
+        ? pool.filter((country) => [country.code, country.names[config.lang] ?? country.names.en, country.names.en, ...country.aliases].some((value) => normalize(value).includes(needle))).slice(0, 8)
+        : pool.slice(0, 7);
+      state.countryIndex = state.countryMatches.length ? 0 : -1;
+    };
+
+    const selectCountry = (country) => {
+      if (!country) return;
+      state.values.country = country.names[config.lang] ?? country.names.en;
+      state.values.countryCode = country.code;
+      state.countryMatches = [];
+      state.countryIndex = -1;
+      render({ focusCountry: false });
+    };
+
+    const startTemplate = () => `
+      <div class="reservation-start">
+        <span class="reservation-kicker">${esc(t.kicker)}</span>
+        <h1>${esc(t.title)}</h1>
+        <p>${esc(t.lead)}</p>
+        <div class="reservation-start__panel">
+          <div>
+            <span class="reservation-kicker">${esc(t.startTitle)}</span>
+            <p>${esc(t.startLead)}</p>
+          </div>
+          <div class="reservation-choice-grid">
+            ${modeKeys.map((mode) => `
+              <button class="reservation-choice" type="button" data-start-mode="${mode}">
+                <span>${mode === 'camping' ? 'RV' : mode === 'bungalow' ? '2/3/4' : 'MIX'}</span>
+                <strong>${esc(t.modes[mode][0])}</strong>
+                <small>${esc(t.modes[mode][1])}</small>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+
+    const progressTemplate = () => {
+      const percent = Math.round(((state.step - 1) / (stepKeys.length - 1)) * 100);
+      return `
+        <div class="reservation-progress">
+          <div class="reservation-progress__mobile">
+            <span>Krok ${state.step} z ${stepKeys.length}</span>
+            <strong>${esc(t.steps[state.step - 1])}</strong>
+            <i style="--progress:${percent}%"></i>
+          </div>
+          <div class="reservation-progress__rail" style="--progress:${percent}%">
+            ${t.steps.map((label, index) => {
+              const step = index + 1;
+              return `
+                <button type="button" data-jump-step="${step}" class="${step === state.step ? 'is-active' : ''} ${step < state.step ? 'is-complete' : ''}" ${step > state.step ? 'disabled' : ''}>
+                  <span>${String(step).padStart(2, '0')}</span>
+                  <strong>${esc(label)}</strong>
+                </button>
+              `;
+            }).join('')}
+          </div>
+          <div class="reservation-selected">
+            <span>${esc(t.summary.stay)}: <strong>${esc(modeTitle())}</strong></span>
+            <button type="button" data-change-mode>${esc(t.actions.change)}</button>
+          </div>
+        </div>
+      `;
+    };
+
+    const field = ({ key, label, type = 'text', hint = '', value = '', attrs = '' }) => `
+      <label class="booking-field">
+        <span>${esc(label)}</span>
+        <input type="${type}" data-bind="${key}" value="${esc(value)}" ${attrs} />
+        ${hint ? `<small>${esc(hint)}</small>` : ''}
+      </label>
+    `;
+
+    const stepper = ({ scope, id, label, price = -1, value, icon = '+' }) => `
+      <article class="booking-stepper-card">
+        <div class="booking-stepper-card__meta">
+          <span class="booking-stepper-card__icon">${esc(icon)}</span>
+          <div>
+            <strong>${esc(label)}</strong>
+            ${price >= 0 ? `<small>${money(price)} / noc</small>` : ''}
+          </div>
+        </div>
+        <div class="booking-stepper" data-stepper>
+          <button type="button" data-minus="${esc(id)}" data-scope="${esc(scope)}" aria-label="${esc(`${t.actions.decrease} ${label}`)}" ${value <= 0 ? 'disabled' : ''}>−</button>
+          <input type="text" inputmode="numeric" value="${value}" data-quantity="${esc(id)}" data-scope="${esc(scope)}" aria-label="${esc(label)}" />
+          <button type="button" data-plus="${esc(id)}" data-scope="${esc(scope)}" aria-label="${esc(`${t.actions.increase} ${label}`)}">+</button>
+        </div>
+      </article>
+    `;
+
+    const guestStep = () => {
+      const items = state.mode === 'combined'
+        ? [
+          { scope: 'value', id: 'bungalowGuests', label: t.fields.bungalowGuests, value: state.values.bungalowGuests, icon: 'DG' },
+          { scope: 'value', id: 'campingGuests', label: t.fields.campingGuests, value: state.values.campingGuests, price: config.people.adults.price, icon: 'CG' },
+          { scope: 'value', id: 'children', label: t.fields.children, value: state.values.children, price: config.people.children.price, icon: 'CH' },
+          { scope: 'value', id: 'toddlers', label: t.fields.toddlers, value: state.values.toddlers, price: 0, icon: '0+' },
+        ]
+        : [
+          { scope: 'value', id: 'adults', label: t.fields.adults, value: state.values.adults, price: state.mode === 'camping' ? config.people.adults.price : -1, icon: 'AD' },
+          { scope: 'value', id: 'children', label: t.fields.children, value: state.values.children, price: state.mode === 'camping' ? config.people.children.price : -1, icon: 'CH' },
+          { scope: 'value', id: 'toddlers', label: t.fields.toddlers, value: state.values.toddlers, price: 0, icon: '0+' },
+        ];
+      return `<div class="booking-stepper-grid">${items.map(stepper).join('')}</div>`;
+    };
+
+    const serviceCard = (scope, service) => {
+      const value = intValue(state.quantities[quantityKey(scope, service.id)]);
+      const unit = servicePrice(service);
+      const subtotal = unit * value * Math.max(1, getNights());
+      return `
+        <article class="booking-service-card ${value > 0 ? 'is-selected' : ''}">
+          <div class="booking-service-card__top">
+            <span class="booking-stepper-card__icon">${esc(service.icon)}</span>
+            <div>
+              <strong>${esc(service.label)}</strong>
+              <small>${money(unit)} / noc</small>
+            </div>
+          </div>
+          <div class="booking-service-card__bottom">
+            <div class="booking-stepper" data-stepper>
+              <button type="button" data-service-minus="${esc(service.id)}" data-scope="${esc(scope)}" aria-label="${esc(`${t.actions.decrease} ${service.label}`)}" ${value <= 0 ? 'disabled' : ''}>−</button>
+              <input type="text" inputmode="numeric" value="${value}" data-service-quantity="${esc(service.id)}" data-scope="${esc(scope)}" aria-label="${esc(service.label)}" />
+              <button type="button" data-service-plus="${esc(service.id)}" data-scope="${esc(scope)}" aria-label="${esc(`${t.actions.increase} ${service.label}`)}">+</button>
+            </div>
+            ${value > 0 ? `<small>${money(subtotal)}</small>` : ''}
+          </div>
+        </article>
+      `;
+    };
+
+    const serviceGroup = (title, scope, note = '') => `
+      <section class="booking-service-group">
+        <header>
+          <h3>${esc(title)}</h3>
+          ${note ? `<p>${esc(note)}</p>` : ''}
+        </header>
+        <div class="booking-service-grid">
+          ${servicesForScope(scope).map((service) => serviceCard(scope, service)).join('')}
+        </div>
+      </section>
+    `;
+
+    const servicesStep = () => {
+      if (state.mode === 'camping') return serviceGroup(t.modes.camping[0], 'camping', t.info.campingPitch);
+      if (state.mode === 'bungalow') return serviceGroup(t.modes.bungalow[0], 'bungalow', t.info.bungalowHours);
+      return `
+        <div class="booking-combined-grid">
+          ${serviceGroup(t.modes.bungalow[0], 'combinedBungalow')}
+          ${serviceGroup(t.modes.camping[0], 'combinedCamping', t.info.combined)}
+        </div>
+      `;
+    };
+
+    const countryList = () => {
+      if (!state.countryMatches.length) return '';
+      return `
+        <div class="booking-country-list" role="listbox">
+          ${state.countryMatches.map((country, index) => `
+            <button type="button" class="${index === state.countryIndex ? 'is-active' : ''}" data-country-index="${index}">
+              <span class="${esc(country.flagClass)}"></span>
+              <strong>${esc(country.names[config.lang] ?? country.names.en)}</strong>
+              <small>${esc(country.code)}</small>
+            </button>
+          `).join('')}
+        </div>
+      `;
+    };
+
+    const detailsStep = () => `
+      <div class="booking-form-grid">
+        ${field({ key: 'name', label: t.fields.name, value: state.values.name, attrs: 'autocomplete="name"' })}
+        ${field({ key: 'email', label: t.fields.email, type: 'email', value: state.values.email, attrs: 'autocomplete="email"' })}
+        ${field({ key: 'phone', label: t.fields.phone, type: 'tel', value: state.values.phone, attrs: 'autocomplete="tel"' })}
+        <label class="booking-field">
+          <span>${esc(t.fields.language)}</span>
+          <select data-bind="language">
+            ${languageOptions.map((option) => `<option value="${option}" ${state.values.language === option ? 'selected' : ''}>${option}</option>`).join('')}
+          </select>
+        </label>
+        <label class="booking-field booking-country">
+          <span>${esc(t.fields.country)}</span>
+          <input type="text" data-country-input value="${esc(state.values.country)}" placeholder="${esc(t.fields.countryPlaceholder)}" autocomplete="off" />
+          <input type="hidden" value="${esc(state.values.countryCode)}" data-country-code />
+          ${countryList()}
+        </label>
+        ${field({ key: 'plate', label: t.fields.plate, value: state.values.plate, hint: t.fields.plateHint })}
+        <label class="booking-check">
+          <input type="checkbox" data-check="specialNeeds" ${state.values.specialNeeds ? 'checked' : ''} />
+          <span>${esc(t.fields.specialNeeds)}</span>
+        </label>
+        <label class="booking-check">
+          <input type="checkbox" data-check="lateCheckout" ${state.values.lateCheckout ? 'checked' : ''} />
+          <span>${esc(t.fields.lateCheckout)}</span>
+        </label>
+        ${state.values.specialNeeds ? `
+          <label class="booking-field booking-field--full">
+            <span>${esc(t.fields.specialNeedsText)}</span>
+            <textarea data-bind="specialNeedsText">${esc(state.values.specialNeedsText)}</textarea>
+          </label>
+        ` : ''}
+        ${state.values.lateCheckout ? `
+          <label class="booking-field booking-field--full">
+            <span>${esc(t.fields.lateTime)}</span>
+            <select data-bind="lateCheckoutTime">
+              <option value="">--</option>
+              ${['13:00','14:00','15:00','16:00','17:00'].map((time) => `<option value="${time}" ${state.values.lateCheckoutTime === time ? 'selected' : ''}>${time}</option>`).join('')}
+            </select>
+            <small>${esc(t.info.lateCheckout)}</small>
+          </label>
+        ` : ''}
+        <label class="booking-field booking-field--full">
+          <span>${esc(t.fields.message)}</span>
+          <textarea data-bind="message">${esc(state.values.message)}</textarea>
+        </label>
+        <label class="booking-check booking-check--full">
+          <input type="checkbox" data-check="quiet" ${state.values.quiet ? 'checked' : ''} />
+          <span>${esc(t.fields.quiet)}</span>
+        </label>
+        <label class="booking-check booking-check--full">
+          <input type="checkbox" data-check="consent" ${state.values.consent ? 'checked' : ''} />
+          <span>${esc(t.fields.consent)}</span>
+        </label>
+      </div>
+    `;
+
+    const summaryRows = () => [
+      [t.summary.stay, modeTitle()],
+      [t.summary.dates, datesLabel()],
+      [t.fields.nights, String(getNights())],
+      [t.summary.guests, guestsLabel()],
+      [t.summary.country, state.values.country || '-'],
+      [t.summary.language, state.values.language || '-'],
+      ...(state.values.specialNeeds ? [[t.summary.specialNeeds, 'zgłoszono']] : []),
+      ...(state.values.lateCheckout ? [[t.summary.lateCheckout, state.values.lateCheckoutTime || '-']] : []),
+    ];
+
+    const summaryTemplate = (full = false) => {
+      const services = selectedServices();
+      const total = estimatedTotal();
+      const nights = Math.max(1, getNights());
+      return `
+        <div class="booking-summary-content">
+          <span class="reservation-kicker">${esc(t.summary.title)}</span>
+          ${total > 0 ? `<h2>${money(total)}</h2><p>${esc(t.summary.total)}</p>` : `<h2>${esc(t.summary.title)}</h2><p>${esc(t.summary.empty)}</p>`}
+          <div class="booking-summary-rows">
+            ${summaryRows().map(([label, value]) => `<dl><dt>${esc(label)}</dt><dd>${esc(value)}</dd></dl>`).join('')}
+          </div>
+          ${services.length ? `
+            <div class="booking-summary-services">
+              <h3>${esc(t.summary.services)}</h3>
+              ${services.map((service) => `<p><span>${esc(service.label)} x ${service.quantity}</span><strong>${money(service.unitPrice * service.quantity * nights)}</strong></p>`).join('')}
+              ${peopleCostPerNight() > 0 ? `<p><span>${esc(t.summary.guests)}</span><strong>${money(peopleCostPerNight() * nights)}</strong></p>` : ''}
+            </div>
+          ` : ''}
+          <small>${esc(t.summary.confirm)}</small>
+          ${full ? `<textarea name="reservationPayload" hidden>${esc(JSON.stringify(payload(), null, 2))}</textarea>` : ''}
+        </div>
+      `;
+    };
+
+    const payload = () => ({
+      stayMode: state.mode,
+      dates: { arrival: state.values.arrival, departure: state.values.departure, nights: getNights() },
+      guests: {
+        adults: state.values.adults,
+        children: state.values.children,
+        toddlers: state.values.toddlers,
+        bungalowGuests: state.values.bungalowGuests,
+        campingGuests: state.values.campingGuests,
+      },
+      services: selectedServices().map((service) => ({
+        id: service.id,
+        scope: service.scope,
+        label: service.label,
+        quantity: service.quantity,
+        unitPrice: service.unitPrice,
+      })),
+      details: {
+        name: state.values.name,
+        email: state.values.email,
+        phone: state.values.phone,
+        language: state.values.language,
+        country: state.values.countryCode,
+        plate: state.values.plate,
+        message: state.values.message,
+      },
+      specialNeeds: state.values.specialNeeds ? state.values.specialNeedsText : '',
+      lateCheckout: state.values.lateCheckout ? state.values.lateCheckoutTime : '',
+      estimatedTotal: estimatedTotal(),
+    });
+
+    const dateStep = () => {
+      const info = state.mode === 'combined'
+        ? `${t.info.campingHours} ${t.info.bungalowHours}`
+        : state.mode === 'bungalow'
+        ? t.info.bungalowHours
+        : t.info.campingHours;
+      return `
+        <div class="booking-date-grid">
+          <label class="booking-field">
+            <span>${esc(t.fields.arrival)}</span>
+            <input type="date" data-bind="arrival" value="${esc(state.values.arrival)}" />
+          </label>
+          <label class="booking-field">
+            <span>${esc(t.fields.departure)}</span>
+            <input type="date" data-bind="departure" value="${esc(state.values.departure)}" />
+          </label>
+          <div class="booking-night-card">
+            <span>${esc(t.fields.nights)}</span>
+            <strong>${getNights()}</strong>
+          </div>
+        </div>
+        <p class="booking-note">${esc(info)}</p>
+        ${touchesSummer() ? `<p class="booking-note booking-note--warm">${esc(t.info.summer)}</p>` : ''}
+      `;
+    };
+
+    const stepBody = () => {
+      if (state.step === 1) return dateStep();
+      if (state.step === 2) return guestStep();
+      if (state.step === 3) return servicesStep();
+      if (state.step === 4) return detailsStep();
+      return summaryTemplate(true);
+    };
+
+    const appTemplate = () => `
+      <div class="reservation-app">
+        ${progressTemplate()}
+        <div class="reservation-layout">
+          <form class="reservation-stage" data-reservation-form novalidate>
+            <header class="reservation-step-head">
+              <span class="reservation-kicker">${esc(t.steps[state.step - 1])}</span>
+              <h2>${esc(t.steps[state.step - 1])}</h2>
+              <p>${esc(t.stepLead[stepKeys[state.step - 1]])}</p>
+            </header>
+            <div class="reservation-step-panel">
+              ${stepBody()}
+            </div>
+            <p class="reservation-status" data-status>${esc(state.status || state.success)}</p>
+            <div class="reservation-nav">
+              <button class="reservation-btn reservation-btn--ghost" type="button" data-back ${state.step <= 1 ? 'hidden' : ''}>${esc(t.actions.back)}</button>
+              ${state.step < stepKeys.length
+                ? `<button class="reservation-btn reservation-btn--primary" type="button" data-next>${esc(t.actions.next)}</button>`
+                : `<button class="reservation-btn reservation-btn--primary" type="submit">${esc(t.actions.send)}</button>`}
+            </div>
+          </form>
+          <aside class="reservation-summary">
+            ${summaryTemplate(false)}
+          </aside>
+        </div>
+      </div>
+    `;
+
+    const render = ({ focusCountry = false } = {}) => {
+      mount.innerHTML = state.mode ? appTemplate() : startTemplate();
+      root.dataset.mode = state.mode || '';
+      root.dataset.step = String(state.step);
+      if (focusCountry) {
+        const input = mount.querySelector('[data-country-input]');
+        if (input instanceof HTMLInputElement) {
+          input.focus();
+          input.setSelectionRange(input.value.length, input.value.length);
+        }
+      }
+    };
+
+    const startFlow = (mode) => {
+      state.mode = modeKeys.includes(mode) ? mode : 'camping';
+      state.step = 1;
+      state.status = '';
+      state.success = '';
+      const url = new URL(window.location.href);
+      url.searchParams.set('stay', state.mode);
+      window.history.replaceState({}, '', url);
+      render();
+      window.requestAnimationFrame(() => root.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    };
+
+    const resetFlow = () => {
+      state.mode = null;
+      state.step = 0;
+      state.status = '';
+      state.success = '';
+      const url = new URL(window.location.href);
+      url.searchParams.delete('stay');
+      window.history.replaceState({}, '', url);
+      render();
+    };
+
+    const serviceCounts = () => {
+      const camping = state.mode === 'combined' ? selectedForScope('combinedCamping') : selectedForScope('camping');
+      const bungalow = state.mode === 'combined' ? selectedForScope('combinedBungalow') : selectedForScope('bungalow');
+      return {
+        camping: camping.filter((service) => service.group === 'camping').reduce((sum, service) => sum + service.quantity, 0),
+        bungalow: bungalow.filter((service) => service.group === 'bungalow').reduce((sum, service) => sum + service.quantity, 0),
+      };
+    };
+
+    const validateStep = () => {
+      state.status = '';
+      if (state.step !== 3) return true;
+      const counts = serviceCounts();
+      if (state.mode === 'camping' && counts.camping < 1) state.status = t.validation.campingService;
+      if (state.mode === 'bungalow' && counts.bungalow < 1) state.status = t.validation.bungalowService;
+      if (state.mode === 'combined' && (counts.camping < 1 || counts.bungalow < 1)) state.status = t.validation.combinedService;
+      return !state.status;
+    };
+
+    const setStep = (nextStep) => {
+      state.step = Math.max(1, Math.min(stepKeys.length, nextStep));
+      state.status = '';
+      render();
+    };
+
+    mount.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const startButton = target.closest('[data-start-mode]');
+      if (startButton instanceof HTMLElement) {
+        startFlow(startButton.dataset.startMode);
+        return;
+      }
+      if (target.closest('[data-change-mode]')) {
+        resetFlow();
+        return;
+      }
+      const jumpButton = target.closest('[data-jump-step]');
+      if (jumpButton instanceof HTMLElement) {
+        const requested = Number(jumpButton.dataset.jumpStep);
+        if (requested <= state.step) setStep(requested);
+        return;
+      }
+      if (target.closest('[data-next]')) {
+        if (validateStep()) setStep(state.step + 1);
+        else render();
+        return;
+      }
+      if (target.closest('[data-back]')) {
+        setStep(state.step - 1);
+        return;
+      }
+      const countryButton = target.closest('[data-country-index]');
+      if (countryButton instanceof HTMLElement) {
+        selectCountry(state.countryMatches[Number(countryButton.dataset.countryIndex)]);
+        return;
+      }
+      const plus = target.closest('[data-plus], [data-minus], [data-service-plus], [data-service-minus]');
+      if (plus instanceof HTMLElement) {
+        const scope = plus.dataset.scope || 'value';
+        const id = plus.dataset.plus || plus.dataset.minus || plus.dataset.servicePlus || plus.dataset.serviceMinus;
+        const delta = plus.hasAttribute('data-plus') || plus.hasAttribute('data-service-plus') ? 1 : -1;
+        if (scope === 'value') state.values[id] = Math.max(0, intValue(state.values[id]) + delta);
+        else state.quantities[quantityKey(scope, id)] = Math.max(0, intValue(state.quantities[quantityKey(scope, id)]) + delta);
+        render();
+      }
+    });
+
+    mount.addEventListener('input', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)) return;
+      if (target.matches('[data-country-input]')) {
+        state.values.country = target.value;
+        state.values.countryCode = '';
+        searchCountries(target.value);
+        render({ focusCountry: true });
+        return;
+      }
+      const serviceQuantity = target.dataset.serviceQuantity;
+      const quantity = target.dataset.quantity;
+      if (serviceQuantity) {
+        state.quantities[quantityKey(target.dataset.scope, serviceQuantity)] = intValue(target.value);
+        render();
+        return;
+      }
+      if (quantity) {
+        state.values[quantity] = intValue(target.value);
+        render();
+        return;
+      }
+      const key = target.dataset.bind;
+      if (key) {
+        state.values[key] = target.value;
+        render();
+      }
+    });
+
+    mount.addEventListener('change', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)) return;
+      const check = target.dataset.check;
+      if (check) {
+        state.values[check] = target instanceof HTMLInputElement ? target.checked : Boolean(target.value);
+        render();
+      }
+    });
+
+    mount.addEventListener('keydown', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement) || !target.matches('[data-country-input]')) return;
+      if (!state.countryMatches.length) return;
+      if (event.key === 'Escape') {
+        state.countryMatches = [];
+        render({ focusCountry: true });
+      }
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        state.countryIndex = event.key === 'ArrowDown'
+          ? Math.min(state.countryMatches.length - 1, state.countryIndex + 1)
+          : Math.max(0, state.countryIndex - 1);
+        render({ focusCountry: true });
+      }
+      if (event.key === 'Enter' && state.countryIndex >= 0) {
+        event.preventDefault();
+        selectCountry(state.countryMatches[state.countryIndex]);
+      }
+    });
+
+    mount.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!state.values.quiet || !state.values.consent) {
+        state.status = t.validation.consents;
+        state.success = '';
+        render();
+        return;
+      }
+      state.status = '';
+      state.success = t.summary.success;
+      render();
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    const stay = params.get('stay');
+    if (modeKeys.includes(stay)) startFlow(stay);
+    else render();
+  })();
+</script>
+
+<style>
+.reservation-game,
+.reservation-game * {
+  box-sizing: border-box;
+}
+
+.reservation-game {
+  position: relative;
+  min-height: 100svh;
+  padding: clamp(112px, 11vw, 148px) 0 clamp(68px, 8vw, 104px);
+  overflow-x: clip;
+  color: #fff;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(60, 179, 113, .24), transparent 32%),
+    radial-gradient(circle at 88% 12%, rgba(242, 192, 120, .16), transparent 28%),
+    linear-gradient(135deg, #06130e 0%, #0b1a14 48%, #16351f 100%);
+}
+
+.reservation-game__ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: clip;
+}
+
+.reservation-game__ambient span {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 999px;
+  background: rgba(60, 179, 113, .18);
+  filter: blur(12px);
+  opacity: .65;
+}
+
+.reservation-game__ambient span:nth-child(1) { left: -90px; top: 18%; }
+.reservation-game__ambient span:nth-child(2) { right: 8%; top: 9%; background: rgba(242, 192, 120, .14); }
+.reservation-game__ambient span:nth-child(3) { right: 24%; bottom: 0; width: 190px; height: 190px; }
+
+.reservation-game__shell,
+.reservation-game__mount {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.reservation-start,
+.reservation-app {
+  display: grid;
+  gap: clamp(20px, 4vw, 34px);
+}
+
+.reservation-start {
+  max-width: 1160px;
+}
+
+.reservation-kicker {
+  display: inline-flex;
+  width: fit-content;
+  color: #8fe0b4;
+  font-size: .76rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.reservation-start h1 {
+  max-width: 920px;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.25rem, 6vw, 5.5rem);
+  line-height: .96;
+  font-weight: 950;
+}
+
+.reservation-start > p,
+.reservation-start__panel p,
+.reservation-step-head p,
+.booking-service-group header p,
+.booking-note,
+.booking-field small,
+.reservation-summary small {
+  color: rgba(244, 251, 246, .72);
+  line-height: 1.62;
+}
+
+.reservation-start__panel,
+.reservation-stage,
+.reservation-summary,
+.reservation-progress__rail,
+.reservation-progress__mobile,
+.reservation-selected {
+  border: 1px solid rgba(143, 224, 180, .18);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(60, 179, 113, .16), transparent 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, .115), rgba(255, 255, 255, .055));
+  box-shadow: 0 34px 94px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .12);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+}
+
+.reservation-start__panel {
+  display: grid;
+  gap: clamp(20px, 3vw, 32px);
+  padding: clamp(22px, 5vw, 52px);
+  border-radius: 36px;
+}
+
+.reservation-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 22px);
+}
+
+.reservation-choice {
+  min-height: 220px;
+  display: grid;
+  gap: 12px;
+  align-content: end;
+  padding: clamp(20px, 3vw, 30px);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 28px;
+  color: #fff;
+  text-align: left;
+  background: rgba(255, 255, 255, .07);
+  cursor: pointer;
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
+}
+
+.reservation-choice:hover,
+.reservation-choice:focus-visible {
+  transform: translateY(-5px);
+  border-color: rgba(143, 224, 180, .48);
+  background: rgba(60, 179, 113, .13);
+  box-shadow: 0 24px 60px rgba(60, 179, 113, .18);
+}
+
+.reservation-choice span,
+.booking-stepper-card__icon {
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  color: #082016;
+  background: linear-gradient(135deg, #b7f4d0, #3CB371);
+  box-shadow: 0 16px 38px rgba(60, 179, 113, .24);
+  font-size: .78rem;
+  font-weight: 950;
+}
+
+.reservation-choice strong {
+  color: #fff;
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  font-weight: 950;
+}
+
+.reservation-choice small {
+  color: rgba(244, 251, 246, .72);
+  line-height: 1.5;
+  font-weight: 760;
+}
+
+.reservation-progress {
+  display: grid;
+  gap: 12px;
+}
+
+.reservation-progress__mobile {
+  display: none;
+}
+
+.reservation-progress__rail {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px;
+  border-radius: 26px;
+}
+
+.reservation-progress__rail::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  bottom: 0;
+  width: var(--progress);
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3CB371, #b7f4d0);
+  box-shadow: 0 0 20px rgba(60, 179, 113, .52);
+}
+
+.reservation-progress button {
+  min-width: 0;
+  min-height: 60px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, .10);
+  border-radius: 18px;
+  color: rgba(244, 251, 246, .66);
+  background: rgba(255, 255, 255, .05);
+}
+
+.reservation-progress button:not(:disabled) {
+  cursor: pointer;
+}
+
+.reservation-progress button.is-active,
+.reservation-progress button.is-complete {
+  color: #fff;
+  border-color: rgba(143, 224, 180, .38);
+  background: rgba(60, 179, 113, .17);
+}
+
+.reservation-progress button span {
+  color: #8fe0b4;
+  font-size: .68rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+}
+
+.reservation-progress button strong {
+  font-size: .8rem;
+  font-weight: 920;
+}
+
+.reservation-selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 22px;
+  color: rgba(244, 251, 246, .78);
+}
+
+.reservation-selected strong {
+  color: #fff;
+}
+
+.reservation-selected button {
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: #082016;
+  background: #8fe0b4;
+  font-weight: 950;
+}
+
+.reservation-layout {
+  display: grid;
+  gap: 20px;
+}
+
+.reservation-stage,
+.reservation-summary {
+  border-radius: 32px;
+  padding: clamp(20px, 4vw, 38px);
+}
+
+.reservation-stage {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+
+.reservation-step-head h2,
+.booking-summary-content h2 {
+  margin: 8px 0 10px;
+  color: #fff;
+  font-size: clamp(1.9rem, 3.6vw, 3.2rem);
+  line-height: 1;
+  font-weight: 950;
+}
+
+.reservation-step-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.booking-date-grid,
+.booking-form-grid,
+.booking-stepper-grid,
+.booking-service-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  min-width: 0;
+}
+
+.booking-field {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.booking-field span {
+  color: rgba(244, 251, 246, .88);
+  font-size: .82rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+
+.booking-field input,
+.booking-field select,
+.booking-field textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, .13);
+  border-radius: 17px;
+  color: #fff;
+  background: rgba(255, 255, 255, .075);
+  outline: none;
+}
+
+.booking-field input,
+.booking-field select {
+  height: 58px;
+  padding: 0 16px;
+}
+
+.booking-field textarea {
+  min-height: 126px;
+  padding: 14px 16px;
+  resize: vertical;
+}
+
+.booking-field input:focus,
+.booking-field select:focus,
+.booking-field textarea:focus,
+.booking-stepper input:focus {
+  border-color: rgba(143, 224, 180, .58);
+  box-shadow: 0 0 0 4px rgba(60, 179, 113, .16);
+}
+
+.booking-night-card,
+.booking-note {
+  padding: 16px 18px;
+  border: 1px solid rgba(143, 224, 180, .18);
+  border-radius: 20px;
+  background: rgba(60, 179, 113, .10);
+}
+
+.booking-night-card {
+  display: grid;
+  align-content: center;
+  gap: 6px;
+}
+
+.booking-night-card span {
+  color: #8fe0b4;
+  font-size: .74rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.booking-night-card strong {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 950;
+}
+
+.booking-note--warm {
+  border-color: rgba(242, 192, 120, .28);
+  background: rgba(242, 192, 120, .10);
+}
+
+.booking-stepper-card,
+.booking-service-card {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .06);
+  transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.booking-service-card.is-selected,
+.booking-stepper-card:hover,
+.booking-service-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(143, 224, 180, .40);
+  background: rgba(60, 179, 113, .12);
+  box-shadow: 0 18px 42px rgba(60, 179, 113, .12);
+}
+
+.booking-stepper-card__meta,
+.booking-service-card__top,
+.booking-service-card__bottom {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.booking-stepper-card__meta > div,
+.booking-service-card__top > div {
+  min-width: 0;
+}
+
+.booking-stepper-card strong,
+.booking-service-card strong {
+  display: block;
+  color: #fff;
+  font-weight: 950;
+  overflow-wrap: anywhere;
+}
+
+.booking-stepper-card small,
+.booking-service-card small {
+  color: rgba(244, 251, 246, .66);
+  font-weight: 850;
+}
+
+.booking-stepper {
+  display: grid;
+  grid-template-columns: 46px 64px 46px;
+  gap: 8px;
+  align-items: center;
+}
+
+.booking-stepper button,
+.booking-stepper input {
+  height: 46px;
+  border-radius: 16px;
+}
+
+.booking-stepper button {
+  width: 46px;
+  color: #082016;
+  background: linear-gradient(135deg, #b7f4d0, #3CB371);
+  font-size: 1.35rem;
+  font-weight: 950;
+  box-shadow: 0 12px 28px rgba(60, 179, 113, .18);
+}
+
+.booking-stepper button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.booking-stepper input {
+  width: 64px;
+  padding: 0 6px;
+  border: 1px solid rgba(255, 255, 255, .13);
+  color: #fff;
+  text-align: center;
+  background: rgba(255, 255, 255, .075);
+  font-weight: 950;
+}
+
+.booking-service-group {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.booking-service-group header h3 {
+  margin: 0 0 6px;
+  color: #fff;
+  font-size: clamp(1.25rem, 2vw, 1.7rem);
+}
+
+.booking-combined-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.booking-country {
+  z-index: 5;
+}
+
+.booking-country-list {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  display: grid;
+  gap: 6px;
+  max-height: 280px;
+  padding: 8px;
+  border: 1px solid rgba(143, 224, 180, .24);
+  border-radius: 18px;
+  overflow-y: auto;
+  background: rgba(8, 24, 17, .98);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .28);
+}
+
+.booking-country-list button {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 11px 12px;
+  border-radius: 13px;
+  color: #fff;
+  text-align: left;
+  background: transparent;
+}
+
+.booking-country-list button:hover,
+.booking-country-list button.is-active {
+  background: rgba(60, 179, 113, .16);
+}
+
+.booking-country-list span {
+  width: 20px;
+  height: 15px;
+  border-radius: 2px;
+}
+
+.booking-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-height: 56px;
+  padding: 15px 16px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 18px;
+  color: rgba(244, 251, 246, .86);
+  background: rgba(255, 255, 255, .06);
+  font-weight: 850;
+}
+
+.booking-check input {
+  width: 19px;
+  height: 19px;
+  margin-top: 2px;
+  flex: 0 0 auto;
+  accent-color: #3CB371;
+}
+
+.booking-field--full,
+.booking-check--full {
+  grid-column: 1 / -1;
+}
+
+.reservation-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.reservation-btn {
+  min-height: 54px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  border-radius: 999px;
+  font-weight: 950;
+}
+
+.reservation-btn--primary {
+  color: #082016;
+  background: linear-gradient(135deg, #b7f4d0, #3CB371);
+  box-shadow: 0 18px 44px rgba(60, 179, 113, .26);
+}
+
+.reservation-btn--ghost {
+  color: #fff;
+  border: 1px solid rgba(143, 224, 180, .20);
+  background: rgba(255, 255, 255, .08);
+}
+
+.reservation-status {
+  min-height: 24px;
+  margin: 0;
+  color: #ffca8a;
+  font-weight: 900;
+}
+
+.reservation-summary {
+  align-self: start;
+}
+
+.booking-summary-content {
+  display: grid;
+  gap: 12px;
+}
+
+.booking-summary-content > p {
+  margin: 0;
+  color: rgba(244, 251, 246, .72);
+}
+
+.booking-summary-rows,
+.booking-summary-services {
+  display: grid;
+  gap: 8px;
+}
+
+.booking-summary-rows dl,
+.booking-summary-services p {
+  display: grid;
+  grid-template-columns: minmax(0, .85fr) minmax(0, 1fr);
+  gap: 10px;
+  margin: 0;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .09);
+}
+
+.booking-summary-rows dt,
+.booking-summary-services span {
+  color: rgba(244, 251, 246, .56);
+  font-weight: 850;
+}
+
+.booking-summary-rows dd,
+.booking-summary-services strong {
+  margin: 0;
+  color: #fff;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 760px) {
+  .booking-date-grid,
+  .booking-form-grid,
+  .booking-stepper-grid,
+  .booking-service-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .booking-combined-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+@media (min-width: 1120px) {
+  .reservation-layout {
+    grid-template-columns: minmax(0, 1fr) 380px;
+    align-items: start;
+  }
+
+  .reservation-summary {
+    position: sticky;
+    top: 104px;
+  }
+}
+
+@media (max-width: 920px) {
+  .reservation-choice-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .reservation-game {
+    padding: 104px 14px 90px;
+  }
+
+  .reservation-game__shell {
+    padding: 0;
+  }
+
+  .reservation-start h1 {
+    font-size: clamp(2rem, 10vw, 2.75rem);
+    line-height: 1.02;
+  }
+
+  .reservation-start__panel,
+  .reservation-stage,
+  .reservation-summary {
+    border-radius: 26px;
+    padding: 20px;
+  }
+
+  .reservation-choice {
+    min-height: 160px;
+    border-radius: 23px;
+  }
+
+  .reservation-progress__rail {
+    display: none;
+  }
+
+  .reservation-progress__mobile {
+    display: grid;
+    gap: 8px;
+    padding: 14px 16px;
+    border-radius: 22px;
+  }
+
+  .reservation-progress__mobile span {
+    color: #8fe0b4;
+    font-weight: 950;
+  }
+
+  .reservation-progress__mobile strong {
+    color: #fff;
+    font-weight: 950;
+  }
+
+  .reservation-progress__mobile i {
+    width: 100%;
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #3CB371 var(--progress), rgba(255, 255, 255, .12) var(--progress));
+    box-shadow: 0 0 18px rgba(60, 179, 113, .28);
+  }
+
+  .booking-stepper-card__meta,
+  .booking-service-card__top,
+  .booking-service-card__bottom {
+    align-items: flex-start;
+  }
+
+  .booking-stepper {
+    width: 100%;
+    grid-template-columns: 1fr 1.2fr 1fr;
+  }
+
+  .booking-stepper button,
+  .booking-stepper input {
+    width: 100%;
+  }
+
+  .reservation-btn {
+    width: 100%;
+  }
+
+  .booking-summary-rows dl,
+  .booking-summary-services p {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reservation-choice,
+  .booking-stepper-card,
+  .booking-service-card {
+    transition: none !important;
+  }
+}
+</style>
