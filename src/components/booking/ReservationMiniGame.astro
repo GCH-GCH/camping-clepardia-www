@@ -396,7 +396,7 @@ const config = {
 const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 ---
 
-<section class="reservation-mini booking-app-page" data-reservation-mini-game data-after-hero>
+<section class="reservation-mini booking-app-page" data-reservation-mini-game data-component="ReservationMiniGame" data-after-hero>
   <div class="reservation-mini__ambient" aria-hidden="true">
     <span></span>
     <span></span>
@@ -411,7 +411,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <p>{t.lead}</p>
         <div class="reservation-mini__choices">
           {Object.entries(t.modes).map(([mode, [label, desc]]) => (
-            <button class="reservation-choice-card" type="button" data-start-mode={mode}>
+            <button class="stay-choice-card reservation-choice-card" type="button" data-start-mode={mode}>
               <span aria-hidden="true">{mode === 'camping' ? 'RV' : mode === 'bungalow' ? 'D4' : 'R+'}</span>
               <strong>{label}</strong>
               <small>{desc}</small>
@@ -605,7 +605,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <p>${esc(t.lead)}</p>
         <div class="reservation-mini__choices">
           ${stayModes.map((mode) => `
-            <button class="reservation-choice-card" type="button" data-start-mode="${mode}">
+            <button class="stay-choice-card reservation-choice-card" type="button" data-start-mode="${mode}">
               <span aria-hidden="true">${mode === 'camping' ? 'RV' : mode === 'bungalow' ? 'D4' : 'R+'}</span>
               <strong>${esc(t.modes[mode][0])}</strong>
               <small>${esc(t.modes[mode][1])}</small>
@@ -1121,12 +1121,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     if (stayModes.includes(queryMode)) {
       state.mode = queryMode;
       state.step = 1;
+      render();
     }
-    render();
   })();
 </script>
 
-<style>
+<style is:global>
 .reservation-mini {
   position: relative;
   isolation: isolate;
@@ -1215,6 +1215,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
   margin-top: 20px;
 }
 
+.stay-choice-card,
 .reservation-choice-card,
 .reservation-step-card,
 .reservation-summary,
@@ -1229,6 +1230,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
   -webkit-backdrop-filter: blur(18px) saturate(135%);
 }
 
+.stay-choice-card,
 .reservation-choice-card {
   min-height: 250px;
   display: grid;
@@ -1242,6 +1244,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
   transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
 }
 
+.stay-choice-card:hover,
+.stay-choice-card:focus-visible,
 .reservation-choice-card:hover,
 .reservation-choice-card:focus-visible {
   transform: translateY(-5px);
@@ -1249,6 +1253,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
   box-shadow: 0 30px 96px rgba(60,179,113,.18), inset 0 1px 0 rgba(255,255,255,.18);
 }
 
+.stay-choice-card span,
 .reservation-choice-card span,
 .reservation-item-card__icon {
   width: 58px;
@@ -1263,12 +1268,14 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
   box-shadow: 0 16px 36px rgba(60,179,113,.25);
 }
 
+.stay-choice-card strong,
 .reservation-choice-card strong {
   display: block;
   color: #fff;
   font-size: clamp(1.45rem, 3vw, 2rem);
 }
 
+.stay-choice-card small,
 .reservation-choice-card small {
   color: rgba(245,255,248,.74);
   font-size: 1rem;
@@ -1802,6 +1809,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     display: block;
   }
 
+  .stay-choice-card,
   .reservation-choice-card {
     min-height: 176px;
   }
