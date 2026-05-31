@@ -252,17 +252,19 @@ const quickActions = [
       if (!(quickRail instanceof HTMLElement) || !(quickScrollbar instanceof HTMLElement) || !(quickThumb instanceof HTMLElement)) return;
       const max = quickMaxScroll();
       quickScrollbar.classList.toggle('is-hidden', max <= 4);
+      quickScrollbar.classList.toggle('is-at-start', quickRail.scrollLeft <= 2);
+      quickScrollbar.classList.toggle('is-at-end', max > 4 && quickRail.scrollLeft >= max - 2);
       if (max <= 4) {
         quickThumb.style.width = '100%';
         quickThumb.style.transform = 'translateX(0)';
         return;
       }
       const trackWidth = quickScrollbar.clientWidth;
-      const thumbWidth = Math.max(42, Math.round(trackWidth * (quickRail.clientWidth / quickRail.scrollWidth)));
+      const thumbWidth = Math.max(42, trackWidth * (quickRail.clientWidth / quickRail.scrollWidth));
       const travel = Math.max(1, trackWidth - thumbWidth);
-      const left = Math.round((quickRail.scrollLeft / max) * travel);
+      const left = (quickRail.scrollLeft / max) * travel;
       quickThumb.style.width = `${thumbWidth}px`;
-      quickThumb.style.transform = `translateX(${left}px)`;
+      quickThumb.style.transform = `translate3d(${left}px,0,0)`;
     };
 
     const animateQuickScrollTo = (target) => {
@@ -508,7 +510,7 @@ const quickActions = [
       quickRail.addEventListener('wheel', (event) => {
         const max = maxScroll();
         if (max <= 0) return;
-        const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+        const delta = (Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY) * 1.08;
         const next = Math.max(0, Math.min(max, (quickScrollRaf ? quickScrollTarget : quickRail.scrollLeft) + delta));
         if (next === quickRail.scrollLeft) return;
         event.preventDefault();
@@ -1093,6 +1095,33 @@ body.has-floating-chat-open {
   cursor: grab;
   pointer-events: auto;
   transition: opacity .2s ease, background .2s ease;
+  overflow: hidden;
+}
+
+.floating-chat__quick-scrollbar::before,
+.floating-chat__quick-scrollbar::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  width: 32px;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity .18s ease;
+}
+
+.floating-chat__quick-scrollbar::before {
+  left: 0;
+  background: linear-gradient(90deg, rgba(7,20,15,.72), transparent);
+}
+
+.floating-chat__quick-scrollbar::after {
+  right: 0;
+  background: linear-gradient(270deg, rgba(7,20,15,.72), transparent);
+}
+
+.floating-chat__quick-scrollbar.is-at-start::before,
+.floating-chat__quick-scrollbar.is-at-end::after {
+  opacity: .18;
 }
 
 .floating-chat__quick-scrollbar.is-hidden {
@@ -1115,12 +1144,15 @@ body.has-floating-chat-open {
   position: absolute;
   inset-block: 2px;
   left: 2px;
+  z-index: 2;
   width: 42px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #8fe0b4, #3CB371);
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.42), transparent 30%),
+    linear-gradient(90deg, #8fe0b4, #3CB371);
   box-shadow: 0 0 16px rgba(60,179,113,.34), inset 0 1px 0 rgba(255,255,255,.34);
   transform: translateX(0);
-  transition: width .16s ease, transform .16s ease, box-shadow .16s ease;
+  transition: width .18s cubic-bezier(.22, 1, .36, 1), transform .18s cubic-bezier(.22, 1, .36, 1), box-shadow .18s ease;
   will-change: transform, width;
 }
 

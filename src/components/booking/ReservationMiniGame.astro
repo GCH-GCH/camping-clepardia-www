@@ -1,4 +1,5 @@
 ---
+import { icons } from 'lucide';
 import { countries } from '@/data/countries';
 import { pricingConfig } from '@/data/pricing';
 import { resolveContentLanguage } from '@/i18n/config';
@@ -13,6 +14,17 @@ type SupportedLang = 'pl' | 'en' | 'de' | 'it';
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode) as SupportedLang;
+
+const renderLucideIcon = (name: keyof typeof icons | string) => {
+  const iconNode = icons[name as keyof typeof icons] ?? icons.CircleHelp;
+  const attrsToString = (attrs: Record<string, unknown>) => Object.entries(attrs)
+    .map(([key, value]) => `${key}="${String(value).replace(/"/g, '&quot;')}"`)
+    .join(' ');
+
+  return `<svg class="reservation-lucide-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${iconNode
+    .map(([tag, attrs]) => `<${tag} ${attrsToString(attrs as Record<string, unknown>)}></${tag}>`)
+    .join('')}</svg>`;
+};
 
 const copy = {
   pl: {
@@ -372,27 +384,74 @@ const copy = {
 const t = copy[lang] ?? copy.en;
 const modeChipsCopy = {
   pl: {
-    camping: ['Kamper', 'Namiot', 'Prad 10A'],
-    bungalow: ['2-os.', '3-os.', '4-os.'],
-    combined: ['Domek', 'Kamper', 'Rodzina/grupa'],
+    camping: ['Kamper', 'Van', 'Namiot', 'Prad 10A'],
+    bungalow: ['2-os.', '3-os.', '4-os.', 'Check-in 16:00'],
+    combined: ['Domek', 'Kamper', 'Rodzina/grupa', 'Jedno zapytanie'],
   },
   en: {
-    camping: ['Camper', 'Tent', '10A power'],
-    bungalow: ['2-person', '3-person', '4-person'],
-    combined: ['Bungalow', 'Camper', 'Family/group'],
+    camping: ['Camper', 'Van', 'Tent', '10A power'],
+    bungalow: ['2-person', '3-person', '4-person', 'Check-in 16:00'],
+    combined: ['Bungalow', 'Camper', 'Family/group', 'One enquiry'],
   },
   de: {
-    camping: ['Camper', 'Zelt', '10A Strom'],
-    bungalow: ['2 Pers.', '3 Pers.', '4 Pers.'],
-    combined: ['Bungalow', 'Camper', 'Familie/Gruppe'],
+    camping: ['Camper', 'Van', 'Zelt', '10A Strom'],
+    bungalow: ['2 Pers.', '3 Pers.', '4 Pers.', 'Check-in 16:00'],
+    combined: ['Bungalow', 'Camper', 'Familie/Gruppe', 'Eine Anfrage'],
   },
   it: {
-    camping: ['Camper', 'Tenda', 'Corrente 10A'],
-    bungalow: ['2 pers.', '3 pers.', '4 pers.'],
-    combined: ['Bungalow', 'Camper', 'Famiglia/gruppo'],
+    camping: ['Camper', 'Van', 'Tenda', 'Corrente 10A'],
+    bungalow: ['2 pers.', '3 pers.', '4 pers.', 'Check-in 16:00'],
+    combined: ['Bungalow', 'Camper', 'Famiglia/gruppo', 'Una richiesta'],
   },
 } as const;
 const modeChips = modeChipsCopy[lang] ?? modeChipsCopy.en;
+
+const iconHtml = {
+  modes: {
+    camping: renderLucideIcon('Caravan'),
+    bungalow: renderLucideIcon('House'),
+    combined: renderLucideIcon('UsersRound'),
+  },
+  steps: ['CalendarDays', 'UsersRound', 'Sparkles', 'IdCard', 'Receipt'].map(renderLucideIcon),
+  guests: {
+    adults: renderLucideIcon('UsersRound'),
+    children: renderLucideIcon('UsersRound'),
+    toddlers: renderLucideIcon('Baby'),
+    bungalowGuests: renderLucideIcon('House'),
+    campingGuests: renderLucideIcon('Tent'),
+  },
+  services: {
+    camper: renderLucideIcon('Caravan'),
+    van: renderLucideIcon('CarFront'),
+    caravan: renderLucideIcon('Caravan'),
+    'tent-small': renderLucideIcon('Tent'),
+    'tent-large': renderLucideIcon('Tent'),
+    'rooftop-tent': renderLucideIcon('TentTree'),
+    parking: renderLucideIcon('ParkingCircle'),
+    motorcycle: renderLucideIcon('Bike'),
+    'cargo-trailer': renderLucideIcon('Container'),
+    bus: renderLucideIcon('Truck'),
+    electricity: renderLucideIcon('PlugZap'),
+    dog: renderLucideIcon('PawPrint'),
+    'bungalow-2': renderLucideIcon('House'),
+    'bungalow-3': renderLucideIcon('HousePlus'),
+    'bungalow-4': renderLucideIcon('HousePlus'),
+  },
+  details: {
+    contact: renderLucideIcon('UserRound'),
+    stay: renderLucideIcon('CarFront'),
+    message: renderLucideIcon('MessageCircle'),
+    country: renderLucideIcon('Globe2'),
+    plate: renderLucideIcon('BadgeInfo'),
+    accessibility: renderLucideIcon('Accessibility'),
+    late: renderLucideIcon('Clock3'),
+    quiet: renderLucideIcon('Moon'),
+    consent: renderLucideIcon('ShieldCheck'),
+    help: renderLucideIcon('CircleHelp'),
+    success: renderLucideIcon('CheckCircle2'),
+    deposit: renderLucideIcon('WalletCards'),
+  },
+};
 
 const uxCopy = {
   pl: {
@@ -538,6 +597,7 @@ const config = {
   },
   modeChips,
   ux,
+  icons: iconHtml,
   countries: countries.map((country) => ({
     code: country.code,
     flagClass: country.flagClass,
@@ -565,34 +625,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <div class="reservation-mini__choices">
           {Object.entries(t.modes).map(([mode, [label, desc]]) => (
             <button class="stay-choice-card reservation-choice-card" type="button" data-start-mode={mode}>
-              <span class:list={['reservation-choice-card__icon', `reservation-choice-card__icon--${mode}`]} aria-hidden="true">
-                {mode === 'camping' ? (
-                  <svg viewBox="0 0 48 48" focusable="false">
-                    <path d="M7 28V16c0-3 2-5 5-5h15c3 0 5 2 5 5v12" />
-                    <path d="M32 20h5l5 6v9H7v-7h25z" />
-                    <path d="M14 17h8v7h-8z" />
-                    <path d="M29 24h8" />
-                    <circle cx="16" cy="35" r="4" />
-                    <circle cx="35" cy="35" r="4" />
-                  </svg>
-                ) : mode === 'bungalow' ? (
-                  <svg viewBox="0 0 48 48" focusable="false">
-                    <path d="M7 25 24 10l17 15" />
-                    <path d="M12 22v16h24V22" />
-                    <path d="M20 38V27h8v11" />
-                    <path d="M31 15v-5h5v10" />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 48 48" focusable="false">
-                    <path d="M12 31V19c0-2 2-4 4-4h10c2 0 4 2 4 4v12" />
-                    <path d="M30 22h4l4 5v8H12v-4h18z" />
-                    <circle cx="18" cy="35" r="3" />
-                    <circle cx="34" cy="35" r="3" />
-                    <path d="M35 12v8" />
-                    <path d="M31 16h8" />
-                  </svg>
-                )}
-              </span>
+              <span class:list={['reservation-choice-card__icon', `reservation-choice-card__icon--${mode}`]} aria-hidden="true" set:html={iconHtml.modes[mode as keyof typeof iconHtml.modes]} />
               <span class="reservation-choice-card__content">
                 <strong>{label}</strong>
                 <small>{desc}</small>
@@ -663,6 +696,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       toast: '',
       summaryPulse: false,
       countryOpen: false,
+      countryDirty: false,
       countryActiveIndex: 0,
       helpOpen: false,
       success: false,
@@ -686,13 +720,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const countryMatches = () => {
       const query = normalize(state.details.countrySearch);
-      const popularCodes = ['PL', 'DE', 'NL', 'CZ', 'SK', 'SE'];
       if (!state.countryOpen) return [];
-      if (!query) {
-        return config.countries
-          .filter((country) => popularCodes.includes(country.code))
-          .slice(0, 6);
-      }
+      if (!query || !state.countryDirty) return [];
       return config.countries
         .filter((country) => {
           const haystack = [country.code, country.name, ...(country.aliases || [])].map(normalize).join(' ');
@@ -879,43 +908,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const modeTitle = () => state.mode === 'simple' ? ui.simple.title : t.modes[state.mode]?.[0];
     const modeDescription = () => state.mode === 'simple' ? ui.simple.desc : t.modes[state.mode]?.[1];
 
-    const inlineIcon = (path) => `<svg viewBox="0 0 48 48" focusable="false" aria-hidden="true">${path}</svg>`;
-
-    const serviceIcon = (id) => {
-      const icons = {
-        camper: '<path d="M7 29V16c0-3 2-5 5-5h15c3 0 5 5 5 5v13"/><path d="M32 21h5l5 6v8H7v-6h25z"/><path d="M14 17h8v7h-8z"/><circle cx="16" cy="35" r="4"/><circle cx="35" cy="35" r="4"/>',
-        van: '<path d="M8 18h24l8 9v8H8z"/><path d="M31 20v8h9"/><circle cx="16" cy="35" r="4"/><circle cx="34" cy="35" r="4"/>',
-        caravan: '<path d="M9 17h25v16H9z"/><path d="M34 29h6"/><circle cx="18" cy="34" r="4"/><path d="M14 22h8"/>',
-        'tent-small': '<path d="M24 11 8 37h32z"/><path d="M24 11v26"/><path d="M18 37l6-10 6 10"/>',
-        'tent-large': '<path d="M24 9 6 38h36z"/><path d="M24 9v29"/><path d="M15 38l9-15 9 15"/>',
-        'rooftop-tent': '<path d="M9 29h30v8H9z"/><path d="M16 29l8-14 8 14"/><path d="M12 37v4m24-4v4"/>',
-        parking: '<path d="M14 39V10h13c6 0 10 4 10 10s-4 10-10 10h-7v9z"/><path d="M20 16h7c3 0 5 2 5 4s-2 4-5 4h-7z"/>',
-        motorcycle: '<circle cx="14" cy="34" r="5"/><circle cx="34" cy="34" r="5"/><path d="M18 34h8l6-13h-7"/><path d="M24 21h-5l-5 13"/>',
-        'cargo-trailer': '<path d="M8 20h24v14H8z"/><path d="M32 29h8"/><circle cx="17" cy="35" r="4"/>',
-        bus: '<path d="M9 12h30v24H9z"/><path d="M14 17h20"/><path d="M14 25h20"/><circle cx="17" cy="37" r="3"/><circle cx="31" cy="37" r="3"/>',
-        electricity: '<path d="M27 5 14 27h10l-3 16 13-23H24z"/>',
-        dog: '<circle cx="18" cy="20" r="4"/><circle cx="30" cy="20" r="4"/><circle cx="15" cy="31" r="4"/><circle cx="33" cy="31" r="4"/><path d="M20 31c1-4 7-4 8 0l2 6H18z"/>',
-        'bungalow-2': '<path d="M7 25 24 10l17 15"/><path d="M12 22v16h24V22"/><path d="M20 38V27h8v11"/>',
-        'bungalow-3': '<path d="M7 25 24 10l17 15"/><path d="M12 22v16h24V22"/><path d="M17 31h14"/><path d="M17 38V27h14v11"/>',
-        'bungalow-4': '<path d="M7 25 24 10l17 15"/><path d="M12 22v16h24V22"/><path d="M18 27h12v11H18z"/><path d="M24 27v11"/>',
-      };
-      return inlineIcon(icons[id] || '<circle cx="24" cy="24" r="14"/><path d="M24 14v20M14 24h20"/>');
-    };
-
-    const guestIcon = (key) => inlineIcon(key === 'toddlers'
-      ? '<circle cx="24" cy="18" r="7"/><path d="M14 39c2-9 18-9 20 0"/><path d="M16 12h16"/>'
-      : '<circle cx="18" cy="17" r="6"/><circle cx="32" cy="20" r="5"/><path d="M8 39c2-10 18-10 20 0"/><path d="M24 39c1-7 13-7 16 0"/>');
-
-    const stepIcon = (index) => {
-      const icons = [
-        '<path d="M14 8v7M34 8v7"/><path d="M10 14h28v26H10z"/><path d="M10 22h28"/>',
-        '<circle cx="18" cy="17" r="6"/><circle cx="32" cy="20" r="5"/><path d="M8 39c2-10 18-10 20 0"/><path d="M24 39c1-7 13-7 16 0"/>',
-        '<path d="M10 15h28"/><path d="M10 24h28"/><path d="M10 33h28"/><circle cx="16" cy="15" r="3"/><circle cx="30" cy="24" r="3"/><circle cx="22" cy="33" r="3"/>',
-        '<path d="M12 10h24v28H12z"/><path d="M18 18h12"/><path d="M18 25h12"/><path d="M18 32h8"/>',
-        '<path d="M13 8h22v32H13z"/><path d="M18 16h12"/><path d="M18 24h12"/><path d="M18 32h8"/>',
-      ];
-      return inlineIcon(icons[index] || icons[0]);
-    };
+    const iconFromConfig = (group, key) => config.icons?.[group]?.[key] ?? config.icons?.details?.help ?? '';
+    const modeIcon = (mode) => iconFromConfig('modes', mode);
+    const stepIcon = (index) => config.icons?.steps?.[index] ?? iconFromConfig('details', 'help');
+    const serviceIcon = (id) => iconFromConfig('services', id);
+    const guestIcon = (key) => iconFromConfig('guests', key);
+    const detailIcon = (key) => iconFromConfig('details', key);
 
     const startTemplate = () => `
       <div class="reservation-mini__start">
@@ -968,22 +966,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       `;
     };
 
-    const modeIcon = (mode) => {
-      if (mode === 'camping') {
-        return '<svg viewBox="0 0 48 48" focusable="false"><path d="M7 28V16c0-3 2-5 5-5h15c3 0 5 2 5 5v12"/><path d="M32 20h5l5 6v9H7v-7h25z"/><path d="M14 17h8v7h-8z"/><path d="M29 24h8"/><circle cx="16" cy="35" r="4"/><circle cx="35" cy="35" r="4"/></svg>';
-      }
-      if (mode === 'bungalow') {
-        return '<svg viewBox="0 0 48 48" focusable="false"><path d="M7 25 24 10l17 15"/><path d="M12 22v16h24V22"/><path d="M20 38V27h8v11"/><path d="M31 15v-5h5v10"/></svg>';
-      }
-      return '<svg viewBox="0 0 48 48" focusable="false"><path d="M12 31V19c0-2 2-4 4-4h10c2 0 4 2 4 4v12"/><path d="M30 22h4l4 5v8H12v-4h18z"/><circle cx="18" cy="35" r="3"/><circle cx="34" cy="35" r="3"/><path d="M35 12v8"/><path d="M31 16h8"/></svg>';
-    };
-
     const stepperTemplate = ({ kind, key, scope = '', id = '', label, price = 0, value }) => {
       const current = Number(value ?? 0);
       const attrs = kind === 'guest' ? `data-guest-key="${esc(key)}"` : `data-service-scope="${esc(scope)}" data-service-id="${esc(id)}"`;
       return `
         <div class="reservation-stepper" ${attrs}>
-          <button type="button" data-stepper-minus aria-label="${esc(t.actions.decrease)} ${esc(label)}" ${current <= 0 ? 'disabled' : ''}>-</button>
+          <button type="button" data-stepper-minus aria-label="${esc(t.actions.decrease)} ${esc(label)}" ${current <= 0 ? 'disabled' : ''}>&minus;</button>
           <strong aria-live="polite">${current}</strong>
           <button type="button" data-stepper-plus aria-label="${esc(t.actions.increase)} ${esc(label)}">+</button>
         </div>
@@ -1096,16 +1084,19 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const countryTemplate = () => {
       const matches = countryMatches();
       const hasQuery = normalize(state.details.countrySearch).length > 0;
+      const showHint = state.countryOpen && !hasQuery && !state.details.countryCode;
+      const showResults = state.countryOpen && state.countryDirty && hasQuery;
       return `
         <div class="reservation-country">
           <label class="reservation-field">
             <span>${esc(t.fields.country)}</span>
-            <input type="text" data-country-search value="${esc(state.details.countrySearch)}" placeholder="${esc(t.fields.countryPlaceholder)}" autocomplete="off" aria-autocomplete="list" aria-expanded="${state.countryOpen ? 'true' : 'false'}" />
+            <input type="text" data-country-search value="${esc(state.details.countrySearch)}" placeholder="${esc(t.fields.countryPlaceholder)}" autocomplete="off" aria-autocomplete="list" aria-expanded="${showResults ? 'true' : 'false'}" />
           </label>
           <input type="hidden" data-country-code value="${esc(state.details.countryCode)}" />
-          ${state.countryOpen ? `
+          ${showHint ? `<p class="reservation-country__hint">${esc(ui.noCountries)}</p>` : ''}
+          ${showResults ? `
             <div class="reservation-country__list" role="listbox">
-              <p>${esc(hasQuery ? ui.suggestedCountries : ui.popularCountries)}</p>
+              <p>${esc(ui.suggestedCountries)}</p>
               ${matches.length ? matches.map((country, index) => `
                 <button type="button" data-country-pick="${esc(country.code)}" role="option" class="${index === state.countryActiveIndex ? 'is-active' : ''}">
                   <i class="${esc(country.flagClass)}" aria-hidden="true"></i>
@@ -1119,69 +1110,138 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       `;
     };
 
-    const detailsStep = () => `
-      <section class="reservation-step-card">
-        <p class="reservation-step-card__eyebrow">${esc(stepTitles[3])}</p>
-        <h2>${esc(stepTitles[3])}</h2>
-        <p>${esc(t.stepLead.details)}</p>
-        ${state.hint ? `<div class="reservation-hint">${esc(state.hint)}</div>` : ''}
-        <div class="reservation-form-grid">
-          <label class="reservation-field">
-            <span>${esc(t.fields.name)}</span>
-            <input type="text" data-field="details.name" value="${esc(state.details.name)}" autocomplete="name" />
-          </label>
-          <label class="reservation-field">
-            <span>${esc(t.fields.email)}</span>
-            <input type="email" data-field="details.email" value="${esc(state.details.email)}" autocomplete="email" />
-          </label>
-          <label class="reservation-field">
-            <span>${esc(t.fields.phone)}</span>
-            <input type="tel" data-field="details.phone" value="${esc(state.details.phone)}" autocomplete="tel" />
-          </label>
-          <div class="reservation-field">
-            <span>${esc(t.fields.language)}</span>
-            <div class="reservation-pills">
-              ${['PL','EN','DE','IT'].map((language) => `
-                <button type="button" data-language="${language}" class="${state.details.language === language ? 'is-active' : ''}">${language}</button>
-              `).join('')}
-            </div>
-          </div>
-          ${countryTemplate()}
-          <label class="reservation-field">
-            <span>${esc(t.fields.plate)}</span>
-            <input type="text" data-field="details.plate" value="${esc(state.details.plate)}" />
-            <small>${esc(t.fields.plateHint)}</small>
-          </label>
-          <label class="reservation-field reservation-field--wide">
-            <span>${esc(t.fields.message)}</span>
-            <textarea data-field="details.message" rows="4">${esc(state.details.message)}</textarea>
-          </label>
-        </div>
-        <div class="reservation-consents">
-          <label><input type="checkbox" data-check="specialNeeds" ${state.details.specialNeeds ? 'checked' : ''} /> <span>${esc(t.fields.specialNeeds)}</span></label>
-          ${state.details.specialNeeds ? `
-            <label class="reservation-field reservation-field--wide">
-              <span>${esc(t.fields.specialNeedsText)}</span>
-              <textarea data-field="details.specialNeedsText" rows="3">${esc(state.details.specialNeedsText)}</textarea>
-            </label>
-          ` : ''}
-          <label><input type="checkbox" data-check="lateCheckout" ${state.details.lateCheckout ? 'checked' : ''} /> <span>${esc(t.fields.lateCheckout)}</span></label>
-          ${state.details.lateCheckout ? `
-            <div class="reservation-late-panel">
-              <label class="reservation-field">
-                <span>${esc(t.fields.lateTime)}</span>
-                <select data-field="details.lateTime">
-                  ${['13:00','14:00','15:00','16:00','17:00'].map((time) => `<option value="${time}" ${state.details.lateTime === time ? 'selected' : ''}>${time}</option>`).join('')}
-                </select>
-              </label>
-              <p>${esc(t.info.lateCheckout)}</p>
-            </div>
-          ` : ''}
-          <label><input type="checkbox" data-check="quiet" ${state.details.quiet ? 'checked' : ''} /> <span>${esc(t.fields.quiet)}</span></label>
-          <label><input type="checkbox" data-check="consent" ${state.details.consent ? 'checked' : ''} /> <span>${esc(t.fields.consent)}</span></label>
-        </div>
-      </section>
+    const detailsSectionCopy = () => (config.lang === 'pl' ? {
+      contactTitle: 'Dane kontaktowe',
+      contactLead: 'Recepcja uzyje ich tylko do odpowiedzi na zapytanie.',
+      stayTitle: 'Szczegoly pobytu',
+      stayLead: 'Dopisz informacje, ktore pomoga przygotowac przyjazd.',
+      consentTitle: 'Potwierdzenia',
+      consentLead: 'Kilka waznych zasad, zeby zapytanie bylo kompletne.',
+      specialHelper: 'Opcjonalnie. Pokazemy dodatkowe pole po zaznaczeniu.',
+      lateHelper: 'Recepcja potwierdzi mozliwosc po przyjezdzie.',
+      quietHelper: 'Wymagane przed wyslaniem.',
+      consentHelper: 'Wymagane przed wyslaniem.',
+    } : {
+      contactTitle: 'Contact details',
+      contactLead: 'Reception will use them only to answer this enquiry.',
+      stayTitle: 'Stay details',
+      stayLead: 'Add anything that helps prepare your arrival.',
+      consentTitle: 'Confirmations',
+      consentLead: 'A few important rules to complete the enquiry.',
+      specialHelper: 'Optional. An extra field appears after selecting it.',
+      lateHelper: 'Reception confirms possibility after arrival.',
+      quietHelper: 'Required before sending.',
+      consentHelper: 'Required before sending.',
+    });
+
+    const optionRow = ({ check, icon, label, helper }) => `
+      <label class="reservation-option-row">
+        <input type="checkbox" data-check="${esc(check)}" ${state.details[check] ? 'checked' : ''} />
+        <i aria-hidden="true">${detailIcon(icon)}</i>
+        <span>
+          <strong>${esc(label)}</strong>
+          <small>${esc(helper)}</small>
+        </span>
+      </label>
     `;
+
+    const detailsStep = () => {
+      const labels = detailsSectionCopy();
+      return `
+        <section class="reservation-step-card reservation-step-card--details">
+          <p class="reservation-step-card__eyebrow">${esc(stepTitles[3])}</p>
+          <h2>${esc(stepTitles[3])}</h2>
+          <p>${esc(t.stepLead.details)}</p>
+          ${state.hint ? `<div class="reservation-hint">${esc(state.hint)}</div>` : ''}
+          <div class="reservation-details-stack">
+            <section class="reservation-details-section">
+              <header class="reservation-details-section__head">
+                <span aria-hidden="true">${detailIcon('contact')}</span>
+                <div>
+                  <strong>${esc(labels.contactTitle)}</strong>
+                  <p>${esc(labels.contactLead)}</p>
+                </div>
+              </header>
+              <div class="reservation-form-grid">
+                <label class="reservation-field">
+                  <span>${esc(t.fields.name)}</span>
+                  <input type="text" data-field="details.name" value="${esc(state.details.name)}" autocomplete="name" />
+                </label>
+                <label class="reservation-field">
+                  <span>${esc(t.fields.email)}</span>
+                  <input type="email" data-field="details.email" value="${esc(state.details.email)}" autocomplete="email" />
+                </label>
+                <label class="reservation-field">
+                  <span>${esc(t.fields.phone)}</span>
+                  <input type="tel" data-field="details.phone" value="${esc(state.details.phone)}" autocomplete="tel" />
+                </label>
+                <div class="reservation-field">
+                  <span>${esc(t.fields.language)}</span>
+                  <div class="reservation-pills">
+                    ${['PL','EN','DE','IT'].map((language) => `
+                      <button type="button" data-language="${language}" class="${state.details.language === language ? 'is-active' : ''}">${language}</button>
+                    `).join('')}
+                  </div>
+                </div>
+                ${countryTemplate()}
+              </div>
+            </section>
+            <section class="reservation-details-section">
+              <header class="reservation-details-section__head">
+                <span aria-hidden="true">${detailIcon('stay')}</span>
+                <div>
+                  <strong>${esc(labels.stayTitle)}</strong>
+                  <p>${esc(labels.stayLead)}</p>
+                </div>
+              </header>
+              <div class="reservation-form-grid">
+                <label class="reservation-field">
+                  <span>${esc(t.fields.plate)}</span>
+                  <input type="text" data-field="details.plate" value="${esc(state.details.plate)}" />
+                  <small>${esc(t.fields.plateHint)}</small>
+                </label>
+                <label class="reservation-field reservation-field--wide">
+                  <span>${esc(t.fields.message)}</span>
+                  <textarea data-field="details.message" rows="4">${esc(state.details.message)}</textarea>
+                </label>
+              </div>
+            </section>
+            <section class="reservation-details-section">
+              <header class="reservation-details-section__head">
+                <span aria-hidden="true">${detailIcon('consent')}</span>
+                <div>
+                  <strong>${esc(labels.consentTitle)}</strong>
+                  <p>${esc(labels.consentLead)}</p>
+                </div>
+              </header>
+              <div class="reservation-consents">
+                ${optionRow({ check: 'specialNeeds', icon: 'accessibility', label: t.fields.specialNeeds, helper: labels.specialHelper })}
+                ${state.details.specialNeeds ? `
+                  <label class="reservation-field reservation-field--wide reservation-reveal-field">
+                    <span>${esc(t.fields.specialNeedsText)}</span>
+                    <textarea data-field="details.specialNeedsText" rows="3">${esc(state.details.specialNeedsText)}</textarea>
+                  </label>
+                ` : ''}
+                ${optionRow({ check: 'lateCheckout', icon: 'late', label: t.fields.lateCheckout, helper: labels.lateHelper })}
+                ${state.details.lateCheckout ? `
+                  <div class="reservation-late-panel reservation-reveal-field">
+                    <label class="reservation-field">
+                      <span>${esc(t.fields.lateTime)}</span>
+                      <select data-field="details.lateTime">
+                        ${['13:00','14:00','15:00','16:00','17:00'].map((time) => `<option value="${time}" ${state.details.lateTime === time ? 'selected' : ''}>${time}</option>`).join('')}
+                      </select>
+                    </label>
+                    <p>${esc(t.info.lateCheckout)}</p>
+                  </div>
+                ` : ''}
+                ${optionRow({ check: 'quiet', icon: 'quiet', label: t.fields.quiet, helper: labels.quietHelper })}
+                ${optionRow({ check: 'consent', icon: 'consent', label: t.fields.consent, helper: labels.consentHelper })}
+              </div>
+            </section>
+          </div>
+        </section>
+      `;
+    };
 
     const summaryContent = (full = false) => {
       const selected = selectedServices();
@@ -1267,7 +1327,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <button class="reservation-help__scrim" type="button" data-help-close aria-label="${esc(ui.help.close)}"></button>
         <aside class="reservation-help__panel">
           <div class="reservation-help__head">
-            <span aria-hidden="true">${inlineIcon('<circle cx="24" cy="24" r="18"/><path d="M19 19a5 5 0 1 1 8 4c-2 1-3 2-3 5"/><path d="M24 35h.01"/>')}</span>
+            <span aria-hidden="true">${detailIcon('help')}</span>
             <div>
               <p class="reservation-mini__kicker">${esc(ui.help.open)}</p>
               <h2>${esc(ui.help.title)}</h2>
@@ -1275,9 +1335,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             <button type="button" data-help-close aria-label="${esc(ui.help.close)}">x</button>
           </div>
           <div class="reservation-help__sections">
-            ${ui.help.sections.map(([title, text]) => `
+            ${ui.help.sections.map(([title, text], index) => `
               <article>
-                <i aria-hidden="true">${inlineIcon('<path d="M12 24h24"/><path d="M24 12v24"/><circle cx="24" cy="24" r="18"/>')}</i>
+                <i aria-hidden="true">${[detailIcon('stay'), detailIcon('deposit'), detailIcon('success'), detailIcon('late'), detailIcon('quiet'), detailIcon('country')][index] ?? detailIcon('help')}</i>
                 <strong>${esc(title)}</strong>
                 <p>${esc(text)}</p>
               </article>
@@ -1298,7 +1358,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       return `
         <div class="reservation-success-modal" role="dialog" aria-modal="true" aria-label="${esc(ui.success.title)}">
           <div class="reservation-success-modal__card">
-            <span class="reservation-success-modal__mark" aria-hidden="true">${inlineIcon('<path d="M10 25l9 9 19-20"/><circle cx="24" cy="24" r="19"/>')}</span>
+            <span class="reservation-success-modal__mark" aria-hidden="true">${detailIcon('success')}</span>
             <h2>${esc(ui.success.title)}</h2>
             <p>${esc(ui.success.text)}</p>
             <dl>
@@ -1451,6 +1511,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.details.countryName = country.name;
       state.details.countrySearch = `${country.name} (${country.code})`;
       state.countryOpen = false;
+      state.countryDirty = false;
       state.countryActiveIndex = 0;
       render();
       restoreCountryFocus();
@@ -1581,6 +1642,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         state.details.countryCode = '';
         state.details.countryName = '';
         state.countryOpen = true;
+        state.countryDirty = true;
         state.countryActiveIndex = 0;
         render();
         restoreCountryFocus();
@@ -1592,6 +1654,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (!(target instanceof HTMLInputElement) || !target.hasAttribute('data-country-search')) return;
       if (state.countryOpen) return;
       state.countryOpen = true;
+      state.countryDirty = false;
       state.countryActiveIndex = 0;
       render();
       restoreCountryFocus();
@@ -1613,6 +1676,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (event.key === 'ArrowDown') {
         event.preventDefault();
         state.countryOpen = true;
+        state.countryDirty = true;
         state.countryActiveIndex = results.length ? Math.min(results.length - 1, state.countryActiveIndex + 1) : 0;
         render();
         restoreCountryFocus();
@@ -1621,6 +1685,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (event.key === 'ArrowUp') {
         event.preventDefault();
         state.countryOpen = true;
+        state.countryDirty = true;
         state.countryActiveIndex = Math.max(0, state.countryActiveIndex - 1);
         render();
         restoreCountryFocus();
@@ -1632,6 +1697,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       }
       if (event.key === 'Escape') {
         state.countryOpen = false;
+        state.countryDirty = false;
         render();
       }
     });
@@ -1736,6 +1802,7 @@ body.booking-app-page .main-content {
   -webkit-backdrop-filter: blur(20px) saturate(140%);
   text-align: center;
   overflow: hidden;
+  animation: reservationPanelIn .72s cubic-bezier(.22, 1, .36, 1) both;
 }
 
 .reservation-mini__start::before,
@@ -1768,6 +1835,21 @@ body.booking-app-page .main-content {
   position: relative;
   z-index: 1;
 }
+
+.reservation-mini__start .reservation-mini__kicker,
+.reservation-mini__start h1,
+.reservation-mini__start > p:not(.reservation-mini__note):not(.reservation-mini__kicker),
+.reservation-mini__choices,
+.reservation-simple-link,
+.reservation-mini__note {
+  animation: reservationElementIn .68s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.reservation-mini__start h1 { animation-delay: .08s; }
+.reservation-mini__start > p:not(.reservation-mini__note):not(.reservation-mini__kicker) { animation-delay: .15s; }
+.reservation-mini__choices { animation-delay: .22s; }
+.reservation-simple-link { animation-delay: .36s; }
+.reservation-mini__note { animation-delay: .42s; }
 
 .reservation-mini__kicker,
 .reservation-step-card__eyebrow {
@@ -1836,7 +1918,15 @@ body.booking-app-page .main-content {
   overflow: hidden;
   transform: translateZ(0);
   transition: transform .26s cubic-bezier(.22, 1, .36, 1), border-color .26s ease, box-shadow .26s ease;
+  animation:
+    reservationCardIn .72s cubic-bezier(.22, 1, .36, 1) both,
+    reservationChoiceFloat 7.4s ease-in-out infinite;
+  animation-delay: var(--choice-delay, .28s), calc(var(--choice-delay, .28s) + .9s);
 }
+
+.reservation-mini__choices .reservation-choice-card:nth-child(1) { --choice-delay: .22s; }
+.reservation-mini__choices .reservation-choice-card:nth-child(2) { --choice-delay: .34s; }
+.reservation-mini__choices .reservation-choice-card:nth-child(3) { --choice-delay: .46s; }
 
 .stay-choice-card::before,
 .reservation-choice-card::before {
@@ -1850,6 +1940,8 @@ body.booking-app-page .main-content {
   opacity: .52;
   pointer-events: none;
   transition: opacity .26s ease;
+  background-size: 100% 100%, 220% 100%;
+  animation: reservationGlowSweep 8s ease-in-out infinite;
 }
 
 .stay-choice-card::after,
@@ -1871,6 +1963,11 @@ body.booking-app-page .main-content {
   transform: translateY(-5px);
   border-color: rgba(143,224,180,.5);
   box-shadow: 0 34px 110px rgba(60,179,113,.21), 0 0 0 1px rgba(143,224,180,.16), inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+.stay-choice-card:active,
+.reservation-choice-card:active {
+  transform: translateY(-2px) scale(.985);
 }
 
 .stay-choice-card:hover::before,
@@ -2105,6 +2202,8 @@ body.booking-app-page .main-content {
 .reservation-progress__desktop button i svg,
 .reservation-item-card__icon svg,
 .reservation-presets button svg,
+.reservation-details-section__head svg,
+.reservation-option-row svg,
 .reservation-help svg,
 .reservation-success-modal svg {
   width: 100%;
@@ -2139,6 +2238,7 @@ body.booking-app-page .main-content {
   grid-template-columns: minmax(0, 1fr) 380px;
   gap: clamp(24px, 3vw, 34px);
   align-items: start;
+  animation: reservationElementIn .4s cubic-bezier(.22, 1, .36, 1) both;
 }
 
 .reservation-step-card,
@@ -2160,6 +2260,61 @@ body.booking-app-page .main-content {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   margin-top: 22px;
+}
+
+.reservation-step-card--details {
+  padding: clamp(20px, 3.2vw, 34px);
+}
+
+.reservation-details-stack {
+  display: grid;
+  gap: 18px;
+  margin-top: 22px;
+}
+
+.reservation-details-section {
+  display: grid;
+  gap: 17px;
+  padding: clamp(16px, 2vw, 22px);
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(143,224,180,.10), transparent 35%),
+    rgba(255,255,255,.055);
+}
+
+.reservation-details-section .reservation-form-grid {
+  margin-top: 0;
+}
+
+.reservation-details-section__head {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 13px;
+  align-items: center;
+}
+
+.reservation-details-section__head > span {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  color: #07140f;
+  background: linear-gradient(135deg, #f2c078, #8fe0b4 48%, #3CB371);
+  box-shadow: 0 14px 34px rgba(60,179,113,.18);
+}
+
+.reservation-details-section__head strong {
+  display: block;
+  color: #fff;
+  font-size: 1.08rem;
+}
+
+.reservation-details-section__head p {
+  margin-top: 2px;
+  color: rgba(245,255,248,.62);
+  font-size: .92rem;
 }
 
 .reservation-field {
@@ -2416,6 +2571,19 @@ body.booking-app-page .main-content {
   min-width: 0;
 }
 
+.reservation-country__hint {
+  margin-top: 8px !important;
+  width: fit-content;
+  max-width: 100%;
+  padding: 9px 12px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 999px;
+  color: rgba(245,255,248,.72) !important;
+  background: rgba(60,179,113,.09);
+  font-size: .82rem;
+  line-height: 1.35;
+}
+
 .reservation-country__list {
   position: absolute;
   z-index: 30;
@@ -2484,19 +2652,28 @@ body.booking-app-page .main-content {
 .reservation-consents {
   display: grid;
   gap: 12px;
-  margin-top: 18px;
 }
 
-.reservation-consents > label {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
+.reservation-option-row {
+  display: grid;
+  grid-template-columns: 20px 42px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
   padding: 13px 14px;
   border: 1px solid rgba(255,255,255,.12);
-  border-radius: 18px;
-  background: rgba(255,255,255,.065);
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.04)),
+    rgba(255,255,255,.035);
   color: rgba(245,255,248,.82);
   line-height: 1.55;
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+
+.reservation-option-row:hover {
+  transform: translateY(-1px);
+  border-color: rgba(143,224,180,.28);
+  background: rgba(60,179,113,.10);
 }
 
 .reservation-consents input[type='checkbox'] {
@@ -2505,6 +2682,37 @@ body.booking-app-page .main-content {
   margin-top: 3px;
   accent-color: #3CB371;
   flex: 0 0 auto;
+}
+
+.reservation-option-row i {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  color: #8fe0b4;
+  background: rgba(60,179,113,.11);
+}
+
+.reservation-option-row strong,
+.reservation-option-row small {
+  display: block;
+}
+
+.reservation-option-row strong {
+  color: #fff;
+  font-size: .95rem;
+}
+
+.reservation-option-row small {
+  margin-top: 2px;
+  color: rgba(245,255,248,.56);
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.reservation-reveal-field {
+  animation: reservationRevealField .26s cubic-bezier(.22, 1, .36, 1) both;
 }
 
 .reservation-late-panel {
@@ -2933,6 +3141,7 @@ html[data-theme="light"] .reservation-mini__start,
 html[data-theme="light"] .reservation-choice-card,
 html[data-theme="light"] .stay-choice-card,
 html[data-theme="light"] .reservation-step-card,
+html[data-theme="light"] .reservation-details-section,
 html[data-theme="light"] .reservation-summary,
 html[data-theme="light"] .reservation-item-card,
 html[data-theme="light"] .reservation-final-summary,
@@ -2957,6 +3166,8 @@ html[data-theme="light"] .reservation-success-modal__card h2,
 html[data-theme="light"] .reservation-choice-card strong,
 html[data-theme="light"] .stay-choice-card strong,
 html[data-theme="light"] .reservation-presets strong,
+html[data-theme="light"] .reservation-details-section__head strong,
+html[data-theme="light"] .reservation-option-row strong,
 html[data-theme="light"] .reservation-help__sections article strong,
 html[data-theme="light"] .reservation-help__short strong,
 html[data-theme="light"] .reservation-item-card strong,
@@ -2972,6 +3183,8 @@ html[data-theme="light"] .stay-choice-card small,
 html[data-theme="light"] .reservation-item-card small,
 html[data-theme="light"] .reservation-item-card em,
 html[data-theme="light"] .reservation-field small,
+html[data-theme="light"] .reservation-details-section__head p,
+html[data-theme="light"] .reservation-option-row small,
 html[data-theme="light"] .reservation-summary dt,
 html[data-theme="light"] .reservation-final-summary dt,
 html[data-theme="light"] .reservation-success-modal__card dt,
@@ -2988,7 +3201,8 @@ html[data-theme="light"] .reservation-info-grid p,
 html[data-theme="light"] .reservation-hint,
 html[data-theme="light"] .reservation-summary__status,
 html[data-theme="light"] .reservation-summary__deposit,
-html[data-theme="light"] .reservation-consents > label {
+html[data-theme="light"] .reservation-country__hint,
+html[data-theme="light"] .reservation-option-row {
   color: #1b5b3a;
   border-color: rgba(60,179,113,.20);
   background: rgba(60,179,113,.10);
@@ -3025,6 +3239,36 @@ html[data-theme="light"] .reservation-summary__deposit {
   color: #1b5b3a;
 }
 
+@keyframes reservationPanelIn {
+  from { opacity: 0; transform: translateY(24px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes reservationElementIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes reservationCardIn {
+  from { opacity: 0; transform: translateY(26px) scale(.965); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes reservationChoiceFloat {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -6px; }
+}
+
+@keyframes reservationGlowSweep {
+  0%, 100% { background-position: 0 0, -80% 0; }
+  50% { background-position: 0 0, 120% 0; }
+}
+
+@keyframes reservationRevealField {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes reservationOrb {
   0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
   50% { transform: translate3d(20px, -16px, 0) scale(1.08); }
@@ -3048,6 +3292,15 @@ html[data-theme="light"] .reservation-summary__deposit {
 
 @media (prefers-reduced-motion: reduce) {
   .reservation-mini__ambient span,
+  .reservation-mini__start,
+  .reservation-mini__start .reservation-mini__kicker,
+  .reservation-mini__start h1,
+  .reservation-mini__start > p:not(.reservation-mini__note):not(.reservation-mini__kicker),
+  .reservation-mini__choices,
+  .reservation-simple-link,
+  .reservation-mini__note,
+  .stay-choice-card,
+  .reservation-choice-card,
   .reservation-step-card,
   .reservation-summary,
   .reservation-final-summary,
@@ -3058,6 +3311,8 @@ html[data-theme="light"] .reservation-summary__deposit {
 
   .stay-choice-card,
   .reservation-choice-card,
+  .reservation-details-section,
+  .reservation-option-row,
   .reservation-btn {
     transition: none;
   }
