@@ -26,7 +26,7 @@ export const en = {
     darkMode: 'Dark mode',
     enableLight: 'Enable light mode',
     enableDark: 'Enable dark mode',
-    cta: 'Check availability',
+    cta: 'Book',
     items: {
       start: 'Home',
       camping: 'Camping',
@@ -195,8 +195,8 @@ export const en = {
       cta: {
         title: 'Plan your camping stay',
         copy: 'Check prices or send an enquiry to Camping Clepardia reception.',
-        primaryLabel: 'Check availability',
-        primaryHref: '/kontakt',
+        primaryLabel: 'Book your stay',
+        primaryHref: '/en/booking',
         secondaryLabel: 'View prices',
         secondaryHref: '/cennik',
       },
@@ -265,8 +265,8 @@ export const en = {
         title: 'Confirm your dates with reception',
         copy:
           'The calculator helps estimate your stay quickly. Reception confirms final availability and booking details.',
-        primaryLabel: 'Ask about availability',
-        primaryHref: '/kontakt',
+        primaryLabel: 'Book your stay',
+        primaryHref: '/en/booking',
         secondaryLabel: 'View bungalows',
         secondaryHref: '/domki',
       },
@@ -570,7 +570,7 @@ export const en = {
       subtitle: 'Camping in Krakow close to the city centre',
       copy:
         'A green base for motorhomes, caravans, tents and comfortable bungalows. Stay calmly and reach the Old Town by tram.',
-      primary: 'Check availability',
+      primary: 'Book your stay',
       secondary: 'View prices',
       badges: ['Close to Krakow centre', 'Camping + bungalows', 'Tram to the centre', 'Mister Camping 2024 & 2025'],
       benefits: ['Near the centre', 'Tram to the Old Town', 'Motorhomes, tents and bungalows'],

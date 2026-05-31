@@ -11,6 +11,14 @@ export interface InquiryCalculatorSummary {
   breakdown?: string[];
 }
 
+export interface InquiryServiceLine {
+  id: string;
+  scope: string;
+  label: string;
+  qty: number;
+  price: number;
+}
+
 export interface ReservationInquiryPayload {
   fullName: string;
   email: string;
@@ -35,6 +43,15 @@ export interface ReservationInquiryPayload {
   source?: string;
   locale?: string;
   calculatorSummary?: InquiryCalculatorSummary | null;
+  stayMode?: string;
+  selectedStayMode?: string;
+  services?: InquiryServiceLine[];
+  estimatedTotal?: number | string;
+  vehiclePlate?: string;
+  specialNeeds?: string;
+  lateCheckout?: string;
+  originalMessage?: string;
+  translatedSummaryPl?: string;
 }
 
 export interface NormalizedReservationInquiry extends ReservationInquiryPayload {
@@ -62,6 +79,14 @@ export interface NormalizedReservationInquiry extends ReservationInquiryPayload 
   locale: string;
   submittedAt: string;
   inquiryId: string;
+  selectedStayMode: string;
+  services: InquiryServiceLine[];
+  estimatedTotal: string;
+  vehiclePlate: string;
+  specialNeeds: string;
+  lateCheckout: string;
+  originalMessage: string;
+  translatedSummaryPl: string;
 }
 
 export interface CcSystemLeadDraft {
@@ -84,6 +109,11 @@ export interface CcSystemLeadDraft {
     stayCategory: string;
     people: InquiryPeople;
     addons: string[];
+    services: InquiryServiceLine[];
+    estimatedTotal: string;
+    vehiclePlate: string;
+    specialNeeds: string;
+    lateCheckout: string;
     summerNotice: boolean;
     quietConsent: boolean;
   };

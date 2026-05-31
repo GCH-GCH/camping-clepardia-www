@@ -53,8 +53,8 @@ export const sitePages: Record<PageSlug, SitePage> = {
     cta: {
       title: 'Zaplanuj pobyt campingowy',
       copy: 'Sprawdź cennik albo wyślij zapytanie do recepcji Camping Clepardia.',
-      primaryLabel: 'Sprawdź dostępność',
-      primaryHref: '/kontakt',
+      primaryLabel: 'Zarezerwuj pobyt',
+      primaryHref: '/rezerwacja',
       secondaryLabel: 'Zobacz cennik',
       secondaryHref: '/cennik',
     },
@@ -96,8 +96,8 @@ export const sitePages: Record<PageSlug, SitePage> = {
     cta: {
       title: 'Potwierdź termin z recepcją',
       copy: 'Kalkulator pomaga szybko oszacować pobyt. Finalną dostępność i szczegóły rezerwacji potwierdza recepcja.',
-      primaryLabel: 'Zapytaj o dostępność',
-      primaryHref: '/kontakt',
+      primaryLabel: 'Zarezerwuj pobyt',
+      primaryHref: '/rezerwacja',
       secondaryLabel: 'Zobacz domki',
       secondaryHref: '/domki',
     },

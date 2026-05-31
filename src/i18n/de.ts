@@ -28,7 +28,7 @@ export const de = {
     darkMode: 'Dunkler Modus',
     enableLight: 'Hellen Modus aktivieren',
     enableDark: 'Dunklen Modus aktivieren',
-    cta: 'Verfügbarkeit prüfen',
+    cta: 'Buchen',
     items: {
       start: 'Start',
       camping: 'Camping',
@@ -368,8 +368,8 @@ export const de = {
       cta: {
         title: 'Campingaufenthalt planen',
         copy: 'Prüfen Sie die Preise oder senden Sie eine Anfrage an die Rezeption von Camping Clepardia.',
-        primaryLabel: 'Verfügbarkeit prüfen',
-        primaryHref: '/kontakt',
+        primaryLabel: 'Aufenthalt buchen',
+        primaryHref: '/de/buchung',
         secondaryLabel: 'Preise ansehen',
         secondaryHref: '/cennik',
       },
@@ -415,8 +415,8 @@ export const de = {
       cta: {
         title: 'Termin mit der Rezeption bestätigen',
         copy: 'Der Rechner hilft bei einer schnellen Schätzung. Die Rezeption bestätigt Verfügbarkeit und Buchungsdetails.',
-        primaryLabel: 'Verfügbarkeit anfragen',
-        primaryHref: '/kontakt',
+        primaryLabel: 'Aufenthalt buchen',
+        primaryHref: '/de/buchung',
         secondaryLabel: 'Bungalows ansehen',
         secondaryHref: '/domki',
       },
@@ -613,7 +613,7 @@ export const de = {
       subtitle: 'Camping in Krakau nahe dem Stadtzentrum',
       copy:
         'Eine grüne Basis für Wohnmobile, Wohnwagen, Zelte und komfortable Bungalows. Ruhig wohnen und mit der Straßenbahn in die Altstadt fahren.',
-      primary: 'Verfügbarkeit prüfen',
+      primary: 'Aufenthalt buchen',
       secondary: 'Preise ansehen',
       badges: ['Nahe am Zentrum von Krakau', 'Camping + Bungalows', 'Straßenbahn ins Zentrum', 'Mister Camping 2024 & 2025'],
       benefits: ['Nahe am Zentrum', 'Straßenbahn zur Altstadt', 'Wohnmobile, Zelte und Bungalows'],

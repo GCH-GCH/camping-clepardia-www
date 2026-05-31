@@ -28,7 +28,7 @@ export const it = {
     darkMode: 'Modalità scura',
     enableLight: 'Attiva modalità chiara',
     enableDark: 'Attiva modalità scura',
-    cta: 'Verifica disponibilità',
+    cta: 'Prenota',
     items: {
       start: 'Home',
       camping: 'Camping',
@@ -368,8 +368,8 @@ export const it = {
       cta: {
         title: 'Pianifica il soggiorno in camping',
         copy: 'Controlla i prezzi o invia una richiesta alla reception di Camping Clepardia.',
-        primaryLabel: 'Verifica disponibilità',
-        primaryHref: '/kontakt',
+        primaryLabel: 'Prenota il soggiorno',
+        primaryHref: '/it/prenotazione',
         secondaryLabel: 'Guarda i prezzi',
         secondaryHref: '/cennik',
       },
@@ -415,8 +415,8 @@ export const it = {
       cta: {
         title: 'Conferma le date con la reception',
         copy: 'Il calcolatore aiuta a stimare il soggiorno. La reception conferma disponibilità e dettagli.',
-        primaryLabel: 'Chiedi disponibilità',
-        primaryHref: '/kontakt',
+        primaryLabel: 'Prenota il soggiorno',
+        primaryHref: '/it/prenotazione',
         secondaryLabel: 'Guarda i bungalow',
         secondaryHref: '/domki',
       },
@@ -613,7 +613,7 @@ export const it = {
       subtitle: 'Camping a Cracovia vicino al centro città',
       copy:
         'Una base verde per camper, roulotte, tende e bungalow confortevoli. Riposa con calma e raggiungi la Città Vecchia in tram.',
-      primary: 'Verifica disponibilità',
+      primary: 'Prenota il soggiorno',
       secondary: 'Guarda i prezzi',
       badges: ['Vicino al centro di Cracovia', 'Camping + bungalow', 'Tram per il centro', 'Mister Camping 2024 e 2025'],
       benefits: ['Vicino al centro', 'Tram per la Città Vecchia', 'Camper, tende e bungalow'],

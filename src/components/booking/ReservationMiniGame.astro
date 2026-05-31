@@ -490,7 +490,9 @@ const uxCopy = {
     },
     success: {
       title: 'Dziekujemy! \uD83C\uDF3F',
-      text: 'Twoje zapytanie zostalo przygotowane dla recepcji. Odpowiemy mozliwie szybko i potwierdzimy dostepnosc oraz szczegoly pobytu.',
+      text: 'Twoje zapytanie zostalo wyslane do recepcji. Odpowiemy mozliwie szybko i potwierdzimy dostepnosc oraz szczegoly pobytu.',
+      mockText: 'Zapytanie zostalo przygotowane w trybie testowym. Po skonfigurowaniu RESEND_API_KEY zostanie wyslane realnie do recepcji.',
+      errorText: 'Nie udalo sie wyslac zapytania. Sprobuj ponownie albo skontaktuj sie bezposrednio z recepcja.',
       bungalow: 'W przypadku domkow moze byc wymagana zaliczka. Dane do zaliczki oraz potwierdzenie dostepnosci wyslemy w odpowiedzi mailowej.',
       camping: 'To zapytanie nie oznacza automatycznej rezerwacji. Recepcja potwierdzi dostepnosc i szczegoly pobytu.',
       home: 'Wroc na strone glowna',
@@ -537,7 +539,9 @@ const uxCopy = {
     },
     success: {
       title: 'Thank you! \uD83C\uDF3F',
-      text: 'Your enquiry has been prepared for reception. We will reply as soon as possible and confirm availability and stay details.',
+      text: 'Your enquiry has been sent to reception. We will reply as soon as possible and confirm availability and stay details.',
+      mockText: 'Your enquiry has been prepared in test mode. Once RESEND_API_KEY is configured, it will be sent to reception.',
+      errorText: 'We could not send the enquiry. Please try again or contact reception directly.',
       bungalow: 'A deposit may be required for bungalows. Deposit details and availability confirmation will be sent by email.',
       camping: 'This enquiry is not an automatic booking. Reception will confirm availability and stay details.',
       home: 'Back to homepage',
@@ -700,6 +704,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       countryActiveIndex: 0,
       helpOpen: false,
       success: false,
+      submitting: false,
+      submitMode: '',
+      submitError: '',
+      inquiryId: '',
     };
 
     const esc = (value) => String(value ?? '')
@@ -1317,7 +1325,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <button class="reservation-btn reservation-btn--ghost" type="button" data-back ${state.step <= 1 ? 'disabled' : ''}>${esc(t.actions.back)}</button>
         ${state.step < 5
           ? `<button class="reservation-btn reservation-btn--primary" type="button" data-next>${esc(t.actions.next)}</button>`
-          : `<button class="reservation-btn reservation-btn--primary" type="button" data-submit>${esc(t.actions.send)}</button>`
+          : `<button class="reservation-btn reservation-btn--primary" type="button" data-submit ${state.submitting ? 'disabled' : ''}>${esc(state.submitting ? 'Wysylanie...' : t.actions.send)}</button>`
         }
       </div>
     `;
@@ -1355,12 +1363,14 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const selected = selectedServices();
       const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
       const stayNote = state.mode === 'bungalow' || state.mode === 'combined' ? ui.success.bungalow : ui.success.camping;
+      const successText = state.submitMode === 'sent' ? ui.success.text : (ui.success.mockText || ui.success.text);
       return `
         <div class="reservation-success-modal" role="dialog" aria-modal="true" aria-label="${esc(ui.success.title)}">
           <div class="reservation-success-modal__card">
             <span class="reservation-success-modal__mark" aria-hidden="true">${detailIcon('success')}</span>
             <h2>${esc(ui.success.title)}</h2>
-            <p>${esc(ui.success.text)}</p>
+            <p>${esc(successText)}</p>
+            ${state.inquiryId ? `<p class="reservation-success-modal__id">ID: ${esc(state.inquiryId)}</p>` : ''}
             <dl>
               <div><dt>${esc(t.summary.stay)}</dt><dd>${esc(modeTitle())}</dd></div>
               <div><dt>${esc(t.summary.dates)}</dt><dd>${esc(state.dates.arrival || '-')} - ${esc(state.dates.departure || '-')} (${nights()} n.)</dd></div>
@@ -1408,21 +1418,76 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       </div>
     `;
 
-    const payload = () => ({
-      stayMode: state.mode,
-      dates: state.dates,
-      nights: nights(),
-      guests: state.guests,
-      services: selectedServices(),
-      estimatedTotal: estimatedTotal(),
-      country: state.details.countryCode,
-      language: state.details.language,
-      vehiclePlate: state.details.plate,
-      specialNeeds: state.details.specialNeeds ? state.details.specialNeedsText : '',
-      lateCheckout: state.details.lateCheckout ? state.details.lateTime : '',
-      originalMessage: state.details.message,
-      translatedSummaryPl: '',
-    });
+    const servicePayload = () => selectedServices().map((item) => ({
+      id: item.id,
+      scope: item.scope,
+      label: item.label,
+      qty: item.qty,
+      price: item.price,
+    }));
+
+    const payload = () => {
+      const services = servicePayload();
+      const countryLabel = state.details.countryName
+        ? `${state.details.countryName} (${state.details.countryCode})`
+        : state.details.countrySearch;
+      const people = state.mode === 'combined'
+        ? {
+            adults: Number(state.guests.bungalowGuests || 0) + Number(state.guests.campingGuests || 0),
+            children: Number(state.guests.children || 0),
+            toddlers: Number(state.guests.toddlers || 0),
+          }
+        : {
+            adults: Number(state.guests.adults || 0),
+            children: Number(state.guests.children || 0),
+            toddlers: Number(state.guests.toddlers || 0),
+          };
+      const lateCheckout = state.details.lateCheckout ? state.details.lateTime : '';
+      const specialNeeds = state.details.specialNeeds ? state.details.specialNeedsText : '';
+
+      return {
+        fullName: state.details.name,
+        email: state.details.email,
+        phone: state.details.phone,
+        country: countryLabel,
+        contactLanguage: state.details.language,
+        arrivalIso: state.dates.arrival,
+        departureIso: state.dates.departure,
+        nights: nights(),
+        stayType: modeTitle(),
+        stayTypeId: state.mode,
+        stayCategory: state.mode,
+        selectedStayMode: state.mode,
+        people,
+        addons: services.map((item) => `${item.label} x ${item.qty}`),
+        message: [
+          state.details.message,
+          state.details.plate ? `Numer rejestracyjny: ${state.details.plate}` : '',
+          specialNeeds ? `Specjalne potrzeby: ${specialNeeds}` : '',
+          lateCheckout ? `Późniejszy wyjazd: ${lateCheckout}` : '',
+        ].filter(Boolean).join('\n\n'),
+        summerNotice: touchesSummer(),
+        quietConsent: state.details.quiet,
+        consent: state.details.consent,
+        website: '',
+        source: 'website',
+        locale: config.lang,
+        calculatorSummary: {
+          total: selectedServices().length ? fmt(estimatedTotal()) : '',
+          pricePerNight: selectedServices().length ? fmt(perNightTotal()) : '',
+          season: highSeason() ? 'high' : 'low',
+          breakdown: services.map((item) => `${item.label} x ${item.qty}: ${fmt(item.price * item.qty)} / noc`),
+        },
+        stayMode: state.mode,
+        services,
+        estimatedTotal: selectedServices().length ? fmt(estimatedTotal()) : '',
+        vehiclePlate: state.details.plate,
+        specialNeeds,
+        lateCheckout,
+        originalMessage: state.details.message,
+        translatedSummaryPl: '',
+      };
+    };
 
     const render = () => {
       mount.innerHTML = state.mode ? appTemplate() : startTemplate();
@@ -1484,16 +1549,51 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       return true;
     };
 
-    const submit = () => {
+    const submit = async () => {
+      if (state.submitting) return;
       if (!state.details.quiet || !state.details.consent) {
         state.hint = t.hints.required;
         state.step = 4;
         render();
         return;
       }
-      state.success = true;
+      state.submitting = true;
+      state.submitError = '';
       state.toast = '';
       render();
+      try {
+        const response = await fetch('/api/reservation', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload()),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (response.status === 404 && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname)) {
+          state.submitMode = 'mock';
+          state.inquiryId = `LOCAL-${Date.now().toString(36).toUpperCase()}`;
+          state.success = true;
+          return;
+        }
+        if (!response.ok || !result?.ok) {
+          const errors = result?.errors ? Object.values(result.errors).join(' ') : '';
+          state.submitError = errors || result?.message || ui.success.errorText || 'Wysylka nie powiodla sie.';
+          state.hint = state.submitError;
+          state.step = 4;
+          state.submitting = false;
+          render();
+          return;
+        }
+        state.submitMode = result.mode || 'mock';
+        state.inquiryId = result.inquiryId || '';
+        state.success = true;
+      } catch {
+        state.submitError = ui.success.errorText || 'Wysylka nie powiodla sie.';
+        state.hint = state.submitError;
+        state.step = 4;
+      } finally {
+        state.submitting = false;
+        render();
+      }
     };
 
     const restoreCountryFocus = () => {
@@ -1625,7 +1725,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       }
 
       if (target.closest('[data-submit]')) {
-        submit();
+        void submit();
       }
     });
 

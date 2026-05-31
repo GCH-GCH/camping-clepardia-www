@@ -21,7 +21,7 @@ export const pl = {
     darkMode: 'Tryb ciemny',
     enableLight: 'Włącz tryb jasny',
     enableDark: 'Włącz tryb ciemny',
-    cta: 'Sprawdź dostępność',
+    cta: 'Zarezerwuj',
     items: {
       start: 'Start',
       camping: 'Camping',
@@ -346,7 +346,7 @@ export const pl = {
       subtitle: 'Camping w Krakowie blisko centrum miasta',
       copy:
         'Zielona baza dla kamperów, przyczep, namiotów i komfortowych domków. Odpoczywaj spokojnie i dojedź tramwajem do Starego Miasta.',
-      primary: 'Sprawdź dostępność',
+      primary: 'Zarezerwuj pobyt',
       secondary: 'Zobacz cennik',
       badges: ['Blisko centrum Krakowa', 'Camping + domki', 'Tramwaj do centrum', 'Mister Camping 2024 i 2025'],
       benefits: ['Blisko centrum', 'Tramwaj do Starego Miasta', 'Kampery, namioty i domki'],

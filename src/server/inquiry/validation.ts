@@ -1,5 +1,6 @@
 import type {
   CcSystemLeadDraft,
+  InquiryServiceLine,
   InquiryPeople,
   NormalizedReservationInquiry,
   ReservationInquiryPayload,
@@ -65,6 +66,21 @@ const normalizePeople = (people?: InquiryPeople): InquiryPeople => ({
   toddlers: toNonNegativeInteger(people?.toddlers, 0),
 });
 
+const normalizeServices = (services?: InquiryServiceLine[]): InquiryServiceLine[] => {
+  if (!Array.isArray(services)) return [];
+
+  return services
+    .map((service) => ({
+      id: sanitizeInlineText(service?.id, 80),
+      scope: sanitizeInlineText(service?.scope, 40),
+      label: sanitizeInlineText(service?.label, 120),
+      qty: toNonNegativeInteger(service?.qty, 0),
+      price: Math.max(0, Number(service?.price || 0)),
+    }))
+    .filter((service) => service.id && service.label && service.qty > 0)
+    .slice(0, 40);
+};
+
 const createInquiryId = () => {
   const random = Math.random().toString(36).slice(2, 10).toUpperCase();
   return `WEB-${Date.now().toString(36).toUpperCase()}-${random}`;
@@ -81,11 +97,19 @@ export const normalizeReservationInquiry = (rawPayload: unknown) => {
   const stayType = sanitizeInlineText(payload.stayType, 120);
   const stayTypeId = sanitizeInlineText(payload.stayTypeId, 80);
   const stayCategory = sanitizeInlineText(payload.stayCategory, 40);
+  const selectedStayMode = sanitizeInlineText(payload.selectedStayMode || payload.stayMode || stayCategory, 40);
   const people = normalizePeople(payload.people);
   const addons = Array.isArray(payload.addons)
     ? payload.addons.map((addon) => sanitizeInlineText(addon, 100)).filter(Boolean).slice(0, 12)
     : [];
   const message = sanitizeText(payload.message, 2400);
+  const services = normalizeServices(payload.services);
+  const estimatedTotal = sanitizeInlineText(payload.estimatedTotal, 80);
+  const vehiclePlate = sanitizeInlineText(payload.vehiclePlate, 80);
+  const specialNeeds = sanitizeText(payload.specialNeeds, 1200);
+  const lateCheckout = sanitizeInlineText(payload.lateCheckout, 120);
+  const originalMessage = sanitizeText(payload.originalMessage, 2400);
+  const translatedSummaryPl = sanitizeText(payload.translatedSummaryPl, 3000);
   const website = sanitizeInlineText(payload.website, 220);
   const locale = sanitizeInlineText(payload.locale, 12) || 'pl';
   const { arrival, departure } = normalizeDatePair(payload);
@@ -125,9 +149,17 @@ export const normalizeReservationInquiry = (rawPayload: unknown) => {
     stayType,
     stayTypeId,
     stayCategory,
+    selectedStayMode,
     people,
     addons,
     message,
+    services,
+    estimatedTotal,
+    vehiclePlate,
+    specialNeeds,
+    lateCheckout,
+    originalMessage,
+    translatedSummaryPl,
     summerNotice: Boolean(payload.summerNotice),
     quietConsent: Boolean(payload.quietConsent),
     consent: Boolean(payload.consent),
@@ -162,6 +194,11 @@ export const createCcSystemLeadDraft = (inquiry: NormalizedReservationInquiry): 
     stayCategory: inquiry.stayCategory,
     people: inquiry.people,
     addons: inquiry.addons,
+    services: inquiry.services,
+    estimatedTotal: inquiry.estimatedTotal,
+    vehiclePlate: inquiry.vehiclePlate,
+    specialNeeds: inquiry.specialNeeds,
+    lateCheckout: inquiry.lateCheckout,
     summerNotice: inquiry.summerNotice,
     quietConsent: inquiry.quietConsent,
   },
