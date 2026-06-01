@@ -8,11 +8,18 @@ interface Props {
 
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
-const t = getTranslations(languageCode ?? pathContext.languageCode);
+const activeLanguage = languageCode ?? pathContext.languageCode;
+const t = getTranslations(activeLanguage);
 const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
+const bookingLabel = {
+  pl: 'Zarezerwuj pobyt',
+  en: 'Book your stay',
+  de: 'Aufenthalt buchen',
+  it: 'Prenota il soggiorno',
+}[activeLanguage as 'pl' | 'en' | 'de' | 'it'] ?? 'Book your stay';
 const actions = [
-  { label: t.cta.pricing, href: getLocalizedPath(explicitLanguage, 'cennik'), primary: true },
-  { label: t.cta.availability, href: getBookingLocalizedPath(languageCode ?? pathContext.languageCode) },
+  { label: bookingLabel, href: getBookingLocalizedPath(activeLanguage), primary: true },
+  { label: t.cta.pricing, href: getLocalizedPath(explicitLanguage, 'cennik') },
   { label: t.cta.gallery, href: getLocalizedPath(explicitLanguage, 'galeria') },
 ];
 ---
