@@ -17,11 +17,12 @@ const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode) as
 
 const renderLucideIcon = (name: keyof typeof icons | string) => {
   const iconNode = icons[name as keyof typeof icons] ?? icons.CircleHelp;
+  const iconName = String(name).replace(/([a-z0-9])([A-Z])/g, '$1-$2').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
   const attrsToString = (attrs: Record<string, unknown>) => Object.entries(attrs)
     .map(([key, value]) => `${key}="${String(value).replace(/"/g, '&quot;')}"`)
     .join(' ');
 
-  return `<svg class="reservation-lucide-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${iconNode
+  return `<svg class="reservation-lucide-icon lucide lucide-${iconName}" data-lucide="${iconName}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${iconNode
     .map(([tag, attrs]) => `<${tag} ${attrsToString(attrs as Record<string, unknown>)}></${tag}>`)
     .join('')}</svg>`;
 };
@@ -1489,7 +1490,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       };
     };
 
-    const render = () => {
+    const render = ({ motion = 'soft' } = {}) => {
+      root.classList.toggle('is-soft-render', motion === 'soft');
       mount.innerHTML = state.mode ? appTemplate() : startTemplate();
     };
 
@@ -1503,7 +1505,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const url = new URL(window.location.href);
       url.searchParams.set('stay', mode);
       window.history.replaceState({}, '', url);
-      render();
+      render({ motion: 'step' });
       scrollToTop();
     };
 
@@ -1516,7 +1518,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const url = new URL(window.location.href);
       url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
-      render();
+      render({ motion: 'step' });
       scrollToTop();
     };
 
@@ -1530,7 +1532,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const url = new URL(window.location.href);
       url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
-      render();
+      render({ motion: 'start' });
       scrollToTop();
     };
 
@@ -1623,33 +1625,39 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
       const start = target.closest('[data-start-mode]');
       if (start instanceof HTMLElement) {
+        event.preventDefault();
         startFlow(start.dataset.startMode);
         return;
       }
 
       if (target.closest('[data-simple-start]')) {
+        event.preventDefault();
         startSimpleFlow();
         return;
       }
 
       if (target.closest('[data-change-mode]')) {
+        event.preventDefault();
         resetFlow();
         return;
       }
 
       if (target.closest('[data-help-open]')) {
+        event.preventDefault();
         state.helpOpen = true;
         render();
         return;
       }
 
       if (target.closest('[data-help-close]')) {
+        event.preventDefault();
         state.helpOpen = false;
         render();
         return;
       }
 
       if (target.closest('[data-new-inquiry]')) {
+        event.preventDefault();
         state.success = false;
         resetFlow();
         return;
@@ -1657,23 +1665,26 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
       const presetButton = target.closest('[data-preset]');
       if (presetButton instanceof HTMLElement) {
+        event.preventDefault();
         applyPreset(presetButton.dataset.preset);
         return;
       }
 
       const jump = target.closest('[data-step-jump]');
       if (jump instanceof HTMLElement && jump.dataset.stepJump) {
+        event.preventDefault();
         const next = Number(jump.dataset.stepJump);
         if (next >= 1 && next <= state.step) {
           state.step = next;
           state.hint = '';
-          render();
+          render({ motion: 'step' });
         }
         return;
       }
 
       const serviceStepper = target.closest('[data-service-scope][data-service-id]');
       if (serviceStepper instanceof HTMLElement && (target.closest('[data-stepper-plus]') || target.closest('[data-stepper-minus]'))) {
+        event.preventDefault();
         const scope = serviceStepper.dataset.serviceScope;
         const id = serviceStepper.dataset.serviceId;
         const current = getQty(scope, id);
@@ -1685,6 +1696,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
       const guestStepper = target.closest('[data-guest-key]');
       if (guestStepper instanceof HTMLElement && (target.closest('[data-stepper-plus]') || target.closest('[data-stepper-minus]'))) {
+        event.preventDefault();
         const key = guestStepper.dataset.guestKey;
         const current = Number(state.guests[key] || 0);
         state.guests[key] = Math.max(0, current + (target.closest('[data-stepper-plus]') ? 1 : -1));
@@ -1694,37 +1706,42 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
       const countryPick = target.closest('[data-country-pick]');
       if (countryPick instanceof HTMLElement) {
+        event.preventDefault();
         pickCountry(countryPick.dataset.countryPick);
         return;
       }
 
       const language = target.closest('[data-language]');
       if (language instanceof HTMLElement) {
+        event.preventDefault();
         state.details.language = language.dataset.language || state.details.language;
         render();
         return;
       }
 
       if (target.closest('[data-back]')) {
+        event.preventDefault();
         state.step = Math.max(1, state.step - 1);
         state.hint = '';
-        render();
+        render({ motion: 'step' });
         scrollToTop();
         return;
       }
 
       if (target.closest('[data-next]')) {
+        event.preventDefault();
         if (!validateBeforeNext()) {
           render();
           return;
         }
         state.step = Math.min(5, state.step + 1);
-        render();
+        render({ motion: 'step' });
         scrollToTop();
         return;
       }
 
       if (target.closest('[data-submit]')) {
+        event.preventDefault();
         void submit();
       }
     });
@@ -1806,7 +1823,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     if (stayModes.includes(queryMode)) {
       state.mode = queryMode;
       state.step = 1;
-      render();
+      render({ motion: 'step' });
     }
 
     window.addEventListener('keydown', (event) => {
@@ -2105,9 +2122,10 @@ body.booking-app-page .main-content {
   height: 42px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 3;
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
 
 .reservation-choice-card__icon--bungalow {
@@ -2310,9 +2328,20 @@ body.booking-app-page .main-content {
   height: 100%;
   fill: none;
   stroke: currentColor;
-  stroke-width: 3;
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.reservation-mini.is-soft-render .reservation-mini__layout,
+.reservation-mini.is-soft-render .reservation-step-card,
+.reservation-mini.is-soft-render .reservation-summary,
+.reservation-mini.is-soft-render .reservation-final-summary,
+.reservation-mini.is-soft-render .reservation-item-card,
+.reservation-mini.is-soft-render .reservation-presets button,
+.reservation-mini.is-soft-render .reservation-details-section {
+  animation: none !important;
 }
 
 .reservation-progress__desktop button em {
