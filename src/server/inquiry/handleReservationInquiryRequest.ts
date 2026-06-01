@@ -98,7 +98,7 @@ export const handleReservationInquiryRequest = async (request: Request) => {
 
   const ccSystemDraft = createCcSystemLeadDraft(inquiry);
   const receptionMail = buildReceptionMail(inquiry);
-  const autoresponderMail = buildAutoresponderMail(inquiry);
+  const autoresponderMail = inquiry.email ? buildAutoresponderMail(inquiry) : null;
   const mail = await sendInquiryWorkflow(receptionMail, autoresponderMail);
 
   return toJsonResponse({

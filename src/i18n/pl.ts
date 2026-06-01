@@ -119,9 +119,9 @@ export const pl = {
     },
     answers: {
       camperPrice:
-        'Kamper kosztuje 80 PLN za noc. Do tego doliczane są osoby: dorosły 35 PLN, dziecko 4–14 lat 20 PLN. Prąd: 25 PLN, pies: 0 PLN.',
+        'Kamper kosztuje 80 PLN za noc. Do tego doliczane są osoby: dorosły 35 PLN, dziecko 4–14 lat 20 PLN. Prąd: 30 PLN, pies: 0 PLN. Przykład: 2 osoby + kamper + prąd = 180 PLN / noc.',
       pricing:
-        'Orientacyjnie: kamper 80 PLN / noc, bus / ciężarówka 160 PLN / noc, prąd 25 PLN / noc, pies 0 PLN. Pełny kalkulator znajdziesz na stronie Cennik.',
+        'Orientacyjnie: kamper 80 PLN / noc, bus / ciężarówka 160 PLN / noc, prąd 30 PLN / noc, pies 0 PLN. Pełny kalkulator znajdziesz na stronie Cennik.',
       centerTransit:
         'Przystanek jest ok. 40 m od bramy. Do Starego Kleparza / centrum jest ok. 9 przystanków i ok. 14 minut jazdy tramwajem.',
       directions:

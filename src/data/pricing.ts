@@ -46,7 +46,7 @@ export const pricingConfig = {
     },
   ],
   addons: [
-    { id: 'electricity', label: 'Prąd', price: 25 },
+    { id: 'electricity', label: 'Prąd', price: 30 },
     { id: 'dog', label: 'Pies', price: 0 },
     { id: 'motorcycle', label: 'Motocykl', price: 25 },
     { id: 'cargo-trailer', label: 'Przyczepa bagażowa', price: 20 },

@@ -127,9 +127,9 @@ export const de = {
     },
     answers: {
       camperPrice:
-        'Ein Wohnmobil kostet 80 PLN pro Nacht. Personen werden separat berechnet: Erwachsener 35 PLN, Kind 4-14 Jahre 20 PLN. Strom: 25 PLN, Hund: 0 PLN.',
+        'Ein Wohnmobil kostet 80 PLN pro Nacht. Personen werden separat berechnet: Erwachsener 35 PLN, Kind 4-14 Jahre 20 PLN. Strom: 30 PLN, Hund: 0 PLN. Beispiel: 2 Erwachsene + Camper + Strom = 180 PLN / Nacht.',
       pricing:
-        'Orientierungspreise: Wohnmobil 80 PLN / Nacht, Lkw / Bus 160 PLN / Nacht, Strom 25 PLN / Nacht, Hund 0 PLN. Den vollständigen Rechner finden Sie auf der Preisseite.',
+        'Orientierungspreise: Wohnmobil 80 PLN / Nacht, Lkw / Bus 160 PLN / Nacht, Strom 30 PLN / Nacht, Hund 0 PLN. Den vollständigen Rechner finden Sie auf der Preisseite.',
       centerTransit:
         'Die Haltestelle liegt ca. 40 m vom Tor entfernt. Zum Stary Kleparz / Zentrum sind es ca. 9 Haltestellen und etwa 14 Minuten mit der Straßenbahn.',
       directions:

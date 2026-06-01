@@ -93,15 +93,15 @@ export const sendMail = async (message: MailMessage): Promise<MailDeliveryResult
   };
 };
 
-export const sendInquiryWorkflow = async (receptionMail: MailMessage, autoresponderMail: MailMessage) => {
+export const sendInquiryWorkflow = async (receptionMail: MailMessage, autoresponderMail?: MailMessage | null) => {
   const reception = await sendMail(receptionMail);
   const autoresponderEnabled = process.env.MAIL_AUTORESPONDER !== 'false';
-  const autoresponder = autoresponderEnabled
+  const autoresponder = autoresponderEnabled && autoresponderMail
     ? await sendMail(autoresponderMail)
     : {
         provider: reception.provider,
         delivered: false,
-        reason: 'MAIL_AUTORESPONDER=false',
+        reason: autoresponderMail ? 'MAIL_AUTORESPONDER=false' : 'Customer email missing - autoresponder skipped.',
       };
 
   return { reception, autoresponder };

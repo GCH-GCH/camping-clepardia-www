@@ -24,7 +24,7 @@ export const campyKnowledge = {
     tentLarge: 40,
     rooftopTent: 50,
     busTruck: 160,
-    electricity: 25,
+    electricity: 30,
     dog: 0,
     bungalow2: '200 PLN niski sezon / 220 PLN wysoki sezon',
     bungalow3: '250 PLN niski sezon / 300 PLN wysoki sezon',
@@ -83,7 +83,7 @@ export const getCampyFallbackResponse = (language: CampyLanguage = 'pl', message
       return 'Jasne, zaplanujmy dzień. Ile macie czasu, czy jedziecie z dziećmi, wolicie spokojny czy intensywny plan i tramwaj czy auto?';
     }
     if (normalized.includes('kamper') || normalized.includes('cena') || normalized.includes('koszt')) {
-      return 'Kamper kosztuje 80 PLN za noc. Dorosły: 35 PLN, dziecko 4-14 lat: 20 PLN, prąd: 25 PLN, pies: 0 PLN. Dostępność potwierdza recepcja.';
+      return 'Kamper kosztuje 80 PLN za noc. Dorosły: 35 PLN, dziecko 4-14 lat: 20 PLN, prąd: 30 PLN, pies: 0 PLN. Przykład: 2 osoby + kamper + prąd = 180 PLN za noc. Dostępność potwierdza recepcja.';
     }
     if (normalized.includes('centrum') || normalized.includes('tram')) {
       return 'Przystanek jest ok. 40 m od bramy. Do Starego Kleparza / centrum jest ok. 9 przystanków i ok. 14 minut tramwajem.';
@@ -95,7 +95,7 @@ export const getCampyFallbackResponse = (language: CampyLanguage = 'pl', message
     return 'Sure, let us sketch a day. How much time do you have, are you with children, calm or intensive plan, tram or car?';
   }
   if (normalized.includes('camper') || normalized.includes('price') || normalized.includes('cost')) {
-    return 'A motorhome costs 80 PLN per night. Adult: 35 PLN, child 4-14: 20 PLN, electricity: 25 PLN, dog: 0 PLN. Reception confirms availability.';
+    return 'A motorhome costs 80 PLN per night. Adult: 35 PLN, child 4-14: 20 PLN, electricity: 30 PLN, dog: 0 PLN. Example: 2 adults + camper + electricity = 180 PLN per night. Reception confirms availability.';
   }
   if (normalized.includes('centre') || normalized.includes('center') || normalized.includes('tram')) {
     return 'The tram stop is about 40 m from the gate. It is about 9 stops and around 14 minutes to Stary Kleparz / the city centre.';

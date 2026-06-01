@@ -64,7 +64,7 @@ const copy = {
       country: 'Kraj',
       countryPlaceholder: 'Wpisz np. de, ge, niem, Germany...',
       plate: 'Numer rejestracyjny pojazdu',
-      plateHint: 'Opcjonalnie. Przy przyczepie wpisz rejestrację auta, przy kamperze rejestrację kampera.',
+      plateHint: 'Opcjonalnie. Wpisz rejestrację głównego pojazdu lub przyczepy, której dotyczy pobyt.',
       message: 'Wiadomość',
       specialNeeds: 'Osoba z niepełnosprawnością / specjalne potrzeby',
       specialNeedsText: 'Napisz, czego potrzebujesz, abyśmy mogli lepiej przygotować pobyt.',
@@ -152,7 +152,7 @@ const copy = {
       country: 'Country',
       countryPlaceholder: 'Type de, ge, Germany...',
       plate: 'Vehicle registration number',
-      plateHint: 'Optional. With a caravan, enter the car plate; with a camper, enter the camper plate.',
+      plateHint: 'Optional. Enter the registration plate of the main vehicle or trailer for this stay.',
       message: 'Message',
       specialNeeds: 'Guest with a disability / special needs',
       specialNeedsText: 'Tell us what you need so we can better prepare your stay.',
@@ -240,7 +240,7 @@ const copy = {
       country: 'Land',
       countryPlaceholder: 'z.B. de, ge, Germany...',
       plate: 'Kennzeichen',
-      plateHint: 'Optional. Beim Wohnwagen Auto-Kennzeichen, beim Camper Camper-Kennzeichen.',
+      plateHint: 'Optional. Bitte das Kennzeichen des Hauptfahrzeugs oder Anhängers eintragen.',
       message: 'Nachricht',
       specialNeeds: 'Gast mit Behinderung / besondere Bedurfnisse',
       specialNeedsText: 'Schreiben Sie, was Sie brauchen, damit wir den Aufenthalt besser vorbereiten konnen.',
@@ -328,7 +328,7 @@ const copy = {
       country: 'Paese',
       countryPlaceholder: 'es. de, ge, Germany...',
       plate: 'Targa veicolo',
-      plateHint: 'Opzionale. Con roulotte inserisci la targa auto; con camper la targa camper.',
+      plateHint: 'Opzionale. Inserisci la targa del veicolo principale o del rimorchio relativo al soggiorno.',
       message: 'Messaggio',
       specialNeeds: 'Ospite con disabilita / esigenze speciali',
       specialNeedsText: 'Dicci cosa ti serve per preparare meglio il soggiorno.',
@@ -696,6 +696,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         lateTime: '13:00',
         quiet: false,
         consent: false,
+        privacy: false,
       },
       hint: '',
       toast: '',
@@ -706,10 +707,99 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       helpOpen: false,
       success: false,
       submitting: false,
+      submitAttempted: false,
       submitMode: '',
       submitError: '',
       inquiryId: '',
     };
+
+    const formTextByLang = {
+      pl: {
+        privacy: 'Wyrażam zgodę na przetwarzanie danych osobowych w celu obsługi zapytania.',
+        privacyHelper: 'Wymagane. Dane wykorzystamy tylko do odpowiedzi na zapytanie.',
+        validation: {
+          name: 'Podaj imię i nazwisko.',
+          contact: 'Podaj email albo telefon.',
+          country: 'Wybierz kraj z listy.',
+          dates: 'Wybierz datę przyjazdu i wyjazdu.',
+          service: 'Wybierz przynajmniej jedną opcję pobytu lub usługę.',
+          consents: 'Zaznacz wymagane zgody przed wysłaniem zapytania.',
+        },
+        plateHints: {
+          camper: 'Przy kamperze wpisz rejestrację kampera.',
+          van: 'Przy vanie wpisz rejestrację vana.',
+          caravan: 'Przy przyczepie kempingowej wpisz rejestrację przyczepy.',
+          rooftop: 'Przy aucie z namiotem dachowym wpisz rejestrację auta.',
+          bus: 'Przy busie, ciężarówce lub autobusie wpisz rejestrację tego pojazdu.',
+          car: 'Przy aucie wpisz rejestrację auta.',
+          default: 'Wpisz numer rejestracyjny głównego pojazdu lub przyczepy, której dotyczy pobyt.',
+        },
+      },
+      en: {
+        privacy: 'I agree to personal data processing for handling this enquiry.',
+        privacyHelper: 'Required. We use the data only to answer this enquiry.',
+        validation: {
+          name: 'Enter your full name.',
+          contact: 'Enter email or phone.',
+          country: 'Choose a country from the list.',
+          dates: 'Choose arrival and departure dates.',
+          service: 'Choose at least one stay option or service.',
+          consents: 'Tick the required consent fields before sending.',
+        },
+        plateHints: {
+          camper: 'For a camper, enter the camper registration plate.',
+          van: 'For a van, enter the van registration plate.',
+          caravan: 'For a caravan, enter the caravan/trailer registration plate.',
+          rooftop: 'For a car with a rooftop tent, enter the car registration plate.',
+          bus: 'For a bus, truck or coach, enter that vehicle registration plate.',
+          car: 'For a car, enter the car registration plate.',
+          default: 'Enter the registration plate of the main vehicle or trailer for this stay.',
+        },
+      },
+      de: {
+        privacy: 'Ich stimme der Verarbeitung personenbezogener Daten zur Bearbeitung dieser Anfrage zu.',
+        privacyHelper: 'Erforderlich. Die Daten werden nur zur Beantwortung der Anfrage verwendet.',
+        validation: {
+          name: 'Bitte Vor- und Nachname angeben.',
+          contact: 'Bitte E-Mail oder Telefon angeben.',
+          country: 'Bitte Land aus der Liste wählen.',
+          dates: 'Bitte Anreise- und Abreisedatum wählen.',
+          service: 'Bitte mindestens eine Aufenthaltsoption oder Leistung wählen.',
+          consents: 'Bitte die erforderlichen Zustimmungen markieren.',
+        },
+        plateHints: {
+          camper: 'Beim Camper bitte das Camper-Kennzeichen eintragen.',
+          van: 'Beim Van bitte das Van-Kennzeichen eintragen.',
+          caravan: 'Beim Wohnwagen bitte das Kennzeichen des Wohnwagens/Anhängers eintragen.',
+          rooftop: 'Beim Auto mit Dachzelt bitte das Auto-Kennzeichen eintragen.',
+          bus: 'Beim Bus, Lkw oder Reisebus bitte das Kennzeichen dieses Fahrzeugs eintragen.',
+          car: 'Beim Auto bitte das Auto-Kennzeichen eintragen.',
+          default: 'Bitte das Kennzeichen des Hauptfahrzeugs oder Anhängers eintragen.',
+        },
+      },
+      it: {
+        privacy: 'Acconsento al trattamento dei dati personali per gestire questa richiesta.',
+        privacyHelper: 'Obbligatorio. Usiamo i dati solo per rispondere alla richiesta.',
+        validation: {
+          name: 'Inserisci nome e cognome.',
+          contact: 'Inserisci email o telefono.',
+          country: 'Scegli un paese dalla lista.',
+          dates: 'Scegli data di arrivo e partenza.',
+          service: 'Scegli almeno una opzione di soggiorno o servizio.',
+          consents: 'Seleziona i consensi obbligatori prima dell’invio.',
+        },
+        plateHints: {
+          camper: 'Per il camper inserisci la targa del camper.',
+          van: 'Per il van inserisci la targa del van.',
+          caravan: 'Per la roulotte inserisci la targa della roulotte/rimorchio.',
+          rooftop: 'Per auto con tenda da tetto inserisci la targa dell’auto.',
+          bus: 'Per bus, camion o pullman inserisci la targa di quel veicolo.',
+          car: 'Per l’auto inserisci la targa dell’auto.',
+          default: 'Inserisci la targa del veicolo principale o del rimorchio relativo al soggiorno.',
+        },
+      },
+    };
+    const formText = formTextByLang[config.lang] || formTextByLang.en;
 
     const esc = (value) => String(value ?? '')
       .replace(/&/g, '&amp;')
@@ -908,6 +998,18 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const estimatedTotal = () => perNightTotal() * Math.max(1, nights() || 1);
 
     const hasChosenService = () => selectedServices().length > 0;
+
+    const vehiclePlateHelper = () => {
+      const hints = formText.plateHints || {};
+      const has = (scope, id) => getQty(scope, id) > 0;
+      if (has('camping', 'caravan')) return hints.caravan;
+      if (has('camping', 'camper')) return hints.camper;
+      if (has('camping', 'van')) return hints.van;
+      if (has('camping', 'rooftop-tent')) return hints.rooftop;
+      if (has('camping', 'bus')) return hints.bus;
+      if (has('camping', 'parking') || has('bungalow', 'parking')) return hints.car;
+      return hints.default || t.fields.plateHint;
+    };
 
     const scrollToTop = () => {
       const top = Math.max(0, root.getBoundingClientRect().top + window.scrollY - 92);
@@ -1143,8 +1245,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       consentHelper: 'Required before sending.',
     });
 
-    const optionRow = ({ check, icon, label, helper }) => `
-      <label class="reservation-option-row">
+    const optionRow = ({ check, icon, label, helper, required = false }) => `
+      <label class="reservation-option-row ${required && state.submitAttempted && !state.details[check] ? 'is-invalid' : ''}">
         <input type="checkbox" data-check="${esc(check)}" ${state.details[check] ? 'checked' : ''} />
         <i aria-hidden="true">${detailIcon(icon)}</i>
         <span>
@@ -1207,7 +1309,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
                 <label class="reservation-field">
                   <span>${esc(t.fields.plate)}</span>
                   <input type="text" data-field="details.plate" value="${esc(state.details.plate)}" />
-                  <small>${esc(t.fields.plateHint)}</small>
+                  <small data-plate-helper>${esc(vehiclePlateHelper())}</small>
                 </label>
                 <label class="reservation-field reservation-field--wide">
                   <span>${esc(t.fields.message)}</span>
@@ -1239,8 +1341,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
                     </label>
                     <p>${esc(t.info.lateCheckout)}</p>
                   </div>
-                ${optionRow({ check: 'quiet', icon: 'quiet', label: t.fields.quiet, helper: labels.quietHelper })}
-                ${optionRow({ check: 'consent', icon: 'consent', label: t.fields.consent, helper: labels.consentHelper })}
+                ${optionRow({ check: 'quiet', icon: 'quiet', label: t.fields.quiet, helper: labels.quietHelper, required: true })}
+                ${optionRow({ check: 'consent', icon: 'consent', label: t.fields.consent, helper: labels.consentHelper, required: true })}
+                ${optionRow({ check: 'privacy', icon: 'consent', label: formText.privacy, helper: formText.privacyHelper, required: true })}
               </div>
             </section>
           </div>
@@ -1364,6 +1467,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       return `
         <div class="reservation-success-modal" role="dialog" aria-modal="true" aria-label="${esc(ui.success.title)}">
           <div class="reservation-success-modal__card">
+            <button class="reservation-success-modal__close" type="button" data-success-close aria-label="${esc(ui.help.close)}">×</button>
             <span class="reservation-success-modal__mark" aria-hidden="true">${detailIcon('success')}</span>
             <h2>${esc(ui.success.title)}</h2>
             <p>${esc(successText)}</p>
@@ -1375,6 +1479,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
               <div><dt>${esc(t.summary.total)}</dt><dd>${selected.length ? fmt(estimatedTotal()) : '-'}</dd></div>
               ${state.details.countryCode ? `<div><dt>${esc(t.summary.country)}</dt><dd>${esc(state.details.countryName)} (${esc(state.details.countryCode)})</dd></div>` : ''}
               <div><dt>${esc(t.summary.language)}</dt><dd>${esc(state.details.language)}</dd></div>
+              ${state.details.specialNeeds ? `<div><dt>${esc(t.summary.specialNeeds)}</dt><dd>Tak</dd></div>` : ''}
+              ${state.details.lateCheckout ? `<div><dt>${esc(t.summary.lateCheckout)}</dt><dd>${esc(state.details.lateTime)}</dd></div>` : ''}
+              <div><dt>Cisza nocna</dt><dd>${state.details.quiet ? 'zaakceptowana' : 'brak'}</dd></div>
             </dl>
             <p class="reservation-success-modal__note">${esc(stayNote)}</p>
             <div class="reservation-success-modal__actions">
@@ -1466,6 +1573,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         summerNotice: touchesSummer(),
         quietConsent: state.details.quiet,
         consent: state.details.consent,
+        privacyConsent: state.details.privacy,
         website: '',
         source: 'website',
         locale: config.lang,
@@ -1547,6 +1655,21 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (late instanceof HTMLElement) late.hidden = !state.details.lateCheckout;
     };
 
+    const updatePlateHelperDom = () => {
+      const helper = mount.querySelector('[data-plate-helper]');
+      if (helper instanceof HTMLElement) helper.textContent = vehiclePlateHelper();
+    };
+
+    const updateConsentInvalidDom = () => {
+      ['quiet', 'consent', 'privacy'].forEach((key) => {
+        const input = mount.querySelector(`[data-check="${key}"]`);
+        const row = input?.closest('.reservation-option-row');
+        if (row instanceof HTMLElement) {
+          row.classList.toggle('is-invalid', Boolean(state.submitAttempted && !state.details[key]));
+        }
+      });
+    };
+
     const updateCountryDom = () => {
       const input = mount.querySelector('[data-country-search]');
       const hidden = mount.querySelector('[data-country-code]');
@@ -1579,6 +1702,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       updateStepperDom();
       updateLanguageDom();
       updateConditionalFieldsDom();
+      updatePlateHelperDom();
+      updateConsentInvalidDom();
       updateCountryDom();
       updateSummaryDom();
       updateToastDom();
@@ -1596,6 +1721,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.hint = '';
       state.toast = '';
       state.helpOpen = false;
+      state.submitAttempted = false;
       const url = new URL(window.location.href);
       url.searchParams.set('stay', mode);
       window.history.replaceState({}, '', url);
@@ -1623,6 +1749,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.toast = '';
       state.helpOpen = false;
       state.success = false;
+      state.submitAttempted = false;
       const url = new URL(window.location.href);
       url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
@@ -1638,8 +1765,48 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const validateBeforeNext = () => {
       state.hint = '';
+      if (state.step === 1 && (!state.dates.arrival || !state.dates.departure || nights() < 1)) {
+        state.hint = formText.validation.dates;
+        return false;
+      }
       if (state.step === 3 && state.mode !== 'simple' && !hasChosenService()) {
-        state.hint = t.hints.chooseService;
+        state.hint = formText.validation.service || t.hints.chooseService;
+        return false;
+      }
+      return true;
+    };
+
+    const validateForSubmit = () => {
+      state.submitAttempted = true;
+      state.hint = '';
+      if (!state.dates.arrival || !state.dates.departure || nights() < 1) {
+        state.hint = formText.validation.dates;
+        state.step = 1;
+        return false;
+      }
+      if (state.mode !== 'simple' && !hasChosenService()) {
+        state.hint = formText.validation.service;
+        state.step = 3;
+        return false;
+      }
+      if (!state.details.name.trim()) {
+        state.hint = formText.validation.name;
+        state.step = 4;
+        return false;
+      }
+      if (!state.details.email.trim() && !state.details.phone.trim()) {
+        state.hint = formText.validation.contact;
+        state.step = 4;
+        return false;
+      }
+      if (!state.details.countryCode) {
+        state.hint = formText.validation.country;
+        state.step = 4;
+        return false;
+      }
+      if (!state.details.quiet || !state.details.consent || !state.details.privacy) {
+        state.hint = formText.validation.consents || t.hints.required;
+        state.step = 4;
         return false;
       }
       return true;
@@ -1647,9 +1814,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const submit = async () => {
       if (state.submitting) return;
-      if (!state.details.quiet || !state.details.consent) {
-        state.hint = t.hints.required;
-        state.step = 4;
+      if (!validateForSubmit()) {
         render();
         return;
       }
@@ -1756,6 +1921,13 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         event.preventDefault();
         state.success = false;
         resetFlow();
+        return;
+      }
+
+      if (target.closest('[data-success-close]')) {
+        event.preventDefault();
+        state.success = false;
+        render();
         return;
       }
 
@@ -1948,6 +2120,13 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
   overflow-y: visible;
 }
 
+.reservation-mini,
+.reservation-mini *,
+.reservation-mini *::before,
+.reservation-mini *::after {
+  box-sizing: border-box;
+}
+
 html:has(body.booking-app-page),
 body.booking-app-page {
   overflow-y: auto !important;
@@ -1991,6 +2170,7 @@ body.booking-app-page .main-content {
 .reservation-mini__wrap {
   width: min(1320px, 100%);
   margin: 0 auto;
+  min-width: 0;
 }
 
 .reservation-mini [hidden] {
@@ -2000,6 +2180,7 @@ body.booking-app-page .main-content {
 .reservation-mini__start,
 .reservation-mini__app {
   width: 100%;
+  min-width: 0;
 }
 
 .reservation-mini__start {
@@ -2084,6 +2265,8 @@ body.booking-app-page .main-content {
   font-size: clamp(2.2rem, 7vw, 5.1rem);
   line-height: .98;
   letter-spacing: 0;
+  overflow-wrap: normal;
+  text-wrap: balance;
 }
 
 .reservation-mini p {
@@ -2259,6 +2442,7 @@ body.booking-app-page .main-content {
   color: rgba(245,255,248,.74);
   font-size: 1rem;
   line-height: 1.55;
+  overflow-wrap: anywhere;
 }
 
 .reservation-choice-card__chips {
@@ -2924,6 +3108,12 @@ body.booking-app-page .main-content {
   background: rgba(60,179,113,.10);
 }
 
+.reservation-option-row.is-invalid {
+  border-color: rgba(255, 122, 122, .72);
+  background: rgba(255, 86, 86, .12);
+  box-shadow: 0 0 0 3px rgba(255, 86, 86, .10);
+}
+
 .reservation-consents input[type='checkbox'] {
   width: 20px;
   height: 20px;
@@ -3195,6 +3385,28 @@ body.booking-app-page .main-content {
   font-weight: 950;
 }
 
+.reservation-success-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255,255,255,.10);
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
+.reservation-success-modal__close:hover {
+  border-color: rgba(143,224,180,.42);
+  background: rgba(60,179,113,.18);
+}
+
 .reservation-help__sections {
   display: grid;
   gap: 12px;
@@ -3309,6 +3521,15 @@ body.booking-app-page .main-content {
     padding: 82px 14px 96px;
   }
 
+  .reservation-mini__start {
+    padding: 28px 18px;
+  }
+
+  .reservation-mini h1 {
+    font-size: clamp(2rem, 10vw, 3.35rem);
+    line-height: 1.04;
+  }
+
   .reservation-mini__choices,
   .reservation-form-grid,
   .reservation-card-grid {
@@ -3376,6 +3597,38 @@ body.booking-app-page .main-content {
 
   .reservation-mini__note {
     border-radius: 20px;
+  }
+}
+
+@media (max-width: 430px) {
+  .reservation-mini {
+    padding-inline: 10px;
+  }
+
+  .reservation-mini__start {
+    padding: 26px 14px;
+    border-radius: 24px;
+  }
+
+  .reservation-mini h1 {
+    font-size: clamp(1.62rem, 8.4vw, 2.05rem);
+  }
+
+  .reservation-choice-card,
+  .stay-choice-card {
+    padding: 20px 18px;
+    border-radius: 24px;
+  }
+
+  .stay-choice-card strong,
+  .reservation-choice-card strong {
+    font-size: clamp(1.42rem, 7vw, 1.8rem);
+  }
+
+  .reservation-choice-card__chips i {
+    min-height: 28px;
+    padding-inline: 9px;
+    font-size: .72rem;
   }
 }
 

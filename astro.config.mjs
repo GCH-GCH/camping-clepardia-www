@@ -36,13 +36,18 @@ const reservationApiDevPlugin = () => ({
         }
 
         const errors = {};
+        const services = Array.isArray(payload.services) ? payload.services.filter((item) => Number(item?.qty || 0) > 0) : [];
+        const addons = Array.isArray(payload.addons) ? payload.addons.filter(Boolean) : [];
         if (!String(payload.fullName || '').trim()) errors.fullName = 'Podaj imię i nazwisko.';
-        if (!String(payload.email || '').trim()) errors.email = 'Podaj adres email.';
+        if (!String(payload.email || '').trim() && !String(payload.phone || '').trim()) errors.contact = 'Podaj adres email albo telefon.';
+        if (!String(payload.country || '').trim()) errors.country = 'Wybierz kraj.';
         if (!String(payload.arrivalIso || '').trim()) errors.arrival = 'Podaj datę przyjazdu.';
         if (!String(payload.departureIso || '').trim()) errors.departure = 'Podaj datę wyjazdu.';
         if (!String(payload.stayType || '').trim()) errors.stayType = 'Wybierz typ pobytu.';
+        if (!services.length && !addons.length) errors.services = 'Wybierz przynajmniej jedną opcję pobytu lub usługę.';
         if (!payload.quietConsent) errors.quietConsent = 'Potwierdź zasady ciszy nocnej.';
         if (!payload.consent) errors.consent = 'Zaakceptuj kontakt zwrotny.';
+        if (!payload.privacyConsent) errors.privacyConsent = 'Zaakceptuj zgodę na przetwarzanie danych.';
 
         res.setHeader('content-type', 'application/json; charset=utf-8');
         res.setHeader('cache-control', 'no-store');
@@ -58,6 +63,24 @@ const reservationApiDevPlugin = () => ({
           ok: true,
           mode: 'mock',
           inquiryId: `LOCAL-${Date.now().toString(36).toUpperCase()}`,
+          mail: {
+            reception: {
+              provider: 'mock',
+              delivered: false,
+              reason: 'Local dev Vite mock - mail body prepared but not sent.',
+            },
+            autoresponder: String(payload.email || '').trim()
+              ? {
+                  provider: 'mock',
+                  delivered: false,
+                  reason: 'Local dev Vite mock - autoresponder prepared but not sent.',
+                }
+              : {
+                  provider: 'mock',
+                  delivered: false,
+                  reason: 'Customer email missing - autoresponder skipped.',
+                },
+          },
           message: 'Reservation enquiry accepted in local dev mock mode.',
         }));
       });

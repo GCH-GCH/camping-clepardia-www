@@ -115,16 +115,19 @@ export const normalizeReservationInquiry = (rawPayload: unknown) => {
   const { arrival, departure } = normalizeDatePair(payload);
 
   if (!fullName) errors.fullName = 'Podaj imie i nazwisko.';
-  if (!email) errors.email = 'Podaj adres email.';
-  else if (!isValidEmail(email)) errors.email = 'Podaj poprawny adres email.';
+  if (!email && !phone) errors.contact = 'Podaj adres email albo telefon.';
+  if (email && !isValidEmail(email)) errors.email = 'Podaj poprawny adres email.';
+  if (!country) errors.country = 'Wybierz kraj.';
   if (!arrival) errors.arrival = 'Podaj date przyjazdu.';
   if (!departure) errors.departure = 'Podaj date wyjazdu.';
   if (arrival && departure && departure <= arrival) {
     errors.departure = 'Data wyjazdu musi byc po dacie przyjazdu.';
   }
   if (!stayType) errors.stayType = 'Wybierz typ pobytu.';
+  if (!services.length && !addons.length) errors.services = 'Wybierz przynajmniej jedna opcje pobytu lub usluge.';
   if (!payload.quietConsent) errors.quietConsent = 'Potwierdz zasady ciszy nocnej.';
   if (!payload.consent) errors.consent = 'Zaakceptuj kontakt zwrotny.';
+  if (!payload.privacyConsent) errors.privacyConsent = 'Zaakceptuj zgode na przetwarzanie danych.';
 
   const nightsFromDates = arrival && departure ? Math.max(1, Math.round((departure.getTime() - arrival.getTime()) / DAY)) : 0;
   const nights = nightsFromDates || toNonNegativeInteger(payload.nights, 0);
@@ -163,6 +166,7 @@ export const normalizeReservationInquiry = (rawPayload: unknown) => {
     summerNotice: Boolean(payload.summerNotice),
     quietConsent: Boolean(payload.quietConsent),
     consent: Boolean(payload.consent),
+    privacyConsent: Boolean(payload.privacyConsent),
     website,
     source: 'website',
     locale,
@@ -201,6 +205,8 @@ export const createCcSystemLeadDraft = (inquiry: NormalizedReservationInquiry): 
     lateCheckout: inquiry.lateCheckout,
     summerNotice: inquiry.summerNotice,
     quietConsent: inquiry.quietConsent,
+    consent: inquiry.consent,
+    privacyConsent: inquiry.privacyConsent,
   },
   notes: inquiry.message,
   createdAt: inquiry.submittedAt,

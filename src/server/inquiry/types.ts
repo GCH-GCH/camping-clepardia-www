@@ -39,6 +39,7 @@ export interface ReservationInquiryPayload {
   summerNotice?: boolean;
   quietConsent?: boolean;
   consent?: boolean;
+  privacyConsent?: boolean;
   website?: string;
   source?: string;
   locale?: string;
@@ -74,6 +75,7 @@ export interface NormalizedReservationInquiry extends ReservationInquiryPayload 
   summerNotice: boolean;
   quietConsent: boolean;
   consent: boolean;
+  privacyConsent: boolean;
   website: string;
   source: 'website';
   locale: string;
@@ -116,6 +118,8 @@ export interface CcSystemLeadDraft {
     lateCheckout: string;
     summerNotice: boolean;
     quietConsent: boolean;
+    consent: boolean;
+    privacyConsent: boolean;
   };
   notes: string;
   createdAt: string;

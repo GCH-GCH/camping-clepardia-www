@@ -124,9 +124,9 @@ export const en = {
     },
     answers: {
       camperPrice:
-        'A motorhome costs 80 PLN per night. Guests are added separately: adult 35 PLN, child 4-14 years 20 PLN. Electricity: 25 PLN, dog: 0 PLN.',
+        'A motorhome costs 80 PLN per night. Guests are added separately: adult 35 PLN, child 4-14 years 20 PLN. Electricity: 30 PLN, dog: 0 PLN. Example: 2 adults + camper + electricity = 180 PLN / night.',
       pricing:
-        'As a guide: motorhome 80 PLN / night, truck / bus 160 PLN / night, electricity 25 PLN / night and dog 0 PLN. The full calculator is on the Prices page.',
+        'As a guide: motorhome 80 PLN / night, truck / bus 160 PLN / night, electricity 30 PLN / night and dog 0 PLN. The full calculator is on the Prices page.',
       centerTransit:
         'The stop is about 40 m from the gate. It is about 9 stops and around 14 minutes by tram to Stary Kleparz / the city centre.',
       directions:

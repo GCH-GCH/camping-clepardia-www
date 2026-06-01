@@ -510,7 +510,7 @@ const bookingConfigEncoded = Buffer.from(JSON.stringify({
     adults: 35,
     children: 20,
     toddlers: 0,
-    electricity: pricingConfig.addons.find((item) => item.id === 'electricity')?.price ?? 25,
+    electricity: pricingConfig.addons.find((item) => item.id === 'electricity')?.price ?? 30,
     dog: pricingConfig.addons.find((item) => item.id === 'dog')?.price ?? 0,
     car: pricingConfig.addons.find((item) => item.id === 'parking')?.price ?? 35,
     campingTypes: Object.fromEntries(campingTypes.map(([id, label, price]) => [id, { label, price }])),

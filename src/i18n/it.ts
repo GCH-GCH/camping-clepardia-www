@@ -127,9 +127,9 @@ export const it = {
     },
     answers: {
       camperPrice:
-        'Il camper costa 80 PLN a notte. Le persone si aggiungono a parte: adulto 35 PLN, bambino 4-14 anni 20 PLN. Elettricità: 25 PLN, cane: 0 PLN.',
+        'Il camper costa 80 PLN a notte. Le persone si aggiungono a parte: adulto 35 PLN, bambino 4-14 anni 20 PLN. Elettricità: 30 PLN, cane: 0 PLN. Esempio: 2 adulti + camper + elettricità = 180 PLN / notte.',
       pricing:
-        'Indicativamente: camper 80 PLN / notte, camion / bus 160 PLN / notte, elettricità 25 PLN / notte, cane 0 PLN. Il calcolatore completo è nella pagina Prezzi.',
+        'Indicativamente: camper 80 PLN / notte, camion / bus 160 PLN / notte, elettricità 30 PLN / notte, cane 0 PLN. Il calcolatore completo è nella pagina Prezzi.',
       centerTransit:
         'La fermata è a circa 40 m dal cancello. Verso Stary Kleparz / centro sono circa 9 fermate e circa 14 minuti in tram.',
       directions:

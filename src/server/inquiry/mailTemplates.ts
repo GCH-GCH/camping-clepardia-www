@@ -21,6 +21,23 @@ const servicesSummary = (inquiry: NormalizedReservationInquiry) => {
   return inquiry.addons.length ? inquiry.addons : ['brak'];
 };
 
+const hasService = (inquiry: NormalizedReservationInquiry, id: string) =>
+  inquiry.services.some((service) => service.id === id && service.qty > 0);
+
+const vehiclePlateLabel = (inquiry: NormalizedReservationInquiry) => {
+  if (hasService(inquiry, 'caravan') || hasService(inquiry, 'cargo-trailer')) return 'Rejestracja przyczepy';
+  if (hasService(inquiry, 'camper')) return 'Rejestracja kampera';
+  if (hasService(inquiry, 'van')) return 'Rejestracja vana';
+  if (hasService(inquiry, 'rooftop-tent') || hasService(inquiry, 'parking')) return 'Rejestracja auta';
+  if (hasService(inquiry, 'bus')) return 'Rejestracja busa / ciężarówki / autobusu';
+  return 'Numer rejestracyjny';
+};
+
+const servicesByScope = (inquiry: NormalizedReservationInquiry, scope: string) =>
+  inquiry.services
+    .filter((service) => service.scope === scope)
+    .map((service) => `${service.label} x ${service.qty} (${service.price} PLN / noc)`);
+
 const peopleSummary = (inquiry: NormalizedReservationInquiry) => [
   line('Dorośli', inquiry.people.adults),
   line('Dzieci 4-14', inquiry.people.children),
@@ -48,12 +65,16 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
     'Camping Clepardia WWW <no-reply@clepardia.com.pl>',
   );
   const to = firstConfigured(env('RESERVATION_TO_EMAIL'), env('MAIL_TO'), 'clepardia@gmail.com');
-  const subject = `Nowe zapytanie rezerwacyjne - Camping Clepardia - ${inquiry.stayType} - ${inquiry.arrival} - ${inquiry.departure}`;
+  const subject = `Nowe zapytanie rezerwacyjne — Camping Clepardia — ${inquiry.stayType} — ${inquiry.arrival} - ${inquiry.departure}`;
   const services = servicesSummary(inquiry);
+  const bungalowServices = servicesByScope(inquiry, 'bungalow');
+  const campingServices = servicesByScope(inquiry, 'camping');
+  const isCombined = /combined|razem/i.test(`${inquiry.selectedStayMode} ${inquiry.stayCategory}`);
+  const plateLabel = vehiclePlateLabel(inquiry);
   const bungalowNote = isBungalowInquiry(inquiry)
     ? 'W przypadku domków może być wymagana zaliczka. Dane do zaliczki należy wysłać klientowi w odpowiedzi mailowej po potwierdzeniu dostępności.'
     : '';
-  const combinedNote = /combined|razem/i.test(`${inquiry.selectedStayMode} ${inquiry.stayCategory}`)
+  const combinedNote = isCombined
     ? 'Zapytanie obejmuje domek i część campingową. Może być wymagana zaliczka za część noclegową.'
     : '';
 
@@ -83,11 +104,19 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
     line('Wariant', inquiry.selectedStayMode),
     line('Termin', `${inquiry.arrival} - ${inquiry.departure}`),
     line('Liczba nocy', inquiry.nights),
-    line('Numer rejestracyjny', inquiry.vehiclePlate),
+    line(plateLabel, inquiry.vehiclePlate),
     peopleSummary(inquiry),
     '',
     'USŁUGI I CENY',
     ...services.map((service) => `- ${service}`),
+    ...(isCombined ? [
+      '',
+      'SEKCJA DOMKI',
+      ...(bungalowServices.length ? bungalowServices.map((service) => `- ${service}`) : ['- brak']),
+      '',
+      'SEKCJA CAMPING',
+      ...(campingServices.length ? campingServices.map((service) => `- ${service}`) : ['- brak']),
+    ] : []),
     line('Suma orientacyjna', inquiry.estimatedTotal || inquiry.calculatorSummary?.total || 'brak'),
     '',
     'DODATKOWE INFORMACJE',
@@ -96,6 +125,7 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
     line('Komunikat sezonowy', inquiry.summerNotice ? 'Tak - termin zahacza o lipiec/sierpień' : 'Nie'),
     line('Cisza nocna zaakceptowana', yesNo(inquiry.quietConsent)),
     line('Zgoda kontaktowa', yesNo(inquiry.consent)),
+    line('Zgoda RODO / dane osobowe', yesNo(inquiry.privacyConsent)),
     '',
     'WIADOMOŚĆ KLIENTA',
     inquiry.originalMessage || inquiry.message || 'brak',
@@ -109,6 +139,16 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
   const servicesHtml = services.map((service) => `
     <li style="margin:0;padding:10px 0;border-top:1px solid #edf4ef;color:#102319;font-weight:700;">${escapeHtml(service)}</li>
   `).join('');
+  const scopeList = (title: string, lines: string[]) => `
+    <div style="margin-top:14px;padding:14px;border-radius:14px;background:#f4fbf6;border:1px solid #dceee4;">
+      <strong style="display:block;margin-bottom:8px;color:#102319;">${escapeHtml(title)}</strong>
+      <ul style="list-style:none;margin:0;padding:0;">
+        ${(lines.length ? lines : ['brak']).map((service) => `
+          <li style="margin:0;padding:7px 0;border-top:1px solid #e7f2eb;color:#102319;font-weight:700;">${escapeHtml(service)}</li>
+        `).join('')}
+      </ul>
+    </div>
+  `;
 
   const html = `
     <div style="font-family:Inter,Arial,sans-serif;background:#eef7f1;padding:28px;color:#102319;">
@@ -132,7 +172,7 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
           ['Wariant', inquiry.selectedStayMode],
           ['Termin', `${inquiry.arrival} - ${inquiry.departure}`],
           ['Liczba nocy', inquiry.nights],
-          ['Numer rejestracyjny', inquiry.vehiclePlate],
+          [plateLabel, inquiry.vehiclePlate],
         ])}
 
         ${card('Goście i cena', [
@@ -145,6 +185,7 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
         <section style="margin:18px 0;padding:18px 20px;border:1px solid #dceee4;border-radius:18px;background:#ffffff;">
           <h2 style="margin:0 0 10px;font-size:17px;color:#102319;">Usługi</h2>
           <ul style="list-style:none;margin:0;padding:0;">${servicesHtml}</ul>
+          ${isCombined ? `${scopeList('Sekcja Domki', bungalowServices)}${scopeList('Sekcja Camping', campingServices)}` : ''}
         </section>
 
         <section style="margin:18px 0;padding:18px 20px;border:1px solid #dceee4;border-radius:18px;background:#ffffff;">
@@ -162,13 +203,13 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
         ` : ''}
 
         <footer style="padding:18px 6px;color:#54675d;font-size:12px;line-height:1.6;">
-          Cisza nocna: ${escapeHtml(yesNo(inquiry.quietConsent))}. Zgoda kontaktowa: ${escapeHtml(yesNo(inquiry.consent))}. Finalną dostępność i warunki potwierdza recepcja.
+          Cisza nocna: ${escapeHtml(yesNo(inquiry.quietConsent))}. Zgoda kontaktowa: ${escapeHtml(yesNo(inquiry.consent))}. Zgoda RODO / dane osobowe: ${escapeHtml(yesNo(inquiry.privacyConsent))}. Finalną dostępność i warunki potwierdza recepcja.
         </footer>
       </div>
     </div>
   `;
 
-  return { to, from, replyTo: inquiry.email, subject, text, html };
+  return { to, from, replyTo: inquiry.email || undefined, subject, text, html };
 };
 
 export const buildAutoresponderMail = (inquiry: NormalizedReservationInquiry): MailMessage => {
