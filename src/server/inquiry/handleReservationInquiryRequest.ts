@@ -54,7 +54,7 @@ export const handleReservationInquiryRequest = async (request: Request) => {
   }
 
   const contentType = request.headers.get('content-type') || '';
-  if (!contentType.includes('application/json')) {
+  if (contentType && !contentType.includes('application/json')) {
     return toJsonResponse({ ok: false, message: 'Content-Type must be application/json.' }, 415);
   }
 
