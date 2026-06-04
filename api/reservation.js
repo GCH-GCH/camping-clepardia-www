@@ -85,7 +85,8 @@ const collectBody = (req) =>
 
 const readPayload = async (req) => {
   if (req.body && typeof req.body === 'object') return req.body;
-  const raw = typeof req.body === 'string' ? req.body : await collectBody(req);
+  const rawBody = typeof req.body === 'string' ? req.body : await collectBody(req);
+  const raw = String(rawBody || '').replace(/^\uFEFF/, '').trim();
   return raw ? JSON.parse(raw) : {};
 };
 
