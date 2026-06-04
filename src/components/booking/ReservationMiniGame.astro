@@ -440,17 +440,32 @@ const iconHtml = {
   },
   details: {
     contact: renderLucideIcon('UserRound'),
+    name: renderLucideIcon('UserRound'),
+    email: renderLucideIcon('Mail'),
+    phone: renderLucideIcon('Phone'),
+    language: renderLucideIcon('Languages'),
     stay: renderLucideIcon('CarFront'),
-    message: renderLucideIcon('MessageCircle'),
+    message: renderLucideIcon('MessageSquare'),
     country: renderLucideIcon('Globe2'),
+    flag: renderLucideIcon('Flag'),
     plate: renderLucideIcon('BadgeInfo'),
     accessibility: renderLucideIcon('Accessibility'),
     late: renderLucideIcon('Clock3'),
     quiet: renderLucideIcon('Moon'),
     consent: renderLucideIcon('ShieldCheck'),
+    contactConsent: renderLucideIcon('MailCheck'),
     help: renderLucideIcon('CircleHelp'),
     success: renderLucideIcon('CheckCircle2'),
     deposit: renderLucideIcon('WalletCards'),
+    calendar: renderLucideIcon('CalendarDays'),
+    guests: renderLucideIcon('UsersRound'),
+    services: renderLucideIcon('ListChecks'),
+    price: renderLucideIcon('ReceiptText'),
+    status: renderLucideIcon('Clock'),
+    info: renderLucideIcon('Info'),
+    copy: renderLucideIcon('Copy'),
+    warning: renderLucideIcon('AlertCircle'),
+    privacy: renderLucideIcon('ShieldCheck'),
   },
 };
 
@@ -801,6 +816,106 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     };
     const formText = formTextByLang[config.lang] || formTextByLang.en;
 
+    const detailTextByLang = {
+      pl: {
+        required: 'Wymagane',
+        optional: 'Opcjonalne',
+        conditionalContact: 'Wymagane, jeśli nie podano drugiej formy kontaktu',
+        missingTitle: 'Do wysłania brakuje:',
+        readyTitle: 'Wszystko gotowe - możesz wysłać zapytanie 🌿',
+        summaryStatusMissing: 'Uzupełnij wymagane pola',
+        summaryStatusReady: 'Gotowe do wysłania',
+        copySummary: 'Skopiuj całe podsumowanie',
+        copied: 'Podsumowanie skopiowane 🌿',
+        copyFallback: 'Zaznaczono tekst podsumowania. Skopiuj go skrótem Ctrl+C.',
+        statusConfirmedByReception: 'Do potwierdzenia przez recepcję',
+        privacyLink: 'Polityka prywatności',
+        consentSectionTitle: 'Wymagane zgody',
+        consentSectionLead: 'Bez tych zgód nie możemy wysłać zapytania do recepcji.',
+        field: {
+          name: { placeholder: 'np. Jan Kowalski', helper: 'Podaj imię i nazwisko osoby kontaktowej.' },
+          email: { placeholder: 'np. jan@email.com', helper: 'Na ten adres recepcja wyśle odpowiedź. Podaj email lub telefon.' },
+          phone: { placeholder: 'np. +48 123 456 789', helper: 'Podaj numer, jeśli wolisz kontakt telefoniczny lub WhatsApp. Email albo telefon jest wymagany.' },
+          language: { helper: 'Wybierz język, w którym recepcja ma odpowiedzieć.' },
+          country: { placeholder: 'np. de, ge, niem, Germany, Chile...', helper: 'Zacznij wpisywać kraj - możesz użyć nazwy, kodu albo nazwy w swoim języku.' },
+          plate: {
+            helper: 'Przy kamperze wpisz rejestrację kampera. Przy przyczepie kempingowej wpisz rejestrację przyczepy. Przy aucie z namiotem dachowym wpisz rejestrację auta.',
+            placeholders: {
+              camper: 'np. KR 12345 - rejestracja kampera',
+              van: 'np. KR 12345 - rejestracja vana',
+              caravan: 'np. KRA 1234 - rejestracja przyczepy',
+              rooftop: 'np. KR 12345 - rejestracja auta',
+              bus: 'np. KR 12345 - rejestracja pojazdu',
+              car: 'np. KR 12345 - rejestracja auta',
+              default: 'np. KR 12345',
+            },
+          },
+          message: { placeholder: 'Np. przyjedziemy później, prosimy o miejsce blisko sanitariatów...', helper: 'Dodaj dodatkowe informacje, które pomogą recepcji przygotować pobyt.' },
+          specialNeeds: { helper: 'Opcjonalnie. Po zaznaczeniu pokażemy pole na szczegóły.' },
+          lateCheckout: { helper: 'Opcjonalnie. Recepcja potwierdzi możliwość i ewentualny koszt po przyjeździe.' },
+        },
+        missing: {
+          dates: 'Termin pobytu',
+          service: 'Opcja pobytu lub usługa',
+          name: 'Imię i nazwisko',
+          contact: 'Email albo telefon',
+          country: 'Kraj',
+          quiet: 'Zgoda o ciszy nocnej',
+          consent: 'Zgoda na kontakt',
+          privacy: 'Polityka prywatności',
+        },
+      },
+      en: {
+        required: 'Required',
+        optional: 'Optional',
+        conditionalContact: 'Required if the other contact method is missing',
+        missingTitle: 'Still needed before sending:',
+        readyTitle: 'Everything is ready - you can send the enquiry 🌿',
+        summaryStatusMissing: 'Complete required fields',
+        summaryStatusReady: 'Ready to send',
+        copySummary: 'Copy full summary',
+        copied: 'Summary copied 🌿',
+        copyFallback: 'The summary text is selected. Copy it with Ctrl+C.',
+        statusConfirmedByReception: 'To be confirmed by reception',
+        privacyLink: 'Privacy policy',
+        consentSectionTitle: 'Required consents',
+        consentSectionLead: 'These consents are needed before sending the enquiry to reception.',
+        field: {
+          name: { placeholder: 'e.g. Jan Kowalski', helper: 'Enter the contact person full name.' },
+          email: { placeholder: 'e.g. jan@email.com', helper: 'Reception will reply to this address. Email or phone is required.' },
+          phone: { placeholder: 'e.g. +48 123 456 789', helper: 'Add a number if you prefer phone or WhatsApp contact. Email or phone is required.' },
+          language: { helper: 'Choose the language for reception reply.' },
+          country: { placeholder: 'e.g. de, ge, Germany, Chile...', helper: 'Start typing a country name, code or local name.' },
+          plate: {
+            helper: 'For a camper enter the camper plate. For a caravan enter the caravan/trailer plate. For a rooftop tent enter the car plate.',
+            placeholders: {
+              camper: 'e.g. KR 12345 - camper plate',
+              van: 'e.g. KR 12345 - van plate',
+              caravan: 'e.g. KRA 1234 - caravan plate',
+              rooftop: 'e.g. KR 12345 - car plate',
+              bus: 'e.g. KR 12345 - vehicle plate',
+              car: 'e.g. KR 12345 - car plate',
+              default: 'e.g. KR 12345',
+            },
+          },
+          message: { placeholder: 'E.g. we will arrive later, please place us near sanitary facilities...', helper: 'Add anything that helps reception prepare your stay.' },
+          specialNeeds: { helper: 'Optional. A text field appears after selecting this.' },
+          lateCheckout: { helper: 'Optional. Reception confirms possibility and any cost after arrival.' },
+        },
+        missing: {
+          dates: 'Stay dates',
+          service: 'Stay option or service',
+          name: 'Full name',
+          contact: 'Email or phone',
+          country: 'Country',
+          quiet: 'Quiet hours consent',
+          consent: 'Contact consent',
+          privacy: 'Privacy policy',
+        },
+      },
+    };
+    const detailText = detailTextByLang[config.lang] || detailTextByLang.en;
+
     const esc = (value) => String(value ?? '')
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -821,11 +936,26 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const query = normalize(state.details.countrySearch);
       if (!state.countryOpen) return [];
       if (!query || !state.countryDirty) return [];
+      const preferredCode = { ge: 'DE', sv: 'SE', cs: 'CZ' }[query];
       return config.countries
-        .filter((country) => {
-          const haystack = [country.code, country.name, ...(country.aliases || [])].map(normalize).join(' ');
-          return haystack.includes(query);
+        .map((country) => {
+          const code = normalize(country.code);
+          const name = normalize(country.name);
+          const aliases = (country.aliases || []).map(normalize);
+          const values = [code, name, ...aliases];
+          let score = 99;
+          if (preferredCode && country.code === preferredCode) score = -1;
+          else if (aliases.some((alias) => alias === query)) score = 0;
+          else if (code === query) score = 1;
+          else if (name === query) score = 2;
+          else if (aliases.some((alias) => alias.startsWith(query))) score = 3;
+          else if (code.startsWith(query) || name.startsWith(query)) score = 4;
+          else if (values.some((value) => value.includes(query))) score = 5;
+          return { country, score };
         })
+        .filter((entry) => entry.score < 99)
+        .sort((a, b) => a.score - b.score || a.country.name.localeCompare(b.country.name))
+        .map((entry) => entry.country)
         .slice(0, 7);
     };
 
@@ -892,7 +1022,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       camping: [
         { id: 'camping-camper-power', icon: 'camper', label: '2 osoby + kamper + prąd', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:camper': 1, 'camping:electricity': 1 } },
         { id: 'camping-van', icon: 'van', label: '2 osoby + van', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:van': 1 } },
-        { id: 'camping-caravan-power', icon: 'caravan', label: '2 osoby + przyczepa + prąd', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:caravan': 1, 'camping:electricity': 1 } },
+        { id: 'camping-caravan-power', icon: 'caravan', label: '2 osoby + auto + przyczepa + prąd', toast: 'Dodano zestaw: 2 osoby + auto + przyczepa + prąd 🌿', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:parking': 1, 'camping:caravan': 1, 'camping:electricity': 1 } },
         { id: 'camping-tent', icon: 'tent-small', label: '2 osoby + namiot', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:tent-small': 1 } },
         { id: 'camping-family', icon: 'camper', label: 'Rodzina: 2 dorosłych + 2 dzieci + kamper + prąd', guests: { adults: 2, children: 2, toddlers: 0 }, services: { 'camping:camper': 1, 'camping:electricity': 1 } },
       ],
@@ -950,12 +1080,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         const [scope, serviceId] = key.split(':');
         setQty(scope, serviceId, Number(value));
       });
-      state.toast = ui.presetAdded;
+      state.toast = preset.toast || ui.presetAdded;
       state.hint = '';
       refreshControlDom();
       pulseSummary();
       window.setTimeout(() => {
-        if (state.toast === ui.presetAdded) {
+        if (state.toast === (preset.toast || ui.presetAdded)) {
           state.toast = '';
           updateToastDom();
         }
@@ -1010,6 +1140,132 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (has('camping', 'parking') || has('bungalow', 'parking')) return hints.car;
       return hints.default || t.fields.plateHint;
     };
+
+    const vehiclePlatePlaceholder = () => {
+      const placeholders = detailText.field?.plate?.placeholders || {};
+      const has = (scope, id) => getQty(scope, id) > 0;
+      if (has('camping', 'caravan') || has('camping', 'cargo-trailer')) return placeholders.caravan;
+      if (has('camping', 'camper')) return placeholders.camper;
+      if (has('camping', 'van')) return placeholders.van;
+      if (has('camping', 'rooftop-tent')) return placeholders.rooftop;
+      if (has('camping', 'bus')) return placeholders.bus;
+      if (has('camping', 'parking') || has('bungalow', 'parking')) return placeholders.car;
+      return placeholders.default || '';
+    };
+
+    const missingItems = () => {
+      const missing = [];
+      if (!state.dates.arrival || !state.dates.departure || nights() < 1) {
+        missing.push({ key: 'dates', icon: 'calendar', label: detailText.missing.dates });
+      }
+      if (state.mode !== 'simple' && !hasChosenService()) {
+        missing.push({ key: 'service', icon: 'services', label: detailText.missing.service });
+      }
+      if (!state.details.name.trim()) {
+        missing.push({ key: 'name', icon: 'name', label: detailText.missing.name });
+      }
+      if (!state.details.email.trim() && !state.details.phone.trim()) {
+        missing.push({ key: 'contact', icon: 'contactConsent', label: detailText.missing.contact });
+      }
+      if (!state.details.countryCode) {
+        missing.push({ key: 'country', icon: 'country', label: detailText.missing.country });
+      }
+      if (!state.details.quiet) {
+        missing.push({ key: 'quiet', icon: 'quiet', label: detailText.missing.quiet });
+      }
+      if (!state.details.consent) {
+        missing.push({ key: 'consent', icon: 'contactConsent', label: detailText.missing.consent });
+      }
+      if (!state.details.privacy) {
+        missing.push({ key: 'privacy', icon: 'privacy', label: detailText.missing.privacy });
+      }
+      return missing;
+    };
+
+    const hasMissing = (key) => missingItems().some((item) => item.key === key);
+    const fieldInvalid = (key) => Boolean(state.submitAttempted && hasMissing(key));
+    const contactInvalid = () => fieldInvalid('contact');
+
+    const fieldBadge = (kind = 'optional') => {
+      const label = kind === 'required'
+        ? detailText.required
+        : kind === 'conditional'
+          ? detailText.conditionalContact
+          : detailText.optional;
+      return `<b class="reservation-field-badge reservation-field-badge--${esc(kind)}">${esc(label)}</b>`;
+    };
+
+    const fieldLabel = ({ icon, label, badge = 'optional' }) => `
+      <span class="reservation-field__label">
+        <i aria-hidden="true">${detailIcon(icon)}</i>
+        <span>${esc(label)}</span>
+        ${fieldBadge(badge)}
+      </span>
+    `;
+
+    const fieldError = (key) => {
+      if (!fieldInvalid(key) && !(key === 'contact' && contactInvalid())) return '';
+      const messages = {
+        name: formText.validation.name,
+        contact: formText.validation.contact,
+        country: formText.validation.country,
+      };
+      return `<em class="reservation-field__error">${esc(messages[key] || state.hint || t.hints.required)}</em>`;
+    };
+
+    const missingListTemplate = (compact = false) => {
+      const missing = missingItems();
+      if (!missing.length) {
+        return `
+          <div class="reservation-missing-card reservation-missing-card--ready" data-missing-card>
+            <i aria-hidden="true">${detailIcon('success')}</i>
+            <strong>${esc(detailText.readyTitle)}</strong>
+          </div>
+        `;
+      }
+      return `
+        <div class="reservation-missing-card" data-missing-card>
+          <i aria-hidden="true">${detailIcon('warning')}</i>
+          <div>
+            <strong>${esc(detailText.missingTitle)}</strong>
+            <ul>
+              ${missing.slice(0, compact ? 5 : missing.length).map((item) => `
+                <li><span aria-hidden="true">${detailIcon(item.icon)}</span>${esc(item.label)}</li>
+              `).join('')}
+            </ul>
+          </div>
+        </div>
+      `;
+    };
+
+    const summaryRow = (icon, label, value) => {
+      const hasValue = value !== undefined && value !== null && String(value).trim() !== '';
+      if (!hasValue) return '';
+      return `
+        <div class="reservation-summary-row">
+          <i aria-hidden="true">${detailIcon(icon)}</i>
+          <span>
+            <dt>${esc(label)}</dt>
+            <dd>${esc(value)}</dd>
+          </span>
+        </div>
+      `;
+    };
+
+    const servicesText = () => {
+      const selected = selectedServices();
+      return selected.length ? selected.map((item) => `${item.label} x ${item.qty}`).join(', ') : '';
+    };
+
+    const guestsText = () => guestRows().map(([key, label]) => `${label}: ${Number(state.guests[key] || 0)}`).join(', ');
+
+    const consentsText = () => [
+      `${detailText.missing.quiet}: ${state.details.quiet ? 'OK' : '-'}`,
+      `${detailText.missing.consent}: ${state.details.consent ? 'OK' : '-'}`,
+      `${detailText.missing.privacy}: ${state.details.privacy ? 'OK' : '-'}`,
+    ].join(', ');
+
+    const yesLabel = () => config.lang === 'pl' ? 'Tak' : 'Yes';
 
     const scrollToTop = () => {
       const top = Math.max(0, root.getBoundingClientRect().top + window.scrollY - 92);
@@ -1199,9 +1455,11 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const showResults = state.countryOpen && state.countryDirty && hasQuery;
       return `
         <div class="reservation-country">
-          <label class="reservation-field">
-            <span>${esc(t.fields.country)}</span>
-            <input type="text" data-country-search value="${esc(state.details.countrySearch)}" placeholder="${esc(t.fields.countryPlaceholder)}" autocomplete="off" aria-autocomplete="list" aria-expanded="${showResults ? 'true' : 'false'}" />
+          <label class="reservation-field ${fieldInvalid('country') ? 'is-invalid' : ''}" data-field-key="country">
+            ${fieldLabel({ icon: 'country', label: t.fields.country, badge: 'required' })}
+            <input type="text" data-country-search value="${esc(state.details.countrySearch)}" placeholder="${esc(detailText.field.country.placeholder || t.fields.countryPlaceholder)}" autocomplete="off" aria-autocomplete="list" aria-expanded="${showResults ? 'true' : 'false'}" />
+            <small>${esc(detailText.field.country.helper)}</small>
+            ${fieldError('country')}
           </label>
           <input type="hidden" data-country-code value="${esc(state.details.countryCode)}" />
           <p class="reservation-country__hint" data-country-hint ${showHint ? '' : 'hidden'}>${esc(ui.noCountries)}</p>
@@ -1210,7 +1468,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
               <div data-country-results>
               ${matches.length ? matches.map((country, index) => `
                 <button type="button" data-country-pick="${esc(country.code)}" role="option" class="${index === state.countryActiveIndex ? 'is-active' : ''}">
-                  <i class="${esc(country.flagClass)}" aria-hidden="true"></i>
+                  <span class="reservation-country__flag" aria-hidden="true"><i class="${esc(country.flagClass)}"></i><b>${detailIcon('country')}</b></span>
                   <span>${esc(country.name)}</span>
                   <small>${esc(country.code)}</small>
                 </button>
@@ -1245,12 +1503,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       consentHelper: 'Required before sending.',
     });
 
-    const optionRow = ({ check, icon, label, helper, required = false }) => `
-      <label class="reservation-option-row ${required && state.submitAttempted && !state.details[check] ? 'is-invalid' : ''}">
+    const optionRow = ({ check, icon, label, labelHtml = '', helper, required = false }) => `
+      <label class="reservation-option-row ${required ? 'is-required' : ''} ${required && state.submitAttempted && !state.details[check] ? 'is-invalid' : ''}">
         <input type="checkbox" data-check="${esc(check)}" ${state.details[check] ? 'checked' : ''} />
         <i aria-hidden="true">${detailIcon(icon)}</i>
         <span>
-          <strong>${esc(label)}</strong>
+          <strong>${labelHtml || esc(label)} ${fieldBadge(required ? 'required' : 'optional')}</strong>
           <small>${esc(helper)}</small>
         </span>
       </label>
@@ -1264,6 +1522,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           <h2>${esc(stepTitles[3])}</h2>
           <p>${esc(t.stepLead.details)}</p>
           ${state.hint ? `<div class="reservation-hint">${esc(state.hint)}</div>` : ''}
+          ${missingListTemplate(false)}
           <div class="reservation-details-stack">
             <section class="reservation-details-section">
               <header class="reservation-details-section__head">
@@ -1274,25 +1533,31 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
                 </div>
               </header>
               <div class="reservation-form-grid">
-                <label class="reservation-field">
-                  <span>${esc(t.fields.name)}</span>
-                  <input type="text" data-field="details.name" value="${esc(state.details.name)}" autocomplete="name" />
+                <label class="reservation-field ${fieldInvalid('name') ? 'is-invalid' : ''}" data-field-key="name">
+                  ${fieldLabel({ icon: 'name', label: t.fields.name, badge: 'required' })}
+                  <input type="text" data-field="details.name" value="${esc(state.details.name)}" placeholder="${esc(detailText.field.name.placeholder)}" autocomplete="name" aria-invalid="${fieldInvalid('name') ? 'true' : 'false'}" />
+                  <small>${esc(detailText.field.name.helper)}</small>
+                  ${fieldError('name')}
                 </label>
-                <label class="reservation-field">
-                  <span>${esc(t.fields.email)}</span>
-                  <input type="email" data-field="details.email" value="${esc(state.details.email)}" autocomplete="email" />
+                <label class="reservation-field ${contactInvalid() ? 'is-invalid' : ''}" data-field-key="email">
+                  ${fieldLabel({ icon: 'email', label: t.fields.email, badge: 'conditional' })}
+                  <input type="email" data-field="details.email" value="${esc(state.details.email)}" placeholder="${esc(detailText.field.email.placeholder)}" autocomplete="email" aria-invalid="${contactInvalid() ? 'true' : 'false'}" />
+                  <small>${esc(detailText.field.email.helper)}</small>
+                  ${contactInvalid() ? fieldError('contact') : ''}
                 </label>
-                <label class="reservation-field">
-                  <span>${esc(t.fields.phone)}</span>
-                  <input type="tel" data-field="details.phone" value="${esc(state.details.phone)}" autocomplete="tel" />
+                <label class="reservation-field ${contactInvalid() ? 'is-invalid' : ''}" data-field-key="phone">
+                  ${fieldLabel({ icon: 'phone', label: t.fields.phone, badge: 'conditional' })}
+                  <input type="tel" data-field="details.phone" value="${esc(state.details.phone)}" placeholder="${esc(detailText.field.phone.placeholder)}" autocomplete="tel" aria-invalid="${contactInvalid() ? 'true' : 'false'}" />
+                  <small>${esc(detailText.field.phone.helper)}</small>
                 </label>
                 <div class="reservation-field">
-                  <span>${esc(t.fields.language)}</span>
+                  ${fieldLabel({ icon: 'language', label: t.fields.language, badge: 'required' })}
                   <div class="reservation-pills">
                     ${['PL','EN','DE','IT'].map((language) => `
                       <button type="button" data-language="${language}" class="${state.details.language === language ? 'is-active' : ''}">${language}</button>
                     `).join('')}
                   </div>
+                  <small>${esc(detailText.field.language.helper)}</small>
                 </div>
                 ${countryTemplate()}
               </div>
@@ -1307,13 +1572,15 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
               </header>
               <div class="reservation-form-grid">
                 <label class="reservation-field">
-                  <span>${esc(t.fields.plate)}</span>
-                  <input type="text" data-field="details.plate" value="${esc(state.details.plate)}" />
+                  ${fieldLabel({ icon: 'plate', label: t.fields.plate, badge: 'optional' })}
+                  <input type="text" data-field="details.plate" value="${esc(state.details.plate)}" placeholder="${esc(vehiclePlatePlaceholder())}" autocomplete="off" />
+                  <small>${esc(detailText.field.plate.helper)}</small>
                   <small data-plate-helper>${esc(vehiclePlateHelper())}</small>
                 </label>
                 <label class="reservation-field reservation-field--wide">
-                  <span>${esc(t.fields.message)}</span>
-                  <textarea data-field="details.message" rows="4">${esc(state.details.message)}</textarea>
+                  ${fieldLabel({ icon: 'message', label: t.fields.message, badge: 'optional' })}
+                  <textarea data-field="details.message" rows="4" placeholder="${esc(detailText.field.message.placeholder)}">${esc(state.details.message)}</textarea>
+                  <small>${esc(detailText.field.message.helper)}</small>
                 </label>
               </div>
             </section>
@@ -1326,24 +1593,42 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
                 </div>
               </header>
               <div class="reservation-consents">
-                ${optionRow({ check: 'specialNeeds', icon: 'accessibility', label: t.fields.specialNeeds, helper: labels.specialHelper })}
+                ${optionRow({ check: 'specialNeeds', icon: 'accessibility', label: t.fields.specialNeeds, helper: detailText.field.specialNeeds.helper })}
                 <label class="reservation-field reservation-field--wide reservation-reveal-field" data-special-needs-field ${state.details.specialNeeds ? '' : 'hidden'}>
-                    <span>${esc(t.fields.specialNeedsText)}</span>
-                    <textarea data-field="details.specialNeedsText" rows="3">${esc(state.details.specialNeedsText)}</textarea>
+                    ${fieldLabel({ icon: 'accessibility', label: t.fields.specialNeedsText, badge: 'optional' })}
+                    <textarea data-field="details.specialNeedsText" rows="3" placeholder="${esc(t.fields.specialNeedsText)}">${esc(state.details.specialNeedsText)}</textarea>
                 </label>
-                ${optionRow({ check: 'lateCheckout', icon: 'late', label: t.fields.lateCheckout, helper: labels.lateHelper })}
+                ${optionRow({ check: 'lateCheckout', icon: 'late', label: t.fields.lateCheckout, helper: detailText.field.lateCheckout.helper })}
                 <div class="reservation-late-panel reservation-reveal-field" data-late-checkout-panel ${state.details.lateCheckout ? '' : 'hidden'}>
                     <label class="reservation-field">
-                      <span>${esc(t.fields.lateTime)}</span>
+                      ${fieldLabel({ icon: 'late', label: t.fields.lateTime, badge: 'optional' })}
                       <select data-field="details.lateTime">
                         ${['13:00','14:00','15:00','16:00','17:00'].map((time) => `<option value="${time}" ${state.details.lateTime === time ? 'selected' : ''}>${time}</option>`).join('')}
                       </select>
                     </label>
                     <p>${esc(t.info.lateCheckout)}</p>
                   </div>
+              </div>
+            </section>
+            <section class="reservation-details-section reservation-details-section--required">
+              <header class="reservation-details-section__head">
+                <span aria-hidden="true">${detailIcon('privacy')}</span>
+                <div>
+                  <strong>${esc(detailText.consentSectionTitle)}</strong>
+                  <p>${esc(detailText.consentSectionLead)}</p>
+                </div>
+              </header>
+              <div class="reservation-consents">
                 ${optionRow({ check: 'quiet', icon: 'quiet', label: t.fields.quiet, helper: labels.quietHelper, required: true })}
-                ${optionRow({ check: 'consent', icon: 'consent', label: t.fields.consent, helper: labels.consentHelper, required: true })}
-                ${optionRow({ check: 'privacy', icon: 'consent', label: formText.privacy, helper: formText.privacyHelper, required: true })}
+                ${optionRow({ check: 'consent', icon: 'contactConsent', label: t.fields.consent, helper: labels.consentHelper, required: true })}
+                ${optionRow({
+                  check: 'privacy',
+                  icon: 'privacy',
+                  label: formText.privacy,
+                  labelHtml: `${esc(formText.privacy)} <a class="reservation-privacy-link" href="/polityka-prywatnosci" target="_blank" rel="noopener noreferrer">${esc(detailText.privacyLink)}</a>`,
+                  helper: formText.privacyHelper,
+                  required: true,
+                })}
               </div>
             </section>
           </div>
@@ -1355,40 +1640,65 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const selected = selectedServices();
       const hasCostData = selected.length > 0;
       const depositNote = state.mode === 'bungalow' ? ui.summary.depositBungalow : state.mode === 'combined' ? ui.summary.depositCombined : '';
+      const statusText = missingItems().length ? detailText.summaryStatusMissing : detailText.summaryStatusReady;
+      const dateText = state.dates.arrival || state.dates.departure
+        ? `${state.dates.arrival || '-'} - ${state.dates.departure || '-'} (${nights()} n.)`
+        : '';
       if (!hasCostData) {
         return `
           <div class="reservation-summary__status">
-            <span>${esc(ui.summary.statusLabel)}</span>
-            <strong>${esc(ui.summary.status)}</strong>
+            <i aria-hidden="true">${detailIcon(missingItems().length ? 'status' : 'success')}</i>
+            <span>
+              <em>${esc(ui.summary.statusLabel)}</em>
+              <strong>${esc(statusText)}</strong>
+              <small>${esc(detailText.statusConfirmedByReception)}</small>
+            </span>
           </div>
           <h2>${esc(t.summary.title)}</h2>
           <b class="reservation-summary__badge">${esc(ui.summary.badge)}</b>
           <p>${esc(t.summary.empty)}</p>
+          <dl>
+            ${summaryRow('stay', t.summary.stay, modeTitle())}
+            ${summaryRow('calendar', t.summary.dates, dateText)}
+            ${summaryRow('guests', t.summary.guests, guestsText())}
+            ${summaryRow('language', t.summary.language, state.details.language)}
+            ${state.details.countryCode ? summaryRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
+            ${state.details.plate ? summaryRow('plate', t.fields.plate, state.details.plate) : ''}
+            ${summaryRow('privacy', detailText.consentSectionTitle, consentsText())}
+          </dl>
+          ${missingListTemplate(true)}
           <small>${esc(t.summary.confirm)}</small>
           ${depositNote ? `<p class="reservation-summary__deposit">${esc(depositNote)}</p>` : ''}
         `;
       }
       return `
         <div class="reservation-summary__status">
-          <span>${esc(ui.summary.statusLabel)}</span>
-          <strong>${esc(ui.summary.status)}</strong>
+          <i aria-hidden="true">${detailIcon(missingItems().length ? 'status' : 'success')}</i>
+          <span>
+            <em>${esc(ui.summary.statusLabel)}</em>
+            <strong>${esc(statusText)}</strong>
+            <small>${esc(detailText.statusConfirmedByReception)}</small>
+          </span>
         </div>
         <h2>${esc(t.summary.title)}</h2>
         <b class="reservation-summary__badge">${esc(ui.summary.badge)}</b>
         <dl>
-          <div><dt>${esc(t.summary.stay)}</dt><dd>${esc(modeTitle())}</dd></div>
-          <div><dt>${esc(t.summary.dates)}</dt><dd>${esc(state.dates.arrival || '-')} - ${esc(state.dates.departure || '-')} (${nights()} n.)</dd></div>
-          <div><dt>${esc(t.summary.guests)}</dt><dd>${guestRows().map(([key, label]) => `${label}: ${Number(state.guests[key] || 0)}`).join(', ')}</dd></div>
-          ${selected.length ? `<div><dt>${esc(t.summary.services)}</dt><dd>${selected.map((item) => `${item.label} x ${item.qty}`).join(', ')}</dd></div>` : ''}
-          ${state.details.countryCode ? `<div><dt>${esc(t.summary.country)}</dt><dd>${esc(state.details.countryName)} (${esc(state.details.countryCode)})</dd></div>` : ''}
-          <div><dt>${esc(t.summary.language)}</dt><dd>${esc(state.details.language)}</dd></div>
-          ${state.details.specialNeeds ? `<div><dt>${esc(t.summary.specialNeeds)}</dt><dd>Tak</dd></div>` : ''}
-          ${state.details.lateCheckout ? `<div><dt>${esc(t.summary.lateCheckout)}</dt><dd>${esc(state.details.lateTime)}</dd></div>` : ''}
+          ${summaryRow('stay', t.summary.stay, modeTitle())}
+          ${summaryRow('calendar', t.summary.dates, dateText)}
+          ${summaryRow('guests', t.summary.guests, guestsText())}
+          ${summaryRow('services', t.summary.services, servicesText())}
+          ${state.details.countryCode ? summaryRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
+          ${summaryRow('language', t.summary.language, state.details.language)}
+          ${state.details.plate ? summaryRow('plate', t.fields.plate, state.details.plate) : ''}
+          ${state.details.specialNeeds ? summaryRow('accessibility', t.summary.specialNeeds, yesLabel()) : ''}
+          ${state.details.lateCheckout ? summaryRow('late', t.summary.lateCheckout, state.details.lateTime) : ''}
+          ${summaryRow('privacy', detailText.consentSectionTitle, consentsText())}
         </dl>
         <div class="reservation-summary__total">
           <span>${esc(t.summary.total)}</span>
           <strong>${fmt(estimatedTotal())}</strong>
         </div>
+        ${missingListTemplate(true)}
         <small>${esc(t.summary.confirm)}</small>
         ${depositNote ? `<p class="reservation-summary__deposit">${esc(depositNote)}</p>` : ''}
         ${state.success ? `<p class="reservation-success">${esc(t.summary.success)}</p>` : ''}
@@ -1459,11 +1769,51 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       </div>
     `;
 
+    const successRow = (icon, label, value) => {
+      const hasValue = value !== undefined && value !== null && String(value).trim() !== '';
+      if (!hasValue) return '';
+      return `
+        <div class="reservation-success-row">
+          <i aria-hidden="true">${detailIcon(icon)}</i>
+          <span>
+            <dt>${esc(label)}</dt>
+            <dd>${esc(value)}</dd>
+          </span>
+        </div>
+      `;
+    };
+
+    const copySummaryText = () => {
+      const selected = selectedServices();
+      const depositNote = state.mode === 'bungalow' ? ui.summary.depositBungalow : state.mode === 'combined' ? ui.summary.depositCombined : '';
+      return [
+        'Camping Clepardia - podsumowanie zapytania',
+        state.inquiryId ? `ID: ${state.inquiryId}` : '',
+        `Status: ${detailText.statusConfirmedByReception}`,
+        `Wariant: ${modeTitle()}`,
+        `Termin: ${state.dates.arrival || '-'} - ${state.dates.departure || '-'} (${nights()} n.)`,
+        `Goście: ${guestsText()}`,
+        `Usługi: ${selected.length ? servicesText() : '-'}`,
+        `Cena orientacyjna: ${selected.length ? fmt(estimatedTotal()) : '-'}`,
+        `Kraj: ${state.details.countryCode ? `${state.details.countryName} (${state.details.countryCode})` : '-'}`,
+        `Język kontaktu: ${state.details.language}`,
+        `Numer rejestracyjny: ${state.details.plate || '-'}`,
+        `Specjalne potrzeby: ${state.details.specialNeeds ? (state.details.specialNeedsText || yesLabel()) : '-'}`,
+        `Późniejszy wyjazd: ${state.details.lateCheckout ? state.details.lateTime : '-'}`,
+        `Cisza nocna: ${state.details.quiet ? 'zaakceptowana' : '-'}`,
+        `Zgoda kontaktowa: ${state.details.consent ? 'zaakceptowana' : '-'}`,
+        `Polityka prywatności: ${state.details.privacy ? 'zaakceptowana' : '-'}`,
+        depositNote,
+        'Dostępność i finalne warunki potwierdza recepcja.',
+      ].filter(Boolean).join('\n');
+    };
+
     const successModalTemplate = () => {
       const selected = selectedServices();
       const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
       const stayNote = state.mode === 'bungalow' || state.mode === 'combined' ? ui.success.bungalow : ui.success.camping;
       const successText = state.submitMode === 'sent' ? ui.success.text : (ui.success.mockText || ui.success.text);
+      const depositNote = state.mode === 'bungalow' ? ui.summary.depositBungalow : state.mode === 'combined' ? ui.summary.depositCombined : '';
       return `
         <div class="reservation-success-modal" role="dialog" aria-modal="true" aria-label="${esc(ui.success.title)}">
           <div class="reservation-success-modal__card">
@@ -1473,17 +1823,26 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             <p>${esc(successText)}</p>
             ${state.inquiryId ? `<p class="reservation-success-modal__id">ID: ${esc(state.inquiryId)}</p>` : ''}
             <dl>
-              <div><dt>${esc(t.summary.stay)}</dt><dd>${esc(modeTitle())}</dd></div>
-              <div><dt>${esc(t.summary.dates)}</dt><dd>${esc(state.dates.arrival || '-')} - ${esc(state.dates.departure || '-')} (${nights()} n.)</dd></div>
-              ${selected.length ? `<div><dt>${esc(t.summary.services)}</dt><dd>${selected.map((item) => `${item.label} x ${item.qty}`).join(', ')}</dd></div>` : ''}
-              <div><dt>${esc(t.summary.total)}</dt><dd>${selected.length ? fmt(estimatedTotal()) : '-'}</dd></div>
-              ${state.details.countryCode ? `<div><dt>${esc(t.summary.country)}</dt><dd>${esc(state.details.countryName)} (${esc(state.details.countryCode)})</dd></div>` : ''}
-              <div><dt>${esc(t.summary.language)}</dt><dd>${esc(state.details.language)}</dd></div>
-              ${state.details.specialNeeds ? `<div><dt>${esc(t.summary.specialNeeds)}</dt><dd>Tak</dd></div>` : ''}
-              ${state.details.lateCheckout ? `<div><dt>${esc(t.summary.lateCheckout)}</dt><dd>${esc(state.details.lateTime)}</dd></div>` : ''}
-              <div><dt>Cisza nocna</dt><dd>${state.details.quiet ? 'zaakceptowana' : 'brak'}</dd></div>
+              ${successRow('status', ui.summary.statusLabel, detailText.statusConfirmedByReception)}
+              ${successRow('stay', t.summary.stay, modeTitle())}
+              ${successRow('calendar', t.summary.dates, `${state.dates.arrival || '-'} - ${state.dates.departure || '-'} (${nights()} n.)`)}
+              ${successRow('guests', t.summary.guests, guestsText())}
+              ${selected.length ? successRow('services', t.summary.services, servicesText()) : ''}
+              ${successRow('price', t.summary.total, selected.length ? fmt(estimatedTotal()) : '-')}
+              ${state.details.countryCode ? successRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
+              ${successRow('language', t.summary.language, state.details.language)}
+              ${state.details.plate ? successRow('plate', t.fields.plate, state.details.plate) : ''}
+              ${state.details.specialNeeds ? successRow('accessibility', t.summary.specialNeeds, state.details.specialNeedsText || yesLabel()) : ''}
+              ${state.details.lateCheckout ? successRow('late', t.summary.lateCheckout, state.details.lateTime) : ''}
+              ${successRow('quiet', 'Cisza nocna', state.details.quiet ? 'zaakceptowana' : 'brak')}
+              ${successRow('contactConsent', detailText.missing.consent, state.details.consent ? 'zaakceptowana' : 'brak')}
+              ${successRow('privacy', detailText.missing.privacy, state.details.privacy ? 'zaakceptowana' : 'brak')}
             </dl>
             <p class="reservation-success-modal__note">${esc(stayNote)}</p>
+            ${depositNote ? `<p class="reservation-success-modal__note reservation-success-modal__note--deposit">${esc(depositNote)}</p>` : ''}
+            <button class="reservation-btn reservation-btn--primary reservation-success-modal__copy" type="button" data-copy-summary>${detailIcon('copy')}${esc(detailText.copySummary)}</button>
+            <p class="reservation-copy-status" data-copy-status hidden></p>
+            <textarea class="reservation-copy-fallback" data-copy-fallback rows="8" readonly hidden>${esc(copySummaryText())}</textarea>
             <div class="reservation-success-modal__actions">
               <a class="reservation-btn reservation-btn--ghost" href="/">${esc(ui.success.home)}</a>
               <a class="reservation-btn reservation-btn--ghost" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">${esc(ui.success.maps)}</a>
@@ -1670,6 +2029,27 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       });
     };
 
+    const updateValidationDom = () => {
+      const toggleField = (key, invalid) => {
+        mount.querySelectorAll(`[data-field-key="${key}"]`).forEach((field) => {
+          if (!(field instanceof HTMLElement)) return;
+          field.classList.toggle('is-invalid', Boolean(invalid));
+          field.querySelectorAll('input, textarea, select').forEach((input) => {
+            if (input instanceof HTMLElement) input.setAttribute('aria-invalid', invalid ? 'true' : 'false');
+          });
+        });
+      };
+      toggleField('name', fieldInvalid('name'));
+      toggleField('email', contactInvalid());
+      toggleField('phone', contactInvalid());
+      toggleField('country', fieldInvalid('country'));
+      mount.querySelectorAll('[data-missing-card]').forEach((card) => {
+        if (card instanceof HTMLElement) {
+          card.outerHTML = missingListTemplate(card.closest('.reservation-summary') !== null);
+        }
+      });
+    };
+
     const updateCountryDom = () => {
       const input = mount.querySelector('[data-country-search]');
       const hidden = mount.querySelector('[data-country-code]');
@@ -1689,7 +2069,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         resultsRoot.innerHTML = matches.length
           ? matches.map((country, index) => `
               <button type="button" data-country-pick="${esc(country.code)}" role="option" class="${index === state.countryActiveIndex ? 'is-active' : ''}">
-                <i class="${esc(country.flagClass)}" aria-hidden="true"></i>
+                <span class="reservation-country__flag" aria-hidden="true"><i class="${esc(country.flagClass)}"></i><b>${detailIcon('country')}</b></span>
                 <span>${esc(country.name)}</span>
                 <small>${esc(country.code)}</small>
               </button>
@@ -1706,6 +2086,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       updateConsentInvalidDom();
       updateCountryDom();
       updateSummaryDom();
+      updateValidationDom();
       updateToastDom();
     };
 
@@ -1812,10 +2193,18 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       return true;
     };
 
+    const scrollFirstIssue = () => {
+      const issue = mount.querySelector('.reservation-field.is-invalid, .reservation-option-row.is-invalid, .reservation-missing-card');
+      if (issue instanceof HTMLElement) {
+        issue.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+
     const submit = async () => {
       if (state.submitting) return;
       if (!validateForSubmit()) {
         render();
+        window.setTimeout(scrollFirstIssue, 50);
         return;
       }
       state.submitting = true;
@@ -1878,6 +2267,34 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (input instanceof HTMLInputElement) input.value = state.details.countrySearch;
       updateCountryDom();
       updateSummaryDom();
+      updateValidationDom();
+    };
+
+    const copySuccessSummary = async () => {
+      const text = copySummaryText();
+      const status = mount.querySelector('[data-copy-status]');
+      const fallback = mount.querySelector('[data-copy-fallback]');
+      if (fallback instanceof HTMLTextAreaElement) fallback.value = text;
+
+      try {
+        if (!navigator.clipboard?.writeText) throw new Error('Clipboard API unavailable');
+        await navigator.clipboard.writeText(text);
+        if (status instanceof HTMLElement) {
+          status.hidden = false;
+          status.textContent = detailText.copied;
+        }
+        if (fallback instanceof HTMLTextAreaElement) fallback.hidden = true;
+      } catch {
+        if (fallback instanceof HTMLTextAreaElement) {
+          fallback.hidden = false;
+          fallback.focus();
+          fallback.select();
+        }
+        if (status instanceof HTMLElement) {
+          status.hidden = false;
+          status.textContent = detailText.copyFallback;
+        }
+      }
     };
 
     mount.addEventListener('click', (event) => {
@@ -1928,6 +2345,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         event.preventDefault();
         state.success = false;
         render();
+        return;
+      }
+
+      if (target.closest('[data-copy-summary]')) {
+        event.preventDefault();
+        void copySuccessSummary();
         return;
       }
 
@@ -2022,7 +2445,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (target.dataset.field) {
         updateField(target.dataset.field, target.value);
         if (target.dataset.field.startsWith('dates.')) render();
-        else updateSummaryDom();
+        else {
+          updateSummaryDom();
+          updateValidationDom();
+        }
         return;
       }
       if (target.hasAttribute('data-country-search')) {
@@ -2034,6 +2460,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         state.countryActiveIndex = 0;
         updateCountryDom();
         updateSummaryDom();
+        updateValidationDom();
       }
     });
 
@@ -2757,6 +3184,53 @@ body.booking-app-page .main-content {
   font-weight: 850;
 }
 
+.reservation-field__label {
+  display: flex !important;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  color: #fff;
+}
+
+.reservation-field__label > i {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(143,224,180,.22);
+  border-radius: 11px;
+  color: #8fe0b4;
+  background: rgba(60,179,113,.10);
+}
+
+.reservation-field__label svg {
+  width: 17px;
+  height: 17px;
+}
+
+.reservation-field-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  padding: 0 8px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 999px;
+  color: rgba(245,255,248,.72);
+  background: rgba(255,255,255,.06);
+  font-size: .68rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.reservation-field-badge--required,
+.reservation-field-badge--conditional {
+  border-color: rgba(143,224,180,.24);
+  color: #dffff0;
+  background: rgba(60,179,113,.12);
+}
+
 .reservation-field--wide {
   grid-column: 1 / -1;
 }
@@ -2790,6 +3264,22 @@ body.booking-app-page .main-content {
 .reservation-field textarea:focus {
   border-color: rgba(143,224,180,.58);
   box-shadow: 0 0 0 4px rgba(60,179,113,.16);
+}
+
+.reservation-field.is-invalid input,
+.reservation-field.is-invalid select,
+.reservation-field.is-invalid textarea {
+  border-color: rgba(255,122,122,.72);
+  box-shadow: 0 0 0 4px rgba(255,86,86,.12);
+}
+
+.reservation-field__error {
+  display: block;
+  color: #ffb3b3;
+  font-size: .82rem;
+  font-style: normal;
+  font-weight: 850;
+  line-height: 1.45;
 }
 
 .reservation-night-card {
@@ -3054,6 +3544,31 @@ body.booking-app-page .main-content {
   text-align: left;
 }
 
+.reservation-country__flag {
+  width: 24px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 5px;
+  background: rgba(255,255,255,.10);
+}
+
+.reservation-country__flag i {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background-size: cover;
+}
+
+.reservation-country__flag b {
+  display: none;
+  width: 16px;
+  height: 16px;
+  color: #8fe0b4;
+}
+
 .reservation-country__list button:hover,
 .reservation-country__list button:focus-visible,
 .reservation-country__list button.is-active {
@@ -3149,6 +3664,90 @@ body.booking-app-page .main-content {
   line-height: 1.45;
 }
 
+.reservation-option-row strong .reservation-field-badge {
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.reservation-privacy-link {
+  color: #8fe0b4;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.reservation-missing-card {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid rgba(255,122,122,.26);
+  border-radius: 20px;
+  color: #f5fff8;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255,122,122,.10), transparent 36%),
+    rgba(255,86,86,.08);
+}
+
+.reservation-missing-card--ready {
+  align-items: center;
+  border-color: rgba(143,224,180,.24);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(143,224,180,.12), transparent 36%),
+    rgba(60,179,113,.10);
+}
+
+.reservation-missing-card > i {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  color: #ffb3b3;
+  background: rgba(255,86,86,.12);
+}
+
+.reservation-missing-card--ready > i {
+  color: #8fe0b4;
+  background: rgba(60,179,113,.13);
+}
+
+.reservation-missing-card strong {
+  display: block;
+  color: #fff;
+}
+
+.reservation-missing-card ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reservation-missing-card li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  color: rgba(245,255,248,.78);
+  background: rgba(255,255,255,.06);
+  font-size: .8rem;
+  font-weight: 850;
+}
+
+.reservation-missing-card li span,
+.reservation-missing-card svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+
 .reservation-reveal-field {
   animation: reservationRevealField .26s cubic-bezier(.22, 1, .36, 1) both;
 }
@@ -3179,7 +3778,9 @@ body.booking-app-page .main-content {
 
 .reservation-summary__status {
   display: grid;
-  gap: 3px;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 11px;
+  align-items: center;
   margin-bottom: 14px;
   padding: 12px 13px;
   border: 1px solid rgba(143,224,180,.18);
@@ -3187,15 +3788,36 @@ body.booking-app-page .main-content {
   background: rgba(60,179,113,.10);
 }
 
-.reservation-summary__status span {
+.reservation-summary__status > i {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: #8fe0b4;
+  background: rgba(60,179,113,.12);
+}
+
+.reservation-summary__status em {
+  display: block;
   color: rgba(245,255,248,.58);
   font-size: .72rem;
+  font-style: normal;
   font-weight: 950;
   text-transform: uppercase;
 }
 
 .reservation-summary__status strong {
+  display: block;
   color: #dffff0;
+}
+
+.reservation-summary__status small {
+  display: block;
+  margin-top: 2px;
+  color: rgba(245,255,248,.55);
+  font-size: .78rem;
+  line-height: 1.35;
 }
 
 .reservation-summary__badge {
@@ -3216,6 +3838,32 @@ body.booking-app-page .main-content {
   display: grid;
   gap: 10px;
   margin: 0;
+}
+
+.reservation-summary-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 15px;
+  background: rgba(255,255,255,.045);
+}
+
+.reservation-summary-row > i {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #8fe0b4;
+  background: rgba(60,179,113,.10);
+}
+
+.reservation-summary-row svg {
+  width: 18px;
+  height: 18px;
 }
 
 .reservation-summary dt,
@@ -3472,11 +4120,34 @@ body.booking-app-page .main-content {
   margin: 18px 0;
 }
 
-.reservation-success-modal__card dl div {
+.reservation-success-modal__card dl div,
+.reservation-success-row {
   padding: 12px;
   border: 1px solid rgba(255,255,255,.10);
   border-radius: 16px;
   background: rgba(255,255,255,.06);
+}
+
+.reservation-success-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+}
+
+.reservation-success-row > i {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #8fe0b4;
+  background: rgba(60,179,113,.11);
+}
+
+.reservation-success-row > i svg {
+  width: 18px;
+  height: 18px;
 }
 
 .reservation-success-modal__card dt {
@@ -3496,6 +4167,40 @@ body.booking-app-page .main-content {
   border: 1px solid rgba(242,192,120,.22);
   border-radius: 18px;
   background: rgba(242,192,120,.10);
+}
+
+.reservation-success-modal__note--deposit {
+  margin-top: 10px;
+}
+
+.reservation-success-modal__copy {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.reservation-success-modal__copy svg {
+  width: 18px;
+  height: 18px;
+}
+
+.reservation-copy-status {
+  margin-top: 10px !important;
+  padding: 10px 12px;
+  border: 1px solid rgba(143,224,180,.22);
+  border-radius: 14px;
+  color: #dffff0 !important;
+  background: rgba(60,179,113,.10);
+  font-weight: 850;
+}
+
+.reservation-copy-fallback {
+  width: 100%;
+  margin-top: 10px;
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: 14px;
+  color: #f5fff8;
+  background: rgba(6,18,13,.78);
+  padding: 12px;
 }
 
 .reservation-success-modal__actions {
@@ -3723,6 +4428,7 @@ html[data-theme="light"] .reservation-success-modal__mark {
 }
 
 html[data-theme="light"] .reservation-field,
+html[data-theme="light"] .reservation-field__label,
 html[data-theme="light"] .reservation-pills button,
 html[data-theme="light"] .reservation-btn--ghost {
   color: #122319;
@@ -3735,7 +4441,10 @@ html[data-theme="light"] .reservation-pills button,
 html[data-theme="light"] .reservation-progress__desktop button,
 html[data-theme="light"] .reservation-progress__mobile,
 html[data-theme="light"] .reservation-presets button,
-html[data-theme="light"] .reservation-country__list {
+html[data-theme="light"] .reservation-country__list,
+html[data-theme="light"] .reservation-summary-row,
+html[data-theme="light"] .reservation-success-row,
+html[data-theme="light"] .reservation-copy-fallback {
   color: #122319;
   border-color: rgba(22,56,36,.14);
   background: rgba(255,255,255,.72);
@@ -3743,7 +4452,8 @@ html[data-theme="light"] .reservation-country__list {
 
 html[data-theme="light"] .reservation-country__list p,
 html[data-theme="light"] .reservation-country__list em,
-html[data-theme="light"] .reservation-summary__status span {
+html[data-theme="light"] .reservation-summary__status em,
+html[data-theme="light"] .reservation-summary__status small {
   color: rgba(18,35,25,.58);
 }
 
@@ -3751,6 +4461,45 @@ html[data-theme="light"] .reservation-summary__status strong,
 html[data-theme="light"] .reservation-summary__badge,
 html[data-theme="light"] .reservation-summary__deposit {
   color: #1b5b3a;
+}
+
+html[data-theme="light"] .reservation-field__label > i,
+html[data-theme="light"] .reservation-summary-row > i,
+html[data-theme="light"] .reservation-success-row > i,
+html[data-theme="light"] .reservation-missing-card > i {
+  color: #23784d;
+  border-color: rgba(35,120,77,.20);
+  background: rgba(60,179,113,.10);
+}
+
+html[data-theme="light"] .reservation-field-badge {
+  color: #315444;
+  border-color: rgba(22,56,36,.13);
+  background: rgba(22,56,36,.06);
+}
+
+html[data-theme="light"] .reservation-field-badge--required,
+html[data-theme="light"] .reservation-field-badge--conditional,
+html[data-theme="light"] .reservation-privacy-link {
+  color: #1b7a4b;
+}
+
+html[data-theme="light"] .reservation-missing-card {
+  color: #122319;
+  border-color: rgba(184,65,65,.22);
+  background: rgba(255,86,86,.07);
+}
+
+html[data-theme="light"] .reservation-missing-card--ready,
+html[data-theme="light"] .reservation-copy-status {
+  color: #1b5b3a !important;
+  border-color: rgba(60,179,113,.20);
+  background: rgba(60,179,113,.10);
+}
+
+html[data-theme="light"] .reservation-missing-card strong,
+html[data-theme="light"] .reservation-missing-card li {
+  color: #122319;
 }
 
 @keyframes reservationPanelIn {

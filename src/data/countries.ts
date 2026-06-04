@@ -7,131 +7,74 @@ export interface CountryOption {
   aliases: string[];
 }
 
-export const countries: CountryOption[] = [
-  {
-    code: 'PL',
-    flagClass: 'fi fi-pl',
-    names: { pl: 'Polska', en: 'Poland', de: 'Polen', it: 'Polonia' },
-    aliases: ['pl', 'pol', 'polska', 'poland', 'polen', 'polonia'],
-  },
-  {
-    code: 'DE',
-    flagClass: 'fi fi-de',
-    names: { pl: 'Niemcy', en: 'Germany', de: 'Deutschland', it: 'Germania' },
-    aliases: ['de', 'ge', 'ger', 'germ', 'niem', 'niemcy', 'deutschland', 'germany', 'germania'],
-  },
-  {
-    code: 'NL',
-    flagClass: 'fi fi-nl',
-    names: { pl: 'Holandia', en: 'Netherlands', de: 'Niederlande', it: 'Paesi Bassi' },
-    aliases: ['nl', 'hol', 'holland', 'holandia', 'nederlands', 'netherlands', 'paesi bassi', 'niederlande'],
-  },
-  {
-    code: 'CZ',
-    flagClass: 'fi fi-cz',
-    names: { pl: 'Czechy', en: 'Czechia', de: 'Tschechien', it: 'Cechia' },
-    aliases: ['cz', 'cs', 'cze', 'czech', 'czechy', 'cesko', 'česko', 'czechia', 'tschechien', 'cechia'],
-  },
-  {
-    code: 'SE',
-    flagClass: 'fi fi-se',
-    names: { pl: 'Szwecja', en: 'Sweden', de: 'Schweden', it: 'Svezia' },
-    aliases: ['sv', 'se', 'swe', 'sweden', 'szwecja', 'sverige', 'schweden', 'svezia'],
-  },
-  {
-    code: 'SK',
-    flagClass: 'fi fi-sk',
-    names: { pl: 'Słowacja', en: 'Slovakia', de: 'Slowakei', it: 'Slovacchia' },
-    aliases: ['sk', 'slovakia', 'slowacja', 'słowacja', 'slovensko', 'slowakei', 'slovacchia'],
-  },
-  {
-    code: 'GB',
-    flagClass: 'fi fi-gb',
-    names: { pl: 'Wielka Brytania', en: 'United Kingdom', de: 'Vereinigtes Königreich', it: 'Regno Unito' },
-    aliases: ['gb', 'uk', 'england', 'britain', 'united kingdom', 'wielka brytania', 'regno unito'],
-  },
-  {
-    code: 'IT',
-    flagClass: 'fi fi-it',
-    names: { pl: 'Włochy', en: 'Italy', de: 'Italien', it: 'Italia' },
-    aliases: ['it', 'ita', 'italy', 'italia', 'wlochy', 'włochy', 'italien'],
-  },
-  {
-    code: 'FR',
-    flagClass: 'fi fi-fr',
-    names: { pl: 'Francja', en: 'France', de: 'Frankreich', it: 'Francia' },
-    aliases: ['fr', 'fra', 'france', 'francja', 'frankreich', 'francia'],
-  },
-  {
-    code: 'ES',
-    flagClass: 'fi fi-es',
-    names: { pl: 'Hiszpania', en: 'Spain', de: 'Spanien', it: 'Spagna' },
-    aliases: ['es', 'esp', 'spain', 'hiszpania', 'espana', 'españa', 'spanien', 'spagna'],
-  },
-  {
-    code: 'AT',
-    flagClass: 'fi fi-at',
-    names: { pl: 'Austria', en: 'Austria', de: 'Österreich', it: 'Austria' },
-    aliases: ['at', 'aut', 'austria', 'osterreich', 'österreich'],
-  },
-  {
-    code: 'CH',
-    flagClass: 'fi fi-ch',
-    names: { pl: 'Szwajcaria', en: 'Switzerland', de: 'Schweiz', it: 'Svizzera' },
-    aliases: ['ch', 'swiss', 'switzerland', 'szwajcaria', 'schweiz', 'svizzera'],
-  },
-  {
-    code: 'BE',
-    flagClass: 'fi fi-be',
-    names: { pl: 'Belgia', en: 'Belgium', de: 'Belgien', it: 'Belgio' },
-    aliases: ['be', 'bel', 'belgia', 'belgium', 'belgien', 'belgio'],
-  },
-  {
-    code: 'DK',
-    flagClass: 'fi fi-dk',
-    names: { pl: 'Dania', en: 'Denmark', de: 'Dänemark', it: 'Danimarca' },
-    aliases: ['dk', 'denmark', 'dania', 'danmark', 'danemark', 'dänemark', 'danimarca'],
-  },
-  {
-    code: 'NO',
-    flagClass: 'fi fi-no',
-    names: { pl: 'Norwegia', en: 'Norway', de: 'Norwegen', it: 'Norvegia' },
-    aliases: ['no', 'norway', 'norwegia', 'norge', 'norwegen', 'norvegia'],
-  },
-  {
-    code: 'FI',
-    flagClass: 'fi fi-fi',
-    names: { pl: 'Finlandia', en: 'Finland', de: 'Finnland', it: 'Finlandia' },
-    aliases: ['fi', 'fin', 'finland', 'finlandia', 'suomi', 'finnland'],
-  },
-  {
-    code: 'UA',
-    flagClass: 'fi fi-ua',
-    names: { pl: 'Ukraina', en: 'Ukraine', de: 'Ukraine', it: 'Ucraina' },
-    aliases: ['ua', 'ukr', 'ukraina', 'ukraine', 'ucraina'],
-  },
-  {
-    code: 'LT',
-    flagClass: 'fi fi-lt',
-    names: { pl: 'Litwa', en: 'Lithuania', de: 'Litauen', it: 'Lituania' },
-    aliases: ['lt', 'litwa', 'lithuania', 'lietuva', 'litauen', 'lituania'],
-  },
-  {
-    code: 'LV',
-    flagClass: 'fi fi-lv',
-    names: { pl: 'Łotwa', en: 'Latvia', de: 'Lettland', it: 'Lettonia' },
-    aliases: ['lv', 'lotwa', 'łotwa', 'latvia', 'latvija', 'lettland', 'lettonia'],
-  },
-  {
-    code: 'HU',
-    flagClass: 'fi fi-hu',
-    names: { pl: 'Węgry', en: 'Hungary', de: 'Ungarn', it: 'Ungheria' },
-    aliases: ['hu', 'hun', 'wegry', 'węgry', 'hungary', 'magyar', 'ungarn', 'ungheria'],
-  },
-  {
-    code: 'RO',
-    flagClass: 'fi fi-ro',
-    names: { pl: 'Rumunia', en: 'Romania', de: 'Rumänien', it: 'Romania' },
-    aliases: ['ro', 'romania', 'rumunia', 'rumanien', 'rumänien'],
-  },
-];
+const countryCodes = [
+  'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ',
+  'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BQ', 'BR', 'BS',
+  'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN',
+  'CO', 'CR', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE',
+  'EG', 'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF',
+  'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM',
+  'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IM', 'IN', 'IO', 'IQ', 'IR', 'IS', 'IT', 'JE', 'JM',
+  'JO', 'JP', 'KE', 'KG', 'KH', 'KI', 'KM', 'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC',
+  'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK',
+  'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA',
+  'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'OM', 'PA', 'PE', 'PF', 'PG',
+  'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PW', 'PY', 'QA', 'RE', 'RO', 'RS', 'RU', 'RW',
+  'SA', 'SB', 'SC', 'SD', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'SS',
+  'ST', 'SV', 'SX', 'SY', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TN', 'TO',
+  'TR', 'TT', 'TV', 'TW', 'TZ', 'UA', 'UG', 'UM', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI',
+  'VN', 'VU', 'WF', 'WS', 'YE', 'YT', 'ZA', 'ZM', 'ZW',
+] as const;
+
+const displayNames = {
+  pl: new Intl.DisplayNames(['pl'], { type: 'region' }),
+  en: new Intl.DisplayNames(['en'], { type: 'region' }),
+  de: new Intl.DisplayNames(['de'], { type: 'region' }),
+  it: new Intl.DisplayNames(['it'], { type: 'region' }),
+} satisfies Record<CountryLanguage, Intl.DisplayNames>;
+
+const nameOverrides: Partial<Record<string, Partial<Record<CountryLanguage, string>>>> = {
+  CZ: { pl: 'Czechy' },
+  GB: { pl: 'Wielka Brytania', de: 'Vereinigtes Koenigreich' },
+  NL: { pl: 'Holandia' },
+  US: { pl: 'Stany Zjednoczone' },
+};
+
+const aliasOverrides: Record<string, string[]> = {
+  CL: ['cl', 'chl', 'chile'],
+  CZ: ['cz', 'cs', 'cze', 'czech', 'czechy', 'cesko', 'cesky', 'ceska republika', 'czechia', 'tschechien', 'cechia'],
+  DE: ['de', 'ge', 'ger', 'germ', 'niem', 'niemcy', 'deutsch', 'deutschland', 'germany', 'germania'],
+  ES: ['es', 'esp', 'spain', 'hiszpania', 'espana', 'espagna', 'spanien', 'spagna'],
+  FR: ['fr', 'fra', 'france', 'francja', 'frankreich', 'francia'],
+  GB: ['gb', 'uk', 'england', 'britain', 'great britain', 'united kingdom', 'wielka brytania', 'anglia', 'regno unito'],
+  IT: ['it', 'ita', 'italy', 'italia', 'wlochy', 'włochy', 'italien'],
+  NL: ['nl', 'hol', 'holland', 'holandia', 'niderlandy', 'nederlands', 'netherlands', 'paesi bassi', 'niederlande'],
+  PL: ['pl', 'pol', 'polska', 'poland', 'polen', 'polonia'],
+  SE: ['sv', 'se', 'swe', 'sweden', 'szwecja', 'sverige', 'schweden', 'svezia'],
+  SK: ['sk', 'slovakia', 'slowacja', 'słowacja', 'slovensko', 'slowakei', 'slovacchia'],
+};
+
+const countryName = (code: string, language: CountryLanguage) =>
+  nameOverrides[code]?.[language] || displayNames[language].of(code) || code;
+
+const unique = (values: string[]) => [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+
+export const countries: CountryOption[] = countryCodes.map((code) => {
+  const names: Record<CountryLanguage, string> = {
+    pl: countryName(code, 'pl'),
+    en: countryName(code, 'en'),
+    de: countryName(code, 'de'),
+    it: countryName(code, 'it'),
+  };
+
+  return {
+    code,
+    flagClass: `fi fi-${code.toLowerCase()}`,
+    names,
+    aliases: unique([
+      code.toLowerCase(),
+      ...(aliasOverrides[code] || []),
+      ...Object.values(names).map((name) => name.toLowerCase()),
+    ]),
+  };
+});
