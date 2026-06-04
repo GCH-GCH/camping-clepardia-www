@@ -946,6 +946,16 @@ const quickActionGroups = [
       submitPrompt(input instanceof HTMLInputElement ? input.value : '');
     });
 
+    window.addEventListener('campy:prompt', (event) => {
+      const detail = event instanceof CustomEvent ? event.detail : {};
+      const prompt = String(detail?.prompt || '').trim();
+      if (!prompt) return;
+      setOpen(true);
+      window.setTimeout(() => {
+        submitPrompt(prompt, String(detail?.actionKey || ''));
+      }, 120);
+    });
+
     window.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && open) setOpen(false);
     });

@@ -3,7 +3,7 @@ import { icons } from 'lucide';
 import { countries } from '@/data/countries';
 import { pricingConfig } from '@/data/pricing';
 import { resolveContentLanguage } from '@/i18n/config';
-import { getPathContext } from '@/utils/localizedLinks';
+import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
 interface Props {
   languageCode?: string;
@@ -14,6 +14,8 @@ type SupportedLang = 'pl' | 'en' | 'de' | 'it';
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode) as SupportedLang;
+const attractionsPath = getLocalizedPath(pathContext.explicitLanguage, 'atrakcje');
+const seeKrakowHref = 'https://qr.codes/vksKBT';
 
 const renderLucideIcon = (name: keyof typeof icons | string) => {
   const iconNode = icons[name as keyof typeof icons] ?? icons.CircleHelp;
@@ -463,6 +465,11 @@ const iconHtml = {
     price: renderLucideIcon('ReceiptText'),
     status: renderLucideIcon('Clock'),
     info: renderLucideIcon('Info'),
+    map: renderLucideIcon('Map'),
+    sparkles: renderLucideIcon('Sparkles'),
+    electricity: renderLucideIcon('PlugZap'),
+    car: renderLucideIcon('Car'),
+    dog: renderLucideIcon('PawPrint'),
     copy: renderLucideIcon('Copy'),
     warning: renderLucideIcon('AlertCircle'),
     privacy: renderLucideIcon('ShieldCheck'),
@@ -480,6 +487,38 @@ const uxCopy = {
     progressLabel: 'Postęp zapytania',
     datesHelperTitle: 'Godziny pobytu',
     datesHelperLead: 'Wybierz daty, a liczba nocy i informacja sezonowa odświeżą się automatycznie.',
+    calendar: {
+      title: 'Kalendarz pobytu',
+      lead: 'Kliknij przyjazd i wyjazd albo przeciągnij zakres. Pola dat powyżej zostają aktywne.',
+      previous: 'Poprzedni miesiąc',
+      next: 'Następny miesiąc',
+      summaryTitle: 'Twój pobyt',
+      adviceTitle: 'Podpowiedź na Twój pobyt',
+      ctaAttractions: 'Zobacz atrakcje',
+      ctaCampy: 'Zapytaj CAMPY o plan dnia',
+      ctaTours: 'Zarezerwuj wycieczkę SeeKrakow',
+      past: 'Termin z przeszłości jest niedostępny',
+      arrival: 'Przyjazd',
+      departure: 'Wyjazd',
+    },
+    stayAdvice: {
+      none: 'Wybierz daty, a podpowiemy, co możesz zobaczyć w Krakowie i okolicy.',
+      one: 'To szybki pobyt - wystarczy na spacer po Starym Mieście, Rynek, Sukiennice i okolice Wawelu. Na Wieliczkę lub Auschwitz może zabraknąć czasu.',
+      two: 'Dobry wybór na centrum Krakowa i spokojniejsze zwiedzanie. Możesz zobaczyć Stare Miasto, Wawel i Kazimierz. Na Wieliczkę lub Auschwitz warto rozważyć dodatkowy dzień.',
+      three: 'Bardzo dobry czas na Kraków + jedną większą wycieczkę, np. Wieliczkę albo Auschwitz-Birkenau.',
+      four: 'Świetny wybór. Możesz zwiedzić Kraków, Kazimierz, Wieliczkę i zaplanować spokojniejszy dzień na odpoczynek.',
+      five: 'Doskonała baza na Kraków i Małopolskę. Możesz rozłożyć zwiedzanie bez pośpiechu: Stare Miasto, Wieliczka, Auschwitz-Birkenau, Ojców/Zakopane albo Energylandia.',
+    },
+    serviceSuggestions: {
+      title: 'Podpowiedzi do pobytu',
+      camperPower: 'Goście z kamperem najczęściej wybierają także prąd 10A. Możesz dodać go jednym kliknięciem.',
+      addPower: 'Dodaj prąd 10A',
+      caravanCar: 'Przy przyczepie kempingowej zwykle potrzebne jest także miejsce dla auta. Dodać samochód / parking?',
+      addCar: 'Dodaj auto',
+      tentCar: 'Jeśli przyjeżdżasz autem, dodaj samochód / parking.',
+      dogFree: 'Pies jest bezpłatny - prosimy tylko o opiekę i sprzątanie.',
+      summerCamping: 'W lipcu i sierpniu miejsca campingowe są dostępne według kolejności przyjazdu. Najlepiej przyjechać krótko po 12:00.',
+    },
     sending: 'Wysyłanie...',
     stepRewards: {
       dates: 'Brawo, termin jest ustawiony 🌿',
@@ -518,12 +557,16 @@ const uxCopy = {
       title: 'Dziękujemy! \uD83C\uDF3F',
       resendErrorTitle: 'Nie udało się wysłać automatycznie',
       text: 'Twoje zapytanie zostało wysłane do recepcji. Odpowiemy możliwie szybko i potwierdzimy dostępność oraz szczegóły pobytu.',
+      formsubmitText: 'Twoje zapytanie zostało wysłane do recepcji Camping Clepardia przez bezpieczny formularz.',
+      formsubmitActivationText: 'Zapytanie zostało przygotowane. Jeśli to pierwsze użycie formularza, sprawdź skrzynkę clepardia@gmail.com i potwierdź aktywację FormSubmit, a następnie wyślij test ponownie.',
       mockText: 'Zapytanie zostało przygotowane w trybie testowym. Mail nie został wysłany, ponieważ brakuje konfiguracji maila w środowisku.',
       resendErrorText: 'Nie udało się wysłać maila automatycznie. Skopiuj całe podsumowanie i skontaktuj się z recepcją bezpośrednio.',
       invalidKeyText: 'Nie udało się wysłać automatycznie - klucz Resend API jest niepoprawny. Wygeneruj nowy API key w Resend i podmień RESEND_API_KEY w Vercel.',
       senderRejectedText: 'Nie udało się wysłać automatycznie - Resend odrzucił nadawcę. Sprawdź RESERVATION_FROM_EMAIL albo weryfikację domeny.',
       errorText: 'Nie udało się wysłać zapytania. Spróbuj ponownie albo skontaktuj się bezpośrednio z recepcją.',
       sentBadge: 'Mail wysłany do recepcji',
+      resendBadge: 'Wysłano przez Resend',
+      formsubmitBadge: 'Wysłano przez bezpieczny formularz',
       mockBadge: 'Tryb testowy - mail nie wysłany',
       errorBadge: 'Błąd automatycznej wysyłki',
       bungalow: 'W przypadku domków może być wymagana zaliczka. Dane do zaliczki oraz potwierdzenie dostępności wyślemy w odpowiedzi mailowej.',
@@ -546,6 +589,38 @@ const uxCopy = {
     progressLabel: 'Enquiry progress',
     datesHelperTitle: 'Stay hours',
     datesHelperLead: 'Choose dates and nights plus seasonal notes will update automatically.',
+    calendar: {
+      title: 'Stay calendar',
+      lead: 'Click arrival and departure or drag a range. The date fields above still work.',
+      previous: 'Previous month',
+      next: 'Next month',
+      summaryTitle: 'Your stay',
+      adviceTitle: 'Stay suggestion',
+      ctaAttractions: 'See attractions',
+      ctaCampy: 'Ask CAMPY for a day plan',
+      ctaTours: 'Book a SeeKrakow tour',
+      past: 'Past dates are unavailable',
+      arrival: 'Arrival',
+      departure: 'Departure',
+    },
+    stayAdvice: {
+      none: 'Choose dates and we will suggest what you can see in Krakow and the region.',
+      one: 'This is a quick stay - enough for Old Town, the Main Square, Cloth Hall and Wawel area. Wieliczka or Auschwitz may be too tight.',
+      two: 'Good for central Krakow at a calmer pace: Old Town, Wawel and Kazimierz. Consider one extra day for Wieliczka or Auschwitz.',
+      three: 'A very good length for Krakow plus one larger trip, such as Wieliczka or Auschwitz-Birkenau.',
+      four: 'Great choice. You can see Krakow, Kazimierz, Wieliczka and keep one calmer rest day.',
+      five: 'Excellent base for Krakow and Małopolska: Old Town, Wieliczka, Auschwitz-Birkenau, Ojców/Zakopane or Energylandia without rushing.',
+    },
+    serviceSuggestions: {
+      title: 'Stay tips',
+      camperPower: 'Camper guests most often add 10A electricity. You can add it with one click.',
+      addPower: 'Add 10A electricity',
+      caravanCar: 'A caravan usually also needs a car / parking place. Add it?',
+      addCar: 'Add car',
+      tentCar: 'If you arrive by car, add car / parking.',
+      dogFree: 'Dog fee is 0 PLN - please keep your dog under care and clean up after it.',
+      summerCamping: 'In July and August camping pitches work by arrival order. It is best to arrive shortly after 12:00.',
+    },
     sending: 'Sending...',
     stepRewards: {
       dates: 'Nice, the dates are set 🌿',
@@ -584,12 +659,16 @@ const uxCopy = {
       title: 'Thank you! \uD83C\uDF3F',
       resendErrorTitle: 'Automatic sending failed',
       text: 'Your enquiry has been sent to reception. We will reply as soon as possible and confirm availability and stay details.',
+      formsubmitText: 'Your enquiry has been sent to Camping Clepardia reception through a secure form.',
+      formsubmitActivationText: 'The enquiry has been prepared. If this is the first FormSubmit use, check clepardia@gmail.com and confirm FormSubmit activation, then send the test again.',
       mockText: 'Your enquiry has been prepared in test mode. Email was not sent because mail configuration is missing in the environment.',
       resendErrorText: 'Automatic email sending failed. Copy the full summary and contact reception directly.',
       invalidKeyText: 'Automatic sending failed - the Resend API key is invalid. Generate a new API key in Resend and update RESEND_API_KEY in Vercel.',
       senderRejectedText: 'Automatic sending failed - Resend rejected the sender. Check RESERVATION_FROM_EMAIL or domain verification.',
       errorText: 'We could not send the enquiry. Please try again or contact reception directly.',
       sentBadge: 'Email sent to reception',
+      resendBadge: 'Sent by Resend',
+      formsubmitBadge: 'Sent by secure form',
       mockBadge: 'Test mode - email not sent',
       errorBadge: 'Automatic sending failed',
       bungalow: 'A deposit may be required for bungalows. Deposit details and availability confirmation will be sent by email.',
@@ -652,6 +731,10 @@ const config = {
   modeChips,
   ux,
   icons: iconHtml,
+  links: {
+    attractions: attractionsPath,
+    seeKrakow: seeKrakowHref,
+  },
   countries: countries.map((country) => ({
     code: country.code,
     flagClass: country.flagClass,
@@ -723,10 +806,17 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const modeChips = config.modeChips;
     const stepHints = t.progressHints;
     const stepRewards = ui.stepRewards || {};
+    const today = new Date();
+    today.setHours(12, 0, 0, 0);
+    const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const state = {
       mode: null,
       step: 0,
       dates: { arrival: '', departure: '' },
+      calendarMonth: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`,
+      calendarDragging: false,
+      calendarDragStart: '',
+      calendarHover: '',
       guests: { adults: 2, children: 0, toddlers: 0, bungalowGuests: 2, campingGuests: 0 },
       services: {},
       simple: { people: 2 },
@@ -760,8 +850,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       submitAttempted: false,
       submitMode: '',
       submitError: '',
+      formSubmitActivationNotice: false,
       inquiryId: '',
     };
+    let suppressCalendarClick = false;
 
     const formTextByLang = {
       pl: {
@@ -1002,6 +1094,63 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       return Number.isNaN(parsed.getTime()) ? null : parsed;
     };
 
+    const dateToIso = (date) =>
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+    const monthStart = (iso = state.calendarMonth) => {
+      const parsed = parseDate(iso) || today;
+      return new Date(parsed.getFullYear(), parsed.getMonth(), 1, 12);
+    };
+
+    const monthLabel = () => monthStart().toLocaleDateString(config.lang || 'pl', {
+      month: 'long',
+      year: 'numeric',
+    });
+
+    const shiftCalendarMonth = (delta) => {
+      const current = monthStart();
+      current.setMonth(current.getMonth() + delta);
+      state.calendarMonth = dateToIso(current);
+    };
+
+    const compareIso = (a, b) => {
+      if (!a || !b) return 0;
+      return a.localeCompare(b);
+    };
+
+    const rangeBounds = () => {
+      const start = state.calendarDragging ? state.calendarDragStart : state.dates.arrival;
+      const end = state.calendarDragging ? state.calendarHover : state.dates.departure;
+      if (!start && !end) return { start: '', end: '' };
+      if (start && end && compareIso(end, start) < 0) return { start: end, end: start };
+      return { start: start || end, end: end || start };
+    };
+
+    const calendarDays = () => {
+      const start = monthStart();
+      const firstWeekday = (start.getDay() + 6) % 7;
+      const daysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
+      const cells = [];
+      for (let i = 0; i < firstWeekday; i += 1) cells.push(null);
+      for (let day = 1; day <= daysInMonth; day += 1) {
+        const date = new Date(start.getFullYear(), start.getMonth(), day, 12);
+        cells.push(dateToIso(date));
+      }
+      while (cells.length % 7) cells.push(null);
+      return cells;
+    };
+
+    const stayAdviceText = () => {
+      const count = nights();
+      const advice = ui.stayAdvice || {};
+      if (!count) return advice.none || '';
+      if (count === 1) return advice.one || '';
+      if (count === 2) return advice.two || '';
+      if (count === 3) return advice.three || '';
+      if (count === 4) return advice.four || '';
+      return advice.five || '';
+    };
+
     const nights = () => {
       const arrival = parseDate(state.dates.arrival);
       const departure = parseDate(state.dates.departure);
@@ -1165,6 +1314,29 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const estimatedTotal = () => perNightTotal() * Math.max(1, nights() || 1);
 
     const hasChosenService = () => selectedServices().length > 0;
+
+    const serviceSuggestions = () => {
+      const text = ui.serviceSuggestions || {};
+      const suggestions = [];
+      const hasCamping = state.mode === 'camping' || state.mode === 'combined';
+      const has = (scope, id) => getQty(scope, id) > 0;
+      if (hasCamping && has('camping', 'camper') && !has('camping', 'electricity')) {
+        suggestions.push({ icon: 'electricity', text: text.camperPower, action: text.addPower, scope: 'camping', id: 'electricity' });
+      }
+      if (hasCamping && has('camping', 'caravan') && !has('camping', 'parking')) {
+        suggestions.push({ icon: 'car', text: text.caravanCar, action: text.addCar, scope: 'camping', id: 'parking' });
+      }
+      if (hasCamping && (has('camping', 'tent-small') || has('camping', 'tent-large')) && !has('camping', 'parking')) {
+        suggestions.push({ icon: 'car', text: text.tentCar, action: text.addCar, scope: 'camping', id: 'parking' });
+      }
+      if ((has('camping', 'dog') || has('bungalow', 'dog')) && text.dogFree) {
+        suggestions.push({ icon: 'dog', text: text.dogFree });
+      }
+      if (hasCamping && touchesSummer() && text.summerCamping) {
+        suggestions.push({ icon: 'warning', text: text.summerCamping });
+      }
+      return suggestions.slice(0, 4);
+    };
 
     const vehiclePlateHelper = () => {
       const hints = formText.plateHints || {};
@@ -1404,6 +1576,89 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       `;
     };
 
+    const calendarTemplate = () => {
+      const labels = ui.calendar || {};
+      const { start, end } = rangeBounds();
+      const weekDays = (config.lang === 'pl'
+        ? ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd']
+        : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
+      return `
+        <div class="reservation-calendar" data-date-calendar>
+          <header class="reservation-calendar__head">
+            <span aria-hidden="true">${detailIcon('calendar')}</span>
+            <div>
+              <strong>${esc(labels.title || 'Stay calendar')}</strong>
+              <p>${esc(labels.lead || '')}</p>
+            </div>
+            <div class="reservation-calendar__nav">
+              <button type="button" data-calendar-prev aria-label="${esc(labels.previous || 'Previous month')}">‹</button>
+              <em>${esc(monthLabel())}</em>
+              <button type="button" data-calendar-next aria-label="${esc(labels.next || 'Next month')}">›</button>
+            </div>
+          </header>
+          <div class="reservation-calendar__weekdays" aria-hidden="true">
+            ${weekDays.map((day) => `<span>${esc(day)}</span>`).join('')}
+          </div>
+          <div class="reservation-calendar__grid" role="grid" aria-label="${esc(labels.title || 'Stay calendar')}">
+            ${calendarDays().map((iso) => {
+              if (!iso) return '<span class="reservation-calendar__empty" aria-hidden="true"></span>';
+              const disabled = compareIso(iso, todayIso) < 0;
+              const isStart = iso === state.dates.arrival || (state.calendarDragging && iso === state.calendarDragStart);
+              const isEnd = iso === state.dates.departure || (state.calendarDragging && iso === state.calendarHover && iso !== state.calendarDragStart);
+              const inRange = start && end && compareIso(iso, start) >= 0 && compareIso(iso, end) <= 0;
+              const classes = [
+                'reservation-calendar__day',
+                disabled ? 'is-disabled' : '',
+                isStart ? 'is-start' : '',
+                isEnd ? 'is-end' : '',
+                inRange ? 'is-range' : '',
+                iso === todayIso ? 'is-today' : '',
+              ].filter(Boolean).join(' ');
+              const dayNo = Number(iso.slice(-2));
+              const suffix = isStart ? `, ${labels.arrival || 'Arrival'}` : isEnd ? `, ${labels.departure || 'Departure'}` : '';
+              return `<button type="button" class="${classes}" data-calendar-day="${esc(iso)}" ${disabled ? 'disabled' : ''} aria-label="${esc(`${iso}${suffix}`)}"><span>${dayNo}</span></button>`;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    };
+
+    const dateStaySummary = () => {
+      const labels = ui.calendar || {};
+      const advice = stayAdviceText();
+      const stayHours = state.mode === 'bungalow'
+        ? t.info.bungalowHours
+        : state.mode === 'combined'
+          ? `${t.info.campingHours} ${t.info.bungalowHours}`
+          : t.info.campingHours;
+      return `
+        <div class="reservation-date-summary">
+          <div>
+            <span aria-hidden="true">${detailIcon('sparkles')}</span>
+            <strong>${esc(labels.summaryTitle || 'Your stay')}</strong>
+          </div>
+          <dl>
+            <div><dt>${esc(t.fields.arrival)}</dt><dd>${esc(state.dates.arrival || '-')}</dd></div>
+            <div><dt>${esc(t.fields.departure)}</dt><dd>${esc(state.dates.departure || '-')}</dd></div>
+            <div><dt>${esc(t.fields.nights)}</dt><dd>${nights()}</dd></div>
+            <div><dt>${esc(config.lang === 'pl' ? 'Godziny' : 'Hours')}</dt><dd>${esc(stayHours)}</dd></div>
+          </dl>
+          <section class="reservation-stay-advice">
+            <i aria-hidden="true">${detailIcon('map')}</i>
+            <span>
+              <strong>${esc(labels.adviceTitle || 'Stay suggestion')}</strong>
+              <p>${esc(advice)}</p>
+            </span>
+          </section>
+          <div class="reservation-stay-advice__actions">
+            <a href="${esc(config.links?.attractions || '/atrakcje')}" class="reservation-mini-link">${esc(labels.ctaAttractions || 'See attractions')}</a>
+            <button type="button" class="reservation-mini-link" data-ask-campy-plan>${esc(labels.ctaCampy || 'Ask CAMPY')}</button>
+            <a href="${esc(config.links?.seeKrakow || 'https://qr.codes/vksKBT')}" target="_blank" rel="noopener noreferrer" class="reservation-mini-link">${esc(labels.ctaTours || 'SeeKrakow')}</a>
+          </div>
+        </div>
+      `;
+    };
+
     const datesStep = () => `
       <section class="reservation-step-card">
         <p class="reservation-step-card__eyebrow">${esc(stepTitles[0])}</p>
@@ -1412,12 +1667,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <div class="reservation-form-grid">
           <label class="reservation-field">
             ${fieldLabel({ icon: 'calendar', label: t.fields.arrival, badge: 'required' })}
-            <input type="date" data-field="dates.arrival" value="${esc(state.dates.arrival)}" />
+            <input type="date" data-field="dates.arrival" min="${todayIso}" value="${esc(state.dates.arrival)}" />
             <small>${esc(config.lang === 'pl' ? 'Pierwszy dzień pobytu.' : 'First day of stay.')}</small>
           </label>
           <label class="reservation-field">
             ${fieldLabel({ icon: 'calendar', label: t.fields.departure, badge: 'required' })}
-            <input type="date" data-field="dates.departure" value="${esc(state.dates.departure)}" />
+            <input type="date" data-field="dates.departure" min="${todayIso}" value="${esc(state.dates.departure)}" />
             <small>${esc(config.lang === 'pl' ? 'Wyjazd musi być po przyjeździe.' : 'Departure must be after arrival.')}</small>
           </label>
           <div class="reservation-night-card">
@@ -1427,6 +1682,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             <small>${esc(config.lang === 'pl' ? 'Liczone automatycznie.' : 'Counted automatically.')}</small>
           </div>
         </div>
+        ${calendarTemplate()}
+        ${dateStaySummary()}
         <div class="reservation-date-helper">
           <i aria-hidden="true">${detailIcon('info')}</i>
           <span>
@@ -1462,6 +1719,26 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         </div>
       </section>
     `;
+
+    const serviceSuggestionsTemplate = () => {
+      const suggestions = serviceSuggestions();
+      if (!suggestions.length) return '';
+      const copy = ui.serviceSuggestions || {};
+      return `
+        <div class="reservation-smart-suggestions">
+          <strong>${esc(copy.title || 'Stay tips')}</strong>
+          <div>
+            ${suggestions.map((suggestion) => `
+              <article>
+                <i aria-hidden="true">${detailIcon(suggestion.icon || 'sparkles')}</i>
+                <p>${esc(suggestion.text || '')}</p>
+                ${suggestion.scope && suggestion.id ? `<button type="button" data-suggestion-add="${esc(`${suggestion.scope}:${suggestion.id}`)}">${esc(suggestion.action || '+')}</button>` : ''}
+              </article>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    };
 
     const servicesStep = () => `
       <section class="reservation-step-card">
@@ -1515,6 +1792,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             </div>
           `).join('')}
         </div>
+        ${serviceSuggestionsTemplate()}
       </section>
     `;
 
@@ -1882,22 +2160,28 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const selected = selectedServices();
       const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
       const stayNote = state.mode === 'bungalow' || state.mode === 'combined' ? ui.success.bungalow : ui.success.camping;
-      const successText = state.submitMode === 'sent'
+      const mode = state.submitMode || 'mock';
+      const isErrorMode = mode === 'error' || mode === 'resend-error';
+      const successText = mode === 'resend' || mode === 'sent'
         ? ui.success.text
-        : state.submitMode === 'resend-error'
-          ? (state.submitError || ui.success.resendErrorText || ui.success.errorText)
-          : (ui.success.mockText || ui.success.text);
-      const successBadge = state.submitMode === 'sent'
-        ? (ui.success.sentBadge || 'Email sent')
-        : state.submitMode === 'resend-error'
-          ? (ui.success.errorBadge || 'Email error')
-          : (ui.success.mockBadge || 'Test mode');
-      const modalTitle = state.submitMode === 'resend-error'
+        : mode === 'formsubmit'
+          ? (state.formSubmitActivationNotice ? ui.success.formsubmitActivationText : ui.success.formsubmitText)
+          : isErrorMode
+            ? (state.submitError || ui.success.resendErrorText || ui.success.errorText)
+            : (ui.success.mockText || ui.success.text);
+      const successBadge = mode === 'resend' || mode === 'sent'
+        ? (ui.success.resendBadge || ui.success.sentBadge || 'Email sent')
+        : mode === 'formsubmit'
+          ? (ui.success.formsubmitBadge || 'Secure form')
+          : isErrorMode
+            ? (ui.success.errorBadge || 'Email error')
+            : (ui.success.mockBadge || 'Test mode');
+      const modalTitle = isErrorMode
         ? (ui.success.resendErrorTitle || ui.success.title)
         : ui.success.title;
       const depositNote = state.mode === 'bungalow' ? ui.summary.depositBungalow : state.mode === 'combined' ? ui.summary.depositCombined : '';
       return `
-        <div class="reservation-success-modal" role="dialog" aria-modal="true" aria-label="${esc(modalTitle)}" data-submit-mode="${esc(state.submitMode || 'mock')}">
+        <div class="reservation-success-modal" role="dialog" aria-modal="true" aria-label="${esc(modalTitle)}" data-submit-mode="${esc(mode)}">
           <div class="reservation-success-modal__card">
             <button class="reservation-success-modal__close" type="button" data-success-close aria-label="${esc(ui.help.close)}">×</button>
             <span class="reservation-success-modal__mark" aria-hidden="true">${detailIcon('success')}</span>
@@ -2185,6 +2469,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.hint = '';
       state.toast = '';
       state.helpOpen = false;
+      state.success = false;
+      state.submitMode = '';
+      state.submitError = '';
+      state.formSubmitActivationNotice = false;
       state.submitAttempted = false;
       const url = new URL(window.location.href);
       url.searchParams.set('stay', mode);
@@ -2199,6 +2487,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.hint = '';
       state.toast = '';
       state.helpOpen = false;
+      state.success = false;
+      state.submitMode = '';
+      state.submitError = '';
+      state.formSubmitActivationNotice = false;
       const url = new URL(window.location.href);
       url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
@@ -2214,6 +2506,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.helpOpen = false;
       state.success = false;
       state.submitAttempted = false;
+      state.submitMode = '';
+      state.submitError = '';
+      state.formSubmitActivationNotice = false;
       const url = new URL(window.location.href);
       url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
@@ -2225,6 +2520,74 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const [group, key] = path.split('.');
       if (group === 'dates') state.dates[key] = value;
       if (group === 'details') state.details[key] = value;
+    };
+
+    const normalizeDateRange = () => {
+      if (state.dates.arrival && state.dates.departure && compareIso(state.dates.departure, state.dates.arrival) <= 0) {
+        state.dates.departure = '';
+      }
+      if (state.dates.arrival) {
+        const arrival = parseDate(state.dates.arrival);
+        if (arrival) {
+          const month = new Date(arrival.getFullYear(), arrival.getMonth(), 1, 12);
+          state.calendarMonth = dateToIso(month);
+        }
+      }
+    };
+
+    const selectCalendarDate = (iso) => {
+      if (!iso || compareIso(iso, todayIso) < 0) return;
+      if (!state.dates.arrival || (state.dates.arrival && state.dates.departure)) {
+        state.dates.arrival = iso;
+        state.dates.departure = '';
+      } else if (compareIso(iso, state.dates.arrival) > 0) {
+        state.dates.departure = iso;
+      } else {
+        state.dates.arrival = iso;
+        state.dates.departure = '';
+      }
+      state.calendarDragging = false;
+      state.calendarDragStart = '';
+      state.calendarHover = '';
+      render({ motion: 'soft' });
+      pulseSummary();
+    };
+
+    const updateCalendarPreviewDom = () => {
+      const { start, end } = rangeBounds();
+      mount.querySelectorAll('[data-calendar-day]').forEach((button) => {
+        if (!(button instanceof HTMLButtonElement)) return;
+        const iso = button.dataset.calendarDay || '';
+        const isStart = iso === state.calendarDragStart;
+        const isEnd = Boolean(state.calendarHover && iso === state.calendarHover && iso !== state.calendarDragStart);
+        const isRange = Boolean(start && end && compareIso(iso, start) >= 0 && compareIso(iso, end) <= 0);
+        button.classList.toggle('is-start', isStart);
+        button.classList.toggle('is-end', isEnd);
+        button.classList.toggle('is-range', isRange);
+      });
+    };
+
+    const finishCalendarDrag = (iso) => {
+      if (!state.calendarDragging || !state.calendarDragStart) return;
+      const end = iso && compareIso(iso, todayIso) >= 0 ? iso : state.calendarHover || state.calendarDragStart;
+      const start = state.calendarDragStart;
+      if (compareIso(end, start) > 0) {
+        state.dates.arrival = start;
+        state.dates.departure = end;
+      } else if (compareIso(end, start) < 0) {
+        state.dates.arrival = end;
+        state.dates.departure = start;
+      } else {
+        state.dates.arrival = start;
+        state.dates.departure = '';
+      }
+      state.calendarDragging = false;
+      state.calendarDragStart = '';
+      state.calendarHover = '';
+      suppressCalendarClick = true;
+      window.setTimeout(() => { suppressCalendarClick = false; }, 0);
+      render({ motion: 'soft' });
+      pulseSummary();
     };
 
     const validateBeforeNext = () => {
@@ -2292,6 +2655,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       }
       state.submitting = true;
       state.submitError = '';
+      state.formSubmitActivationNotice = false;
       state.toast = '';
       render();
       try {
@@ -2309,9 +2673,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         }
         if (!response.ok || !result?.ok) {
           const errors = result?.errors ? Object.values(result.errors).join(' ') : '';
-          if (result?.mode === 'resend-error') {
-            state.submitMode = 'resend-error';
+          if (result?.mode === 'error' || result?.mode === 'resend-error') {
+            state.submitMode = 'error';
             state.inquiryId = result?.inquiryId || '';
+            state.formSubmitActivationNotice = Boolean(result?.mail?.reception?.activationNotice || result?.errorCode === 'formsubmit_activation_required');
             state.submitError = result?.errorCode === 'invalid_api_key'
               ? (ui.success.invalidKeyText || result?.message || ui.success.resendErrorText)
               : result?.errorCode === 'sender_rejected'
@@ -2330,6 +2695,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         }
         state.submitMode = result.mode || 'mock';
         state.inquiryId = result.inquiryId || '';
+        state.formSubmitActivationNotice = Boolean(result?.mail?.reception?.activationNotice);
         state.success = true;
       } catch {
         state.submitError = ui.success.errorText || 'Wysyłka nie powiodła się.';
@@ -2449,6 +2815,52 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         return;
       }
 
+      if (target.closest('[data-calendar-prev]')) {
+        event.preventDefault();
+        shiftCalendarMonth(-1);
+        render({ motion: 'soft' });
+        return;
+      }
+
+      if (target.closest('[data-calendar-next]')) {
+        event.preventDefault();
+        shiftCalendarMonth(1);
+        render({ motion: 'soft' });
+        return;
+      }
+
+      const calendarDay = target.closest('[data-calendar-day]');
+      if (calendarDay instanceof HTMLButtonElement) {
+        event.preventDefault();
+        if (suppressCalendarClick) return;
+        selectCalendarDate(calendarDay.dataset.calendarDay);
+        return;
+      }
+
+      const suggestionAdd = target.closest('[data-suggestion-add]');
+      if (suggestionAdd instanceof HTMLElement) {
+        event.preventDefault();
+        const [scope, id] = String(suggestionAdd.dataset.suggestionAdd || '').split(':');
+        if (scope && id) {
+          setQty(scope, id, Math.max(1, getQty(scope, id) || 0));
+          state.toast = ui.presetAdded || '';
+          refreshControlDom();
+          pulseSummary();
+        }
+        return;
+      }
+
+      if (target.closest('[data-ask-campy-plan]')) {
+        event.preventDefault();
+        window.dispatchEvent(new CustomEvent('campy:prompt', {
+          detail: {
+            prompt: config.lang === 'pl' ? 'Zaplanuj dzień w Krakowie' : 'Plan a Krakow day',
+            actionKey: 'dayPlan',
+          },
+        }));
+        return;
+      }
+
       const presetButton = target.closest('[data-preset]');
       if (presetButton instanceof HTMLElement) {
         event.preventDefault();
@@ -2545,12 +2957,53 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       }
     });
 
+    mount.addEventListener('pointerdown', (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const day = target.closest('[data-calendar-day]');
+      if (!(day instanceof HTMLButtonElement) || day.disabled || event.button !== 0) return;
+      const iso = day.dataset.calendarDay || '';
+      if (!iso || compareIso(iso, todayIso) < 0) return;
+      state.calendarDragging = true;
+      state.calendarDragStart = iso;
+      state.calendarHover = iso;
+      day.setPointerCapture?.(event.pointerId);
+      updateCalendarPreviewDom();
+    });
+
+    mount.addEventListener('pointerover', (event) => {
+      if (!state.calendarDragging) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const day = target.closest('[data-calendar-day]');
+      if (!(day instanceof HTMLButtonElement) || day.disabled) return;
+      state.calendarHover = day.dataset.calendarDay || state.calendarHover;
+      updateCalendarPreviewDom();
+    });
+
+    mount.addEventListener('pointerup', (event) => {
+      if (!state.calendarDragging) return;
+      const target = event.target;
+      const day = target instanceof Element ? target.closest('[data-calendar-day]') : null;
+      finishCalendarDrag(day instanceof HTMLButtonElement ? day.dataset.calendarDay : state.calendarHover);
+    });
+
+    mount.addEventListener('pointercancel', () => {
+      state.calendarDragging = false;
+      state.calendarDragStart = '';
+      state.calendarHover = '';
+      updateCalendarPreviewDom();
+    });
+
     mount.addEventListener('input', (event) => {
       const target = event.target;
       if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)) return;
       if (target.dataset.field) {
         updateField(target.dataset.field, target.value);
-        if (target.dataset.field.startsWith('dates.')) render();
+        if (target.dataset.field.startsWith('dates.')) {
+          normalizeDateRange();
+          render();
+        }
         else {
           updateSummaryDom();
           updateValidationDom();
@@ -3544,6 +3997,256 @@ body.booking-app-page .main-content {
   background: rgba(242,192,120,.10);
 }
 
+.reservation-calendar,
+.reservation-date-summary,
+.reservation-smart-suggestions {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+  padding: clamp(16px, 2.2vw, 22px);
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(143,224,180,.14), transparent 38%),
+    rgba(255,255,255,.055);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.reservation-calendar__head {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.reservation-calendar__head > span,
+.reservation-date-summary > div:first-child span,
+.reservation-stay-advice > i,
+.reservation-smart-suggestions article > i {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: 16px;
+  color: #8fe0b4;
+  background: rgba(60,179,113,.11);
+  box-shadow: 0 14px 32px rgba(60,179,113,.12);
+}
+
+.reservation-calendar__head strong,
+.reservation-date-summary strong,
+.reservation-smart-suggestions > strong,
+.reservation-stay-advice strong {
+  color: #fff;
+}
+
+.reservation-calendar__head p {
+  margin-top: 2px;
+  color: rgba(245,255,248,.66);
+  font-size: .9rem;
+}
+
+.reservation-calendar__nav {
+  min-width: 250px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,.07);
+}
+
+.reservation-calendar__nav button {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(60,179,113,.15);
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+
+.reservation-calendar__nav button:hover,
+.reservation-calendar__nav button:focus-visible {
+  background: rgba(60,179,113,.28);
+  box-shadow: 0 0 0 4px rgba(60,179,113,.14);
+}
+
+.reservation-calendar__nav em {
+  color: #f5fff8;
+  font-style: normal;
+  font-weight: 900;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.reservation-calendar__weekdays,
+.reservation-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.reservation-calendar__weekdays span {
+  color: rgba(245,255,248,.54);
+  font-size: .72rem;
+  font-weight: 950;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.reservation-calendar__empty,
+.reservation-calendar__day {
+  min-height: 48px;
+  border-radius: 16px;
+}
+
+.reservation-calendar__day {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.10);
+  color: #f5fff8;
+  background: rgba(255,255,255,.055);
+  font-weight: 900;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.reservation-calendar__day:hover,
+.reservation-calendar__day:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(143,224,180,.48);
+  background: rgba(60,179,113,.16);
+}
+
+.reservation-calendar__day.is-today:not(.is-start):not(.is-end) {
+  border-color: rgba(242,192,120,.34);
+  box-shadow: inset 0 0 0 1px rgba(242,192,120,.16);
+}
+
+.reservation-calendar__day.is-range {
+  border-color: rgba(143,224,180,.22);
+  background: linear-gradient(135deg, rgba(60,179,113,.24), rgba(143,224,180,.10));
+}
+
+.reservation-calendar__day.is-start,
+.reservation-calendar__day.is-end {
+  color: #062016;
+  border-color: rgba(143,224,180,.72);
+  background: linear-gradient(135deg, #a8f0c4, #3CB371);
+  box-shadow: 0 18px 38px rgba(60,179,113,.28);
+}
+
+.reservation-calendar__day.is-disabled {
+  cursor: not-allowed;
+  color: rgba(245,255,248,.28);
+  background: rgba(255,255,255,.025);
+  box-shadow: none;
+}
+
+.reservation-date-summary > div:first-child,
+.reservation-stay-advice {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.reservation-date-summary dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.reservation-date-summary dl div {
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 16px;
+  background: rgba(255,255,255,.055);
+}
+
+.reservation-date-summary dt {
+  color: rgba(245,255,248,.56);
+  font-size: .7rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.reservation-date-summary dd {
+  margin: 4px 0 0;
+  color: #fff;
+  font-weight: 900;
+}
+
+.reservation-stay-advice {
+  align-items: start;
+  padding: 14px;
+  border: 1px solid rgba(143,224,180,.16);
+  border-radius: 18px;
+  background: rgba(60,179,113,.09);
+}
+
+.reservation-stay-advice p {
+  margin-top: 4px;
+  color: rgba(245,255,248,.72);
+}
+
+.reservation-stay-advice__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.reservation-mini-link,
+.reservation-smart-suggestions button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 13px;
+  border: 1px solid rgba(143,224,180,.22);
+  border-radius: 999px;
+  color: #dffff0;
+  background: rgba(60,179,113,.12);
+  font-size: .82rem;
+  font-weight: 900;
+  text-decoration: none;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.reservation-mini-link:hover,
+.reservation-mini-link:focus-visible,
+.reservation-smart-suggestions button:hover,
+.reservation-smart-suggestions button:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(143,224,180,.48);
+  background: rgba(60,179,113,.20);
+}
+
+.reservation-smart-suggestions > div {
+  display: grid;
+  gap: 10px;
+}
+
+.reservation-smart-suggestions article {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 13px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  background: rgba(255,255,255,.055);
+}
+
+.reservation-smart-suggestions article p {
+  color: rgba(245,255,248,.76);
+}
+
 .reservation-presets,
 .reservation-simple-panel {
   display: grid;
@@ -4353,10 +5056,17 @@ body.booking-app-page .main-content {
   letter-spacing: .04em;
 }
 
-.reservation-success-modal[data-submit-mode="resend-error"] .reservation-success-modal__badge {
+.reservation-success-modal[data-submit-mode="resend-error"] .reservation-success-modal__badge,
+.reservation-success-modal[data-submit-mode="error"] .reservation-success-modal__badge {
   border-color: rgba(242,192,120,.34);
   color: #ffe6bb;
   background: rgba(242,192,120,.12);
+}
+
+.reservation-success-modal[data-submit-mode="formsubmit"] .reservation-success-modal__badge {
+  border-color: rgba(143,224,180,.34);
+  color: #dffff0;
+  background: rgba(60,179,113,.15);
 }
 
 .reservation-success-modal[data-submit-mode="mock"] .reservation-success-modal__badge {
@@ -4540,7 +5250,36 @@ body.booking-app-page .main-content {
   }
 
   .reservation-presets__grid,
-  .reservation-success-modal__card dl {
+  .reservation-success-modal__card dl,
+  .reservation-date-summary dl {
+    grid-template-columns: 1fr;
+  }
+
+  .reservation-calendar__head,
+  .reservation-date-summary > div:first-child,
+  .reservation-stay-advice,
+  .reservation-smart-suggestions article {
+    grid-template-columns: 1fr;
+  }
+
+  .reservation-calendar__nav {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .reservation-calendar__weekdays,
+  .reservation-calendar__grid {
+    gap: 5px;
+  }
+
+  .reservation-calendar__empty,
+  .reservation-calendar__day {
+    min-height: 42px;
+    border-radius: 13px;
+  }
+
+  .reservation-stay-advice__actions {
+    display: grid;
     grid-template-columns: 1fr;
   }
 
@@ -4610,6 +5349,9 @@ html[data-theme="light"] .reservation-summary,
 html[data-theme="light"] .reservation-item-card,
 html[data-theme="light"] .reservation-final-summary,
 html[data-theme="light"] .reservation-date-helper,
+html[data-theme="light"] .reservation-calendar,
+html[data-theme="light"] .reservation-date-summary,
+html[data-theme="light"] .reservation-smart-suggestions,
 html[data-theme="light"] .reservation-presets,
 html[data-theme="light"] .reservation-simple-panel,
 html[data-theme="light"] .reservation-help__panel,
@@ -4637,6 +5379,11 @@ html[data-theme="light"] .reservation-help__sections article strong,
 html[data-theme="light"] .reservation-help__short strong,
 html[data-theme="light"] .reservation-item-card strong,
 html[data-theme="light"] .reservation-date-helper strong,
+html[data-theme="light"] .reservation-calendar__head strong,
+html[data-theme="light"] .reservation-date-summary strong,
+html[data-theme="light"] .reservation-date-summary dd,
+html[data-theme="light"] .reservation-stay-advice strong,
+html[data-theme="light"] .reservation-smart-suggestions > strong,
 html[data-theme="light"] .reservation-summary dd,
 html[data-theme="light"] .reservation-final-summary dd,
 html[data-theme="light"] .reservation-success-modal__card dd {
@@ -4652,6 +5399,9 @@ html[data-theme="light"] .reservation-field small,
 html[data-theme="light"] .reservation-details-section__head p,
 html[data-theme="light"] .reservation-option-row small,
 html[data-theme="light"] .reservation-date-helper small,
+html[data-theme="light"] .reservation-calendar__head p,
+html[data-theme="light"] .reservation-stay-advice p,
+html[data-theme="light"] .reservation-smart-suggestions article p,
 html[data-theme="light"] .reservation-summary dt,
 html[data-theme="light"] .reservation-final-summary dt,
 html[data-theme="light"] .reservation-success-modal__card dt,
@@ -4709,6 +5459,43 @@ html[data-theme="light"] .reservation-copy-fallback {
   color: #122319;
   border-color: rgba(22,56,36,.14);
   background: rgba(255,255,255,.72);
+}
+
+html[data-theme="light"] .reservation-calendar__day,
+html[data-theme="light"] .reservation-date-summary dl div,
+html[data-theme="light"] .reservation-smart-suggestions article {
+  color: #122319;
+  border-color: rgba(22,56,36,.13);
+  background: rgba(255,255,255,.68);
+}
+
+html[data-theme="light"] .reservation-calendar__day.is-range {
+  border-color: rgba(60,179,113,.24);
+  background: linear-gradient(135deg, rgba(60,179,113,.20), rgba(143,224,180,.12));
+}
+
+html[data-theme="light"] .reservation-calendar__day.is-start,
+html[data-theme="light"] .reservation-calendar__day.is-end {
+  color: #062016;
+  border-color: rgba(35,120,77,.34);
+  background: linear-gradient(135deg, #9beebd, #3CB371);
+}
+
+html[data-theme="light"] .reservation-calendar__day.is-disabled {
+  color: rgba(18,35,25,.28);
+  background: rgba(22,56,36,.035);
+}
+
+html[data-theme="light"] .reservation-calendar__weekdays span,
+html[data-theme="light"] .reservation-date-summary dt {
+  color: rgba(18,35,25,.58);
+}
+
+html[data-theme="light"] .reservation-mini-link,
+html[data-theme="light"] .reservation-smart-suggestions button {
+  color: #1b5b3a;
+  border-color: rgba(60,179,113,.25);
+  background: rgba(60,179,113,.10);
 }
 
 html[data-theme="light"] .reservation-country__list p,

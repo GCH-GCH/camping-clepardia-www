@@ -30,6 +30,14 @@ const escapeHtml = (value) =>
 
 const configured = (...values) => values.find((value) => String(value || '').trim()) || '';
 
+const mailProvider = () => {
+  const provider = String(process.env.MAIL_PROVIDER || 'auto').trim().toLowerCase();
+  return ['auto', 'resend', 'formsubmit'].includes(provider) ? provider : 'auto';
+};
+
+const formSubmitEmail = () =>
+  configured(process.env.FORMSUBMIT_TO_EMAIL, process.env.RESERVATION_TO_EMAIL, process.env.MAIL_TO, 'clepardia@gmail.com');
+
 const mailEnvSnapshot = () => {
   const apiKey = String(process.env.RESEND_API_KEY || '').trim();
   const from = configured(process.env.RESERVATION_FROM_EMAIL, process.env.MAIL_FROM, 'Camping Clepardia WWW <no-reply@clepardia.com.pl>');
@@ -37,11 +45,13 @@ const mailEnvSnapshot = () => {
   const fromDomain = String(from).match(/@([^>\s]+)/)?.[1] || '';
 
   return {
+    mailProvider: mailProvider(),
     resendKeyPresent: Boolean(apiKey),
     resendKeyStartsWithRe: apiKey.startsWith('re_'),
     resendKeyLength: apiKey.length,
     reservationFromPresent: Boolean(String(process.env.RESERVATION_FROM_EMAIL || '').trim()),
     reservationToPresent: Boolean(String(process.env.RESERVATION_TO_EMAIL || '').trim()),
+    formSubmitToPresent: Boolean(formSubmitEmail()),
     fromDomain,
     toPresent: Boolean(to),
   };
@@ -231,6 +241,12 @@ const buildReceptionMail = (inquiry) => {
     ? 'W przypadku domkow moze byc wymagana zaliczka. Dane do zaliczki nalezy wyslac klientowi w odpowiedzi mailowej po potwierdzeniu dostepnosci.'
     : '';
   const services = inquiry.services.map((service) => `${service.label} x ${service.qty} (${service.price} PLN / noc)`);
+  const serviceGroups = inquiry.services.reduce((groups, service) => {
+    const scope = /bungalow/i.test(service.scope) ? 'Domki' : /camping/i.test(service.scope) ? 'Camping' : 'Pozostale';
+    groups[scope] = groups[scope] || [];
+    groups[scope].push(`${service.label} x ${service.qty} (${service.price} PLN / noc)`);
+    return groups;
+  }, {});
   const guests = [
     inquiry.people.adults ? `Dorosli: ${inquiry.people.adults}` : '',
     inquiry.people.children ? `Dzieci 4-14: ${inquiry.people.children}` : '',
@@ -265,6 +281,22 @@ const buildReceptionMail = (inquiry) => {
   const serviceHtml = services.map((service) => `
     <li style="padding:9px 0;border-top:1px solid #e6f1ea;color:#102319;font-weight:800;">${escapeHtml(service)}</li>
   `).join('');
+  const groupedServiceText = Object.keys(serviceGroups).length
+    ? Object.entries(serviceGroups).map(([group, items]) => [
+        `${group}:`,
+        ...items.map((item) => `- ${item}`),
+      ].join('\n')).join('\n\n')
+    : 'brak';
+  const groupedServiceHtml = Object.keys(serviceGroups).length
+    ? Object.entries(serviceGroups).map(([group, items]) => `
+        <section style="margin-top:12px;padding:12px 14px;border:1px solid #e6f1ea;border-radius:14px;background:#f7fbf8;">
+          <h3 style="margin:0 0 8px;font-size:14px;color:#24794e;">${escapeHtml(group)}</h3>
+          <ul style="list-style:none;margin:0;padding:0;">
+            ${items.map((item) => `<li style="padding:7px 0;border-top:1px solid #e6f1ea;color:#102319;font-weight:800;">${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </section>
+      `).join('')
+    : '';
   const bodyHtml = `
     <div style="font-family:Arial,sans-serif;background:#eef7f1;padding:28px;color:#102319;">
       <div style="max-width:760px;margin:0 auto;">
@@ -280,6 +312,7 @@ const buildReceptionMail = (inquiry) => {
         <section style="margin:18px 0;padding:18px 20px;border:1px solid #dceee4;border-radius:18px;background:#fff;">
           <h2 style="margin:0 0 12px;font-size:17px;">Uslugi i ceny</h2>
           <ul style="list-style:none;margin:0;padding:0;">${serviceHtml}</ul>
+          ${groupedServiceHtml}
         </section>
         <section style="margin:18px 0;padding:18px 20px;border:1px solid #dceee4;border-radius:18px;background:#fff;">
           <h2 style="margin:0 0 12px;font-size:17px;">Wiadomosc klienta</h2>
@@ -297,6 +330,9 @@ const buildReceptionMail = (inquiry) => {
     '',
     'USLUGI I CENY',
     ...(services.length ? services.map((service) => `- ${service}`) : ['- brak']),
+    '',
+    'SEKCJE',
+    groupedServiceText,
     '',
     'WIADOMOSC KLIENTA',
     inquiry.message || 'brak',
@@ -408,7 +444,62 @@ const normalizeResendError = (body, status) => {
   };
 };
 
-const sendMail = async (message) => {
+const isResendFallbackError = (result) =>
+  ['invalid_api_key', 'sender_rejected'].includes(String(result?.errorCode || '').toLowerCase())
+  || [401, 403].includes(Number(result?.status || 0));
+
+const normalizeFormSubmitError = (body, status) => {
+  const rawMessage = oneLine(body?.message || body?.error || body?.reason || `FormSubmit returned ${status}.`, 800);
+  const normalized = rawMessage.toLowerCase();
+  if (normalized.includes('activate') || normalized.includes('activation') || normalized.includes('confirm')) {
+    return {
+      errorCode: 'formsubmit_activation_required',
+      message: 'FormSubmit may require first-use activation in the clepardia@gmail.com mailbox.',
+      reason: rawMessage,
+    };
+  }
+  return {
+    errorCode: oneLine(body?.code || body?.error || `FORMSUBMIT_${status}`, 120),
+    message: rawMessage,
+    reason: rawMessage,
+  };
+};
+
+const buildFormSubmitPayload = (message, inquiry) => ({
+  _subject: message.subject,
+  _template: 'table',
+  _captcha: 'false',
+  _replyto: inquiry.email || '',
+  _autoresponse: '',
+  inquiry_id: inquiry.inquiryId,
+  status: 'Do potwierdzenia przez recepcje',
+  typ_pobytu: inquiry.stayType,
+  termin: `${inquiry.arrival} - ${inquiry.departure}`,
+  liczba_nocy: inquiry.nights,
+  goscie: [
+    inquiry.people.adults ? `Dorosli: ${inquiry.people.adults}` : '',
+    inquiry.people.children ? `Dzieci 4-14: ${inquiry.people.children}` : '',
+    inquiry.people.toddlers ? `Dzieci do 4: ${inquiry.people.toddlers}` : '',
+  ].filter(Boolean).join(', ') || 'brak',
+  uslugi: inquiry.services.map((service) => `${service.scope ? `[${service.scope}] ` : ''}${service.label} x ${service.qty} - ${service.price} PLN / noc`).join('\n') || 'brak',
+  cena_orientacyjna: inquiry.estimatedTotal || 'brak',
+  kraj: inquiry.country || 'brak',
+  jezyk_kontaktu: inquiry.contactLanguage || 'brak',
+  imie_i_nazwisko: inquiry.fullName || 'brak',
+  email: inquiry.email || 'brak',
+  telefon: inquiry.phone || 'brak',
+  numer_rejestracyjny: inquiry.vehiclePlate || 'brak',
+  specjalne_potrzeby: inquiry.specialNeeds || 'brak',
+  pozniejszy_wyjazd: inquiry.lateCheckout || 'brak',
+  wiadomosc_klienta: inquiry.message || 'brak',
+  zgoda_cisza_nocna: inquiry.quietConsent ? 'zaakceptowana' : 'brak',
+  zgoda_kontaktowa: inquiry.consent ? 'zaakceptowana' : 'brak',
+  zgoda_prywatnosc: inquiry.privacyConsent ? 'zaakceptowana' : 'brak',
+  informacja: 'Dostepnosc i finalne warunki potwierdza recepcja.',
+  podsumowanie: message.text,
+});
+
+const sendWithResend = async (message) => {
   const apiKey = String(process.env.RESEND_API_KEY || '').trim();
   if (!apiKey) {
     return {
@@ -463,6 +554,94 @@ const sendMail = async (message) => {
   }
 };
 
+const sendWithFormSubmit = async (message, inquiry) => {
+  const to = formSubmitEmail();
+  if (!to) {
+    return {
+      provider: 'mock',
+      delivered: false,
+      reason: 'FORMSUBMIT_TO_EMAIL / RESERVATION_TO_EMAIL is not configured - mail body prepared but not sent.',
+    };
+  }
+
+  try {
+    const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(to)}`, {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(buildFormSubmitPayload(message, inquiry)),
+    });
+    const body = await response.json().catch(() => ({}));
+
+    if (!response.ok || body?.success === false) {
+      const normalizedError = normalizeFormSubmitError(body, response.status);
+      return {
+        provider: 'formsubmit',
+        delivered: false,
+        status: response.status,
+        ...normalizedError,
+      };
+    }
+
+    return {
+      provider: 'formsubmit',
+      delivered: true,
+      messageId: oneLine(body?.submission_id || body?.message || body?.next || '', 180),
+      activationNotice: true,
+      message: 'Sent through FormSubmit. If this is the first FormSubmit test, confirm activation in clepardia@gmail.com and submit again.',
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'FormSubmit request failed.';
+    return {
+      provider: 'formsubmit',
+      delivered: false,
+      errorCode: 'FORMSUBMIT_REQUEST_FAILED',
+      message,
+      reason: message,
+    };
+  }
+};
+
+const sendReceptionMail = async (message, inquiry) => {
+  const provider = mailProvider();
+  if (provider === 'resend') return sendWithResend(message);
+  if (provider === 'formsubmit') return sendWithFormSubmit(message, inquiry);
+
+  const apiKey = String(process.env.RESEND_API_KEY || '').trim();
+  if (!apiKey) return sendWithFormSubmit(message, inquiry);
+
+  const resend = await sendWithResend(message);
+  if (resend.delivered) return resend;
+  if (!isResendFallbackError(resend)) return resend;
+
+  const formsubmit = await sendWithFormSubmit(message, inquiry);
+  return {
+    ...formsubmit,
+    fallbackFrom: {
+      provider: 'resend',
+      delivered: false,
+      status: resend.status || null,
+      errorCode: resend.errorCode || 'RESEND_ERROR',
+      message: resend.message || resend.reason || 'Resend delivery failed.',
+      reason: resend.reason || '',
+    },
+  };
+};
+
+const sendCustomerConfirmation = async (message) => {
+  const apiKey = String(process.env.RESEND_API_KEY || '').trim();
+  if (!apiKey) {
+    return {
+      provider: 'mock',
+      delivered: false,
+      reason: 'Customer autoresponder template is ready, but RESEND_API_KEY is not configured.',
+    };
+  }
+  return sendWithResend(message);
+};
+
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.setHeader('allow', 'POST, OPTIONS');
@@ -488,7 +667,7 @@ export default async function handler(req, res) {
     }
 
     logMailEnv(inquiry.inquiryId);
-    const reception = await sendMail(buildReceptionMail(inquiry));
+    const reception = await sendReceptionMail(buildReceptionMail(inquiry), inquiry);
     const mail = {
       reception,
       autoresponder: {
@@ -500,18 +679,20 @@ export default async function handler(req, res) {
       },
     };
 
-    if (reception.provider === 'resend' && !reception.delivered) {
-      console.error('[reservation-api] resend-error', {
+    if (!reception.delivered && reception.provider !== 'mock') {
+      console.error('[reservation-api] mail-error', {
         inquiryId: inquiry.inquiryId,
+        provider: reception.provider || 'unknown',
         status: reception.status || null,
-        errorCode: reception.errorCode || 'RESEND_ERROR',
-        message: reception.message || reception.reason || 'Resend delivery failed.',
+        errorCode: reception.errorCode || 'MAIL_ERROR',
+        message: reception.message || reception.reason || 'Mail delivery failed.',
       });
       return sendJson(res, 502, {
         ok: false,
-        mode: 'resend-error',
-        errorCode: reception.errorCode || 'RESEND_ERROR',
-        message: reception.message || reception.reason || 'Resend delivery failed.',
+        mode: 'error',
+        provider: reception.provider || 'unknown',
+        errorCode: reception.errorCode || 'MAIL_ERROR',
+        message: reception.message || reception.reason || 'Mail delivery failed.',
         inquiryId: inquiry.inquiryId,
         mail,
         ccSystemDraft: createCcSystemDraft(inquiry),
@@ -519,13 +700,14 @@ export default async function handler(req, res) {
     }
 
     if (reception.delivered && inquiry.email && customerConfirmationEnabled()) {
-      const autoresponder = await sendMail(buildCustomerMail(inquiry));
+      const autoresponder = await sendCustomerConfirmation(buildCustomerMail(inquiry));
       mail.autoresponder = autoresponder;
-      if (autoresponder.provider === 'resend' && !autoresponder.delivered) {
+      if (!autoresponder.delivered) {
         console.error('[reservation-api] customer-autoresponder-error', {
           inquiryId: inquiry.inquiryId,
+          provider: autoresponder.provider || 'unknown',
           status: autoresponder.status || null,
-          errorCode: autoresponder.errorCode || 'RESEND_ERROR',
+          errorCode: autoresponder.errorCode || 'CUSTOMER_AUTORESPONDER_ERROR',
           message: autoresponder.message || autoresponder.reason || 'Customer autoresponder failed.',
         });
       }
@@ -539,7 +721,7 @@ export default async function handler(req, res) {
 
     return sendJson(res, 200, {
       ok: true,
-      mode: reception.delivered ? 'sent' : 'mock',
+      mode: reception.delivered ? reception.provider : 'mock',
       inquiryId: inquiry.inquiryId,
       mail,
       ccSystemDraft: createCcSystemDraft(inquiry),
