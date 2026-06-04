@@ -30,6 +30,30 @@ const escapeHtml = (value) =>
 
 const configured = (...values) => values.find((value) => String(value || '').trim()) || '';
 
+const mailEnvSnapshot = () => {
+  const apiKey = String(process.env.RESEND_API_KEY || '').trim();
+  const from = configured(process.env.RESERVATION_FROM_EMAIL, process.env.MAIL_FROM, 'Camping Clepardia WWW <no-reply@clepardia.com.pl>');
+  const to = configured(process.env.RESERVATION_TO_EMAIL, process.env.MAIL_TO, 'clepardia@gmail.com');
+  const fromDomain = String(from).match(/@([^>\s]+)/)?.[1] || '';
+
+  return {
+    resendKeyPresent: Boolean(apiKey),
+    resendKeyPrefix: apiKey ? apiKey.slice(0, 3) : '',
+    reservationFromPresent: Boolean(String(process.env.RESERVATION_FROM_EMAIL || '').trim()),
+    reservationToPresent: Boolean(String(process.env.RESERVATION_TO_EMAIL || '').trim()),
+    fromDomain,
+    toPresent: Boolean(to),
+  };
+};
+
+const logMailEnv = (inquiryId) => {
+  try {
+    console.info('[reservation-api] mail-env', { inquiryId, ...mailEnvSnapshot() });
+  } catch {
+    // Logging must never block accepting an enquiry.
+  }
+};
+
 const collectBody = (req) =>
   new Promise((resolve, reject) => {
     const chunks = [];
@@ -281,7 +305,7 @@ const buildReceptionMail = (inquiry) => {
 };
 
 const sendMail = async (message) => {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = String(process.env.RESEND_API_KEY || '').trim();
   if (!apiKey) {
     return {
       provider: 'mock',
@@ -309,10 +333,15 @@ const sendMail = async (message) => {
     const body = await response.json().catch(() => ({}));
 
     if (!response.ok) {
+      const errorCode = oneLine(body?.name || body?.code || body?.error || `RESEND_${response.status}`, 120);
+      const message = oneLine(body?.message || body?.error || `Resend returned ${response.status}.`, 800);
       return {
         provider: 'resend',
         delivered: false,
-        reason: body?.message || `Resend returned ${response.status}.`,
+        status: response.status,
+        errorCode,
+        message,
+        reason: message,
       };
     }
 
@@ -322,10 +351,13 @@ const sendMail = async (message) => {
       messageId: body?.id || '',
     };
   } catch (error) {
+    const message = error instanceof Error ? error.message : 'Resend request failed.';
     return {
       provider: 'resend',
       delivered: false,
-      reason: error instanceof Error ? error.message : 'Resend request failed.',
+      errorCode: 'RESEND_REQUEST_FAILED',
+      message,
+      reason: message,
     };
   }
 };
@@ -354,6 +386,7 @@ export default async function handler(req, res) {
       return sendJson(res, 200, { ok: true, mode: 'spam-filtered', inquiryId: inquiry.inquiryId });
     }
 
+    logMailEnv(inquiry.inquiryId);
     const reception = await sendMail(buildReceptionMail(inquiry));
     const mail = {
       reception,
@@ -363,6 +396,24 @@ export default async function handler(req, res) {
         reason: 'Customer autoresponder template is prepared for a later step.',
       },
     };
+
+    if (reception.provider === 'resend' && !reception.delivered) {
+      console.error('[reservation-api] resend-error', {
+        inquiryId: inquiry.inquiryId,
+        status: reception.status || null,
+        errorCode: reception.errorCode || 'RESEND_ERROR',
+        message: reception.message || reception.reason || 'Resend delivery failed.',
+      });
+      return sendJson(res, 502, {
+        ok: false,
+        mode: 'resend-error',
+        errorCode: reception.errorCode || 'RESEND_ERROR',
+        message: reception.message || reception.reason || 'Resend delivery failed.',
+        inquiryId: inquiry.inquiryId,
+        mail,
+        ccSystemDraft: createCcSystemDraft(inquiry),
+      });
+    }
 
     return sendJson(res, 200, {
       ok: true,

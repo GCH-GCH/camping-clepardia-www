@@ -105,6 +105,7 @@ const bookingBungalowHref = getBookingLocalizedPath(pathContext.languageCode, 'b
 const bookingCombinedHref = getBookingLocalizedPath(pathContext.languageCode, 'combined');
 const pricesHref = getLocalizedPath(pathContext.explicitLanguage, 'cennik');
 const contactHref = getLocalizedPath(pathContext.explicitLanguage, 'kontakt');
+const attractionsHref = getLocalizedPath(pathContext.explicitLanguage, 'atrakcje');
 const mapsHref = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
 const jakdojadeHref = 'https://jakdojade.pl/krakow';
 const sctHref = 'https://www.sct.ztp.krakow.pl/';
@@ -114,64 +115,107 @@ const finalCampyCopy = {
     actions: {
       bookStay: 'Zarezerwuj pobyt',
       camperPrice: 'Ile kosztuje kamper?',
+      stayCompare: 'Camping czy domki?',
+      campingPricing: 'Cennik campingowy',
+      powerDog: 'Prąd i pies',
       centerTransit: 'Jak dojadę do centrum?',
       dayPlan: 'Zaplanuj dzień w Krakowie',
       familyAttractions: 'Co zwiedzić z dziećmi?',
       dog: 'Czy można z psem?',
       bungalowOptions: 'Domki 2/3/4-os.',
       combinedStay: 'Camping + domki razem',
+      toursFromKrakow: 'Wycieczki z Krakowa',
       quiet: 'Cisza nocna',
       sctEtoll: 'SCT / e-TOLL',
       maps: 'Google Maps',
       reception: 'Kontakt z recepcją',
+      receptionHours: 'Godziny recepcji',
     },
     answers: {
       bookStay: 'Jasne. Najwygodniej przejść do rezerwacji i wybrać Camping, Domki albo Razem. To zapytanie do recepcji, a dostępność i warunki potwierdza obiekt.',
       camperPrice: 'Kamper kosztuje 80 PLN / noc. Do tego: dorosły 35 PLN, dziecko 4-14 lat 20 PLN, prąd 30 PLN, pies 0 PLN. Przykład: 2 osoby + kamper + prąd = 180 PLN / noc. Pełny cennik jest w kalkulatorze.',
+      stayCompare: 'Camping wybierz dla kampera, vana, namiotu lub przyczepy. Domki są 2-, 3- i 4-osobowe. Razem jest dla grup, gdzie część osób śpi w domku, a część przyjeżdża na camping.',
+      campingPricing: 'Cennik campingowy liczy pojazd lub namiot, osoby oraz dodatki. Przykład: kamper 80 PLN / noc, dorosły 35 PLN, dziecko 4-14 lat 20 PLN, prąd 30 PLN, pies 0 PLN.',
+      powerDog: 'Prąd 10A kosztuje 30 PLN / noc. Pies kosztuje 0 PLN. Prosimy tylko o opiekę nad pupilem i sprzątanie po nim.',
       centerTransit: 'Przystanek jest ok. 40 m od bramy. Do Starego Kleparza / centrum jest ok. 9 przystanków i ok. 14 minut jazdy. Do trasy polecam Google Maps i Jakdojade.',
       dayPlan: 'Zaplanujmy dzień. Napisz proszę: ile macie czasu, czy jedziecie z dziećmi, czy plan ma być spokojny czy intensywny oraz czy wybieracie tramwaj czy auto.',
       familyAttractions: 'Z dziećmi najczęściej sprawdza się Stare Miasto i Wawel, Wieliczka, Ojców albo Energylandia. Wybór zależy od czasu, pogody i energii ekipy.',
       dog: 'Tak, można z psem. Pies ma stawkę 0 PLN. Prosimy tylko o opiekę nad pupilem i sprzątanie po nim na terenie campingu.',
       bungalowOptions: 'Domki są tylko 2-, 3- i 4-osobowe. Mają osobną dostępność, a przy domkach może być wymagana zaliczka po potwierdzeniu terminu.',
       combinedStay: 'Wybierz wariant Razem, jeśli część osób śpi w domku, a część przyjeżdża kamperem, przyczepą albo namiotem. Formularz zbierze obie części w jednym zapytaniu.',
+      toursFromKrakow: 'Na gotowe wycieczki z Krakowa najlepiej sprawdzić sekcję SeeKrakow: Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia i trasy po centrum. Rezerwacja odbywa się przez ich link.',
       quiet: 'Camping Clepardia jest spokojnym miejscem, nie imprezowym. Cisza nocna obowiązuje od 22:00 do 07:00.',
       sctEtoll: 'Przed przyjazdem sprawdź aktualne zasady SCT w Krakowie oraz e-TOLL, szczególnie przy większym pojeździe lub zestawie. Przepisy mogą się zmieniać, więc najlepiej korzystać z oficjalnych stron.',
       maps: 'Zalecamy Google Maps, ponieważ dojazd do campingu zmienił się w 2022 roku i starsze nawigacje mogą prowadzić nieprawidłowo.',
       reception: 'Recepcja: +48 795 294 486, email: clepardia@gmail.com. W sprawie pobytu możesz też przejść do kontaktu albo rezerwacji.',
+      receptionHours: 'Godziny recepcji najlepiej potwierdzić bezpośrednio przed przyjazdem. Telefon: +48 795 294 486, email: clepardia@gmail.com.',
+    },
+    quick: {
+      toggle: 'Szybkie odpowiedzi',
+      aria: 'Szybkie odpowiedzi CAMPY',
+      groups: {
+        booking: 'Rezerwacja',
+        prices: 'Ceny',
+        transport: 'Dojazd',
+        attractions: 'Atrakcje',
+        contact: 'Kontakt',
+      },
     },
   },
   en: {
     actions: {
       bookStay: 'Book your stay',
       camperPrice: 'Camper price',
+      stayCompare: 'Camping or bungalows?',
+      campingPricing: 'Camping prices',
+      powerDog: 'Electricity and dog',
       centerTransit: 'How to reach centre?',
       dayPlan: 'Plan a Krakow day',
       familyAttractions: 'Kids attractions',
       dog: 'Can I bring a dog?',
       bungalowOptions: '2/3/4-person bungalows',
       combinedStay: 'Camping + bungalow',
+      toursFromKrakow: 'Tours from Krakow',
       quiet: 'Quiet hours',
       sctEtoll: 'SCT / e-TOLL',
       maps: 'Google Maps',
       reception: 'Contact reception',
+      receptionHours: 'Reception hours',
     },
     answers: {
       bookStay: 'Sure. Open the booking flow and choose Camping, Bungalows or Combined. It is an enquiry; reception confirms availability and final conditions.',
       camperPrice: 'Camper: 80 PLN / night. Adults: 35 PLN, children 4-14: 20 PLN, electricity: 30 PLN, dog: 0 PLN. Example: 2 adults + camper + electricity = 180 PLN / night. The full calculator is on the price page.',
+      stayCompare: 'Choose Camping for a camper, van, tent or caravan. Bungalows are 2-, 3- and 4-person units. Combined is for groups mixing a bungalow and a camping pitch.',
+      campingPricing: 'Camping price combines vehicle or tent, guests and extras. Example: camper 80 PLN / night, adult 35 PLN, child 4-14: 20 PLN, electricity 30 PLN, dog 0 PLN.',
+      powerDog: '10A electricity is 30 PLN / night. Dog fee is 0 PLN. Please keep your dog under care and clean up after it.',
       centerTransit: 'The tram stop is about 40 m from the gate. It is about 9 stops and around 14 minutes to Stary Kleparz / the centre. Use Google Maps and Jakdojade.',
       dayPlan: 'Let us plan it. Tell me how much time you have, whether you travel with children, calm or intensive pace, and tram or car.',
       familyAttractions: 'With children, Old Town and Wawel, Wieliczka, Ojców or Energylandia usually work well depending on time and weather.',
       dog: 'Yes, dogs are welcome. Dog fee is 0 PLN. Please keep your dog under care and clean up after it.',
       bungalowOptions: 'Bungalows are only 2-, 3- and 4-person units. Availability is separate, and a deposit may be required after confirmation.',
       combinedStay: 'Choose Combined if part of the group stays in a bungalow and part arrives with a camper, caravan or tent.',
+      toursFromKrakow: 'For organised tours from Krakow, check the SeeKrakow section: Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia and city tours. Booking uses their link.',
       quiet: 'Camping Clepardia is a calm campsite, not a party place. Quiet hours are 22:00-07:00.',
       sctEtoll: 'Before arrival, check current Krakow SCT and e-TOLL rules, especially for larger vehicles or combinations. Use official sources because rules can change.',
       maps: 'We recommend Google Maps because access to the campsite changed in 2022 and older navigation can be wrong.',
       reception: 'Reception: +48 795 294 486, email: clepardia@gmail.com. You can also open contact or booking.',
+      receptionHours: 'Please confirm reception hours directly before arrival. Phone: +48 795 294 486, email: clepardia@gmail.com.',
+    },
+    quick: {
+      toggle: 'Quick answers',
+      aria: 'CAMPY quick answers',
+      groups: {
+        booking: 'Booking',
+        prices: 'Prices',
+        transport: 'Transport',
+        attractions: 'Attractions',
+        contact: 'Contact',
+      },
     },
   },
 };
 const finalCampy = finalCampyCopy[pathContext.languageCode as keyof typeof finalCampyCopy] ?? finalCampyCopy.en;
+const campyQuick = finalCampy.quick ?? finalCampyCopy.en.quick;
 const enhancedChatTexts = {
   ...chatTexts,
   actions: {
@@ -191,6 +235,7 @@ const enhancedChatTexts = {
     bookingCombined: bookingCombinedHref,
     prices: pricesHref,
     contact: contactHref,
+    attractions: attractionsHref,
     maps: mapsHref,
     jakdojade: jakdojadeHref,
     sct: sctHref,
@@ -198,19 +243,56 @@ const enhancedChatTexts = {
   },
 };
 const chatConfigEncoded = Buffer.from(JSON.stringify(enhancedChatTexts), 'utf8').toString('base64');
-const quickActions = [
-  { key: 'bookStay', icon: 'CalendarCheck', label: enhancedChatTexts.actions.bookStay },
-  { key: 'camperPrice', icon: 'ReceiptText', label: enhancedChatTexts.actions.camperPrice },
-  { key: 'centerTransit', icon: 'TramFront', label: enhancedChatTexts.actions.centerTransit },
-  { key: 'dayPlan', icon: 'Map', label: enhancedChatTexts.actions.dayPlan },
-  { key: 'familyAttractions', icon: 'UsersRound', label: enhancedChatTexts.actions.familyAttractions },
-  { key: 'dog', icon: 'PawPrint', label: enhancedChatTexts.actions.dog },
-  { key: 'bungalowOptions', icon: 'House', label: enhancedChatTexts.actions.bungalowOptions },
-  { key: 'combinedStay', icon: 'Combine', label: enhancedChatTexts.actions.combinedStay },
-  { key: 'quiet', icon: 'Moon', label: enhancedChatTexts.actions.quiet },
-  { key: 'sctEtoll', icon: 'Route', label: enhancedChatTexts.actions.sctEtoll },
-  { key: 'maps', icon: 'MapPin', label: enhancedChatTexts.actions.maps },
-  { key: 'reception', icon: 'Mail', label: enhancedChatTexts.actions.reception },
+const quickActionGroups = [
+  {
+    key: 'booking',
+    icon: 'CalendarCheck',
+    title: campyQuick.groups.booking,
+    actions: [
+      { key: 'bookStay', icon: 'CalendarCheck', label: enhancedChatTexts.actions.bookStay },
+      { key: 'stayCompare', icon: 'Split', label: enhancedChatTexts.actions.stayCompare },
+      { key: 'combinedStay', icon: 'Combine', label: enhancedChatTexts.actions.combinedStay },
+    ],
+  },
+  {
+    key: 'prices',
+    icon: 'ReceiptText',
+    title: campyQuick.groups.prices,
+    actions: [
+      { key: 'camperPrice', icon: 'ReceiptText', label: enhancedChatTexts.actions.camperPrice },
+      { key: 'campingPricing', icon: 'Calculator', label: enhancedChatTexts.actions.campingPricing },
+      { key: 'powerDog', icon: 'PlugZap', label: enhancedChatTexts.actions.powerDog },
+    ],
+  },
+  {
+    key: 'transport',
+    icon: 'TramFront',
+    title: campyQuick.groups.transport,
+    actions: [
+      { key: 'centerTransit', icon: 'TramFront', label: enhancedChatTexts.actions.centerTransit },
+      { key: 'maps', icon: 'MapPin', label: enhancedChatTexts.actions.maps },
+      { key: 'sctEtoll', icon: 'Route', label: enhancedChatTexts.actions.sctEtoll },
+    ],
+  },
+  {
+    key: 'attractions',
+    icon: 'Map',
+    title: campyQuick.groups.attractions,
+    actions: [
+      { key: 'dayPlan', icon: 'Map', label: enhancedChatTexts.actions.dayPlan },
+      { key: 'familyAttractions', icon: 'UsersRound', label: enhancedChatTexts.actions.familyAttractions },
+      { key: 'toursFromKrakow', icon: 'Ticket', label: enhancedChatTexts.actions.toursFromKrakow },
+    ],
+  },
+  {
+    key: 'contact',
+    icon: 'Mail',
+    title: campyQuick.groups.contact,
+    actions: [
+      { key: 'reception', icon: 'Mail', label: enhancedChatTexts.actions.reception },
+      { key: 'receptionHours', icon: 'Clock', label: enhancedChatTexts.actions.receptionHours },
+    ],
+  },
 ];
 ---
 
@@ -265,16 +347,42 @@ const quickActions = [
 
     <div class="floating-chat__messages" data-chat-messages aria-live="polite"></div>
 
-    <div class="floating-chat__quick" data-chat-quick-rail tabindex="0" role="list" aria-label={chatTexts.quickLabel}>
-      {quickActions.map((action) => (
-        <button type="button" data-chat-action={action.key} data-chat-prompt={action.label} aria-label={action.label} role="listitem">
-          <Icon name={action.icon} size={16} strokeWidth={1.9} />
-          <span data-chat-quick-label></span>
-        </button>
-      ))}
-    </div>
-    <div class="floating-chat__quick-scrollbar" data-chat-quick-scrollbar aria-hidden="true">
-      <span data-chat-quick-scroll-thumb></span>
+    <div class="floating-chat__quick-hub" data-chat-quick-hub>
+      <button
+        class="floating-chat__quick-toggle"
+        type="button"
+        data-chat-quick-toggle
+        aria-expanded="false"
+        aria-controls="floatingChatQuickPanel"
+      >
+        <Icon name="MessagesSquare" size={17} strokeWidth={2} />
+        <span>{campyQuick.toggle}</span>
+        <Icon name="ChevronDown" size={17} strokeWidth={2} class="floating-chat__quick-chevron" />
+      </button>
+      <div
+        class="floating-chat__quick-panel"
+        id="floatingChatQuickPanel"
+        data-chat-quick-panel
+        aria-label={campyQuick.aria}
+        hidden
+      >
+        {quickActionGroups.map((group) => (
+          <section class="floating-chat__quick-section" aria-labelledby={`campyQuick-${group.key}`}>
+            <h3 id={`campyQuick-${group.key}`}>
+              <Icon name={group.icon} size={16} strokeWidth={2} />
+              <span>{group.title}</span>
+            </h3>
+            <div class="floating-chat__quick-grid" role="list">
+              {group.actions.map((action) => (
+                <button type="button" data-chat-action={action.key} data-chat-prompt={action.label} aria-label={action.label} role="listitem">
+                  <Icon name={action.icon} size={16} strokeWidth={1.9} />
+                  <span>{action.label}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
     </div>
 
     <form class="floating-chat__form" data-chat-form>
@@ -316,6 +424,8 @@ const quickActions = [
     const statusNode = root.querySelector('[data-chat-status-node]');
     const inputLabel = root.querySelector('[data-chat-input-label]');
     const sendButton = root.querySelector('[data-chat-send]');
+    const quickToggleButton = root.querySelector('[data-chat-quick-toggle]');
+    const quickPanel = root.querySelector('[data-chat-quick-panel]');
     const quickRail = root.querySelector('.floating-chat__quick');
     const quickScrollbar = root.querySelector('[data-chat-quick-scrollbar]');
     const quickThumb = root.querySelector('[data-chat-quick-scroll-thumb]');
@@ -330,6 +440,7 @@ const quickActions = [
     let quickThumbStartScroll = 0;
     let quickScrollTarget = 0;
     let quickScrollRaf = 0;
+    let quickPanelOpen = false;
 
     const quickMaxScroll = () => quickRail instanceof HTMLElement
       ? Math.max(0, quickRail.scrollWidth - quickRail.clientWidth)
@@ -394,6 +505,14 @@ const quickActions = [
       panelHydrated = true;
     };
 
+    const setQuickPanelOpen = (nextOpen) => {
+      if (!(quickToggleButton instanceof HTMLButtonElement) || !(quickPanel instanceof HTMLElement)) return;
+      quickPanelOpen = nextOpen;
+      quickToggleButton.setAttribute('aria-expanded', String(quickPanelOpen));
+      quickPanel.hidden = !quickPanelOpen;
+      root.classList.toggle('has-quick-panel-open', quickPanelOpen);
+    };
+
     const updateMobileAvailability = () => {
       const available = window.innerWidth > 640 || window.scrollY > 320 || open;
       root.classList.toggle('is-available', available);
@@ -431,6 +550,7 @@ const quickActions = [
         return;
       }
 
+      setQuickPanelOpen(false);
       root.classList.remove('is-open');
       panel.setAttribute('inert', '');
       hideTimer = window.setTimeout(() => {
@@ -493,6 +613,7 @@ const quickActions = [
       const actionLabels = {
         booking: 'Przejdź do rezerwacji',
         prices: 'Zobacz cennik',
+        attractions: 'Zobacz atrakcje',
         maps: 'Otwórz Google Maps',
         jakdojade: 'Otwórz Jakdojade',
         contact: 'Kontakt',
@@ -505,16 +626,21 @@ const quickActions = [
 
       if (key === 'bookStay') return { text: answers.bookStay, actions: [{ label: actionLabels.booking, href: links.booking }] };
       if (key === 'camperPrice') return { text: answers.camperPrice, actions: [{ label: actionLabels.prices, href: links.prices }] };
+      if (key === 'stayCompare') return { text: answers.stayCompare, actions: [{ label: actionLabels.camping, href: links.bookingCamping }, { label: actionLabels.bungalow, href: links.bookingBungalow }, { label: actionLabels.combined, href: links.bookingCombined }] };
+      if (key === 'campingPricing') return { text: answers.campingPricing, actions: [{ label: actionLabels.prices, href: links.prices }] };
+      if (key === 'powerDog') return { text: answers.powerDog, actions: [{ label: actionLabels.prices, href: links.prices }] };
       if (key === 'centerTransit') return { text: answers.centerTransit, actions: [{ label: actionLabels.maps, href: links.maps }, { label: actionLabels.jakdojade, href: links.jakdojade }] };
       if (key === 'dayPlan') return { text: answers.dayPlan };
       if (key === 'familyAttractions') return { text: answers.familyAttractions };
       if (key === 'dog') return { text: answers.dog };
       if (key === 'bungalowOptions') return { text: answers.bungalowOptions, actions: [{ label: actionLabels.bungalow, href: links.bookingBungalow }] };
       if (key === 'combinedStay') return { text: answers.combinedStay, actions: [{ label: actionLabels.camping, href: links.bookingCamping }, { label: actionLabels.bungalow, href: links.bookingBungalow }, { label: actionLabels.combined, href: links.bookingCombined }] };
+      if (key === 'toursFromKrakow') return { text: answers.toursFromKrakow, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
       if (key === 'quiet') return { text: answers.quiet };
       if (key === 'sctEtoll') return { text: answers.sctEtoll, actions: [{ label: actionLabels.sct, href: links.sct }, { label: actionLabels.etoll, href: links.etoll }] };
       if (key === 'maps') return { text: answers.maps, actions: [{ label: actionLabels.maps, href: links.maps }] };
       if (key === 'reception') return { text: answers.reception, actions: [{ label: actionLabels.contact, href: links.contact }, { label: actionLabels.booking, href: links.booking }] };
+      if (key === 'receptionHours') return { text: answers.receptionHours, actions: [{ label: actionLabels.contact, href: links.contact }] };
       return null;
     };
 
@@ -633,6 +759,19 @@ const quickActions = [
     closeButtons.forEach((button) => {
       button.addEventListener('click', () => setOpen(false));
     });
+
+    if (quickToggleButton instanceof HTMLButtonElement && quickPanel instanceof HTMLElement) {
+      quickToggleButton.addEventListener('click', () => setQuickPanelOpen(!quickPanelOpen));
+      quickPanel.addEventListener('click', (event) => {
+        const actionButton = event.target instanceof Element
+          ? event.target.closest('[data-chat-action]')
+          : null;
+        if (!(actionButton instanceof HTMLButtonElement)) return;
+        event.preventDefault();
+        submitPrompt(actionButton.dataset.chatPrompt ?? actionButton.textContent ?? '', actionButton.dataset.chatAction ?? '');
+        setQuickPanelOpen(false);
+      });
+    }
 
     if (quickRail instanceof HTMLElement) {
       let dragging = false;
@@ -951,7 +1090,7 @@ body.has-floating-chat-open {
   width: min(392px, calc(100vw - 32px));
   max-height: min(680px, calc(100svh - 132px));
   display: grid;
-  grid-template-rows: auto minmax(180px, 1fr) auto auto auto;
+  grid-template-rows: auto minmax(180px, 1fr) auto auto;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,.16);
   border-radius: 28px;
@@ -1189,6 +1328,122 @@ body.has-floating-chat-open {
 .floating-chat__message--typing span:nth-child(2) { animation-delay: .14s; }
 .floating-chat__message--typing span:nth-child(3) { animation-delay: .28s; }
 
+.floating-chat__quick-hub {
+  position: relative;
+  z-index: 1;
+  padding: 0 16px 10px;
+}
+
+.floating-chat__quick-toggle {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: 18px;
+  color: #e7fff0;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(143,224,180,.18), transparent 42%),
+    linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.055));
+  font-size: .84rem;
+  font-weight: 950;
+  box-shadow: 0 12px 28px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.12);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.floating-chat__quick-toggle:hover,
+.floating-chat__quick-toggle[aria-expanded="true"] {
+  transform: translateY(-1px);
+  border-color: rgba(143,224,180,.48);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(143,224,180,.24), transparent 44%),
+    linear-gradient(145deg, rgba(255,255,255,.15), rgba(255,255,255,.07));
+  box-shadow: 0 16px 34px rgba(60,179,113,.14), inset 0 1px 0 rgba(255,255,255,.14);
+}
+
+.floating-chat__quick-toggle span {
+  flex: 1;
+  text-align: left;
+}
+
+.floating-chat__quick-chevron {
+  transition: transform .22s cubic-bezier(.22, 1, .36, 1);
+}
+
+.floating-chat__quick-toggle[aria-expanded="true"] .floating-chat__quick-chevron {
+  transform: rotate(180deg);
+}
+
+.floating-chat__quick-panel {
+  margin-top: 10px;
+  max-height: min(340px, 45svh);
+  padding: 12px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.16), transparent 36%),
+    rgba(8,24,17,.76);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 18px 46px rgba(0,0,0,.16);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: campyQuickPanel .24s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.floating-chat__quick-panel[hidden] {
+  display: none !important;
+}
+
+.floating-chat__quick-section + .floating-chat__quick-section {
+  margin-top: 13px;
+}
+
+.floating-chat__quick-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 8px;
+  color: #a7f2c7;
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.floating-chat__quick-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+.floating-chat__quick-grid button {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 15px;
+  color: #e9fff2;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.10), rgba(255,255,255,.045)),
+    rgba(60,179,113,.08);
+  font-size: .82rem;
+  font-weight: 850;
+  text-align: left;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.floating-chat__quick-grid button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(143,224,180,.42);
+  background: rgba(60,179,113,.16);
+  box-shadow: 0 12px 28px rgba(60,179,113,.12);
+}
+
 .floating-chat__quick {
   display: flex;
   gap: 8px;
@@ -1421,6 +1676,20 @@ html[data-theme="light"] .floating-chat__quick button {
   background: rgba(60,179,113,.12);
 }
 
+html[data-theme="light"] .floating-chat__quick-toggle,
+html[data-theme="light"] .floating-chat__quick-panel,
+html[data-theme="light"] .floating-chat__quick-grid button {
+  color: #173624;
+  border-color: rgba(25,54,38,.12);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.12), transparent 36%),
+    rgba(255,255,255,.62);
+}
+
+html[data-theme="light"] .floating-chat__quick-section h3 {
+  color: #1f744b;
+}
+
 html[data-theme="light"] .floating-chat__quick-scrollbar {
   background: rgba(35,73,48,.10);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.80);
@@ -1485,6 +1754,7 @@ html[data-theme="light"] .floating-chat__quick-scrollbar {
 
 .floating-chat__header,
 .floating-chat__messages,
+.floating-chat__quick-hub,
 .floating-chat__quick,
 .floating-chat__form {
   position: relative;
@@ -1667,6 +1937,11 @@ body.booking-app-page .floating-chat__button-image {
 @keyframes campyPanelOpen {
   from { opacity: 0; transform: translateY(18px) scale(.97); filter: blur(8px); }
   to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+@keyframes campyQuickPanel {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes campyOnline {

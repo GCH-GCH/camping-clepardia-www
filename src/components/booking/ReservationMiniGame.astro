@@ -516,9 +516,14 @@ const uxCopy = {
     },
     success: {
       title: 'Dziękujemy! \uD83C\uDF3F',
+      resendErrorTitle: 'Nie udało się wysłać automatycznie',
       text: 'Twoje zapytanie zostało wysłane do recepcji. Odpowiemy możliwie szybko i potwierdzimy dostępność oraz szczegóły pobytu.',
-      mockText: 'Zapytanie zostało przygotowane w trybie testowym. Aby realnie wysyłać maile, skonfiguruj dane mailowe w Vercel.',
+      mockText: 'Zapytanie zostało przygotowane w trybie testowym. Mail nie został wysłany, ponieważ brakuje konfiguracji maila w środowisku.',
+      resendErrorText: 'Nie udało się wysłać maila automatycznie. Skopiuj całe podsumowanie i skontaktuj się z recepcją bezpośrednio.',
       errorText: 'Nie udało się wysłać zapytania. Spróbuj ponownie albo skontaktuj się bezpośrednio z recepcją.',
+      sentBadge: 'Mail wysłany do recepcji',
+      mockBadge: 'Tryb testowy - mail nie wysłany',
+      errorBadge: 'Błąd automatycznej wysyłki',
       bungalow: 'W przypadku domków może być wymagana zaliczka. Dane do zaliczki oraz potwierdzenie dostępności wyślemy w odpowiedzi mailowej.',
       camping: 'To zapytanie nie oznacza automatycznej rezerwacji. Recepcja potwierdzi dostępność i szczegóły pobytu.',
       home: 'Wróć na stronę główną',
@@ -575,9 +580,14 @@ const uxCopy = {
     },
     success: {
       title: 'Thank you! \uD83C\uDF3F',
+      resendErrorTitle: 'Automatic sending failed',
       text: 'Your enquiry has been sent to reception. We will reply as soon as possible and confirm availability and stay details.',
-      mockText: 'Your enquiry has been prepared in test mode. Configure mail environment variables in Vercel to send real emails.',
+      mockText: 'Your enquiry has been prepared in test mode. Email was not sent because mail configuration is missing in the environment.',
+      resendErrorText: 'Automatic email sending failed. Copy the full summary and contact reception directly.',
       errorText: 'We could not send the enquiry. Please try again or contact reception directly.',
+      sentBadge: 'Email sent to reception',
+      mockBadge: 'Test mode - email not sent',
+      errorBadge: 'Automatic sending failed',
       bungalow: 'A deposit may be required for bungalows. Deposit details and availability confirmation will be sent by email.',
       camping: 'This enquiry is not an automatic booking. Reception will confirm availability and stay details.',
       home: 'Back to homepage',
@@ -1868,14 +1878,27 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const selected = selectedServices();
       const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
       const stayNote = state.mode === 'bungalow' || state.mode === 'combined' ? ui.success.bungalow : ui.success.camping;
-      const successText = state.submitMode === 'sent' ? ui.success.text : (ui.success.mockText || ui.success.text);
+      const successText = state.submitMode === 'sent'
+        ? ui.success.text
+        : state.submitMode === 'resend-error'
+          ? (state.submitError || ui.success.resendErrorText || ui.success.errorText)
+          : (ui.success.mockText || ui.success.text);
+      const successBadge = state.submitMode === 'sent'
+        ? (ui.success.sentBadge || 'Email sent')
+        : state.submitMode === 'resend-error'
+          ? (ui.success.errorBadge || 'Email error')
+          : (ui.success.mockBadge || 'Test mode');
+      const modalTitle = state.submitMode === 'resend-error'
+        ? (ui.success.resendErrorTitle || ui.success.title)
+        : ui.success.title;
       const depositNote = state.mode === 'bungalow' ? ui.summary.depositBungalow : state.mode === 'combined' ? ui.summary.depositCombined : '';
       return `
-        <div class="reservation-success-modal" role="dialog" aria-modal="true" aria-label="${esc(ui.success.title)}">
+        <div class="reservation-success-modal" role="dialog" aria-modal="true" aria-label="${esc(modalTitle)}" data-submit-mode="${esc(state.submitMode || 'mock')}">
           <div class="reservation-success-modal__card">
             <button class="reservation-success-modal__close" type="button" data-success-close aria-label="${esc(ui.help.close)}">×</button>
             <span class="reservation-success-modal__mark" aria-hidden="true">${detailIcon('success')}</span>
-            <h2>${esc(ui.success.title)}</h2>
+            <span class="reservation-success-modal__badge">${esc(successBadge)}</span>
+            <h2>${esc(modalTitle)}</h2>
             <p>${esc(successText)}</p>
             ${state.inquiryId ? `<p class="reservation-success-modal__id">ID: ${esc(state.inquiryId)}</p>` : ''}
             <dl>
@@ -2282,6 +2305,14 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         }
         if (!response.ok || !result?.ok) {
           const errors = result?.errors ? Object.values(result.errors).join(' ') : '';
+          if (result?.mode === 'resend-error') {
+            state.submitMode = 'resend-error';
+            state.inquiryId = result?.inquiryId || '';
+            state.submitError = result?.message || ui.success.resendErrorText || ui.success.errorText || 'Wysyłka maila nie powiodła się.';
+            state.success = true;
+            state.step = 5;
+            return;
+          }
           state.submitError = errors || result?.message || ui.success.errorText || 'Wysyłka nie powiodła się.';
           state.hint = state.submitError;
           state.step = 4;
@@ -4296,6 +4327,34 @@ body.booking-app-page .main-content {
 
 .reservation-success-modal__mark {
   margin-bottom: 14px;
+}
+
+.reservation-success-modal__badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  margin-bottom: 12px;
+  padding: 0 12px;
+  border: 1px solid rgba(143,224,180,.28);
+  border-radius: 999px;
+  color: #dffff0;
+  background: rgba(60,179,113,.13);
+  font-size: .76rem;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.reservation-success-modal[data-submit-mode="resend-error"] .reservation-success-modal__badge {
+  border-color: rgba(242,192,120,.34);
+  color: #ffe6bb;
+  background: rgba(242,192,120,.12);
+}
+
+.reservation-success-modal[data-submit-mode="mock"] .reservation-success-modal__badge {
+  border-color: rgba(255,255,255,.20);
+  color: rgba(245,255,248,.82);
+  background: rgba(255,255,255,.08);
 }
 
 .reservation-success-modal__card p {
