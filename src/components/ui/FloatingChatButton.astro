@@ -118,7 +118,9 @@ const finalCampyCopy = {
       stayCompare: 'Camping czy domki?',
       campingPricing: 'Cennik campingowy',
       powerDog: 'Prąd i pies',
+      lateCheckout: 'Późniejszy wyjazd',
       centerTransit: 'Jak dojadę do centrum?',
+      tramTickets: 'Bilety tramwajowe',
       dayPlan: 'Zaplanuj dzień w Krakowie',
       familyAttractions: 'Co zwiedzić z dziećmi?',
       dog: 'Czy można z psem?',
@@ -137,7 +139,9 @@ const finalCampyCopy = {
       stayCompare: 'Camping wybierz dla kampera, vana, namiotu lub przyczepy. Domki są 2-, 3- i 4-osobowe. Razem jest dla grup, gdzie część osób śpi w domku, a część przyjeżdża na camping.',
       campingPricing: 'Cennik campingowy liczy pojazd lub namiot, osoby oraz dodatki. Przykład: kamper 80 PLN / noc, dorosły 35 PLN, dziecko 4-14 lat 20 PLN, prąd 30 PLN, pies 0 PLN.',
       powerDog: 'Prąd 10A kosztuje 30 PLN / noc. Pies kosztuje 0 PLN. Prosimy tylko o opiekę nad pupilem i sprzątanie po nim.',
+      lateCheckout: 'Późniejszy wyjazd jest możliwy tylko po decyzji recepcji. Zależy od typu pojazdu, liczby dodatkowych godzin, dostępności miejsc i rezerwacji. Recepcja poda instrukcje oraz ewentualny koszt.',
       centerTransit: 'Przystanek jest ok. 40 m od bramy. Do Starego Kleparza / centrum jest ok. 9 przystanków i ok. 14 minut jazdy. Do trasy polecam Google Maps i Jakdojade.',
+      tramTickets: 'Bilety tramwajowe możesz zwykle kupić w automatach albo aplikacji, ale nie zakładamy, że każdy automat zawsze działa. Do trasy i biletów najwygodniej sprawdzić Jakdojade.',
       dayPlan: 'Zaplanujmy dzień. Napisz proszę: ile macie czasu, czy jedziecie z dziećmi, czy plan ma być spokojny czy intensywny oraz czy wybieracie tramwaj czy auto.',
       familyAttractions: 'Z dziećmi najczęściej sprawdza się Stare Miasto i Wawel, Wieliczka, Ojców albo Energylandia. Wybór zależy od czasu, pogody i energii ekipy.',
       dog: 'Tak, można z psem. Pies ma stawkę 0 PLN. Prosimy tylko o opiekę nad pupilem i sprzątanie po nim na terenie campingu.',
@@ -151,8 +155,8 @@ const finalCampyCopy = {
       receptionHours: 'Godziny recepcji najlepiej potwierdzić bezpośrednio przed przyjazdem. Telefon: +48 795 294 486, email: clepardia@gmail.com.',
     },
     quick: {
-      toggle: 'Szybkie odpowiedzi',
-      aria: 'Szybkie odpowiedzi CAMPY',
+      toggle: 'Szybkie tematy ✨',
+      aria: 'Szybkie tematy CAMPY',
       groups: {
         booking: 'Rezerwacja',
         prices: 'Ceny',
@@ -169,7 +173,9 @@ const finalCampyCopy = {
       stayCompare: 'Camping or bungalows?',
       campingPricing: 'Camping prices',
       powerDog: 'Electricity and dog',
+      lateCheckout: 'Later check-out',
       centerTransit: 'How to reach centre?',
+      tramTickets: 'Tram tickets',
       dayPlan: 'Plan a Krakow day',
       familyAttractions: 'Kids attractions',
       dog: 'Can I bring a dog?',
@@ -188,7 +194,9 @@ const finalCampyCopy = {
       stayCompare: 'Choose Camping for a camper, van, tent or caravan. Bungalows are 2-, 3- and 4-person units. Combined is for groups mixing a bungalow and a camping pitch.',
       campingPricing: 'Camping price combines vehicle or tent, guests and extras. Example: camper 80 PLN / night, adult 35 PLN, child 4-14: 20 PLN, electricity 30 PLN, dog 0 PLN.',
       powerDog: '10A electricity is 30 PLN / night. Dog fee is 0 PLN. Please keep your dog under care and clean up after it.',
+      lateCheckout: 'Later check-out is possible only after reception approval. It depends on vehicle type, extra hours, pitch and parking availability, and reservations. Reception will confirm instructions and any cost.',
       centerTransit: 'The tram stop is about 40 m from the gate. It is about 9 stops and around 14 minutes to Stary Kleparz / the centre. Use Google Maps and Jakdojade.',
+      tramTickets: 'Tram tickets can usually be bought in machines or apps, but we do not promise every machine always works. Jakdojade is useful for routes and tickets.',
       dayPlan: 'Let us plan it. Tell me how much time you have, whether you travel with children, calm or intensive pace, and tram or car.',
       familyAttractions: 'With children, Old Town and Wawel, Wieliczka, Ojców or Energylandia usually work well depending on time and weather.',
       dog: 'Yes, dogs are welcome. Dog fee is 0 PLN. Please keep your dog under care and clean up after it.',
@@ -202,8 +210,8 @@ const finalCampyCopy = {
       receptionHours: 'Please confirm reception hours directly before arrival. Phone: +48 795 294 486, email: clepardia@gmail.com.',
     },
     quick: {
-      toggle: 'Quick answers',
-      aria: 'CAMPY quick answers',
+      toggle: 'Quick topics',
+      aria: 'CAMPY quick topics',
       groups: {
         booking: 'Booking',
         prices: 'Prices',
@@ -252,6 +260,7 @@ const quickActionGroups = [
       { key: 'bookStay', icon: 'CalendarCheck', label: enhancedChatTexts.actions.bookStay },
       { key: 'stayCompare', icon: 'Split', label: enhancedChatTexts.actions.stayCompare },
       { key: 'combinedStay', icon: 'Combine', label: enhancedChatTexts.actions.combinedStay },
+      { key: 'lateCheckout', icon: 'Clock', label: enhancedChatTexts.actions.lateCheckout },
     ],
   },
   {
@@ -262,6 +271,7 @@ const quickActionGroups = [
       { key: 'camperPrice', icon: 'ReceiptText', label: enhancedChatTexts.actions.camperPrice },
       { key: 'campingPricing', icon: 'Calculator', label: enhancedChatTexts.actions.campingPricing },
       { key: 'powerDog', icon: 'PlugZap', label: enhancedChatTexts.actions.powerDog },
+      { key: 'bungalowOptions', icon: 'House', label: enhancedChatTexts.actions.bungalowOptions },
     ],
   },
   {
@@ -272,6 +282,7 @@ const quickActionGroups = [
       { key: 'centerTransit', icon: 'TramFront', label: enhancedChatTexts.actions.centerTransit },
       { key: 'maps', icon: 'MapPin', label: enhancedChatTexts.actions.maps },
       { key: 'sctEtoll', icon: 'Route', label: enhancedChatTexts.actions.sctEtoll },
+      { key: 'tramTickets', icon: 'Ticket', label: enhancedChatTexts.actions.tramTickets },
     ],
   },
   {
@@ -629,7 +640,9 @@ const quickActionGroups = [
       if (key === 'stayCompare') return { text: answers.stayCompare, actions: [{ label: actionLabels.camping, href: links.bookingCamping }, { label: actionLabels.bungalow, href: links.bookingBungalow }, { label: actionLabels.combined, href: links.bookingCombined }] };
       if (key === 'campingPricing') return { text: answers.campingPricing, actions: [{ label: actionLabels.prices, href: links.prices }] };
       if (key === 'powerDog') return { text: answers.powerDog, actions: [{ label: actionLabels.prices, href: links.prices }] };
+      if (key === 'lateCheckout') return { text: answers.lateCheckout, actions: [{ label: actionLabels.booking, href: links.booking }] };
       if (key === 'centerTransit') return { text: answers.centerTransit, actions: [{ label: actionLabels.maps, href: links.maps }, { label: actionLabels.jakdojade, href: links.jakdojade }] };
+      if (key === 'tramTickets') return { text: answers.tramTickets, actions: [{ label: actionLabels.jakdojade, href: links.jakdojade }] };
       if (key === 'dayPlan') return { text: answers.dayPlan };
       if (key === 'familyAttractions') return { text: answers.familyAttractions };
       if (key === 'dog') return { text: answers.dog };
@@ -686,6 +699,14 @@ const quickActionGroups = [
 
       if (prompt.includes('planuj') || prompt.includes('plan') || prompt.includes('dzień') || prompt.includes('day')) {
         return chatTexts.answers.dayPlan ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      }
+
+      if (prompt.includes('późniejszy') || prompt.includes('pozniejszy') || prompt.includes('late') || prompt.includes('checkout') || prompt.includes('wymeld')) {
+        return actionResponse('lateCheckout') ?? chatTexts.answers.fallback;
+      }
+
+      if (prompt.includes('bilet') || prompt.includes('ticket')) {
+        return actionResponse('tramTickets') ?? chatTexts.answers.centerTransit ?? chatTexts.answers.fallback;
       }
 
       if (prompt.includes('dzieck') || prompt.includes('children') || prompt.includes('kids') || prompt.includes('kind')) {

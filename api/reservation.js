@@ -38,7 +38,8 @@ const mailEnvSnapshot = () => {
 
   return {
     resendKeyPresent: Boolean(apiKey),
-    resendKeyPrefix: apiKey ? apiKey.slice(0, 3) : '',
+    resendKeyStartsWithRe: apiKey.startsWith('re_'),
+    resendKeyLength: apiKey.length,
     reservationFromPresent: Boolean(String(process.env.RESERVATION_FROM_EMAIL || '').trim()),
     reservationToPresent: Boolean(String(process.env.RESERVATION_TO_EMAIL || '').trim()),
     fromDomain,
@@ -189,6 +190,9 @@ const createInquiry = (payload, normalized) => {
 const hasBungalow = (inquiry) =>
   /bungalow|domek|domki|combined|razem/i.test(`${inquiry.selectedStayMode} ${inquiry.stayCategory} ${inquiry.stayType}`);
 
+const customerConfirmationEnabled = () =>
+  /^true$/i.test(String(process.env.SEND_CUSTOMER_CONFIRMATION || '').trim());
+
 const createCcSystemDraft = (inquiry) => ({
   source: 'website',
   status: 'new',
@@ -227,11 +231,18 @@ const buildReceptionMail = (inquiry) => {
     ? 'W przypadku domkow moze byc wymagana zaliczka. Dane do zaliczki nalezy wyslac klientowi w odpowiedzi mailowej po potwierdzeniu dostepnosci.'
     : '';
   const services = inquiry.services.map((service) => `${service.label} x ${service.qty} (${service.price} PLN / noc)`);
+  const guests = [
+    inquiry.people.adults ? `Dorosli: ${inquiry.people.adults}` : '',
+    inquiry.people.children ? `Dzieci 4-14: ${inquiry.people.children}` : '',
+    inquiry.people.toddlers ? `Dzieci do 4: ${inquiry.people.toddlers}` : '',
+  ].filter(Boolean).join(', ') || 'brak';
   const rows = [
     ['ID', inquiry.inquiryId],
+    ['Status', 'Do potwierdzenia przez recepcje'],
     ['Typ pobytu', inquiry.stayType],
     ['Termin', `${inquiry.arrival} - ${inquiry.departure}`],
     ['Noce', inquiry.nights],
+    ['Goscie', guests],
     ['Cena orientacyjna', inquiry.estimatedTotal || 'brak'],
     ['Imie i nazwisko', inquiry.fullName],
     ['Email', inquiry.email],
@@ -304,6 +315,99 @@ const buildReceptionMail = (inquiry) => {
   };
 };
 
+const buildCustomerMail = (inquiry) => {
+  const depositNote = hasBungalow(inquiry)
+    ? 'W przypadku domkow moze byc wymagana zaliczka. Szczegoly otrzymasz w odpowiedzi po sprawdzeniu dostepnosci.'
+    : '';
+  const services = inquiry.services.map((service) => `${service.label} x ${service.qty}`);
+  const rows = [
+    ['Typ pobytu', inquiry.stayType],
+    ['Termin', `${inquiry.arrival} - ${inquiry.departure}`],
+    ['Noce', inquiry.nights],
+    ['Goscie', [
+      inquiry.people.adults ? `dorosli: ${inquiry.people.adults}` : '',
+      inquiry.people.children ? `dzieci 4-14: ${inquiry.people.children}` : '',
+      inquiry.people.toddlers ? `dzieci do 4: ${inquiry.people.toddlers}` : '',
+    ].filter(Boolean).join(', ') || 'brak'],
+    ['Uslugi', services.length ? services.join(', ') : 'brak'],
+    ['Cena orientacyjna', inquiry.estimatedTotal || 'do potwierdzenia'],
+  ];
+  const rowHtml = rows.map(([label, value]) => `
+    <tr>
+      <td style="padding:9px 0;color:#61736a;border-top:1px solid #e6f1ea;">${escapeHtml(label)}</td>
+      <td style="padding:9px 0;color:#102319;font-weight:800;text-align:right;border-top:1px solid #e6f1ea;">${escapeHtml(value || 'brak')}</td>
+    </tr>
+  `).join('');
+  const bodyHtml = `
+    <div style="font-family:Arial,sans-serif;background:#eef7f1;padding:28px;color:#102319;">
+      <div style="max-width:720px;margin:0 auto;">
+        <header style="padding:24px 26px;border-radius:24px;background:linear-gradient(135deg,#0b1f15,#1b3b2a);color:#fff;">
+          <p style="display:inline-block;margin:0 0 12px;padding:7px 11px;border-radius:999px;background:rgba(60,179,113,.18);color:#9cf2bf;font-size:12px;font-weight:900;text-transform:uppercase;">Otrzymalismy zapytanie</p>
+          <h1 style="margin:0;font-size:26px;">Camping Clepardia</h1>
+          <p style="margin:12px 0 0;color:#d7efe0;">To nie jest automatyczne potwierdzenie rezerwacji. Recepcja sprawdzi dostepnosc i odpowie mozliwie szybko.</p>
+        </header>
+        <section style="margin:18px 0;padding:18px 20px;border:1px solid #dceee4;border-radius:18px;background:#fff;">
+          <h2 style="margin:0 0 12px;font-size:17px;">Twoje zapytanie</h2>
+          <table role="presentation" style="width:100%;border-collapse:collapse;">${rowHtml}</table>
+        </section>
+        ${depositNote ? `<section style="margin:18px 0;padding:18px 20px;border-radius:18px;background:#fff8ea;border:1px solid #f0d7a6;color:#4c3b13;"><strong>Zaliczka przy domkach</strong><p style="margin:8px 0 0;line-height:1.6;">${escapeHtml(depositNote)}</p></section>` : ''}
+        <section style="margin:18px 0;padding:18px 20px;border-radius:18px;background:#fff;border:1px solid #dceee4;color:#102319;">
+          <p style="margin:0;line-height:1.65;">Cisza nocna obowiazuje od 22:00 do 07:00. Dojazd najlepiej sprawdzic w Google Maps: ul. Henryka Pachonskiego 28A, Krakow.</p>
+        </section>
+        <footer style="padding:18px 6px;color:#54675d;font-size:12px;line-height:1.6;">Kontakt: clepardia@gmail.com, +48 795 294 486. Finalne warunki potwierdza recepcja.</footer>
+      </div>
+    </div>
+  `;
+  const bodyText = [
+    'Otrzymalismy Twoje zapytanie - Camping Clepardia',
+    '',
+    'To nie jest automatyczne potwierdzenie rezerwacji. Recepcja sprawdzi dostepnosc i odpowie mozliwie szybko.',
+    '',
+    ...rows.map(([label, value]) => `${label}: ${value || 'brak'}`),
+    '',
+    depositNote,
+    'Cisza nocna: 22:00-07:00.',
+    'Kontakt: clepardia@gmail.com, +48 795 294 486.',
+  ].filter(Boolean).join('\n');
+
+  return {
+    from: configured(process.env.RESERVATION_FROM_EMAIL, process.env.MAIL_FROM, 'Camping Clepardia WWW <no-reply@clepardia.com.pl>'),
+    to: inquiry.email,
+    replyTo: configured(process.env.RESERVATION_TO_EMAIL, process.env.MAIL_TO, 'clepardia@gmail.com'),
+    subject: 'Otrzymalismy Twoje zapytanie - Camping Clepardia',
+    html: bodyHtml,
+    text: bodyText,
+  };
+};
+
+const normalizeResendError = (body, status) => {
+  const rawCode = oneLine(body?.name || body?.code || body?.error || `RESEND_${status}`, 120);
+  const rawMessage = oneLine(body?.message || body?.error || `Resend returned ${status}.`, 800);
+  const normalized = `${rawCode} ${rawMessage}`.toLowerCase();
+
+  if (status === 401 || normalized.includes('api key is invalid') || normalized.includes('invalid api key')) {
+    return {
+      errorCode: 'invalid_api_key',
+      message: 'Resend API key is invalid. Generate a new key in Resend and update RESEND_API_KEY in Vercel.',
+      reason: rawMessage,
+    };
+  }
+
+  if (normalized.includes('domain') || normalized.includes('sender') || normalized.includes('from') || normalized.includes('verify')) {
+    return {
+      errorCode: 'sender_rejected',
+      message: 'Resend rejected the sender. Check RESERVATION_FROM_EMAIL or domain verification.',
+      reason: rawMessage,
+    };
+  }
+
+  return {
+    errorCode: rawCode,
+    message: rawMessage,
+    reason: rawMessage,
+  };
+};
+
 const sendMail = async (message) => {
   const apiKey = String(process.env.RESEND_API_KEY || '').trim();
   if (!apiKey) {
@@ -333,15 +437,12 @@ const sendMail = async (message) => {
     const body = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      const errorCode = oneLine(body?.name || body?.code || body?.error || `RESEND_${response.status}`, 120);
-      const message = oneLine(body?.message || body?.error || `Resend returned ${response.status}.`, 800);
+      const normalizedError = normalizeResendError(body, response.status);
       return {
         provider: 'resend',
         delivered: false,
         status: response.status,
-        errorCode,
-        message,
-        reason: message,
+        ...normalizedError,
       };
     }
 
@@ -393,7 +494,9 @@ export default async function handler(req, res) {
       autoresponder: {
         provider: reception.provider,
         delivered: false,
-        reason: 'Customer autoresponder template is prepared for a later step.',
+        reason: customerConfirmationEnabled()
+          ? 'Customer autoresponder was not attempted because reception mail did not finish yet.'
+          : 'Customer autoresponder template is prepared. Set SEND_CUSTOMER_CONFIRMATION=true to enable it.',
       },
     };
 
@@ -413,6 +516,25 @@ export default async function handler(req, res) {
         mail,
         ccSystemDraft: createCcSystemDraft(inquiry),
       });
+    }
+
+    if (reception.delivered && inquiry.email && customerConfirmationEnabled()) {
+      const autoresponder = await sendMail(buildCustomerMail(inquiry));
+      mail.autoresponder = autoresponder;
+      if (autoresponder.provider === 'resend' && !autoresponder.delivered) {
+        console.error('[reservation-api] customer-autoresponder-error', {
+          inquiryId: inquiry.inquiryId,
+          status: autoresponder.status || null,
+          errorCode: autoresponder.errorCode || 'RESEND_ERROR',
+          message: autoresponder.message || autoresponder.reason || 'Customer autoresponder failed.',
+        });
+      }
+    } else if (reception.delivered && inquiry.email) {
+      mail.autoresponder = {
+        provider: reception.provider,
+        delivered: false,
+        reason: 'Customer autoresponder template is ready but SEND_CUSTOMER_CONFIRMATION is not true.',
+      };
     }
 
     return sendJson(res, 200, {

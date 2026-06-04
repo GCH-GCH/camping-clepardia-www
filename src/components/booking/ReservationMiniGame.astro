@@ -520,6 +520,8 @@ const uxCopy = {
       text: 'Twoje zapytanie zostało wysłane do recepcji. Odpowiemy możliwie szybko i potwierdzimy dostępność oraz szczegóły pobytu.',
       mockText: 'Zapytanie zostało przygotowane w trybie testowym. Mail nie został wysłany, ponieważ brakuje konfiguracji maila w środowisku.',
       resendErrorText: 'Nie udało się wysłać maila automatycznie. Skopiuj całe podsumowanie i skontaktuj się z recepcją bezpośrednio.',
+      invalidKeyText: 'Nie udało się wysłać automatycznie - klucz Resend API jest niepoprawny. Wygeneruj nowy API key w Resend i podmień RESEND_API_KEY w Vercel.',
+      senderRejectedText: 'Nie udało się wysłać automatycznie - Resend odrzucił nadawcę. Sprawdź RESERVATION_FROM_EMAIL albo weryfikację domeny.',
       errorText: 'Nie udało się wysłać zapytania. Spróbuj ponownie albo skontaktuj się bezpośrednio z recepcją.',
       sentBadge: 'Mail wysłany do recepcji',
       mockBadge: 'Tryb testowy - mail nie wysłany',
@@ -584,6 +586,8 @@ const uxCopy = {
       text: 'Your enquiry has been sent to reception. We will reply as soon as possible and confirm availability and stay details.',
       mockText: 'Your enquiry has been prepared in test mode. Email was not sent because mail configuration is missing in the environment.',
       resendErrorText: 'Automatic email sending failed. Copy the full summary and contact reception directly.',
+      invalidKeyText: 'Automatic sending failed - the Resend API key is invalid. Generate a new API key in Resend and update RESEND_API_KEY in Vercel.',
+      senderRejectedText: 'Automatic sending failed - Resend rejected the sender. Check RESERVATION_FROM_EMAIL or domain verification.',
       errorText: 'We could not send the enquiry. Please try again or contact reception directly.',
       sentBadge: 'Email sent to reception',
       mockBadge: 'Test mode - email not sent',
@@ -2308,7 +2312,11 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           if (result?.mode === 'resend-error') {
             state.submitMode = 'resend-error';
             state.inquiryId = result?.inquiryId || '';
-            state.submitError = result?.message || ui.success.resendErrorText || ui.success.errorText || 'Wysyłka maila nie powiodła się.';
+            state.submitError = result?.errorCode === 'invalid_api_key'
+              ? (ui.success.invalidKeyText || result?.message || ui.success.resendErrorText)
+              : result?.errorCode === 'sender_rejected'
+                ? (ui.success.senderRejectedText || result?.message || ui.success.resendErrorText)
+                : (result?.message || ui.success.resendErrorText || ui.success.errorText || 'Wysyłka maila nie powiodła się.');
             state.success = true;
             state.step = 5;
             return;
