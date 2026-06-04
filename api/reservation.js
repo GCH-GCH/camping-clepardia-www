@@ -452,10 +452,10 @@ const isResendFallbackError = (result) =>
 const normalizeFormSubmitError = (body, status) => {
   const rawMessage = oneLine(body?.message || body?.error || body?.reason || `FormSubmit returned ${status}.`, 800);
   const normalized = rawMessage.toLowerCase();
-  if (normalized.includes('activate') || normalized.includes('activation') || normalized.includes('confirm')) {
+  if (status === 403 || normalized.includes('activate') || normalized.includes('activation') || normalized.includes('confirm')) {
     return {
       errorCode: 'formsubmit_activation_required',
-      message: 'FormSubmit may require first-use activation in the clepardia@gmail.com mailbox.',
+      message: 'FormSubmit may require first-use activation in the clepardia@gmail.com mailbox. Confirm the activation email and submit the form again.',
       reason: rawMessage,
     };
   }
@@ -566,11 +566,14 @@ const sendWithFormSubmit = async (message, inquiry) => {
   }
 
   try {
-    const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(to)}`, {
+    const response = await fetch(`https://formsubmit.co/ajax/${to}`, {
       method: 'POST',
       headers: {
         accept: 'application/json',
         'content-type': 'application/json',
+        origin: 'https://camping-clepardia-www.vercel.app',
+        referer: 'https://camping-clepardia-www.vercel.app/rezerwacja',
+        'user-agent': 'Camping Clepardia reservation API',
       },
       body: JSON.stringify(buildFormSubmitPayload(message, inquiry)),
     });
@@ -582,6 +585,8 @@ const sendWithFormSubmit = async (message, inquiry) => {
         provider: 'formsubmit',
         delivered: false,
         status: response.status,
+        activationNotice: normalizedError.errorCode === 'formsubmit_activation_required',
+        activationRequired: normalizedError.errorCode === 'formsubmit_activation_required',
         ...normalizedError,
       };
     }
@@ -679,6 +684,17 @@ export default async function handler(req, res) {
           : 'Customer autoresponder template is prepared. Set SEND_CUSTOMER_CONFIRMATION=true to enable it.',
       },
     };
+
+    if (!reception.delivered && reception.provider === 'formsubmit' && reception.activationNotice) {
+      return sendJson(res, 200, {
+        ok: true,
+        mode: 'formsubmit',
+        inquiryId: inquiry.inquiryId,
+        message: reception.message,
+        mail,
+        ccSystemDraft: createCcSystemDraft(inquiry),
+      });
+    }
 
     if (!reception.delivered && reception.provider !== 'mock') {
       console.error('[reservation-api] mail-error', {
