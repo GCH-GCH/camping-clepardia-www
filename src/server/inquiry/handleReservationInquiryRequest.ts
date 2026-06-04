@@ -99,7 +99,20 @@ export const handleReservationInquiryRequest = async (request: Request) => {
   const ccSystemDraft = createCcSystemLeadDraft(inquiry);
   const receptionMail = buildReceptionMail(inquiry);
   const autoresponderMail = inquiry.email ? buildAutoresponderMail(inquiry) : null;
-  const mail = await sendInquiryWorkflow(receptionMail, autoresponderMail);
+  const mail = await sendInquiryWorkflow(receptionMail, autoresponderMail).catch((error) => ({
+    reception: {
+      provider: 'mock',
+      delivered: false,
+      reason: error instanceof Error
+        ? `Mail workflow failed: ${error.message}`
+        : 'Mail workflow failed before delivery.',
+    },
+    autoresponder: {
+      provider: 'mock',
+      delivered: false,
+      reason: 'Autoresponder skipped because reception mail workflow failed.',
+    },
+  }));
 
   return toJsonResponse({
     ok: true,

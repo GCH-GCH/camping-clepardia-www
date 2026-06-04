@@ -20,21 +20,33 @@ const sendWithResend = async (message: MailMessage): Promise<MailDeliveryResult>
     };
   }
 
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      authorization: `Bearer ${apiKey}`,
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: message.from,
-      to: toRecipients(message.to),
-      reply_to: message.replyTo,
-      subject: message.subject,
-      html: message.html,
-      text: message.text,
-    }),
-  });
+  let response: Response;
+  try {
+    response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${apiKey}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: message.from,
+        to: toRecipients(message.to),
+        reply_to: message.replyTo,
+        subject: message.subject,
+        html: message.html,
+        text: message.text,
+      }),
+    });
+  } catch (error) {
+    return {
+      provider: 'resend',
+      delivered: false,
+      messageId: createMockMessageId(),
+      reason: error instanceof Error
+        ? `Resend request failed: ${error.message}`
+        : 'Resend request failed before delivery.',
+    };
+  }
 
   const body = await response.json().catch(() => ({}));
 
@@ -52,6 +64,21 @@ const sendWithResend = async (message: MailMessage): Promise<MailDeliveryResult>
     delivered: true,
     messageId: typeof body?.id === 'string' ? body.id : undefined,
   };
+};
+
+const safeSendMail = async (message: MailMessage): Promise<MailDeliveryResult> => {
+  try {
+    return await sendMail(message);
+  } catch (error) {
+    return {
+      provider: 'mock',
+      delivered: false,
+      messageId: createMockMessageId(),
+      reason: error instanceof Error
+        ? `Mail transport failed: ${error.message}`
+        : 'Mail transport failed before delivery.',
+    };
+  }
 };
 
 export const sendMail = async (message: MailMessage): Promise<MailDeliveryResult> => {
@@ -94,10 +121,10 @@ export const sendMail = async (message: MailMessage): Promise<MailDeliveryResult
 };
 
 export const sendInquiryWorkflow = async (receptionMail: MailMessage, autoresponderMail?: MailMessage | null) => {
-  const reception = await sendMail(receptionMail);
+  const reception = await safeSendMail(receptionMail);
   const autoresponderEnabled = process.env.MAIL_AUTORESPONDER !== 'false';
   const autoresponder = autoresponderEnabled && autoresponderMail
-    ? await sendMail(autoresponderMail)
+    ? await safeSendMail(autoresponderMail)
     : {
         provider: reception.provider,
         delivered: false,

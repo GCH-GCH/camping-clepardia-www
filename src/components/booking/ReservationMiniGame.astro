@@ -477,6 +477,16 @@ const uxCopy = {
     presetsTitle: 'Najpopularniejsze wybory',
     presetsLead: 'Kliknij gotowy zestaw albo ustaw wszystko ręcznie.',
     presetAdded: 'Dodano popularny zestaw \uD83C\uDF3F',
+    progressLabel: 'Postęp zapytania',
+    datesHelperTitle: 'Godziny pobytu',
+    datesHelperLead: 'Wybierz daty, a liczba nocy i informacja sezonowa odświeżą się automatycznie.',
+    sending: 'Wysyłanie...',
+    stepRewards: {
+      dates: 'Brawo, termin jest ustawiony 🌿',
+      guests: 'Super, mamy już gości',
+      services: 'Świetnie, usługi trafiły do podsumowania',
+      details: 'Już prawie gotowe — sprawdź finalne podsumowanie',
+    },
     help: {
       title: 'Pomoc',
       open: 'Pomoc',
@@ -507,7 +517,7 @@ const uxCopy = {
     success: {
       title: 'Dziękujemy! \uD83C\uDF3F',
       text: 'Twoje zapytanie zostało wysłane do recepcji. Odpowiemy możliwie szybko i potwierdzimy dostępność oraz szczegóły pobytu.',
-      mockText: 'Zapytanie zostało przygotowane w trybie testowym. Po skonfigurowaniu RESEND_API_KEY zostanie wysłane realnie do recepcji.',
+      mockText: 'Zapytanie zostało przygotowane w trybie testowym. Aby realnie wysyłać maile, skonfiguruj dane mailowe w Vercel.',
       errorText: 'Nie udało się wysłać zapytania. Spróbuj ponownie albo skontaktuj się bezpośrednio z recepcją.',
       bungalow: 'W przypadku domków może być wymagana zaliczka. Dane do zaliczki oraz potwierdzenie dostępności wyślemy w odpowiedzi mailowej.',
       camping: 'To zapytanie nie oznacza automatycznej rezerwacji. Recepcja potwierdzi dostępność i szczegóły pobytu.',
@@ -526,6 +536,16 @@ const uxCopy = {
     presetsTitle: 'Popular choices',
     presetsLead: 'Choose a ready-made set or adjust everything manually.',
     presetAdded: 'Popular set added \uD83C\uDF3F',
+    progressLabel: 'Enquiry progress',
+    datesHelperTitle: 'Stay hours',
+    datesHelperLead: 'Choose dates and nights plus seasonal notes will update automatically.',
+    sending: 'Sending...',
+    stepRewards: {
+      dates: 'Nice, the dates are set 🌿',
+      guests: 'Great, guest details are ready',
+      services: 'Good, services are now in the summary',
+      details: 'Almost done — review the final summary',
+    },
     help: {
       title: 'Help',
       open: 'Help',
@@ -556,7 +576,7 @@ const uxCopy = {
     success: {
       title: 'Thank you! \uD83C\uDF3F',
       text: 'Your enquiry has been sent to reception. We will reply as soon as possible and confirm availability and stay details.',
-      mockText: 'Your enquiry has been prepared in test mode. Once RESEND_API_KEY is configured, it will be sent to reception.',
+      mockText: 'Your enquiry has been prepared in test mode. Configure mail environment variables in Vercel to send real emails.',
       errorText: 'We could not send the enquiry. Please try again or contact reception directly.',
       bungalow: 'A deposit may be required for bungalows. Deposit details and availability confirmation will be sent by email.',
       camping: 'This enquiry is not an automatic booking. Reception will confirm availability and stay details.',
@@ -688,6 +708,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const stayModes = ['camping', 'bungalow', 'combined'];
     const modeChips = config.modeChips;
     const stepHints = t.progressHints;
+    const stepRewards = ui.stepRewards || {};
     const state = {
       mode: null,
       step: 0,
@@ -856,6 +877,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         },
         missing: {
           dates: 'Termin pobytu',
+          guests: 'Goście',
           service: 'Opcja pobytu lub usługa',
           name: 'Imię i nazwisko',
           contact: 'Email albo telefon',
@@ -904,6 +926,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         },
         missing: {
           dates: 'Stay dates',
+          guests: 'Guests',
           service: 'Stay option or service',
           name: 'Full name',
           contact: 'Email or phone',
@@ -1153,10 +1176,25 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       return placeholders.default || '';
     };
 
+    const guestCount = () => {
+      if (state.mode === 'combined') {
+        return Number(state.guests.bungalowGuests || 0)
+          + Number(state.guests.campingGuests || 0)
+          + Number(state.guests.children || 0)
+          + Number(state.guests.toddlers || 0);
+      }
+      return Number(state.guests.adults || 0)
+        + Number(state.guests.children || 0)
+        + Number(state.guests.toddlers || 0);
+    };
+
     const missingItems = () => {
       const missing = [];
       if (!state.dates.arrival || !state.dates.departure || nights() < 1) {
         missing.push({ key: 'dates', icon: 'calendar', label: detailText.missing.dates });
+      }
+      if (guestCount() < 1) {
+        missing.push({ key: 'guests', icon: 'guests', label: detailText.missing.guests });
       }
       if (state.mode !== 'simple' && !hasChosenService()) {
         missing.push({ key: 'service', icon: 'services', label: detailText.missing.service });
@@ -1308,8 +1346,15 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const progressTemplate = () => {
       const percent = Math.max(0, Math.min(100, (state.step / steps.length) * 100));
+      const activeHint = state.toast || stepHints[state.step - 1] || '';
       return `
         <div class="reservation-progress" aria-label="Booking progress">
+          <div class="reservation-progress__meter">
+            <span>${esc(ui.progressLabel || 'Progress')}</span>
+            <strong>${Math.round(percent)}%</strong>
+            <i aria-hidden="true"><b style="width:${percent}%"></b></i>
+            <p>${esc(activeHint)}</p>
+          </div>
           <div class="reservation-progress__mobile">
             <strong>Krok ${state.step} z ${steps.length}</strong>
             <span>${esc(stepTitles[state.step - 1])}</span>
@@ -1352,17 +1397,28 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <p>${esc(t.stepLead.dates)}</p>
         <div class="reservation-form-grid">
           <label class="reservation-field">
-            <span>${esc(t.fields.arrival)}</span>
+            ${fieldLabel({ icon: 'calendar', label: t.fields.arrival, badge: 'required' })}
             <input type="date" data-field="dates.arrival" value="${esc(state.dates.arrival)}" />
+            <small>${esc(config.lang === 'pl' ? 'Pierwszy dzień pobytu.' : 'First day of stay.')}</small>
           </label>
           <label class="reservation-field">
-            <span>${esc(t.fields.departure)}</span>
+            ${fieldLabel({ icon: 'calendar', label: t.fields.departure, badge: 'required' })}
             <input type="date" data-field="dates.departure" value="${esc(state.dates.departure)}" />
+            <small>${esc(config.lang === 'pl' ? 'Wyjazd musi być po przyjeździe.' : 'Departure must be after arrival.')}</small>
           </label>
           <div class="reservation-night-card">
+            <i aria-hidden="true">${detailIcon('calendar')}</i>
             <span>${esc(t.fields.nights)}</span>
             <strong>${nights()}</strong>
+            <small>${esc(config.lang === 'pl' ? 'Liczone automatycznie.' : 'Counted automatically.')}</small>
           </div>
+        </div>
+        <div class="reservation-date-helper">
+          <i aria-hidden="true">${detailIcon('info')}</i>
+          <span>
+            <strong>${esc(ui.datesHelperTitle || 'Stay hours')}</strong>
+            <small>${esc(ui.datesHelperLead || t.stepLead.dates)}</small>
+          </span>
         </div>
         <div class="reservation-info-grid">
           ${(state.mode === 'camping' || state.mode === 'combined') ? `<p>${esc(t.info.campingHours)}</p>` : ''}
@@ -1735,7 +1791,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <button class="reservation-btn reservation-btn--ghost" type="button" data-back ${state.step <= 1 ? 'disabled' : ''}>${esc(t.actions.back)}</button>
         ${state.step < 5
           ? `<button class="reservation-btn reservation-btn--primary" type="button" data-next>${esc(t.actions.next)}</button>`
-          : `<button class="reservation-btn reservation-btn--primary" type="button" data-submit ${state.submitting ? 'disabled' : ''}>${esc(state.submitting ? 'Wysyłanie...' : t.actions.send)}</button>`
+          : `<button class="reservation-btn reservation-btn--primary" type="button" data-submit ${state.submitting ? 'disabled' : ''}>${esc(state.submitting ? (ui.sending || 'Sending...') : t.actions.send)}</button>`
         }
       </div>
     `;
@@ -2427,8 +2483,19 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           render();
           return;
         }
+        const previousStepKey = currentStepKey();
+        const reward = stepRewards[previousStepKey] || '';
         state.step = Math.min(5, state.step + 1);
+        state.toast = reward;
         render({ motion: 'step' });
+        if (reward) {
+          window.setTimeout(() => {
+            if (state.toast === reward) {
+              state.toast = '';
+              updateToastDom();
+            }
+          }, 1900);
+        }
         scrollToTop();
         return;
       }
@@ -2948,6 +3015,62 @@ body.booking-app-page .main-content {
   margin-bottom: 22px;
 }
 
+.reservation-progress__meter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 14px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 13px 15px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 20px;
+  color: #dffff0;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(143,224,180,.14), transparent 34%),
+    rgba(255,255,255,.07);
+  box-shadow: 0 16px 42px rgba(60,179,113,.10), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.reservation-progress__meter span {
+  color: rgba(245,255,248,.58);
+  font-size: .73rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.reservation-progress__meter strong {
+  color: #8fe0b4;
+  font-weight: 1000;
+}
+
+.reservation-progress__meter i {
+  grid-column: 1 / -1;
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.10);
+  overflow: hidden;
+}
+
+.reservation-progress__meter b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, #8fe0b4, #3CB371),
+    linear-gradient(120deg, transparent, rgba(255,255,255,.38), transparent);
+  box-shadow: 0 0 24px rgba(60,179,113,.45);
+  transition: width .32s cubic-bezier(.22, 1, .36, 1);
+}
+
+.reservation-progress__meter p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: rgba(245,255,248,.72);
+  font-size: .86rem;
+}
+
 .reservation-mini__toast {
   width: fit-content;
   max-width: 100%;
@@ -3295,6 +3418,72 @@ body.booking-app-page .main-content {
 .reservation-night-card strong {
   color: #8fe0b4;
   font-size: 2.2rem;
+}
+
+.reservation-night-card i {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 2px;
+  border: 1px solid rgba(143,224,180,.22);
+  border-radius: 13px;
+  color: #8fe0b4;
+  background: rgba(60,179,113,.10);
+}
+
+.reservation-night-card i svg {
+  width: 20px;
+  height: 20px;
+}
+
+.reservation-night-card small {
+  color: rgba(245,255,248,.60);
+  font-weight: 750;
+}
+
+.reservation-date-helper {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin-top: 18px;
+  padding: 15px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(143,224,180,.13), transparent 38%),
+    rgba(60,179,113,.08);
+}
+
+.reservation-date-helper > i {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  color: #8fe0b4;
+  background: rgba(60,179,113,.12);
+}
+
+.reservation-date-helper svg {
+  width: 22px;
+  height: 22px;
+}
+
+.reservation-date-helper strong,
+.reservation-date-helper small {
+  display: block;
+}
+
+.reservation-date-helper strong {
+  color: #fff;
+}
+
+.reservation-date-helper small {
+  margin-top: 2px;
+  color: rgba(245,255,248,.66);
+  line-height: 1.45;
 }
 
 .reservation-info-grid {
@@ -4353,6 +4542,7 @@ html[data-theme="light"] .reservation-details-section,
 html[data-theme="light"] .reservation-summary,
 html[data-theme="light"] .reservation-item-card,
 html[data-theme="light"] .reservation-final-summary,
+html[data-theme="light"] .reservation-date-helper,
 html[data-theme="light"] .reservation-presets,
 html[data-theme="light"] .reservation-simple-panel,
 html[data-theme="light"] .reservation-help__panel,
@@ -4379,6 +4569,7 @@ html[data-theme="light"] .reservation-option-row strong,
 html[data-theme="light"] .reservation-help__sections article strong,
 html[data-theme="light"] .reservation-help__short strong,
 html[data-theme="light"] .reservation-item-card strong,
+html[data-theme="light"] .reservation-date-helper strong,
 html[data-theme="light"] .reservation-summary dd,
 html[data-theme="light"] .reservation-final-summary dd,
 html[data-theme="light"] .reservation-success-modal__card dd {
@@ -4393,6 +4584,7 @@ html[data-theme="light"] .reservation-item-card em,
 html[data-theme="light"] .reservation-field small,
 html[data-theme="light"] .reservation-details-section__head p,
 html[data-theme="light"] .reservation-option-row small,
+html[data-theme="light"] .reservation-date-helper small,
 html[data-theme="light"] .reservation-summary dt,
 html[data-theme="light"] .reservation-final-summary dt,
 html[data-theme="light"] .reservation-success-modal__card dt,
@@ -4407,6 +4599,7 @@ html[data-theme="light"] .reservation-mini__note,
 html[data-theme="light"] .reservation-simple-link,
 html[data-theme="light"] .reservation-info-grid p,
 html[data-theme="light"] .reservation-hint,
+html[data-theme="light"] .reservation-progress__meter,
 html[data-theme="light"] .reservation-summary__status,
 html[data-theme="light"] .reservation-summary__deposit,
 html[data-theme="light"] .reservation-country__hint,
@@ -4420,6 +4613,7 @@ html[data-theme="light"] .reservation-choice-card__icon,
 html[data-theme="light"] .reservation-item-card__icon,
 html[data-theme="light"] .reservation-details-section__head > span,
 html[data-theme="light"] .reservation-help__head > span,
+html[data-theme="light"] .reservation-date-helper > i,
 html[data-theme="light"] .reservation-success-modal__mark {
   color: #23784d;
   border-color: rgba(35,120,77,.22);

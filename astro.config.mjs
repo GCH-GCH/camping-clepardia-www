@@ -58,6 +58,27 @@ const reservationApiDevPlugin = () => ({
           return;
         }
 
+        const estimatedTotal = String(payload.estimatedTotal || payload.calculatorSummary?.total || '').trim();
+        const ccSystemDraft = {
+          source: 'website-reservation-dev-mock',
+          customer: {
+            fullName: String(payload.fullName || '').trim(),
+            email: String(payload.email || '').trim(),
+            phone: String(payload.phone || '').trim(),
+            country: String(payload.country || '').trim(),
+            language: String(payload.contactLanguage || payload.locale || '').trim(),
+          },
+          stay: {
+            type: String(payload.stayType || payload.selectedStayMode || '').trim(),
+            arrivalIso: String(payload.arrivalIso || '').trim(),
+            departureIso: String(payload.departureIso || '').trim(),
+            nights: Number(payload.nights || 0),
+            estimatedTotal,
+          },
+          services,
+          originalMessage: String(payload.message || '').trim(),
+        };
+
         res.statusCode = 200;
         res.end(JSON.stringify({
           ok: true,
@@ -81,6 +102,7 @@ const reservationApiDevPlugin = () => ({
                   reason: 'Customer email missing - autoresponder skipped.',
                 },
           },
+          ccSystemDraft,
           message: 'Reservation enquiry accepted in local dev mock mode.',
         }));
       });

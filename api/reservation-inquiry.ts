@@ -19,6 +19,23 @@ const collectBody = async (req: any) =>
     req.on('error', reject);
   });
 
+const normalizeNodeHeaders = (headers: Record<string, string | string[] | undefined> = {}) => {
+  const normalized = new Headers();
+
+  Object.entries(headers).forEach(([key, value]) => {
+    if (typeof value === 'string') {
+      normalized.set(key, value);
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      normalized.set(key, value.filter(Boolean).join(', '));
+    }
+  });
+
+  return normalized;
+};
+
 const nodeRequestToWebRequest = async (req: any) => {
   const protocol = req.headers?.['x-forwarded-proto'] || 'https';
   const host = req.headers?.host || 'localhost';
@@ -31,7 +48,7 @@ const nodeRequestToWebRequest = async (req: any) => {
 
   return new Request(url, {
     method: req.method || 'POST',
-    headers: req.headers,
+    headers: normalizeNodeHeaders(req.headers),
     body: req.method === 'GET' || req.method === 'HEAD' ? undefined : body,
   });
 };
@@ -43,13 +60,38 @@ const sendNodeResponse = async (res: any, response: Response) => {
 };
 
 export default async function handler(req: any, res?: any) {
-  const request = req instanceof Request ? req : await nodeRequestToWebRequest(req);
-  const response = await handleReservationInquiryRequest(request);
+  try {
+    const request = req instanceof Request ? req : await nodeRequestToWebRequest(req);
+    const response = await handleReservationInquiryRequest(request);
 
-  if (res) {
-    await sendNodeResponse(res, response);
-    return;
+    if (res) {
+      await sendNodeResponse(res, response);
+      return;
+    }
+
+    return response;
+  } catch (error) {
+    const payload = JSON.stringify({
+      ok: false,
+      mode: 'error',
+      message: 'Reservation endpoint failed before accepting the enquiry.',
+      reason: error instanceof Error ? error.message : 'Unknown reservation endpoint error.',
+    });
+
+    if (res) {
+      res.statusCode = 500;
+      res.setHeader('content-type', 'application/json; charset=utf-8');
+      res.setHeader('cache-control', 'no-store');
+      res.end(payload);
+      return;
+    }
+
+    return new Response(payload, {
+      status: 500,
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+        'cache-control': 'no-store',
+      },
+    });
   }
-
-  return response;
 }
