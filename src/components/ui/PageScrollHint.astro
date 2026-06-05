@@ -145,6 +145,20 @@ const label = isHome ? copy.home : copy.page;
   transform: translateX(-50%) translateY(-2px);
 }
 
+.page-scroll-hint:focus,
+.page-scroll-hint:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+.page-scroll-hint:focus-visible {
+  outline: none;
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 3px rgba(60, 179, 113, .34),
+    0 0 30px rgba(60, 179, 113, .24);
+}
+
 .page-scroll-hint:hover .page-scroll-hint__mouse {
   border-color: rgba(180,243,204,.95);
   box-shadow:
