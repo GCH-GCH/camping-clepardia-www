@@ -871,6 +871,12 @@ const pricingAppConfig = {
     linear-gradient(180deg, #f7fbf4 0%, #edf6ef 46%, #102018 100%);
 }
 
+.pricing-app .reveal-section,
+.pricing-app .motion-reveal {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 .pricing-app__container {
   display: grid;
   gap: clamp(54px, 8vw, 98px);
@@ -1983,6 +1989,57 @@ html[data-theme="dark"] .pricing-faq__item summary span svg {
 }
 
 @media (max-width: 640px) {
+  .pricing-app {
+    overflow-x: clip;
+  }
+
+  .pricing-app__container,
+  .pricing-app__choice,
+  .pricing-popular,
+  .pricing-app__calculator,
+  .pricing-full,
+  .pricing-info,
+  .pricing-faq,
+  .pricing-final-cta,
+  .pricing-mode-grid,
+  .pricing-popular__grid,
+  .pricing-service-grid,
+  .pricing-info__grid,
+  .pricing-full__grid {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .pricing-app__section-head h2,
+  .pricing-app__section-head p,
+  .pricing-mode-card strong,
+  .pricing-mode-card small,
+  .pricing-popular-card h3,
+  .pricing-popular-card p,
+  .pricing-service-card strong,
+  .pricing-service-card small,
+  .pricing-price-row strong,
+  .pricing-price-row span,
+  .pricing-info-card h3,
+  .pricing-info-card p,
+  .pricing-faq__item summary,
+  .pricing-faq__item p {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .pricing-mode-card,
+  .pricing-popular-card,
+  .pricing-app__panel,
+  .pricing-app-summary,
+  .pricing-price-group,
+  .pricing-info-card,
+  .pricing-faq__item {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .pricing-season-toggle {
     width: 100%;
   }
@@ -2001,6 +2058,15 @@ html[data-theme="dark"] .pricing-faq__item summary span svg {
   .pricing-final-cta__actions a,
   .pricing-final-cta__actions button {
     width: 100%;
+    max-width: 100%;
+  }
+
+  .pricing-service-card {
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  .pricing-stepper {
+    max-width: 100%;
   }
 
   .pricing-price-group__rows div {

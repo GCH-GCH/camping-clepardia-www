@@ -294,7 +294,7 @@ const operationalTextByLanguage = {
 const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 ---
 
-<section class="page-mini-hero reveal-section">
+<section class:list={['page-mini-hero', page.slug !== 'cennik' && 'reveal-section', page.slug === 'cennik' && 'page-mini-hero--pricing']}>
   <div class="container page-mini-hero__inner">
     <nav class="breadcrumbs" aria-label="Breadcrumb">
       <a href={homeHref}>{breadcrumbHome}</a>
@@ -601,9 +601,29 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   overflow: hidden;
 }
 
+.page-mini-hero--pricing {
+  min-height: auto;
+  align-items: center;
+  padding: clamp(118px, 12vw, 156px) 0 clamp(58px, 8vw, 88px);
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 .page-mini-hero__inner {
   display: grid;
   gap: 20px;
+}
+
+.page-mini-hero--pricing .page-mini-hero__inner {
+  gap: 18px;
+}
+
+.page-mini-hero--pricing h1 {
+  max-width: 900px;
+}
+
+.page-mini-hero--pricing p {
+  max-width: 720px;
 }
 
 .breadcrumbs {
@@ -725,6 +745,7 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 }
 
 .pricing-hero-actions__stats svg {
+  grid-column: 1;
   grid-row: span 2;
   width: 42px;
   height: 42px;
@@ -735,6 +756,7 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 }
 
 .pricing-hero-actions__stats strong {
+  grid-column: 2;
   color: #fff;
   font-size: clamp(1.05rem, 2.2vw, 1.36rem);
   line-height: 1;
@@ -742,6 +764,7 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 }
 
 .pricing-hero-actions__stats small {
+  grid-column: 2;
   color: rgba(255,255,255,.72);
   font-weight: 850;
   line-height: 1.35;
@@ -1334,6 +1357,15 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
     overflow: hidden;
   }
 
+  .page-mini-hero--pricing {
+    padding: 104px 0 42px;
+    overflow-x: clip;
+  }
+
+  .page-mini-hero--pricing .page-mini-hero__inner {
+    overflow: hidden;
+  }
+
   .breadcrumbs {
     min-width: 0;
     font-size: .76rem;
@@ -1352,6 +1384,11 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
     word-break: normal;
   }
 
+  .page-mini-hero--pricing h1 {
+    font-size: clamp(2rem, 9.8vw, 2.72rem);
+    overflow-wrap: anywhere;
+  }
+
   .page-mini-hero p {
     max-width: 100%;
     font-size: .98rem;
@@ -1363,11 +1400,37 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   .pricing-hero-actions__stats {
     display: grid;
     grid-template-columns: 1fr;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .pricing-hero-actions,
+  .pricing-hero-actions__notes,
+  .pricing-hero-actions__notes span,
+  .pricing-hero-actions__stats span {
+    max-width: 100%;
+    min-width: 0;
   }
 
   .pricing-hero-actions__buttons a {
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     justify-content: center;
+    padding-inline: 16px;
+  }
+
+  .pricing-hero-actions__notes {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-hero-actions__notes span,
+  .pricing-hero-actions__stats span,
+  .pricing-hero-actions__stats strong,
+  .pricing-hero-actions__stats small {
+    overflow-wrap: anywhere;
+    word-break: normal;
   }
 
   .page-cta__actions {
