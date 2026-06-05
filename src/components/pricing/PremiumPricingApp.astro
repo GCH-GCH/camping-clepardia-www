@@ -1,0 +1,1522 @@
+---
+import { pricingConfig } from '@/data/pricing';
+import Icon from '@/components/ui/Icon.astro';
+import { getBookingLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const activeLanguage = languageCode ?? pathContext.languageCode;
+const bookingHref = getBookingLocalizedPath(activeLanguage);
+const currency = pricingConfig.currency;
+const formatPrice = (price: number) => `${price} ${currency}`;
+const findStayType = (id: string) => pricingConfig.stayTypes.find((item) => item.id === id);
+const findAddon = (id: string) => pricingConfig.addons.find((item) => item.id === id);
+const flatStay = (id: string) => {
+  const item = findStayType(id);
+  if (!item || !('price' in item)) throw new Error(`Missing flat stay pricing: ${id}`);
+  return item;
+};
+const seasonalStay = (id: string) => {
+  const item = findStayType(id);
+  if (!item || !('seasonalPrices' in item)) throw new Error(`Missing seasonal stay pricing: ${id}`);
+  return item;
+};
+const addon = (id: string) => {
+  const item = findAddon(id);
+  if (!item) throw new Error(`Missing addon pricing: ${id}`);
+  return item;
+};
+
+const adult = pricingConfig.people.adults;
+const child = pricingConfig.people.children;
+const toddler = pricingConfig.people.toddlers;
+const camper = flatStay('camper');
+const van = flatStay('van');
+const caravan = flatStay('caravan');
+const tentSmall = flatStay('tent-small');
+const tentLarge = flatStay('tent-large');
+const rooftopTent = flatStay('rooftop-tent');
+const bungalow2 = seasonalStay('bungalow-2');
+const bungalow3 = seasonalStay('bungalow-3');
+const bungalow4 = seasonalStay('bungalow-4');
+const electricity = addon('electricity');
+const dog = addon('dog');
+const parking = addon('parking');
+const motorcycle = addon('motorcycle');
+const cargoTrailer = addon('cargo-trailer');
+const bus = addon('bus');
+
+const highSeasonRange = `${pricingConfig.seasons.high.start.slice(3)}.${pricingConfig.seasons.high.start.slice(0, 2)}-${pricingConfig.seasons.high.end.slice(3)}.${pricingConfig.seasons.high.end.slice(0, 2)}`;
+const popularPrice = {
+  camperElectricity: adult.price * 2 + camper.price + electricity.price,
+  van: adult.price * 2 + van.price,
+  caravanElectricityCar: adult.price * 2 + caravan.price + electricity.price + parking.price,
+  tentSmall: adult.price * 2 + tentSmall.price,
+  bungalow2: bungalow2.seasonalPrices.low,
+  bungalow4: bungalow4.seasonalPrices.low,
+};
+
+const modeCards = [
+  {
+    mode: 'camping',
+    icon: 'camper',
+    title: 'Camping',
+    copy: 'Kamper, van, namiot, przyczepa, auto + namiot dachowy.',
+    chips: ['Kamper', 'Namiot', 'Prąd 10A'],
+  },
+  {
+    mode: 'bungalow',
+    icon: 'house',
+    title: 'Domki',
+    copy: 'Domki 2-, 3- i 4-osobowe.',
+    chips: ['2-os.', '3-os.', '4-os.'],
+  },
+  {
+    mode: 'combined',
+    icon: 'users',
+    title: 'Camping + domek',
+    copy: 'Dla rodzin i grup, gdy część osób śpi w domku, a część przyjeżdża kamperem lub przyczepą.',
+    chips: ['Domek', 'Kamper', 'Grupa'],
+  },
+];
+
+const counters = [
+  { id: 'nights', label: 'Liczba nocy', value: 1, min: 1, price: null, icon: 'calendar' },
+  { id: 'adults', label: 'Dorośli', value: 2, min: 0, price: adult.price, icon: 'users' },
+  { id: 'children', label: 'Dzieci 4-14', value: 0, min: 0, price: child.price, icon: 'baby' },
+  { id: 'toddlers', label: 'Dzieci do 4', value: 0, min: 0, price: toddler.price, icon: 'baby' },
+];
+
+const campingServices = [
+  { id: 'camper', label: camper.label, price: camper.price, icon: 'camper', note: 'Najczęstszy wybór' },
+  { id: 'van', label: van.label, price: van.price, icon: 'busFront', note: 'Kompaktowy pobyt' },
+  { id: 'caravan', label: caravan.label, price: caravan.price, icon: 'caravan', note: 'Przyczepa kempingowa' },
+  { id: 'tent-small', label: tentSmall.label, price: tentSmall.price, icon: 'tent', note: 'Namiot 1-2 os.' },
+  { id: 'tent-large', label: tentLarge.label, price: tentLarge.price, icon: 'tent', note: 'Namiot 3-4 os.' },
+  { id: 'rooftop-tent', label: rooftopTent.label, price: rooftopTent.price, icon: 'tent', note: 'Auto + namiot' },
+  { id: 'parking', label: 'Samochód / parking', price: parking.price, icon: 'car', note: 'Auto przy zestawie' },
+  { id: 'motorcycle', label: motorcycle.label, price: motorcycle.price, icon: 'motorcycle', note: 'Motocykl' },
+  { id: 'cargo-trailer', label: cargoTrailer.label, price: cargoTrailer.price, icon: 'caravan', note: 'Dodatkowy bagaż' },
+  { id: 'bus', label: bus.label, price: bus.price, icon: 'truck', note: 'Cięższy pojazd' },
+  { id: 'electricity', label: 'Prąd 10A', price: electricity.price, icon: 'electricity', note: 'Bez ładowania EV' },
+  { id: 'dog', label: dog.label, price: dog.price, icon: 'dog', note: 'Pies bezpłatnie' },
+];
+
+const bungalowServices = [
+  { id: 'bungalow-2', label: bungalow2.label, seasonalPrices: bungalow2.seasonalPrices, icon: 'house', note: '2 osoby' },
+  { id: 'bungalow-3', label: bungalow3.label, seasonalPrices: bungalow3.seasonalPrices, icon: 'house', note: '2 lub 3 osoby' },
+  { id: 'bungalow-4', label: bungalow4.label, seasonalPrices: bungalow4.seasonalPrices, icon: 'house', note: 'Dla rodziny' },
+  { id: 'bungalow-parking', label: 'Samochód / parking', price: parking.price, icon: 'car', note: 'Auto przy domku' },
+  { id: 'bungalow-dog', label: dog.label, price: dog.price, icon: 'dog', note: 'Pies bezpłatnie' },
+];
+
+const serviceConfigEntries = [...campingServices, ...bungalowServices].map((item) => [
+  item.id,
+  {
+    label: item.label,
+    price: 'price' in item ? item.price : undefined,
+    seasonalPrices: 'seasonalPrices' in item ? item.seasonalPrices : undefined,
+  },
+]);
+
+const presets = [
+  {
+    id: 'camper-electricity',
+    mode: 'camping',
+    icon: 'camper',
+    title: '2 osoby + kamper + prąd',
+    price: popularPrice.camperElectricity,
+    href: `${bookingHref}?stay=camping&preset=camper-electricity`,
+    values: { adults: 2, children: 0, toddlers: 0 },
+    services: { camper: 1, electricity: 1 },
+  },
+  {
+    id: 'van',
+    mode: 'camping',
+    icon: 'busFront',
+    title: '2 osoby + van',
+    price: popularPrice.van,
+    href: `${bookingHref}?stay=camping&preset=van`,
+    values: { adults: 2, children: 0, toddlers: 0 },
+    services: { van: 1 },
+  },
+  {
+    id: 'caravan-electricity-car',
+    mode: 'camping',
+    icon: 'caravan',
+    title: '2 osoby + auto + przyczepa + prąd',
+    price: popularPrice.caravanElectricityCar,
+    href: `${bookingHref}?stay=camping&preset=caravan-electricity`,
+    values: { adults: 2, children: 0, toddlers: 0 },
+    services: { caravan: 1, parking: 1, electricity: 1 },
+  },
+  {
+    id: 'tent-small',
+    mode: 'camping',
+    icon: 'tent',
+    title: '2 osoby + namiot 1-2 os.',
+    price: popularPrice.tentSmall,
+    href: `${bookingHref}?stay=camping&preset=tent-small`,
+    values: { adults: 2, children: 0, toddlers: 0 },
+    services: { 'tent-small': 1 },
+  },
+  {
+    id: 'bungalow-2',
+    mode: 'bungalow',
+    icon: 'house',
+    title: 'Domek 2-os.',
+    price: popularPrice.bungalow2,
+    href: `${bookingHref}?stay=bungalow&preset=bungalow-2`,
+    values: { adults: 2, children: 0, toddlers: 0 },
+    services: { 'bungalow-2': 1 },
+  },
+  {
+    id: 'bungalow-4',
+    mode: 'bungalow',
+    icon: 'house',
+    title: 'Domek 4-os.',
+    price: popularPrice.bungalow4,
+    href: `${bookingHref}?stay=bungalow&preset=bungalow-4`,
+    values: { adults: 2, children: 2, toddlers: 0 },
+    services: { 'bungalow-4': 1 },
+  },
+];
+
+const fullPriceGroups = [
+  {
+    icon: 'users',
+    title: 'Camping - osoby',
+    copy: 'Osoby doliczane są do pojazdu, namiotu albo zestawu campingowego.',
+    rows: [
+      { label: 'Osoba dorosła', price: adult.price },
+      { label: 'Dziecko 4-14 lat', price: child.price },
+      { label: 'Dziecko do 4 lat', price: toddler.price },
+    ],
+  },
+  {
+    icon: 'camper',
+    title: 'Camping - pojazdy i nocleg',
+    copy: 'Wybierz główny typ pobytu campingowego.',
+    rows: [
+      { label: camper.label, price: camper.price },
+      { label: 'Van / minibus', price: van.price },
+      { label: caravan.label, price: caravan.price },
+      { label: tentSmall.label, price: tentSmall.price },
+      { label: tentLarge.label, price: tentLarge.price },
+      { label: rooftopTent.label, price: rooftopTent.price },
+      { label: bus.label, price: bus.price },
+    ],
+  },
+  {
+    icon: 'plug',
+    title: 'Camping - dodatki',
+    copy: 'Dodatki liczone za noc pobytu.',
+    rows: [
+      { label: 'Prąd 10A', price: electricity.price },
+      { label: 'Samochód / parking', price: parking.price },
+      { label: motorcycle.label, price: motorcycle.price },
+      { label: cargoTrailer.label, price: cargoTrailer.price },
+      { label: dog.label, price: dog.price },
+    ],
+  },
+  {
+    icon: 'house',
+    title: 'Domki',
+    copy: `Wysoki sezon: ${highSeasonRange}. Domek 3-os. ma w danych cenę 300 PLN w wysokim sezonie.`,
+    rows: [
+      { label: bungalow2.label, low: bungalow2.seasonalPrices.low, high: bungalow2.seasonalPrices.high },
+      { label: bungalow3.label, low: bungalow3.seasonalPrices.low, high: bungalow3.seasonalPrices.high },
+      { label: bungalow4.label, low: bungalow4.seasonalPrices.low, high: bungalow4.seasonalPrices.high },
+    ],
+  },
+];
+
+const infoCards = [
+  { icon: 'clock', title: 'Camping 12:00-12:00', copy: 'Doba campingowa trwa od 12:00 do 12:00.' },
+  { icon: 'house', title: 'Domki 16:00-11:00', copy: 'Check-in od 16:00, check-out do 11:00.' },
+  { icon: 'moon', title: 'Cisza nocna 22:00-07:00', copy: 'Camping Clepardia nie jest miejscem imprezowym.' },
+  { icon: 'plug', title: 'Prąd 10A', copy: 'Standardowe przyłącze campingowe. Bez ładowania aut EV.' },
+  { icon: 'calendar', title: 'Lipiec i sierpień', copy: 'Miejsca campingowe są dostępne według kolejności przyjazdu. Domki można rezerwować.' },
+  { icon: 'map', title: 'Google Maps', copy: 'Dojazd zmienił się w 2022 roku, dlatego polecamy Google Maps.' },
+];
+
+const faqItems = [
+  ['Czy cena z kalkulatora jest ostateczna?', 'Nie, kalkulator pokazuje koszt orientacyjny. Dostępność i finalne warunki potwierdza recepcja.'],
+  ['Czy pies jest płatny?', 'Nie, pies jest bezpłatny. Prosimy tylko o opiekę i sprzątanie po pupilu.'],
+  ['Czy prąd jest w cenie?', `Prąd 10A jest płatny według cennika - ${electricity.price} PLN / noc.`],
+  ['Czy można rezerwować miejsca campingowe w lipcu i sierpniu?', 'W wysokim sezonie miejsca campingowe są dostępne według kolejności przyjazdu. Najlepiej przyjechać krótko po 12:00. Rezerwacje online dotyczą głównie domków.'],
+  ['Czy domki wymagają zaliczki?', 'Dla domków może być wymagana zaliczka. Szczegóły recepcja przesyła po potwierdzeniu dostępności.'],
+  ['Czy można przyjechać cięższym pojazdem?', 'Tak, ale cięższe pojazdy ustawiamy na asfalcie, aby uniknąć zakopania się na trawie.'],
+];
+
+const pricingAppConfig = {
+  currency,
+  people: {
+    adults: adult.price,
+    children: child.price,
+    toddlers: toddler.price,
+  },
+  services: Object.fromEntries(serviceConfigEntries),
+  presets: Object.fromEntries(presets.map((preset) => [preset.id, preset])),
+  seasonLabels: {
+    low: 'Niski sezon',
+    high: 'Wysoki sezon',
+  },
+  modeLabels: {
+    camping: 'Camping',
+    bungalow: 'Domki',
+    combined: 'Camping + domek',
+  },
+};
+---
+
+<section class="pricing-app" data-pricing-app>
+  <div class="container pricing-app__container">
+    <section class="pricing-app__choice reveal-section" aria-labelledby="pricingStayTypeTitle">
+      <div class="pricing-app__section-head">
+        <span class="section-kicker">Wybierz typ pobytu</span>
+        <h2 id="pricingStayTypeTitle">Najpierw wybierz, co chcesz policzyć</h2>
+        <p>Aktywny wariant dopasuje kalkulator, podsumowanie i najważniejsze opcje.</p>
+      </div>
+
+      <div class="pricing-mode-grid" role="group" aria-label="Typ pobytu w cenniku">
+        {modeCards.map((card, index) => (
+          <button
+            type="button"
+            class:list={['pricing-mode-card', index === 0 && 'is-active']}
+            data-pricing-mode={card.mode}
+            style={`--delay: ${index * 90}ms`}
+          >
+            <span class="pricing-mode-card__icon"><Icon name={card.icon} size={30} strokeWidth={1.9} /></span>
+            <strong>{card.title}</strong>
+            <small>{card.copy}</small>
+            <span class="pricing-mode-card__chips">
+              {card.chips.map((chip) => <em>{chip}</em>)}
+            </span>
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <section class="pricing-app__calculator reveal-section" id="oblicz-koszt" aria-labelledby="pricingCalculatorTitle">
+      <div class="pricing-app__section-head pricing-app__section-head--wide">
+        <span class="section-kicker">Kalkulator orientacyjny</span>
+        <h2 id="pricingCalculatorTitle">Policz pobyt w kilka kliknięć</h2>
+        <p>To szybka kalkulacja, bez danych klienta i zgód. Finalną dostępność oraz szczegóły potwierdza recepcja.</p>
+      </div>
+
+      <div class="pricing-app__layout">
+        <div class="pricing-app__panel premium-card">
+          <div class="pricing-app__toolbar">
+            <div class="pricing-season-toggle" role="group" aria-label="Sezon dla domków">
+              <button type="button" class="is-active" data-pricing-season="low">Niski sezon</button>
+              <button type="button" data-pricing-season="high">Wysoki sezon</button>
+            </div>
+            <p><Icon name="info" size={16} /> Domki zmieniają cenę w sezonie wysokim. Camping ma stałą cenę za noc.</p>
+          </div>
+
+          <div class="pricing-counters">
+            {counters.map((counter) => (
+              <article class="pricing-counter-card" data-counter-card={counter.id}>
+                <span><Icon name={counter.icon} size={20} /></span>
+                <label for={`pricing-${counter.id}`}>{counter.label}</label>
+                <div class="pricing-stepper">
+                  <button type="button" data-stepper-target={counter.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${counter.label}`}>
+                    <Icon name="minus" size={18} strokeWidth={2.4} />
+                  </button>
+                  <input id={`pricing-${counter.id}`} type="number" min={counter.min} value={counter.value} inputmode="numeric" data-pricing-input={counter.id} />
+                  <button type="button" data-stepper-target={counter.id} data-stepper-delta="1" aria-label={`Zwiększ ${counter.label}`}>
+                    <Icon name="plus" size={18} strokeWidth={2.4} />
+                  </button>
+                </div>
+                <small>{counter.price === null ? 'Suma mnożona przez liczbę nocy' : `${formatPrice(counter.price)} / noc`}</small>
+              </article>
+            ))}
+          </div>
+
+          <div class="pricing-service-groups">
+            <section class="pricing-service-group" data-service-group="camping" data-modes="camping combined">
+              <div class="pricing-service-group__head">
+                <span><Icon name="camper" size={20} /></span>
+                <div>
+                  <h3>Camping</h3>
+                  <p>Pojazdy, namioty i dodatki campingowe.</p>
+                </div>
+              </div>
+              <div class="pricing-service-grid">
+                {campingServices.map((item) => (
+                  <article class="pricing-service-card" data-service-card={item.id}>
+                    <span class="pricing-service-card__icon"><Icon name={item.icon} size={22} /></span>
+                    <div>
+                      <strong>{item.label}</strong>
+                      <small>{item.note}</small>
+                    </div>
+                    <em>{formatPrice(item.price)} / noc</em>
+                    <div class="pricing-stepper pricing-stepper--service">
+                      <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${item.label}`}>
+                        <Icon name="minus" size={17} strokeWidth={2.4} />
+                      </button>
+                      <input type="number" min="0" value={item.id === 'camper' ? '1' : '0'} inputmode="numeric" data-service-input={item.id} />
+                      <button type="button" data-stepper-target={item.id} data-stepper-delta="1" aria-label={`Zwiększ ${item.label}`}>
+                        <Icon name="plus" size={17} strokeWidth={2.4} />
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section class="pricing-service-group" data-service-group="bungalow" data-modes="bungalow combined" hidden>
+              <div class="pricing-service-group__head">
+                <span><Icon name="house" size={20} /></span>
+                <div>
+                  <h3>Domki</h3>
+                  <p>Ceny domków zależą od sezonu. Osoby pomagają dobrać wariant, ale nie są doliczane osobno.</p>
+                </div>
+              </div>
+              <div class="pricing-service-grid">
+                {bungalowServices.map((item) => {
+                  const priceLabel = 'seasonalPrices' in item
+                    ? `${formatPrice(item.seasonalPrices.low)} / ${formatPrice(item.seasonalPrices.high)}`
+                    : formatPrice(item.price);
+                  return (
+                    <article class="pricing-service-card" data-service-card={item.id}>
+                      <span class="pricing-service-card__icon"><Icon name={item.icon} size={22} /></span>
+                      <div>
+                        <strong>{item.label}</strong>
+                        <small>{item.note}</small>
+                      </div>
+                      <em>{priceLabel} / noc</em>
+                      <div class="pricing-stepper pricing-stepper--service">
+                        <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${item.label}`}>
+                          <Icon name="minus" size={17} strokeWidth={2.4} />
+                        </button>
+                        <input type="number" min="0" value="0" inputmode="numeric" data-service-input={item.id} />
+                        <button type="button" data-stepper-target={item.id} data-stepper-delta="1" aria-label={`Zwiększ ${item.label}`}>
+                          <Icon name="plus" size={17} strokeWidth={2.4} />
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <aside class="pricing-app-summary premium-card" aria-live="polite">
+          <span class="pricing-app-summary__badge">Twój orientacyjny koszt</span>
+          <h3 data-summary-total>{formatPrice(popularPrice.camperElectricity - electricity.price)}</h3>
+          <p data-summary-hint>Wybrano domyślnie: 2 osoby + kamper. Dodaj prąd albo wybierz popularny zestaw.</p>
+          <div class="pricing-app-summary__meta">
+            <p><span>Typ pobytu</span><strong data-summary-mode>Camping</strong></p>
+            <p><span>Liczba nocy</span><strong data-summary-nights>1</strong></p>
+            <p><span>Cena / noc</span><strong data-summary-nightly>{formatPrice(popularPrice.camperElectricity - electricity.price)}</strong></p>
+          </div>
+          <div class="pricing-app-summary__lines" data-summary-lines></div>
+          <a class="pricing-app-summary__cta" href={bookingHref}>
+            <Icon name="booking" size={18} />
+            Zarezerwuj pobyt
+          </a>
+          <small>Dostępność i finalne warunki potwierdza recepcja.</small>
+        </aside>
+      </div>
+    </section>
+
+    <section class="pricing-popular reveal-section" aria-labelledby="pricingPopularTitle">
+      <div class="pricing-app__section-head">
+        <span class="section-kicker">Najczęściej wybierane</span>
+        <h2 id="pricingPopularTitle">Gotowe zestawy dla szybkiego startu</h2>
+        <p>Użyj zestawu w kalkulatorze albo przejdź od razu do rezerwacji z przygotowanym kontekstem.</p>
+      </div>
+      <div class="pricing-popular__grid">
+        {presets.map((preset) => (
+          <article class="pricing-popular-card premium-card">
+            <span><Icon name={preset.icon} size={24} /></span>
+            <h3>{preset.title}</h3>
+            <strong>{preset.id === 'bungalow-2' || preset.id === 'bungalow-4' ? 'od ' : ''}{formatPrice(preset.price)} / noc</strong>
+            <div>
+              <button type="button" data-pricing-preset={preset.id}>Użyj w kalkulatorze</button>
+              <a href={preset.href}>Zarezerwuj</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="pricing-full reveal-section" aria-labelledby="pricingFullTitle">
+      <div class="pricing-app__section-head pricing-app__section-head--wide">
+        <span class="section-kicker">Pełny cennik</span>
+        <h2 id="pricingFullTitle">Ceny w czytelnych grupach</h2>
+        <p>Wszystkie kwoty pochodzą z konfiguracji cenowej strony. Kalkulator i rezerwacja korzystają z tej samej logiki.</p>
+      </div>
+      <div class="pricing-full__grid">
+        {fullPriceGroups.map((group) => (
+          <article class="pricing-price-group premium-card">
+            <span class="pricing-price-group__icon"><Icon name={group.icon} size={24} /></span>
+            <h3>{group.title}</h3>
+            <p>{group.copy}</p>
+            <div class="pricing-price-group__rows">
+              {group.rows.map((row) => (
+                <div>
+                  <span>{row.label}</span>
+                  {'price' in row ? (
+                    <strong>{row.price === 0 ? '0 PLN' : `${formatPrice(row.price)} / noc`}</strong>
+                  ) : (
+                    <strong>{formatPrice(row.low)} niski / {formatPrice(row.high)} wysoki</strong>
+                  )}
+                </div>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="pricing-info reveal-section" aria-labelledby="pricingInfoTitle">
+      <div class="pricing-app__section-head">
+        <span class="section-kicker">Przed przyjazdem</span>
+        <h2 id="pricingInfoTitle">Ważne informacje przed przyjazdem</h2>
+      </div>
+      <div class="pricing-info__grid">
+        {infoCards.map((item) => (
+          <article class="pricing-info-card premium-card">
+            <span><Icon name={item.icon} size={22} /></span>
+            <h3>{item.title}</h3>
+            <p>{item.copy}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="pricing-faq reveal-section" aria-labelledby="pricingFaqTitle">
+      <div class="pricing-app__section-head">
+        <span class="section-kicker">FAQ cennika</span>
+        <h2 id="pricingFaqTitle">Najczęstsze pytania o ceny</h2>
+      </div>
+      <div class="pricing-faq__list">
+        {faqItems.map(([question, answer]) => (
+          <details class="premium-card pricing-faq__item">
+            <summary>{question}<Icon name="chevronDown" size={18} /></summary>
+            <p>{answer}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="pricing-final-cta reveal-section">
+      <div class="pricing-final-cta__panel premium-card">
+        <div>
+          <span class="section-kicker">Następny krok</span>
+          <h2>Wiesz już, co wybrać?</h2>
+          <p>Wyślij zapytanie, a recepcja potwierdzi dostępność i szczegóły pobytu.</p>
+        </div>
+        <div class="pricing-final-cta__actions">
+          <a href={bookingHref} class="btn btn-primary premium-button"><Icon name="booking" size={18} /> Zarezerwuj pobyt</a>
+          <button type="button" class="btn btn-glass" data-pricing-ask-campy><Icon name="chat" size={18} /> Zapytaj CAMPY</button>
+          <a href="/kontakt" class="btn btn-glass"><Icon name="phone" size={18} /> Kontakt z recepcją</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="pricing-toast" data-pricing-toast role="status" aria-live="polite">Dodano popularny zestaw 🌿</div>
+</section>
+
+<script define:vars={{ pricingAppConfig }}>
+  (() => {
+    const root = document.querySelector('[data-pricing-app]');
+    if (!(root instanceof HTMLElement)) return;
+
+    const config = pricingAppConfig;
+    const modeButtons = Array.from(root.querySelectorAll('[data-pricing-mode]'));
+    const seasonButtons = Array.from(root.querySelectorAll('[data-pricing-season]'));
+    const serviceGroups = Array.from(root.querySelectorAll('[data-service-group]'));
+    const summaryTotal = root.querySelector('[data-summary-total]');
+    const summaryHint = root.querySelector('[data-summary-hint]');
+    const summaryMode = root.querySelector('[data-summary-mode]');
+    const summaryNights = root.querySelector('[data-summary-nights]');
+    const summaryNightly = root.querySelector('[data-summary-nightly]');
+    const summaryLines = root.querySelector('[data-summary-lines]');
+    const summaryCard = root.querySelector('.pricing-app-summary');
+    const toast = root.querySelector('[data-pricing-toast]');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const state = { mode: 'camping', season: 'low' };
+
+    const formatMoney = (value) => `${Math.round(Math.max(0, value)).toLocaleString('pl-PL')} ${config.currency}`;
+    const numberInput = (id) => root.querySelector(`[data-pricing-input="${id}"], [data-service-input="${id}"]`);
+    const getValue = (id) => {
+      const input = numberInput(id);
+      const min = Number(input?.getAttribute('min') ?? 0);
+      const value = Number(input?.value ?? 0);
+      return Number.isFinite(value) ? Math.max(min, value) : min;
+    };
+    const setValue = (id, value) => {
+      const input = numberInput(id);
+      if (input) input.value = String(Math.max(Number(input.getAttribute('min') ?? 0), value));
+    };
+    const resetServices = () => {
+      root.querySelectorAll('[data-service-input]').forEach((input) => {
+        input.value = '0';
+      });
+    };
+    const getServicePrice = (id) => {
+      const service = config.services[id];
+      if (!service) return 0;
+      if (service.seasonalPrices) return service.seasonalPrices[state.season] ?? service.seasonalPrices.low ?? 0;
+      return service.price ?? 0;
+    };
+    const getRelevantGroupNames = () => {
+      if (state.mode === 'camping') return ['camping'];
+      if (state.mode === 'bungalow') return ['bungalow'];
+      return ['camping', 'bungalow'];
+    };
+    const updateGroups = () => {
+      const groups = getRelevantGroupNames();
+      serviceGroups.forEach((group) => {
+        const groupName = group.getAttribute('data-service-group');
+        group.hidden = !groups.includes(groupName);
+      });
+    };
+    const setMode = (mode, reset = true) => {
+      state.mode = mode;
+      modeButtons.forEach((button) => button.classList.toggle('is-active', button.dataset.pricingMode === mode));
+      if (reset) {
+        resetServices();
+        if (mode === 'camping') setValue('camper', 1);
+        if (mode === 'bungalow') setValue('bungalow-2', 1);
+        if (mode === 'combined') {
+          setValue('camper', 1);
+          setValue('bungalow-2', 1);
+        }
+      }
+      updateGroups();
+      update();
+    };
+    const setSeason = (season) => {
+      state.season = season;
+      seasonButtons.forEach((button) => button.classList.toggle('is-active', button.dataset.pricingSeason === season));
+      update();
+    };
+    const visibleServiceInputs = () => {
+      const groups = getRelevantGroupNames();
+      return Array.from(root.querySelectorAll('[data-service-input]')).filter((input) => {
+        const card = input.closest('[data-service-card]');
+        const group = card?.closest('[data-service-group]')?.getAttribute('data-service-group');
+        return groups.includes(group);
+      });
+    };
+    const collectServices = () => visibleServiceInputs()
+      .map((input) => {
+        const id = input.dataset.serviceInput;
+        const qty = Math.max(0, Number(input.value || 0));
+        const service = config.services[id];
+        if (!id || !service || qty <= 0) return null;
+        return { id, qty, label: service.label, price: getServicePrice(id), total: getServicePrice(id) * qty };
+      })
+      .filter(Boolean);
+    const calculate = () => {
+      const nights = getValue('nights');
+      const adults = getValue('adults');
+      const children = getValue('children');
+      const toddlers = getValue('toddlers');
+      const services = collectServices();
+      const chargePeople = state.mode !== 'bungalow';
+      const peoplePerNight = chargePeople
+        ? adults * config.people.adults + children * config.people.children + toddlers * config.people.toddlers
+        : 0;
+      const servicesPerNight = services.reduce((sum, service) => sum + service.total, 0);
+      const nightly = peoplePerNight + servicesPerNight;
+      return { nights, adults, children, toddlers, services, peoplePerNight, servicesPerNight, nightly, total: nightly * nights };
+    };
+    const animateTextMoney = (element, value) => {
+      if (!element) return;
+      if (reduceMotion) {
+        element.textContent = formatMoney(value);
+        element.dataset.value = String(value);
+        return;
+      }
+      const start = Number(element.dataset.value || 0);
+      const end = Math.round(value);
+      const startTime = performance.now();
+      const duration = 280;
+      const tick = (now) => {
+        const progress = Math.min(1, (now - startTime) / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = start + (end - start) * eased;
+        element.textContent = formatMoney(current);
+        if (progress < 1) requestAnimationFrame(tick);
+        else element.dataset.value = String(end);
+      };
+      requestAnimationFrame(tick);
+    };
+    const updateCardStates = () => {
+      root.querySelectorAll('[data-service-card]').forEach((card) => {
+        const input = card.querySelector('[data-service-input]');
+        const active = Number(input?.value || 0) > 0;
+        card.classList.toggle('is-active', active);
+      });
+    };
+    const update = () => {
+      const result = calculate();
+      animateTextMoney(summaryTotal, result.total);
+      if (summaryMode) summaryMode.textContent = config.modeLabels[state.mode] || state.mode;
+      if (summaryNights) summaryNights.textContent = `${result.nights} ${result.nights === 1 ? 'noc' : 'noce'}`;
+      if (summaryNightly) summaryNightly.textContent = `${formatMoney(result.nightly)} / noc`;
+      if (summaryHint) {
+        summaryHint.textContent = result.services.length
+          ? 'Cena obejmuje wybrane elementy i liczbę nocy. To nadal koszt orientacyjny.'
+          : 'Wybierz usługi, a tutaj zobaczysz orientacyjny koszt.';
+      }
+      if (summaryLines) {
+        const lines = [];
+        if (state.mode !== 'bungalow') {
+          if (result.adults > 0) lines.push(`<p><span>Dorośli x ${result.adults}</span><strong>${formatMoney(result.adults * config.people.adults)} / noc</strong></p>`);
+          if (result.children > 0) lines.push(`<p><span>Dzieci 4-14 x ${result.children}</span><strong>${formatMoney(result.children * config.people.children)} / noc</strong></p>`);
+          if (result.toddlers > 0) lines.push(`<p><span>Dzieci do 4 x ${result.toddlers}</span><strong>0 PLN</strong></p>`);
+        } else {
+          lines.push('<p><span>Osoby w domku</span><strong>W cenie domku</strong></p>');
+        }
+        result.services.forEach((service) => {
+          lines.push(`<p><span>${service.label} x ${service.qty}</span><strong>${formatMoney(service.total)} / noc</strong></p>`);
+        });
+        summaryLines.innerHTML = lines.length ? lines.join('') : '<p><span>Usługi</span><strong>Do wyboru</strong></p>';
+      }
+      summaryCard?.classList.add('is-pulsing');
+      window.setTimeout(() => summaryCard?.classList.remove('is-pulsing'), 180);
+      updateCardStates();
+    };
+    const applyPreset = (presetId) => {
+      const preset = config.presets[presetId];
+      if (!preset) return;
+      setMode(preset.mode, true);
+      resetServices();
+      Object.entries(preset.values || {}).forEach(([id, value]) => setValue(id, value));
+      Object.entries(preset.services || {}).forEach(([id, value]) => setValue(id, value));
+      updateGroups();
+      update();
+      if (toast) {
+        toast.classList.add('is-visible');
+        window.setTimeout(() => toast.classList.remove('is-visible'), 2100);
+      }
+      root.querySelector('#oblicz-koszt')?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    };
+
+    modeButtons.forEach((button) => button.addEventListener('click', () => setMode(button.dataset.pricingMode || 'camping')));
+    seasonButtons.forEach((button) => button.addEventListener('click', () => setSeason(button.dataset.pricingSeason || 'low')));
+    root.querySelectorAll('[data-stepper-target]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const id = button.dataset.stepperTarget;
+        const delta = Number(button.dataset.stepperDelta || 0);
+        const input = numberInput(id);
+        if (!input) return;
+        const min = Number(input.getAttribute('min') || 0);
+        input.value = String(Math.max(min, Number(input.value || 0) + delta));
+        button.closest('.pricing-counter-card, .pricing-service-card')?.classList.add('is-bumped');
+        window.setTimeout(() => button.closest('.pricing-counter-card, .pricing-service-card')?.classList.remove('is-bumped'), 180);
+        update();
+      });
+    });
+    root.querySelectorAll('input[type="number"]').forEach((input) => input.addEventListener('input', () => {
+      const min = Number(input.getAttribute('min') || 0);
+      input.value = String(Math.max(min, Number(input.value || 0)));
+      update();
+    }));
+    root.querySelectorAll('[data-pricing-preset]').forEach((button) => button.addEventListener('click', () => applyPreset(button.dataset.pricingPreset)));
+    root.querySelector('[data-pricing-ask-campy]')?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('campy:prompt', {
+        detail: {
+          prompt: 'Pomóż mi wybrać najlepszy wariant pobytu i policzyć orientacyjny koszt na Camping Clepardia.',
+          actionKey: 'campingPricing',
+        },
+      }));
+    });
+
+    updateGroups();
+    update();
+  })();
+</script>
+
+<style is:global>
+.pricing-app {
+  position: relative;
+  overflow: clip;
+  background:
+    radial-gradient(circle at 12% 4%, rgba(60,179,113,.18), transparent 34%),
+    radial-gradient(circle at 86% 16%, rgba(242,192,120,.16), transparent 34%),
+    linear-gradient(180deg, #f7fbf4 0%, #edf6ef 46%, #102018 100%);
+}
+
+.pricing-app__container {
+  display: grid;
+  gap: clamp(54px, 8vw, 98px);
+  padding-top: clamp(52px, 7vw, 86px);
+  padding-bottom: clamp(64px, 8vw, 104px);
+}
+
+.pricing-app__section-head {
+  max-width: 820px;
+  display: grid;
+  gap: 12px;
+  margin-bottom: clamp(24px, 4vw, 40px);
+}
+
+.pricing-app__section-head--wide {
+  max-width: 980px;
+}
+
+.pricing-app__section-head h2 {
+  margin: 0;
+  color: #102018;
+  font-size: clamp(2.1rem, 5.5vw, 4.5rem);
+  line-height: .98;
+  font-weight: 950;
+}
+
+.pricing-app__section-head p {
+  margin: 0;
+  color: #536359;
+  font-size: clamp(1rem, 1.5vw, 1.13rem);
+  line-height: 1.72;
+}
+
+.pricing-mode-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.pricing-mode-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 260px;
+  display: grid;
+  justify-items: start;
+  align-content: start;
+  gap: 14px;
+  padding: clamp(24px, 3vw, 34px);
+  border: 1px solid rgba(25,70,44,.12);
+  border-radius: 30px;
+  text-align: left;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(60,179,113,.14), transparent 34%),
+    rgba(255,255,255,.74);
+  box-shadow: 0 22px 60px rgba(17,40,28,.10), inset 0 1px 0 rgba(255,255,255,.70);
+  animation: pricingCardIn .55s cubic-bezier(.22, 1, .36, 1) both;
+  animation-delay: var(--delay, 0ms);
+  transition: transform .28s cubic-bezier(.22, 1, .36, 1), box-shadow .28s ease, border-color .28s ease, background .28s ease;
+}
+
+.pricing-mode-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(120deg, transparent 0 34%, rgba(255,255,255,.54) 48%, transparent 62%),
+    radial-gradient(circle at 80% 14%, rgba(60,179,113,.18), transparent 34%);
+  transform: translateX(-40%);
+  transition: opacity .28s ease, transform .8s ease;
+}
+
+.pricing-mode-card:hover,
+.pricing-mode-card.is-active {
+  transform: translateY(-6px);
+  border-color: rgba(60,179,113,.42);
+  background: rgba(255,255,255,.90);
+  box-shadow: 0 30px 80px rgba(17,40,28,.15), 0 0 38px rgba(60,179,113,.16), inset 0 1px 0 rgba(255,255,255,.76);
+}
+
+.pricing-mode-card:hover::before,
+.pricing-mode-card.is-active::before {
+  opacity: 1;
+  transform: translateX(30%);
+}
+
+.pricing-mode-card__icon,
+.pricing-price-group__icon,
+.pricing-info-card > span,
+.pricing-service-group__head > span,
+.pricing-service-card__icon,
+.pricing-popular-card > span {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(60,179,113,.24);
+  border-radius: 20px;
+  color: #25975b;
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255,255,255,.70), transparent 34%),
+    rgba(60,179,113,.12);
+  box-shadow: 0 16px 34px rgba(60,179,113,.13);
+}
+
+.pricing-mode-card strong {
+  position: relative;
+  z-index: 1;
+  color: #102018;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  line-height: 1;
+  font-weight: 950;
+}
+
+.pricing-mode-card small {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+  color: #536359;
+  font-size: .98rem;
+  line-height: 1.55;
+  font-weight: 750;
+}
+
+.pricing-mode-card__chips {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.pricing-mode-card__chips em {
+  padding: 8px 10px;
+  border-radius: 999px;
+  color: #1f7048;
+  background: rgba(60,179,113,.11);
+  font-size: .74rem;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.pricing-app__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 34px);
+  align-items: start;
+}
+
+.pricing-app__panel,
+.pricing-app-summary {
+  border-radius: 32px;
+}
+
+.pricing-app__panel {
+  display: grid;
+  gap: 22px;
+  padding: clamp(20px, 3vw, 34px);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(60,179,113,.12), transparent 34%),
+    rgba(255,255,255,.82);
+}
+
+.pricing-app__toolbar {
+  display: grid;
+  gap: 14px;
+}
+
+.pricing-app__toolbar p {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #536359;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.pricing-season-toggle {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px;
+  border: 1px solid rgba(25,70,44,.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,.72);
+}
+
+.pricing-season-toggle button {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  color: #345241;
+  font-weight: 950;
+  transition: background .22s ease, color .22s ease, box-shadow .22s ease;
+}
+
+.pricing-season-toggle button.is-active {
+  color: #fff;
+  background: linear-gradient(135deg, #58d493, #3CB371);
+  box-shadow: 0 12px 30px rgba(60,179,113,.24);
+}
+
+.pricing-counters,
+.pricing-service-grid,
+.pricing-popular__grid,
+.pricing-full__grid,
+.pricing-info__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.pricing-counter-card,
+.pricing-service-card {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid rgba(25,70,44,.10);
+  border-radius: 24px;
+  background: rgba(255,255,255,.66);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.62);
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
+}
+
+.pricing-counter-card:hover,
+.pricing-service-card:hover,
+.pricing-service-card.is-active {
+  transform: translateY(-2px);
+  border-color: rgba(60,179,113,.30);
+  background: rgba(255,255,255,.90);
+  box-shadow: 0 18px 48px rgba(17,40,28,.10), 0 0 24px rgba(60,179,113,.09);
+}
+
+.pricing-counter-card.is-bumped,
+.pricing-service-card.is-bumped {
+  box-shadow: 0 0 0 5px rgba(60,179,113,.12), 0 18px 48px rgba(17,40,28,.10);
+}
+
+.pricing-counter-card > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  color: #25975b;
+  background: rgba(60,179,113,.11);
+}
+
+.pricing-counter-card label,
+.pricing-service-card strong {
+  color: #102018;
+  font-weight: 950;
+}
+
+.pricing-counter-card small,
+.pricing-service-card small {
+  color: #607067;
+  line-height: 1.45;
+  font-weight: 800;
+}
+
+.pricing-stepper {
+  display: grid;
+  grid-template-columns: 46px minmax(56px, 1fr) 46px;
+  gap: 8px;
+  align-items: center;
+}
+
+.pricing-stepper button {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(60,179,113,.22);
+  border-radius: 16px;
+  color: #1f7048;
+  background: rgba(60,179,113,.12);
+  transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.pricing-stepper button:hover {
+  transform: translateY(-1px);
+  background: rgba(60,179,113,.20);
+  box-shadow: 0 10px 26px rgba(60,179,113,.14);
+}
+
+.pricing-stepper input {
+  width: 100%;
+  height: 46px;
+  border: 1px solid rgba(25,70,44,.12);
+  border-radius: 16px;
+  color: #102018;
+  background: rgba(255,255,255,.80);
+  text-align: center;
+  font: inherit;
+  font-weight: 950;
+}
+
+.pricing-service-group {
+  display: grid;
+  gap: 16px;
+}
+
+.pricing-service-group[hidden] {
+  display: none;
+}
+
+.pricing-service-group__head {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 18px;
+  border-radius: 24px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 84% 0%, rgba(242,192,120,.14), transparent 34%),
+    linear-gradient(135deg, rgba(9,28,18,.94), rgba(18,52,33,.88));
+}
+
+.pricing-service-group__head h3,
+.pricing-service-group__head p {
+  margin: 0;
+}
+
+.pricing-service-group__head h3 {
+  color: #fff;
+  font-size: 1.22rem;
+  font-weight: 950;
+}
+
+.pricing-service-group__head p {
+  color: rgba(255,255,255,.70);
+  line-height: 1.5;
+}
+
+.pricing-service-card {
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-items: center;
+}
+
+.pricing-service-card em {
+  grid-column: 1 / -1;
+  color: #2f9d63;
+  font-size: .86rem;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.pricing-service-card .pricing-stepper {
+  grid-column: 1 / -1;
+}
+
+.pricing-app-summary {
+  position: sticky;
+  top: 110px;
+  display: grid;
+  gap: 18px;
+  padding: clamp(24px, 3vw, 32px);
+  color: #fff;
+  border-color: rgba(143,224,180,.18);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.30), transparent 34%),
+    radial-gradient(circle at 96% 12%, rgba(242,192,120,.18), transparent 34%),
+    linear-gradient(145deg, rgba(8,24,16,.97), rgba(18,50,32,.92));
+  box-shadow: 0 30px 88px rgba(0,0,0,.22), 0 0 40px rgba(60,179,113,.16), inset 0 1px 0 rgba(255,255,255,.13);
+}
+
+.pricing-app-summary.is-pulsing {
+  animation: pricingSummaryPulse .22s ease both;
+}
+
+.pricing-app-summary__badge {
+  width: fit-content;
+  padding: 8px 11px;
+  border-radius: 999px;
+  color: #8fe0b4;
+  background: rgba(143,224,180,.12);
+  font-size: .74rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.pricing-app-summary h3 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  line-height: .95;
+  font-weight: 950;
+}
+
+.pricing-app-summary p,
+.pricing-app-summary small {
+  margin: 0;
+  color: rgba(255,255,255,.68);
+  line-height: 1.6;
+}
+
+.pricing-app-summary__meta,
+.pricing-app-summary__lines {
+  display: grid;
+  gap: 10px;
+}
+
+.pricing-app-summary__meta p,
+.pricing-app-summary__lines p {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.08);
+}
+
+.pricing-app-summary__meta span,
+.pricing-app-summary__lines span {
+  color: rgba(255,255,255,.62);
+  font-size: .78rem;
+  font-weight: 850;
+}
+
+.pricing-app-summary__meta strong,
+.pricing-app-summary__lines strong {
+  color: #fff;
+  text-align: right;
+}
+
+.pricing-app-summary__cta {
+  display: inline-flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 999px;
+  color: #082016;
+  background: linear-gradient(135deg, #a8f0c7, #3CB371 58%, #2c8f5c);
+  font-weight: 950;
+  box-shadow: 0 20px 50px rgba(60,179,113,.28);
+}
+
+.pricing-popular-card,
+.pricing-price-group,
+.pricing-info-card,
+.pricing-faq__item {
+  padding: clamp(22px, 3vw, 30px);
+  border-radius: 28px;
+}
+
+.pricing-popular-card {
+  display: grid;
+  gap: 14px;
+}
+
+.pricing-popular-card h3,
+.pricing-price-group h3,
+.pricing-info-card h3 {
+  margin: 0;
+  color: #102018;
+  font-size: 1.18rem;
+  font-weight: 950;
+}
+
+.pricing-popular-card strong {
+  color: #1f7048;
+  font-size: 1.35rem;
+  font-weight: 950;
+}
+
+.pricing-popular-card div,
+.pricing-final-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pricing-popular-card button,
+.pricing-popular-card a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 950;
+}
+
+.pricing-popular-card button {
+  color: #082016;
+  background: rgba(60,179,113,.17);
+}
+
+.pricing-popular-card a {
+  color: #fff;
+  background: #102018;
+}
+
+.pricing-price-group {
+  display: grid;
+  gap: 16px;
+}
+
+.pricing-price-group p,
+.pricing-info-card p {
+  margin: 0;
+  color: #536359;
+  line-height: 1.65;
+}
+
+.pricing-price-group__rows {
+  display: grid;
+  gap: 8px;
+}
+
+.pricing-price-group__rows div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 0;
+  border-top: 1px solid rgba(25,70,44,.10);
+}
+
+.pricing-price-group__rows span {
+  color: #314937;
+  font-weight: 850;
+}
+
+.pricing-price-group__rows strong {
+  color: #102018;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.pricing-info-card {
+  display: grid;
+  gap: 14px;
+}
+
+.pricing-faq__list {
+  display: grid;
+  gap: 12px;
+}
+
+.pricing-faq__item summary {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  color: #102018;
+  font-weight: 950;
+}
+
+.pricing-faq__item p {
+  margin: 16px 0 0;
+  color: #536359;
+  line-height: 1.7;
+}
+
+.pricing-final-cta__panel {
+  display: grid;
+  gap: 24px;
+  padding: clamp(28px, 5vw, 54px);
+  border-radius: 32px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 84% 0%, rgba(242,192,120,.18), transparent 34%),
+    radial-gradient(circle at 12% 86%, rgba(60,179,113,.22), transparent 36%),
+    linear-gradient(135deg, rgba(9,26,17,.95), rgba(18,50,32,.90));
+}
+
+.pricing-final-cta__panel h2 {
+  margin: 12px 0 12px;
+  color: #fff;
+  font-size: clamp(2.1rem, 5vw, 4rem);
+  line-height: .98;
+  font-weight: 950;
+}
+
+.pricing-final-cta__panel p {
+  margin: 0;
+  color: rgba(255,255,255,.72);
+  line-height: 1.7;
+}
+
+.pricing-final-cta__actions a,
+.pricing-final-cta__actions button {
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.pricing-toast {
+  position: fixed;
+  z-index: 1500;
+  left: 50%;
+  bottom: 28px;
+  padding: 12px 16px;
+  border: 1px solid rgba(143,224,180,.28);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(9,28,18,.92);
+  box-shadow: 0 18px 48px rgba(0,0,0,.22), 0 0 28px rgba(60,179,113,.18);
+  opacity: 0;
+  transform: translate(-50%, 16px);
+  pointer-events: none;
+  transition: opacity .24s ease, transform .24s ease;
+}
+
+.pricing-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+html[data-theme="dark"] .pricing-app {
+  background:
+    radial-gradient(circle at 12% 4%, rgba(60,179,113,.20), transparent 34%),
+    radial-gradient(circle at 86% 16%, rgba(242,192,120,.12), transparent 34%),
+    linear-gradient(180deg, #0b1811 0%, #102018 56%, #07120d 100%);
+}
+
+html[data-theme="dark"] .pricing-app__section-head h2,
+html[data-theme="dark"] .pricing-mode-card strong,
+html[data-theme="dark"] .pricing-counter-card label,
+html[data-theme="dark"] .pricing-service-card strong,
+html[data-theme="dark"] .pricing-popular-card h3,
+html[data-theme="dark"] .pricing-price-group h3,
+html[data-theme="dark"] .pricing-info-card h3,
+html[data-theme="dark"] .pricing-faq__item summary,
+html[data-theme="dark"] .pricing-price-group__rows strong {
+  color: #fff;
+}
+
+html[data-theme="dark"] .pricing-app__section-head p,
+html[data-theme="dark"] .pricing-mode-card small,
+html[data-theme="dark"] .pricing-counter-card small,
+html[data-theme="dark"] .pricing-service-card small,
+html[data-theme="dark"] .pricing-price-group p,
+html[data-theme="dark"] .pricing-info-card p,
+html[data-theme="dark"] .pricing-faq__item p,
+html[data-theme="dark"] .pricing-price-group__rows span,
+html[data-theme="dark"] .pricing-app__toolbar p {
+  color: rgba(255,255,255,.68);
+}
+
+html[data-theme="dark"] .pricing-mode-card,
+html[data-theme="dark"] .pricing-app__panel,
+html[data-theme="dark"] .pricing-counter-card,
+html[data-theme="dark"] .pricing-service-card,
+html[data-theme="dark"] .pricing-popular-card,
+html[data-theme="dark"] .pricing-price-group,
+html[data-theme="dark"] .pricing-info-card,
+html[data-theme="dark"] .pricing-faq__item {
+  border-color: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+html[data-theme="dark"] .pricing-stepper input,
+html[data-theme="dark"] .pricing-season-toggle {
+  color: #fff;
+  border-color: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.08);
+}
+
+@media (min-width: 720px) {
+  .pricing-mode-grid,
+  .pricing-counters,
+  .pricing-service-grid,
+  .pricing-popular__grid,
+  .pricing-info__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1040px) {
+  .pricing-mode-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pricing-app__layout {
+    grid-template-columns: minmax(0, 1fr) 390px;
+  }
+
+  .pricing-counters {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .pricing-service-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pricing-popular__grid,
+  .pricing-info__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pricing-full__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pricing-final-cta__panel {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+}
+
+@media (max-width: 640px) {
+  .pricing-season-toggle {
+    width: 100%;
+  }
+
+  .pricing-season-toggle button {
+    flex: 1 1 0;
+  }
+
+  .pricing-popular-card div,
+  .pricing-final-cta__actions {
+    display: grid;
+  }
+
+  .pricing-popular-card button,
+  .pricing-popular-card a,
+  .pricing-final-cta__actions a,
+  .pricing-final-cta__actions button {
+    width: 100%;
+  }
+
+  .pricing-price-group__rows div {
+    display: grid;
+  }
+
+  .pricing-price-group__rows strong {
+    text-align: left;
+    white-space: normal;
+  }
+}
+
+@keyframes pricingCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pricingSummaryPulse {
+  50% {
+    transform: translateY(-2px);
+    box-shadow: 0 34px 94px rgba(0,0,0,.24), 0 0 56px rgba(60,179,113,.24), inset 0 1px 0 rgba(255,255,255,.13);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pricing-app *,
+  .pricing-toast {
+    animation: none !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>

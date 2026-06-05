@@ -1,5 +1,5 @@
 ---
-import PricingCalculator from '@/components/pricing/PricingCalculator.astro';
+import PremiumPricingApp from '@/components/pricing/PremiumPricingApp.astro';
 import Icon from '@/components/ui/Icon.astro';
 import TransportDirections from './TransportDirections.astro';
 import AttractionsPage from './AttractionsPage.astro';
@@ -57,14 +57,57 @@ const contactHeroTextByLanguage = {
     lead: 'Telefono, email, indirizzo, Google Maps e accesso rapido alla prenotazione.',
   },
 };
+const pricingHeroTextByLanguage = {
+  pl: {
+    overline: `Cennik Camping Clepardia ${currentYear}`,
+    title: 'Cennik Camping Clepardia',
+    lead: 'Sprawdź orientacyjny koszt pobytu i wybierz najlepszy wariant dla siebie.',
+    primary: 'Oblicz koszt',
+    secondary: 'Zarezerwuj pobyt',
+    notes: ['Cena jest orientacyjna', 'Dostępność potwierdza recepcja', 'Camping 12:00-12:00', 'Domki 16:00-11:00'],
+  },
+  en: {
+    overline: `Camping Clepardia prices ${currentYear}`,
+    title: 'Camping Clepardia prices',
+    lead: 'Check the indicative stay cost and choose the best option for you.',
+    primary: 'Calculate cost',
+    secondary: 'Book your stay',
+    notes: ['Indicative price', 'Reception confirms availability', 'Camping 12:00-12:00', 'Bungalows 16:00-11:00'],
+  },
+  de: {
+    overline: `Camping Clepardia Preisliste ${currentYear}`,
+    title: 'Preise Camping Clepardia',
+    lead: 'Prüfen Sie die ungefähren Aufenthaltskosten und wählen Sie die passende Option.',
+    primary: 'Kosten berechnen',
+    secondary: 'Aufenthalt buchen',
+    notes: ['Richtpreis', 'Rezeption bestätigt Verfügbarkeit', 'Camping 12:00-12:00', 'Bungalows 16:00-11:00'],
+  },
+  it: {
+    overline: `Prezzi Camping Clepardia ${currentYear}`,
+    title: 'Prezzi Camping Clepardia',
+    lead: 'Controlla il costo indicativo del soggiorno e scegli la soluzione migliore.',
+    primary: 'Calcola costo',
+    secondary: 'Prenota soggiorno',
+    notes: ['Prezzo indicativo', 'La reception conferma disponibilità', 'Camping 12:00-12:00', 'Bungalow 16:00-11:00'],
+  },
+};
 const contactHeroText = contactHeroTextByLanguage[resolvedContentLanguage];
+const pricingHeroText = pricingHeroTextByLanguage[resolvedContentLanguage];
 const displayOverline = page.slug === 'kontakt'
   ? contactHeroText.overline
   : page.slug === 'cennik'
-    ? pricingOverlineByLanguage[resolvedContentLanguage]
+    ? pricingHeroText.overline
     : page.overline;
-const displayTitle = page.slug === 'kontakt' ? contactHeroText.title : page.title;
-const displayLead = page.slug === 'kontakt' ? contactHeroText.lead : page.lead;
+const displayTitle = page.slug === 'kontakt'
+  ? contactHeroText.title
+  : page.slug === 'cennik'
+    ? pricingHeroText.title
+    : page.title;
+const displayLead = page.slug === 'kontakt'
+  ? contactHeroText.lead
+  : page.slug === 'cennik'
+    ? pricingHeroText.lead
+    : page.lead;
 const localizeHref = (href: string) => href.startsWith('/') ? getLocalizedPath(linkLanguage, href) : href;
 const homeHref = getLocalizedPath(linkLanguage, '');
 const breadcrumbHome = languageName ? `Camping Clepardia ${languageName}` : 'Camping Clepardia';
@@ -235,6 +278,25 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
     <span class="section-kicker">{displayOverline}</span>
     <h1>{displayTitle}</h1>
     <p>{displayLead}</p>
+    {page.slug === 'cennik' && (
+      <div class="pricing-hero-actions" aria-label="Szybkie akcje cennika">
+        <div class="pricing-hero-actions__buttons">
+          <a class="btn btn-primary premium-button" href="#oblicz-koszt">
+            <Icon name="pricing" size={18} strokeWidth={2} />
+            {pricingHeroText.primary}
+          </a>
+          <a class="btn btn-glass pricing-hero-actions__secondary" href={bookingHref}>
+            <Icon name="booking" size={18} strokeWidth={2} />
+            {pricingHeroText.secondary}
+          </a>
+        </div>
+        <div class="pricing-hero-actions__notes">
+          {pricingHeroText.notes.map((note) => (
+            <span><Icon name="check" size={15} strokeWidth={2.2} /> {note}</span>
+          ))}
+        </div>
+      </div>
+    )}
   </div>
 </section>
 
@@ -262,7 +324,7 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 </section>
 )}
 
-{page.slug === 'cennik' && (
+{false && page.slug === 'cennik' && (
   <section class="pricing-quick-info reveal-section" aria-label={t.content.pricingQuickAria}>
     <div class="container pricing-quick-info__grid">
       {pricingInfoBarItems.map((item) => (
@@ -408,7 +470,7 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   </section>
 )}
 
-{page.slug === 'cennik' && <PricingCalculator languageCode={contentLanguage} />}
+{page.slug === 'cennik' && <PremiumPricingApp languageCode={contentLanguage} />}
 
 {page.slug === 'dojazd' && <TransportDirections languageCode={contentLanguage} />}
 
@@ -424,7 +486,7 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 
 {(page.slug === 'regulamin' || page.slug === 'polityka-prywatnosci') && <LegalPage pageSlug={page.slug} languageCode={contentLanguage} />}
 
-{page.slug === 'cennik' && (
+{false && page.slug === 'cennik' && (
   <section class="site-section page-detail pricing-guidance reveal-section">
     <div class="container page-detail__grid">
       <div class="page-detail__intro">
@@ -468,7 +530,7 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   </section>
 )}
 
-{page.slug !== 'kontakt' && page.slug !== 'dojazd' && page.slug !== 'atrakcje' && page.slug !== 'faq' && page.slug !== 'galeria' && page.slug !== 'dla-kamperow' && page.slug !== 'dla-rodzin' && (
+{page.slug !== 'cennik' && page.slug !== 'kontakt' && page.slug !== 'dojazd' && page.slug !== 'atrakcje' && page.slug !== 'faq' && page.slug !== 'galeria' && page.slug !== 'dla-kamperow' && page.slug !== 'dla-rodzin' && (
 <section class="site-section page-cta reveal-section">
   <div class="container">
     <div class="page-cta__panel premium-card">
@@ -547,6 +609,61 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   color: rgba(255,255,255,.84);
   font-size: clamp(1.02rem, 2vw, 1.24rem);
   line-height: 1.72;
+}
+
+.pricing-hero-actions {
+  display: grid;
+  gap: 18px;
+  margin-top: 8px;
+}
+
+.pricing-hero-actions__buttons,
+.pricing-hero-actions__notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.pricing-hero-actions__buttons a {
+  min-height: 54px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pricing-hero-actions__secondary {
+  min-height: 54px;
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff;
+  background: rgba(255,255,255,.09);
+  font-weight: 950;
+}
+
+.pricing-hero-actions__secondary:hover {
+  color: #fff;
+  border-color: rgba(143,224,180,.42);
+  background: rgba(255,255,255,.15);
+}
+
+.pricing-hero-actions__notes span {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid rgba(143,224,180,.22);
+  border-radius: 999px;
+  color: rgba(255,255,255,.80);
+  background: rgba(255,255,255,.08);
+  font-size: .82rem;
+  font-weight: 850;
+}
+
+.pricing-hero-actions__notes svg {
+  color: #8fe0b4;
 }
 
 .page-detail {

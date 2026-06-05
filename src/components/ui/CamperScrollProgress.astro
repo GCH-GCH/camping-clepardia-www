@@ -6,8 +6,8 @@
     <img
       src="/brand/logo/clepardia-logo-white.svg"
       alt=""
-      width="56"
-      height="56"
+      width="60"
+      height="60"
       loading="eager"
       decoding="async"
     />
@@ -62,13 +62,13 @@
 .camper-scroll-progress {
   position: fixed;
   z-index: 930;
-  left: 14px;
+  left: 4px;
   top: 120px;
   bottom: 90px;
-  width: 52px;
+  width: 82px;
   pointer-events: none;
   opacity: .92;
-  contain: layout paint;
+  contain: layout style;
 }
 
 .camper-scroll-progress__track {
@@ -102,9 +102,11 @@
   position: absolute;
   left: 50%;
   top: 0;
-  display: block;
-  width: 58px;
-  height: 58px;
+  display: grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  padding: 7px;
   overflow: visible;
   transform: translate3d(-50%, 0, 0);
   will-change: transform;
@@ -112,9 +114,9 @@
 
 .camper-scroll-progress__marker img {
   display: block;
-  width: 58px;
+  width: 60px;
   max-width: none;
-  height: 58px;
+  height: 60px;
   object-fit: contain;
   transform: translate3d(0, 0, 0);
   border: 0;
