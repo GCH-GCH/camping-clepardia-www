@@ -5,6 +5,7 @@ import { resolveContentLanguage } from '@/i18n/config';
 const pathContext = getPathContext(Astro.url.pathname);
 const lang = resolveContentLanguage(pathContext.languageCode);
 const isHome = !pathContext.slug;
+const isPricingPage = pathContext.slug === 'cennik';
 const copy = {
   pl: { home: 'Przewiń', page: 'Przewiń' },
   en: { home: 'Scroll', page: 'Scroll' },
@@ -15,7 +16,7 @@ const copy = {
 const label = isHome ? copy.home : copy.page;
 ---
 
-<button class="page-scroll-hint" type="button" data-page-scroll-hint aria-label={label}>
+<button class:list={['page-scroll-hint', isPricingPage && 'page-scroll-hint--pricing']} type="button" data-page-scroll-hint aria-label={label}>
   <span class="page-scroll-hint__mouse" aria-hidden="true">
     <span class="page-scroll-hint__wheel"></span>
   </span>
@@ -229,6 +230,10 @@ html[data-theme="light"] .page-scroll-hint__wheel {
 }
 
 @media (max-width: 720px) {
+  .page-scroll-hint--pricing {
+    display: none;
+  }
+
   .page-scroll-hint {
     bottom: max(16px, calc(16px + env(safe-area-inset-bottom)));
     width: 68px;

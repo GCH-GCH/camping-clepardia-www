@@ -231,6 +231,71 @@ const presets = [
   },
 ];
 
+const popularSpotlightCards = [
+  {
+    presetId: 'camper-electricity',
+    icon: 'camper',
+    label: 'Najczęściej wybierany camping',
+    title: '2 osoby + kamper + prąd',
+    price: popularPrice.camperElectricity,
+    composition: '2 dorosłych, kamper, prąd 10A',
+    copy: 'Pełny campingowy klasyk z szybkim podłączeniem do prądu.',
+    href: `${bookingHref}?stay=camping&preset=camper-electricity`,
+  },
+  {
+    presetId: 'van',
+    icon: 'busFront',
+    label: 'Lekki city break',
+    title: '2 osoby + van',
+    price: popularPrice.van,
+    composition: '2 dorosłych, van',
+    copy: 'Prosty wariant dla krótszego pobytu blisko centrum.',
+    href: `${bookingHref}?stay=camping&preset=van`,
+  },
+  {
+    presetId: 'caravan-electricity-car',
+    icon: 'caravan',
+    label: 'Przyczepa z autem',
+    title: '2 osoby + auto + przyczepa + prąd',
+    price: popularPrice.caravanElectricityCar,
+    composition: '2 dorosłych, auto, przyczepa, prąd 10A',
+    copy: 'Czytelny zestaw dla pary podróżującej z przyczepą.',
+    href: `${bookingHref}?stay=camping&preset=caravan-electricity`,
+  },
+  {
+    presetId: 'tent-small',
+    icon: 'tent',
+    label: 'Najprostszy namiot',
+    title: '2 osoby + namiot 1-2 os.',
+    price: popularPrice.tentSmall,
+    composition: '2 dorosłych, namiot 1-2 os.',
+    copy: 'Budżetowy wariant z pełnym dostępem do campingu.',
+    href: `${bookingHref}?stay=camping&preset=tent-small`,
+  },
+  {
+    presetId: 'bungalow-2',
+    icon: 'house',
+    label: 'Domek dla pary',
+    title: 'Domek 2-os.',
+    price: popularPrice.bungalow2,
+    prefix: 'od ',
+    composition: 'Domek 2-osobowy, niski sezon',
+    copy: 'Najprostszy wariant domku dla dwóch osób.',
+    href: `${bookingHref}?stay=bungalow&preset=bungalow-2`,
+  },
+  {
+    presetId: 'bungalow-4',
+    icon: 'house',
+    label: 'Domek rodzinny',
+    title: 'Domek 4-os.',
+    price: popularPrice.bungalow4,
+    prefix: 'od ',
+    composition: 'Domek 4-osobowy, niski sezon',
+    copy: 'Dla rodziny lub małej grupy, z rezerwacją domku.',
+    href: `${bookingHref}?stay=bungalow&preset=bungalow-4`,
+  },
+];
+
 const fullPriceGroups = [
   {
     icon: 'users',
@@ -331,6 +396,35 @@ const pricingAppConfig = {
 
 <section class="pricing-app" data-pricing-app>
   <div class="container pricing-app__container">
+    <section class="pricing-spotlight reveal-section" aria-labelledby="pricingSpotlightTitle">
+      <div class="pricing-app__section-head pricing-app__section-head--wide">
+        <span class="section-kicker">Najpopularniejsze ceny</span>
+        <h2 id="pricingSpotlightTitle">Szybki podgląd najczęstszych pobytów</h2>
+        <p>Najpierw zobacz realne przykłady, potem dopasuj szczegóły w kalkulatorze.</p>
+      </div>
+      <div class="pricing-spotlight__grid">
+        {popularSpotlightCards.map((card, index) => (
+          <article
+            class:list={['pricing-spotlight-card', 'premium-card', index === 0 && 'pricing-spotlight-card--featured']}
+            style={`--delay: ${index * 70}ms`}
+          >
+            <span class="pricing-spotlight-card__icon"><Icon name={card.icon} size={32} strokeWidth={2.35} /></span>
+            <div class="pricing-spotlight-card__body">
+              <small>{card.label}</small>
+              <h3>{card.title}</h3>
+              <p>{card.copy}</p>
+              <em>{card.composition}</em>
+            </div>
+            <strong>{card.prefix ?? ''}{formatPrice(card.price)} <small>/ noc</small></strong>
+            <div class="pricing-spotlight-card__actions">
+              <button type="button" data-pricing-preset={card.presetId}>Użyj w kalkulatorze</button>
+              <a href={card.href}>Zarezerwuj</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
     <section class="pricing-app__choice reveal-section" aria-labelledby="pricingStayTypeTitle">
       <div class="pricing-app__section-head">
         <span class="section-kicker">Wybierz typ pobytu</span>
@@ -527,7 +621,10 @@ const pricingAppConfig = {
             <span class="pricing-app-summary__badge"><Icon name="receipt" size={16} strokeWidth={2.4} /> Orientacyjna cena</span>
             <small>Status: do potwierdzenia przez recepcję</small>
           </div>
-          <h3 data-summary-total>{formatPrice(popularPrice.camperElectricity - electricity.price)}</h3>
+          <div class="pricing-app-summary__price">
+            <span>Razem orientacyjnie</span>
+            <h3 data-summary-total>{formatPrice(popularPrice.camperElectricity - electricity.price)}</h3>
+          </div>
           <p data-summary-hint>Wybrano domyślnie: 2 osoby + kamper. Dodaj prąd albo wybierz popularny zestaw.</p>
           <div class="pricing-app-summary__meta">
             <p><span><Icon name="camping" size={15} strokeWidth={2.3} /> Typ pobytu</span><strong data-summary-mode>Camping</strong></p>
@@ -879,8 +976,8 @@ const pricingAppConfig = {
 
 .pricing-app__container {
   display: grid;
-  gap: clamp(54px, 8vw, 98px);
-  padding-top: clamp(52px, 7vw, 86px);
+  gap: clamp(64px, 8vw, 112px);
+  padding-top: clamp(48px, 7vw, 90px);
   padding-bottom: clamp(64px, 8vw, 104px);
 }
 
@@ -898,7 +995,7 @@ const pricingAppConfig = {
 .pricing-app__section-head h2 {
   margin: 0;
   color: #102018;
-  font-size: clamp(2.1rem, 5.5vw, 4.5rem);
+  font-size: clamp(2.1rem, 5.2vw, 4.15rem);
   line-height: .98;
   font-weight: 950;
 }
@@ -910,6 +1007,146 @@ const pricingAppConfig = {
   line-height: 1.72;
 }
 
+.pricing-spotlight__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(16px, 2vw, 22px);
+}
+
+.pricing-spotlight-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 300px;
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding: clamp(24px, 3.4vw, 38px);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(60,179,113,.18), transparent 32%),
+    linear-gradient(145deg, rgba(255,255,255,.92), rgba(240,249,243,.76));
+  box-shadow: 0 28px 80px rgba(17,40,28,.12), inset 0 1px 0 rgba(255,255,255,.74);
+  animation: pricingCardIn .58s cubic-bezier(.22, 1, .36, 1) both;
+  animation-delay: var(--delay, 0ms);
+  transition: transform .28s cubic-bezier(.22, 1, .36, 1), border-color .28s ease, box-shadow .28s ease;
+}
+
+.pricing-spotlight-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(120deg, transparent 0 38%, rgba(255,255,255,.48) 50%, transparent 64%),
+    radial-gradient(circle at 12% 100%, rgba(242,192,120,.16), transparent 36%);
+  transform: translateX(-52%);
+  transition: opacity .28s ease, transform .8s ease;
+}
+
+.pricing-spotlight-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(60,179,113,.36);
+  box-shadow: 0 34px 94px rgba(17,40,28,.16), 0 0 34px rgba(60,179,113,.14), inset 0 1px 0 rgba(255,255,255,.80);
+}
+
+.pricing-spotlight-card:hover::after {
+  opacity: 1;
+  transform: translateX(34%);
+}
+
+.pricing-spotlight-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pricing-spotlight-card__body {
+  display: grid;
+  gap: 9px;
+}
+
+.pricing-spotlight-card__body small {
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #137a49;
+  background: rgba(60,179,113,.12);
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+}
+
+.pricing-spotlight-card h3 {
+  margin: 0;
+  color: #102018;
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  line-height: 1.05;
+  font-weight: 950;
+}
+
+.pricing-spotlight-card p,
+.pricing-spotlight-card em {
+  margin: 0;
+  color: #536359;
+  line-height: 1.58;
+  font-style: normal;
+  font-weight: 780;
+}
+
+.pricing-spotlight-card em {
+  color: #1f7048;
+  font-size: .86rem;
+  font-weight: 950;
+}
+
+.pricing-spotlight-card > strong {
+  color: #0f6b3f;
+  font-size: clamp(2rem, 4.2vw, 3.05rem);
+  line-height: .95;
+  font-weight: 950;
+}
+
+.pricing-spotlight-card--featured > strong {
+  font-size: clamp(2.4rem, 5.2vw, 3.85rem);
+}
+
+.pricing-spotlight-card > strong small {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.pricing-spotlight-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.pricing-spotlight-card__actions button,
+.pricing-spotlight-card__actions a {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 999px;
+  font-weight: 950;
+}
+
+.pricing-spotlight-card__actions button {
+  color: #082016;
+  background: linear-gradient(135deg, rgba(168,240,199,.92), rgba(60,179,113,.82));
+  box-shadow: 0 16px 36px rgba(60,179,113,.20);
+}
+
+.pricing-spotlight-card__actions a {
+  color: #fff;
+  background: #102018;
+}
+
 .pricing-mode-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -919,12 +1156,12 @@ const pricingAppConfig = {
 .pricing-mode-card {
   position: relative;
   overflow: hidden;
-  min-height: 260px;
+  min-height: 292px;
   display: grid;
   justify-items: start;
   align-content: start;
   gap: 14px;
-  padding: clamp(24px, 3vw, 34px);
+  padding: clamp(26px, 3.4vw, 40px);
   border: 1px solid rgba(25,70,44,.12);
   border-radius: 30px;
   text-align: left;
@@ -965,6 +1202,7 @@ const pricingAppConfig = {
 }
 
 .pricing-mode-card__icon,
+.pricing-spotlight-card__icon,
 .pricing-price-group__icon,
 .pricing-info-card > span,
 .pricing-service-group__head > span,
@@ -1024,7 +1262,7 @@ const pricingAppConfig = {
 .pricing-app__layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: clamp(20px, 3vw, 34px);
+  gap: clamp(24px, 3vw, 36px);
   align-items: start;
 }
 
@@ -1035,8 +1273,8 @@ const pricingAppConfig = {
 
 .pricing-app__panel {
   display: grid;
-  gap: 22px;
-  padding: clamp(20px, 3vw, 34px);
+  gap: clamp(24px, 3vw, 36px);
+  padding: clamp(22px, 3.2vw, 42px);
   background:
     radial-gradient(circle at 8% 0%, rgba(60,179,113,.12), transparent 34%),
     rgba(255,255,255,.82);
@@ -1095,12 +1333,14 @@ const pricingAppConfig = {
 .pricing-service-card {
   position: relative;
   display: grid;
-  gap: 10px;
-  padding: 16px;
-  border: 1px solid rgba(25,70,44,.10);
-  border-radius: 24px;
-  background: rgba(255,255,255,.66);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.62);
+  gap: 14px;
+  padding: clamp(18px, 2vw, 24px);
+  border: 1px solid rgba(25,70,44,.09);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 94% 0%, rgba(60,179,113,.10), transparent 36%),
+    rgba(255,255,255,.70);
+  box-shadow: 0 12px 34px rgba(17,40,28,.06), inset 0 1px 0 rgba(255,255,255,.66);
   transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
 }
 
@@ -1143,18 +1383,18 @@ const pricingAppConfig = {
 
 .pricing-stepper {
   display: grid;
-  grid-template-columns: 46px minmax(56px, 1fr) 46px;
-  gap: 8px;
+  grid-template-columns: 54px minmax(64px, 1fr) 54px;
+  gap: 10px;
   align-items: center;
 }
 
 .pricing-stepper button {
-  width: 46px;
-  height: 46px;
+  width: 54px;
+  height: 54px;
   display: grid;
   place-items: center;
   border: 1px solid rgba(60,179,113,.22);
-  border-radius: 16px;
+  border-radius: 18px;
   color: #1f7048;
   background: rgba(60,179,113,.12);
   transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
@@ -1168,9 +1408,9 @@ const pricingAppConfig = {
 
 .pricing-stepper input {
   width: 100%;
-  height: 46px;
+  height: 54px;
   border: 1px solid rgba(25,70,44,.12);
-  border-radius: 16px;
+  border-radius: 18px;
   color: #102018;
   background: rgba(255,255,255,.80);
   text-align: center;
@@ -1216,7 +1456,7 @@ const pricingAppConfig = {
 }
 
 .pricing-service-card {
-  grid-template-columns: 66px minmax(0, 1fr);
+  grid-template-columns: 72px minmax(0, 1fr);
   align-items: center;
 }
 
@@ -1265,10 +1505,30 @@ const pricingAppConfig = {
 
 .pricing-app-summary h3 {
   margin: 0;
-  color: #fff;
+  color: #082016;
   font-size: clamp(2.2rem, 5vw, 3.6rem);
   line-height: .95;
   font-weight: 950;
+}
+
+.pricing-app-summary__price {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid rgba(143,224,180,.30);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(255,255,255,.38), transparent 32%),
+    linear-gradient(135deg, #c6f8d9, #6ade9d 56%, #3CB371);
+  box-shadow: 0 22px 54px rgba(60,179,113,.25), inset 0 1px 0 rgba(255,255,255,.62);
+}
+
+.pricing-app-summary__price span {
+  color: rgba(8,32,22,.70);
+  font-size: .75rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
 }
 
 .pricing-app-summary p,
@@ -1395,11 +1655,14 @@ const pricingAppConfig = {
 }
 
 .pricing-price-group__rows div {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 13px 0;
-  border-top: 1px solid rgba(25,70,44,.10);
+  display: grid;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid rgba(25,70,44,.09);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(60,179,113,.08), transparent 38%),
+    rgba(255,255,255,.56);
 }
 
 .pricing-price-group__rows span {
@@ -1409,8 +1672,8 @@ const pricingAppConfig = {
 
 .pricing-price-group__rows strong {
   color: #102018;
-  text-align: right;
-  white-space: nowrap;
+  text-align: left;
+  white-space: normal;
 }
 
 .pricing-info-card {
@@ -1503,6 +1766,7 @@ html[data-theme="dark"] .pricing-app {
 }
 
 html[data-theme="dark"] .pricing-app__section-head h2,
+html[data-theme="dark"] .pricing-spotlight-card h3,
 html[data-theme="dark"] .pricing-mode-card strong,
 html[data-theme="dark"] .pricing-counter-card label,
 html[data-theme="dark"] .pricing-service-card strong,
@@ -1515,6 +1779,8 @@ html[data-theme="dark"] .pricing-price-group__rows strong {
 }
 
 html[data-theme="dark"] .pricing-app__section-head p,
+html[data-theme="dark"] .pricing-spotlight-card p,
+html[data-theme="dark"] .pricing-spotlight-card em,
 html[data-theme="dark"] .pricing-mode-card small,
 html[data-theme="dark"] .pricing-counter-card small,
 html[data-theme="dark"] .pricing-service-card small,
@@ -1527,6 +1793,7 @@ html[data-theme="dark"] .pricing-app__toolbar p {
 }
 
 html[data-theme="dark"] .pricing-mode-card,
+html[data-theme="dark"] .pricing-spotlight-card,
 html[data-theme="dark"] .pricing-app__panel,
 html[data-theme="dark"] .pricing-counter-card,
 html[data-theme="dark"] .pricing-service-card,
@@ -1559,6 +1826,7 @@ html[data-theme="dark"] .pricing-season-toggle {
 }
 
 .pricing-mode-card__icon,
+.pricing-spotlight-card__icon,
 .pricing-price-group__icon,
 .pricing-info-card > span,
 .pricing-service-group__head > span,
@@ -1852,6 +2120,14 @@ html[data-theme="light"] .pricing-app-summary h3 {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.82);
 }
 
+html[data-theme="light"] .pricing-app-summary__price h3,
+html[data-theme="dark"] .pricing-app-summary__price h3 {
+  padding: 0;
+  color: #082016;
+  background: transparent;
+  box-shadow: none;
+}
+
 html[data-theme="light"] .pricing-app-summary p,
 html[data-theme="light"] .pricing-app-summary small,
 html[data-theme="light"] .pricing-app-summary__top > small {
@@ -1886,6 +2162,7 @@ html[data-theme="light"] .pricing-app-summary__campy {
 }
 
 html[data-theme="light"] .pricing-mode-card,
+html[data-theme="light"] .pricing-spotlight-card,
 html[data-theme="light"] .pricing-app__panel,
 html[data-theme="light"] .pricing-counter-card,
 html[data-theme="light"] .pricing-service-card,
@@ -1898,6 +2175,7 @@ html[data-theme="light"] .pricing-faq__item {
 }
 
 html[data-theme="dark"] .pricing-mode-card__icon,
+html[data-theme="dark"] .pricing-spotlight-card__icon,
 html[data-theme="dark"] .pricing-price-group__icon,
 html[data-theme="dark"] .pricing-info-card > span,
 html[data-theme="dark"] .pricing-service-group__head > span,
@@ -1943,7 +2221,29 @@ html[data-theme="dark"] .pricing-faq__item summary span svg {
   color: #8fe0b4;
 }
 
+.pricing-app .pricing-counter-group,
+.pricing-app .pricing-service-group,
+.pricing-app .pricing-service-subgroup {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.pricing-app .pricing-counter-groups,
+.pricing-app .pricing-service-groups,
+.pricing-app .pricing-service-subgroup {
+  gap: clamp(24px, 3vw, 34px);
+}
+
+html[data-theme="dark"] .pricing-app .pricing-counter-group,
+html[data-theme="dark"] .pricing-app .pricing-service-group,
+html[data-theme="dark"] .pricing-app .pricing-service-subgroup {
+  border-color: transparent;
+  background: transparent;
+}
+
 @media (min-width: 720px) {
+  .pricing-spotlight__grid,
   .pricing-mode-grid,
   .pricing-service-grid,
   .pricing-popular__grid,
@@ -1957,12 +2257,20 @@ html[data-theme="dark"] .pricing-faq__item summary span svg {
 }
 
 @media (min-width: 1040px) {
+  .pricing-spotlight__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pricing-spotlight-card--featured {
+    grid-column: span 2;
+  }
+
   .pricing-mode-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .pricing-app__layout {
-    grid-template-columns: minmax(0, 1fr) 390px;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);
   }
 
   .pricing-counters {
@@ -1970,7 +2278,7 @@ html[data-theme="dark"] .pricing-faq__item summary span svg {
   }
 
   .pricing-service-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .pricing-popular__grid,
@@ -1988,12 +2296,23 @@ html[data-theme="dark"] .pricing-faq__item summary span svg {
   }
 }
 
+@media (max-width: 1039px) {
+  .pricing-app-summary {
+    position: static;
+  }
+}
+
 @media (max-width: 640px) {
   .pricing-app {
     overflow-x: clip;
   }
 
+  .pricing-app__container {
+    padding-top: clamp(76px, 20vw, 104px);
+  }
+
   .pricing-app__container,
+  .pricing-spotlight,
   .pricing-app__choice,
   .pricing-popular,
   .pricing-app__calculator,
@@ -2002,6 +2321,7 @@ html[data-theme="dark"] .pricing-faq__item summary span svg {
   .pricing-faq,
   .pricing-final-cta,
   .pricing-mode-grid,
+  .pricing-spotlight__grid,
   .pricing-popular__grid,
   .pricing-service-grid,
   .pricing-info__grid,
@@ -2012,6 +2332,10 @@ html[data-theme="dark"] .pricing-faq__item summary span svg {
 
   .pricing-app__section-head h2,
   .pricing-app__section-head p,
+  .pricing-spotlight-card h3,
+  .pricing-spotlight-card p,
+  .pricing-spotlight-card em,
+  .pricing-spotlight-card > strong,
   .pricing-mode-card strong,
   .pricing-mode-card small,
   .pricing-popular-card h3,
@@ -2030,6 +2354,7 @@ html[data-theme="dark"] .pricing-faq__item summary span svg {
   }
 
   .pricing-mode-card,
+  .pricing-spotlight-card,
   .pricing-popular-card,
   .pricing-app__panel,
   .pricing-app-summary,
@@ -2049,12 +2374,15 @@ html[data-theme="dark"] .pricing-faq__item summary span svg {
   }
 
   .pricing-popular-card div,
+  .pricing-spotlight-card__actions,
   .pricing-final-cta__actions {
     display: grid;
   }
 
   .pricing-popular-card button,
   .pricing-popular-card a,
+  .pricing-spotlight-card__actions button,
+  .pricing-spotlight-card__actions a,
   .pricing-final-cta__actions a,
   .pricing-final-cta__actions button {
     width: 100%;
@@ -2063,6 +2391,10 @@ html[data-theme="dark"] .pricing-faq__item summary span svg {
 
   .pricing-service-card {
     grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  .pricing-app-summary {
+    position: static;
   }
 
   .pricing-stepper {

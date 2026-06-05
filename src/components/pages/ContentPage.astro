@@ -307,6 +307,11 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
     <p>{displayLead}</p>
     {page.slug === 'cennik' && (
       <div class="pricing-hero-actions" aria-label="Szybkie akcje cennika">
+        <article class="pricing-hero-actions__featured">
+          <span>Najczęściej wybierany pobyt</span>
+          <strong>{pricingHeroStats[0].value} <small>/ noc</small></strong>
+          <p>{pricingHeroStats[0].label}</p>
+        </article>
         <div class="pricing-hero-actions__buttons">
           <a class="btn btn-primary premium-button" href="#oblicz-koszt">
             <Icon name="pricing" size={18} strokeWidth={2} />
@@ -669,8 +674,70 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 
 .pricing-hero-actions {
   display: grid;
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
   margin-top: 8px;
+  max-width: 1040px;
+}
+
+.pricing-hero-actions__featured {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 10px;
+  max-width: 540px;
+  padding: clamp(22px, 3vw, 32px);
+  border: 1px solid rgba(143,224,180,.30);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(242,192,120,.18), transparent 34%),
+    linear-gradient(145deg, rgba(143,224,180,.16), rgba(255,255,255,.07));
+  box-shadow: 0 26px 72px rgba(0,0,0,.18), 0 0 42px rgba(60,179,113,.15), inset 0 1px 0 rgba(255,255,255,.14);
+}
+
+.pricing-hero-actions__featured::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, transparent 0 36%, rgba(255,255,255,.22) 48%, transparent 62%);
+  transform: translateX(-38%);
+}
+
+.pricing-hero-actions__featured > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pricing-hero-actions__featured span {
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #b7f4cf;
+  background: rgba(143,224,180,.12);
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.pricing-hero-actions__featured strong {
+  color: #fff;
+  font-size: clamp(2.2rem, 6vw, 4.35rem);
+  line-height: .92;
+  font-weight: 950;
+}
+
+.pricing-hero-actions__featured strong small {
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  font-weight: 900;
+}
+
+.pricing-hero-actions__featured p {
+  max-width: 360px;
+  color: rgba(255,255,255,.78);
+  font-size: 1rem;
+  font-weight: 850;
 }
 
 .pricing-hero-actions__buttons,
@@ -1335,6 +1402,22 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
     grid-template-columns: repeat(4, 1fr);
   }
 
+  .page-mini-hero--pricing .pricing-hero-actions {
+    grid-template-columns: minmax(0, .9fr) minmax(360px, 520px);
+    align-items: end;
+  }
+
+  .page-mini-hero--pricing .pricing-hero-actions__featured {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+  }
+
+  .page-mini-hero--pricing .pricing-hero-actions__buttons,
+  .page-mini-hero--pricing .pricing-hero-actions__notes,
+  .page-mini-hero--pricing .pricing-hero-actions__stats {
+    grid-column: 1;
+  }
+
   .pricing-guidance__cards {
     grid-template-columns: repeat(4, 1fr);
   }
@@ -1405,11 +1488,21 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   }
 
   .pricing-hero-actions,
+  .pricing-hero-actions__featured,
   .pricing-hero-actions__notes,
   .pricing-hero-actions__notes span,
   .pricing-hero-actions__stats span {
     max-width: 100%;
     min-width: 0;
+  }
+
+  .pricing-hero-actions__featured {
+    padding: 20px;
+  }
+
+  .pricing-hero-actions__featured strong {
+    font-size: clamp(2.1rem, 11vw, 3rem);
+    overflow-wrap: anywhere;
   }
 
   .pricing-hero-actions__buttons a {
