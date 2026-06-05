@@ -2567,6 +2567,15 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       });
     };
 
+    const calendarIsoFromPoint = (event) => {
+      if (!('clientX' in event) || !('clientY' in event)) return '';
+      const element = document.elementFromPoint(event.clientX, event.clientY);
+      const day = element instanceof Element ? element.closest('[data-calendar-day]') : null;
+      if (!(day instanceof HTMLButtonElement) || day.disabled) return '';
+      const iso = day.dataset.calendarDay || '';
+      return compareIso(iso, todayIso) >= 0 ? iso : '';
+    };
+
     const finishCalendarDrag = (iso) => {
       if (!state.calendarDragging || !state.calendarDragStart) return;
       const end = iso && compareIso(iso, todayIso) >= 0 ? iso : state.calendarHover || state.calendarDragStart;
@@ -2964,10 +2973,19 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (!(day instanceof HTMLButtonElement) || day.disabled || event.button !== 0) return;
       const iso = day.dataset.calendarDay || '';
       if (!iso || compareIso(iso, todayIso) < 0) return;
+      event.preventDefault();
       state.calendarDragging = true;
       state.calendarDragStart = iso;
       state.calendarHover = iso;
       day.setPointerCapture?.(event.pointerId);
+      updateCalendarPreviewDom();
+    });
+
+    mount.addEventListener('pointermove', (event) => {
+      if (!state.calendarDragging) return;
+      const iso = calendarIsoFromPoint(event);
+      if (!iso || iso === state.calendarHover) return;
+      state.calendarHover = iso;
       updateCalendarPreviewDom();
     });
 
@@ -2983,9 +3001,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     mount.addEventListener('pointerup', (event) => {
       if (!state.calendarDragging) return;
-      const target = event.target;
-      const day = target instanceof Element ? target.closest('[data-calendar-day]') : null;
-      finishCalendarDrag(day instanceof HTMLButtonElement ? day.dataset.calendarDay : state.calendarHover);
+      finishCalendarDrag(calendarIsoFromPoint(event) || state.calendarHover);
     });
 
     mount.addEventListener('pointercancel', () => {
@@ -4088,6 +4104,8 @@ body.booking-app-page .main-content {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 8px;
+  touch-action: manipulation;
+  user-select: none;
 }
 
 .reservation-calendar__weekdays span {

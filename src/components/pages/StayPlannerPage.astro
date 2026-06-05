@@ -1,0 +1,632 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { resolveContentLanguage } from '@/i18n/config';
+
+interface Props {
+  languageCode?: string;
+}
+
+type SupportedLang = 'pl' | 'en' | 'de' | 'it';
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode) as SupportedLang;
+const explicitLanguage = pathContext.explicitLanguage;
+const bookingHref = getBookingLocalizedPath(lang);
+const transportHref = getLocalizedPath(explicitLanguage, 'dojazd');
+const seeKrakowHref = 'https://qr.codes/vksKBT';
+
+const copy = {
+  pl: {
+    kicker: 'Planer pobytu',
+    title: 'Ułóż dzień albo kilka dni w Krakowie',
+    lead: 'Zaznacz tempo, długość pobytu i atrakcje. Planer podpowie, czy wszystko ma sens, co odpuścić i jak połączyć zwiedzanie z odpoczynkiem na campingu.',
+    nights: 'Liczba nocy',
+    pace: 'Tempo',
+    group: 'Z kim jedziesz?',
+    transport: 'Transport',
+    attractions: 'Atrakcje i pomysły',
+    resultTitle: 'Twój szkic pobytu',
+    empty: 'Wybierz kilka atrakcji, a tutaj pojawi się podpowiedź planu.',
+    fits: 'Plan wygląda realnie przy wybranym tempie.',
+    tight: 'Plan jest napięty. Warto odpuścić część atrakcji albo wybrać spokojniejsze tempo.',
+    skip: 'Najpierw odpuść',
+    sample: 'Przykładowy rytm',
+    ctaBooking: 'Zarezerwuj pobyt',
+    ctaCampy: 'Zapytaj CAMPY',
+    ctaTours: 'SeeKrakow',
+    ctaTram: 'Dojazd tramwajem',
+    options: {
+      calm: 'Spokojnie',
+      normal: 'Normalnie',
+      intensive: 'Intensywnie',
+      pair: 'Para',
+      family: 'Rodzina',
+      solo: 'Solo',
+      group: 'Grupa',
+      tram: 'Tramwaj',
+      car: 'Auto',
+      mixed: 'Spacer + tramwaj',
+    },
+  },
+  en: {
+    kicker: 'Stay planner',
+    title: 'Shape one day or a few days in Krakow',
+    lead: 'Choose pace, length and attractions. The planner suggests whether it fits, what to skip and how to balance sightseeing with campsite rest.',
+    nights: 'Nights',
+    pace: 'Pace',
+    group: 'Travel group',
+    transport: 'Transport',
+    attractions: 'Attractions and ideas',
+    resultTitle: 'Your stay draft',
+    empty: 'Choose a few attractions and the plan suggestion will appear here.',
+    fits: 'This plan looks realistic for the selected pace.',
+    tight: 'This plan is tight. Skip a few attractions or choose a calmer pace.',
+    skip: 'Skip first',
+    sample: 'Sample rhythm',
+    ctaBooking: 'Book your stay',
+    ctaCampy: 'Ask CAMPY',
+    ctaTours: 'SeeKrakow',
+    ctaTram: 'Tram directions',
+    options: {
+      calm: 'Calm',
+      normal: 'Normal',
+      intensive: 'Intensive',
+      pair: 'Couple',
+      family: 'Family',
+      solo: 'Solo',
+      group: 'Group',
+      tram: 'Tram',
+      car: 'Car',
+      mixed: 'Walk + tram',
+    },
+  },
+  de: {
+    kicker: 'Aufenthaltsplaner',
+    title: 'Planen Sie einen oder mehrere Tage in Krakau',
+    lead: 'Wählen Sie Tempo, Aufenthaltslänge und Attraktionen. Der Planer sagt, ob es realistisch ist und was man besser auslässt.',
+    nights: 'Nächte',
+    pace: 'Tempo',
+    group: 'Reisegruppe',
+    transport: 'Transport',
+    attractions: 'Attraktionen und Ideen',
+    resultTitle: 'Ihr Aufenthaltsentwurf',
+    empty: 'Wählen Sie einige Attraktionen, dann erscheint hier ein Vorschlag.',
+    fits: 'Der Plan wirkt für das gewählte Tempo realistisch.',
+    tight: 'Der Plan ist eng. Lassen Sie einige Punkte aus oder wählen Sie ein ruhigeres Tempo.',
+    skip: 'Zuerst auslassen',
+    sample: 'Beispielrhythmus',
+    ctaBooking: 'Aufenthalt buchen',
+    ctaCampy: 'CAMPY fragen',
+    ctaTours: 'SeeKrakow',
+    ctaTram: 'Tram-Anfahrt',
+    options: {
+      calm: 'Ruhig',
+      normal: 'Normal',
+      intensive: 'Intensiv',
+      pair: 'Paar',
+      family: 'Familie',
+      solo: 'Solo',
+      group: 'Gruppe',
+      tram: 'Tram',
+      car: 'Auto',
+      mixed: 'Zu Fuß + Tram',
+    },
+  },
+  it: {
+    kicker: 'Planner soggiorno',
+    title: 'Organizza uno o più giorni a Cracovia',
+    lead: 'Scegli ritmo, durata e attrazioni. Il planner suggerisce se il programma è realistico, cosa saltare e come bilanciare visite e riposo.',
+    nights: 'Notti',
+    pace: 'Ritmo',
+    group: 'Con chi viaggi',
+    transport: 'Trasporto',
+    attractions: 'Attrazioni e idee',
+    resultTitle: 'Bozza del soggiorno',
+    empty: 'Scegli alcune attrazioni e qui apparirà un suggerimento.',
+    fits: 'Il piano sembra realistico per il ritmo selezionato.',
+    tight: 'Il piano è intenso. Meglio saltare alcune attrazioni o scegliere un ritmo più calmo.',
+    skip: 'Salta prima',
+    sample: 'Ritmo esempio',
+    ctaBooking: 'Prenota soggiorno',
+    ctaCampy: 'Chiedi a CAMPY',
+    ctaTours: 'SeeKrakow',
+    ctaTram: 'Tram',
+    options: {
+      calm: 'Calmo',
+      normal: 'Normale',
+      intensive: 'Intenso',
+      pair: 'Coppia',
+      family: 'Famiglia',
+      solo: 'Solo',
+      group: 'Gruppo',
+      tram: 'Tram',
+      car: 'Auto',
+      mixed: 'Passeggiata + tram',
+    },
+  },
+}[lang];
+
+const attractions = [
+  { id: 'old-town', icon: 'landmark', weight: 1, label: { pl: 'Stare Miasto', en: 'Old Town', de: 'Altstadt', it: 'Città Vecchia' } },
+  { id: 'kazimierz', icon: 'route', weight: 1, label: { pl: 'Kazimierz', en: 'Kazimierz', de: 'Kazimierz', it: 'Kazimierz' } },
+  { id: 'wawel', icon: 'Landmark', weight: 1, label: { pl: 'Wawel', en: 'Wawel', de: 'Wawel', it: 'Wawel' } },
+  { id: 'wieliczka', icon: 'Sparkles', weight: 1.7, label: { pl: 'Wieliczka', en: 'Wieliczka', de: 'Wieliczka', it: 'Wieliczka' } },
+  { id: 'auschwitz', icon: 'CircleAlert', weight: 2.1, label: { pl: 'Auschwitz', en: 'Auschwitz', de: 'Auschwitz', it: 'Auschwitz' } },
+  { id: 'schindler', icon: 'ReceiptText', weight: 1.2, label: { pl: 'Fabryka Schindlera', en: 'Schindler Factory', de: 'Schindler-Fabrik', it: 'Fabbrica di Schindler' } },
+  { id: 'ojcow', icon: 'Leaf', weight: 1.8, label: { pl: 'Ojców', en: 'Ojców', de: 'Ojców', it: 'Ojców' } },
+  { id: 'zakopane', icon: 'Mountain', weight: 2.4, label: { pl: 'Zakopane', en: 'Zakopane', de: 'Zakopane', it: 'Zakopane' } },
+  { id: 'energylandia', icon: 'Zap', weight: 2.2, label: { pl: 'Energylandia', en: 'Energylandia', de: 'Energylandia', it: 'Energylandia' } },
+  { id: 'camp-rest', icon: 'Moon', weight: .6, label: { pl: 'Odpoczynek na campingu', en: 'Rest at campsite', de: 'Ruhe am Campingplatz', it: 'Riposo al camping' } },
+];
+
+const plannerConfigEncoded = Buffer.from(JSON.stringify({
+  copy,
+  attractions: attractions.map((item) => ({ id: item.id, weight: item.weight, label: item.label[lang] ?? item.label.en })),
+}), 'utf8').toString('base64');
+---
+
+<section class="site-section stay-planner reveal-section" data-stay-planner>
+  <div class="stay-planner__ambient" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div class="container stay-planner__shell">
+    <div class="stay-planner__head">
+      <span class="section-kicker">{copy.kicker}</span>
+      <h1>{copy.title}</h1>
+      <p>{copy.lead}</p>
+    </div>
+
+    <div class="stay-planner__layout">
+      <div class="premium-card stay-planner__panel">
+        <div class="stay-planner__control">
+          <h2><Icon name="calendar" size={21} strokeWidth={2} /> {copy.nights}</h2>
+          <div class="stay-planner__segments" data-planner-nights>
+            {['1', '2', '3', '4', '5+'].map((value, index) => (
+              <button type="button" class:list={[index === 1 && 'is-active']} data-value={value}>{value}</button>
+            ))}
+          </div>
+        </div>
+
+        <div class="stay-planner__control">
+          <h2><Icon name="Sparkles" size={21} strokeWidth={2} /> {copy.pace}</h2>
+          <div class="stay-planner__segments" data-planner-pace>
+            {[
+              ['calm', copy.options.calm],
+              ['normal', copy.options.normal],
+              ['intensive', copy.options.intensive],
+            ].map(([value, label], index) => (
+              <button type="button" class:list={[index === 1 && 'is-active']} data-value={value}>{label}</button>
+            ))}
+          </div>
+        </div>
+
+        <div class="stay-planner__control">
+          <h2><Icon name="users" size={21} strokeWidth={2} /> {copy.group}</h2>
+          <div class="stay-planner__segments" data-planner-group>
+            {[
+              ['pair', copy.options.pair],
+              ['family', copy.options.family],
+              ['solo', copy.options.solo],
+              ['group', copy.options.group],
+            ].map(([value, label], index) => (
+              <button type="button" class:list={[index === 1 && 'is-active']} data-value={value}>{label}</button>
+            ))}
+          </div>
+        </div>
+
+        <div class="stay-planner__control">
+          <h2><Icon name="tram" size={21} strokeWidth={2} /> {copy.transport}</h2>
+          <div class="stay-planner__segments" data-planner-transport>
+            {[
+              ['tram', copy.options.tram],
+              ['car', copy.options.car],
+              ['mixed', copy.options.mixed],
+            ].map(([value, label], index) => (
+              <button type="button" class:list={[index === 0 && 'is-active']} data-value={value}>{label}</button>
+            ))}
+          </div>
+        </div>
+
+        <div class="stay-planner__control stay-planner__control--wide">
+          <h2><Icon name="landmark" size={21} strokeWidth={2} /> {copy.attractions}</h2>
+          <div class="stay-planner__attractions" data-planner-attractions>
+            {attractions.map((item, index) => (
+              <button type="button" data-value={item.id} class:list={[index < 3 && 'is-active']}>
+                <Icon name={item.icon} size={18} strokeWidth={2} />
+                <span>{item.label[lang] ?? item.label.en}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <aside class="premium-card stay-planner__result" data-planner-result aria-live="polite">
+        <span class="stay-planner__result-badge">{copy.resultTitle}</span>
+        <h2>{copy.resultTitle}</h2>
+        <p>{copy.empty}</p>
+      </aside>
+    </div>
+
+    <div class="stay-planner__actions">
+      <a class="btn btn-primary premium-button" href={bookingHref}><Icon name="reservation" size={18} strokeWidth={2} /> {copy.ctaBooking}</a>
+      <button class="btn btn-glass" type="button" data-ask-campy-planner><Icon name="chat" size={18} strokeWidth={2} /> {copy.ctaCampy}</button>
+      <a class="btn btn-glass" href={seeKrakowHref} target="_blank" rel="noopener noreferrer"><Icon name="ticket" size={18} strokeWidth={2} /> {copy.ctaTours}</a>
+      <a class="btn btn-glass" href={transportHref}><Icon name="tram" size={18} strokeWidth={2} /> {copy.ctaTram}</a>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ plannerConfigEncoded }}>
+  (() => {
+    const root = document.querySelector('[data-stay-planner]');
+    if (!(root instanceof HTMLElement)) return;
+
+    const decode = () => {
+      try {
+        const binary = window.atob(plannerConfigEncoded);
+        const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+        return JSON.parse(new TextDecoder().decode(bytes));
+      } catch {
+        return null;
+      }
+    };
+
+    const config = decode();
+    if (!config) return;
+
+    const state = { nights: '2', pace: 'normal', group: 'family', transport: 'tram' };
+    const result = root.querySelector('[data-planner-result]');
+    const attractionButtons = Array.from(root.querySelectorAll('[data-planner-attractions] button'));
+    const getSelected = () => attractionButtons
+      .filter((button) => button.classList.contains('is-active'))
+      .map((button) => config.attractions.find((item) => item.id === button.dataset.value))
+      .filter(Boolean);
+
+    const numericNights = () => state.nights === '5+' ? 5 : Math.max(1, Number(state.nights) || 1);
+    const capacity = () => numericNights() * ({ calm: 1.45, normal: 2.25, intensive: 3.05 }[state.pace] || 2.25);
+
+    const render = () => {
+      if (!(result instanceof HTMLElement)) return;
+      const selected = getSelected();
+      if (!selected.length) {
+        result.innerHTML = `<span class="stay-planner__result-badge">${config.copy.resultTitle}</span><h2>${config.copy.resultTitle}</h2><p>${config.copy.empty}</p>`;
+        return;
+      }
+      const score = selected.reduce((sum, item) => sum + Number(item.weight || 1), 0);
+      const fits = score <= capacity();
+      const skip = selected.slice().sort((a, b) => Number(b.weight) - Number(a.weight)).slice(0, Math.max(1, Math.ceil((score - capacity()) / 1.4)));
+      const days = Array.from({ length: numericNights() }, (_, index) => selected.filter((_, itemIndex) => itemIndex % numericNights() === index));
+      result.innerHTML = `
+        <span class="stay-planner__result-badge">${config.copy.resultTitle}</span>
+        <h2>${fits ? config.copy.fits : config.copy.tight}</h2>
+        ${fits ? '' : `<p><strong>${config.copy.skip}:</strong> ${skip.map((item) => item.label).join(', ')}</p>`}
+        <div class="stay-planner__plan">
+          <strong>${config.copy.sample}</strong>
+          ${days.map((day, index) => `<div><span>${index + 1}</span><p>${day.length ? day.map((item) => item.label).join(' + ') : selected[index % selected.length].label}</p></div>`).join('')}
+        </div>
+      `;
+    };
+
+    const bindSegment = (selector, key) => {
+      const buttons = Array.from(root.querySelectorAll(`${selector} button`));
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+          buttons.forEach((item) => item.classList.toggle('is-active', item === button));
+          state[key] = button.dataset.value || state[key];
+          render();
+        });
+      });
+    };
+
+    bindSegment('[data-planner-nights]', 'nights');
+    bindSegment('[data-planner-pace]', 'pace');
+    bindSegment('[data-planner-group]', 'group');
+    bindSegment('[data-planner-transport]', 'transport');
+    attractionButtons.forEach((button) => button.addEventListener('click', () => {
+      button.classList.toggle('is-active');
+      render();
+    }));
+
+    root.querySelector('[data-ask-campy-planner]')?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('campy:prompt', {
+        detail: { prompt: config.copy.ctaCampy, actionKey: 'dayPlan' },
+      }));
+    });
+
+    render();
+  })();
+</script>
+
+<style>
+.stay-planner {
+  position: relative;
+  overflow: hidden;
+  padding-top: clamp(130px, 16vw, 190px);
+  background:
+    radial-gradient(circle at 14% 12%, rgba(60,179,113,.16), transparent 32%),
+    radial-gradient(circle at 86% 8%, rgba(242,192,120,.15), transparent 34%),
+    linear-gradient(180deg, rgba(8,25,16,.95), rgba(239,247,240,.08));
+}
+
+.stay-planner__ambient span {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(22px);
+  pointer-events: none;
+  animation: plannerFloat 20s ease-in-out infinite;
+}
+
+.stay-planner__ambient span:nth-child(1) {
+  width: 360px;
+  height: 360px;
+  left: -120px;
+  top: 14%;
+  background: rgba(60,179,113,.18);
+}
+
+.stay-planner__ambient span:nth-child(2) {
+  width: 300px;
+  height: 300px;
+  right: -90px;
+  top: 20%;
+  background: rgba(242,192,120,.15);
+  animation-delay: -8s;
+}
+
+.stay-planner__ambient span:nth-child(3) {
+  width: 260px;
+  height: 260px;
+  right: 28%;
+  bottom: 8%;
+  background: rgba(143,224,180,.12);
+  animation-delay: -13s;
+}
+
+.stay-planner__shell {
+  position: relative;
+  z-index: 1;
+}
+
+.stay-planner__head {
+  max-width: 900px;
+  margin-bottom: clamp(28px, 5vw, 54px);
+}
+
+.stay-planner__head h1 {
+  max-width: 860px;
+  margin: 0 0 18px;
+  color: #f7fff9;
+  font-size: clamp(2.6rem, 7vw, 5.8rem);
+  line-height: .92;
+  letter-spacing: -.04em;
+}
+
+.stay-planner__head p {
+  max-width: 760px;
+  margin: 0;
+  color: rgba(245,255,248,.74);
+  font-size: clamp(1rem, 2vw, 1.18rem);
+  line-height: 1.75;
+  font-weight: 680;
+}
+
+.stay-planner__layout {
+  display: grid;
+  gap: 24px;
+  align-items: start;
+}
+
+.stay-planner__panel,
+.stay-planner__result {
+  border-radius: 30px;
+  border-color: rgba(143,224,180,.18);
+  background:
+    radial-gradient(circle at 14% 0%, rgba(60,179,113,.18), transparent 38%),
+    rgba(9, 28, 19, .74);
+  backdrop-filter: blur(22px);
+}
+
+.stay-planner__panel {
+  display: grid;
+  gap: 18px;
+  padding: clamp(20px, 4vw, 34px);
+}
+
+.stay-planner__control {
+  display: grid;
+  gap: 12px;
+}
+
+.stay-planner__control h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  color: #f7fff9;
+  font-size: 1rem;
+}
+
+.stay-planner__segments,
+.stay-planner__attractions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.stay-planner__segments button,
+.stay-planner__attractions button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 15px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 999px;
+  color: rgba(245,255,248,.82);
+  background: rgba(255,255,255,.07);
+  font-weight: 900;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.stay-planner__segments button:hover,
+.stay-planner__segments button.is-active,
+.stay-planner__attractions button:hover,
+.stay-planner__attractions button.is-active {
+  transform: translateY(-2px);
+  color: #082016;
+  border-color: rgba(143,224,180,.48);
+  background: linear-gradient(135deg, #a7f2c7, #3CB371);
+  box-shadow: 0 16px 34px rgba(60,179,113,.22);
+}
+
+.stay-planner__result {
+  position: sticky;
+  top: 110px;
+  padding: clamp(22px, 4vw, 32px);
+  color: rgba(245,255,248,.84);
+}
+
+.stay-planner__result h2 {
+  margin: 12px 0;
+  color: #fff;
+  font-size: clamp(1.45rem, 3vw, 2.2rem);
+  line-height: 1.08;
+}
+
+.stay-planner__result-badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 7px 11px;
+  border-radius: 999px;
+  color: #8fe0b4;
+  background: rgba(60,179,113,.12);
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.stay-planner__plan {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.stay-planner__plan > div {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid rgba(143,224,180,.14);
+  border-radius: 16px;
+  background: rgba(255,255,255,.06);
+}
+
+.stay-planner__plan span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  color: #082016;
+  background: #8fe0b4;
+  font-weight: 950;
+}
+
+.stay-planner__plan p {
+  margin: 0;
+}
+
+.stay-planner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.stay-planner__actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+html[data-theme="light"] .stay-planner {
+  background:
+    radial-gradient(circle at 14% 12%, rgba(60,179,113,.18), transparent 32%),
+    radial-gradient(circle at 86% 8%, rgba(242,192,120,.16), transparent 34%),
+    linear-gradient(180deg, #f7fbf5, #edf6ef);
+}
+
+html[data-theme="light"] .stay-planner__head h1,
+html[data-theme="light"] .stay-planner__control h2,
+html[data-theme="light"] .stay-planner__result h2 {
+  color: #102018;
+}
+
+html[data-theme="light"] .stay-planner__head p,
+html[data-theme="light"] .stay-planner__result {
+  color: #52655a;
+}
+
+html[data-theme="light"] .stay-planner__panel,
+html[data-theme="light"] .stay-planner__result {
+  background: rgba(255,255,255,.78);
+  border-color: rgba(60,179,113,.18);
+}
+
+html[data-theme="light"] .stay-planner__segments button,
+html[data-theme="light"] .stay-planner__attractions button,
+html[data-theme="light"] .stay-planner__plan > div {
+  color: #263a2f;
+  background: rgba(255,255,255,.72);
+  border-color: rgba(29,83,52,.12);
+}
+
+@media (min-width: 980px) {
+  .stay-planner__layout {
+    grid-template-columns: minmax(0, 1fr) 380px;
+  }
+
+  .stay-planner__panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stay-planner__control--wide {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .stay-planner {
+    padding-top: 116px;
+  }
+
+  .stay-planner__head h1 {
+    font-size: clamp(2.35rem, 14vw, 3.6rem);
+  }
+
+  .stay-planner__result {
+    position: static;
+  }
+
+  .stay-planner__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stay-planner__ambient span,
+  .stay-planner__segments button,
+  .stay-planner__attractions button {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@keyframes plannerFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(22px, -18px, 0) scale(1.06); }
+}
+</style>

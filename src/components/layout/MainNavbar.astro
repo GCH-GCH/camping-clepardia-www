@@ -1,20 +1,27 @@
 ---
 import { logoMain, logoMainPng } from '@/data/assets';
-import { getBookingLocalizedPath, getLanguageSwitchLinks, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getBookingLocalizedPath, getLanguageSwitchLinks, getLocalizedPath, getPathContext, getPlannerLocalizedPath, isPlannerSlug } from '@/utils/localizedLinks';
 import { getTranslations } from '@/i18n/config';
 import Icon from '@/components/ui/Icon.astro';
 
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
+const plannerLabels = {
+  pl: 'Planer',
+  en: 'Planner',
+  de: 'Planer',
+  it: 'Planner',
+};
 const navItems = [
-  { slug: '', label: t.nav.items.start },
-  { slug: 'camping', label: t.nav.items.camping },
-  { slug: 'domki', label: t.nav.items.domki },
-  { slug: 'cennik', label: t.nav.items.cennik },
-  { slug: 'dojazd', label: t.nav.items.dojazd },
-  { slug: 'atrakcje', label: t.nav.items.atrakcje },
-  { slug: 'galeria', label: t.nav.items.galeria },
-  { slug: 'kontakt', label: t.nav.items.kontakt },
+  { slug: '', label: t.nav.items.start, icon: 'home' },
+  { slug: 'camping', label: t.nav.items.camping, icon: 'tent' },
+  { slug: 'domki', label: t.nav.items.domki, icon: 'house' },
+  { slug: 'cennik', label: t.nav.items.cennik, icon: 'pricing' },
+  { slug: 'dojazd', label: t.nav.items.dojazd, icon: 'tram' },
+  { slug: 'atrakcje', label: t.nav.items.atrakcje, icon: 'landmark' },
+  { slug: 'galeria', label: t.nav.items.galeria, icon: 'gallery' },
+  { slug: '__planner__', label: plannerLabels[pathContext.languageCode as keyof typeof plannerLabels] ?? plannerLabels.en, icon: 'planner' },
+  { slug: 'kontakt', label: t.nav.items.kontakt, icon: 'phone' },
 ];
 
 const currentLanguage = pathContext.currentLanguage;
@@ -25,8 +32,8 @@ const homeHref = getLocalizedPath(activeLanguagePrefix, '');
 const bookingHref = getBookingLocalizedPath(pathContext.languageCode);
 const localizedNavItems = navItems.map((item) => ({
   ...item,
-  href: getLocalizedPath(activeLanguagePrefix, item.slug),
-  active: item.slug === currentSlug,
+  href: item.slug === '__planner__' ? getPlannerLocalizedPath(pathContext.languageCode) : getLocalizedPath(activeLanguagePrefix, item.slug),
+  active: item.slug === '__planner__' ? isPlannerSlug(currentSlug) : item.slug === currentSlug,
 }));
 const languageLinks = getLanguageSwitchLinks(Astro.url.pathname);
 const navMessages = {
@@ -53,6 +60,7 @@ const navMessages = {
             class:list={['main-navbar__link', item.active && 'is-active']}
             aria-current={item.active ? 'page' : undefined}
           >
+            <Icon name={item.icon} size={16} strokeWidth={2.15} />
             {item.label}
           </a>
         </li>
@@ -158,8 +166,9 @@ const navMessages = {
             <a
               href={item.href}
               class:list={['main-navbar-mobile__link', item.active && 'is-active']}
-              aria-current={item.active ? 'page' : undefined}
-            >
+            aria-current={item.active ? 'page' : undefined}
+          >
+              <Icon name={item.icon} size={18} strokeWidth={2.05} />
               {item.label}
             </a>
           </li>
@@ -420,15 +429,30 @@ body.has-main-navbar-open {
   min-height: 40px;
   align-items: center;
   justify-content: center;
-  padding: 0 13px;
+  gap: 6px;
+  padding: 0 10px;
   border: 1px solid transparent;
   border-radius: 999px;
   color: rgba(255,255,255,.82);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: -.01em;
   white-space: nowrap;
   transition: color .22s ease, background .22s ease, border-color .22s ease, box-shadow .22s ease, transform .22s ease;
+}
+
+.main-navbar__link svg {
+  width: 16px;
+  height: 16px;
+  opacity: .76;
+  transition: opacity .22s ease, transform .22s ease, filter .22s ease;
+}
+
+.main-navbar__link:hover svg,
+.main-navbar__link.is-active svg {
+  opacity: 1;
+  transform: translateY(-1px);
+  filter: drop-shadow(0 0 10px rgba(143,224,180,.28));
 }
 
 .main-navbar__link:hover {
@@ -873,6 +897,12 @@ html[data-theme="light"] .main-navbar-theme__icon--moon {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.main-navbar-mobile__link svg {
+  width: 18px;
+  height: 18px;
+  color: #8fe0b4;
 }
 
 .main-navbar-mobile__link {

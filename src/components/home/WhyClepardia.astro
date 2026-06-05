@@ -16,46 +16,34 @@ const copyByLanguage = {
   pl: [
     { title: 'Blisko centrum', copy: 'Zostaw auto na campingu i jedź tramwajem w stronę Starego Miasta.', icon: 'MapPinned', tone: 'hero' },
     { title: 'Tramwaj 9 przystanków', copy: 'Przystanek ok. 40 m od bramy, do Starego Kleparza ok. 14 minut.', icon: 'tram', tone: 'wide' },
-    { title: 'Domki 2/3/4-os.', copy: 'Proste warianty domków bez sztucznych kategorii rodzinnych.', icon: 'bungalow', tone: 'compact' },
-    { title: 'Kampery i vany', copy: 'Płyty betonowe dla kamperów, cięższe pojazdy ustawiamy na asfalcie.', icon: 'camper', tone: 'tall' },
-    { title: 'Cisza 22:00-07:00', copy: 'To spokojny camping, nie miejsce imprezowe.', icon: 'moon', tone: 'compact' },
-    { title: 'Google Maps 2022', copy: 'Dojazd zmienił się w 2022 roku, dlatego polecamy Google Maps.', icon: 'map', tone: 'wide' },
-    { title: 'Zwierzęta mile widziane', copy: 'Pies: 0 PLN. Prosimy tylko o opiekę i sprzątanie po pupilu.', icon: 'dog', tone: 'compact' },
-    { title: 'Prąd 10A', copy: 'Przyłącze dla kamperów i przyczep, bez ładowania aut elektrycznych.', icon: 'plug', tone: 'compact' },
-    { title: 'Baza na Małopolskę', copy: 'Kraków, Wieliczka, Ojców, Zakopane i Energylandia w zasięgu planu dnia.', icon: 'landmark', tone: 'wide' },
+    { title: 'Camping + domki', copy: 'Miejsca dla kamperów, vanów, przyczep, namiotów oraz domki 2/3/4-os.', icon: 'HousePlus', tone: 'wide' },
+    { title: 'Spokojny camping', copy: 'Cisza nocna 22:00-07:00. To nie jest miejsce imprezowe.', icon: 'moon', tone: 'compact' },
+    { title: 'Google Maps 2022', copy: 'Dojazd zmienił się w 2022 roku, dlatego polecamy Google Maps.', icon: 'map', tone: 'compact' },
+    { title: 'Baza na Małopolskę', copy: 'Kraków, Wieliczka, Ojców, Zakopane i Energylandia w zasięgu planu dnia.', icon: 'landmark', tone: 'hero' },
   ],
   en: [
     { title: 'Close to the centre', copy: 'Leave the car at the campsite and take the tram toward the Old Town.', icon: 'MapPinned', tone: 'hero' },
-    { title: '9 tram stops', copy: 'Stop about 40 m from the gate, around 14 minutes to Stary Kleparz.', icon: 'tram', tone: 'wide' },
-    { title: '2/3/4-person bungalows', copy: 'Clear bungalow options without artificial family categories.', icon: 'bungalow', tone: 'compact' },
-    { title: 'Motorhomes and vans', copy: 'Concrete slabs for campers, heavier vehicles placed on asphalt.', icon: 'camper', tone: 'tall' },
-    { title: 'Quiet 22:00-07:00', copy: 'A calm campsite, not a party place.', icon: 'moon', tone: 'compact' },
-    { title: 'Google Maps 2022', copy: 'Access changed in 2022, so we recommend Google Maps.', icon: 'map', tone: 'wide' },
-    { title: 'Pet friendly', copy: 'Dog: 0 PLN. Please keep pets under control and clean up after them.', icon: 'dog', tone: 'compact' },
-    { title: '10A electricity', copy: 'Connection for campers and caravans, no EV/hybrid charging.', icon: 'plug', tone: 'compact' },
-    { title: 'Lesser Poland base', copy: 'Krakow, Wieliczka, Ojców, Zakopane and Energylandia within trip plans.', icon: 'landmark', tone: 'wide' },
+    { title: '9 tram stops', copy: 'The stop is about 40 m from the gate, around 14 minutes to Stary Kleparz.', icon: 'tram', tone: 'wide' },
+    { title: 'Camping + bungalows', copy: 'Pitches for campers, vans, caravans, tents and 2/3/4-person bungalows.', icon: 'HousePlus', tone: 'wide' },
+    { title: 'Calm campsite', copy: 'Quiet hours 22:00-07:00. This is not a party place.', icon: 'moon', tone: 'compact' },
+    { title: 'Google Maps 2022', copy: 'Access changed in 2022, so we recommend Google Maps.', icon: 'map', tone: 'compact' },
+    { title: 'Lesser Poland base', copy: 'Krakow, Wieliczka, Ojców, Zakopane and Energylandia within day-trip reach.', icon: 'landmark', tone: 'hero' },
   ],
   de: [
     { title: 'Nah am Zentrum', copy: 'Auto auf dem Campingplatz lassen und mit der Straßenbahn in die Altstadt fahren.', icon: 'MapPinned', tone: 'hero' },
     { title: '9 Haltestellen', copy: 'Haltestelle ca. 40 m vom Tor, etwa 14 Minuten bis Stary Kleparz.', icon: 'tram', tone: 'wide' },
-    { title: 'Bungalows 2/3/4 Pers.', copy: 'Klare Bungalow-Varianten ohne künstliche Familienkategorie.', icon: 'bungalow', tone: 'compact' },
-    { title: 'Camper und Vans', copy: 'Betonplatten für Camper, schwere Fahrzeuge auf Asphalt.', icon: 'camper', tone: 'tall' },
-    { title: 'Ruhe 22:00-07:00', copy: 'Ein ruhiger Campingplatz, kein Party-Ort.', icon: 'moon', tone: 'compact' },
-    { title: 'Google Maps 2022', copy: 'Die Zufahrt wurde 2022 geändert, deshalb empfehlen wir Google Maps.', icon: 'map', tone: 'wide' },
-    { title: 'Haustiere willkommen', copy: 'Hund: 0 PLN. Bitte unter Kontrolle halten und aufräumen.', icon: 'dog', tone: 'compact' },
-    { title: 'Strom 10A', copy: 'Anschluss für Camper und Wohnwagen, kein Laden von Elektroautos.', icon: 'plug', tone: 'compact' },
-    { title: 'Basis für Małopolska', copy: 'Krakau, Wieliczka, Ojców, Zakopane und Energylandia gut planbar.', icon: 'landmark', tone: 'wide' },
+    { title: 'Camping + Bungalows', copy: 'Plätze für Camper, Vans, Wohnwagen, Zelte und Bungalows für 2/3/4 Personen.', icon: 'HousePlus', tone: 'wide' },
+    { title: 'Ruhiger Campingplatz', copy: 'Nachtruhe 22:00-07:00. Dies ist kein Party-Ort.', icon: 'moon', tone: 'compact' },
+    { title: 'Google Maps 2022', copy: 'Die Zufahrt wurde 2022 geändert, deshalb empfehlen wir Google Maps.', icon: 'map', tone: 'compact' },
+    { title: 'Basis für Małopolska', copy: 'Krakau, Wieliczka, Ojców, Zakopane und Energylandia für Tagespläne erreichbar.', icon: 'landmark', tone: 'hero' },
   ],
   it: [
     { title: 'Vicino al centro', copy: 'Lascia l’auto al camping e prendi il tram verso il centro storico.', icon: 'MapPinned', tone: 'hero' },
     { title: '9 fermate di tram', copy: 'Fermata a circa 40 m dal cancello, circa 14 minuti fino a Stary Kleparz.', icon: 'tram', tone: 'wide' },
-    { title: 'Bungalow 2/3/4 persone', copy: 'Opzioni chiare senza categorie familiari artificiali.', icon: 'bungalow', tone: 'compact' },
-    { title: 'Camper e van', copy: 'Piastre in cemento per camper, veicoli pesanti su asfalto.', icon: 'camper', tone: 'tall' },
-    { title: 'Silenzio 22:00-07:00', copy: 'Un camping tranquillo, non un luogo per feste.', icon: 'moon', tone: 'compact' },
-    { title: 'Google Maps 2022', copy: 'L’accesso è cambiato nel 2022, consigliamo Google Maps.', icon: 'map', tone: 'wide' },
-    { title: 'Animali benvenuti', copy: 'Cane: 0 PLN. Chiediamo controllo e pulizia.', icon: 'dog', tone: 'compact' },
-    { title: 'Elettricità 10A', copy: 'Allaccio per camper e roulotte, non per caricare auto elettriche.', icon: 'plug', tone: 'compact' },
-    { title: 'Base per Małopolska', copy: 'Cracovia, Wieliczka, Ojców, Zakopane ed Energylandia in programma.', icon: 'landmark', tone: 'wide' },
+    { title: 'Camping + bungalow', copy: 'Piazzole per camper, van, roulotte, tende e bungalow 2/3/4 persone.', icon: 'HousePlus', tone: 'wide' },
+    { title: 'Camping tranquillo', copy: 'Silenzio 22:00-07:00. Non è un luogo per feste.', icon: 'moon', tone: 'compact' },
+    { title: 'Google Maps 2022', copy: 'L’accesso è cambiato nel 2022, consigliamo Google Maps.', icon: 'map', tone: 'compact' },
+    { title: 'Base per Małopolska', copy: 'Cracovia, Wieliczka, Ojców, Zakopane ed Energylandia per gite in giornata.', icon: 'landmark', tone: 'hero' },
   ],
 };
 
@@ -245,8 +233,8 @@ const cards = copyByLanguage[lang];
   }
 
   .why__card--hero {
-    grid-column: span 4;
-    min-height: 340px;
+    grid-column: span 3;
+    min-height: 310px;
   }
 
   .why__card--wide {
@@ -254,14 +242,9 @@ const cards = copyByLanguage[lang];
     min-height: 270px;
   }
 
-  .why__card--tall {
-    grid-column: span 2;
-    min-height: 340px;
-  }
-
   .why__card--compact {
-    grid-column: span 2;
-    min-height: 240px;
+    grid-column: span 3;
+    min-height: 270px;
   }
 }
 
@@ -272,16 +255,15 @@ const cards = copyByLanguage[lang];
   }
 
   .why__card--hero {
-    grid-column: span 5;
+    grid-column: span 4;
   }
 
   .why__card--wide {
     grid-column: span 4;
   }
 
-  .why__card--tall,
   .why__card--compact {
-    grid-column: span 3;
+    grid-column: span 4;
   }
 }
 

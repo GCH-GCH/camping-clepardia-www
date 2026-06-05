@@ -43,9 +43,9 @@ const galleryTextByLanguage = {
       all: 'Wszystkie',
       camping: 'Camping',
       bungalows: 'Domki',
-      sanitary: 'Sanitariaty',
-      transport: 'Dojazd',
-      krakow: 'Kraków',
+      sanitary: 'Sanitariaty / zaplecze',
+      transport: 'Okolica',
+      krakow: 'Kraków / atrakcje',
     },
     items: [
       ['Miejsca campingowe', 'Miejsca campingowe Camping Clepardia'],
@@ -84,9 +84,9 @@ const galleryTextByLanguage = {
       all: 'All',
       camping: 'Camping',
       bungalows: 'Bungalows',
-      sanitary: 'Sanitary facilities',
-      transport: 'Directions',
-      krakow: 'Krakow',
+      sanitary: 'Sanitary / facilities',
+      transport: 'Surroundings',
+      krakow: 'Krakow / attractions',
     },
     items: [
       ['Camping pitches', 'Camping Clepardia pitches'],
@@ -125,9 +125,9 @@ const galleryTextByLanguage = {
       all: 'Alle',
       camping: 'Camping',
       bungalows: 'Bungalows',
-      sanitary: 'Sanitäranlagen',
-      transport: 'Anfahrt',
-      krakow: 'Krakau',
+      sanitary: 'Sanitär / Infrastruktur',
+      transport: 'Umgebung',
+      krakow: 'Krakau / Attraktionen',
     },
     items: [
       ['Campingplätze', 'Stellplätze von Camping Clepardia'],
@@ -166,9 +166,9 @@ const galleryTextByLanguage = {
       all: 'Tutte',
       camping: 'Camping',
       bungalows: 'Bungalow',
-      sanitary: 'Servizi igienici',
-      transport: 'Come arrivare',
-      krakow: 'Cracovia',
+      sanitary: 'Servizi / strutture',
+      transport: 'Dintorni',
+      krakow: 'Cracovia / attrazioni',
     },
     items: [
       ['Piazzole camping', 'Piazzole di Camping Clepardia'],
@@ -360,6 +360,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
           data-gallery-filter={category.id}
           aria-pressed={category.id === 'all' ? 'true' : 'false'}
         >
+          <Icon name={category.id === 'all' ? 'images' : categoryIcons[category.id as GalleryCategory]} size={16} strokeWidth={2} />
           {category.label}
         </button>
       ))}
@@ -470,6 +471,8 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
     let activeIndex = 0;
     let lastFocused: HTMLElement | null = null;
     let previousBodyOverflow = '';
+    let touchStartX = 0;
+    let touchStartY = 0;
 
     const getVisibleItems = () => items.filter((item) => !item.hidden);
 
@@ -580,6 +583,22 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
     prevButton?.addEventListener('click', () => moveLightbox(-1));
     nextButton?.addEventListener('click', () => moveLightbox(1));
 
+    lightbox?.addEventListener('touchstart', (event) => {
+      const touch = event.touches[0];
+      if (!touch) return;
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    }, { passive: true });
+
+    lightbox?.addEventListener('touchend', (event) => {
+      const touch = event.changedTouches[0];
+      if (!touch) return;
+      const deltaX = touch.clientX - touchStartX;
+      const deltaY = touch.clientY - touchStartY;
+      if (Math.abs(deltaX) < 52 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
+      moveLightbox(deltaX < 0 ? 1 : -1);
+    }, { passive: true });
+
     document.addEventListener('keydown', (event) => {
       if (!lightbox || lightbox.hidden) return;
       if (event.key === 'Escape') closeLightbox();
@@ -619,6 +638,9 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 .gallery-page__filter {
   flex: 0 0 auto;
   min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px 18px;
   border-radius: 999px;
   border: 1px solid rgba(22,50,36,.12);
@@ -627,6 +649,11 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   font-size: .88rem;
   font-weight: 900;
   transition: transform .22s ease, background .22s ease, border-color .22s ease, color .22s ease, box-shadow .22s ease;
+}
+
+.gallery-page__filter svg {
+  width: 16px;
+  height: 16px;
 }
 
 .gallery-page__filter:hover,

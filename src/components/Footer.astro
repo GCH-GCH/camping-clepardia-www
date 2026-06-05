@@ -1,7 +1,8 @@
 ---
 import { logoMain, logoMainPng } from '@/data/assets';
-import { getBookingLocalizedPath, getLanguageSwitchLinks, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getBookingLocalizedPath, getLanguageSwitchLinks, getLocalizedPath, getPathContext, getPlannerLocalizedPath } from '@/utils/localizedLinks';
 import { getTranslations } from '@/i18n/config';
+import Icon from '@/components/ui/Icon.astro';
 
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
@@ -11,22 +12,38 @@ const bookingFooterLabels = {
   de: 'Buchung',
   it: 'Prenotazione',
 };
+const plannerFooterLabels = {
+  pl: 'Planer pobytu',
+  en: 'Stay planner',
+  de: 'Aufenthaltsplaner',
+  it: 'Planner soggiorno',
+};
+const footerCtaLabels = {
+  pl: { booking: 'Zarezerwuj pobyt', maps: 'Otwórz Google Maps' },
+  en: { booking: 'Book your stay', maps: 'Open Google Maps' },
+  de: { booking: 'Aufenthalt buchen', maps: 'Google Maps öffnen' },
+  it: { booking: 'Prenota soggiorno', maps: 'Apri Google Maps' },
+};
+const footerCta = footerCtaLabels[pathContext.languageCode as keyof typeof footerCtaLabels] ?? footerCtaLabels.en;
 const footerNavItems = [
-  { slug: '', label: t.nav.items.start },
-  { slug: 'camping', label: t.nav.items.camping },
-  { slug: 'domki', label: t.nav.items.domki },
-  { slug: 'cennik', label: t.nav.items.cennik },
-  { slug: 'dojazd', label: t.nav.items.dojazd },
-  { slug: 'atrakcje', label: t.nav.items.atrakcje },
-  { slug: 'galeria', label: t.nav.items.galeria },
-  { slug: '__booking__', label: bookingFooterLabels[pathContext.languageCode as keyof typeof bookingFooterLabels] ?? bookingFooterLabels.en },
-  { slug: 'kontakt', label: t.nav.items.kontakt },
+  { slug: '', label: t.nav.items.start, icon: 'home' },
+  { slug: 'camping', label: t.nav.items.camping, icon: 'tent' },
+  { slug: 'domki', label: t.nav.items.domki, icon: 'house' },
+  { slug: 'cennik', label: t.nav.items.cennik, icon: 'pricing' },
+  { slug: 'dojazd', label: t.nav.items.dojazd, icon: 'tram' },
+  { slug: 'atrakcje', label: t.nav.items.atrakcje, icon: 'landmark' },
+  { slug: 'galeria', label: t.nav.items.galeria, icon: 'gallery' },
+  { slug: '__planner__', label: plannerFooterLabels[pathContext.languageCode as keyof typeof plannerFooterLabels] ?? plannerFooterLabels.en, icon: 'planner' },
+  { slug: '__booking__', label: bookingFooterLabels[pathContext.languageCode as keyof typeof bookingFooterLabels] ?? bookingFooterLabels.en, icon: 'reservation' },
+  { slug: 'kontakt', label: t.nav.items.kontakt, icon: 'phone' },
 ];
 
 const footerNavLinks = footerNavItems.map((item) => ({
   ...item,
   href: item.slug === '__booking__'
     ? getBookingLocalizedPath(pathContext.languageCode)
+    : item.slug === '__planner__'
+    ? getPlannerLocalizedPath(pathContext.languageCode)
     : getLocalizedPath(pathContext.explicitLanguage, item.slug),
 }));
 const footerLegalLabels = {
@@ -61,6 +78,16 @@ const googleMapsHref = footerSocialLinks[1].href;
       <img class="footer__logo" src={logoMain} alt="Camping Clepardia" width="196" height="52" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
       <h2>Camping Clepardia</h2>
       <p>{t.footer.description}</p>
+      <div class="footer__cta-row">
+        <a class="footer__cta footer__cta--primary" href={getBookingLocalizedPath(pathContext.languageCode)}>
+          <Icon name="reservation" size={18} strokeWidth={2.1} />
+          <span>{footerCta.booking}</span>
+        </a>
+        <a class="footer__cta footer__cta--ghost" href={googleMapsHref} target="_blank" rel="noopener noreferrer">
+          <Icon name="map" size={18} strokeWidth={2.1} />
+          <span>{footerCta.maps}</span>
+        </a>
+      </div>
       <div class="footer__langs" aria-label={t.footer.languages}>
         {footerLanguageLinks.map((language) => (
           <a
@@ -75,33 +102,48 @@ const googleMapsHref = footerSocialLinks[1].href;
         ))}
       </div>
     </div>
-    <div>
+    <div class="footer__section">
       <h3>{t.footer.quickLinks}</h3>
       {footerNavLinks.map((link) => (
-        <a href={link.href}>{link.label}</a>
+        <a class="footer__link" href={link.href}>
+          <Icon name={link.icon} size={16} strokeWidth={2} />
+          <span>{link.label}</span>
+        </a>
       ))}
       <div class="footer__legal-links">
         {footerLegalLinks.map((link) => (
-          <a href={link.href}>{link.label}</a>
+          <a class="footer__link footer__link--legal" href={link.href}>
+            <Icon name={link.slug === 'faq' ? 'help' : 'shield'} size={15} strokeWidth={2} />
+            <span>{link.label}</span>
+          </a>
         ))}
       </div>
     </div>
-    <div>
+    <div class="footer__section footer__contact-card">
       <h3>{t.footer.contact}</h3>
       <a class="footer__address-link" href={googleMapsHref} target="_blank" rel="noopener noreferrer" aria-label="Otwórz Camping Clepardia w Google Maps">
+        <Icon name="map" size={22} strokeWidth={2} />
         <strong>{t.footer.addressLabel}</strong>
         <span set:html={t.footer.contactPlace} />
         <small>{t.footer.mapsLabel}</small>
       </a>
-      <a href="tel:+48795294486">{t.footer.phoneLabel}: +48 795 294 486</a>
-      <a href="mailto:clepardia@gmail.com">{t.footer.emailLabel}: clepardia@gmail.com</a>
+      <a class="footer__link" href="tel:+48795294486">
+        <Icon name="phone" size={16} strokeWidth={2} />
+        <span>{t.footer.phoneLabel}: +48 795 294 486</span>
+      </a>
+      <a class="footer__link" href="mailto:clepardia@gmail.com">
+        <Icon name="mail" size={16} strokeWidth={2} />
+        <span>{t.footer.emailLabel}: clepardia@gmail.com</span>
+      </a>
       <p>{t.footer.receptionHoursLabel}: {t.footer.reception}</p>
-      <a href={googleMapsHref} target="_blank" rel="noopener noreferrer">{t.footer.mapsLabel}</a>
     </div>
-    <div>
+    <div class="footer__section">
       <h3>{t.footer.social}</h3>
       {footerSocialLinks.map((link) => (
-        <a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>
+        <a class="footer__link" href={link.href} target="_blank" rel="noopener noreferrer">
+          <Icon name={link.label === 'Google Maps' ? 'map' : 'ExternalLink'} size={16} strokeWidth={2} />
+          <span>{link.label}</span>
+        </a>
       ))}
     </div>
   </div>
@@ -144,4 +186,135 @@ const googleMapsHref = footerSocialLinks[1].href;
 .footer__bottom { margin-top: 46px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.10); display: flex; flex-direction: column; gap: 8px; justify-content: space-between; }
 @media (min-width: 800px) { .footer__grid { grid-template-columns: 1.6fr .8fr .8fr .6fr; } .footer__bottom { flex-direction: row; } }
 @media (max-width: 640px) { .footer h2 { font-size: clamp(1.85rem, 9vw, 2.55rem); } .footer__langs a { margin: 0; } }
+
+.footer {
+  position: relative;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.18), transparent 34%),
+    radial-gradient(circle at 88% 26%, rgba(242,192,120,.12), transparent 34%),
+    linear-gradient(180deg, #0d1812 0%, #07120d 100%);
+  padding-top: clamp(82px, 9vw, 124px);
+}
+
+.footer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .16;
+  background-image:
+    radial-gradient(circle at 18% 28%, rgba(255,255,255,.7) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 74% 62%, rgba(143,224,180,.55) 0 1px, transparent 1.5px);
+  background-size: 120px 120px, 170px 170px;
+  mask-image: linear-gradient(180deg, #000, transparent 86%);
+}
+
+.footer__grid {
+  position: relative;
+  z-index: 1;
+  align-items: start;
+}
+
+.footer__section,
+.footer__contact-card {
+  padding: 22px;
+  border: 1px solid rgba(143,224,180,.13);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.12), transparent 42%),
+    rgba(255,255,255,.035);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.footer__contact-card {
+  border-color: rgba(143,224,180,.20);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.18), transparent 42%),
+    rgba(255,255,255,.052);
+}
+
+.footer__cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.footer__cta,
+.footer__link {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.footer__cta {
+  min-height: 46px;
+  margin: 0 !important;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-weight: 950;
+}
+
+.footer__cta--primary {
+  color: #082016 !important;
+  background: linear-gradient(135deg, #a7f2c7, #3CB371);
+  box-shadow: 0 18px 40px rgba(60,179,113,.26);
+}
+
+.footer__cta--ghost {
+  color: #eafff2 !important;
+  border: 1px solid rgba(143,224,180,.22);
+  background: rgba(255,255,255,.06);
+}
+
+.footer__link {
+  width: fit-content;
+  margin: 7px 0 !important;
+  padding: 7px 10px;
+  border-radius: 14px;
+  transition: transform .18s ease, background .18s ease, color .18s ease;
+}
+
+.footer__link svg {
+  color: #8fe0b4;
+}
+
+.footer__link:hover {
+  transform: translateX(2px);
+  background: rgba(60,179,113,.10);
+}
+
+.footer__address-link {
+  display: grid !important;
+  gap: 6px;
+  margin-bottom: 14px !important;
+}
+
+.footer__address-link svg {
+  color: #8fe0b4;
+}
+
+@media (min-width: 980px) {
+  .footer__grid {
+    grid-template-columns: minmax(0, 1.35fr) minmax(190px, .72fr) minmax(250px, .9fr) minmax(150px, .55fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .footer__section,
+  .footer__contact-card {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .footer__cta-row {
+    flex-direction: column;
+  }
+
+  .footer__cta {
+    width: 100%;
+    justify-content: center;
+  }
+}
 </style>

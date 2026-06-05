@@ -375,6 +375,7 @@ const quickActionGroups = [
         id="floatingChatQuickPanel"
         data-chat-quick-panel
         aria-label={campyQuick.aria}
+        tabindex="0"
         hidden
       >
         {quickActionGroups.map((group) => (
@@ -1145,6 +1146,10 @@ body.has-floating-chat-open {
     transform .28s cubic-bezier(.22, 1, .36, 1);
 }
 
+.floating-chat.has-quick-panel-open .floating-chat__panel {
+  grid-template-rows: auto minmax(110px, .7fr) auto auto;
+}
+
 .floating-chat__panel[hidden] {
   display: none !important;
 }
@@ -1275,6 +1280,10 @@ body.has-floating-chat-open {
   min-height: 0;
   padding: 16px;
   overflow-y: auto;
+}
+
+.floating-chat.has-quick-panel-open .floating-chat__messages {
+  max-height: min(210px, 26svh);
 }
 
 .floating-chat__message {
@@ -1410,7 +1419,7 @@ body.has-floating-chat-open {
 
 .floating-chat__quick-panel {
   margin-top: 10px;
-  max-height: min(340px, 45svh);
+  max-height: min(420px, calc(100svh - 344px));
   padding: 12px;
   border: 1px solid rgba(143,224,180,.18);
   border-radius: 22px;
@@ -1420,7 +1429,30 @@ body.has-floating-chat-open {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 18px 46px rgba(0,0,0,.16);
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(143,224,180,.72) rgba(255,255,255,.08);
   animation: campyQuickPanel .24s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.floating-chat__quick-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.floating-chat__quick-panel::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: rgba(255,255,255,.07);
+}
+
+.floating-chat__quick-panel::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(8,24,17,.76);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #8fe0b4, #3CB371);
+  box-shadow: 0 0 12px rgba(60,179,113,.22);
+}
+
+.floating-chat__quick-panel:focus-visible {
+  outline: 0;
+  box-shadow: inset 0 0 0 2px rgba(143,224,180,.38), 0 18px 46px rgba(0,0,0,.16);
 }
 
 .floating-chat__quick-panel[hidden] {
