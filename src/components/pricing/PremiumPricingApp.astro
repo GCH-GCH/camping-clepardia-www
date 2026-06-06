@@ -541,11 +541,11 @@ const pricingAppConfig = {
                     {campingServiceGroups[0].items.map((item) => (
                       <article class="pricing-service-card pricing-service-card--primary" data-service-card={item.id}>
                         <span class="pricing-service-card__icon"><Icon name={item.icon} size={30} strokeWidth={2.25} /></span>
-                        <div>
-                          <strong>{item.label}</strong>
-                          <small>{item.note}</small>
+                        <div class="pricing-option-content">
+                          <strong class="pricing-option-title">{item.label}</strong>
+                          <em class="pricing-option-price">{formatPrice(item.price)} / noc</em>
+                          <small class="pricing-option-note">{item.note}</small>
                         </div>
-                        <em>{formatPrice(item.price)} / noc</em>
                         <div class="pricing-stepper pricing-stepper--service">
                           <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${item.label}`}>
                             <Icon name="minus" size={17} strokeWidth={2.6} />
@@ -569,11 +569,11 @@ const pricingAppConfig = {
                       return (
                         <article class="pricing-service-card pricing-service-card--primary" data-service-card={item.id}>
                           <span class="pricing-service-card__icon"><Icon name={item.icon} size={30} strokeWidth={2.25} /></span>
-                          <div>
-                            <strong>{item.label}</strong>
-                            <small>{item.note}</small>
+                          <div class="pricing-option-content">
+                            <strong class="pricing-option-title">{item.label}</strong>
+                            <em class="pricing-option-price">{priceLabel} / noc</em>
+                            <small class="pricing-option-note">{item.note}</small>
                           </div>
-                          <em>{priceLabel} / noc</em>
                           <div class="pricing-stepper pricing-stepper--service">
                             <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${item.label}`}>
                               <Icon name="minus" size={17} strokeWidth={2.6} />
@@ -606,11 +606,11 @@ const pricingAppConfig = {
                     {campingServiceGroups[1].items.map((item) => (
                       <article class="pricing-addon-row" data-service-card={item.id}>
                         <span class="pricing-addon-row__icon"><Icon name={item.icon} size={24} strokeWidth={2.25} /></span>
-                        <div>
-                          <strong>{item.label}</strong>
-                          <small>{item.note}</small>
+                        <div class="pricing-option-content">
+                          <strong class="pricing-option-title">{item.label}</strong>
+                          <em class="pricing-option-price">{formatPrice(item.price)} / noc</em>
+                          <small class="pricing-option-note">{item.note}</small>
                         </div>
-                        <em>{formatPrice(item.price)} / noc</em>
                         <div class="pricing-stepper pricing-stepper--row">
                           <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${item.label}`}>
                             <Icon name="minus" size={17} strokeWidth={2.6} />
@@ -634,11 +634,11 @@ const pricingAppConfig = {
                       return (
                         <article class="pricing-addon-row" data-service-card={item.id}>
                           <span class="pricing-addon-row__icon"><Icon name={item.icon} size={24} strokeWidth={2.25} /></span>
-                          <div>
-                            <strong>{item.label}</strong>
-                            <small>{item.note}</small>
+                          <div class="pricing-option-content">
+                            <strong class="pricing-option-title">{item.label}</strong>
+                            <em class="pricing-option-price">{priceLabel} / noc</em>
+                            <small class="pricing-option-note">{item.note}</small>
                           </div>
-                          <em>{priceLabel} / noc</em>
                           <div class="pricing-stepper pricing-stepper--row">
                             <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${item.label}`}>
                               <Icon name="minus" size={17} strokeWidth={2.6} />
@@ -2734,10 +2734,11 @@ html[data-theme="light"] .pricing-calc-step {
 .pricing-counter-row,
 .pricing-addon-row {
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr) auto minmax(162px, 184px);
+  grid-template-columns: 56px minmax(0, 1fr) 170px;
   align-items: center;
-  gap: 14px;
-  padding: 14px;
+  gap: 18px;
+  min-width: 0;
+  padding: 16px;
   border: 1px solid rgba(35,126,77,.12);
   border-radius: 22px;
   background: rgba(255,255,255,.70);
@@ -2749,40 +2750,67 @@ html[data-theme="light"] .pricing-calc-step {
 .pricing-addon-row__icon {
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   border-radius: 18px;
-  color: #157a49;
-  background: rgba(60,179,113,.12);
+  color: #0f6b3f;
+  background:
+    radial-gradient(circle at 32% 18%, rgba(255,255,255,.82), transparent 34%),
+    rgba(60,179,113,.18);
+  box-shadow: 0 12px 28px rgba(60,179,113,.15);
 }
 
 .pricing-counter-row__copy {
   display: grid;
   gap: 5px;
+  min-width: 0;
+}
+
+.pricing-option-content {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
 }
 
 .pricing-counter-row label,
-.pricing-addon-row strong {
+.pricing-addon-row strong,
+.pricing-option-title {
   color: #102018;
   font-size: 1.03rem;
   font-weight: 950;
+  line-height: 1.16;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
 }
 
 .pricing-counter-row strong,
-.pricing-addon-row em {
+.pricing-addon-row em,
+.pricing-option-price {
+  width: fit-content;
+  max-width: 100%;
+  padding: 7px 10px;
+  border-radius: 999px;
   color: #147a49;
+  background: rgba(60,179,113,.11);
   font-size: 1rem;
   font-style: normal;
   font-weight: 950;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.pricing-addon-row small {
+.pricing-addon-row small,
+.pricing-option-note {
   display: block;
   margin-top: 4px;
   color: #5b6d61;
   line-height: 1.35;
   font-size: .86rem;
   font-weight: 760;
+  word-break: normal;
+  overflow-wrap: normal;
 }
 
 .pricing-counter-row.is-active,
@@ -2803,7 +2831,8 @@ html[data-theme="light"] .pricing-calc-step {
 }
 
 .pricing-service-card--primary {
-  grid-template-columns: 72px minmax(0, 1fr) minmax(130px, auto) minmax(170px, 188px);
+  grid-template-columns: 72px minmax(0, 1fr) 170px;
+  min-width: 0;
   padding: clamp(18px, 2.2vw, 24px);
 }
 
@@ -2813,7 +2842,7 @@ html[data-theme="light"] .pricing-calc-step {
 
 .pricing-service-card--primary em {
   color: #117243;
-  font-size: clamp(1.05rem, 1.45vw, 1.22rem);
+  font-size: clamp(.96rem, 1.1vw, 1.06rem);
   font-weight: 950;
 }
 
@@ -2825,6 +2854,8 @@ html[data-theme="light"] .pricing-calc-step {
 
 .pricing-stepper--row,
 .pricing-stepper--service {
+  width: 170px;
+  justify-self: end;
   grid-template-columns: 50px minmax(54px, 1fr) 50px;
 }
 
@@ -2981,6 +3012,132 @@ html[data-theme="light"] .pricing-app-summary__price {
   background: linear-gradient(145deg, rgba(60,179,113,.10), rgba(255,255,255,.84));
 }
 
+.pricing-app__panel .pricing-service-grid {
+  grid-template-columns: 1fr;
+}
+
+.pricing-service-card .pricing-option-price,
+.pricing-addon-row .pricing-option-price {
+  grid-column: auto;
+  justify-self: start;
+}
+
+.pricing-counter-row .pricing-stepper,
+.pricing-addon-row .pricing-stepper {
+  justify-self: end;
+}
+
+.pricing-price-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.pricing-price-row span {
+  min-width: 0;
+}
+
+.pricing-price-row span strong {
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+}
+
+.pricing-price-row em {
+  justify-self: end;
+  white-space: nowrap;
+}
+
+.pricing-checkout-totals p,
+.pricing-app-summary__lines p {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.pricing-checkout-totals p span,
+.pricing-app-summary__lines span {
+  min-width: 0;
+}
+
+.pricing-checkout-totals p strong,
+.pricing-app-summary__lines strong {
+  white-space: nowrap;
+}
+
+.pricing-app .pricing-mode-card__icon,
+.pricing-app .pricing-spotlight-card__icon,
+.pricing-app .pricing-price-group__icon,
+.pricing-app .pricing-info-card > span,
+.pricing-app .pricing-service-group__head > span,
+.pricing-app .pricing-service-card__icon,
+.pricing-app .pricing-popular-card > span,
+.pricing-app .pricing-counter-card > span,
+.pricing-app .pricing-counter-row__icon,
+.pricing-app .pricing-addon-row__icon,
+.pricing-app .pricing-calc-step__icon {
+  box-sizing: border-box;
+  width: clamp(52px, 4.8vw, 64px);
+  height: clamp(52px, 4.8vw, 64px);
+  opacity: 1;
+  color: #0f6b3f;
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255,255,255,.86), transparent 34%),
+    rgba(60,179,113,.18);
+  border-color: rgba(60,179,113,.34);
+  box-shadow: 0 14px 32px rgba(60,179,113,.17);
+}
+
+.pricing-app .pricing-mode-card__icon svg,
+.pricing-app .pricing-spotlight-card__icon svg,
+.pricing-app .pricing-price-group__icon svg,
+.pricing-app .pricing-info-card > span svg,
+.pricing-app .pricing-service-group__head > span svg,
+.pricing-app .pricing-service-card__icon svg,
+.pricing-app .pricing-popular-card > span svg,
+.pricing-app .pricing-counter-card > span svg,
+.pricing-app .pricing-counter-row__icon svg,
+.pricing-app .pricing-addon-row__icon svg,
+.pricing-app .pricing-calc-step__icon svg {
+  stroke-width: 2.35;
+}
+
+html[data-theme="dark"] .pricing-app .pricing-mode-card__icon,
+html[data-theme="dark"] .pricing-app .pricing-spotlight-card__icon,
+html[data-theme="dark"] .pricing-app .pricing-price-group__icon,
+html[data-theme="dark"] .pricing-app .pricing-info-card > span,
+html[data-theme="dark"] .pricing-app .pricing-service-group__head > span,
+html[data-theme="dark"] .pricing-app .pricing-service-card__icon,
+html[data-theme="dark"] .pricing-app .pricing-popular-card > span,
+html[data-theme="dark"] .pricing-app .pricing-counter-card > span,
+html[data-theme="dark"] .pricing-app .pricing-counter-row__icon,
+html[data-theme="dark"] .pricing-app .pricing-addon-row__icon,
+html[data-theme="dark"] .pricing-app .pricing-calc-step__icon {
+  color: #b7f4cf;
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255,255,255,.18), transparent 34%),
+    rgba(60,179,113,.20);
+  border-color: rgba(183,244,207,.36);
+  box-shadow: 0 14px 34px rgba(60,179,113,.18), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+html[data-theme="light"] .pricing-app .pricing-mode-card__icon,
+html[data-theme="light"] .pricing-app .pricing-spotlight-card__icon,
+html[data-theme="light"] .pricing-app .pricing-price-group__icon,
+html[data-theme="light"] .pricing-app .pricing-info-card > span,
+html[data-theme="light"] .pricing-app .pricing-service-group__head > span,
+html[data-theme="light"] .pricing-app .pricing-service-card__icon,
+html[data-theme="light"] .pricing-app .pricing-popular-card > span,
+html[data-theme="light"] .pricing-app .pricing-counter-card > span,
+html[data-theme="light"] .pricing-app .pricing-counter-row__icon,
+html[data-theme="light"] .pricing-app .pricing-addon-row__icon,
+html[data-theme="light"] .pricing-app .pricing-calc-step__icon {
+  color: #0d653b;
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255,255,255,.90), transparent 34%),
+    rgba(60,179,113,.20);
+  border-color: rgba(17,114,67,.28);
+}
+
 @media (min-width: 720px) {
   .pricing-spotlight__grid,
   .pricing-mode-grid,
@@ -3018,6 +3175,10 @@ html[data-theme="light"] .pricing-app-summary__price {
 
   .pricing-service-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pricing-app__panel .pricing-service-grid {
+    grid-template-columns: 1fr;
   }
 
   .pricing-popular__grid,
@@ -3111,6 +3272,14 @@ html[data-theme="light"] .pricing-app-summary__price {
     word-break: normal;
   }
 
+  .pricing-option-title,
+  .pricing-option-note,
+  .pricing-price-row span strong {
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+  }
+
   .pricing-mode-card,
   .pricing-spotlight-card,
   .pricing-popular-card,
@@ -3121,6 +3290,21 @@ html[data-theme="light"] .pricing-app-summary__price {
   .pricing-faq__item {
     min-width: 0;
     max-width: 100%;
+  }
+
+  .pricing-app .pricing-mode-card__icon,
+  .pricing-app .pricing-spotlight-card__icon,
+  .pricing-app .pricing-price-group__icon,
+  .pricing-app .pricing-info-card > span,
+  .pricing-app .pricing-service-group__head > span,
+  .pricing-app .pricing-service-card__icon,
+  .pricing-app .pricing-popular-card > span,
+  .pricing-app .pricing-counter-card > span,
+  .pricing-app .pricing-counter-row__icon,
+  .pricing-app .pricing-addon-row__icon {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 18px;
   }
 
   .pricing-season-toggle {
@@ -3153,7 +3337,15 @@ html[data-theme="light"] .pricing-app-summary__price {
 
   .pricing-counter-row,
   .pricing-addon-row {
-    grid-template-columns: 50px minmax(0, 1fr);
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .pricing-counter-row__icon,
+  .pricing-addon-row__icon {
+    width: 50px;
+    height: 50px;
   }
 
   .pricing-counter-row .pricing-stepper,
@@ -3164,6 +3356,15 @@ html[data-theme="light"] .pricing-app-summary__price {
 
   .pricing-addon-row em {
     justify-self: start;
+  }
+
+  .pricing-counter-row .pricing-stepper,
+  .pricing-addon-row .pricing-stepper,
+  .pricing-service-card .pricing-stepper,
+  .pricing-stepper--row,
+  .pricing-stepper--service {
+    width: 100%;
+    justify-self: stretch;
   }
 
   .pricing-calc-step {
@@ -3189,6 +3390,11 @@ html[data-theme="light"] .pricing-app-summary__price {
     justify-self: start;
   }
 
+  .pricing-service-card .pricing-option-price {
+    grid-column: auto;
+    justify-self: start;
+  }
+
   .pricing-price-row {
     grid-template-columns: 1fr;
   }
@@ -3199,6 +3405,18 @@ html[data-theme="light"] .pricing-app-summary__price {
 
   .pricing-app-summary {
     position: static;
+  }
+
+  .pricing-checkout-totals p,
+  .pricing-app-summary__lines p {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .pricing-checkout-totals p strong,
+  .pricing-app-summary__lines strong {
+    justify-self: start;
+    text-align: left;
   }
 
   .pricing-stepper {
