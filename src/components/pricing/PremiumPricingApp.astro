@@ -405,9 +405,10 @@ const pricingAppConfig = {
       <div class="pricing-spotlight__grid">
         {popularSpotlightCards.map((card, index) => (
           <article
-            class:list={['pricing-spotlight-card', 'premium-card', index === 0 && 'pricing-spotlight-card--featured']}
+            class:list={['pricing-spotlight-card', 'premium-card', index < 2 && 'pricing-spotlight-card--featured']}
             style={`--delay: ${index * 70}ms`}
           >
+            {index === 0 && <span class="pricing-spotlight-card__ribbon">Najczęściej wybierane</span>}
             <span class="pricing-spotlight-card__icon"><Icon name={card.icon} size={32} strokeWidth={2.35} /></span>
             <div class="pricing-spotlight-card__body">
               <small>{card.label}</small>
@@ -451,40 +452,16 @@ const pricingAppConfig = {
       </div>
     </section>
 
-    <section class="pricing-popular reveal-section" aria-labelledby="pricingPopularTitle">
-      <div class="pricing-app__section-head">
-        <span class="section-kicker">Najczęściej wybierane</span>
-        <h2 id="pricingPopularTitle">Gotowe zestawy dla szybkiego startu</h2>
-        <p>Najpierw wybierz popularny zestaw, a kalkulator poniżej od razu pokaże rozbicie kosztów.</p>
-      </div>
-      <div class="pricing-popular__grid">
-        {presets.map((preset) => (
-          <article class="pricing-popular-card premium-card" style={`--delay: ${presets.indexOf(preset) * 60}ms`}>
-            <span><Icon name={preset.icon} size={28} strokeWidth={2.25} /></span>
-            <div class="pricing-popular-card__body">
-              <h3>{preset.title}</h3>
-              <p>Najczęściej klikany wariant dla szybkiej wyceny.</p>
-              <strong>{preset.id === 'bungalow-2' || preset.id === 'bungalow-4' ? 'od ' : ''}{formatPrice(preset.price)} / noc</strong>
-            </div>
-            <div class="pricing-popular-card__actions">
-              <button type="button" data-pricing-preset={preset.id}>Użyj w kalkulatorze</button>
-              <a href={preset.href}>Zarezerwuj</a>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
-
     <section class="pricing-app__calculator reveal-section" id="oblicz-koszt" aria-labelledby="pricingCalculatorTitle">
       <div class="pricing-app__section-head pricing-app__section-head--wide">
         <span class="section-kicker">Kalkulator orientacyjny</span>
-        <h2 id="pricingCalculatorTitle">Policz pobyt w kilka kliknięć</h2>
-        <p>To szybka kalkulacja, bez danych klienta i zgód. Finalną dostępność oraz szczegóły potwierdza recepcja.</p>
+        <h2 id="pricingCalculatorTitle">Kalkulator w 3 prostych krokach</h2>
+        <p>Najpierw ustaw gości i noce, potem wybierz sposób pobytu oraz dodatki. Bez danych klienta i bez zgód.</p>
       </div>
 
       <div class="pricing-app__layout">
         <div class="pricing-app__panel premium-card">
-          <div class="pricing-app__toolbar">
+          <div class="pricing-app__toolbar pricing-app__toolbar--simple">
             <div class="pricing-season-toggle" role="group" aria-label="Sezon dla domków">
               <button type="button" class="is-active" data-pricing-season="low">Niski sezon</button>
               <button type="button" data-pricing-season="high">Wysoki sezon</button>
@@ -492,60 +469,51 @@ const pricingAppConfig = {
             <p><Icon name="info" size={16} /> Domki zmieniają cenę w sezonie wysokim. Camping ma stałą cenę za noc.</p>
           </div>
 
-          <div class="pricing-counter-groups">
-            {counterGroups.map((group) => (
-              <section class="pricing-counter-group">
-                <div class="pricing-group-title">
-                  <span><Icon name={group.icon} size={22} strokeWidth={2.25} /></span>
-                  <div>
-                    <h3>{group.title}</h3>
-                    <p>{group.copy}</p>
-                  </div>
-                </div>
-                <div class="pricing-counters">
-                  {group.counters.map((counter) => (
-                    <article class="pricing-counter-card" data-counter-card={counter.id}>
-                      <span><Icon name={counter.icon} size={22} strokeWidth={2.25} /></span>
-                      <label for={`pricing-${counter.id}`}>{counter.label}</label>
-                      <div class="pricing-stepper">
-                        <button type="button" data-stepper-target={counter.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${counter.label}`}>
-                          <Icon name="minus" size={18} strokeWidth={2.6} />
-                        </button>
-                        <input id={`pricing-${counter.id}`} type="number" min={counter.min} value={counter.value} inputmode="numeric" data-pricing-input={counter.id} />
-                        <button type="button" data-stepper-target={counter.id} data-stepper-delta="1" aria-label={`Zwiększ ${counter.label}`}>
-                          <Icon name="plus" size={18} strokeWidth={2.6} />
-                        </button>
-                      </div>
-                      <small>{counter.price === null ? 'Suma mnożona przez liczbę nocy' : `${formatPrice(counter.price)} / noc`}</small>
-                    </article>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-
-          <div class="pricing-service-groups">
-            <section class="pricing-service-group" data-service-group="camping" data-modes="camping combined">
-              <div class="pricing-service-group__head">
-                <span><Icon name="camper" size={24} strokeWidth={2.25} /></span>
+          <div class="pricing-calc-steps">
+            <section class="pricing-calc-step pricing-calc-step--people">
+              <div class="pricing-calc-step__head">
+                <span class="pricing-calc-step__number">01</span>
+                <span class="pricing-calc-step__icon"><Icon name="users" size={28} strokeWidth={2.25} /></span>
                 <div>
-                  <h3>Camping</h3>
-                  <p>Najpierw wybierz pojazd albo namiot, potem dodatki takie jak prąd 10A.</p>
+                  <h3>Kto przyjeżdża?</h3>
+                  <p>Ustaw liczbę nocy i gości. W campingu osoby doliczane są do pojazdu lub namiotu.</p>
                 </div>
               </div>
-              {campingServiceGroups.map((group) => (
-                <section class="pricing-service-subgroup">
-                  <div class="pricing-group-title pricing-group-title--compact">
-                    <span><Icon name={group.icon} size={21} strokeWidth={2.25} /></span>
-                    <div>
-                      <h4>{group.title}</h4>
-                      <p>{group.copy}</p>
+              <div class="pricing-counters">
+                {counters.map((counter) => (
+                  <article class="pricing-counter-card" data-counter-card={counter.id}>
+                    <span><Icon name={counter.icon} size={24} strokeWidth={2.25} /></span>
+                    <label for={`pricing-${counter.id}`}>{counter.label}</label>
+                    <small>{counter.price === null ? 'Mnoży cały pobyt' : `${formatPrice(counter.price)} / noc`}</small>
+                    <div class="pricing-stepper">
+                      <button type="button" data-stepper-target={counter.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${counter.label}`}>
+                        <Icon name="minus" size={18} strokeWidth={2.6} />
+                      </button>
+                      <input id={`pricing-${counter.id}`} type="number" min={counter.min} value={counter.value} inputmode="numeric" data-pricing-input={counter.id} />
+                      <button type="button" data-stepper-target={counter.id} data-stepper-delta="1" aria-label={`Zwiększ ${counter.label}`}>
+                        <Icon name="plus" size={18} strokeWidth={2.6} />
+                      </button>
                     </div>
-                  </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section class="pricing-calc-step pricing-calc-step--stay">
+              <div class="pricing-calc-step__head">
+                <span class="pricing-calc-step__number">02</span>
+                <span class="pricing-calc-step__icon"><Icon name="camping" size={28} strokeWidth={2.25} /></span>
+                <div>
+                  <h3>Czym przyjeżdżasz / gdzie śpisz?</h3>
+                  <p>Wybierz główny element pobytu. Wariant strony pokaże tylko pasujące opcje.</p>
+                </div>
+              </div>
+              <div class="pricing-service-groups pricing-service-groups--stay">
+                <section class="pricing-service-group" data-service-group="camping" data-modes="camping combined">
                   <div class="pricing-service-grid">
-                    {group.items.map((item) => (
+                    {campingServiceGroups[0].items.map((item) => (
                       <article class="pricing-service-card" data-service-card={item.id}>
-                        <span class="pricing-service-card__icon"><Icon name={item.icon} size={24} strokeWidth={2.25} /></span>
+                        <span class="pricing-service-card__icon"><Icon name={item.icon} size={30} strokeWidth={2.25} /></span>
                         <div>
                           <strong>{item.label}</strong>
                           <small>{item.note}</small>
@@ -564,34 +532,16 @@ const pricingAppConfig = {
                     ))}
                   </div>
                 </section>
-              ))}
-            </section>
 
-            <section class="pricing-service-group" data-service-group="bungalow" data-modes="bungalow combined" hidden>
-              <div class="pricing-service-group__head">
-                <span><Icon name="house" size={24} strokeWidth={2.25} /></span>
-                <div>
-                  <h3>Domki</h3>
-                  <p>Wybierz typ domku i praktyczne dodatki. Ceny domków zależą od sezonu.</p>
-                </div>
-              </div>
-              {bungalowServiceGroups.map((group) => (
-                <section class="pricing-service-subgroup">
-                  <div class="pricing-group-title pricing-group-title--compact">
-                    <span><Icon name={group.icon} size={21} strokeWidth={2.25} /></span>
-                    <div>
-                      <h4>{group.title}</h4>
-                      <p>{group.copy}</p>
-                    </div>
-                  </div>
+                <section class="pricing-service-group" data-service-group="bungalow" data-modes="bungalow combined" hidden>
                   <div class="pricing-service-grid">
-                    {group.items.map((item) => {
+                    {bungalowServiceGroups[0].items.map((item) => {
                       const priceLabel = 'seasonalPrices' in item
                         ? `${formatPrice(item.seasonalPrices.low)} / ${formatPrice(item.seasonalPrices.high)}`
                         : formatPrice(item.price);
                       return (
                         <article class="pricing-service-card" data-service-card={item.id}>
-                          <span class="pricing-service-card__icon"><Icon name={item.icon} size={24} strokeWidth={2.25} /></span>
+                          <span class="pricing-service-card__icon"><Icon name={item.icon} size={30} strokeWidth={2.25} /></span>
                           <div>
                             <strong>{item.label}</strong>
                             <small>{item.note}</small>
@@ -611,15 +561,81 @@ const pricingAppConfig = {
                     })}
                   </div>
                 </section>
-              ))}
+              </div>
+            </section>
+
+            <section class="pricing-calc-step pricing-calc-step--addons">
+              <div class="pricing-calc-step__head">
+                <span class="pricing-calc-step__number">03</span>
+                <span class="pricing-calc-step__icon"><Icon name="sparkles" size={28} strokeWidth={2.25} /></span>
+                <div>
+                  <h3>Co dodać?</h3>
+                  <p>Prąd 10A, parking, pies i praktyczne dodatki. Pies pozostaje bezpłatny.</p>
+                </div>
+              </div>
+              <div class="pricing-service-groups pricing-service-groups--addons">
+                <section class="pricing-service-group" data-service-group="camping" data-modes="camping combined">
+                  <div class="pricing-service-grid">
+                    {campingServiceGroups[1].items.map((item) => (
+                      <article class="pricing-service-card" data-service-card={item.id}>
+                        <span class="pricing-service-card__icon"><Icon name={item.icon} size={30} strokeWidth={2.25} /></span>
+                        <div>
+                          <strong>{item.label}</strong>
+                          <small>{item.note}</small>
+                        </div>
+                        <em>{formatPrice(item.price)} / noc</em>
+                        <div class="pricing-stepper pricing-stepper--service">
+                          <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${item.label}`}>
+                            <Icon name="minus" size={17} strokeWidth={2.6} />
+                          </button>
+                          <input type="number" min="0" value="0" inputmode="numeric" data-service-input={item.id} />
+                          <button type="button" data-stepper-target={item.id} data-stepper-delta="1" aria-label={`Zwiększ ${item.label}`}>
+                            <Icon name="plus" size={17} strokeWidth={2.6} />
+                          </button>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+
+                <section class="pricing-service-group" data-service-group="bungalow" data-modes="bungalow combined" hidden>
+                  <div class="pricing-service-grid">
+                    {bungalowServiceGroups[1].items.map((item) => {
+                      const priceLabel = 'seasonalPrices' in item
+                        ? `${formatPrice(item.seasonalPrices.low)} / ${formatPrice(item.seasonalPrices.high)}`
+                        : formatPrice(item.price);
+                      return (
+                        <article class="pricing-service-card" data-service-card={item.id}>
+                          <span class="pricing-service-card__icon"><Icon name={item.icon} size={30} strokeWidth={2.25} /></span>
+                          <div>
+                            <strong>{item.label}</strong>
+                            <small>{item.note}</small>
+                          </div>
+                          <em>{priceLabel} / noc</em>
+                          <div class="pricing-stepper pricing-stepper--service">
+                            <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${item.label}`}>
+                              <Icon name="minus" size={17} strokeWidth={2.6} />
+                            </button>
+                            <input type="number" min="0" value="0" inputmode="numeric" data-service-input={item.id} />
+                            <button type="button" data-stepper-target={item.id} data-stepper-delta="1" aria-label={`Zwiększ ${item.label}`}>
+                              <Icon name="plus" size={17} strokeWidth={2.6} />
+                            </button>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </section>
+              </div>
             </section>
           </div>
         </div>
 
         <aside class="pricing-app-summary premium-card" aria-live="polite">
           <div class="pricing-app-summary__top">
-            <span class="pricing-app-summary__badge"><Icon name="receipt" size={16} strokeWidth={2.4} /> Orientacyjna cena</span>
-            <small>Status: do potwierdzenia przez recepcję</small>
+            <span class="pricing-app-summary__badge"><Icon name="receipt" size={16} strokeWidth={2.4} /> Status: do potwierdzenia</span>
+            <h3 class="pricing-app-summary__title">Twój pobyt</h3>
+            <small data-summary-title>2 osoby + kamper</small>
           </div>
           <div class="pricing-app-summary__price">
             <span>Razem orientacyjnie</span>
@@ -743,6 +759,7 @@ const pricingAppConfig = {
     const serviceGroups = Array.from(root.querySelectorAll('[data-service-group]'));
     const summaryTotal = root.querySelector('[data-summary-total]');
     const summaryHint = root.querySelector('[data-summary-hint]');
+    const summaryTitle = root.querySelector('[data-summary-title]');
     const summaryMode = root.querySelector('[data-summary-mode]');
     const summaryNights = root.querySelector('[data-summary-nights]');
     const summaryNightly = root.querySelector('[data-summary-nightly]');
@@ -751,6 +768,8 @@ const pricingAppConfig = {
     const toast = root.querySelector('[data-pricing-toast]');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const state = { mode: 'camping', season: 'low' };
+    let summaryPulseTimer = 0;
+    let toastTimer = 0;
 
     const formatMoney = (value) => `${Math.round(Math.max(0, value)).toLocaleString('pl-PL')} ${config.currency}`;
     const numberInput = (id) => root.querySelector(`[data-pricing-input="${id}"], [data-service-input="${id}"]`);
@@ -879,6 +898,15 @@ const pricingAppConfig = {
       if (summaryMode) summaryMode.textContent = config.modeLabels[state.mode] || state.mode;
       if (summaryNights) summaryNights.textContent = `${result.nights} ${result.nights === 1 ? 'noc' : 'noce'}`;
       if (summaryNightly) summaryNightly.textContent = `${formatMoney(result.nightly)} / noc`;
+      if (summaryTitle) {
+        const peopleLabel = state.mode === 'bungalow'
+          ? 'Pobyt w domku'
+          : `${result.adults + result.children + result.toddlers || 0} os.`;
+        const servicesLabel = result.services.length
+          ? result.services.slice(0, 3).map((service) => service.label).join(' + ')
+          : 'wybierz elementy pobytu';
+        summaryTitle.textContent = `${peopleLabel} + ${servicesLabel}`;
+      }
       if (summaryHint) {
         summaryHint.textContent = result.services.length
           ? 'Cena obejmuje wybrane elementy i liczbę nocy. To nadal koszt orientacyjny.'
@@ -899,7 +927,8 @@ const pricingAppConfig = {
         summaryLines.innerHTML = lines.length ? lines.join('') : '<p><span>Usługi</span><strong>Do wyboru</strong></p>';
       }
       summaryCard?.classList.add('is-pulsing');
-      window.setTimeout(() => summaryCard?.classList.remove('is-pulsing'), 180);
+      window.clearTimeout(summaryPulseTimer);
+      summaryPulseTimer = window.setTimeout(() => summaryCard?.classList.remove('is-pulsing'), 180);
       updateCardStates();
     };
     const applyPreset = (presetId) => {
@@ -912,8 +941,9 @@ const pricingAppConfig = {
       updateGroups();
       update();
       if (toast) {
+        window.clearTimeout(toastTimer);
         toast.classList.add('is-visible');
-        window.setTimeout(() => toast.classList.remove('is-visible'), 2100);
+        toastTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 2100);
       }
       const calculator = root.querySelector('#oblicz-koszt');
       calculator?.classList.add('is-highlighted');
@@ -2242,6 +2272,217 @@ html[data-theme="dark"] .pricing-app .pricing-service-subgroup {
   background: transparent;
 }
 
+.pricing-spotlight-card__ribbon {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 2;
+  padding: 8px 11px;
+  border-radius: 999px;
+  color: #082016;
+  background: linear-gradient(135deg, #c6f8d9, #60d996);
+  box-shadow: 0 16px 34px rgba(60,179,113,.20);
+  font-size: .68rem;
+  font-weight: 950;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+}
+
+.pricing-calc-steps {
+  display: grid;
+  gap: clamp(24px, 3vw, 34px);
+}
+
+.pricing-calc-step {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: clamp(18px, 2.4vw, 28px);
+  padding: clamp(24px, 3vw, 36px);
+  border: 1px solid rgba(35,126,77,.16);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(60,179,113,.14), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,.88), rgba(241,250,245,.72));
+  box-shadow: 0 24px 70px rgba(17,40,28,.10), inset 0 1px 0 rgba(255,255,255,.72);
+}
+
+.pricing-calc-step::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, transparent 0 38%, rgba(255,255,255,.28) 50%, transparent 64%);
+  opacity: .45;
+  transform: translateX(-45%);
+}
+
+.pricing-calc-step > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pricing-calc-step__head {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+}
+
+.pricing-calc-step__number {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  color: #082016;
+  background: linear-gradient(135deg, #b8f5d1, #3CB371);
+  box-shadow: 0 14px 30px rgba(60,179,113,.22);
+  font-size: .82rem;
+  font-weight: 950;
+}
+
+.pricing-calc-step__icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border: 1px solid rgba(60,179,113,.24);
+  border-radius: 21px;
+  color: #147a49;
+  background: rgba(60,179,113,.12);
+}
+
+.pricing-calc-step__head h3 {
+  margin: 0;
+  color: #102018;
+  font-size: clamp(1.35rem, 2.2vw, 2rem);
+  line-height: 1.05;
+  font-weight: 950;
+}
+
+.pricing-calc-step__head p {
+  margin: 6px 0 0;
+  max-width: 760px;
+  color: #536359;
+  line-height: 1.55;
+  font-weight: 780;
+}
+
+.pricing-app .pricing-counter-groups,
+.pricing-app .pricing-service-groups,
+.pricing-app .pricing-service-subgroup {
+  gap: clamp(18px, 2.4vw, 24px);
+}
+
+.pricing-app .pricing-service-group {
+  display: grid;
+  gap: 18px;
+}
+
+.pricing-counters,
+.pricing-service-grid {
+  gap: clamp(16px, 2vw, 22px);
+}
+
+.pricing-counter-card,
+.pricing-service-card {
+  min-height: 0;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 98% 0%, rgba(60,179,113,.12), transparent 38%),
+    rgba(255,255,255,.76);
+}
+
+.pricing-counter-card {
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+}
+
+.pricing-counter-card > span {
+  grid-row: span 3;
+}
+
+.pricing-counter-card .pricing-stepper {
+  grid-column: 1 / -1;
+}
+
+.pricing-service-card {
+  grid-template-columns: 70px minmax(0, 1fr) auto minmax(166px, 188px);
+  align-items: center;
+  gap: 14px 18px;
+  padding: clamp(18px, 2vw, 24px);
+}
+
+.pricing-service-card__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 22px;
+}
+
+.pricing-service-card em {
+  grid-column: auto;
+  justify-self: end;
+  white-space: nowrap;
+  font-size: .9rem;
+}
+
+.pricing-service-card .pricing-stepper {
+  grid-column: auto;
+}
+
+.pricing-stepper--service {
+  grid-template-columns: 48px minmax(54px, 1fr) 48px;
+}
+
+.pricing-stepper--service button,
+.pricing-stepper--service input {
+  height: 48px;
+}
+
+.pricing-app-summary__title {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  line-height: 1;
+  font-weight: 950;
+}
+
+.pricing-price-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  padding: 18px;
+}
+
+.pricing-price-row em {
+  justify-self: end;
+  padding: 10px 13px;
+  font-size: .95rem;
+}
+
+html[data-theme="dark"] .pricing-calc-step {
+  border-color: rgba(255,255,255,.12);
+  background:
+    radial-gradient(circle at 92% 0%, rgba(60,179,113,.16), transparent 34%),
+    rgba(255,255,255,.065);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+html[data-theme="dark"] .pricing-calc-step__head h3 {
+  color: #fff;
+}
+
+html[data-theme="dark"] .pricing-calc-step__head p {
+  color: rgba(255,255,255,.66);
+}
+
+html[data-theme="light"] .pricing-calc-step {
+  border-color: rgba(35,126,77,.16);
+  background:
+    radial-gradient(circle at 92% 0%, rgba(60,179,113,.13), transparent 34%),
+    rgba(255,255,255,.86);
+}
+
 @media (min-width: 720px) {
   .pricing-spotlight__grid,
   .pricing-mode-grid,
@@ -2258,7 +2499,7 @@ html[data-theme="dark"] .pricing-app .pricing-service-subgroup {
 
 @media (min-width: 1040px) {
   .pricing-spotlight__grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .pricing-spotlight-card--featured {
@@ -2270,7 +2511,7 @@ html[data-theme="dark"] .pricing-app .pricing-service-subgroup {
   }
 
   .pricing-app__layout {
-    grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 390px);
   }
 
   .pricing-counters {
@@ -2391,6 +2632,37 @@ html[data-theme="dark"] .pricing-app .pricing-service-subgroup {
 
   .pricing-service-card {
     grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  .pricing-calc-step {
+    padding: 20px;
+    border-radius: 28px;
+  }
+
+  .pricing-calc-step__head {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .pricing-calc-step__icon {
+    display: none;
+  }
+
+  .pricing-service-card em,
+  .pricing-service-card .pricing-stepper {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+
+  .pricing-service-card em {
+    justify-self: start;
+  }
+
+  .pricing-price-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-price-row em {
+    justify-self: start;
   }
 
   .pricing-app-summary {
