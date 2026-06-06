@@ -1,0 +1,287 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { getNoticeCopy, getPopupSiteNotice } from '@/data/siteNotices';
+import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+
+const notice = getPopupSiteNotice();
+const pathContext = getPathContext(Astro.url.pathname);
+const languageCode = pathContext.languageCode;
+const copy = notice ? getNoticeCopy(notice, languageCode) : null;
+const localizedDirectionsHref = getLocalizedPath(pathContext.explicitLanguage, 'dojazd');
+const ctaHref = notice?.ctaHref === '/dojazd' ? localizedDirectionsHref : (notice?.ctaHref ?? localizedDirectionsHref);
+const closeLabel = languageCode === 'pl' ? 'Zamknij aktualność' : 'Close notice';
+const eyebrow = languageCode === 'pl' ? 'Aktualnie' : 'Current update';
+const endDate = notice?.endDate ?? '';
+---
+
+{notice && copy && (
+  <aside
+    class="site-notice-popup"
+    data-site-notice-popup
+    data-notice-id={notice.id}
+    data-notice-end={endDate}
+    role="dialog"
+    aria-modal="false"
+    aria-labelledby="siteNoticePopupTitle"
+    hidden
+  >
+    <div class="site-notice-popup__scrim" data-site-notice-close aria-hidden="true"></div>
+    <article class="site-notice-popup__card">
+      <button class="site-notice-popup__close" type="button" data-site-notice-close aria-label={closeLabel}>
+        <Icon name="close" size={18} strokeWidth={2.2} />
+      </button>
+      <span class="site-notice-popup__icon" aria-hidden="true">
+        <Icon name={notice.icon ?? 'Info'} size={25} strokeWidth={2} />
+      </span>
+      <div class="site-notice-popup__copy">
+        <div class="site-notice-popup__meta">
+          <span>{eyebrow}</span>
+          {copy.badge && <small>{copy.badge}</small>}
+        </div>
+        <h2 id="siteNoticePopupTitle">{copy.title}</h2>
+        <p>{copy.description}</p>
+        <a href={ctaHref}>
+          <span>{copy.ctaLabel}</span>
+          <Icon name="ArrowUpRight" size={17} strokeWidth={2.2} />
+        </a>
+      </div>
+    </article>
+  </aside>
+
+  <script define:vars={{ noticeId: notice.id, noticeEndDate: endDate }}>
+    (() => {
+      const popup = document.querySelector('[data-site-notice-popup]');
+      if (!(popup instanceof HTMLElement)) return;
+
+      const storageKey = `cc-site-notice:${noticeId}`;
+      const now = Date.now();
+      const eventEnd = new Date(`${noticeEndDate}T23:59:59`).getTime();
+      const dismissUntil = Math.min(now + 24 * 60 * 60 * 1000, Number.isFinite(eventEnd) ? eventEnd : now + 24 * 60 * 60 * 1000);
+
+      try {
+        const stored = window.localStorage.getItem(storageKey);
+        if (stored && Number(stored) > now) return;
+      } catch {}
+
+      const close = () => {
+        popup.classList.remove('is-visible');
+        window.setTimeout(() => {
+          popup.hidden = true;
+        }, 220);
+        try {
+          window.localStorage.setItem(storageKey, String(dismissUntil));
+        } catch {}
+      };
+
+      popup.querySelectorAll('[data-site-notice-close]').forEach((element) => {
+        element.addEventListener('click', close);
+      });
+
+      window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && popup.classList.contains('is-visible')) close();
+      });
+
+      window.setTimeout(() => {
+        popup.hidden = false;
+        window.requestAnimationFrame(() => popup.classList.add('is-visible'));
+      }, 900);
+    })();
+  </script>
+)}
+
+<style>
+.site-notice-popup[hidden] {
+  display: none !important;
+}
+
+.site-notice-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 1420;
+  display: grid;
+  place-items: end center;
+  padding: 18px;
+  pointer-events: none;
+}
+
+.site-notice-popup__scrim {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: rgba(8, 20, 14, .26);
+  transition: opacity .24s ease;
+  pointer-events: auto;
+}
+
+.site-notice-popup__card {
+  position: relative;
+  width: min(620px, calc(100vw - 24px));
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  padding: clamp(20px, 3vw, 28px);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 30px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.32), transparent 36%),
+    radial-gradient(circle at 92% 100%, rgba(242,192,120,.20), transparent 36%),
+    linear-gradient(145deg, rgba(12,31,22,.98), rgba(23,56,38,.96));
+  box-shadow: 0 32px 90px rgba(0,0,0,.32), 0 0 38px rgba(60,179,113,.16);
+  transform: translateY(24px) scale(.98);
+  opacity: 0;
+  pointer-events: auto;
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1), opacity .24s ease;
+}
+
+.site-notice-popup.is-visible .site-notice-popup__scrim {
+  opacity: 1;
+}
+
+.site-notice-popup.is-visible .site-notice-popup__card {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.site-notice-popup__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 14px;
+  color: #fff;
+  background: rgba(255,255,255,.08);
+}
+
+.site-notice-popup__icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  color: #092016;
+  background: linear-gradient(135deg, #f2c078, #8fe0b4 48%, #3CB371);
+  box-shadow: 0 16px 38px rgba(60,179,113,.26);
+}
+
+.site-notice-popup__copy {
+  min-width: 0;
+  display: grid;
+  gap: 11px;
+  padding-right: 38px;
+}
+
+.site-notice-popup__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.site-notice-popup__meta span,
+.site-notice-popup__meta small {
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #a8f0c7;
+  background: rgba(143,224,180,.12);
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.site-notice-popup__meta small {
+  color: #ffe0ad;
+  background: rgba(242,192,120,.14);
+}
+
+.site-notice-popup h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.35rem, 4vw, 2rem);
+  line-height: 1.08;
+}
+
+.site-notice-popup p {
+  margin: 0;
+  color: rgba(255,255,255,.76);
+  line-height: 1.62;
+  font-weight: 760;
+}
+
+.site-notice-popup a {
+  width: fit-content;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 15px;
+  border-radius: 999px;
+  color: #082016;
+  background: linear-gradient(135deg, #a8f0c7, #3CB371 62%, #2f9d63);
+  font-weight: 950;
+  text-decoration: none;
+  box-shadow: 0 18px 40px rgba(60,179,113,.25);
+}
+
+html[data-theme="light"] .site-notice-popup__card {
+  color: #102018;
+  border-color: rgba(25,54,38,.12);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.16), transparent 36%),
+    radial-gradient(circle at 92% 100%, rgba(242,192,120,.18), transparent 36%),
+    linear-gradient(145deg, rgba(250,251,246,.98), rgba(236,244,233,.96));
+  box-shadow: 0 30px 88px rgba(32,52,38,.24), 0 0 34px rgba(60,179,113,.12);
+}
+
+html[data-theme="light"] .site-notice-popup h2 {
+  color: #102018;
+}
+
+html[data-theme="light"] .site-notice-popup p {
+  color: rgba(23,54,36,.72);
+}
+
+html[data-theme="light"] .site-notice-popup__close {
+  color: #102018;
+  border-color: rgba(25,54,38,.12);
+  background: rgba(255,255,255,.72);
+}
+
+html[data-theme="light"] .site-notice-popup__meta span {
+  color: #0f6b3f;
+  background: rgba(60,179,113,.13);
+}
+
+html[data-theme="light"] .site-notice-popup__meta small {
+  color: #6c4c18;
+  background: rgba(242,192,120,.22);
+}
+
+@media (max-width: 620px) {
+  .site-notice-popup {
+    place-items: end center;
+    padding: 12px;
+  }
+
+  .site-notice-popup__card {
+    grid-template-columns: 1fr;
+    border-radius: 24px;
+  }
+
+  .site-notice-popup__copy {
+    padding-right: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-notice-popup__card,
+  .site-notice-popup__scrim {
+    transition: none;
+  }
+}
+</style>

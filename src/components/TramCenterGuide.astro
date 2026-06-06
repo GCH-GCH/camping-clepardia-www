@@ -1,0 +1,506 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { getLocalizedPath } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+  variant?: 'home' | 'page';
+}
+
+const { languageCode = 'pl', variant = 'home' } = Astro.props as Props;
+const lang = ['pl', 'en', 'de', 'it'].includes(languageCode) ? languageCode : 'en';
+const mapsHref = 'https://www.google.com/maps/dir/?api=1&origin=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w&destination=Stary+Kleparz+Krak%C3%B3w&travelmode=transit';
+const jakdojadeHref = 'https://jakdojade.pl/krakow';
+const attractionsHref = getLocalizedPath(languageCode === 'pl' ? undefined : languageCode, 'atrakcje');
+
+const copyByLang = {
+  pl: {
+    kicker: 'Najprostszy dojazd do centrum',
+    title: 'Tramwajem do centrum w ok. 14 minut',
+    lead:
+      'Zostaw auto, kampera albo przyczepę na campingu. Przystanek Górnickiego jest tuż obok, a tramwaj 18 dowozi do Starego Kleparza, skąd szybko dojdziesz pieszo do Starego Miasta.',
+    route: ['Camping Clepardia', '40 m pieszo', 'Górnickiego', 'Tramwaj 18', 'Stary Kleparz', '5 min spacer', 'Stare Miasto'],
+    facts: [
+      { icon: 'MapPin', title: 'Przystanek ok. 40 m', copy: 'Górnickiego znajduje się bardzo blisko bramy Camping Clepardia.' },
+      { icon: 'Clock', title: 'Około 14 minut', copy: 'Tramwaj 18 jedzie do Starego Kleparza około 9 przystanków.' },
+      { icon: 'Footprints', title: '450 m do centrum', copy: 'Ze Starego Kleparza do Rynku / Starego Miasta dojdziesz w ok. 5 minut.' },
+      { icon: 'Ticket', title: 'Bilet ok. 4 zł', copy: 'Bilet 15-minutowy kosztuje ok. 4 zł. Trasę sprawdzaj w Google Maps lub Jakdojade.' },
+      { icon: 'CreditCard', title: 'Automat i karta', copy: 'Bilet można kupić w automacie w tramwaju. W wielu tramwajach działa płatność kartą.' },
+      { icon: 'Info', title: 'Ulgi i powrót', copy: 'Psy jadą za darmo na smyczy i w kagańcu. Dzieci do 7 lat i seniorzy 70+ jadą bezpłatnie, dzieci 7-16 ulgowo. Linia 18 wraca w przeciwnym kierunku.' },
+    ],
+    note: 'Stary Kleparz to 9. przystanek, nie ostatni — tylko około połowa trasy.',
+    maps: 'Otwórz Google Maps',
+    jakdojade: 'Sprawdź w Jakdojade',
+    campy: 'Zapytaj CAMPY o trasę',
+    attractions: 'Zobacz atrakcje w centrum',
+    campyPrompt: 'Jak dojadę tramwajem z Camping Clepardia do centrum?',
+  },
+  en: {
+    kicker: 'Easiest route to the centre',
+    title: 'By tram to the centre in about 14 minutes',
+    lead:
+      'Leave your car, motorhome or caravan at the campsite. Górnickiego stop is very close, and tram 18 takes you to Stary Kleparz, an easy walk from the Old Town.',
+    route: ['Camping Clepardia', '40 m walk', 'Górnickiego', 'Tram 18', 'Stary Kleparz', '5 min walk', 'Old Town'],
+    facts: [
+      { icon: 'MapPin', title: 'Stop about 40 m away', copy: 'Górnickiego stop is very close to the Camping Clepardia gate.' },
+      { icon: 'Clock', title: 'About 14 minutes', copy: 'Tram 18 takes about 9 stops to Stary Kleparz.' },
+      { icon: 'Footprints', title: '450 m to centre', copy: 'From Stary Kleparz it is about a 5-minute walk to the Old Town.' },
+      { icon: 'Ticket', title: 'Ticket about 4 PLN', copy: 'A 15-minute ticket costs about 4 PLN. Check Google Maps or Jakdojade.' },
+      { icon: 'CreditCard', title: 'Machine and card', copy: 'Tickets can be bought in tram machines. Card payment works in many trams.' },
+      { icon: 'Info', title: 'Discounts and return', copy: 'Dogs travel free on leash and muzzle. Children under 7 and seniors 70+ travel free; children 7-16 use reduced tickets. Line 18 returns in the opposite direction.' },
+    ],
+    note: 'Stary Kleparz is the 9th stop, not the last one.',
+    maps: 'Open Google Maps',
+    jakdojade: 'Check Jakdojade',
+    campy: 'Ask CAMPY',
+    attractions: 'See city attractions',
+    campyPrompt: 'How do I get by tram from Camping Clepardia to the centre?',
+  },
+  de: {
+    kicker: 'Einfach ins Zentrum',
+    title: 'Mit der Straßenbahn in ca. 14 Minuten ins Zentrum',
+    lead:
+      'Lassen Sie Auto, Wohnmobil oder Wohnwagen auf dem Campingplatz. Die Haltestelle Górnickiego ist sehr nah, die Linie 18 fährt zum Stary Kleparz.',
+    route: ['Camping Clepardia', '40 m zu Fuß', 'Górnickiego', 'Linie 18', 'Stary Kleparz', '5 min zu Fuß', 'Altstadt'],
+    facts: [
+      { icon: 'MapPin', title: 'Haltestelle ca. 40 m', copy: 'Górnickiego liegt sehr nah am Tor von Camping Clepardia.' },
+      { icon: 'Clock', title: 'Ca. 14 Minuten', copy: 'Die Linie 18 fährt ca. 9 Haltestellen bis Stary Kleparz.' },
+      { icon: 'Footprints', title: '450 m ins Zentrum', copy: 'Vom Stary Kleparz sind es ca. 5 Minuten zu Fuß zur Altstadt.' },
+      { icon: 'Ticket', title: 'Ticket ca. 4 PLN', copy: 'Ein 15-Minuten-Ticket kostet ca. 4 PLN. Prüfen Sie Google Maps oder Jakdojade.' },
+      { icon: 'CreditCard', title: 'Automat und Karte', copy: 'Tickets gibt es im Automaten in der Straßenbahn. In vielen Bahnen funktioniert Kartenzahlung.' },
+      { icon: 'Info', title: 'Ermäßigungen', copy: 'Hunde fahren gratis mit Leine und Maulkorb. Kinder unter 7 und Senioren 70+ fahren gratis; Kinder 7-16 ermäßigt. Linie 18 fährt zurück.' },
+    ],
+    note: 'Stary Kleparz ist die 9. Haltestelle, nicht die Endstation.',
+    maps: 'Google Maps öffnen',
+    jakdojade: 'Jakdojade öffnen',
+    campy: 'CAMPY fragen',
+    attractions: 'Attraktionen ansehen',
+    campyPrompt: 'Wie komme ich mit der Straßenbahn von Camping Clepardia ins Zentrum?',
+  },
+  it: {
+    kicker: 'Il percorso più semplice',
+    title: 'In tram verso il centro in circa 14 minuti',
+    lead:
+      'Lascia auto, camper o roulotte al camping. La fermata Górnickiego è vicinissima e il tram 18 porta a Stary Kleparz.',
+    route: ['Camping Clepardia', '40 m a piedi', 'Górnickiego', 'Tram 18', 'Stary Kleparz', '5 min a piedi', 'Centro storico'],
+    facts: [
+      { icon: 'MapPin', title: 'Fermata a circa 40 m', copy: 'Górnickiego è molto vicino al cancello del Camping Clepardia.' },
+      { icon: 'Clock', title: 'Circa 14 minuti', copy: 'Il tram 18 impiega circa 9 fermate fino a Stary Kleparz.' },
+      { icon: 'Footprints', title: '450 m dal centro', copy: 'Da Stary Kleparz sono circa 5 minuti a piedi verso il centro storico.' },
+      { icon: 'Ticket', title: 'Biglietto circa 4 PLN', copy: 'Un biglietto da 15 minuti costa circa 4 PLN. Controlla Google Maps o Jakdojade.' },
+      { icon: 'CreditCard', title: 'Macchina e carta', copy: 'I biglietti si possono comprare alle macchine sul tram. In molti tram si paga con carta.' },
+      { icon: 'Info', title: 'Sconti e ritorno', copy: 'I cani viaggiano gratis con guinzaglio e museruola. Bambini sotto 7 anni e senior 70+ gratis; bambini 7-16 ridotto. La linea 18 ritorna in direzione opposta.' },
+    ],
+    note: 'Stary Kleparz è la 9a fermata, non l ultima.',
+    maps: 'Apri Google Maps',
+    jakdojade: 'Apri Jakdojade',
+    campy: 'Chiedi a CAMPY',
+    attractions: 'Vedi attrazioni',
+    campyPrompt: 'Come arrivo in tram dal Camping Clepardia al centro?',
+  },
+};
+
+const copy = copyByLang[lang as keyof typeof copyByLang];
+---
+
+<section class:list={['site-section tram-center-guide reveal-section', `tram-center-guide--${variant}`]} aria-labelledby={`tramCenterTitle-${variant}`}>
+  <div class="container tram-center-guide__inner">
+    <div class="tram-center-guide__head">
+      <span class="section-kicker">{copy.kicker}</span>
+      <h2 class="section-title" id={`tramCenterTitle-${variant}`}>{copy.title}</h2>
+      <p class="section-copy">{copy.lead}</p>
+    </div>
+
+    <div class="tram-center-guide__layout">
+      <article class="premium-card tram-center-guide__route">
+        <span class="tram-center-guide__route-icon" aria-hidden="true">
+          <Icon name="TramFront" size={28} strokeWidth={2} />
+        </span>
+        <div class="tram-center-guide__route-line" aria-label={copy.route.join(' -> ')}>
+          {copy.route.map((step, index) => (
+            <>
+              <span class:list={[index === 0 && 'is-start', index === copy.route.length - 1 && 'is-end']}>{step}</span>
+              {index < copy.route.length - 1 && <i aria-hidden="true"></i>}
+            </>
+          ))}
+        </div>
+        <p class="tram-center-guide__note">
+          <Icon name="Info" size={17} strokeWidth={2} />
+          <span>{copy.note}</span>
+        </p>
+        <div class="tram-center-guide__actions">
+          <a href={mapsHref} target="_blank" rel="noopener noreferrer">
+            <Icon name="Navigation" size={18} strokeWidth={2} />
+            <span>{copy.maps}</span>
+          </a>
+          <a href={jakdojadeHref} target="_blank" rel="noopener noreferrer">
+            <Icon name="TramFront" size={18} strokeWidth={2} />
+            <span>{copy.jakdojade}</span>
+          </a>
+          <button type="button" data-tram-campy data-prompt={copy.campyPrompt}>
+            <Icon name="BotMessageSquare" size={18} strokeWidth={2} />
+            <span>{copy.campy}</span>
+          </button>
+          <a href={attractionsHref}>
+            <Icon name="Landmark" size={18} strokeWidth={2} />
+            <span>{copy.attractions}</span>
+          </a>
+        </div>
+      </article>
+
+      <div class="tram-center-guide__facts">
+        {copy.facts.map((fact, index) => (
+          <article class="premium-card tram-center-guide__fact" style={`--fact-delay: ${index * 70}ms`}>
+            <span aria-hidden="true">
+              <Icon name={fact.icon} size={21} strokeWidth={2} />
+            </span>
+            <h3>{fact.title}</h3>
+            <p>{fact.copy}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    document.querySelectorAll('[data-tram-campy]').forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) return;
+      button.addEventListener('click', () => {
+        window.dispatchEvent(new CustomEvent('campy:prompt', {
+          detail: {
+            prompt: button.dataset.prompt || 'Jak dojadę do centrum?',
+            actionKey: 'centerTransit',
+          },
+        }));
+      });
+    });
+  })();
+</script>
+
+<style>
+.tram-center-guide {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(54px, 8vw, 104px) 0;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(60,179,113,.20), transparent 34%),
+    radial-gradient(circle at 88% 16%, rgba(242,192,120,.14), transparent 30%),
+    linear-gradient(180deg, #f7f8f3, #edf5ec);
+}
+
+.tram-center-guide--page {
+  background:
+    radial-gradient(circle at 12% 10%, rgba(60,179,113,.20), transparent 34%),
+    radial-gradient(circle at 88% 16%, rgba(242,192,120,.14), transparent 30%),
+    linear-gradient(180deg, #101b14, #14261a);
+}
+
+.tram-center-guide::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .14;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,.18) 0 1px, transparent 1px 28px),
+    linear-gradient(90deg, transparent, rgba(60,179,113,.16), transparent);
+  mask-image: radial-gradient(circle at 58% 20%, #000, transparent 72%);
+}
+
+.tram-center-guide__inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: clamp(24px, 4vw, 40px);
+}
+
+.tram-center-guide__head {
+  max-width: 860px;
+}
+
+.tram-center-guide--page .section-title,
+.tram-center-guide--page .section-copy {
+  color: #fff;
+}
+
+.tram-center-guide--page .section-copy {
+  color: rgba(255,255,255,.75);
+}
+
+.tram-center-guide--page .section-kicker {
+  color: #8fe0b4;
+}
+
+.tram-center-guide__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.06fr) minmax(320px, .94fr);
+  gap: clamp(18px, 3vw, 28px);
+  align-items: start;
+}
+
+.tram-center-guide__route {
+  position: sticky;
+  top: 102px;
+  display: grid;
+  gap: 22px;
+  padding: clamp(24px, 3vw, 34px);
+  border-radius: 30px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(60,179,113,.18), transparent 36%),
+    rgba(255,255,255,.78);
+}
+
+.tram-center-guide--page .tram-center-guide__route,
+.tram-center-guide--page .tram-center-guide__fact {
+  border-color: rgba(255,255,255,.14);
+  color: #fff;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(60,179,113,.20), transparent 36%),
+    rgba(255,255,255,.09);
+}
+
+.tram-center-guide__route-icon {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  color: #082016;
+  background: linear-gradient(135deg, #a8f0c7, #3CB371 58%, #2f9d63);
+  box-shadow: 0 18px 46px rgba(60,179,113,.24);
+}
+
+.tram-center-guide__route-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.tram-center-guide__route-line span {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 13px;
+  border-radius: 999px;
+  color: #173624;
+  background: rgba(60,179,113,.13);
+  border: 1px solid rgba(60,179,113,.20);
+  font-size: .88rem;
+  font-weight: 950;
+}
+
+.tram-center-guide--page .tram-center-guide__route-line span {
+  color: rgba(255,255,255,.90);
+  background: rgba(255,255,255,.09);
+  border-color: rgba(255,255,255,.14);
+}
+
+.tram-center-guide__route-line span.is-start,
+.tram-center-guide__route-line span.is-end {
+  color: #082016;
+  background: #8fe0b4;
+  border-color: transparent;
+}
+
+.tram-center-guide__route-line i {
+  width: 28px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(60,179,113,.70);
+}
+
+.tram-center-guide__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 0;
+  padding: 14px;
+  border-radius: 20px;
+  color: #24543a;
+  background: rgba(242,192,120,.16);
+  line-height: 1.55;
+  font-weight: 850;
+}
+
+.tram-center-guide--page .tram-center-guide__note {
+  color: rgba(255,255,255,.82);
+  background: rgba(242,192,120,.12);
+}
+
+.tram-center-guide__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tram-center-guide__actions a,
+.tram-center-guide__actions button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid rgba(60,179,113,.22);
+  border-radius: 999px;
+  color: #082016;
+  background: linear-gradient(135deg, #a8f0c7, #3CB371);
+  font-size: .84rem;
+  font-weight: 950;
+  text-decoration: none;
+  box-shadow: 0 14px 32px rgba(60,179,113,.18);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.tram-center-guide__actions a:hover,
+.tram-center-guide__actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 42px rgba(60,179,113,.24);
+}
+
+.tram-center-guide__actions a:nth-child(n+2),
+.tram-center-guide__actions button {
+  color: #173624;
+  background: rgba(255,255,255,.70);
+}
+
+.tram-center-guide--page .tram-center-guide__actions a:nth-child(n+2),
+.tram-center-guide--page .tram-center-guide__actions button {
+  color: #fff;
+  background: rgba(255,255,255,.10);
+  border-color: rgba(255,255,255,.14);
+}
+
+.tram-center-guide__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.tram-center-guide__fact {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  min-height: 184px;
+  padding: 20px;
+  border-radius: 24px;
+  background: rgba(255,255,255,.74);
+  animation: tramFactIn .48s cubic-bezier(.22, 1, .36, 1) both;
+  animation-delay: var(--fact-delay, 0ms);
+  transition: transform .23s ease, border-color .23s ease, box-shadow .23s ease;
+}
+
+.tram-center-guide__fact:hover {
+  transform: translateY(-3px);
+  border-color: rgba(60,179,113,.32);
+  box-shadow: 0 22px 54px rgba(17,40,28,.12), 0 0 24px rgba(60,179,113,.10);
+}
+
+.tram-center-guide__fact > span {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: #0f6b3f;
+  background: rgba(60,179,113,.14);
+  border: 1px solid rgba(60,179,113,.22);
+}
+
+.tram-center-guide__fact h3 {
+  margin: 0;
+  color: #102018;
+  font-size: 1.05rem;
+  font-weight: 950;
+}
+
+.tram-center-guide__fact p {
+  margin: 0;
+  color: #52645a;
+  line-height: 1.55;
+  font-size: .92rem;
+  font-weight: 760;
+}
+
+.tram-center-guide--page .tram-center-guide__fact h3 {
+  color: #fff;
+}
+
+.tram-center-guide--page .tram-center-guide__fact p {
+  color: rgba(255,255,255,.72);
+}
+
+@keyframes tramFactIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1020px) {
+  .tram-center-guide__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tram-center-guide__route {
+    position: relative;
+    top: auto;
+  }
+}
+
+@media (max-width: 680px) {
+  .tram-center-guide__facts {
+    grid-template-columns: 1fr;
+  }
+
+  .tram-center-guide__actions a,
+  .tram-center-guide__actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+html[data-theme="dark"] .tram-center-guide:not(.tram-center-guide--page) {
+  background:
+    radial-gradient(circle at 12% 10%, rgba(60,179,113,.22), transparent 34%),
+    radial-gradient(circle at 88% 16%, rgba(242,192,120,.12), transparent 30%),
+    linear-gradient(180deg, #0f1d14, #13261a);
+}
+
+html[data-theme="dark"] .tram-center-guide:not(.tram-center-guide--page) .section-title {
+  color: #fff;
+}
+
+html[data-theme="dark"] .tram-center-guide:not(.tram-center-guide--page) .section-copy {
+  color: rgba(255,255,255,.72);
+}
+
+html[data-theme="dark"] .tram-center-guide:not(.tram-center-guide--page) .tram-center-guide__route,
+html[data-theme="dark"] .tram-center-guide:not(.tram-center-guide--page) .tram-center-guide__fact {
+  color: #fff;
+  border-color: rgba(255,255,255,.13);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(60,179,113,.18), transparent 36%),
+    rgba(255,255,255,.08);
+}
+
+html[data-theme="dark"] .tram-center-guide:not(.tram-center-guide--page) .tram-center-guide__fact h3 {
+  color: #fff;
+}
+
+html[data-theme="dark"] .tram-center-guide:not(.tram-center-guide--page) .tram-center-guide__fact p {
+  color: rgba(255,255,255,.72);
+}
+
+html[data-theme="dark"] .tram-center-guide:not(.tram-center-guide--page) .tram-center-guide__note {
+  color: rgba(255,255,255,.82);
+  background: rgba(242,192,120,.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tram-center-guide__fact {
+    animation: none;
+  }
+}
+</style>

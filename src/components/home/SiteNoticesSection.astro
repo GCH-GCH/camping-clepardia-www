@@ -1,0 +1,247 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { getHomepageSiteNotices, getNoticeCopy } from '@/data/siteNotices';
+import { getLocalizedPath } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode = 'pl' } = Astro.props as Props;
+const notices = getHomepageSiteNotices().slice(0, 4);
+const heading = languageCode === 'pl' ? 'Aktualnie w Krakowie i na campingu' : 'Current updates in Krakow and at the campsite';
+const lead = languageCode === 'pl'
+  ? 'Najważniejsze wydarzenia, komunikaty i sezonowe podpowiedzi dla gości Camping Clepardia.'
+  : 'Important events, notices and seasonal tips for Camping Clepardia guests.';
+const fallbackCta = languageCode === 'pl' ? 'Zobacz szczegóły' : 'See details';
+const localizedDirectionsHref = getLocalizedPath(languageCode === 'pl' ? undefined : languageCode, 'dojazd');
+const resolveHref = (href?: string) => href === '/dojazd' ? localizedDirectionsHref : (href ?? localizedDirectionsHref);
+---
+
+{notices.length > 0 && (
+  <section class="site-section site-notices reveal-section" aria-labelledby="siteNoticesTitle">
+    <div class="container site-notices__inner">
+      <div class="site-notices__head">
+        <span class="section-kicker">{languageCode === 'pl' ? 'Aktualności' : 'Updates'}</span>
+        <h2 class="section-title" id="siteNoticesTitle">{heading}</h2>
+        <p class="section-copy">{lead}</p>
+      </div>
+
+      <div class="site-notices__grid">
+        {notices.map((notice, index) => {
+          const copy = getNoticeCopy(notice, languageCode);
+          return (
+            <article class:list={['premium-card site-notices__card', `site-notices__card--${notice.type}`]} style={`--notice-delay: ${index * 90}ms`}>
+              <span class="site-notices__icon" aria-hidden="true">
+                <Icon name={notice.icon ?? 'Info'} size={24} strokeWidth={2} />
+              </span>
+              <div class="site-notices__content">
+                <div class="site-notices__meta">
+                  {copy.badge && <span>{copy.badge}</span>}
+                  <small>{notice.type}</small>
+                </div>
+                <h3>{copy.title}</h3>
+                <p>{copy.description}</p>
+                <a href={resolveHref(notice.ctaHref)}>
+                  <span>{copy.ctaLabel ?? fallbackCta}</span>
+                  <Icon name="ArrowUpRight" size={17} strokeWidth={2.2} />
+                </a>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+.site-notices {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(42px, 7vw, 86px) 0;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.18), transparent 34%),
+    radial-gradient(circle at 86% 20%, rgba(242,192,120,.16), transparent 30%),
+    linear-gradient(180deg, #f7f8f3, #eef6ec);
+}
+
+.site-notices::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .14;
+  background:
+    repeating-linear-gradient(135deg, rgba(16,32,24,.12) 0 1px, transparent 1px 28px),
+    linear-gradient(90deg, transparent, rgba(60,179,113,.18), transparent);
+  mask-image: radial-gradient(circle at 50% 20%, #000, transparent 72%);
+}
+
+.site-notices__inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: clamp(22px, 4vw, 34px);
+}
+
+.site-notices__head {
+  max-width: 760px;
+}
+
+.site-notices__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.site-notices__card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  min-height: 100%;
+  padding: clamp(20px, 2.5vw, 28px);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(60,179,113,.16), transparent 34%),
+    rgba(255,255,255,.74);
+  animation: noticeCardIn .55s cubic-bezier(.22, 1, .36, 1) both;
+  animation-delay: var(--notice-delay, 0ms);
+  transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease;
+}
+
+.site-notices__card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(60,179,113,.36);
+  box-shadow: 0 24px 64px rgba(17,40,28,.13), 0 0 30px rgba(60,179,113,.10);
+}
+
+.site-notices__icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  color: #0f6b3f;
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255,255,255,.82), transparent 34%),
+    rgba(60,179,113,.18);
+  border: 1px solid rgba(60,179,113,.30);
+  box-shadow: 0 14px 32px rgba(60,179,113,.16);
+}
+
+.site-notices__content {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.site-notices__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.site-notices__meta span,
+.site-notices__meta small {
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #0f6b3f;
+  background: rgba(60,179,113,.13);
+  font-size: .74rem;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.site-notices__meta small {
+  color: #6c4c18;
+  background: rgba(242,192,120,.20);
+}
+
+.site-notices__card h3 {
+  margin: 0;
+  color: #102018;
+  font-size: clamp(1.18rem, 2vw, 1.48rem);
+  line-height: 1.18;
+  font-weight: 950;
+}
+
+.site-notices__card p {
+  margin: 0;
+  color: #52645a;
+  line-height: 1.62;
+  font-weight: 760;
+}
+
+.site-notices__card a {
+  width: fit-content;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 4px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: #082016;
+  background: linear-gradient(135deg, #a8f0c7, #3CB371 62%, #2f9d63);
+  font-size: .86rem;
+  font-weight: 950;
+  text-decoration: none;
+  box-shadow: 0 16px 34px rgba(60,179,113,.20);
+}
+
+html[data-theme="dark"] .site-notices {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.22), transparent 34%),
+    radial-gradient(circle at 86% 20%, rgba(242,192,120,.12), transparent 30%),
+    linear-gradient(180deg, #0f1d14, #13261a);
+}
+
+html[data-theme="dark"] .site-notices .section-title {
+  color: #fff;
+}
+
+html[data-theme="dark"] .site-notices .section-copy {
+  color: rgba(255,255,255,.72);
+}
+
+html[data-theme="dark"] .site-notices__card {
+  border-color: rgba(255,255,255,.13);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(60,179,113,.18), transparent 34%),
+    rgba(255,255,255,.08);
+}
+
+html[data-theme="dark"] .site-notices__card h3 {
+  color: #fff;
+}
+
+html[data-theme="dark"] .site-notices__card p {
+  color: rgba(255,255,255,.72);
+}
+
+@keyframes noticeCardIn {
+  from { opacity: 0; transform: translateY(18px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 920px) {
+  .site-notices__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .site-notices__card {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-notices__card {
+    animation: none;
+  }
+}
+</style>

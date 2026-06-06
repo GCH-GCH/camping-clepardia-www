@@ -1,6 +1,7 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
 import Icon from '@/components/ui/Icon.astro';
+import TramCenterGuide from '@/components/TramCenterGuide.astro';
 import { siteAssets } from '@/data/assets';
 import { getLocalizedPath } from '@/utils/localizedLinks';
 import { getTranslations, resolveContentLanguage } from '@/i18n/config';
@@ -266,6 +267,8 @@ const ticketIcons = ['ticket', 'receipt', 'route', 'map'] as const;
     ))}
   </div>
 </section>
+
+<TramCenterGuide languageCode={languageCode} variant="page" />
 
 <section class="site-section transport-center reveal-section">
   <div class="container transport-center__grid">

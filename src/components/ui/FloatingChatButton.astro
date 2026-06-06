@@ -22,7 +22,7 @@ const campyUxCopy = {
     },
     answers: {
       todayAttractions: 'Dziś najlepiej zacząć lekko: tramwaj do centrum, Stare Miasto, kawa lub obiad, a potem spokojny powrót do zielonej bazy Clepardii. Jeśli chcecie coś większego, sprawdźcie Wieliczkę, Fabrykę Schindlera albo SeeKrakow.',
-      tramRoute: 'Przystanek jest ok. 40 m od bramy. Do Starego Kleparza / centrum jest ok. 9 przystanków i ok. 14 minut jazdy tramwajem. Do trasy i biletów polecam Jakdojade oraz Google Maps.',
+      tramRoute: 'Z Camping Clepardia dojdziesz ok. 40 m do przystanku Górnickiego. Tramwaj 18 jedzie do Starego Kleparza ok. 14 minut. Ze Starego Kleparza do Starego Miasta dojdziesz pieszo w ok. 5 minut. Do trasy i biletów polecam Jakdojade oraz Google Maps.',
       etoll: 'Jeśli jedziesz większym pojazdem lub zestawem, sprawdź przed trasą zasady e-TOLL. CAMPY nie podaje limitów bez źródła, ale warto to zweryfikować przed wyjazdem.',
       energylandia: 'Energylandia to całodniowa wyprawa poza Kraków. Najwygodniej potraktować ją jako osobny dzień i po powrocie odpocząć na campingu.',
       wieliczka: 'Wieliczka to klasyczna wycieczka z Krakowa: podziemne trasy i historia kopalni soli. Warto sprawdzić aktualne godziny i dostępność przed wyjazdem.',
@@ -104,6 +104,7 @@ const bookingCampingHref = getBookingLocalizedPath(pathContext.languageCode, 'ca
 const bookingBungalowHref = getBookingLocalizedPath(pathContext.languageCode, 'bungalow');
 const bookingCombinedHref = getBookingLocalizedPath(pathContext.languageCode, 'combined');
 const pricesHref = getLocalizedPath(pathContext.explicitLanguage, 'cennik');
+const directionsHref = getLocalizedPath(pathContext.explicitLanguage, 'dojazd');
 const contactHref = getLocalizedPath(pathContext.explicitLanguage, 'kontakt');
 const attractionsHref = getLocalizedPath(pathContext.explicitLanguage, 'atrakcje');
 const mapsHref = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
@@ -140,7 +141,7 @@ const finalCampyCopy = {
       campingPricing: 'Cennik campingowy liczy pojazd lub namiot, osoby oraz dodatki. Przykład: kamper 80 PLN / noc, dorosły 35 PLN, dziecko 4-14 lat 20 PLN, prąd 30 PLN, pies 0 PLN.',
       powerDog: 'Prąd 10A kosztuje 30 PLN / noc. Pies kosztuje 0 PLN. Prosimy tylko o opiekę nad pupilem i sprzątanie po nim.',
       lateCheckout: 'Późniejszy wyjazd jest możliwy tylko po decyzji recepcji. Zależy od typu pojazdu, liczby dodatkowych godzin, dostępności miejsc i rezerwacji. Recepcja poda instrukcje oraz ewentualny koszt.',
-      centerTransit: 'Przystanek jest ok. 40 m od bramy. Do Starego Kleparza / centrum jest ok. 9 przystanków i ok. 14 minut jazdy. Do trasy polecam Google Maps i Jakdojade.',
+      centerTransit: 'Z Camping Clepardia dojdziesz ok. 40 m do przystanku Górnickiego. Tramwaj 18 jedzie do Starego Kleparza ok. 14 minut. Ze Starego Kleparza do Starego Miasta dojdziesz pieszo w ok. 5 minut. Najwygodniej sprawdzić trasę w Google Maps lub Jakdojade.',
       tramTickets: 'Bilety tramwajowe możesz zwykle kupić w automatach albo aplikacji, ale nie zakładamy, że każdy automat zawsze działa. Do trasy i biletów najwygodniej sprawdzić Jakdojade.',
       dayPlan: 'Zaplanujmy dzień. Napisz proszę: ile macie czasu, czy jedziecie z dziećmi, czy plan ma być spokojny czy intensywny oraz czy wybieracie tramwaj czy auto.',
       familyAttractions: 'Z dziećmi najczęściej sprawdza się Stare Miasto i Wawel, Wieliczka, Ojców albo Energylandia. Wybór zależy od czasu, pogody i energii ekipy.',
@@ -195,7 +196,7 @@ const finalCampyCopy = {
       campingPricing: 'Camping price combines vehicle or tent, guests and extras. Example: camper 80 PLN / night, adult 35 PLN, child 4-14: 20 PLN, electricity 30 PLN, dog 0 PLN.',
       powerDog: '10A electricity is 30 PLN / night. Dog fee is 0 PLN. Please keep your dog under care and clean up after it.',
       lateCheckout: 'Later check-out is possible only after reception approval. It depends on vehicle type, extra hours, pitch and parking availability, and reservations. Reception will confirm instructions and any cost.',
-      centerTransit: 'The tram stop is about 40 m from the gate. It is about 9 stops and around 14 minutes to Stary Kleparz / the centre. Use Google Maps and Jakdojade.',
+      centerTransit: 'Walk about 40 m from Camping Clepardia to Górnickiego stop. Tram 18 reaches Stary Kleparz in about 14 minutes, then it is about a 5-minute walk to the Old Town. Google Maps or Jakdojade are the easiest way to check the route.',
       tramTickets: 'Tram tickets can usually be bought in machines or apps, but we do not promise every machine always works. Jakdojade is useful for routes and tickets.',
       dayPlan: 'Let us plan it. Tell me how much time you have, whether you travel with children, calm or intensive pace, and tram or car.',
       familyAttractions: 'With children, Old Town and Wawel, Wieliczka, Ojców or Energylandia usually work well depending on time and weather.',
@@ -242,6 +243,7 @@ const enhancedChatTexts = {
     bookingBungalow: bookingBungalowHref,
     bookingCombined: bookingCombinedHref,
     prices: pricesHref,
+    directions: directionsHref,
     contact: contactHref,
     attractions: attractionsHref,
     maps: mapsHref,
@@ -628,6 +630,7 @@ const quickActionGroups = [
         attractions: 'Zobacz atrakcje',
         maps: 'Otwórz Google Maps',
         jakdojade: 'Otwórz Jakdojade',
+        directions: 'Zobacz dojazd',
         contact: 'Kontakt',
         camping: 'Camping',
         bungalow: 'Domki',
@@ -642,7 +645,7 @@ const quickActionGroups = [
       if (key === 'campingPricing') return { text: answers.campingPricing, actions: [{ label: actionLabels.prices, href: links.prices }] };
       if (key === 'powerDog') return { text: answers.powerDog, actions: [{ label: actionLabels.prices, href: links.prices }] };
       if (key === 'lateCheckout') return { text: answers.lateCheckout, actions: [{ label: actionLabels.booking, href: links.booking }] };
-      if (key === 'centerTransit') return { text: answers.centerTransit, actions: [{ label: actionLabels.maps, href: links.maps }, { label: actionLabels.jakdojade, href: links.jakdojade }] };
+      if (key === 'centerTransit') return { text: answers.centerTransit, actions: [{ label: actionLabels.maps, href: links.maps }, { label: actionLabels.jakdojade, href: links.jakdojade }, { label: actionLabels.directions, href: links.directions }] };
       if (key === 'tramTickets') return { text: answers.tramTickets, actions: [{ label: actionLabels.jakdojade, href: links.jakdojade }] };
       if (key === 'dayPlan') return { text: answers.dayPlan };
       if (key === 'familyAttractions') return { text: answers.familyAttractions };
