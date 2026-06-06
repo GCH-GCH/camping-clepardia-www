@@ -91,6 +91,8 @@ const counters = [
   { id: 'toddlers', label: 'Dzieci do 4', value: 0, min: 0, price: toddler.price, icon: 'baby' },
 ];
 
+const personCounters = counters.filter((counter) => counter.id !== 'nights');
+
 const counterGroups = [
   {
     icon: 'calendar',
@@ -469,6 +471,29 @@ const pricingAppConfig = {
             <p><Icon name="info" size={16} /> Domki zmieniają cenę w sezonie wysokim. Camping ma stałą cenę za noc.</p>
           </div>
 
+          <div class="pricing-live-strip" aria-label="Szybkie podsumowanie kosztu">
+            <article class="pricing-live-card pricing-live-card--nights">
+              <span><Icon name="calendar" size={22} strokeWidth={2.25} /> Liczba nocy</span>
+              <div class="pricing-stepper pricing-stepper--live">
+                <button type="button" data-stepper-target="nights" data-stepper-delta="-1" aria-label="Zmniejsz liczbę nocy">
+                  <Icon name="minus" size={20} strokeWidth={2.8} />
+                </button>
+                <input id="pricing-nights" type="number" min="1" value="1" inputmode="numeric" data-pricing-input="nights" aria-label="Liczba nocy" />
+                <button type="button" data-stepper-target="nights" data-stepper-delta="1" aria-label="Zwiększ liczbę nocy">
+                  <Icon name="plus" size={20} strokeWidth={2.8} />
+                </button>
+              </div>
+            </article>
+            <article class="pricing-live-card">
+              <span><Icon name="pricing" size={22} strokeWidth={2.25} /> Cena za noc</span>
+              <strong data-summary-nightly>{formatPrice(popularPrice.camperElectricity)} / noc</strong>
+            </article>
+            <article class="pricing-live-card pricing-live-card--total">
+              <span><Icon name="receipt" size={22} strokeWidth={2.25} /> Razem</span>
+              <strong data-summary-total>{formatPrice(popularPrice.camperElectricity)}</strong>
+            </article>
+          </div>
+
           <div class="pricing-calc-steps">
             <section class="pricing-calc-step pricing-calc-step--people">
               <div class="pricing-calc-step__head">
@@ -476,16 +501,18 @@ const pricingAppConfig = {
                 <span class="pricing-calc-step__icon"><Icon name="users" size={28} strokeWidth={2.25} /></span>
                 <div>
                   <h3>Kto przyjeżdża?</h3>
-                  <p>Ustaw liczbę nocy i gości. W campingu osoby doliczane są do pojazdu lub namiotu.</p>
+                  <p>Osoby są doliczane do wariantów campingowych. W domkach cena bazuje na wybranym typie domku.</p>
                 </div>
               </div>
-              <div class="pricing-counters">
-                {counters.map((counter) => (
-                  <article class="pricing-counter-card" data-counter-card={counter.id}>
-                    <span><Icon name={counter.icon} size={24} strokeWidth={2.25} /></span>
-                    <label for={`pricing-${counter.id}`}>{counter.label}</label>
-                    <small>{counter.price === null ? 'Mnoży cały pobyt' : `${formatPrice(counter.price)} / noc`}</small>
-                    <div class="pricing-stepper">
+              <div class="pricing-person-list">
+                {personCounters.map((counter) => (
+                  <article class="pricing-counter-row" data-counter-card={counter.id}>
+                    <span class="pricing-counter-row__icon"><Icon name={counter.icon} size={23} strokeWidth={2.25} /></span>
+                    <div class="pricing-counter-row__copy">
+                      <label for={`pricing-${counter.id}`}>{counter.label}</label>
+                      <strong>{counter.price === 0 ? '0 PLN / noc' : `${formatPrice(counter.price)} / noc`}</strong>
+                    </div>
+                    <div class="pricing-stepper pricing-stepper--row">
                       <button type="button" data-stepper-target={counter.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${counter.label}`}>
                         <Icon name="minus" size={18} strokeWidth={2.6} />
                       </button>
@@ -512,7 +539,7 @@ const pricingAppConfig = {
                 <section class="pricing-service-group" data-service-group="camping" data-modes="camping combined">
                   <div class="pricing-service-grid">
                     {campingServiceGroups[0].items.map((item) => (
-                      <article class="pricing-service-card" data-service-card={item.id}>
+                      <article class="pricing-service-card pricing-service-card--primary" data-service-card={item.id}>
                         <span class="pricing-service-card__icon"><Icon name={item.icon} size={30} strokeWidth={2.25} /></span>
                         <div>
                           <strong>{item.label}</strong>
@@ -540,7 +567,7 @@ const pricingAppConfig = {
                         ? `${formatPrice(item.seasonalPrices.low)} / ${formatPrice(item.seasonalPrices.high)}`
                         : formatPrice(item.price);
                       return (
-                        <article class="pricing-service-card" data-service-card={item.id}>
+                        <article class="pricing-service-card pricing-service-card--primary" data-service-card={item.id}>
                           <span class="pricing-service-card__icon"><Icon name={item.icon} size={30} strokeWidth={2.25} /></span>
                           <div>
                             <strong>{item.label}</strong>
@@ -575,20 +602,20 @@ const pricingAppConfig = {
               </div>
               <div class="pricing-service-groups pricing-service-groups--addons">
                 <section class="pricing-service-group" data-service-group="camping" data-modes="camping combined">
-                  <div class="pricing-service-grid">
+                  <div class="pricing-addon-list">
                     {campingServiceGroups[1].items.map((item) => (
-                      <article class="pricing-service-card" data-service-card={item.id}>
-                        <span class="pricing-service-card__icon"><Icon name={item.icon} size={30} strokeWidth={2.25} /></span>
+                      <article class="pricing-addon-row" data-service-card={item.id}>
+                        <span class="pricing-addon-row__icon"><Icon name={item.icon} size={24} strokeWidth={2.25} /></span>
                         <div>
                           <strong>{item.label}</strong>
                           <small>{item.note}</small>
                         </div>
                         <em>{formatPrice(item.price)} / noc</em>
-                        <div class="pricing-stepper pricing-stepper--service">
+                        <div class="pricing-stepper pricing-stepper--row">
                           <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${item.label}`}>
                             <Icon name="minus" size={17} strokeWidth={2.6} />
                           </button>
-                          <input type="number" min="0" value="0" inputmode="numeric" data-service-input={item.id} />
+                          <input type="number" min="0" value={item.id === 'electricity' ? '1' : '0'} inputmode="numeric" data-service-input={item.id} />
                           <button type="button" data-stepper-target={item.id} data-stepper-delta="1" aria-label={`Zwiększ ${item.label}`}>
                             <Icon name="plus" size={17} strokeWidth={2.6} />
                           </button>
@@ -599,20 +626,20 @@ const pricingAppConfig = {
                 </section>
 
                 <section class="pricing-service-group" data-service-group="bungalow" data-modes="bungalow combined" hidden>
-                  <div class="pricing-service-grid">
+                  <div class="pricing-addon-list">
                     {bungalowServiceGroups[1].items.map((item) => {
                       const priceLabel = 'seasonalPrices' in item
                         ? `${formatPrice(item.seasonalPrices.low)} / ${formatPrice(item.seasonalPrices.high)}`
                         : formatPrice(item.price);
                       return (
-                        <article class="pricing-service-card" data-service-card={item.id}>
-                          <span class="pricing-service-card__icon"><Icon name={item.icon} size={30} strokeWidth={2.25} /></span>
+                        <article class="pricing-addon-row" data-service-card={item.id}>
+                          <span class="pricing-addon-row__icon"><Icon name={item.icon} size={24} strokeWidth={2.25} /></span>
                           <div>
                             <strong>{item.label}</strong>
                             <small>{item.note}</small>
                           </div>
                           <em>{priceLabel} / noc</em>
-                          <div class="pricing-stepper pricing-stepper--service">
+                          <div class="pricing-stepper pricing-stepper--row">
                             <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${item.label}`}>
                               <Icon name="minus" size={17} strokeWidth={2.6} />
                             </button>
@@ -629,25 +656,30 @@ const pricingAppConfig = {
               </div>
             </section>
           </div>
+
+          <div class="pricing-smart-hints" data-pricing-hints hidden></div>
         </div>
 
         <aside class="pricing-app-summary premium-card" aria-live="polite">
           <div class="pricing-app-summary__top">
             <span class="pricing-app-summary__badge"><Icon name="receipt" size={16} strokeWidth={2.4} /> Status: do potwierdzenia</span>
-            <h3 class="pricing-app-summary__title">Twój pobyt</h3>
-            <small data-summary-title>2 osoby + kamper</small>
+            <h3 class="pricing-app-summary__title">Twój koszt</h3>
+            <small data-summary-title>2 osoby + kamper + prąd</small>
           </div>
-          <div class="pricing-app-summary__price">
-            <span>Razem orientacyjnie</span>
-            <h3 data-summary-total>{formatPrice(popularPrice.camperElectricity - electricity.price)}</h3>
+          <div class="pricing-app-summary__selected">
+            <span>Wybrane</span>
+            <div class="pricing-app-summary__lines" data-summary-lines></div>
           </div>
-          <p data-summary-hint>Wybrano domyślnie: 2 osoby + kamper. Dodaj prąd albo wybierz popularny zestaw.</p>
-          <div class="pricing-app-summary__meta">
-            <p><span><Icon name="camping" size={15} strokeWidth={2.3} /> Typ pobytu</span><strong data-summary-mode>Camping</strong></p>
-            <p><span><Icon name="calendar" size={15} strokeWidth={2.3} /> Liczba nocy</span><strong data-summary-nights>1</strong></p>
-            <p><span><Icon name="pricing" size={15} strokeWidth={2.3} /> Cena / noc</span><strong data-summary-nightly>{formatPrice(popularPrice.camperElectricity - electricity.price)}</strong></p>
+          <div class="pricing-checkout-totals">
+            <p><span>Cena za noc</span><strong data-summary-nightly>{formatPrice(popularPrice.camperElectricity)} / noc</strong></p>
+            <p><span>Liczba nocy</span><strong data-summary-nights>1 noc</strong></p>
+            <p class="pricing-checkout-totals__mode"><span>Typ pobytu</span><strong data-summary-mode>Camping</strong></p>
+            <div class="pricing-app-summary__price">
+              <span>Razem orientacyjnie</span>
+              <h3 data-summary-total>{formatPrice(popularPrice.camperElectricity)}</h3>
+            </div>
           </div>
-          <div class="pricing-app-summary__lines" data-summary-lines></div>
+          <p data-summary-hint>Wybrano domyślnie: 2 osoby + kamper + prąd 10A. Możesz od razu zmienić każdy element.</p>
           <div class="pricing-app-summary__actions">
             <a class="pricing-app-summary__cta" href={bookingHref}>
               <Icon name="booking" size={18} strokeWidth={2.3} />
@@ -757,14 +789,15 @@ const pricingAppConfig = {
     const modeButtons = Array.from(root.querySelectorAll('[data-pricing-mode]'));
     const seasonButtons = Array.from(root.querySelectorAll('[data-pricing-season]'));
     const serviceGroups = Array.from(root.querySelectorAll('[data-service-group]'));
-    const summaryTotal = root.querySelector('[data-summary-total]');
+    const summaryTotals = Array.from(root.querySelectorAll('[data-summary-total]'));
     const summaryHint = root.querySelector('[data-summary-hint]');
     const summaryTitle = root.querySelector('[data-summary-title]');
     const summaryMode = root.querySelector('[data-summary-mode]');
     const summaryNights = root.querySelector('[data-summary-nights]');
-    const summaryNightly = root.querySelector('[data-summary-nightly]');
+    const summaryNightlyItems = Array.from(root.querySelectorAll('[data-summary-nightly]'));
     const summaryLines = root.querySelector('[data-summary-lines]');
     const summaryCard = root.querySelector('.pricing-app-summary');
+    const suggestionBox = root.querySelector('[data-pricing-hints]');
     const toast = root.querySelector('[data-pricing-toast]');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const state = { mode: 'camping', season: 'low' };
@@ -811,11 +844,15 @@ const pricingAppConfig = {
       modeButtons.forEach((button) => button.classList.toggle('is-active', button.dataset.pricingMode === mode));
       if (reset) {
         resetServices();
-        if (mode === 'camping') setValue('camper', 1);
+        if (mode === 'camping') {
+          setValue('camper', 1);
+          setValue('electricity', 1);
+        }
         if (mode === 'bungalow') setValue('bungalow-2', 1);
         if (mode === 'combined') {
           setValue('camper', 1);
           setValue('bungalow-2', 1);
+          setValue('electricity', 1);
         }
       }
       updateGroups();
@@ -884,6 +921,11 @@ const pricingAppConfig = {
         const active = Number(input?.value || 0) > 0;
         card.classList.toggle('is-active', active);
       });
+      root.querySelectorAll('[data-counter-card]').forEach((card) => {
+        const input = card.querySelector('[data-pricing-input]');
+        const active = Number(input?.value || 0) > 0;
+        card.classList.toggle('is-active', active);
+      });
       root.querySelectorAll('[data-stepper-target][data-stepper-delta="-1"]').forEach((button) => {
         const id = button.dataset.stepperTarget;
         const input = numberInput(id);
@@ -892,12 +934,43 @@ const pricingAppConfig = {
         if (button instanceof HTMLButtonElement) button.disabled = value <= min;
       });
     };
+    const updateSuggestions = () => {
+      if (!suggestionBox) return;
+      const suggestions = [];
+      if (getValue('camper') > 0 && getValue('electricity') === 0) {
+        suggestions.push(`
+          <article class="pricing-smart-hint">
+            <span>Goście z kamperem najczęściej wybierają także prąd 10A.</span>
+            <button type="button" data-suggestion-service="electricity">Dodaj prąd</button>
+          </article>
+        `);
+      }
+      if (getValue('caravan') > 0 && getValue('parking') === 0) {
+        suggestions.push(`
+          <article class="pricing-smart-hint">
+            <span>Przy przyczepie zwykle potrzebne jest też miejsce dla auta.</span>
+            <button type="button" data-suggestion-service="parking">Dodaj samochód</button>
+          </article>
+        `);
+      }
+      if (getValue('dog') > 0 || getValue('bungalow-dog') > 0) {
+        suggestions.push(`
+          <article class="pricing-smart-hint pricing-smart-hint--quiet">
+            <span>Pies jest bezpłatny — prosimy tylko o opiekę i sprzątanie.</span>
+          </article>
+        `);
+      }
+      suggestionBox.innerHTML = suggestions.join('');
+      suggestionBox.hidden = suggestions.length === 0;
+    };
     const update = () => {
       const result = calculate();
-      animateTextMoney(summaryTotal, result.total);
+      summaryTotals.forEach((element) => animateTextMoney(element, result.total));
       if (summaryMode) summaryMode.textContent = config.modeLabels[state.mode] || state.mode;
       if (summaryNights) summaryNights.textContent = `${result.nights} ${result.nights === 1 ? 'noc' : 'noce'}`;
-      if (summaryNightly) summaryNightly.textContent = `${formatMoney(result.nightly)} / noc`;
+      summaryNightlyItems.forEach((element) => {
+        element.textContent = `${formatMoney(result.nightly)} / noc`;
+      });
       if (summaryTitle) {
         const peopleLabel = state.mode === 'bungalow'
           ? 'Pobyt w domku'
@@ -909,7 +982,7 @@ const pricingAppConfig = {
       }
       if (summaryHint) {
         summaryHint.textContent = result.services.length
-          ? 'Cena obejmuje wybrane elementy i liczbę nocy. To nadal koszt orientacyjny.'
+          ? 'Cena obejmuje wybrane elementy, liczbę nocy i aktualny wariant. To nadal koszt orientacyjny.'
           : 'Wybierz usługi, a tutaj zobaczysz orientacyjny koszt.';
       }
       if (summaryLines) {
@@ -924,12 +997,13 @@ const pricingAppConfig = {
         result.services.forEach((service) => {
           lines.push(`<p><span>${service.label} x ${service.qty}</span><strong>${formatMoney(service.total)} / noc</strong></p>`);
         });
-        summaryLines.innerHTML = lines.length ? lines.join('') : '<p><span>Usługi</span><strong>Do wyboru</strong></p>';
+        summaryLines.innerHTML = lines.length ? lines.join('') : '<p><span>Wybrane elementy</span><strong>Do wyboru</strong></p>';
       }
       summaryCard?.classList.add('is-pulsing');
       window.clearTimeout(summaryPulseTimer);
       summaryPulseTimer = window.setTimeout(() => summaryCard?.classList.remove('is-pulsing'), 180);
       updateCardStates();
+      updateSuggestions();
     };
     const applyPreset = (presetId) => {
       const preset = config.presets[presetId];
@@ -961,8 +1035,9 @@ const pricingAppConfig = {
         if (!input) return;
         const min = Number(input.getAttribute('min') || 0);
         input.value = String(Math.max(min, Number(input.value || 0) + delta));
-        button.closest('.pricing-counter-card, .pricing-service-card')?.classList.add('is-bumped');
-        window.setTimeout(() => button.closest('.pricing-counter-card, .pricing-service-card')?.classList.remove('is-bumped'), 180);
+        const feedbackCard = button.closest('.pricing-live-card, .pricing-counter-row, .pricing-service-card, .pricing-addon-row');
+        feedbackCard?.classList.add('is-bumped');
+        window.setTimeout(() => feedbackCard?.classList.remove('is-bumped'), 180);
         update();
       });
     });
@@ -972,6 +1047,13 @@ const pricingAppConfig = {
       update();
     }));
     root.querySelectorAll('[data-pricing-preset]').forEach((button) => button.addEventListener('click', () => applyPreset(button.dataset.pricingPreset)));
+    suggestionBox?.addEventListener('click', (event) => {
+      const button = event.target instanceof Element ? event.target.closest('[data-suggestion-service]') : null;
+      const id = button?.getAttribute('data-suggestion-service');
+      if (!id) return;
+      setValue(id, Math.max(1, getValue(id)));
+      update();
+    });
     root.querySelectorAll('[data-pricing-ask-campy]').forEach((button) => {
       button.addEventListener('click', () => {
         window.dispatchEvent(new CustomEvent('campy:prompt', {
@@ -2483,6 +2565,422 @@ html[data-theme="light"] .pricing-calc-step {
     rgba(255,255,255,.86);
 }
 
+.pricing-app__panel {
+  display: grid;
+  gap: clamp(24px, 3vw, 34px);
+  padding: clamp(20px, 3vw, 34px);
+}
+
+.pricing-live-strip {
+  display: grid;
+  grid-template-columns: 1.1fr .95fr .95fr;
+  gap: clamp(14px, 2vw, 18px);
+}
+
+.pricing-live-card {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  min-height: 122px;
+  padding: clamp(18px, 2.2vw, 24px);
+  border: 1px solid rgba(60,179,113,.22);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(60,179,113,.22), transparent 40%),
+    rgba(255,255,255,.78);
+  box-shadow: 0 22px 58px rgba(16,32,24,.10), inset 0 1px 0 rgba(255,255,255,.72);
+}
+
+.pricing-live-card > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #31533f;
+  font-size: .78rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.pricing-live-card strong {
+  color: #102018;
+  font-size: clamp(1.75rem, 3.7vw, 3rem);
+  line-height: .98;
+  font-weight: 950;
+}
+
+.pricing-live-card--total {
+  border-color: rgba(60,179,113,.42);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(190,255,215,.45), transparent 42%),
+    linear-gradient(145deg, #11351f, #0c2116);
+  box-shadow: 0 26px 70px rgba(60,179,113,.26), inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+.pricing-live-card--total > span,
+.pricing-live-card--total strong {
+  color: #fff;
+}
+
+.pricing-live-card--total svg {
+  color: #94f0ba;
+}
+
+.pricing-stepper input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.pricing-stepper input[type="number"]::-webkit-outer-spin-button,
+.pricing-stepper input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pricing-stepper {
+  border-radius: 999px;
+  padding: 4px;
+  background: rgba(12,47,26,.06);
+}
+
+.pricing-stepper button,
+.pricing-stepper input {
+  min-width: 46px;
+  height: 46px;
+  border-radius: 999px;
+}
+
+.pricing-stepper input {
+  color: #102018;
+  font-size: 1.12rem;
+  font-weight: 950;
+}
+
+.pricing-stepper button {
+  color: #0f5d38;
+  background: rgba(60,179,113,.13);
+}
+
+.pricing-stepper button:hover {
+  color: #fff;
+  background: #3CB371;
+  box-shadow: 0 12px 26px rgba(60,179,113,.25);
+}
+
+.pricing-stepper button:disabled {
+  opacity: .36;
+  color: #6f8376;
+  background: rgba(91,111,97,.10);
+  box-shadow: none;
+}
+
+.pricing-stepper--live {
+  max-width: 238px;
+  grid-template-columns: 58px minmax(62px, 1fr) 58px;
+  background: rgba(255,255,255,.72);
+}
+
+.pricing-stepper--live button,
+.pricing-stepper--live input {
+  height: 56px;
+  font-size: 1.22rem;
+}
+
+.pricing-calc-steps {
+  gap: clamp(18px, 2.8vw, 28px);
+}
+
+.pricing-calc-step {
+  gap: clamp(18px, 2.4vw, 26px);
+  padding: clamp(18px, 2.5vw, 28px) 0 0;
+  border: 0;
+  border-top: 1px solid rgba(35,126,77,.14);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.pricing-calc-step::after {
+  content: none;
+}
+
+.pricing-calc-step:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.pricing-calc-step__head {
+  grid-template-columns: auto auto minmax(0, 1fr);
+}
+
+.pricing-calc-step__number {
+  width: 42px;
+  height: 42px;
+}
+
+.pricing-calc-step__icon {
+  width: 52px;
+  height: 52px;
+}
+
+.pricing-person-list,
+.pricing-addon-list {
+  display: grid;
+  gap: 12px;
+}
+
+.pricing-counter-row,
+.pricing-addon-row {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto minmax(162px, 184px);
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid rgba(35,126,77,.12);
+  border-radius: 22px;
+  background: rgba(255,255,255,.70);
+  box-shadow: 0 12px 32px rgba(16,32,24,.06);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease, background .2s ease;
+}
+
+.pricing-counter-row__icon,
+.pricing-addon-row__icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  color: #157a49;
+  background: rgba(60,179,113,.12);
+}
+
+.pricing-counter-row__copy {
+  display: grid;
+  gap: 5px;
+}
+
+.pricing-counter-row label,
+.pricing-addon-row strong {
+  color: #102018;
+  font-size: 1.03rem;
+  font-weight: 950;
+}
+
+.pricing-counter-row strong,
+.pricing-addon-row em {
+  color: #147a49;
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.pricing-addon-row small {
+  display: block;
+  margin-top: 4px;
+  color: #5b6d61;
+  line-height: 1.35;
+  font-size: .86rem;
+  font-weight: 760;
+}
+
+.pricing-counter-row.is-active,
+.pricing-addon-row.is-active,
+.pricing-service-card.is-active {
+  border-color: rgba(60,179,113,.52);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(60,179,113,.15), transparent 44%),
+    rgba(255,255,255,.86);
+  box-shadow: 0 18px 48px rgba(60,179,113,.16), inset 0 1px 0 rgba(255,255,255,.68);
+}
+
+.pricing-live-card.is-bumped,
+.pricing-counter-row.is-bumped,
+.pricing-addon-row.is-bumped,
+.pricing-service-card.is-bumped {
+  animation: pricingItemPulse .2s ease;
+}
+
+.pricing-service-card--primary {
+  grid-template-columns: 72px minmax(0, 1fr) minmax(130px, auto) minmax(170px, 188px);
+  padding: clamp(18px, 2.2vw, 24px);
+}
+
+.pricing-service-card--primary strong {
+  font-size: clamp(1.08rem, 1.4vw, 1.24rem);
+}
+
+.pricing-service-card--primary em {
+  color: #117243;
+  font-size: clamp(1.05rem, 1.45vw, 1.22rem);
+  font-weight: 950;
+}
+
+.pricing-service-card--primary .pricing-service-card__icon {
+  width: 66px;
+  height: 66px;
+  border-radius: 22px;
+}
+
+.pricing-stepper--row,
+.pricing-stepper--service {
+  grid-template-columns: 50px minmax(54px, 1fr) 50px;
+}
+
+.pricing-stepper--row button,
+.pricing-stepper--row input,
+.pricing-stepper--service button,
+.pricing-stepper--service input {
+  height: 50px;
+}
+
+.pricing-smart-hints {
+  display: grid;
+  gap: 10px;
+}
+
+.pricing-smart-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(60,179,113,.24);
+  border-radius: 20px;
+  color: #183d28;
+  background: rgba(60,179,113,.10);
+  font-weight: 850;
+}
+
+.pricing-smart-hint button {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  color: #fff;
+  background: linear-gradient(135deg, #2f9b61, #3CB371);
+  box-shadow: 0 14px 30px rgba(60,179,113,.20);
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.pricing-smart-hint--quiet {
+  background: rgba(255,255,255,.62);
+}
+
+.pricing-app-summary {
+  display: grid;
+  gap: 18px;
+}
+
+.pricing-app-summary__selected {
+  display: grid;
+  gap: 10px;
+}
+
+.pricing-app-summary__selected > span,
+.pricing-checkout-totals p span,
+.pricing-app-summary__price span {
+  color: rgba(255,255,255,.62);
+  font-size: .75rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.pricing-checkout-totals {
+  display: grid;
+  gap: 10px;
+}
+
+.pricing-checkout-totals p,
+.pricing-app-summary__lines p {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+
+.pricing-checkout-totals p strong,
+.pricing-app-summary__lines strong {
+  color: #fff;
+  font-weight: 950;
+  text-align: right;
+}
+
+.pricing-app-summary__price {
+  margin-top: 4px;
+  padding: 20px;
+  border: 1px solid rgba(148,240,186,.26);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(60,179,113,.22), transparent 42%),
+    rgba(255,255,255,.07);
+}
+
+.pricing-app-summary__price h3 {
+  margin-top: 8px;
+  font-size: clamp(2.35rem, 4.5vw, 3.65rem);
+}
+
+html[data-theme="dark"] .pricing-live-card,
+html[data-theme="dark"] .pricing-counter-row,
+html[data-theme="dark"] .pricing-addon-row {
+  border-color: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+html[data-theme="dark"] .pricing-live-card > span,
+html[data-theme="dark"] .pricing-counter-row label,
+html[data-theme="dark"] .pricing-addon-row strong {
+  color: #fff;
+}
+
+html[data-theme="dark"] .pricing-live-card strong,
+html[data-theme="dark"] .pricing-stepper input {
+  color: #fff;
+}
+
+html[data-theme="dark"] .pricing-counter-row strong,
+html[data-theme="dark"] .pricing-addon-row em,
+html[data-theme="dark"] .pricing-service-card--primary em {
+  color: #94f0ba;
+}
+
+html[data-theme="dark"] .pricing-addon-row small {
+  color: rgba(255,255,255,.62);
+}
+
+html[data-theme="dark"] .pricing-smart-hint {
+  color: #eafff2;
+  background: rgba(60,179,113,.13);
+}
+
+html[data-theme="light"] .pricing-app-summary__selected > span,
+html[data-theme="light"] .pricing-checkout-totals p span,
+html[data-theme="light"] .pricing-app-summary__price span {
+  color: rgba(21,66,41,.68);
+}
+
+html[data-theme="light"] .pricing-checkout-totals p,
+html[data-theme="light"] .pricing-app-summary__lines p {
+  border-bottom-color: rgba(35,126,77,.12);
+}
+
+html[data-theme="light"] .pricing-checkout-totals p strong,
+html[data-theme="light"] .pricing-app-summary__lines strong {
+  color: #102018;
+}
+
+html[data-theme="light"] .pricing-app-summary__price {
+  border-color: rgba(60,179,113,.24);
+  background: linear-gradient(145deg, rgba(60,179,113,.10), rgba(255,255,255,.84));
+}
+
 @media (min-width: 720px) {
   .pricing-spotlight__grid,
   .pricing-mode-grid,
@@ -2540,6 +3038,25 @@ html[data-theme="light"] .pricing-calc-step {
 @media (max-width: 1039px) {
   .pricing-app-summary {
     position: static;
+  }
+}
+
+@media (max-width: 820px) {
+  .pricing-live-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-live-card {
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .pricing-live-card strong {
+    font-size: clamp(2rem, 11vw, 2.7rem);
+  }
+
+  .pricing-stepper--live {
+    max-width: 100%;
   }
 }
 
@@ -2632,6 +3149,21 @@ html[data-theme="light"] .pricing-calc-step {
 
   .pricing-service-card {
     grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  .pricing-counter-row,
+  .pricing-addon-row {
+    grid-template-columns: 50px minmax(0, 1fr);
+  }
+
+  .pricing-counter-row .pricing-stepper,
+  .pricing-addon-row .pricing-stepper,
+  .pricing-addon-row em {
+    grid-column: 1 / -1;
+  }
+
+  .pricing-addon-row em {
+    justify-self: start;
   }
 
   .pricing-calc-step {
