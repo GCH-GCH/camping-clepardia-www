@@ -1,7 +1,8 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
+import Icon from '@/components/ui/Icon.astro';
 import { siteAssets } from '@/data/assets';
-import { getLocalizedPath } from '@/utils/localizedLinks';
+import { getLocalizedPath, getPlannerLocalizedPath } from '@/utils/localizedLinks';
 import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 
 interface Props {
@@ -15,6 +16,150 @@ const page = t.pages.atrakcje;
 const pricingHref = getLocalizedPath(languageCode, 'cennik');
 const contactHref = getLocalizedPath(languageCode, 'kontakt');
 const transportHref = getLocalizedPath(languageCode, 'dojazd');
+const plannerHref = getPlannerLocalizedPath(languageCode);
+const seeKrakowHref = 'https://qr.codes/vksKBT';
+const mapsHref = 'https://www.google.com/maps/search/?api=1&query=';
+
+const attractionDetailsByLanguage = {
+  pl: {
+    metaLabels: {
+      type: 'Typ',
+      time: 'Dojazd z campingu',
+      transport: 'Transport',
+      onSite: 'Czas na miejscu',
+      forWhom: 'Dla kogo',
+      see: 'Co zobaczyć',
+      planner: 'Dodaj do planu',
+      route: 'Sprawdź trasę',
+      tour: 'Zarezerwuj wycieczkę',
+    },
+    details: [
+      {
+        id: 'old-town',
+        type: 'klasyczny Kraków',
+        time: 'zwykle ok. 14 min tramwajem + ok. 5 min pieszo',
+        transport: 'tramwaj 18 z Górnickiego do Starego Kleparza',
+        onSite: '2-4 godz.',
+        forWhom: 'pierwszy pobyt, pary, rodziny, spacer bez auta',
+        see: 'Rynek, Sukiennice, Floriańska, Planty, Barbakan',
+        routeQuery: 'Stare+Miasto+Krakow',
+        showTour: false,
+      },
+      {
+        id: 'kazimierz',
+        type: 'dzielnica, jedzenie, historia',
+        time: 'orientacyjnie 25-35 min tramwajem i spacerem',
+        transport: 'tramwaj + spacer albo taxi',
+        onSite: '2-4 godz. lub wieczór',
+        forWhom: 'spokojny wieczór, restauracje, historia miasta',
+        see: 'Szeroka, Plac Nowy, kawiarnie, synagogi, murale',
+        routeQuery: 'Kazimierz+Krakow',
+        showTour: false,
+      },
+      {
+        id: 'wawel',
+        type: 'zamek i spacer',
+        time: 'zwykle ok. 25-35 min od campingu',
+        transport: 'tramwaj do centrum + spacer przez Stare Miasto',
+        onSite: '1.5-3 godz.',
+        forWhom: 'pierwszy Kraków, rodziny, klasyczne zwiedzanie',
+        see: 'dziedziniec, katedra, wzgórze wawelskie, Bulwary Wiślane',
+        routeQuery: 'Wawel+Krakow',
+        showTour: false,
+      },
+      {
+        id: 'wieliczka',
+        type: 'wycieczka poza Kraków',
+        time: 'orientacyjnie 45-70 min, zależnie od trasy',
+        transport: 'auto, pociąg lub gotowa wycieczka',
+        onSite: '3-4 godz. + dojazd',
+        forWhom: 'rodziny, klasyka Małopolski, plan na pół dnia',
+        see: 'trasa turystyczna, komory solne, Kaplica św. Kingi',
+        routeQuery: 'Kopalnia+Soli+Wieliczka',
+        showTour: true,
+      },
+      {
+        id: 'schindler',
+        type: 'muzeum historii',
+        time: 'orientacyjnie 30-45 min',
+        transport: 'tramwaj + spacer albo taxi',
+        onSite: '1.5-2.5 godz.',
+        forWhom: 'dorośli, starsza młodzież, historia XX wieku',
+        see: 'wystawa o Krakowie podczas II wojny światowej',
+        routeQuery: 'Fabryka+Emalia+Oskara+Schindlera+Krakow',
+        showTour: false,
+      },
+      {
+        id: 'auschwitz',
+        type: 'miejsce pamięci',
+        time: 'zwykle 1.5-2 godz. w jedną stronę',
+        transport: 'auto, bus, pociąg lub gotowa wycieczka',
+        onSite: '3.5-4.5 godz. + dojazd',
+        forWhom: 'dorośli i starsza młodzież; poważny, całodniowy plan',
+        see: 'Auschwitz I i Auschwitz II-Birkenau, po wcześniejszym sprawdzeniu zasad',
+        routeQuery: 'Auschwitz-Birkenau+Memorial',
+        showTour: true,
+      },
+      {
+        id: 'energylandia',
+        type: 'park rozrywki',
+        time: 'orientacyjnie 1-1.5 godz. autem',
+        transport: 'najwygodniej auto lub zorganizowany transfer',
+        onSite: 'cały dzień',
+        forWhom: 'rodziny, dzieci, nastolatki, intensywny dzień',
+        see: 'strefy rodzinne, rollercoastery, atrakcje wodne w sezonie',
+        routeQuery: 'Energylandia+Zator',
+        showTour: true,
+      },
+      {
+        id: 'ojcow',
+        type: 'natura i zamki',
+        time: 'orientacyjnie 35-55 min autem',
+        transport: 'najwygodniej auto',
+        onSite: '3-5 godz.',
+        forWhom: 'spokojniejszy dzień, natura, spacer, rodziny',
+        see: 'Dolina Prądnika, Brama Krakowska, zamek w Pieskowej Skale',
+        routeQuery: 'Ojcowski+Park+Narodowy',
+        showTour: false,
+      },
+      {
+        id: 'zakopane',
+        type: 'Tatry i całodniowa trasa',
+        time: 'zwykle 2-2.5 godz. autem w jedną stronę, bywa dłużej',
+        transport: 'auto, bus lub gotowa wycieczka',
+        onSite: 'cały dzień',
+        forWhom: 'dłuższy pobyt 4-5+ nocy, krajobrazy, górski dzień',
+        see: 'Krupówki, widoki na Tatry, opcjonalnie Gubałówka',
+        routeQuery: 'Zakopane',
+        showTour: true,
+      },
+    ],
+  },
+  en: {
+    metaLabels: {
+      type: 'Type',
+      time: 'Travel from campsite',
+      transport: 'Transport',
+      onSite: 'Time on site',
+      forWhom: 'Best for',
+      see: 'What to see',
+      planner: 'Add to planner',
+      route: 'Check route',
+      tour: 'Book a tour',
+    },
+    details: [
+      { id: 'old-town', type: 'classic Krakow', time: 'usually about 14 min by tram + 5 min walk', transport: 'tram 18 to Stary Kleparz', onSite: '2-4 h', forWhom: 'first visit, couples, families', see: 'Main Square, Cloth Hall, Floriańska, Planty', routeQuery: 'Old+Town+Krakow', showTour: false },
+      { id: 'kazimierz', type: 'district, food, history', time: 'around 25-35 min', transport: 'tram + walk or taxi', onSite: '2-4 h or evening', forWhom: 'calm evening, food, history', see: 'Szeroka, Plac Nowy, cafes and synagogues', routeQuery: 'Kazimierz+Krakow', showTour: false },
+      { id: 'wawel', type: 'castle and walk', time: 'usually 25-35 min', transport: 'tram to centre + walk', onSite: '1.5-3 h', forWhom: 'first Krakow visit and families', see: 'Wawel Hill, cathedral, riverside', routeQuery: 'Wawel+Krakow', showTour: false },
+      { id: 'wieliczka', type: 'outside Krakow trip', time: 'about 45-70 min depending on route', transport: 'car, train or organised tour', onSite: '3-4 h + travel', forWhom: 'families and classic Lesser Poland trip', see: 'tourist route, salt chambers, St Kinga Chapel', routeQuery: 'Wieliczka+Salt+Mine', showTour: true },
+      { id: 'schindler', type: 'history museum', time: 'around 30-45 min', transport: 'tram + walk or taxi', onSite: '1.5-2.5 h', forWhom: 'adults and older teens', see: 'Krakow during World War II exhibition', routeQuery: 'Schindler+Factory+Krakow', showTour: false },
+      { id: 'auschwitz', type: 'memorial site', time: 'usually 1.5-2 h one way', transport: 'car, bus, train or organised tour', onSite: '3.5-4.5 h + travel', forWhom: 'adults and older teens; serious full-day plan', see: 'Auschwitz I and Auschwitz II-Birkenau', routeQuery: 'Auschwitz-Birkenau+Memorial', showTour: true },
+      { id: 'energylandia', type: 'amusement park', time: 'about 1-1.5 h by car', transport: 'car or organised transfer', onSite: 'full day', forWhom: 'families, kids, teens', see: 'family zones, rollercoasters, seasonal water attractions', routeQuery: 'Energylandia+Zator', showTour: true },
+      { id: 'ojcow', type: 'nature and castles', time: 'about 35-55 min by car', transport: 'car is easiest', onSite: '3-5 h', forWhom: 'slower day, nature, families', see: 'Prądnik Valley, Krakow Gate, Pieskowa Skała', routeQuery: 'Ojców+National+Park', showTour: false },
+      { id: 'zakopane', type: 'Tatra Mountains day trip', time: 'usually 2-2.5 h by car one way, sometimes longer', transport: 'car, bus or organised tour', onSite: 'full day', forWhom: 'longer 4-5+ night stays', see: 'Krupówki, Tatra views, optional Gubałówka', routeQuery: 'Zakopane', showTour: true },
+    ],
+  },
+};
 
 const attractionsTextByLanguage = {
   pl: {
@@ -160,63 +305,83 @@ const attractionsTextByLanguage = {
 };
 
 const attractionsText = attractionsTextByLanguage[contentLanguage];
+const attractionDetailsCopy = attractionDetailsByLanguage[contentLanguage as keyof typeof attractionDetailsByLanguage] ?? attractionDetailsByLanguage.en;
+const attractionDetailsById = new Map(attractionDetailsCopy.details.map((item) => [item.id, item]));
 
 const krakowCards = attractionsText.cards;
 
 const attractions = [
   {
+    id: 'old-town',
     title: attractionsText.attractions[0].title,
     copy: attractionsText.attractions[0].copy,
     image: siteAssets.attractions.oldTown,
     label: attractionsText.attractions[0].label,
+    detail: attractionDetailsById.get('old-town'),
   },
   {
+    id: 'kazimierz',
     title: attractionsText.attractions[1].title,
     copy: attractionsText.attractions[1].copy,
     image: siteAssets.attractions.kazimierz,
     label: attractionsText.attractions[1].label,
+    detail: attractionDetailsById.get('kazimierz'),
   },
   {
+    id: 'wawel',
     title: attractionsText.attractions[2].title,
     copy: attractionsText.attractions[2].copy,
     image: siteAssets.attractions.wawel,
     label: attractionsText.attractions[2].label,
+    detail: attractionDetailsById.get('wawel'),
   },
   {
+    id: 'wieliczka',
     title: attractionsText.attractions[3].title,
     copy: attractionsText.attractions[3].copy,
     image: siteAssets.attractions.wieliczka,
     label: attractionsText.attractions[3].label,
+    detail: attractionDetailsById.get('wieliczka'),
   },
   {
+    id: 'schindler',
     title: attractionsText.attractions[4].title,
     copy: attractionsText.attractions[4].copy,
     image: siteAssets.attractions.schindler,
     label: attractionsText.attractions[4].label,
+    detail: attractionDetailsById.get('schindler'),
   },
   {
+    id: 'auschwitz',
     title: attractionsText.attractions[5].title,
     copy: attractionsText.attractions[5].copy,
     image: siteAssets.attractions.auschwitz,
     label: attractionsText.attractions[5].label,
+    detail: attractionDetailsById.get('auschwitz'),
   },
   {
+    id: 'energylandia',
     title: attractionsText.attractions[6].title,
     copy: attractionsText.attractions[6].copy,
     image: siteAssets.attractions.energylandia,
     label: attractionsText.attractions[6].label,
+    detail: attractionDetailsById.get('energylandia'),
   },
   {
+    id: 'ojcow',
     title: attractionsText.attractions[7].title,
     copy: attractionsText.attractions[7].copy,
     image: siteAssets.attractions.ojcow,
     label: attractionsText.attractions[7].label,
+    detail: attractionDetailsById.get('ojcow'),
   },
   {
+    id: 'zakopane',
     title: attractionsText.attractions[8].title,
     copy: attractionsText.attractions[8].copy,
     image: siteAssets.attractions.zakopane,
     label: attractionsText.attractions[8].label,
+    detail: attractionDetailsById.get('zakopane'),
   },
 ];
 
@@ -279,6 +444,52 @@ const stayPlans = attractionsText.plans;
             <span>{String(index + 1).padStart(2, '0')}</span>
             <h3>{item.title}</h3>
             <p>{item.copy}</p>
+            {item.detail && (
+              <>
+                <dl class="attractions-list__meta">
+                  <div>
+                    <dt><Icon name="Sparkles" size={15} strokeWidth={2} /> {attractionDetailsCopy.metaLabels.type}</dt>
+                    <dd>{item.detail.type}</dd>
+                  </div>
+                  <div>
+                    <dt><Icon name="Clock" size={15} strokeWidth={2} /> {attractionDetailsCopy.metaLabels.time}</dt>
+                    <dd>{item.detail.time}</dd>
+                  </div>
+                  <div>
+                    <dt><Icon name="TramFront" size={15} strokeWidth={2} /> {attractionDetailsCopy.metaLabels.transport}</dt>
+                    <dd>{item.detail.transport}</dd>
+                  </div>
+                  <div>
+                    <dt><Icon name="Hourglass" size={15} strokeWidth={2} /> {attractionDetailsCopy.metaLabels.onSite}</dt>
+                    <dd>{item.detail.onSite}</dd>
+                  </div>
+                  <div>
+                    <dt><Icon name="UsersRound" size={15} strokeWidth={2} /> {attractionDetailsCopy.metaLabels.forWhom}</dt>
+                    <dd>{item.detail.forWhom}</dd>
+                  </div>
+                  <div>
+                    <dt><Icon name="Map" size={15} strokeWidth={2} /> {attractionDetailsCopy.metaLabels.see}</dt>
+                    <dd>{item.detail.see}</dd>
+                  </div>
+                </dl>
+                <div class="attractions-list__actions">
+                  <a href={plannerHref}>
+                    <Icon name="CalendarCheck" size={16} strokeWidth={2} />
+                    <span>{attractionDetailsCopy.metaLabels.planner}</span>
+                  </a>
+                  <a href={`${mapsHref}${item.detail.routeQuery}`} target="_blank" rel="noopener noreferrer">
+                    <Icon name="MapPin" size={16} strokeWidth={2} />
+                    <span>{attractionDetailsCopy.metaLabels.route}</span>
+                  </a>
+                  {item.detail.showTour && (
+                    <a href={seeKrakowHref} target="_blank" rel="noopener noreferrer">
+                      <Icon name="Ticket" size={16} strokeWidth={2} />
+                      <span>{attractionDetailsCopy.metaLabels.tour}</span>
+                    </a>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </article>
       ))}
@@ -480,6 +691,73 @@ const stayPlans = attractionsText.plans;
   line-height: 1.7;
 }
 
+.attractions-list__meta {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 22px 0 0;
+}
+
+.attractions-list__meta div {
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid rgba(25,70,44,.10);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(60,179,113,.09), transparent 38%),
+    rgba(247,250,245,.74);
+}
+
+.attractions-list__meta dt {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 6px;
+  color: #0f6b3f;
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.attractions-list__meta dd {
+  margin: 0;
+  color: #24372c;
+  font-size: .92rem;
+  line-height: 1.48;
+  font-weight: 780;
+}
+
+.attractions-list__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.attractions-list__actions a {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 13px;
+  border: 1px solid rgba(60,179,113,.20);
+  border-radius: 999px;
+  color: #0f6b3f;
+  background: rgba(60,179,113,.10);
+  font-size: .84rem;
+  font-weight: 950;
+  text-decoration: none;
+  transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.attractions-list__actions a:hover {
+  transform: translateY(-2px);
+  border-color: rgba(60,179,113,.42);
+  background: linear-gradient(135deg, rgba(168,240,199,.86), rgba(60,179,113,.22));
+  box-shadow: 0 14px 34px rgba(60,179,113,.16);
+}
+
 .attractions-itinerary {
   background:
     radial-gradient(circle at 16% 18%, rgba(60,179,113,.18), transparent 34%),
@@ -617,6 +895,39 @@ const stayPlans = attractionsText.plans;
   background: rgba(255,255,255,.14);
 }
 
+html[data-theme="dark"] .attractions-local,
+html[data-theme="dark"] .attractions-list {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(60,179,113,.16), transparent 32%),
+    linear-gradient(180deg, #0f1d14, #14261a);
+}
+
+html[data-theme="dark"] .attractions-local__card strong,
+html[data-theme="dark"] .attractions-list__body h3,
+html[data-theme="dark"] .attractions-list__meta dd {
+  color: #f7fff9;
+}
+
+html[data-theme="dark"] .attractions-list__body p,
+html[data-theme="dark"] .attractions-list__meta dt,
+html[data-theme="dark"] .attractions-local .section-copy,
+html[data-theme="dark"] .attractions-list .section-copy {
+  color: rgba(245,255,248,.72);
+}
+
+html[data-theme="dark"] .attractions-list__meta div {
+  border-color: rgba(255,255,255,.12);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(60,179,113,.13), transparent 38%),
+    rgba(255,255,255,.07);
+}
+
+html[data-theme="dark"] .attractions-list__actions a {
+  color: #d8ffe8;
+  border-color: rgba(143,224,180,.22);
+  background: rgba(143,224,180,.09);
+}
+
 @media (min-width: 760px) {
   .attractions-local__cards {
     grid-template-columns: repeat(2, 1fr);
@@ -628,6 +939,10 @@ const stayPlans = attractionsText.plans;
 
   .attractions-itinerary__cards {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  .attractions-list__meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -662,6 +977,14 @@ const stayPlans = attractionsText.plans;
 
   .attractions-final-cta__actions a {
     width: 100%;
+  }
+
+  .attractions-list__actions {
+    display: grid;
+  }
+
+  .attractions-list__actions a {
+    justify-content: center;
   }
 }
 </style>

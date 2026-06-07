@@ -66,6 +66,42 @@ const copy = {
     guidePending: 'Camping Guide PDF — in preparazione.',
   },
 }[lang];
+
+const arrivalDocsByLanguage = {
+  pl: {
+    title: 'Do rejestracji przygotuj',
+    items: [
+      'jeden dokument tożsamości dla recepcji',
+      'numer rejestracyjny auta, kampera, vana lub pojazdu',
+      'przy przyczepie kempingowej: numer rejestracyjny przyczepy',
+    ],
+  },
+  en: {
+    title: 'For registration prepare',
+    items: [
+      'one identity document for reception',
+      'the registration plate of your car, camper, van or vehicle',
+      'with a camping trailer: the trailer registration plate',
+    ],
+  },
+  de: {
+    title: 'Für die Anmeldung vorbereiten',
+    items: [
+      'ein Ausweisdokument für die Rezeption',
+      'das Kennzeichen von Auto, Wohnmobil, Van oder Fahrzeug',
+      'bei Wohnwagen: das Kennzeichen des Wohnwagens/Anhängers',
+    ],
+  },
+  it: {
+    title: 'Per la registrazione prepara',
+    items: [
+      'un documento di identità per la reception',
+      'la targa di auto, camper, van o veicolo',
+      'con una roulotte: la targa della roulotte/rimorchio',
+    ],
+  },
+};
+const arrivalDocs = arrivalDocsByLanguage[lang as keyof typeof arrivalDocsByLanguage] ?? arrivalDocsByLanguage.en;
 ---
 
 <section class="site-section arrival-flow reveal-section" data-after-hero>
@@ -75,6 +111,12 @@ const copy = {
       <h2 class="section-title">{copy.title}</h2>
       <p class="section-copy">{copy.lead}</p>
       <p class="arrival-flow__maps"><Icon name="map" size={18} />{copy.maps}</p>
+      <div class="arrival-flow__docs">
+        <strong>{arrivalDocs.title}</strong>
+        <ul>
+          {arrivalDocs.items.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
       {guideExists ? (
         <a class="btn btn-glass arrival-flow__guide" href={siteAssets.documents.campingGuidePdf} target="_blank" rel="noopener noreferrer">
           <Icon name="ticket" size={17} />
@@ -132,6 +174,51 @@ const copy = {
   margin-top: 18px;
 }
 
+.arrival-flow__docs {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid rgba(60,179,113,.18);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(60,179,113,.10), transparent 36%),
+    rgba(255,255,255,.54);
+}
+
+.arrival-flow__docs strong {
+  color: var(--theme-heading, #102018);
+  font-weight: 950;
+}
+
+.arrival-flow__docs ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arrival-flow__docs li {
+  position: relative;
+  padding-left: 22px;
+  color: var(--theme-copy, #536359);
+  line-height: 1.52;
+  font-weight: 760;
+}
+
+.arrival-flow__docs li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: .58em;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #3CB371;
+  box-shadow: 0 0 0 5px rgba(60,179,113,.12);
+}
+
 .arrival-flow__guide-pending {
   display: block;
   margin-top: 18px;
@@ -180,6 +267,19 @@ const copy = {
   color: var(--theme-copy, #536359);
   line-height: 1.68;
   font-weight: 760;
+}
+
+html[data-theme="dark"] .arrival-flow__docs {
+  border-color: rgba(143,224,180,.18);
+  background: rgba(255,255,255,.06);
+}
+
+html[data-theme="dark"] .arrival-flow__docs strong {
+  color: #f7fff9;
+}
+
+html[data-theme="dark"] .arrival-flow__docs li {
+  color: rgba(245,255,248,.72);
 }
 
 @media (min-width: 980px) {

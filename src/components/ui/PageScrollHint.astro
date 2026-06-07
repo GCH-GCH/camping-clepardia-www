@@ -29,24 +29,65 @@ const label = isHome ? copy.home : copy.page;
     if (!(hint instanceof HTMLButtonElement)) return;
 
     const getTarget = () => {
-      const preferred = document.querySelector('#after-hero, [data-after-hero], main > section:nth-of-type(2)');
-      return preferred instanceof HTMLElement ? preferred : null;
+      const preferred = document.querySelector('#after-hero, [data-after-hero]');
+      if (preferred instanceof HTMLElement && preferred.getBoundingClientRect().top > 96) return preferred;
+
+      const main = document.querySelector('main');
+      const sections = Array.from((main ?? document).querySelectorAll('section'))
+        .filter((section) => section instanceof HTMLElement)
+        .filter((section) => !section.contains(hint))
+        .filter((section) => {
+          const rect = section.getBoundingClientRect();
+          return rect.height > 32 && rect.bottom > 0;
+        });
+
+      const belowHero = sections.find((section, index) => {
+        if (!(section instanceof HTMLElement)) return false;
+        const rect = section.getBoundingClientRect();
+        return index > 0 && rect.top > 80;
+      });
+
+      const secondSection = sections[1];
+      const firstUsefulSection = sections.find((section) => section instanceof HTMLElement && section.getBoundingClientRect().top > window.innerHeight * 0.35);
+      return (belowHero ?? secondSection ?? firstUsefulSection ?? null) instanceof HTMLElement
+        ? (belowHero ?? secondSection ?? firstUsefulSection)
+        : null;
     };
 
     const scrollToTarget = () => {
+      const motionWindow = window;
+      const scrollTo = (top) => {
+        if (typeof motionWindow.__ccScrollTo === 'function') {
+          motionWindow.__ccScrollTo(top, { duration: 0.9 });
+          return;
+        }
+        window.scrollTo({ top, behavior: 'smooth' });
+      };
       const target = getTarget();
-      if (!target) return;
+      if (!target) {
+        scrollTo(Math.max(window.innerHeight * 0.82, 320));
+        return;
+      }
       const navbar = document.querySelector('[data-main-navbar], #mainNavbarShell, #mainNavbar');
       const offset = navbar instanceof HTMLElement ? navbar.getBoundingClientRect().height + 16 : 92;
-      const top = Math.max(0, window.scrollY + target.getBoundingClientRect().top - offset);
-      window.scrollTo({ top, behavior: 'smooth' });
+      const targetTop = Math.max(0, window.scrollY + target.getBoundingClientRect().top - offset);
+      const fallbackTop = Math.min(
+        document.documentElement.scrollHeight - window.innerHeight,
+        window.scrollY + Math.max(window.innerHeight * 0.72, 320),
+      );
+      const top = targetTop > window.scrollY + 8 ? targetTop : fallbackTop;
+      scrollTo(top);
     };
 
     const updateVisibility = () => {
       hint.classList.toggle('is-hidden', window.scrollY > 260);
     };
 
-    hint.addEventListener('click', scrollToTarget);
+    hint.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      window.requestAnimationFrame(scrollToTarget);
+    });
     window.addEventListener('scroll', updateVisibility, { passive: true });
     updateVisibility();
   })();

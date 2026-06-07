@@ -238,6 +238,33 @@ const transportTextByLanguage = {
 };
 
 const transportText = transportTextByLanguage[contentLanguage];
+const registrationTextByLanguage = {
+  pl: {
+    title: 'Co przygotować do rejestracji?',
+    document: 'Przy rejestracji na recepcji poprosimy o jeden dokument tożsamości.',
+    plate: 'Jeśli przyjeżdżasz autem, kamperem, vanem lub przyczepą, przygotuj numer rejestracyjny pojazdu.',
+    trailer: 'Przy przyjeździe z przyczepą kempingową wpisz numer rejestracyjny przyczepy.',
+  },
+  en: {
+    title: 'What to prepare for registration?',
+    document: 'At reception registration we will ask for one identity document.',
+    plate: 'If you arrive by car, camper, van or caravan, prepare the vehicle registration plate.',
+    trailer: 'When arriving with a camping trailer, enter the trailer registration plate.',
+  },
+  de: {
+    title: 'Was wird für die Anmeldung benötigt?',
+    document: 'Bei der Anmeldung an der Rezeption bitten wir um ein Ausweisdokument.',
+    plate: 'Wenn Sie mit Auto, Wohnmobil, Van oder Wohnwagen anreisen, bereiten Sie bitte das Kennzeichen vor.',
+    trailer: 'Bei Anreise mit Wohnwagen tragen Sie bitte das Kennzeichen des Wohnwagens/Anhängers ein.',
+  },
+  it: {
+    title: 'Cosa preparare per la registrazione?',
+    document: 'Alla registrazione in reception chiederemo un documento di identità.',
+    plate: 'Se arrivi in auto, camper, van o roulotte, prepara la targa del veicolo.',
+    trailer: 'Se arrivi con una roulotte, inserisci la targa della roulotte/rimorchio.',
+  },
+};
+const registrationText = registrationTextByLanguage[contentLanguage as keyof typeof registrationTextByLanguage] ?? registrationTextByLanguage.en;
 
 const quickInfo = [
   { icon: 'map', label: transportText.quick.address, value: page.highlights[0].copy },
@@ -365,6 +392,14 @@ const ticketIcons = ['ticket', 'receipt', 'route', 'map'] as const;
         <span class="section-kicker">{transportText.arrivalKicker}</span>
         <h2>{transportText.arrivalTitle}</h2>
         <p>{transportText.arrivalCopy}</p>
+        <div class="transport-arrival__docs">
+          <strong>{registrationText.title}</strong>
+          <ul>
+            <li>{registrationText.document}</li>
+            <li>{registrationText.plate}</li>
+            <li>{registrationText.trailer}</li>
+          </ul>
+        </div>
       </div>
     </article>
 
@@ -740,6 +775,49 @@ const ticketIcons = ['ticket', 'receipt', 'route', 'map'] as const;
   margin: 0;
   color: rgba(255,255,255,.76);
   line-height: 1.72;
+}
+
+.transport-arrival__docs {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid rgba(143,224,180,.20);
+  border-radius: 20px;
+  background: rgba(143,224,180,.09);
+}
+
+.transport-arrival__docs strong {
+  color: #8fe0b4;
+  font-weight: 950;
+}
+
+.transport-arrival__docs ul {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.transport-arrival__docs li {
+  position: relative;
+  padding-left: 22px;
+  color: rgba(255,255,255,.78);
+  line-height: 1.55;
+  font-weight: 780;
+}
+
+.transport-arrival__docs li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: .58em;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #3CB371;
+  box-shadow: 0 0 0 5px rgba(60,179,113,.14);
 }
 
 .transport-arrival__panel a {

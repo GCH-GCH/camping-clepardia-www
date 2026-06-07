@@ -959,6 +959,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         privacyLink: 'Polityka prywatności',
         consentSectionTitle: 'Wymagane zgody',
         consentSectionLead: 'Bez tych zgód nie możemy wysłać zapytania do recepcji.',
+        registration: {
+          title: 'Rejestracja na recepcji',
+          document: 'Przy rejestracji poprosimy o jeden dokument tożsamości.',
+          plate: 'Jeśli przyjeżdżasz autem, kamperem, vanem lub przyczepą, przygotuj numer rejestracyjny.',
+          trailer: 'Przy przyczepie kempingowej wpisz numer rejestracyjny przyczepy.',
+        },
         field: {
           name: { placeholder: 'np. Jan Kowalski', helper: 'Podaj imię i nazwisko osoby kontaktowej.' },
           email: { placeholder: 'np. jan@email.com', helper: 'Na ten adres recepcja wyśle odpowiedź. Podaj email lub telefon.' },
@@ -1008,6 +1014,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         privacyLink: 'Privacy policy',
         consentSectionTitle: 'Required consents',
         consentSectionLead: 'These consents are needed before sending the enquiry to reception.',
+        registration: {
+          title: 'Reception registration',
+          document: 'At registration we will ask for one identity document.',
+          plate: 'If you arrive by car, camper, van or caravan, prepare the registration plate.',
+          trailer: 'For a camping trailer, enter the trailer registration plate.',
+        },
         field: {
           name: { placeholder: 'e.g. Jan Kowalski', helper: 'Enter the contact person full name.' },
           email: { placeholder: 'e.g. jan@email.com', helper: 'Reception will reply to this address. Email or phone is required.' },
@@ -1918,6 +1930,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
                   <p>${esc(labels.stayLead)}</p>
                 </div>
               </header>
+              <div class="reservation-info-grid reservation-info-grid--docs">
+                <p><strong>${esc(detailText.registration.title)}</strong></p>
+                <p>${esc(detailText.registration.document)}</p>
+                <p>${esc(detailText.registration.plate)}</p>
+                <p class="is-warm">${esc(detailText.registration.trailer)}</p>
+              </div>
               <div class="reservation-form-grid">
                 <label class="reservation-field">
                   ${fieldLabel({ icon: 'plate', label: t.fields.plate, badge: 'optional' })}
@@ -2012,6 +2030,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             ${summaryRow('language', t.summary.language, state.details.language)}
             ${state.details.countryCode ? summaryRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
             ${state.details.plate ? summaryRow('plate', t.fields.plate, state.details.plate) : ''}
+            ${summaryRow('info', detailText.registration.title, `${detailText.registration.document} ${detailText.registration.trailer}`)}
             ${summaryRow('privacy', detailText.consentSectionTitle, consentsText())}
           </dl>
           ${missingListTemplate(true)}
@@ -2038,6 +2057,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           ${state.details.countryCode ? summaryRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
           ${summaryRow('language', t.summary.language, state.details.language)}
           ${state.details.plate ? summaryRow('plate', t.fields.plate, state.details.plate) : ''}
+          ${summaryRow('info', detailText.registration.title, `${detailText.registration.document} ${detailText.registration.trailer}`)}
           ${state.details.specialNeeds ? summaryRow('accessibility', t.summary.specialNeeds, yesLabel()) : ''}
           ${state.details.lateCheckout ? summaryRow('late', t.summary.lateCheckout, state.details.lateTime) : ''}
           ${summaryRow('privacy', detailText.consentSectionTitle, consentsText())}

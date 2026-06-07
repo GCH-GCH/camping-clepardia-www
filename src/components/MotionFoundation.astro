@@ -326,6 +326,23 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
     window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
   };
 
+  motionWindow.__ccScrollTo = (target, options = {}) => {
+    const offset = Number(options.offset ?? 0);
+    const top = typeof target === 'number'
+      ? target
+      : target instanceof HTMLElement
+        ? target.getBoundingClientRect().top + window.scrollY + offset
+        : 0;
+    const nextTop = Math.max(0, top);
+
+    if (lenis) {
+      lenis.scrollTo(nextTop, { duration: reduceMotion.matches ? 0 : Number(options.duration ?? 0.9) });
+      return;
+    }
+
+    window.scrollTo({ top: nextTop, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+  };
+
   document.addEventListener('click', (event) => {
     if (event.defaultPrevented) return;
     const targetElement = event.target instanceof Element ? event.target : null;

@@ -1,14 +1,19 @@
 ---
 import Icon from '@/components/ui/Icon.astro';
 import { getNoticeCopy, getPopupSiteNotice } from '@/data/siteNotices';
-import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
 const notice = getPopupSiteNotice();
 const pathContext = getPathContext(Astro.url.pathname);
 const languageCode = pathContext.languageCode;
 const copy = notice ? getNoticeCopy(notice, languageCode) : null;
 const localizedDirectionsHref = getLocalizedPath(pathContext.explicitLanguage, 'dojazd');
-const ctaHref = notice?.ctaHref === '/dojazd' ? localizedDirectionsHref : (notice?.ctaHref ?? localizedDirectionsHref);
+const localizedBookingHref = getBookingLocalizedPath(languageCode);
+const ctaHref = notice?.ctaHref === '/dojazd'
+  ? localizedDirectionsHref
+  : notice?.ctaHref === '/rezerwacja'
+    ? localizedBookingHref
+    : (notice?.ctaHref ?? localizedDirectionsHref);
 const closeLabel = languageCode === 'pl' ? 'Zamknij aktualność' : 'Close notice';
 const eyebrow = languageCode === 'pl' ? 'Aktualnie' : 'Current update';
 const endDate = notice?.endDate ?? '';

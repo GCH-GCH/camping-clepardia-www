@@ -1,21 +1,26 @@
 ---
 import Icon from '@/components/ui/Icon.astro';
 import { getHomepageSiteNotices, getNoticeCopy } from '@/data/siteNotices';
-import { getLocalizedPath } from '@/utils/localizedLinks';
+import { getBookingLocalizedPath, getLocalizedPath } from '@/utils/localizedLinks';
 
 interface Props {
   languageCode?: string;
 }
 
 const { languageCode = 'pl' } = Astro.props as Props;
-const notices = getHomepageSiteNotices().slice(0, 4);
+const notices = getHomepageSiteNotices().slice(0, 5);
 const heading = languageCode === 'pl' ? 'Aktualnie w Krakowie i na campingu' : 'Current updates in Krakow and at the campsite';
 const lead = languageCode === 'pl'
   ? 'Najważniejsze wydarzenia, komunikaty i sezonowe podpowiedzi dla gości Camping Clepardia.'
   : 'Important events, notices and seasonal tips for Camping Clepardia guests.';
 const fallbackCta = languageCode === 'pl' ? 'Zobacz szczegóły' : 'See details';
 const localizedDirectionsHref = getLocalizedPath(languageCode === 'pl' ? undefined : languageCode, 'dojazd');
-const resolveHref = (href?: string) => href === '/dojazd' ? localizedDirectionsHref : (href ?? localizedDirectionsHref);
+const localizedBookingHref = getBookingLocalizedPath(languageCode);
+const resolveHref = (href?: string) => {
+  if (href === '/dojazd') return localizedDirectionsHref;
+  if (href === '/rezerwacja') return localizedBookingHref;
+  return href ?? localizedDirectionsHref;
+};
 ---
 
 {notices.length > 0 && (

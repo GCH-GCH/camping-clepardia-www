@@ -15,28 +15,43 @@ const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode) as
 const explicitLanguage = pathContext.explicitLanguage;
 const bookingHref = getBookingLocalizedPath(lang);
 const transportHref = getLocalizedPath(explicitLanguage, 'dojazd');
+const attractionsHref = getLocalizedPath(explicitLanguage, 'atrakcje');
 const seeKrakowHref = 'https://qr.codes/vksKBT';
 
-const copy = {
+const copyByLang = {
   pl: {
     kicker: 'Planer pobytu',
-    title: 'Ułóż dzień albo kilka dni w Krakowie',
-    lead: 'Zaznacz tempo, długość pobytu i atrakcje. Planer podpowie, czy wszystko ma sens, co odpuścić i jak połączyć zwiedzanie z odpoczynkiem na campingu.',
+    title: 'Zaplanuj pobyt w Krakowie bez upychania wszystkiego naraz',
+    lead:
+      'Wybierz liczbę nocy, tempo, ekipę i transport. Planer podpowie, co spokojnie zobaczysz z Camping Clepardia jako bazą, co może być za dużo i jak ułożyć dzień.',
+    micro: 'To nie jest sztywny program. To szybka podpowiedź, żeby pobyt był przyjemny, a nie goniony.',
     nights: 'Liczba nocy',
-    pace: 'Tempo',
+    pace: 'Tempo zwiedzania',
     group: 'Z kim jedziesz?',
-    transport: 'Transport',
-    attractions: 'Atrakcje i pomysły',
-    resultTitle: 'Twój szkic pobytu',
-    empty: 'Wybierz kilka atrakcji, a tutaj pojawi się podpowiedź planu.',
-    fits: 'Plan wygląda realnie przy wybranym tempie.',
-    tight: 'Plan jest napięty. Warto odpuścić część atrakcji albo wybrać spokojniejsze tempo.',
-    skip: 'Najpierw odpuść',
-    sample: 'Przykładowy rytm',
+    transport: 'Jak chcecie się poruszać?',
+    interests: 'Co Was najbardziej interesuje?',
+    resultTitle: 'Rekomendacja pobytu',
+    comfortable: 'Co spokojnie zobaczysz',
+    tooMuch: 'Co może być za dużo',
+    recommendation: 'Nasza rekomendacja',
+    dayPlan: 'Plan dnia',
+    quizTitle: 'Nie wiesz, co wybrać?',
+    quizCopy: 'Kliknij najbliższy scenariusz, a planer ustawi dobry punkt startu.',
+    todayTitle: 'Plan na dziś',
+    todayCopy: 'Najbezpieczniejszy pierwszy dzień: tramwaj do Starego Kleparza, spacer przez Stare Miasto, Wawel albo Kazimierz i spokojny powrót na camping.',
+    arrivalTitle: 'Pakiet pierwszego przyjazdu',
+    arrivalItems: [
+      'Przy rejestracji przygotuj jeden dokument tożsamości.',
+      'Jeśli przyjeżdżasz pojazdem, recepcja poprosi o numer rejestracyjny.',
+      'Przy przyczepie kempingowej wpisz numer rejestracyjny przyczepy.',
+      'Do nawigacji użyj Google Maps, bo dojazd zmienił się w 2022 roku.',
+      'Cisza nocna obowiązuje 22:00-07:00.',
+    ],
     ctaBooking: 'Zarezerwuj pobyt',
     ctaCampy: 'Zapytaj CAMPY',
     ctaTours: 'SeeKrakow',
     ctaTram: 'Dojazd tramwajem',
+    ctaAttractions: 'Zobacz atrakcje',
     options: {
       calm: 'Spokojnie',
       normal: 'Normalnie',
@@ -49,26 +64,85 @@ const copy = {
       car: 'Auto',
       mixed: 'Spacer + tramwaj',
     },
+    interestsList: [
+      ['classic', 'Stare Miasto + Wawel'],
+      ['history', 'Historia i muzea'],
+      ['kids', 'Dzieci i energia'],
+      ['nature', 'Natura poza miastem'],
+      ['tours', 'Gotowe wycieczki'],
+    ],
+    scenarios: [
+      { id: 'camper', icon: 'Caravan', title: 'Przyjeżdżam kamperem', copy: 'Zacznij od spokojnego Krakowa i tramwaju.', nights: '2', pace: 'normal', group: 'pair', transport: 'tram', interests: ['classic'] },
+      { id: 'family', icon: 'UsersRound', title: 'Rodzina z dziećmi', copy: 'Dodaj oddech, Wieliczkę albo Energylandię jako osobny dzień.', nights: '3', pace: 'calm', group: 'family', transport: 'mixed', interests: ['classic', 'kids'] },
+      { id: 'krakow', icon: 'Landmark', title: 'Chcę zobaczyć Kraków', copy: 'Stare Miasto, Wawel, Kazimierz i muzea bez auta.', nights: '2', pace: 'normal', group: 'pair', transport: 'tram', interests: ['classic', 'history'] },
+      { id: 'cabin', icon: 'House', title: 'Domki i spokojny pobyt', copy: 'Lepszy rytm: miasto + jeden dzień poza Krakowem.', nights: '4', pace: 'calm', group: 'family', transport: 'mixed', interests: ['classic', 'nature'] },
+    ],
+    recommendations: {
+      '1': {
+        comfortable: ['Stare Miasto, Rynek i Sukiennice', 'Wawel albo Kazimierz, ale nie wszystko naraz', 'Tramwaj z Górnickiego do Starego Kleparza i spacer do centrum'],
+        tooMuch: ['Wieliczka i Auschwitz w tym samym pobycie', 'Zakopane lub Energylandia jako dodatek do jednego dnia', 'Zwiedzanie autem po ścisłym centrum'],
+        recommendation: 'Przy 1 nocy zrób city break: Stare Miasto + Wawel, ewentualnie Kazimierz wieczorem. Wieliczkę, Auschwitz i dalsze wycieczki zostaw na dłuższy pobyt.',
+        days: ['Przyjazd, tramwaj do centrum, Stare Miasto, Wawel lub Kazimierz, powrót na spokojny wieczór.'],
+      },
+      '2': {
+        comfortable: ['Stare Miasto, Wawel i Kazimierz', 'Fabryka Schindlera albo spokojny wieczór na Kazimierzu', 'Wieliczka jest możliwa, ale zrobi się intensywnie'],
+        tooMuch: ['Wieliczka + Auschwitz + pełny Kraków w 2 noce', 'Dalekie trasy typu Zakopane bez poświęcenia całego dnia', 'Zbyt późny start w centrum'],
+        recommendation: 'Przy 2 nocach najlepiej połączyć centrum z Kazimierzem. Wieliczka jest możliwa, ale warto wtedy odpuścić część miasta albo dodać jeden dzień.',
+        days: ['Dzień 1: Stare Miasto + Wawel + powrót tramwajem.', 'Dzień 2: Kazimierz albo Wieliczka, zależnie od energii ekipy.'],
+      },
+      '3': {
+        comfortable: ['Kraków klasycznie: Stare Miasto, Wawel, Kazimierz', 'Wieliczka albo Auschwitz jako osobny dzień', 'Rodzinny dzień z wolniejszym tempem'],
+        tooMuch: ['Wieliczka i Auschwitz dzień po dniu przy małych dzieciach', 'Zakopane jako dodatek bez bardzo wczesnego startu', 'Brak dnia zapasowego na pogodę'],
+        recommendation: '3 noce to dobry rytm: dwa dni Krakowa i jeden większy wyjazd. Dla rodzin najczęściej wygrywa Wieliczka albo Energylandia jako osobny dzień.',
+        days: ['Dzień 1: Stare Miasto + Wawel.', 'Dzień 2: Kazimierz + Fabryka Schindlera albo luźny spacer.', 'Dzień 3: Wieliczka albo Auschwitz / Energylandia.'],
+      },
+      '4': {
+        comfortable: ['Kraków bez pośpiechu', 'Kazimierz i muzea', 'Wieliczka jako oddzielna wycieczka', 'Dzień wolniejszy na odpoczynek lub Ojców'],
+        tooMuch: ['Codziennie daleka wycieczka poza miasto', 'Zakopane i Energylandia bez dnia regeneracji', 'Plan bez przerwy przy upale'],
+        recommendation: '4 noce pozwalają zwiedzać spokojniej: Kraków + Kazimierz + Wieliczka + wolniejszy dzień. To bardzo dobry wariant dla domków i rodzin.',
+        days: ['Dzień 1: centrum i Wawel.', 'Dzień 2: Kazimierz + Schindler.', 'Dzień 3: Wieliczka.', 'Dzień 4: Ojców, luźny Kraków albo odpoczynek na campingu.'],
+      },
+      '5+': {
+        comfortable: ['Kraków i Małopolska bez gonienia', 'Wieliczka, Auschwitz albo Ojców', 'Energylandia lub Zakopane jako pełny dzień', 'Dni spokojniejsze między większymi trasami'],
+        tooMuch: ['Wszystkie dalekie atrakcje jedna po drugiej', 'Brak dnia buforowego na pogodę', 'Traktowanie campingu tylko jako parkingu'],
+        recommendation: '5+ nocy to już pobyt regionalny. Camping Clepardia może być bazą na Kraków, Małopolskę, Energylandię, Ojców lub Zakopane.',
+        days: ['Dzień 1: Stare Miasto + Wawel.', 'Dzień 2: Kazimierz + muzea.', 'Dzień 3: Wieliczka albo Auschwitz.', 'Dzień 4: odpoczynek / Ojców.', 'Dzień 5: Energylandia, Zakopane albo własny rytm.'],
+      },
+    },
   },
   en: {
     kicker: 'Stay planner',
-    title: 'Shape one day or a few days in Krakow',
-    lead: 'Choose pace, length and attractions. The planner suggests whether it fits, what to skip and how to balance sightseeing with campsite rest.',
+    title: 'Plan Krakow without packing too much into one stay',
+    lead:
+      'Choose nights, pace, group and transport. The planner suggests what fits from Camping Clepardia, what may be too much and how to shape the day.',
+    micro: 'This is a friendly guide, not a fixed programme.',
     nights: 'Nights',
     pace: 'Pace',
     group: 'Travel group',
     transport: 'Transport',
-    attractions: 'Attractions and ideas',
-    resultTitle: 'Your stay draft',
-    empty: 'Choose a few attractions and the plan suggestion will appear here.',
-    fits: 'This plan looks realistic for the selected pace.',
-    tight: 'This plan is tight. Skip a few attractions or choose a calmer pace.',
-    skip: 'Skip first',
-    sample: 'Sample rhythm',
+    interests: 'Interests',
+    resultTitle: 'Stay recommendation',
+    comfortable: 'Comfortably doable',
+    tooMuch: 'May be too much',
+    recommendation: 'Our recommendation',
+    dayPlan: 'Day plan',
+    quizTitle: 'Not sure what to choose?',
+    quizCopy: 'Pick the closest scenario and the planner will set a good starting point.',
+    todayTitle: 'Plan for today',
+    todayCopy: 'A safe first day: tram to Stary Kleparz, Old Town walk, Wawel or Kazimierz, then a calm return to the campsite.',
+    arrivalTitle: 'First arrival package',
+    arrivalItems: [
+      'Prepare one identity document for reception registration.',
+      'If you arrive with a vehicle, reception will ask for the registration plate.',
+      'With a camping trailer, enter the trailer registration plate.',
+      'Use Google Maps because access changed in 2022.',
+      'Quiet hours: 22:00-07:00.',
+    ],
     ctaBooking: 'Book your stay',
     ctaCampy: 'Ask CAMPY',
     ctaTours: 'SeeKrakow',
     ctaTram: 'Tram directions',
+    ctaAttractions: 'See attractions',
     options: {
       calm: 'Calm',
       normal: 'Normal',
@@ -81,90 +155,31 @@ const copy = {
       car: 'Car',
       mixed: 'Walk + tram',
     },
-  },
-  de: {
-    kicker: 'Aufenthaltsplaner',
-    title: 'Planen Sie einen oder mehrere Tage in Krakau',
-    lead: 'Wählen Sie Tempo, Aufenthaltslänge und Attraktionen. Der Planer sagt, ob es realistisch ist und was man besser auslässt.',
-    nights: 'Nächte',
-    pace: 'Tempo',
-    group: 'Reisegruppe',
-    transport: 'Transport',
-    attractions: 'Attraktionen und Ideen',
-    resultTitle: 'Ihr Aufenthaltsentwurf',
-    empty: 'Wählen Sie einige Attraktionen, dann erscheint hier ein Vorschlag.',
-    fits: 'Der Plan wirkt für das gewählte Tempo realistisch.',
-    tight: 'Der Plan ist eng. Lassen Sie einige Punkte aus oder wählen Sie ein ruhigeres Tempo.',
-    skip: 'Zuerst auslassen',
-    sample: 'Beispielrhythmus',
-    ctaBooking: 'Aufenthalt buchen',
-    ctaCampy: 'CAMPY fragen',
-    ctaTours: 'SeeKrakow',
-    ctaTram: 'Tram-Anfahrt',
-    options: {
-      calm: 'Ruhig',
-      normal: 'Normal',
-      intensive: 'Intensiv',
-      pair: 'Paar',
-      family: 'Familie',
-      solo: 'Solo',
-      group: 'Gruppe',
-      tram: 'Tram',
-      car: 'Auto',
-      mixed: 'Zu Fuß + Tram',
+    interestsList: [
+      ['classic', 'Old Town + Wawel'],
+      ['history', 'History and museums'],
+      ['kids', 'Kids and energy'],
+      ['nature', 'Nature outside the city'],
+      ['tours', 'Organised tours'],
+    ],
+    scenarios: [
+      { id: 'camper', icon: 'Caravan', title: 'Arriving by camper', copy: 'Start with calm Krakow and the tram.', nights: '2', pace: 'normal', group: 'pair', transport: 'tram', interests: ['classic'] },
+      { id: 'family', icon: 'UsersRound', title: 'Family with kids', copy: 'Add breathing space and one bigger attraction.', nights: '3', pace: 'calm', group: 'family', transport: 'mixed', interests: ['classic', 'kids'] },
+      { id: 'krakow', icon: 'Landmark', title: 'I want Krakow', copy: 'Old Town, Wawel, Kazimierz and museums without the car.', nights: '2', pace: 'normal', group: 'pair', transport: 'tram', interests: ['classic', 'history'] },
+      { id: 'cabin', icon: 'House', title: 'Bungalow and slow stay', copy: 'City + one trip outside Krakow.', nights: '4', pace: 'calm', group: 'family', transport: 'mixed', interests: ['classic', 'nature'] },
+    ],
+    recommendations: {
+      '1': { comfortable: ['Old Town and Wawel', 'Kazimierz only if you still have energy', 'Tram route to Stary Kleparz'], tooMuch: ['Wieliczka and Auschwitz', 'Zakopane or Energylandia', 'Driving into the strict centre'], recommendation: 'With 1 night, keep it a city break: Old Town + Wawel. Leave bigger trips for a longer stay.', days: ['Arrival, tram to the centre, Old Town, Wawel or Kazimierz, calm evening.'] },
+      '2': { comfortable: ['Old Town, Wawel and Kazimierz', 'Schindler Factory or a calm Kazimierz evening', 'Wieliczka is possible but intense'], tooMuch: ['Wieliczka + Auschwitz + full Krakow', 'Far trips without a full day', 'Late start every day'], recommendation: 'With 2 nights, combine the centre with Kazimierz. Wieliczka is possible if you skip part of the city or add one day.', days: ['Day 1: Old Town + Wawel.', 'Day 2: Kazimierz or Wieliczka.'] },
+      '3': { comfortable: ['Classic Krakow', 'Wieliczka or Auschwitz as a separate day', 'A family-friendly slower day'], tooMuch: ['Wieliczka and Auschwitz back to back with small kids', 'Zakopane without an early start', 'No weather buffer'], recommendation: '3 nights gives a good rhythm: two Krakow days and one bigger trip.', days: ['Day 1: Old Town + Wawel.', 'Day 2: Kazimierz + museums.', 'Day 3: Wieliczka / Auschwitz / Energylandia.'] },
+      '4': { comfortable: ['Krakow without rush', 'Kazimierz and museums', 'Wieliczka as a separate trip', 'A slower day for Ojców or rest'], tooMuch: ['A long trip every day', 'Zakopane and Energylandia without rest', 'No break in hot weather'], recommendation: '4 nights lets you do Krakow + Kazimierz + Wieliczka + a slower day.', days: ['Day 1: centre and Wawel.', 'Day 2: Kazimierz + Schindler.', 'Day 3: Wieliczka.', 'Day 4: Ojców, slow Krakow or campsite rest.'] },
+      '5+': { comfortable: ['Krakow and Lesser Poland', 'Wieliczka, Auschwitz or Ojców', 'Energylandia or Zakopane as a full day', 'Slower days between bigger trips'], tooMuch: ['All long trips one after another', 'No weather buffer', 'Treating the campsite only as parking'], recommendation: '5+ nights makes Clepardia a regional base for Krakow and Lesser Poland.', days: ['Day 1: Old Town + Wawel.', 'Day 2: Kazimierz + museums.', 'Day 3: Wieliczka or Auschwitz.', 'Day 4: rest / Ojców.', 'Day 5: Energylandia, Zakopane or your own rhythm.'] },
     },
   },
-  it: {
-    kicker: 'Planner soggiorno',
-    title: 'Organizza uno o più giorni a Cracovia',
-    lead: 'Scegli ritmo, durata e attrazioni. Il planner suggerisce se il programma è realistico, cosa saltare e come bilanciare visite e riposo.',
-    nights: 'Notti',
-    pace: 'Ritmo',
-    group: 'Con chi viaggi',
-    transport: 'Trasporto',
-    attractions: 'Attrazioni e idee',
-    resultTitle: 'Bozza del soggiorno',
-    empty: 'Scegli alcune attrazioni e qui apparirà un suggerimento.',
-    fits: 'Il piano sembra realistico per il ritmo selezionato.',
-    tight: 'Il piano è intenso. Meglio saltare alcune attrazioni o scegliere un ritmo più calmo.',
-    skip: 'Salta prima',
-    sample: 'Ritmo esempio',
-    ctaBooking: 'Prenota soggiorno',
-    ctaCampy: 'Chiedi a CAMPY',
-    ctaTours: 'SeeKrakow',
-    ctaTram: 'Tram',
-    options: {
-      calm: 'Calmo',
-      normal: 'Normale',
-      intensive: 'Intenso',
-      pair: 'Coppia',
-      family: 'Famiglia',
-      solo: 'Solo',
-      group: 'Gruppo',
-      tram: 'Tram',
-      car: 'Auto',
-      mixed: 'Passeggiata + tram',
-    },
-  },
-}[lang];
+};
 
-const attractions = [
-  { id: 'old-town', icon: 'landmark', weight: 1, label: { pl: 'Stare Miasto', en: 'Old Town', de: 'Altstadt', it: 'Città Vecchia' } },
-  { id: 'kazimierz', icon: 'route', weight: 1, label: { pl: 'Kazimierz', en: 'Kazimierz', de: 'Kazimierz', it: 'Kazimierz' } },
-  { id: 'wawel', icon: 'Landmark', weight: 1, label: { pl: 'Wawel', en: 'Wawel', de: 'Wawel', it: 'Wawel' } },
-  { id: 'wieliczka', icon: 'Sparkles', weight: 1.7, label: { pl: 'Wieliczka', en: 'Wieliczka', de: 'Wieliczka', it: 'Wieliczka' } },
-  { id: 'auschwitz', icon: 'CircleAlert', weight: 2.1, label: { pl: 'Auschwitz', en: 'Auschwitz', de: 'Auschwitz', it: 'Auschwitz' } },
-  { id: 'schindler', icon: 'ReceiptText', weight: 1.2, label: { pl: 'Fabryka Schindlera', en: 'Schindler Factory', de: 'Schindler-Fabrik', it: 'Fabbrica di Schindler' } },
-  { id: 'ojcow', icon: 'Leaf', weight: 1.8, label: { pl: 'Ojców', en: 'Ojców', de: 'Ojców', it: 'Ojców' } },
-  { id: 'zakopane', icon: 'Mountain', weight: 2.4, label: { pl: 'Zakopane', en: 'Zakopane', de: 'Zakopane', it: 'Zakopane' } },
-  { id: 'energylandia', icon: 'Zap', weight: 2.2, label: { pl: 'Energylandia', en: 'Energylandia', de: 'Energylandia', it: 'Energylandia' } },
-  { id: 'camp-rest', icon: 'Moon', weight: .6, label: { pl: 'Odpoczynek na campingu', en: 'Rest at campsite', de: 'Ruhe am Campingplatz', it: 'Riposo al camping' } },
-];
-
-const plannerConfigEncoded = Buffer.from(JSON.stringify({
-  copy,
-  attractions: attractions.map((item) => ({ id: item.id, weight: item.weight, label: item.label[lang] ?? item.label.en })),
-}), 'utf8').toString('base64');
+const copy = copyByLang[lang as keyof typeof copyByLang] ?? copyByLang.en;
+const plannerConfigEncoded = Buffer.from(JSON.stringify(copy), 'utf8').toString('base64');
 ---
 
 <section class="site-section stay-planner reveal-section" data-stay-planner>
@@ -174,12 +189,37 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
       <span class="section-kicker">{copy.kicker}</span>
       <h1>{copy.title}</h1>
       <p>{copy.lead}</p>
+      <small>{copy.micro}</small>
+    </div>
+
+    <div class="premium-card stay-planner__quiz">
+      <div>
+        <h2>{copy.quizTitle}</h2>
+        <p>{copy.quizCopy}</p>
+      </div>
+      <div class="stay-planner__scenario-grid">
+        {copy.scenarios.map((scenario) => (
+          <button
+            type="button"
+            data-planner-scenario={scenario.id}
+            data-nights={scenario.nights}
+            data-pace={scenario.pace}
+            data-group={scenario.group}
+            data-transport={scenario.transport}
+            data-interests={scenario.interests.join(',')}
+          >
+            <Icon name={scenario.icon} size={22} strokeWidth={2} />
+            <strong>{scenario.title}</strong>
+            <span>{scenario.copy}</span>
+          </button>
+        ))}
+      </div>
     </div>
 
     <div class="stay-planner__layout">
       <div class="premium-card stay-planner__panel">
         <div class="stay-planner__control">
-          <h2><Icon name="calendar" size={21} strokeWidth={2} /> {copy.nights}</h2>
+          <h2><Icon name="CalendarDays" size={21} strokeWidth={2} /> {copy.nights}</h2>
           <div class="stay-planner__segments" data-planner-nights>
             {['1', '2', '3', '4', '5+'].map((value, index) => (
               <button type="button" class:list={[index === 1 && 'is-active']} data-value={value}>{value}</button>
@@ -188,7 +228,7 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
         </div>
 
         <div class="stay-planner__control">
-          <h2><Icon name="Sparkles" size={21} strokeWidth={2} /> {copy.pace}</h2>
+          <h2><Icon name="Gauge" size={21} strokeWidth={2} /> {copy.pace}</h2>
           <div class="stay-planner__segments" data-planner-pace>
             {[
               ['calm', copy.options.calm],
@@ -201,7 +241,7 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
         </div>
 
         <div class="stay-planner__control">
-          <h2><Icon name="users" size={21} strokeWidth={2} /> {copy.group}</h2>
+          <h2><Icon name="UsersRound" size={21} strokeWidth={2} /> {copy.group}</h2>
           <div class="stay-planner__segments" data-planner-group>
             {[
               ['pair', copy.options.pair],
@@ -215,7 +255,7 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
         </div>
 
         <div class="stay-planner__control">
-          <h2><Icon name="tram" size={21} strokeWidth={2} /> {copy.transport}</h2>
+          <h2><Icon name="TramFront" size={21} strokeWidth={2} /> {copy.transport}</h2>
           <div class="stay-planner__segments" data-planner-transport>
             {[
               ['tram', copy.options.tram],
@@ -228,30 +268,46 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
         </div>
 
         <div class="stay-planner__control stay-planner__control--wide">
-          <h2><Icon name="landmark" size={21} strokeWidth={2} /> {copy.attractions}</h2>
-          <div class="stay-planner__attractions" data-planner-attractions>
-            {attractions.map((item, index) => (
-              <button type="button" data-value={item.id} class:list={[index < 3 && 'is-active']}>
-                <Icon name={item.icon} size={18} strokeWidth={2} />
-                <span>{item.label[lang] ?? item.label.en}</span>
+          <h2><Icon name="Sparkles" size={21} strokeWidth={2} /> {copy.interests}</h2>
+          <div class="stay-planner__attractions" data-planner-interests>
+            {copy.interestsList.map(([value, label], index) => (
+              <button type="button" data-value={value} class:list={[index < 2 && 'is-active']}>
+                <Icon name={value === 'kids' ? 'HeartHandshake' : value === 'nature' ? 'Leaf' : value === 'tours' ? 'Ticket' : value === 'history' ? 'Landmark' : 'Map'} size={18} strokeWidth={2} />
+                <span>{label}</span>
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      <aside class="premium-card stay-planner__result" data-planner-result aria-live="polite">
-        <span class="stay-planner__result-badge">{copy.resultTitle}</span>
-        <h2>{copy.resultTitle}</h2>
-        <p>{copy.empty}</p>
-      </aside>
+      <aside class="premium-card stay-planner__result" data-planner-result aria-live="polite"></aside>
+    </div>
+
+    <div class="stay-planner__extras">
+      <article class="premium-card stay-planner__today">
+        <Icon name="SunMedium" size={24} strokeWidth={2} />
+        <div>
+          <h2>{copy.todayTitle}</h2>
+          <p>{copy.todayCopy}</p>
+        </div>
+      </article>
+      <article class="premium-card stay-planner__arrival">
+        <Icon name="BadgeCheck" size={24} strokeWidth={2} />
+        <div>
+          <h2>{copy.arrivalTitle}</h2>
+          <ul>
+            {copy.arrivalItems.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      </article>
     </div>
 
     <div class="stay-planner__actions">
-      <a class="btn btn-primary premium-button" href={bookingHref}><Icon name="reservation" size={18} strokeWidth={2} /> {copy.ctaBooking}</a>
-      <button class="btn btn-glass" type="button" data-ask-campy-planner><Icon name="chat" size={18} strokeWidth={2} /> {copy.ctaCampy}</button>
-      <a class="btn btn-glass" href={seeKrakowHref} target="_blank" rel="noopener noreferrer"><Icon name="ticket" size={18} strokeWidth={2} /> {copy.ctaTours}</a>
-      <a class="btn btn-glass" href={transportHref}><Icon name="tram" size={18} strokeWidth={2} /> {copy.ctaTram}</a>
+      <a class="btn btn-primary premium-button" href={bookingHref}><Icon name="CalendarCheck" size={18} strokeWidth={2} /> {copy.ctaBooking}</a>
+      <button class="btn btn-glass" type="button" data-ask-campy-planner><Icon name="BotMessageSquare" size={18} strokeWidth={2} /> {copy.ctaCampy}</button>
+      <a class="btn btn-glass" href={transportHref}><Icon name="TramFront" size={18} strokeWidth={2} /> {copy.ctaTram}</a>
+      <a class="btn btn-glass" href={attractionsHref}><Icon name="Map" size={18} strokeWidth={2} /> {copy.ctaAttractions}</a>
+      <a class="btn btn-glass" href={seeKrakowHref} target="_blank" rel="noopener noreferrer"><Icon name="Ticket" size={18} strokeWidth={2} /> {copy.ctaTours}</a>
     </div>
   </div>
 </section>
@@ -261,7 +317,7 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
     const root = document.querySelector('[data-stay-planner]');
     if (!(root instanceof HTMLElement)) return;
 
-    const decode = () => {
+    const decodeConfig = () => {
       try {
         const binary = window.atob(plannerConfigEncoded);
         const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
@@ -271,38 +327,72 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
       }
     };
 
-    const config = decode();
+    const config = decodeConfig();
     if (!config) return;
 
-    const state = { nights: '2', pace: 'normal', group: 'family', transport: 'tram' };
-    const result = root.querySelector('[data-planner-result]');
-    const attractionButtons = Array.from(root.querySelectorAll('[data-planner-attractions] button'));
-    const getSelected = () => attractionButtons
-      .filter((button) => button.classList.contains('is-active'))
-      .map((button) => config.attractions.find((item) => item.id === button.dataset.value))
-      .filter(Boolean);
+    const state = {
+      nights: '2',
+      pace: 'normal',
+      group: 'family',
+      transport: 'tram',
+      interests: new Set(['classic', 'history']),
+    };
 
-    const numericNights = () => state.nights === '5+' ? 5 : Math.max(1, Number(state.nights) || 1);
-    const capacity = () => numericNights() * ({ calm: 1.45, normal: 2.25, intensive: 3.05 }[state.pace] || 2.25);
+    const result = root.querySelector('[data-planner-result]');
+    const setActive = (selector, value) => {
+      root.querySelectorAll(`${selector} button`).forEach((button) => {
+        if (button instanceof HTMLButtonElement) {
+          button.classList.toggle('is-active', button.dataset.value === value);
+        }
+      });
+    };
+
+    const paceNote = () => {
+      if (state.pace === 'calm') return 'Tempo spokojne: lepiej zostawić bufor na kawę, obiad i powrót na camping.';
+      if (state.pace === 'intensive') return 'Tempo intensywne: plan da się zagęścić, ale większe wycieczki traktuj jako osobny dzień.';
+      return 'Tempo normalne: dobry balans między zwiedzaniem i odpoczynkiem.';
+    };
+
+    const transportNote = () => {
+      if (state.transport === 'tram') return 'Najprościej: tramwaj z Górnickiego do Starego Kleparza, potem spacer.';
+      if (state.transport === 'car') return 'Auto zostaw raczej na dalsze wycieczki. Do ścisłego centrum wygodniejszy jest tramwaj.';
+      return 'Spacer + tramwaj to najlepszy miks na centrum, Kazimierz i Wawel.';
+    };
+
+    const groupNote = () => {
+      if (state.group === 'family') return 'Dla rodzin najlepiej działa jeden mocniejszy punkt dziennie i przerwa po południu.';
+      if (state.group === 'solo') return 'Solo łatwo zmienić plan w biegu: zacznij od centrum i dopiero potem dobieraj muzea.';
+      if (state.group === 'group') return 'Dla grupy zaplanuj mniej punktów, ale z większym marginesem na logistykę.';
+      return 'Dla pary dobrze sprawdza się centrum + Kazimierz i jeden spokojny wieczór.';
+    };
+
+    const renderList = (items = []) => items.map((item) => `<li>${item}</li>`).join('');
 
     const render = () => {
       if (!(result instanceof HTMLElement)) return;
-      const selected = getSelected();
-      if (!selected.length) {
-        result.innerHTML = `<span class="stay-planner__result-badge">${config.copy.resultTitle}</span><h2>${config.copy.resultTitle}</h2><p>${config.copy.empty}</p>`;
-        return;
-      }
-      const score = selected.reduce((sum, item) => sum + Number(item.weight || 1), 0);
-      const fits = score <= capacity();
-      const skip = selected.slice().sort((a, b) => Number(b.weight) - Number(a.weight)).slice(0, Math.max(1, Math.ceil((score - capacity()) / 1.4)));
-      const days = Array.from({ length: numericNights() }, (_, index) => selected.filter((_, itemIndex) => itemIndex % numericNights() === index));
+      const plan = config.recommendations[state.nights] || config.recommendations['5+'];
       result.innerHTML = `
-        <span class="stay-planner__result-badge">${config.copy.resultTitle}</span>
-        <h2>${fits ? config.copy.fits : config.copy.tight}</h2>
-        ${fits ? '' : `<p><strong>${config.copy.skip}:</strong> ${skip.map((item) => item.label).join(', ')}</p>`}
+        <span class="stay-planner__result-badge">${config.resultTitle}</span>
+        <h2>${config.recommendation}</h2>
+        <p>${plan.recommendation}</p>
+        <div class="stay-planner__result-grid">
+          <section>
+            <strong>${config.comfortable}</strong>
+            <ul>${renderList(plan.comfortable)}</ul>
+          </section>
+          <section>
+            <strong>${config.tooMuch}</strong>
+            <ul>${renderList(plan.tooMuch)}</ul>
+          </section>
+        </div>
+        <div class="stay-planner__context">
+          <p>${paceNote()}</p>
+          <p>${transportNote()}</p>
+          <p>${groupNote()}</p>
+        </div>
         <div class="stay-planner__plan">
-          <strong>${config.copy.sample}</strong>
-          ${days.map((day, index) => `<div><span>${index + 1}</span><p>${day.length ? day.map((item) => item.label).join(' + ') : selected[index % selected.length].label}</p></div>`).join('')}
+          <strong>${config.dayPlan}</strong>
+          ${plan.days.map((day, index) => `<div><span>${index + 1}</span><p>${day}</p></div>`).join('')}
         </div>
       `;
     };
@@ -310,6 +400,7 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
     const bindSegment = (selector, key) => {
       const buttons = Array.from(root.querySelectorAll(`${selector} button`));
       buttons.forEach((button) => {
+        if (!(button instanceof HTMLButtonElement)) return;
         button.addEventListener('click', () => {
           buttons.forEach((item) => item.classList.toggle('is-active', item === button));
           state[key] = button.dataset.value || state[key];
@@ -322,14 +413,42 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
     bindSegment('[data-planner-pace]', 'pace');
     bindSegment('[data-planner-group]', 'group');
     bindSegment('[data-planner-transport]', 'transport');
-    attractionButtons.forEach((button) => button.addEventListener('click', () => {
-      button.classList.toggle('is-active');
-      render();
-    }));
+
+    const interestButtons = Array.from(root.querySelectorAll('[data-planner-interests] button'));
+    interestButtons.forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) return;
+      button.addEventListener('click', () => {
+        const value = button.dataset.value || '';
+        button.classList.toggle('is-active');
+        if (button.classList.contains('is-active')) state.interests.add(value);
+        else state.interests.delete(value);
+        render();
+      });
+    });
+
+    root.querySelectorAll('[data-planner-scenario]').forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) return;
+      button.addEventListener('click', () => {
+        state.nights = button.dataset.nights || '2';
+        state.pace = button.dataset.pace || 'normal';
+        state.group = button.dataset.group || 'family';
+        state.transport = button.dataset.transport || 'tram';
+        state.interests = new Set((button.dataset.interests || 'classic').split(',').filter(Boolean));
+        setActive('[data-planner-nights]', state.nights);
+        setActive('[data-planner-pace]', state.pace);
+        setActive('[data-planner-group]', state.group);
+        setActive('[data-planner-transport]', state.transport);
+        interestButtons.forEach((item) => {
+          if (item instanceof HTMLButtonElement) item.classList.toggle('is-active', state.interests.has(item.dataset.value || ''));
+        });
+        root.querySelector('.stay-planner__layout')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        render();
+      });
+    });
 
     root.querySelector('[data-ask-campy-planner]')?.addEventListener('click', () => {
       window.dispatchEvent(new CustomEvent('campy:prompt', {
-        detail: { prompt: config.copy.ctaCampy, actionKey: 'dayPlan' },
+        detail: { prompt: config.ctaCampy, actionKey: 'stayLength' },
       }));
     });
 
@@ -388,42 +507,124 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
 }
 
 .stay-planner__head {
-  max-width: 900px;
+  max-width: 980px;
   margin-bottom: clamp(28px, 5vw, 54px);
 }
 
 .stay-planner__head h1 {
-  max-width: 860px;
+  max-width: 940px;
   margin: 0 0 18px;
   color: #f7fff9;
-  font-size: clamp(2.6rem, 7vw, 5.8rem);
-  line-height: .92;
-  letter-spacing: -.04em;
+  font-size: clamp(2.5rem, 6.6vw, 5.6rem);
+  line-height: .94;
+  letter-spacing: 0;
 }
 
 .stay-planner__head p {
-  max-width: 760px;
+  max-width: 820px;
   margin: 0;
-  color: rgba(245,255,248,.74);
+  color: rgba(245,255,248,.76);
   font-size: clamp(1rem, 2vw, 1.18rem);
   line-height: 1.75;
   font-weight: 680;
 }
 
-.stay-planner__layout {
-  display: grid;
-  gap: 24px;
-  align-items: start;
+.stay-planner__head small {
+  display: inline-flex;
+  max-width: 720px;
+  margin-top: 18px;
+  padding: 10px 14px;
+  border: 1px solid rgba(143,224,180,.20);
+  border-radius: 999px;
+  color: #bff7d7;
+  background: rgba(143,224,180,.09);
+  font-weight: 850;
 }
 
+.stay-planner__quiz,
 .stay-planner__panel,
-.stay-planner__result {
+.stay-planner__result,
+.stay-planner__today,
+.stay-planner__arrival {
   border-radius: 30px;
   border-color: rgba(143,224,180,.18);
   background:
     radial-gradient(circle at 14% 0%, rgba(60,179,113,.18), transparent 38%),
     rgba(9, 28, 19, .74);
   backdrop-filter: blur(22px);
+}
+
+.stay-planner__quiz {
+  display: grid;
+  gap: 22px;
+  margin-bottom: 24px;
+  padding: clamp(22px, 4vw, 34px);
+  color: #fff;
+}
+
+.stay-planner__quiz h2,
+.stay-planner__today h2,
+.stay-planner__arrival h2 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: clamp(1.4rem, 3vw, 2.1rem);
+}
+
+.stay-planner__quiz p,
+.stay-planner__today p {
+  margin: 0;
+  color: rgba(245,255,248,.72);
+  line-height: 1.65;
+}
+
+.stay-planner__scenario-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.stay-planner__scenario-grid button {
+  min-height: 126px;
+  display: grid;
+  gap: 9px;
+  justify-items: start;
+  padding: 20px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 24px;
+  color: #f7fff9;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255,255,255,.13), transparent 40%),
+    rgba(255,255,255,.07);
+  text-align: left;
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
+}
+
+.stay-planner__scenario-grid button:hover {
+  transform: translateY(-3px);
+  border-color: rgba(143,224,180,.42);
+  background: rgba(143,224,180,.12);
+  box-shadow: 0 20px 46px rgba(60,179,113,.18);
+}
+
+.stay-planner__scenario-grid svg {
+  color: #8fe0b4;
+}
+
+.stay-planner__scenario-grid strong {
+  font-size: 1.02rem;
+  font-weight: 950;
+}
+
+.stay-planner__scenario-grid span {
+  color: rgba(245,255,248,.70);
+  line-height: 1.5;
+  font-weight: 760;
+}
+
+.stay-planner__layout {
+  display: grid;
+  gap: 24px;
+  align-items: start;
 }
 
 .stay-planner__panel {
@@ -455,14 +656,14 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
 
 .stay-planner__segments button,
 .stay-planner__attractions button {
-  min-height: 44px;
+  min-height: 46px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 0 15px;
-  border: 1px solid rgba(143,224,180,.18);
+  border: 1px solid rgba(143,224,180,.20);
   border-radius: 999px;
-  color: rgba(245,255,248,.82);
+  color: rgba(245,255,248,.84);
   background: rgba(255,255,255,.07);
   font-weight: 900;
   transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
@@ -474,7 +675,7 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
 .stay-planner__attractions button.is-active {
   transform: translateY(-2px);
   color: #082016;
-  border-color: rgba(143,224,180,.48);
+  border-color: rgba(143,224,180,.58);
   background: linear-gradient(135deg, #a7f2c7, #3CB371);
   box-shadow: 0 16px 34px rgba(60,179,113,.22);
 }
@@ -493,6 +694,11 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
   line-height: 1.08;
 }
 
+.stay-planner__result p {
+  color: rgba(245,255,248,.76);
+  line-height: 1.65;
+}
+
 .stay-planner__result-badge {
   display: inline-flex;
   width: fit-content;
@@ -504,6 +710,72 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
   font-weight: 950;
   letter-spacing: .12em;
   text-transform: uppercase;
+}
+
+.stay-planner__result-grid {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.stay-planner__result-grid section,
+.stay-planner__context,
+.stay-planner__plan > div {
+  border: 1px solid rgba(143,224,180,.14);
+  border-radius: 18px;
+  background: rgba(255,255,255,.06);
+}
+
+.stay-planner__result-grid section {
+  padding: 16px;
+}
+
+.stay-planner__result-grid strong,
+.stay-planner__plan > strong {
+  display: block;
+  color: #8fe0b4;
+  margin-bottom: 12px;
+  font-weight: 950;
+}
+
+.stay-planner__result-grid ul,
+.stay-planner__arrival ul {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stay-planner__result-grid li,
+.stay-planner__arrival li {
+  position: relative;
+  padding-left: 22px;
+  color: rgba(245,255,248,.78);
+  line-height: 1.5;
+}
+
+.stay-planner__result-grid li::before,
+.stay-planner__arrival li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: .58em;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #3CB371;
+  box-shadow: 0 0 0 5px rgba(60,179,113,.14);
+}
+
+.stay-planner__context {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.stay-planner__context p {
+  margin: 0;
 }
 
 .stay-planner__plan {
@@ -518,9 +790,6 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
   gap: 10px;
   align-items: start;
   padding: 12px;
-  border: 1px solid rgba(143,224,180,.14);
-  border-radius: 16px;
-  background: rgba(255,255,255,.06);
 }
 
 .stay-planner__plan span {
@@ -536,6 +805,31 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify({
 
 .stay-planner__plan p {
   margin: 0;
+}
+
+.stay-planner__extras {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.stay-planner__today,
+.stay-planner__arrival {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 16px;
+  padding: clamp(22px, 3vw, 30px);
+  color: #fff;
+}
+
+.stay-planner__today > svg,
+.stay-planner__arrival > svg {
+  width: 42px;
+  height: 42px;
+  padding: 9px;
+  border-radius: 16px;
+  color: #082016;
+  background: linear-gradient(135deg, #a7f2c7, #3CB371);
 }
 
 .stay-planner__actions {
@@ -560,32 +854,66 @@ html[data-theme="light"] .stay-planner {
 
 html[data-theme="light"] .stay-planner__head h1,
 html[data-theme="light"] .stay-planner__control h2,
-html[data-theme="light"] .stay-planner__result h2 {
+html[data-theme="light"] .stay-planner__result h2,
+html[data-theme="light"] .stay-planner__quiz h2,
+html[data-theme="light"] .stay-planner__today h2,
+html[data-theme="light"] .stay-planner__arrival h2 {
   color: #102018;
 }
 
 html[data-theme="light"] .stay-planner__head p,
-html[data-theme="light"] .stay-planner__result {
+html[data-theme="light"] .stay-planner__result,
+html[data-theme="light"] .stay-planner__quiz p,
+html[data-theme="light"] .stay-planner__today p {
   color: #52655a;
 }
 
+html[data-theme="light"] .stay-planner__head small {
+  color: #0f6b3f;
+  background: rgba(60,179,113,.10);
+}
+
+html[data-theme="light"] .stay-planner__quiz,
 html[data-theme="light"] .stay-planner__panel,
-html[data-theme="light"] .stay-planner__result {
-  background: rgba(255,255,255,.78);
+html[data-theme="light"] .stay-planner__result,
+html[data-theme="light"] .stay-planner__today,
+html[data-theme="light"] .stay-planner__arrival {
+  background: rgba(255,255,255,.80);
   border-color: rgba(60,179,113,.18);
 }
 
+html[data-theme="light"] .stay-planner__scenario-grid button,
 html[data-theme="light"] .stay-planner__segments button,
 html[data-theme="light"] .stay-planner__attractions button,
+html[data-theme="light"] .stay-planner__result-grid section,
+html[data-theme="light"] .stay-planner__context,
 html[data-theme="light"] .stay-planner__plan > div {
   color: #263a2f;
-  background: rgba(255,255,255,.72);
-  border-color: rgba(29,83,52,.12);
+  background: rgba(255,255,255,.76);
+  border-color: rgba(29,83,52,.14);
+}
+
+html[data-theme="light"] .stay-planner__scenario-grid span,
+html[data-theme="light"] .stay-planner__result p,
+html[data-theme="light"] .stay-planner__result-grid li,
+html[data-theme="light"] .stay-planner__arrival li {
+  color: #536359;
+}
+
+@media (min-width: 760px) {
+  .stay-planner__scenario-grid,
+  .stay-planner__extras {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stay-planner__result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (min-width: 980px) {
   .stay-planner__layout {
-    grid-template-columns: minmax(0, 1fr) 380px;
+    grid-template-columns: minmax(0, 1fr) 400px;
   }
 
   .stay-planner__panel {
@@ -597,17 +925,32 @@ html[data-theme="light"] .stay-planner__plan > div {
   }
 }
 
+@media (min-width: 1180px) {
+  .stay-planner__scenario-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 720px) {
   .stay-planner {
     padding-top: 116px;
   }
 
   .stay-planner__head h1 {
-    font-size: clamp(2.35rem, 14vw, 3.6rem);
+    font-size: clamp(2.25rem, 13vw, 3.5rem);
+  }
+
+  .stay-planner__head small {
+    border-radius: 18px;
   }
 
   .stay-planner__result {
     position: static;
+  }
+
+  .stay-planner__today,
+  .stay-planner__arrival {
+    grid-template-columns: 1fr;
   }
 
   .stay-planner__actions .btn {
@@ -619,7 +962,8 @@ html[data-theme="light"] .stay-planner__plan > div {
 @media (prefers-reduced-motion: reduce) {
   .stay-planner__ambient span,
   .stay-planner__segments button,
-  .stay-planner__attractions button {
+  .stay-planner__attractions button,
+  .stay-planner__scenario-grid button {
     animation: none !important;
     transition: none !important;
   }

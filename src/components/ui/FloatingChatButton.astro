@@ -3,11 +3,20 @@ import { getTranslations } from '@/i18n/config';
 import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import Icon from '@/components/ui/Icon.astro';
 import { campyIcon, publicAssetExists } from '@/data/assets';
+import { getHomepageSiteNotices, getNoticeCopy } from '@/data/siteNotices';
 
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
 const chatTexts = t.chat;
 const hasCampyIcon = publicAssetExists(campyIcon);
+const activeNoticeCopy = getHomepageSiteNotices()
+  .slice(0, 5)
+  .map((notice) => getNoticeCopy(notice, pathContext.languageCode));
+const activeNoticesAnswer = activeNoticeCopy.length
+  ? activeNoticeCopy.map((notice) => `${notice.badge ? `${notice.badge}: ` : ''}${notice.title} - ${notice.description}`).join(' ')
+  : (pathContext.languageCode === 'pl'
+    ? 'Nie ma teraz specjalnego komunikatu. Warto sprawdzić dojazd tramwajem, Google Maps i aktualny cennik przed przyjazdem.'
+    : 'There is no special notice right now. Check tram directions, Google Maps and current prices before arrival.');
 const campyUxCopy = {
   pl: {
     actions: {
@@ -115,6 +124,7 @@ const finalCampyCopy = {
   pl: {
     actions: {
       bookStay: 'Zarezerwuj pobyt',
+      registration: 'Co potrzebuję przy rejestracji?',
       camperPrice: 'Ile kosztuje kamper?',
       stayCompare: 'Camping czy domki?',
       campingPricing: 'Cennik campingowy',
@@ -123,6 +133,8 @@ const finalCampyCopy = {
       centerTransit: 'Jak dojadę do centrum?',
       tramTickets: 'Bilety tramwajowe',
       dayPlan: 'Zaplanuj dzień w Krakowie',
+      stayLength: 'Ile dni zostać w Krakowie?',
+      currentNotices: 'Co aktualnie w Krakowie?',
       familyAttractions: 'Co zwiedzić z dziećmi?',
       dog: 'Czy można z psem?',
       bungalowOptions: 'Domki 2/3/4-os.',
@@ -136,6 +148,7 @@ const finalCampyCopy = {
     },
     answers: {
       bookStay: 'Jasne. Najwygodniej przejść do rezerwacji i wybrać Camping, Domki albo Razem. To zapytanie do recepcji, a dostępność i warunki potwierdza obiekt.',
+      registration: 'Przy rejestracji na recepcji przygotuj jeden dokument tożsamości. Jeśli przyjeżdżasz autem, kamperem, vanem lub przyczepą, recepcja poprosi też o numer rejestracyjny. Przy przyczepie kempingowej wpisz numer rejestracyjny przyczepy.',
       camperPrice: 'Kamper kosztuje 80 PLN / noc. Do tego: dorosły 35 PLN, dziecko 4-14 lat 20 PLN, prąd 30 PLN, pies 0 PLN. Przykład: 2 osoby + kamper + prąd = 180 PLN / noc. Pełny cennik jest w kalkulatorze.',
       stayCompare: 'Camping wybierz dla kampera, vana, namiotu lub przyczepy. Domki są 2-, 3- i 4-osobowe. Razem jest dla grup, gdzie część osób śpi w domku, a część przyjeżdża na camping.',
       campingPricing: 'Cennik campingowy liczy pojazd lub namiot, osoby oraz dodatki. Przykład: kamper 80 PLN / noc, dorosły 35 PLN, dziecko 4-14 lat 20 PLN, prąd 30 PLN, pies 0 PLN.',
@@ -144,6 +157,8 @@ const finalCampyCopy = {
       centerTransit: 'Z Camping Clepardia dojdziesz ok. 40 m do przystanku Górnickiego. Tramwaj 18 jedzie do Starego Kleparza ok. 14 minut. Ze Starego Kleparza do Starego Miasta dojdziesz pieszo w ok. 5 minut. Najwygodniej sprawdzić trasę w Google Maps lub Jakdojade.',
       tramTickets: 'Bilety tramwajowe możesz zwykle kupić w automatach albo aplikacji, ale nie zakładamy, że każdy automat zawsze działa. Do trasy i biletów najwygodniej sprawdzić Jakdojade.',
       dayPlan: 'Zaplanujmy dzień. Napisz proszę: ile macie czasu, czy jedziecie z dziećmi, czy plan ma być spokojny czy intensywny oraz czy wybieracie tramwaj czy auto.',
+      stayLength: 'Na 1 noc najlepiej zrobić Stare Miasto + Wawel. 2 noce: centrum, Wawel i Kazimierz, a Wieliczka tylko jeśli chcecie intensywnie. 3 noce: Kraków + Wieliczka albo Auschwitz. 4 noce: Kraków, Kazimierz, Wieliczka i spokojniejszy dzień. 5+ nocy: Kraków + Małopolska, np. Ojców, Zakopane albo Energylandia.',
+      currentNotices: activeNoticesAnswer,
       familyAttractions: 'Z dziećmi najczęściej sprawdza się Stare Miasto i Wawel, Wieliczka, Ojców albo Energylandia. Wybór zależy od czasu, pogody i energii ekipy.',
       dog: 'Tak, można z psem. Pies ma stawkę 0 PLN. Prosimy tylko o opiekę nad pupilem i sprzątanie po nim na terenie campingu.',
       bungalowOptions: 'Domki są tylko 2-, 3- i 4-osobowe. Mają osobną dostępność, a przy domkach może być wymagana zaliczka po potwierdzeniu terminu.',
@@ -170,6 +185,7 @@ const finalCampyCopy = {
   en: {
     actions: {
       bookStay: 'Book your stay',
+      registration: 'What do I need at registration?',
       camperPrice: 'Camper price',
       stayCompare: 'Camping or bungalows?',
       campingPricing: 'Camping prices',
@@ -178,6 +194,8 @@ const finalCampyCopy = {
       centerTransit: 'How to reach centre?',
       tramTickets: 'Tram tickets',
       dayPlan: 'Plan a Krakow day',
+      stayLength: 'How many days in Krakow?',
+      currentNotices: 'What is current in Krakow?',
       familyAttractions: 'Kids attractions',
       dog: 'Can I bring a dog?',
       bungalowOptions: '2/3/4-person bungalows',
@@ -191,6 +209,7 @@ const finalCampyCopy = {
     },
     answers: {
       bookStay: 'Sure. Open the booking flow and choose Camping, Bungalows or Combined. It is an enquiry; reception confirms availability and final conditions.',
+      registration: 'For reception registration, prepare one identity document. If you arrive by car, camper, van or caravan, reception will also ask for the registration plate. With a camping trailer, enter the trailer registration plate.',
       camperPrice: 'Camper: 80 PLN / night. Adults: 35 PLN, children 4-14: 20 PLN, electricity: 30 PLN, dog: 0 PLN. Example: 2 adults + camper + electricity = 180 PLN / night. The full calculator is on the price page.',
       stayCompare: 'Choose Camping for a camper, van, tent or caravan. Bungalows are 2-, 3- and 4-person units. Combined is for groups mixing a bungalow and a camping pitch.',
       campingPricing: 'Camping price combines vehicle or tent, guests and extras. Example: camper 80 PLN / night, adult 35 PLN, child 4-14: 20 PLN, electricity 30 PLN, dog 0 PLN.',
@@ -199,6 +218,8 @@ const finalCampyCopy = {
       centerTransit: 'Walk about 40 m from Camping Clepardia to Górnickiego stop. Tram 18 reaches Stary Kleparz in about 14 minutes, then it is about a 5-minute walk to the Old Town. Google Maps or Jakdojade are the easiest way to check the route.',
       tramTickets: 'Tram tickets can usually be bought in machines or apps, but we do not promise every machine always works. Jakdojade is useful for routes and tickets.',
       dayPlan: 'Let us plan it. Tell me how much time you have, whether you travel with children, calm or intensive pace, and tram or car.',
+      stayLength: 'For 1 night, choose Old Town + Wawel. 2 nights: centre, Wawel and Kazimierz, with Wieliczka only if you want an intense stay. 3 nights: Krakow + Wieliczka or Auschwitz. 4 nights: Krakow, Kazimierz, Wieliczka and a slower day. 5+ nights: Krakow + Lesser Poland, e.g. Ojców, Zakopane or Energylandia.',
+      currentNotices: activeNoticesAnswer,
       familyAttractions: 'With children, Old Town and Wawel, Wieliczka, Ojców or Energylandia usually work well depending on time and weather.',
       dog: 'Yes, dogs are welcome. Dog fee is 0 PLN. Please keep your dog under care and clean up after it.',
       bungalowOptions: 'Bungalows are only 2-, 3- and 4-person units. Availability is separate, and a deposit may be required after confirmation.',
@@ -260,6 +281,7 @@ const quickActionGroups = [
     title: campyQuick.groups.booking,
     actions: [
       { key: 'bookStay', icon: 'CalendarCheck', label: enhancedChatTexts.actions.bookStay },
+      { key: 'registration', icon: 'BadgeCheck', label: enhancedChatTexts.actions.registration },
       { key: 'stayCompare', icon: 'Split', label: enhancedChatTexts.actions.stayCompare },
       { key: 'combinedStay', icon: 'Combine', label: enhancedChatTexts.actions.combinedStay },
       { key: 'lateCheckout', icon: 'Clock', label: enhancedChatTexts.actions.lateCheckout },
@@ -293,6 +315,8 @@ const quickActionGroups = [
     title: campyQuick.groups.attractions,
     actions: [
       { key: 'dayPlan', icon: 'Map', label: enhancedChatTexts.actions.dayPlan },
+      { key: 'stayLength', icon: 'CalendarDays', label: enhancedChatTexts.actions.stayLength },
+      { key: 'currentNotices', icon: 'BellRing', label: enhancedChatTexts.actions.currentNotices },
       { key: 'familyAttractions', icon: 'UsersRound', label: enhancedChatTexts.actions.familyAttractions },
       { key: 'toursFromKrakow', icon: 'Ticket', label: enhancedChatTexts.actions.toursFromKrakow },
     ],
@@ -640,6 +664,7 @@ const quickActionGroups = [
       };
 
       if (key === 'bookStay') return { text: answers.bookStay, actions: [{ label: actionLabels.booking, href: links.booking }] };
+      if (key === 'registration') return { text: answers.registration, actions: [{ label: actionLabels.booking, href: links.booking }, { label: actionLabels.contact, href: links.contact }] };
       if (key === 'camperPrice') return { text: answers.camperPrice, actions: [{ label: actionLabels.prices, href: links.prices }] };
       if (key === 'stayCompare') return { text: answers.stayCompare, actions: [{ label: actionLabels.camping, href: links.bookingCamping }, { label: actionLabels.bungalow, href: links.bookingBungalow }, { label: actionLabels.combined, href: links.bookingCombined }] };
       if (key === 'campingPricing') return { text: answers.campingPricing, actions: [{ label: actionLabels.prices, href: links.prices }] };
@@ -648,6 +673,8 @@ const quickActionGroups = [
       if (key === 'centerTransit') return { text: answers.centerTransit, actions: [{ label: actionLabels.maps, href: links.maps }, { label: actionLabels.jakdojade, href: links.jakdojade }, { label: actionLabels.directions, href: links.directions }] };
       if (key === 'tramTickets') return { text: answers.tramTickets, actions: [{ label: actionLabels.jakdojade, href: links.jakdojade }] };
       if (key === 'dayPlan') return { text: answers.dayPlan };
+      if (key === 'stayLength') return { text: answers.stayLength, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
+      if (key === 'currentNotices') return { text: answers.currentNotices, actions: [{ label: actionLabels.directions, href: links.directions }, { label: actionLabels.booking, href: links.booking }] };
       if (key === 'familyAttractions') return { text: answers.familyAttractions };
       if (key === 'dog') return { text: answers.dog };
       if (key === 'bungalowOptions') return { text: answers.bungalowOptions, actions: [{ label: actionLabels.bungalow, href: links.bookingBungalow }] };
@@ -667,6 +694,7 @@ const quickActionGroups = [
       const prompt = rawPrompt.toLowerCase();
 
       if (rawPrompt === chatTexts.actions.bookStay) return actionResponse('bookStay');
+      if (rawPrompt === chatTexts.actions.registration) return actionResponse('registration');
       if (rawPrompt === chatTexts.actions.pricing || rawPrompt === chatTexts.actions.camperPrice) return actionResponse('camperPrice') ?? chatTexts.answers.camperPrice ?? chatTexts.answers.pricing;
       if (rawPrompt === chatTexts.actions.directions || rawPrompt === chatTexts.actions.transit || rawPrompt === chatTexts.actions.centerTransit) return actionResponse('centerTransit') ?? chatTexts.answers.centerTransit ?? chatTexts.answers.transit ?? chatTexts.answers.directions;
       if (rawPrompt === chatTexts.actions.dog) return actionResponse('dog') ?? chatTexts.answers.dog ?? chatTexts.answers.camping;
@@ -679,6 +707,8 @@ const quickActionGroups = [
       if (rawPrompt === chatTexts.actions.sctEtoll) return actionResponse('sctEtoll') ?? chatTexts.answers.sctEtoll ?? chatTexts.answers.maps;
       if (rawPrompt === chatTexts.actions.attractions) return chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.dayPlan) return chatTexts.answers.dayPlan ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.stayLength) return actionResponse('stayLength') ?? chatTexts.answers.stayLength ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.currentNotices) return actionResponse('currentNotices') ?? chatTexts.answers.currentNotices ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.familyAttractions) return chatTexts.answers.familyAttractions ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.todayAttractions) return chatTexts.answers.todayAttractions ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.tramRoute) return chatTexts.answers.tramRoute ?? chatTexts.answers.centerTransit ?? chatTexts.answers.transit ?? chatTexts.answers.fallback;
@@ -703,6 +733,18 @@ const quickActionGroups = [
 
       if (prompt.includes('planuj') || prompt.includes('plan') || prompt.includes('dzień') || prompt.includes('day')) {
         return chatTexts.answers.dayPlan ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      }
+
+      if (prompt.includes('ile dni') || prompt.includes('ile nocy') || prompt.includes('how many days') || prompt.includes('how many nights')) {
+        return actionResponse('stayLength') ?? chatTexts.answers.stayLength ?? chatTexts.answers.fallback;
+      }
+
+      if (prompt.includes('aktual') || prompt.includes('wydarze') || prompt.includes('current') || prompt.includes('notice')) {
+        return actionResponse('currentNotices') ?? chatTexts.answers.currentNotices ?? chatTexts.answers.fallback;
+      }
+
+      if (prompt.includes('rejestr') || prompt.includes('dokument') || prompt.includes('document') || prompt.includes('plate') || prompt.includes('tablic')) {
+        return actionResponse('registration') ?? chatTexts.answers.registration ?? chatTexts.answers.fallback;
       }
 
       if (prompt.includes('późniejszy') || prompt.includes('pozniejszy') || prompt.includes('late') || prompt.includes('checkout') || prompt.includes('wymeld')) {
