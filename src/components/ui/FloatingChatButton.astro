@@ -4,6 +4,7 @@ import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/uti
 import Icon from '@/components/ui/Icon.astro';
 import { campyIcon, publicAssetExists } from '@/data/assets';
 import { getHomepageSiteNotices, getNoticeCopy } from '@/data/siteNotices';
+import { getSearchIndex } from '@/data/searchIndex';
 
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
@@ -124,6 +125,7 @@ const finalCampyCopy = {
   pl: {
     actions: {
       bookStay: 'Zarezerwuj pobyt',
+      siteSearch: 'Szukaj na stronie',
       registration: 'Co potrzebuję przy rejestracji?',
       camperPrice: 'Ile kosztuje kamper?',
       stayCompare: 'Camping czy domki?',
@@ -148,6 +150,7 @@ const finalCampyCopy = {
     },
     answers: {
       bookStay: 'Jasne. Najwygodniej przejść do rezerwacji i wybrać Camping, Domki albo Razem. To zapytanie do recepcji, a dostępność i warunki potwierdza obiekt.',
+      siteSearch: 'Otwieram wyszukiwarkę strony. Możesz wpisać: prąd, pies, tramwaj, dokument, rejestracja pojazdu, Wieliczka, Auschwitz albo sezon.',
       registration: 'Przy rejestracji na recepcji przygotuj jeden dokument tożsamości. Jeśli przyjeżdżasz autem, kamperem, vanem lub przyczepą, recepcja poprosi też o numer rejestracyjny. Przy przyczepie kempingowej wpisz numer rejestracyjny przyczepy.',
       camperPrice: 'Kamper kosztuje 80 PLN / noc. Do tego: dorosły 35 PLN, dziecko 4-14 lat 20 PLN, prąd 30 PLN, pies 0 PLN. Przykład: 2 osoby + kamper + prąd = 180 PLN / noc. Pełny cennik jest w kalkulatorze.',
       stayCompare: 'Camping wybierz dla kampera, vana, namiotu lub przyczepy. Domki są 2-, 3- i 4-osobowe. Razem jest dla grup, gdzie część osób śpi w domku, a część przyjeżdża na camping.',
@@ -185,6 +188,7 @@ const finalCampyCopy = {
   en: {
     actions: {
       bookStay: 'Book your stay',
+      siteSearch: 'Search the site',
       registration: 'What do I need at registration?',
       camperPrice: 'Camper price',
       stayCompare: 'Camping or bungalows?',
@@ -209,6 +213,7 @@ const finalCampyCopy = {
     },
     answers: {
       bookStay: 'Sure. Open the booking flow and choose Camping, Bungalows or Combined. It is an enquiry; reception confirms availability and final conditions.',
+      siteSearch: 'I am opening site search. Try: electricity, dog, tram, document, vehicle plate, Wieliczka, Auschwitz or season.',
       registration: 'For reception registration, prepare one identity document. If you arrive by car, camper, van or caravan, reception will also ask for the registration plate. With a camping trailer, enter the trailer registration plate.',
       camperPrice: 'Camper: 80 PLN / night. Adults: 35 PLN, children 4-14: 20 PLN, electricity: 30 PLN, dog: 0 PLN. Example: 2 adults + camper + electricity = 180 PLN / night. The full calculator is on the price page.',
       stayCompare: 'Choose Camping for a camper, van, tent or caravan. Bungalows are 2-, 3- and 4-person units. Combined is for groups mixing a bungalow and a camping pitch.',
@@ -272,6 +277,7 @@ const enhancedChatTexts = {
     sct: sctHref,
     etoll: etollHref,
   },
+  searchIndex: getSearchIndex(pathContext.languageCode),
 };
 const chatConfigEncoded = Buffer.from(JSON.stringify(enhancedChatTexts), 'utf8').toString('base64');
 const quickActionGroups = [
@@ -281,6 +287,7 @@ const quickActionGroups = [
     title: campyQuick.groups.booking,
     actions: [
       { key: 'bookStay', icon: 'CalendarCheck', label: enhancedChatTexts.actions.bookStay },
+      { key: 'siteSearch', icon: 'Search', label: enhancedChatTexts.actions.siteSearch },
       { key: 'registration', icon: 'BadgeCheck', label: enhancedChatTexts.actions.registration },
       { key: 'stayCompare', icon: 'Split', label: enhancedChatTexts.actions.stayCompare },
       { key: 'combinedStay', icon: 'Combine', label: enhancedChatTexts.actions.combinedStay },
@@ -331,6 +338,7 @@ const quickActionGroups = [
     ],
   },
 ];
+const quickRailActions = quickActionGroups.flatMap((group) => group.actions).slice(0, 14);
 ---
 
 <div class="floating-chat" data-floating-chat>
@@ -396,6 +404,17 @@ const quickActionGroups = [
         <span>{campyQuick.toggle}</span>
         <Icon name="ChevronDown" size={17} strokeWidth={2} class="floating-chat__quick-chevron" />
       </button>
+      <div class="floating-chat__quick" data-chat-quick-rail role="list" tabindex="0" aria-label={campyQuick.aria}>
+        {quickRailActions.map((action) => (
+          <button type="button" data-chat-action={action.key} data-chat-prompt={action.label} aria-label={action.label} role="listitem">
+            <Icon name={action.icon} size={16} strokeWidth={1.9} />
+            <span>{action.label}</span>
+          </button>
+        ))}
+      </div>
+      <div class="floating-chat__quick-scrollbar" data-chat-quick-scrollbar aria-hidden="true">
+        <span data-chat-quick-scroll-thumb></span>
+      </div>
       <div
         class="floating-chat__quick-panel"
         id="floatingChatQuickPanel"
@@ -464,7 +483,7 @@ const quickActionGroups = [
     const sendButton = root.querySelector('[data-chat-send]');
     const quickToggleButton = root.querySelector('[data-chat-quick-toggle]');
     const quickPanel = root.querySelector('[data-chat-quick-panel]');
-    const quickRail = root.querySelector('.floating-chat__quick');
+    const quickRail = root.querySelector('[data-chat-quick-rail]');
     const quickScrollbar = root.querySelector('[data-chat-quick-scrollbar]');
     const quickThumb = root.querySelector('[data-chat-quick-scroll-thumb]');
 
@@ -664,6 +683,7 @@ const quickActionGroups = [
       };
 
       if (key === 'bookStay') return { text: answers.bookStay, actions: [{ label: actionLabels.booking, href: links.booking }] };
+      if (key === 'siteSearch') return { text: answers.siteSearch };
       if (key === 'registration') return { text: answers.registration, actions: [{ label: actionLabels.booking, href: links.booking }, { label: actionLabels.contact, href: links.contact }] };
       if (key === 'camperPrice') return { text: answers.camperPrice, actions: [{ label: actionLabels.prices, href: links.prices }] };
       if (key === 'stayCompare') return { text: answers.stayCompare, actions: [{ label: actionLabels.camping, href: links.bookingCamping }, { label: actionLabels.bungalow, href: links.bookingBungalow }, { label: actionLabels.combined, href: links.bookingCombined }] };
@@ -688,12 +708,40 @@ const quickActionGroups = [
       return null;
     };
 
+    const searchCampyIndex = (rawPrompt) => {
+      const entries = Array.isArray(chatTexts.searchIndex) ? chatTexts.searchIndex : [];
+      const normalize = (value) => String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const query = normalize(rawPrompt).replace(/\b(szukaj|znajdz|znajdź|search|find|pokaż|pokaz)\b/g, '').trim();
+      if (query.length < 3 || entries.length === 0) return null;
+      const parts = query.split(/\s+/).filter((part) => part.length > 2);
+      const matches = entries
+        .map((entry) => {
+          const haystack = normalize([entry.title, entry.description, entry.category, entry.badge, ...(entry.keywords || [])].filter(Boolean).join(' '));
+          const score = haystack.includes(query)
+            ? 5
+            : parts.some((part) => haystack.includes(part))
+              ? 2
+              : 0;
+          return { entry, score };
+        })
+        .filter((item) => item.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+        .map((item) => item.entry);
+      if (!matches.length) return null;
+      return {
+        text: `Znalazłem ${matches.length} wynik${matches.length === 1 ? '' : 'i'} na stronie. Najbliżej pasuje: ${matches.map((entry) => entry.title).join(', ')}.`,
+        actions: matches.map((entry) => ({ label: entry.title, href: entry.href })),
+      };
+    };
+
     const resolveAnswer = (rawPrompt, actionKey = '') => {
       const keyed = actionResponse(actionKey);
       if (keyed) return keyed;
       const prompt = rawPrompt.toLowerCase();
 
       if (rawPrompt === chatTexts.actions.bookStay) return actionResponse('bookStay');
+      if (rawPrompt === chatTexts.actions.siteSearch) return actionResponse('siteSearch');
       if (rawPrompt === chatTexts.actions.registration) return actionResponse('registration');
       if (rawPrompt === chatTexts.actions.pricing || rawPrompt === chatTexts.actions.camperPrice) return actionResponse('camperPrice') ?? chatTexts.answers.camperPrice ?? chatTexts.answers.pricing;
       if (rawPrompt === chatTexts.actions.directions || rawPrompt === chatTexts.actions.transit || rawPrompt === chatTexts.actions.centerTransit) return actionResponse('centerTransit') ?? chatTexts.answers.centerTransit ?? chatTexts.answers.transit ?? chatTexts.answers.directions;
@@ -718,6 +766,10 @@ const quickActionGroups = [
       if (rawPrompt === chatTexts.actions.auschwitz) return chatTexts.answers.auschwitz ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.weather) return chatTexts.answers.weather ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.rain) return chatTexts.answers.rain ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+
+      if (prompt.includes('prąd') || prompt.includes('prad') || prompt.includes('electric') || prompt.includes('10a')) {
+        return actionResponse('powerDog') ?? chatTexts.answers.powerDog ?? chatTexts.answers.pricing;
+      }
 
       if (prompt.includes('kamper') || prompt.includes('camper') || prompt.includes('motorhome') || prompt.includes('cennik') || prompt.includes('cena') || prompt.includes('koszt')) {
         return actionResponse('camperPrice') ?? chatTexts.answers.camperPrice ?? chatTexts.answers.pricing;
@@ -801,6 +853,9 @@ const quickActionGroups = [
         return chatTexts.answers.camping;
       }
 
+      const searchMatch = searchCampyIndex(rawPrompt);
+      if (searchMatch) return searchMatch;
+
       return chatTexts.answers.fallback;
     };
 
@@ -813,6 +868,9 @@ const quickActionGroups = [
       window.setTimeout(() => {
         typing.remove();
         appendMessage(resolveAnswer(cleanPrompt, actionKey), 'bot');
+        if (actionKey === 'siteSearch') {
+          window.dispatchEvent(new CustomEvent('global-search:open'));
+        }
       }, 420);
 
       if (input instanceof HTMLInputElement) {

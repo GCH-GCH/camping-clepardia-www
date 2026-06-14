@@ -468,6 +468,12 @@ const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
       </article>
 
       <aside class="tours-section__booking premium-card reveal-section" style="--reveal-delay: 160ms" aria-labelledby="tours-booking-title">
+        <ImageFrame
+          src={siteAssets.attractions.seeKrakow}
+          alt={bookingText.reserveTitle}
+          label={copy.powered}
+          className="tours-section__booking-media"
+        />
         <span class="tours-section__powered">{copy.powered}</span>
         <div class="tours-section__booking-icon" aria-hidden="true">
           <Icon name="TicketCheck" size={34} />
@@ -635,6 +641,11 @@ html[data-theme="dark"] .tours-section__benefit {
 .tours-section__featured-media {
   position: relative;
   min-width: 0;
+}
+
+:global(.tours-section__booking-media.photo-frame) {
+  min-height: 190px;
+  border-radius: 24px;
 }
 
 :global(.tours-section__media.photo-frame) {

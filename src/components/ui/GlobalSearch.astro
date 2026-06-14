@@ -1,0 +1,337 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { getSearchIndex } from '@/data/searchIndex';
+import { getPathContext } from '@/utils/localizedLinks';
+
+const pathContext = getPathContext(Astro.url.pathname);
+const entries = getSearchIndex(pathContext.languageCode);
+const searchConfig = {
+  entries,
+  empty: pathContext.languageCode === 'pl' ? 'Wpisz np. prąd, pies, tramwaj, dokument, Wieliczka...' : 'Try electricity, dog, tram, document, Wieliczka...',
+  noResults: pathContext.languageCode === 'pl' ? 'Nie znalazłem wyniku. Spróbuj innej frazy.' : 'No result. Try another phrase.',
+};
+const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').toString('base64');
+---
+
+<div class="global-search" data-global-search hidden aria-hidden="true">
+  <div class="global-search__backdrop" data-search-close></div>
+  <section class="global-search__panel" role="dialog" aria-modal="true" aria-label="Wyszukiwarka strony">
+    <header class="global-search__header">
+      <span aria-hidden="true"><Icon name="Search" size={22} strokeWidth={2} /></span>
+      <label class="sr-only" for="globalSearchInput">Szukaj na stronie</label>
+      <input id="globalSearchInput" type="search" data-search-input autocomplete="off" placeholder="Szukaj: prąd, pies, tramwaj, Google Maps..." />
+      <button type="button" data-search-close aria-label="Zamknij wyszukiwarkę">
+        <Icon name="X" size={22} strokeWidth={2} />
+      </button>
+    </header>
+    <div class="global-search__hints">
+      {['prąd', 'pies', 'tramwaj', 'Google Maps', 'dokument', 'Wieliczka', 'Auschwitz', 'sezon'].map((hint) => (
+        <button type="button" data-search-hint={hint}>{hint}</button>
+      ))}
+    </div>
+    <div class="global-search__results" data-search-results></div>
+  </section>
+</div>
+
+<script define:vars={{ searchConfigEncoded }}>
+  (() => {
+    const decodeConfig = () => {
+      try {
+        const binary = window.atob(searchConfigEncoded);
+        const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+        return JSON.parse(new TextDecoder().decode(bytes));
+      } catch {
+        return { entries: [], empty: '', noResults: '' };
+      }
+    };
+    const config = decodeConfig();
+    const root = document.querySelector('[data-global-search]');
+    if (!(root instanceof HTMLElement)) return;
+
+    const input = root.querySelector('[data-search-input]');
+    const results = root.querySelector('[data-search-results]');
+    const closeButtons = root.querySelectorAll('[data-search-close]');
+    const openButtons = document.querySelectorAll('[data-search-open]');
+    const hints = root.querySelectorAll('[data-search-hint]');
+    let lastFocused = null;
+
+    const normalize = (value) => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    const render = (query = '') => {
+      if (!(results instanceof HTMLElement)) return;
+      const normalizedQuery = normalize(query.trim());
+      if (!normalizedQuery) {
+        results.innerHTML = `<p class="global-search__empty">${config.empty}</p>`;
+        return;
+      }
+
+      const matches = config.entries
+        .map((entry) => {
+          const haystack = normalize([entry.title, entry.description, entry.category, entry.badge, ...(entry.keywords || [])].filter(Boolean).join(' '));
+          const score = haystack.includes(normalizedQuery)
+            ? 4
+            : normalizedQuery.split(/\s+/).some((part) => part.length > 2 && haystack.includes(part))
+              ? 2
+              : 0;
+          return { entry, score };
+        })
+        .filter((item) => item.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 8)
+        .map((item) => item.entry);
+
+      if (!matches.length) {
+        results.innerHTML = `<p class="global-search__empty">${config.noResults}</p>`;
+        return;
+      }
+
+      results.innerHTML = matches.map((entry) => `
+        <a class="global-search__result" href="${entry.href}">
+          <span class="global-search__result-icon" aria-hidden="true"></span>
+          <span>
+            <small>${entry.category}${entry.badge ? ` · ${entry.badge}` : ''}</small>
+            <strong>${entry.title}</strong>
+            <em>${entry.description}</em>
+          </span>
+        </a>
+      `).join('');
+    };
+
+    const open = () => {
+      lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      root.hidden = false;
+      root.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('has-global-search-open');
+      render(input instanceof HTMLInputElement ? input.value : '');
+      window.setTimeout(() => input instanceof HTMLInputElement && input.focus({ preventScroll: true }), 40);
+    };
+
+    const close = () => {
+      root.hidden = true;
+      root.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('has-global-search-open');
+      lastFocused?.focus?.({ preventScroll: true });
+    };
+
+    openButtons.forEach((button) => button.addEventListener('click', open));
+    closeButtons.forEach((button) => button.addEventListener('click', close));
+    hints.forEach((button) => button.addEventListener('click', () => {
+      if (!(input instanceof HTMLInputElement)) return;
+      input.value = button.dataset.searchHint || '';
+      render(input.value);
+      input.focus();
+    }));
+    if (input instanceof HTMLInputElement) {
+      input.addEventListener('input', () => render(input.value));
+    }
+    window.addEventListener('global-search:open', (event) => {
+      const detail = event instanceof CustomEvent ? event.detail : {};
+      open();
+      if (input instanceof HTMLInputElement && typeof detail?.query === 'string') {
+        input.value = detail.query;
+        render(input.value);
+      }
+    });
+    document.addEventListener('keydown', (event) => {
+      const target = event.target;
+      const isTyping = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement;
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        root.hidden ? open() : close();
+      }
+      if (event.key === 'Escape' && !root.hidden) close();
+      if (!isTyping && event.key === '/' && root.hidden) {
+        event.preventDefault();
+        open();
+      }
+    });
+    render('');
+  })();
+</script>
+
+<style>
+.global-search[hidden] {
+  display: none;
+}
+
+.global-search {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: grid;
+  place-items: start center;
+  padding: clamp(82px, 12vh, 132px) 16px 24px;
+}
+
+.global-search__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 15, 10, .66);
+  backdrop-filter: blur(10px);
+}
+
+.global-search__panel {
+  position: relative;
+  z-index: 1;
+  width: min(760px, 100%);
+  max-height: min(720px, calc(100vh - 112px));
+  display: grid;
+  gap: 14px;
+  padding: clamp(16px, 3vw, 22px);
+  border: 1px solid rgba(143,224,180,.24);
+  border-radius: 30px;
+  overflow: auto;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(60,179,113,.22), transparent 34%),
+    rgba(11, 29, 20, .96);
+  box-shadow: 0 34px 120px rgba(0,0,0,.46), 0 0 54px rgba(60,179,113,.16);
+}
+
+.global-search__header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 22px;
+  background: rgba(255,255,255,.08);
+  color: #fff;
+}
+
+.global-search__header input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  color: #fff;
+  background: transparent;
+  font: inherit;
+  font-weight: 850;
+}
+
+.global-search__header input::placeholder {
+  color: rgba(255,255,255,.58);
+}
+
+.global-search__header button,
+.global-search__hints button {
+  border: 0;
+  cursor: pointer;
+}
+
+.global-search__header button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 15px;
+  color: #fff;
+  background: rgba(255,255,255,.10);
+}
+
+.global-search__hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.global-search__hints button {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: rgba(255,255,255,.82);
+  background: rgba(255,255,255,.09);
+  font-size: .8rem;
+  font-weight: 900;
+}
+
+.global-search__results {
+  display: grid;
+  gap: 10px;
+}
+
+.global-search__result {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 20px;
+  color: #fff;
+  background: rgba(255,255,255,.075);
+  text-decoration: none;
+}
+
+.global-search__result-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #a8f0c7, #3CB371);
+  box-shadow: 0 12px 30px rgba(60,179,113,.22);
+}
+
+.global-search__result small,
+.global-search__result em {
+  display: block;
+  color: rgba(255,255,255,.62);
+  font-style: normal;
+  line-height: 1.4;
+}
+
+.global-search__result strong {
+  display: block;
+  margin: 3px 0;
+  color: #fff;
+  font-weight: 950;
+}
+
+.global-search__empty {
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed rgba(143,224,180,.24);
+  border-radius: 20px;
+  color: rgba(255,255,255,.70);
+  background: rgba(255,255,255,.06);
+}
+
+html[data-theme="light"] .global-search__backdrop {
+  background: rgba(246, 250, 244, .70);
+}
+
+html[data-theme="light"] .global-search__panel {
+  background:
+    radial-gradient(circle at 16% 0%, rgba(60,179,113,.18), transparent 34%),
+    rgba(255,255,255,.96);
+  box-shadow: 0 34px 120px rgba(16,40,28,.20);
+}
+
+html[data-theme="light"] .global-search__header,
+html[data-theme="light"] .global-search__result,
+html[data-theme="light"] .global-search__empty {
+  color: #102018;
+  border-color: rgba(21, 62, 39, .12);
+  background: rgba(15, 45, 30, .06);
+}
+
+html[data-theme="light"] .global-search__header input,
+html[data-theme="light"] .global-search__result strong {
+  color: #102018;
+}
+
+html[data-theme="light"] .global-search__header input::placeholder,
+html[data-theme="light"] .global-search__result small,
+html[data-theme="light"] .global-search__result em,
+html[data-theme="light"] .global-search__empty {
+  color: rgba(16,32,24,.64);
+}
+
+html[data-theme="light"] .global-search__header button,
+html[data-theme="light"] .global-search__hints button {
+  color: #123422;
+  background: rgba(60,179,113,.12);
+}
+
+body.has-global-search-open {
+  overflow: hidden;
+}
+</style>

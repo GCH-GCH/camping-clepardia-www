@@ -1,0 +1,629 @@
+---
+import ImageFrame from '@/components/ImageFrame.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { siteAssets } from '@/data/assets';
+import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { resolveContentLanguage } from '@/i18n/config';
+
+interface Props {
+  languageCode?: string;
+  variant?: 'home' | 'transport' | 'reservation';
+}
+
+const { languageCode, variant = 'home' } = Astro.props as Props;
+const isTransportVariant = variant === 'transport';
+const isReservationVariant = variant === 'reservation';
+const pathContext = getPathContext(Astro.url.pathname);
+const contentLanguage = resolveContentLanguage(languageCode ?? pathContext.languageCode);
+const bookingHref = getBookingLocalizedPath(contentLanguage);
+const campingBookingHref = getBookingLocalizedPath(contentLanguage, 'camping');
+const plannerHref = getLocalizedPath(pathContext.explicitLanguage, 'planer-pobytu');
+const pricingHref = getLocalizedPath(pathContext.explicitLanguage, 'cennik');
+const directionsHref = getLocalizedPath(pathContext.explicitLanguage, 'dojazd');
+
+const copyByLang = {
+  pl: {
+    kicker: isTransportVariant ? 'Przed przyjazdem' : isReservationVariant ? 'Szybka pomoc' : 'Pomoc dla gości',
+    title: isTransportVariant ? 'Przygotuj przyjazd bez nerwów' : 'Pomóż mi wybrać pobyt',
+    lead: 'Kilka szybkich odpowiedzi wystarczy, żeby podpowiedzieć najlepszy wariant i przypomnieć najważniejsze rzeczy przed przyjazdem.',
+    quizTitle: 'Mini quiz pobytu',
+    quizLead: 'Kliknij odpowiedzi i zobacz rekomendację.',
+    resultEmpty: 'Wybierz opcje, a tutaj pojawi się podpowiedź.',
+    resultCamping: 'Najlepiej zacząć od wariantu Camping. Formularz policzy kampera, vana, przyczepę albo namiot oraz osoby.',
+    resultBungalow: 'Najbardziej pasują Domki. Wybierz domek 2-, 3- albo 4-osobowy i wyślij zapytanie do recepcji.',
+    resultFamily: 'Dla rodziny dobry będzie domek albo kamper z prądem. Przy 3+ nocach warto dodać Wieliczkę albo Energylandię.',
+    resultTransit: 'Jeśli chcesz zwiedzać centrum, zostaw pojazd na campingu i jedź tramwajem 18 do Starego Kleparza.',
+    questions: [
+      { id: 'vehicle', label: 'Czym przyjeżdżasz?', options: [['camper', 'Kamper'], ['van', 'Van'], ['caravan', 'Przyczepa'], ['tent', 'Namiot'], ['bungalow', 'Szukam domku']] },
+      { id: 'people', label: 'Ile osób?', options: [['two', '1-2'], ['family', 'Rodzina'], ['group', 'Grupa']] },
+      { id: 'goal', label: 'Co chcesz robić?', options: [['center', 'Zwiedzać centrum'], ['rest', 'Odpocząć'], ['region', 'Małopolska'], ['overnight', 'Nocleg po drodze']] },
+      { id: 'nights', label: 'Ile nocy?', options: [['one', '1'], ['two', '2'], ['three', '3'], ['long', '4+']] },
+    ],
+    ctas: {
+      booking: 'Przejdź do rezerwacji',
+      camping: 'Oblicz pobyt kamperem',
+      planner: 'Planer pobytu',
+      pricing: 'Cennik',
+    },
+    checklistTitle: 'Przygotuj przed przyjazdem',
+    checklistReady: 'Gotowe — jesteś przygotowany do przyjazdu 🌿',
+    checklist: [
+      'dokument tożsamości',
+      'numer rejestracyjny pojazdu',
+      'Google Maps, bo dojazd zmienił się w 2022 roku',
+      'cisza nocna 22:00-07:00',
+      'check-out camping 12:00',
+      'check-in domki 16:00',
+      'płatność karta/gotówka',
+      'przy przyczepie: rejestracja przyczepy',
+    ],
+    modes: [
+      {
+        icon: 'UsersRound',
+        title: 'Tryb rodzinny',
+        copy: 'Stare Miasto, smoki, Wieliczka, Ojców albo Energylandia. Przy dzieciach zwykle lepiej planować mniej punktów i wracać tramwajem do zielonej bazy.',
+        chips: ['dzieci', 'Energylandia', '3 noce'],
+        hrefLabel: 'Zobacz planer',
+        href: plannerHref,
+      },
+      {
+        icon: 'Caravan',
+        title: 'Tryb kamperowca',
+        copy: 'Płyty betonowe, prąd 10A, pies 0 PLN, Google Maps i tramwaj 18 do centrum. W lipcu/sierpniu najlepiej przyjechać krótko po 12:00.',
+        chips: ['kamper', 'prąd 10A', 'pies 0 PLN'],
+        hrefLabel: 'Oblicz pobyt',
+        href: campingBookingHref,
+      },
+    ],
+  },
+  en: {
+    kicker: isTransportVariant ? 'Before arrival' : isReservationVariant ? 'Quick helper' : 'Guest helper',
+    title: isTransportVariant ? 'Prepare arrival without stress' : 'Help me choose my stay',
+    lead: 'A few quick answers are enough to suggest a stay type and remind you what to prepare before arrival.',
+    quizTitle: 'Stay mini quiz',
+    quizLead: 'Tap answers and get a recommendation.',
+    resultEmpty: 'Choose options and the recommendation appears here.',
+    resultCamping: 'Start with Camping. The form will count motorhome, van, caravan or tent plus guests.',
+    resultBungalow: 'Bungalows fit best. Choose a 2-, 3- or 4-person unit and send an enquiry.',
+    resultFamily: 'For a family, choose a bungalow or camper with electricity. With 3+ nights add Wieliczka or Energylandia.',
+    resultTransit: 'For the centre, leave your vehicle at the campsite and take tram 18 to Stary Kleparz.',
+    questions: [
+      { id: 'vehicle', label: 'How do you travel?', options: [['camper', 'Camper'], ['van', 'Van'], ['caravan', 'Caravan'], ['tent', 'Tent'], ['bungalow', 'Bungalow']] },
+      { id: 'people', label: 'How many people?', options: [['two', '1-2'], ['family', 'Family'], ['group', 'Group']] },
+      { id: 'goal', label: 'Main plan?', options: [['center', 'City centre'], ['rest', 'Rest'], ['region', 'Region'], ['overnight', 'Overnight']] },
+      { id: 'nights', label: 'Nights?', options: [['one', '1'], ['two', '2'], ['three', '3'], ['long', '4+']] },
+    ],
+    ctas: { booking: 'Open booking', camping: 'Calculate camper stay', planner: 'Stay planner', pricing: 'Prices' },
+    checklistTitle: 'Prepare before arrival',
+    checklistReady: 'Ready — you are prepared for arrival 🌿',
+    checklist: ['ID document', 'vehicle registration number', 'Google Maps', 'quiet hours 22:00-07:00', 'camping check-out 12:00', 'bungalow check-in 16:00', 'card/cash payment', 'caravan: caravan registration plate'],
+    modes: [
+      { icon: 'UsersRound', title: 'Family mode', copy: 'Old Town, dragons, Wieliczka, Ojców or Energylandia. With children, plan fewer stops and return by tram.', chips: ['kids', 'Energylandia', '3 nights'], hrefLabel: 'See planner', href: plannerHref },
+      { icon: 'Caravan', title: 'Camper mode', copy: 'Concrete slabs, 10A electricity, dog 0 PLN, Google Maps and tram 18 to the centre.', chips: ['camper', '10A power', 'dog 0 PLN'], hrefLabel: 'Calculate stay', href: campingBookingHref },
+    ],
+  },
+  de: {
+    kicker: isTransportVariant ? 'Vor der Anreise' : isReservationVariant ? 'Schnelle Hilfe' : 'Gästehilfe',
+    title: isTransportVariant ? 'Anreise entspannt vorbereiten' : 'Hilf mir, den Aufenthalt zu wählen',
+    lead: 'Ein paar schnelle Antworten reichen für eine Empfehlung und die wichtigsten Punkte vor der Anreise.',
+    quizTitle: 'Mini-Quiz',
+    quizLead: 'Antworten anklicken und Empfehlung sehen.',
+    resultEmpty: 'Wählen Sie Optionen, dann erscheint hier die Empfehlung.',
+    resultCamping: 'Camping passt am besten. Das Formular zählt Camper, Van, Wohnwagen oder Zelt plus Gäste.',
+    resultBungalow: 'Bungalows passen am besten. Wählen Sie 2-, 3- oder 4-Personen-Bungalow.',
+    resultFamily: 'Für Familie: Bungalow oder Camper mit Strom. Ab 3 Nächten lohnt Wieliczka oder Energylandia.',
+    resultTransit: 'Für das Zentrum: Fahrzeug stehen lassen und Linie 18 zum Stary Kleparz nehmen.',
+    questions: [
+      { id: 'vehicle', label: 'Womit reisen Sie?', options: [['camper', 'Camper'], ['van', 'Van'], ['caravan', 'Wohnwagen'], ['tent', 'Zelt'], ['bungalow', 'Bungalow']] },
+      { id: 'people', label: 'Wie viele Personen?', options: [['two', '1-2'], ['family', 'Familie'], ['group', 'Gruppe']] },
+      { id: 'goal', label: 'Plan?', options: [['center', 'Zentrum'], ['rest', 'Ruhe'], ['region', 'Region'], ['overnight', 'Transit']] },
+      { id: 'nights', label: 'Nächte?', options: [['one', '1'], ['two', '2'], ['three', '3'], ['long', '4+']] },
+    ],
+    ctas: { booking: 'Buchung öffnen', camping: 'Camper berechnen', planner: 'Planer', pricing: 'Preise' },
+    checklistTitle: 'Vor Anreise vorbereiten',
+    checklistReady: 'Fertig — Sie sind vorbereitet 🌿',
+    checklist: ['Ausweis', 'Kennzeichen', 'Google Maps', 'Ruhezeit 22:00-07:00', 'Camping Check-out 12:00', 'Bungalow Check-in 16:00', 'Karte/Bargeld', 'Wohnwagen: Kennzeichen des Wohnwagens'],
+    modes: [
+      { icon: 'UsersRound', title: 'Familienmodus', copy: 'Altstadt, Drachen, Wieliczka, Ojców oder Energylandia. Mit Kindern lieber weniger Punkte planen.', chips: ['Kinder', 'Energylandia', '3 Nächte'], hrefLabel: 'Planer ansehen', href: plannerHref },
+      { icon: 'Caravan', title: 'Campermodus', copy: 'Betonplatten, 10A Strom, Hund 0 PLN, Google Maps und Linie 18 ins Zentrum.', chips: ['Camper', '10A Strom', 'Hund 0 PLN'], hrefLabel: 'Aufenthalt berechnen', href: campingBookingHref },
+    ],
+  },
+  it: {
+    kicker: isTransportVariant ? 'Prima dell’arrivo' : isReservationVariant ? 'Aiuto rapido' : 'Aiuto ospiti',
+    title: isTransportVariant ? 'Prepara l’arrivo senza stress' : 'Aiutami a scegliere il soggiorno',
+    lead: 'Poche risposte bastano per suggerire il soggiorno e ricordare cosa preparare.',
+    quizTitle: 'Mini quiz soggiorno',
+    quizLead: 'Tocca le risposte e ricevi un consiglio.',
+    resultEmpty: 'Scegli opzioni e qui apparirà il consiglio.',
+    resultCamping: 'Scegli Camping. Il modulo calcola camper, van, roulotte o tenda più ospiti.',
+    resultBungalow: 'I bungalow sono la scelta migliore. Scegli 2, 3 o 4 persone.',
+    resultFamily: 'Per famiglia: bungalow o camper con elettricità. Con 3+ notti aggiungi Wieliczka o Energylandia.',
+    resultTransit: 'Per il centro lascia il veicolo al camping e prendi il tram 18.',
+    questions: [
+      { id: 'vehicle', label: 'Come arrivi?', options: [['camper', 'Camper'], ['van', 'Van'], ['caravan', 'Roulotte'], ['tent', 'Tenda'], ['bungalow', 'Bungalow']] },
+      { id: 'people', label: 'Quante persone?', options: [['two', '1-2'], ['family', 'Famiglia'], ['group', 'Gruppo']] },
+      { id: 'goal', label: 'Piano?', options: [['center', 'Centro'], ['rest', 'Relax'], ['region', 'Regione'], ['overnight', 'Solo notte']] },
+      { id: 'nights', label: 'Notti?', options: [['one', '1'], ['two', '2'], ['three', '3'], ['long', '4+']] },
+    ],
+    ctas: { booking: 'Apri prenotazione', camping: 'Calcola camper', planner: 'Planner', pricing: 'Prezzi' },
+    checklistTitle: 'Prepara prima dell’arrivo',
+    checklistReady: 'Pronto — sei preparato 🌿',
+    checklist: ['documento', 'targa veicolo', 'Google Maps', 'silenzio 22:00-07:00', 'check-out camping 12:00', 'check-in bungalow 16:00', 'carta/contanti', 'roulotte: targa della roulotte'],
+    modes: [
+      { icon: 'UsersRound', title: 'Modalità famiglia', copy: 'Centro, draghi, Wieliczka, Ojców o Energylandia. Con bambini meglio meno tappe.', chips: ['bambini', 'Energylandia', '3 notti'], hrefLabel: 'Vedi planner', href: plannerHref },
+      { icon: 'Caravan', title: 'Modalità camper', copy: 'Piazzole in cemento, elettricità 10A, cane 0 PLN, Google Maps e tram 18.', chips: ['camper', '10A', 'cane 0 PLN'], hrefLabel: 'Calcola soggiorno', href: campingBookingHref },
+    ],
+  },
+};
+
+const copy = copyByLang[contentLanguage as keyof typeof copyByLang] ?? copyByLang.en;
+const modeImages = [siteAssets.family.playground, siteAssets.camping.pitches];
+const quizConfig = Buffer.from(JSON.stringify({
+  empty: copy.resultEmpty,
+  camping: copy.resultCamping,
+  bungalow: copy.resultBungalow,
+  family: copy.resultFamily,
+  transit: copy.resultTransit,
+}), 'utf8').toString('base64');
+---
+
+<section class:list={['site-section client-guide-tools reveal-section', `client-guide-tools--${variant}`]} data-client-guide data-quiz-config={quizConfig}>
+  <div class="container client-guide-tools__inner">
+    <div class="client-guide-tools__head">
+      <span class="section-kicker">{copy.kicker}</span>
+      <h2 class="section-title">{copy.title}</h2>
+      <p class="section-copy">{copy.lead}</p>
+    </div>
+
+    <div class="client-guide-tools__grid">
+      <article class="premium-card client-guide-tools__quiz">
+        <div class="client-guide-tools__card-head">
+          <span aria-hidden="true"><Icon name="Sparkles" size={22} strokeWidth={2} /></span>
+          <div>
+            <h3>{copy.quizTitle}</h3>
+            <p>{copy.quizLead}</p>
+          </div>
+        </div>
+
+        <div class="client-guide-tools__questions">
+          {copy.questions.map((question) => (
+            <fieldset data-quiz-question={question.id}>
+              <legend>{question.label}</legend>
+              <div>
+                {question.options.map(([value, label]) => (
+                  <button type="button" data-quiz-option={value}>{label}</button>
+                ))}
+              </div>
+            </fieldset>
+          ))}
+        </div>
+
+        <div class="client-guide-tools__result" data-quiz-result>
+          <Icon name="Route" size={20} strokeWidth={2} />
+          <strong>{copy.resultEmpty}</strong>
+        </div>
+
+        <div class="client-guide-tools__actions">
+          <a href={bookingHref}><Icon name="CalendarCheck" size={17} strokeWidth={2} />{copy.ctas.booking}</a>
+          <a href={pricingHref}><Icon name="ReceiptText" size={17} strokeWidth={2} />{copy.ctas.pricing}</a>
+        </div>
+      </article>
+
+      <article class="premium-card client-guide-tools__checklist">
+        <div class="client-guide-tools__card-head">
+          <span aria-hidden="true"><Icon name="ListChecks" size={22} strokeWidth={2} /></span>
+          <div>
+            <h3>{copy.checklistTitle}</h3>
+            <p>{copy.checklistReady}</p>
+          </div>
+        </div>
+        <div class="client-guide-tools__checks">
+          {copy.checklist.map((item, index) => (
+            <label>
+              <input type="checkbox" data-client-check />
+              <span><Icon name={index === 2 ? 'MapPin' : index === 3 ? 'Moon' : 'CheckCircle2'} size={16} strokeWidth={2} />{item}</span>
+            </label>
+          ))}
+        </div>
+        <div class="client-guide-tools__ready" data-checklist-ready hidden>
+          <Icon name="CheckCircle2" size={20} strokeWidth={2} />
+          <strong>{copy.checklistReady}</strong>
+        </div>
+      </article>
+    </div>
+
+    <div class="client-guide-tools__modes">
+      {copy.modes.map((mode, index) => (
+        <article class="premium-card client-guide-tools__mode">
+          <ImageFrame
+            src={modeImages[index] ?? siteAssets.camping.camperArea}
+            alt={mode.title}
+            label={mode.title}
+            className="client-guide-tools__mode-media"
+          />
+          <span aria-hidden="true"><Icon name={mode.icon} size={24} strokeWidth={2} /></span>
+          <h3>{mode.title}</h3>
+          <p>{mode.copy}</p>
+          <div>
+            {mode.chips.map((chip) => <small>{chip}</small>)}
+          </div>
+          <a href={mode.href}>{mode.hrefLabel}<Icon name="ArrowUpRight" size={16} strokeWidth={2} /></a>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll('[data-client-guide]').forEach((root) => {
+    if (!(root instanceof HTMLElement)) return;
+
+    const decode = () => {
+      try {
+        const raw = root.dataset.quizConfig ?? '';
+        const bytes = Uint8Array.from(window.atob(raw), (char) => char.charCodeAt(0));
+        return JSON.parse(new TextDecoder().decode(bytes));
+      } catch {
+        return {};
+      }
+    };
+    const config = decode();
+    const state = new Map();
+    const result = root.querySelector('[data-quiz-result] strong');
+    const updateResult = () => {
+      if (!(result instanceof HTMLElement)) return;
+      const vehicle = state.get('vehicle');
+      const people = state.get('people');
+      const goal = state.get('goal');
+      if (vehicle === 'bungalow') result.textContent = config.bungalow;
+      else if (people === 'family' || people === 'group') result.textContent = config.family;
+      else if (goal === 'center') result.textContent = config.transit;
+      else if (vehicle) result.textContent = config.camping;
+      else result.textContent = config.empty;
+      root.querySelector('[data-quiz-result]')?.classList.add('is-pulsing');
+      window.setTimeout(() => root.querySelector('[data-quiz-result]')?.classList.remove('is-pulsing'), 360);
+    };
+
+    root.querySelectorAll('[data-quiz-question]').forEach((fieldset) => {
+      if (!(fieldset instanceof HTMLElement)) return;
+      fieldset.querySelectorAll('[data-quiz-option]').forEach((button) => {
+        if (!(button instanceof HTMLButtonElement)) return;
+        button.addEventListener('click', () => {
+          state.set(fieldset.dataset.quizQuestion, button.dataset.quizOption);
+          fieldset.querySelectorAll('[data-quiz-option]').forEach((item) => {
+            if (item instanceof HTMLElement) item.classList.toggle('is-active', item === button);
+          });
+          updateResult();
+        });
+      });
+    });
+
+    const checks = Array.from(root.querySelectorAll('[data-client-check]')).filter((item): item is HTMLInputElement => item instanceof HTMLInputElement);
+    const ready = root.querySelector('[data-checklist-ready]');
+    const updateChecks = () => {
+      if (ready instanceof HTMLElement) ready.hidden = checks.length === 0 || !checks.every((item) => item.checked);
+    };
+    checks.forEach((item) => item.addEventListener('change', updateChecks));
+  });
+</script>
+
+<style>
+.client-guide-tools {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(56px, 8vw, 102px) 0;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(60,179,113,.18), transparent 36%),
+    radial-gradient(circle at 86% 0%, rgba(242,192,120,.14), transparent 32%),
+    linear-gradient(180deg, #f7f8f3, #edf5ec);
+}
+
+.client-guide-tools--transport,
+.client-guide-tools--reservation {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(60,179,113,.18), transparent 36%),
+    radial-gradient(circle at 86% 0%, rgba(242,192,120,.12), transparent 32%),
+    linear-gradient(180deg, #101b14, #14261a);
+}
+
+.client-guide-tools--transport .section-title,
+.client-guide-tools--transport .section-copy,
+.client-guide-tools--reservation .section-title,
+.client-guide-tools--reservation .section-copy {
+  color: #fff;
+}
+
+.client-guide-tools__inner,
+.client-guide-tools__quiz,
+.client-guide-tools__checklist,
+.client-guide-tools__mode {
+  position: relative;
+  z-index: 1;
+}
+
+.client-guide-tools__head {
+  max-width: 850px;
+  margin-bottom: clamp(24px, 4vw, 38px);
+}
+
+.client-guide-tools__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.22fr) minmax(300px, .78fr);
+  gap: clamp(18px, 3vw, 28px);
+  align-items: start;
+}
+
+.client-guide-tools__quiz,
+.client-guide-tools__checklist,
+.client-guide-tools__mode {
+  display: grid;
+  gap: 18px;
+  padding: clamp(20px, 3vw, 30px);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.16), transparent 38%),
+    rgba(255,255,255,.76);
+  box-shadow: 0 24px 70px rgba(17,40,28,.10);
+}
+
+.client-guide-tools__card-head {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.client-guide-tools__card-head > span,
+.client-guide-tools__mode > span {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  color: #082016;
+  background: linear-gradient(135deg, #a8f0c7, #3CB371);
+  box-shadow: 0 16px 36px rgba(60,179,113,.20);
+}
+
+.client-guide-tools h3 {
+  margin: 0;
+  color: #102018;
+  font-size: clamp(1.1rem, 2vw, 1.42rem);
+}
+
+.client-guide-tools p {
+  margin: 0;
+  color: #52645a;
+  line-height: 1.6;
+  font-weight: 760;
+}
+
+.client-guide-tools__questions {
+  display: grid;
+  gap: 13px;
+}
+
+.client-guide-tools fieldset {
+  min-width: 0;
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.client-guide-tools legend {
+  color: #173624;
+  font-weight: 950;
+}
+
+.client-guide-tools fieldset > div,
+.client-guide-tools__actions,
+.client-guide-tools__mode > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.client-guide-tools button,
+.client-guide-tools__actions a,
+.client-guide-tools__mode a {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 13px;
+  border: 1px solid rgba(60,179,113,.22);
+  border-radius: 999px;
+  color: #173624;
+  background: rgba(60,179,113,.11);
+  font-weight: 920;
+  text-decoration: none;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.client-guide-tools button:hover,
+.client-guide-tools button.is-active,
+.client-guide-tools__actions a:hover,
+.client-guide-tools__mode a:hover {
+  transform: translateY(-2px);
+  border-color: rgba(60,179,113,.44);
+  background: linear-gradient(135deg, #a8f0c7, #3CB371);
+  box-shadow: 0 14px 32px rgba(60,179,113,.18);
+}
+
+.client-guide-tools__result,
+.client-guide-tools__ready {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 15px;
+  border-radius: 20px;
+  color: #173624;
+  background: rgba(242,192,120,.16);
+  font-weight: 880;
+}
+
+.client-guide-tools__result.is-pulsing {
+  animation: guidePulse .36s ease;
+}
+
+.client-guide-tools__checks {
+  display: grid;
+  gap: 9px;
+}
+
+.client-guide-tools__checks label {
+  display: block;
+}
+
+.client-guide-tools__checks input {
+  position: absolute;
+  opacity: 0;
+}
+
+.client-guide-tools__checks span {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(60,179,113,.16);
+  border-radius: 16px;
+  color: #173624;
+  background: rgba(255,255,255,.60);
+  font-weight: 840;
+}
+
+.client-guide-tools__checks input:checked + span {
+  border-color: rgba(60,179,113,.38);
+  background: rgba(60,179,113,.15);
+}
+
+.client-guide-tools__ready[hidden] {
+  display: none;
+}
+
+.client-guide-tools__modes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(16px, 3vw, 24px);
+  margin-top: clamp(18px, 3vw, 28px);
+}
+
+.client-guide-tools__mode small {
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #0f6b3f;
+  background: rgba(60,179,113,.12);
+  font-weight: 920;
+}
+
+:global(.client-guide-tools__mode-media.photo-frame) {
+  min-height: 190px;
+  border-radius: 24px;
+  box-shadow: 0 18px 46px rgba(17,40,28,.12);
+}
+
+.client-guide-tools__mode > span {
+  margin-top: -42px;
+  border: 4px solid rgba(255,255,255,.72);
+  box-shadow: 0 18px 36px rgba(17,40,28,.18);
+}
+
+html[data-theme="dark"] .client-guide-tools__mode > span,
+.client-guide-tools--transport .client-guide-tools__mode > span,
+.client-guide-tools--reservation .client-guide-tools__mode > span {
+  border-color: rgba(11,21,15,.72);
+}
+
+html[data-theme="dark"] .client-guide-tools:not(.client-guide-tools--transport):not(.client-guide-tools--reservation) {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(60,179,113,.20), transparent 36%),
+    radial-gradient(circle at 86% 0%, rgba(242,192,120,.10), transparent 32%),
+    linear-gradient(180deg, #0f1d14, #13261a);
+}
+
+html[data-theme="dark"] .client-guide-tools:not(.client-guide-tools--transport):not(.client-guide-tools--reservation) .section-title {
+  color: #fff;
+}
+
+html[data-theme="dark"] .client-guide-tools:not(.client-guide-tools--transport):not(.client-guide-tools--reservation) .section-copy,
+.client-guide-tools--transport p,
+.client-guide-tools--reservation p {
+  color: rgba(255,255,255,.72);
+}
+
+html[data-theme="dark"] .client-guide-tools__quiz,
+html[data-theme="dark"] .client-guide-tools__checklist,
+html[data-theme="dark"] .client-guide-tools__mode,
+.client-guide-tools--transport .client-guide-tools__quiz,
+.client-guide-tools--transport .client-guide-tools__checklist,
+.client-guide-tools--transport .client-guide-tools__mode,
+.client-guide-tools--reservation .client-guide-tools__quiz,
+.client-guide-tools--reservation .client-guide-tools__checklist,
+.client-guide-tools--reservation .client-guide-tools__mode {
+  color: #fff;
+  border-color: rgba(255,255,255,.13);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(60,179,113,.16), transparent 38%),
+    rgba(255,255,255,.08);
+}
+
+html[data-theme="dark"] .client-guide-tools h3,
+.client-guide-tools--transport h3,
+.client-guide-tools--reservation h3,
+html[data-theme="dark"] .client-guide-tools legend,
+.client-guide-tools--transport legend,
+.client-guide-tools--reservation legend {
+  color: #fff;
+}
+
+html[data-theme="dark"] .client-guide-tools p,
+html[data-theme="dark"] .client-guide-tools__checks span,
+.client-guide-tools--transport .client-guide-tools__checks span,
+.client-guide-tools--reservation .client-guide-tools__checks span {
+  color: rgba(255,255,255,.72);
+}
+
+html[data-theme="dark"] .client-guide-tools__checks span,
+.client-guide-tools--transport .client-guide-tools__checks span,
+.client-guide-tools--reservation .client-guide-tools__checks span {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.12);
+}
+
+html[data-theme="dark"] .client-guide-tools button,
+html[data-theme="dark"] .client-guide-tools__actions a,
+html[data-theme="dark"] .client-guide-tools__mode a,
+.client-guide-tools--transport button,
+.client-guide-tools--transport .client-guide-tools__actions a,
+.client-guide-tools--transport .client-guide-tools__mode a,
+.client-guide-tools--reservation button,
+.client-guide-tools--reservation .client-guide-tools__actions a,
+.client-guide-tools--reservation .client-guide-tools__mode a {
+  color: #e9fff2;
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.13);
+}
+
+@keyframes guidePulse {
+  0% { transform: scale(.99); box-shadow: none; }
+  55% { transform: scale(1.01); box-shadow: 0 0 0 7px rgba(60,179,113,.10); }
+  100% { transform: scale(1); box-shadow: none; }
+}
+
+@media (max-width: 960px) {
+  .client-guide-tools__grid,
+  .client-guide-tools__modes {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .client-guide-tools__actions a,
+  .client-guide-tools__mode a {
+    width: 100%;
+  }
+}
+</style>

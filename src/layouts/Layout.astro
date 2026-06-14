@@ -10,6 +10,7 @@ import CamperScrollProgress from '@/components/ui/CamperScrollProgress.astro';
 import AmbientBackground from '@/components/ui/AmbientBackground.astro';
 import PageScrollHint from '@/components/ui/PageScrollHint.astro';
 import SiteNoticePopup from '@/components/ui/SiteNoticePopup.astro';
+import GlobalSearch from '@/components/ui/GlobalSearch.astro';
 import { logoMain, logoMainPng, publicAssetExists, siteAssets } from '@/data/assets';
 import { getCampgroundJsonLd, homeSeo, resolveOgImage, siteName } from '@/data/seo';
 import { getPathContext, getSeoLanguageMeta, isBookingSlug, withOrigin } from '@/utils/localizedLinks';
@@ -147,6 +148,7 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		{!isBookingExperiencePage && <PageScrollHint />}
 		<FloatingChatButton />
 		{!isBookingExperiencePage && <SiteNoticePopup />}
+		<GlobalSearch />
 		{!isBookingExperiencePage && <Footer />}
 		{!isBookingExperiencePage && <ScrollToTopButton />}
 		<MotionFoundation />

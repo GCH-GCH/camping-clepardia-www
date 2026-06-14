@@ -8,7 +8,7 @@ interface Props {
   languageCode?: string;
 }
 
-type GalleryCategory = 'camping' | 'bungalows' | 'sanitary' | 'transport' | 'krakow';
+type GalleryCategory = 'camping' | 'bungalows' | 'sanitary' | 'transport' | 'family' | 'krakow';
 
 interface GalleryItem {
   title: string;
@@ -45,6 +45,7 @@ const galleryTextByLanguage = {
       bungalows: 'Domki',
       sanitary: 'Sanitariaty / zaplecze',
       transport: 'Okolica',
+      family: 'Rodzina',
       krakow: 'Kraków / atrakcje',
     },
     items: [
@@ -62,6 +63,7 @@ const galleryTextByLanguage = {
       ['Pralnia', 'Pralnia na campingu'],
       ['Tramwaj do centrum', 'Dojazd tramwajem do centrum Krakowa'],
       ['Bilety tramwajowe', 'Automat biletowy w tramwaju'],
+      ['Plac zabaw', 'Plac zabaw dla dzieci na Camping Clepardia'],
       ['Stare Miasto', 'Stare Miasto w Krakowie'],
       ['Kopalnia Soli Wieliczka', 'Kopalnia Soli Wieliczka'],
       ['Energylandia', 'Energylandia'],
@@ -86,6 +88,7 @@ const galleryTextByLanguage = {
       bungalows: 'Bungalows',
       sanitary: 'Sanitary / facilities',
       transport: 'Surroundings',
+      family: 'Family',
       krakow: 'Krakow / attractions',
     },
     items: [
@@ -103,6 +106,7 @@ const galleryTextByLanguage = {
       ['Laundry', 'Laundry at the campsite'],
       ['Tram to the centre', 'Tram access to Krakow centre'],
       ['Tram tickets', 'Ticket machine on a tram'],
+      ['Playground', 'Children playground at Camping Clepardia'],
       ['Old Town', 'Krakow Old Town'],
       ['Wieliczka Salt Mine', 'Wieliczka Salt Mine'],
       ['Energylandia', 'Energylandia'],
@@ -127,6 +131,7 @@ const galleryTextByLanguage = {
       bungalows: 'Bungalows',
       sanitary: 'Sanitär / Infrastruktur',
       transport: 'Umgebung',
+      family: 'Familie',
       krakow: 'Krakau / Attraktionen',
     },
     items: [
@@ -144,6 +149,7 @@ const galleryTextByLanguage = {
       ['Waschmöglichkeit', 'Waschmöglichkeit auf dem Campingplatz'],
       ['Straßenbahn ins Zentrum', 'Straßenbahnverbindung ins Zentrum von Krakau'],
       ['Straßenbahntickets', 'Ticketautomat in der Straßenbahn'],
+      ['Spielplatz', 'Spielplatz für Kinder auf Camping Clepardia'],
       ['Altstadt', 'Krakauer Altstadt'],
       ['Salzbergwerk Wieliczka', 'Salzbergwerk Wieliczka'],
       ['Energylandia', 'Energylandia'],
@@ -168,6 +174,7 @@ const galleryTextByLanguage = {
       bungalows: 'Bungalow',
       sanitary: 'Servizi / strutture',
       transport: 'Dintorni',
+      family: 'Famiglia',
       krakow: 'Cracovia / attrazioni',
     },
     items: [
@@ -185,6 +192,7 @@ const galleryTextByLanguage = {
       ['Lavanderia', 'Lavanderia nel camping'],
       ['Tram per il centro', 'Collegamento in tram verso il centro di Cracovia'],
       ['Biglietti tram', 'Distributore biglietti in tram'],
+      ['Parco giochi', 'Parco giochi per bambini a Camping Clepardia'],
       ['Città Vecchia', 'Città Vecchia di Cracovia'],
       ['Miniera di Sale Wieliczka', 'Miniera di Sale Wieliczka'],
       ['Energylandia', 'Energylandia'],
@@ -200,6 +208,7 @@ const categories: Array<{ id: 'all' | GalleryCategory; label: string }> = [
   { id: 'bungalows', label: galleryText.category.bungalows },
   { id: 'sanitary', label: galleryText.category.sanitary },
   { id: 'transport', label: galleryText.category.transport },
+  { id: 'family', label: galleryText.category.family },
   { id: 'krakow', label: galleryText.category.krakow },
 ];
 
@@ -209,6 +218,7 @@ const categoryIcons: Record<GalleryCategory, string> = {
   bungalows: 'bungalow',
   sanitary: 'sanitary',
   transport: 'tram',
+  family: 'family',
   krakow: 'attractions',
 };
 
@@ -313,23 +323,30 @@ const galleryItems: GalleryItem[] = [
   },
   {
     title: galleryText.items[14][0],
-    category: 'krakow',
-    image: siteAssets.attractions.oldTown,
+    category: 'family',
+    image: siteAssets.family.playground,
     alt: galleryText.items[14][1],
-    size: 'feature',
+    size: 'wide',
   },
   {
     title: galleryText.items[15][0],
     category: 'krakow',
-    image: siteAssets.attractions.wieliczka,
+    image: siteAssets.attractions.oldTown,
     alt: galleryText.items[15][1],
-    size: 'standard',
+    size: 'feature',
   },
   {
     title: galleryText.items[16][0],
     category: 'krakow',
-    image: siteAssets.attractions.energylandia,
+    image: siteAssets.attractions.wieliczka,
     alt: galleryText.items[16][1],
+    size: 'standard',
+  },
+  {
+    title: galleryText.items[17][0],
+    category: 'krakow',
+    image: siteAssets.attractions.energylandia,
+    alt: galleryText.items[17][1],
     size: 'wide',
   },
 ];

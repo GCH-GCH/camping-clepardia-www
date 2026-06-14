@@ -1,0 +1,16 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import NewsPage from '@/components/pages/NewsPage.astro';
+
+const title = 'Aktualności Camping Clepardia | Kraków, dojazd i sezon';
+const description = 'Aktualne informacje Camping Clepardia: sezon, dojazd, wydarzenia w Krakowie, zasady recepcji, atrakcje i praktyczne komunikaty dla gości.';
+---
+
+<Layout
+  title={title}
+  description={description}
+  ogTitle={title}
+  ogDescription={description}
+>
+  <NewsPage languageCode="pl" />
+</Layout>

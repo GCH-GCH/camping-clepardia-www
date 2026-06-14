@@ -1,12 +1,16 @@
 ---
 import Icon from '@/components/ui/Icon.astro';
-import { getNoticeCopy, getPopupSiteNotice } from '@/data/siteNotices';
+import ImageFrame from '@/components/ImageFrame.astro';
+import { getNoticeCopy, getPopupSiteNotice, siteNoticeCategories } from '@/data/siteNotices';
 import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
 const notice = getPopupSiteNotice();
 const pathContext = getPathContext(Astro.url.pathname);
 const languageCode = pathContext.languageCode;
 const copy = notice ? getNoticeCopy(notice, languageCode) : null;
+const categoryLabel = notice
+  ? (siteNoticeCategories.find((category) => category.id === notice.category)?.label ?? notice.category)
+  : '';
 const localizedDirectionsHref = getLocalizedPath(pathContext.explicitLanguage, 'dojazd');
 const localizedBookingHref = getBookingLocalizedPath(languageCode);
 const ctaHref = notice?.ctaHref === '/dojazd'
@@ -35,16 +39,25 @@ const endDate = notice?.endDate ?? '';
       <button class="site-notice-popup__close" type="button" data-site-notice-close aria-label={closeLabel}>
         <Icon name="close" size={18} strokeWidth={2.2} />
       </button>
-      <span class="site-notice-popup__icon" aria-hidden="true">
-        <Icon name={notice.icon ?? 'Info'} size={25} strokeWidth={2} />
-      </span>
+      {notice.image && (
+        <ImageFrame
+          src={notice.image}
+          alt={copy.imageAlt ?? copy.title}
+          label={categoryLabel}
+          className="site-notice-popup__image"
+        />
+      )}
       <div class="site-notice-popup__copy">
         <div class="site-notice-popup__meta">
           <span>{eyebrow}</span>
+          <span>{categoryLabel}</span>
           {copy.badge && <small>{copy.badge}</small>}
         </div>
+        <span class="site-notice-popup__icon" aria-hidden="true">
+          <Icon name={notice.icon ?? 'Info'} size={22} strokeWidth={2} />
+        </span>
         <h2 id="siteNoticePopupTitle">{copy.title}</h2>
-        <p>{copy.description}</p>
+        <p>{copy.shortDescription ?? copy.description}</p>
         <a href={ctaHref}>
           <span>{copy.ctaLabel}</span>
           <Icon name="ArrowUpRight" size={17} strokeWidth={2.2} />
@@ -122,7 +135,7 @@ const endDate = notice?.endDate ?? '';
   position: relative;
   width: min(620px, calc(100vw - 24px));
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: minmax(180px, .68fr) minmax(0, 1fr);
   gap: 16px;
   padding: clamp(20px, 3vw, 28px);
   border: 1px solid rgba(255,255,255,.16);
@@ -137,6 +150,16 @@ const endDate = notice?.endDate ?? '';
   opacity: 0;
   pointer-events: auto;
   transition: transform .3s cubic-bezier(.22, 1, .36, 1), opacity .24s ease;
+}
+
+.site-notice-popup__image {
+  min-height: 100%;
+  aspect-ratio: auto;
+  border-radius: 24px;
+}
+
+.site-notice-popup__image :global(figcaption) {
+  font-size: .66rem;
 }
 
 .site-notice-popup.is-visible .site-notice-popup__scrim {
@@ -178,6 +201,7 @@ const endDate = notice?.endDate ?? '';
   display: grid;
   gap: 11px;
   padding-right: 38px;
+  align-content: start;
 }
 
 .site-notice-popup__meta {
@@ -276,6 +300,10 @@ html[data-theme="light"] .site-notice-popup__meta small {
   .site-notice-popup__card {
     grid-template-columns: 1fr;
     border-radius: 24px;
+  }
+
+  .site-notice-popup__image {
+    min-height: 190px;
   }
 
   .site-notice-popup__copy {

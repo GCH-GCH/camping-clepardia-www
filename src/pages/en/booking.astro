@@ -1,6 +1,7 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import ReservationMiniGame from '@/components/booking/ReservationMiniGame.astro';
+import ClientGuideTools from '@/components/home/ClientGuideTools.astro';
 ---
 
 <Layout
@@ -8,4 +9,5 @@ import ReservationMiniGame from '@/components/booking/ReservationMiniGame.astro'
   description="Premium Camping Clepardia booking flow: choose camping, bungalows or a combined stay and send an enquiry to reception."
 >
   <ReservationMiniGame languageCode="en" />
+  <ClientGuideTools languageCode="en" variant="reservation" />
 </Layout>

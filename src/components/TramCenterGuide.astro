@@ -1,5 +1,7 @@
 ---
 import Icon from '@/components/ui/Icon.astro';
+import ImageFrame from '@/components/ImageFrame.astro';
+import { siteAssets } from '@/data/assets';
 import { getLocalizedPath } from '@/utils/localizedLinks';
 
 interface Props {
@@ -20,6 +22,7 @@ const copyByLang = {
     lead:
       'Zostaw auto, kampera albo przyczepę na campingu. Przystanek Górnickiego jest tuż obok, a tramwaj 18 dowozi do Starego Kleparza, skąd szybko dojdziesz pieszo do Starego Miasta.',
     route: ['Camping Clepardia', '40 m pieszo', 'Górnickiego', 'Tramwaj 18', 'Stary Kleparz', '5 min spacer', 'Stare Miasto'],
+    routeImage: 'Przystanek tramwajowy blisko Camping Clepardia',
     facts: [
       { icon: 'MapPin', title: 'Przystanek ok. 40 m', copy: 'Górnickiego znajduje się bardzo blisko bramy Camping Clepardia.' },
       { icon: 'Clock', title: 'Około 14 minut', copy: 'Tramwaj 18 jedzie do Starego Kleparza około 9 przystanków.' },
@@ -41,6 +44,7 @@ const copyByLang = {
     lead:
       'Leave your car, motorhome or caravan at the campsite. Górnickiego stop is very close, and tram 18 takes you to Stary Kleparz, an easy walk from the Old Town.',
     route: ['Camping Clepardia', '40 m walk', 'Górnickiego', 'Tram 18', 'Stary Kleparz', '5 min walk', 'Old Town'],
+    routeImage: 'Tram stop near Camping Clepardia',
     facts: [
       { icon: 'MapPin', title: 'Stop about 40 m away', copy: 'Górnickiego stop is very close to the Camping Clepardia gate.' },
       { icon: 'Clock', title: 'About 14 minutes', copy: 'Tram 18 takes about 9 stops to Stary Kleparz.' },
@@ -62,6 +66,7 @@ const copyByLang = {
     lead:
       'Lassen Sie Auto, Wohnmobil oder Wohnwagen auf dem Campingplatz. Die Haltestelle Górnickiego ist sehr nah, die Linie 18 fährt zum Stary Kleparz.',
     route: ['Camping Clepardia', '40 m zu Fuß', 'Górnickiego', 'Linie 18', 'Stary Kleparz', '5 min zu Fuß', 'Altstadt'],
+    routeImage: 'Straßenbahnhaltestelle nahe Camping Clepardia',
     facts: [
       { icon: 'MapPin', title: 'Haltestelle ca. 40 m', copy: 'Górnickiego liegt sehr nah am Tor von Camping Clepardia.' },
       { icon: 'Clock', title: 'Ca. 14 Minuten', copy: 'Die Linie 18 fährt ca. 9 Haltestellen bis Stary Kleparz.' },
@@ -83,6 +88,7 @@ const copyByLang = {
     lead:
       'Lascia auto, camper o roulotte al camping. La fermata Górnickiego è vicinissima e il tram 18 porta a Stary Kleparz.',
     route: ['Camping Clepardia', '40 m a piedi', 'Górnickiego', 'Tram 18', 'Stary Kleparz', '5 min a piedi', 'Centro storico'],
+    routeImage: 'Fermata del tram vicino a Camping Clepardia',
     facts: [
       { icon: 'MapPin', title: 'Fermata a circa 40 m', copy: 'Górnickiego è molto vicino al cancello del Camping Clepardia.' },
       { icon: 'Clock', title: 'Circa 14 minuti', copy: 'Il tram 18 impiega circa 9 fermate fino a Stary Kleparz.' },
@@ -124,6 +130,12 @@ const copy = copyByLang[lang as keyof typeof copyByLang];
             </>
           ))}
         </div>
+        <ImageFrame
+          src={siteAssets.transport.tramToCenter}
+          alt={copy.routeImage}
+          label={copy.routeImage}
+          className="tram-center-guide__image"
+        />
         <p class="tram-center-guide__note">
           <Icon name="Info" size={17} strokeWidth={2} />
           <span>{copy.note}</span>
@@ -311,6 +323,14 @@ const copy = copyByLang[lang as keyof typeof copyByLang];
   height: 2px;
   border-radius: 999px;
   background: rgba(60,179,113,.70);
+}
+
+.tram-center-guide__image {
+  border-radius: 24px;
+}
+
+.tram-center-guide__image :global(figcaption) {
+  font-size: .66rem;
 }
 
 .tram-center-guide__note {

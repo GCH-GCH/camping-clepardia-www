@@ -100,6 +100,15 @@ const navMessages = {
       </div>
 
       <button
+        class="main-navbar-search"
+        type="button"
+        data-search-open
+        aria-label={pathContext.languageCode === 'pl' ? 'Szukaj na stronie' : 'Search the site'}
+      >
+        <Icon name="search" size={18} strokeWidth={2.1} />
+      </button>
+
+      <button
         class="main-navbar-theme"
         type="button"
         data-theme-toggle
@@ -118,6 +127,15 @@ const navMessages = {
     </div>
 
     <div class="main-navbar__mobile-controls" aria-label={t.nav.mobileMenu}>
+      <button
+        class="main-navbar-search main-navbar-search--compact"
+        type="button"
+        data-search-open
+        aria-label={pathContext.languageCode === 'pl' ? 'Szukaj na stronie' : 'Search the site'}
+      >
+        <Icon name="search" size={18} strokeWidth={2.1} />
+      </button>
+
       <button
         class="main-navbar-theme main-navbar-theme--compact"
         type="button"
@@ -622,6 +640,30 @@ body.has-main-navbar-open {
   transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease, color .22s ease;
 }
 
+.main-navbar-search {
+  width: 48px;
+  height: 48px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 30% 15%, rgba(143,224,180,.18), transparent 36%),
+    rgba(255,255,255,.075);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  cursor: pointer;
+  transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease, color .22s ease;
+}
+
+.main-navbar-search:hover {
+  color: #fff;
+  transform: translateY(-1px);
+  border-color: rgba(143,224,180,.42);
+  background: rgba(255,255,255,.13);
+  box-shadow: 0 0 28px rgba(60,179,113,.16), inset 0 1px 0 rgba(255,255,255,.12);
+}
+
 .main-navbar-theme:hover {
   color: #fff;
   transform: translateY(-1px);
@@ -990,6 +1032,7 @@ html[data-theme="light"] .main-navbar-shell.is-scrolled .main-navbar {
 
 html[data-theme="light"] .main-navbar__link,
 html[data-theme="light"] .main-navbar-lang__toggle,
+html[data-theme="light"] .main-navbar-search,
 html[data-theme="light"] .main-navbar-theme {
   color: #173624;
   border-color: rgba(25, 54, 38, .12);
@@ -999,6 +1042,7 @@ html[data-theme="light"] .main-navbar-theme {
 html[data-theme="light"] .main-navbar__link:hover,
 html[data-theme="light"] .main-navbar-lang__toggle:hover,
 html[data-theme="light"] .main-navbar-lang.is-open .main-navbar-lang__toggle,
+html[data-theme="light"] .main-navbar-search:hover,
 html[data-theme="light"] .main-navbar-theme:hover {
   color: #102018;
   border-color: rgba(60,179,113,.28);
