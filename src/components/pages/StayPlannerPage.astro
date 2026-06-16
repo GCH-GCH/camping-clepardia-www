@@ -16,14 +16,14 @@ const explicitLanguage = pathContext.explicitLanguage;
 const bookingHref = getBookingLocalizedPath(lang);
 const transportHref = getLocalizedPath(explicitLanguage, 'dojazd');
 const attractionsHref = getLocalizedPath(explicitLanguage, 'atrakcje');
-const seeKrakowHref = 'https://qr.codes/vksKBT';
+const tourBookingHref = 'https://qr.codes/vksKBT';
 
 const copyByLang = {
   pl: {
     kicker: 'Planer pobytu',
-    title: 'Zaplanuj pobyt w Krakowie bez upychania wszystkiego naraz',
+    title: 'Zaplanuj swój pobyt w Krakowie',
     lead:
-      'Wybierz liczbę nocy, tempo, ekipę i transport. Planer podpowie, co spokojnie zobaczysz z Camping Clepardia jako bazą, co może być za dużo i jak ułożyć dzień.',
+      'Wybierz liczbę nocy, tempo zwiedzania i atrakcje — podpowiemy, co realnie ma sens, co warto odpuścić i jak połączyć zwiedzanie z odpoczynkiem na campingu.',
     micro: 'To nie jest sztywny program. To szybka podpowiedź, żeby pobyt był przyjemny, a nie goniony.',
     nights: 'Liczba nocy',
     pace: 'Tempo zwiedzania',
@@ -49,7 +49,7 @@ const copyByLang = {
     ],
     ctaBooking: 'Zarezerwuj pobyt',
     ctaCampy: 'Zapytaj CAMPY',
-    ctaTours: 'SeeKrakow',
+    ctaTours: 'Wycieczki z Krakowa',
     ctaTram: 'Dojazd tramwajem',
     ctaAttractions: 'Zobacz atrakcje',
     options: {
@@ -140,7 +140,7 @@ const copyByLang = {
     ],
     ctaBooking: 'Book your stay',
     ctaCampy: 'Ask CAMPY',
-    ctaTours: 'SeeKrakow',
+    ctaTours: 'Tours from Krakow',
     ctaTram: 'Tram directions',
     ctaAttractions: 'See attractions',
     options: {
@@ -307,7 +307,7 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify(copy), 'utf8').toString(
       <button class="btn btn-glass" type="button" data-ask-campy-planner><Icon name="BotMessageSquare" size={18} strokeWidth={2} /> {copy.ctaCampy}</button>
       <a class="btn btn-glass" href={transportHref}><Icon name="TramFront" size={18} strokeWidth={2} /> {copy.ctaTram}</a>
       <a class="btn btn-glass" href={attractionsHref}><Icon name="Map" size={18} strokeWidth={2} /> {copy.ctaAttractions}</a>
-      <a class="btn btn-glass" href={seeKrakowHref} target="_blank" rel="noopener noreferrer"><Icon name="Ticket" size={18} strokeWidth={2} /> {copy.ctaTours}</a>
+      <a class="btn btn-glass" href={tourBookingHref} target="_blank" rel="noopener noreferrer"><Icon name="Ticket" size={18} strokeWidth={2} /> {copy.ctaTours}</a>
     </div>
   </div>
 </section>

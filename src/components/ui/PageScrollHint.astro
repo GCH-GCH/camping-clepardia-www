@@ -104,7 +104,8 @@ const label = isHome ? copy.home : copy.page;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  width: 86px;
+  width: max-content;
+  min-width: 92px;
   min-height: 78px;
   padding: 0;
   border: 0;
@@ -170,6 +171,7 @@ const label = isHome ? copy.home : copy.page;
 
 .page-scroll-hint__label {
   display: block;
+  max-width: max-content;
   padding: 6px 10px;
   border: 1px solid rgba(143,224,180,.16);
   border-radius: 999px;
@@ -178,6 +180,8 @@ const label = isHome ? copy.home : copy.page;
   line-height: 1;
   letter-spacing: .12em;
   text-transform: uppercase;
+  white-space: nowrap;
+  word-break: keep-all;
   background: rgba(8,25,16,.26);
   box-shadow: 0 12px 26px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.10);
   text-shadow: 0 8px 24px rgba(0,0,0,.36);
@@ -281,7 +285,8 @@ html[data-theme="light"] .page-scroll-hint__wheel {
 
   .page-scroll-hint {
     bottom: max(16px, calc(16px + env(safe-area-inset-bottom)));
-    width: 68px;
+    width: max-content;
+    min-width: 78px;
     min-height: 64px;
   }
 
@@ -292,6 +297,7 @@ html[data-theme="light"] .page-scroll-hint__wheel {
 
   .page-scroll-hint__label {
     font-size: .66rem;
+    letter-spacing: .08em;
   }
 }
 

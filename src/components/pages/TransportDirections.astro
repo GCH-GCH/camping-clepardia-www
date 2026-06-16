@@ -278,6 +278,84 @@ const centerSteps = transportText.steps;
 
 const ticketCards = transportText.tickets;
 const ticketIcons = ['ticket', 'receipt', 'route', 'map'] as const;
+const routeGuideText = {
+  kicker: 'Dojazdy z Clepardii',
+  title: 'Jak dojechać z Camping Clepardia?',
+  copy: 'Czasy są orientacyjne. Przed wyjazdem sprawdź aktualną trasę, remonty i bilety w Google Maps albo Jakdojade.',
+  note: 'Orientacyjnie - sprawdź aktualną trasę przed wyjazdem.',
+};
+const routeCards = [
+  {
+    title: 'Stare Miasto / Rynek',
+    icon: 'Landmark',
+    transport: 'Tramwaj 18 + spacer',
+    time: 'ok. 14 min tramwajem + ok. 5 min pieszo',
+    copy: 'Przystanek Górnickiego jest ok. 40 m od bramy. Wysiądź przy Starym Kleparzu i przejdź w stronę Rynku.',
+  },
+  {
+    title: 'Wawel',
+    icon: 'Castle',
+    transport: 'Tramwaj + spacer przez centrum',
+    time: 'zwykle 30-40 min',
+    copy: 'Najlepiej połączyć ze Starym Miastem, Plantami i spacerem nad Wisłę.',
+  },
+  {
+    title: 'Kazimierz',
+    icon: 'Map',
+    transport: 'Tramwaj z przesiadką lub spacer z centrum',
+    time: 'zwykle 35-45 min',
+    copy: 'Dobra opcja na popołudnie lub wieczór po zwiedzaniu Starego Miasta.',
+  },
+  {
+    title: 'Wieliczka',
+    icon: 'Gem',
+    transport: 'Auto, pociąg albo lokalna wycieczka',
+    time: 'zwykle pół dnia',
+    copy: 'Sprawdź godziny wejść i bilety wcześniej. To jedna z najpopularniejszych wycieczek poza centrum.',
+  },
+  {
+    title: 'Auschwitz-Birkenau',
+    icon: 'Shield',
+    transport: 'Auto, autobus albo lokalna wycieczka',
+    time: 'cały dzień',
+    copy: 'Zaplanuj wcześniej bilety, zasady zwiedzania i czas przejazdu. To poważna, intensywna wycieczka.',
+  },
+  {
+    title: 'Energylandia',
+    icon: 'Sparkles',
+    transport: 'Auto albo transfer',
+    time: 'cały dzień',
+    copy: 'Najlepiej potraktować jako osobny dzień rodzinny i po powrocie odpocząć na campingu.',
+  },
+  {
+    title: 'Ojców',
+    icon: 'Trees',
+    transport: 'Najwygodniej autem',
+    time: 'pół dnia / cały dzień',
+    copy: 'Natura, spacer, zamek i spokojniejsze tempo. Dobra alternatywa dla zatłoczonego centrum.',
+  },
+  {
+    title: 'Zakopane',
+    icon: 'Mountain',
+    transport: 'Auto albo transfer',
+    time: 'cały dzień',
+    copy: 'Przy krótkim pobycie to intensywny plan. Warto ruszyć wcześnie i sprawdzić warunki na trasie.',
+  },
+  {
+    title: 'Galeria Krakowska',
+    icon: 'ShoppingBag',
+    transport: 'Tramwaj do Starego Kleparza / centrum',
+    time: 'ok. 14-20 min',
+    copy: 'Praktyczny punkt przy dworcu, centrum i przesiadkach komunikacji miejskiej.',
+  },
+  {
+    title: 'Tauron Arena',
+    icon: 'Ticket',
+    transport: 'Tramwaj z przesiadką lub auto',
+    time: 'zwykle 35-50 min',
+    copy: 'Na wydarzenia sprawdź aktualne zamknięcia ulic i powroty komunikacją po imprezie.',
+  },
+];
 ---
 
 <section class="site-section transport-page-quick reveal-section" aria-label={transportText.quickAria}>
@@ -299,6 +377,51 @@ const ticketIcons = ['ticket', 'receipt', 'route', 'map'] as const;
 <TramCenterGuide languageCode={languageCode} variant="page" />
 
 <ClientGuideTools languageCode={languageCode} variant="transport" />
+
+<section class="site-section transport-route-guide reveal-section">
+  <div class="container">
+    <div class="transport-route-guide__head">
+      <span class="section-kicker">{routeGuideText.kicker}</span>
+      <h2 class="section-title">{routeGuideText.title}</h2>
+      <p class="section-copy">{routeGuideText.copy}</p>
+    </div>
+
+    <div class="transport-route-guide__grid">
+      {routeCards.map((route, index) => (
+        <article class="premium-card transport-route-guide__card reveal-section" style={`--reveal-delay: ${Math.min(index, 8) * 55}ms`}>
+          <span class="transport-route-guide__icon" aria-hidden="true">
+            <Icon name={route.icon} size={22} strokeWidth={1.8} />
+          </span>
+          <div>
+            <h3>{route.title}</h3>
+            <dl>
+              <div>
+                <dt>Transport</dt>
+                <dd>{route.transport}</dd>
+              </div>
+              <div>
+                <dt>Czas</dt>
+                <dd>{route.time}</dd>
+              </div>
+            </dl>
+            <p>{route.copy}</p>
+          </div>
+          <div class="transport-route-guide__actions">
+            <a href={googleMapsHref} target="_blank" rel="noopener noreferrer">
+              <Icon name="MapPin" size={16} strokeWidth={2} />
+              Google Maps
+            </a>
+            <a href="https://jakdojade.pl/krakow" target="_blank" rel="noopener noreferrer">
+              <Icon name="TramFront" size={16} strokeWidth={2} />
+              Jakdojade
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+    <p class="transport-route-guide__note">{routeGuideText.note}</p>
+  </div>
+</section>
 
 <section class="site-section transport-center reveal-section">
   <div class="container transport-center__grid">
@@ -835,6 +958,140 @@ const ticketIcons = ['ticket', 'receipt', 'route', 'map'] as const;
 .transport-final-cta__panel {
   display: grid;
   gap: 28px;
+}
+
+.transport-route-guide {
+  background:
+    radial-gradient(circle at 10% 12%, rgba(60,179,113,.14), transparent 32%),
+    linear-gradient(180deg, #f6f8f2, #edf5ec);
+}
+
+.transport-route-guide__head {
+  max-width: 820px;
+  margin-bottom: clamp(22px, 4vw, 34px);
+}
+
+.transport-route-guide__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+  gap: 18px;
+}
+
+.transport-route-guide__card {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 16px;
+  min-height: 100%;
+  padding: clamp(20px, 2.4vw, 26px);
+  border-radius: 26px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.80), rgba(255,255,255,.58)),
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.13), transparent 36%);
+}
+
+.transport-route-guide__icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: #0f6b3f;
+  background: rgba(60,179,113,.13);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.70);
+}
+
+.transport-route-guide__card h3 {
+  margin: 0 0 14px;
+  color: #102018;
+  font-size: 1.15rem;
+  font-weight: 950;
+  line-height: 1.16;
+}
+
+.transport-route-guide__card dl {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.transport-route-guide__card dl div {
+  display: grid;
+  gap: 2px;
+}
+
+.transport-route-guide__card dt {
+  color: #0f6b3f;
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.transport-route-guide__card dd,
+.transport-route-guide__card p {
+  margin: 0;
+  color: #52645a;
+  line-height: 1.58;
+  font-weight: 760;
+}
+
+.transport-route-guide__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.transport-route-guide__actions a {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: #0d5033;
+  background: rgba(60,179,113,.12);
+  font-size: .78rem;
+  font-weight: 950;
+  text-decoration: none;
+}
+
+.transport-route-guide__note {
+  margin: 18px 0 0;
+  color: #52645a;
+  font-weight: 850;
+}
+
+html[data-theme="dark"] .transport-route-guide {
+  background:
+    radial-gradient(circle at 10% 12%, rgba(60,179,113,.18), transparent 32%),
+    radial-gradient(circle at 90% 0%, rgba(242,192,120,.10), transparent 30%),
+    linear-gradient(180deg, #07120d, #0d1b14);
+}
+
+html[data-theme="dark"] .transport-route-guide__card {
+  border-color: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.07);
+  box-shadow: 0 22px 60px rgba(0,0,0,.24);
+}
+
+html[data-theme="dark"] .transport-route-guide__card h3 {
+  color: #fff;
+}
+
+html[data-theme="dark"] .transport-route-guide__card dt,
+html[data-theme="dark"] .transport-route-guide__actions a {
+  color: #9ee8bd;
+}
+
+html[data-theme="dark"] .transport-route-guide__card dd,
+html[data-theme="dark"] .transport-route-guide__card p,
+html[data-theme="dark"] .transport-route-guide__note {
+  color: rgba(255,255,255,.74);
+}
+
+html[data-theme="dark"] .transport-route-guide__actions a {
+  border-color: rgba(158,232,189,.22);
+  background: rgba(60,179,113,.12);
 }
 
 @media (min-width: 760px) {

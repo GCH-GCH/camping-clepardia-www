@@ -1,5 +1,6 @@
 ---
 import { publicAssetExists, siteAssets } from '@/data/assets';
+import { sectionImages, type SectionImageCategory } from '@/data/imageRegistry';
 import Icon from '@/components/ui/Icon.astro';
 import { getLocalizedPath } from '@/utils/localizedLinks';
 import { getTranslations, resolveContentLanguage } from '@/i18n/config';
@@ -8,7 +9,7 @@ interface Props {
   languageCode?: string;
 }
 
-type GalleryCategory = 'camping' | 'bungalows' | 'sanitary' | 'transport' | 'family' | 'krakow';
+type GalleryCategory = SectionImageCategory | 'krakow';
 
 interface GalleryItem {
   title: string;
@@ -46,6 +47,8 @@ const galleryTextByLanguage = {
       sanitary: 'Sanitariaty / zaplecze',
       transport: 'Okolica',
       family: 'Rodzina',
+      reception: 'Recepcja',
+      aerial: 'Z lotu ptaka',
       krakow: 'Kraków / atrakcje',
     },
     items: [
@@ -89,6 +92,8 @@ const galleryTextByLanguage = {
       sanitary: 'Sanitary / facilities',
       transport: 'Surroundings',
       family: 'Family',
+      reception: 'Reception',
+      aerial: 'Aerial views',
       krakow: 'Krakow / attractions',
     },
     items: [
@@ -132,6 +137,8 @@ const galleryTextByLanguage = {
       sanitary: 'Sanitär / Infrastruktur',
       transport: 'Umgebung',
       family: 'Familie',
+      reception: 'Rezeption',
+      aerial: 'Aus der Luft',
       krakow: 'Krakau / Attraktionen',
     },
     items: [
@@ -175,6 +182,8 @@ const galleryTextByLanguage = {
       sanitary: 'Servizi / strutture',
       transport: 'Dintorni',
       family: 'Famiglia',
+      reception: 'Reception',
+      aerial: 'Vista dall’alto',
       krakow: 'Cracovia / attrazioni',
     },
     items: [
@@ -209,6 +218,8 @@ const categories: Array<{ id: 'all' | GalleryCategory; label: string }> = [
   { id: 'sanitary', label: galleryText.category.sanitary },
   { id: 'transport', label: galleryText.category.transport },
   { id: 'family', label: galleryText.category.family },
+  { id: 'reception', label: galleryText.category.reception },
+  { id: 'aerial', label: galleryText.category.aerial },
   { id: 'krakow', label: galleryText.category.krakow },
 ];
 
@@ -219,115 +230,29 @@ const categoryIcons: Record<GalleryCategory, string> = {
   sanitary: 'sanitary',
   transport: 'tram',
   family: 'family',
+  reception: 'badgeCheck',
+  aerial: 'camera',
   krakow: 'attractions',
 };
 
+const sectionGalleryItems: GalleryItem[] = sectionImages.map((image, index) => ({
+  title: image.title,
+  category: image.category,
+  image: image.src,
+  alt: image.alt,
+  size: image.featured
+    ? 'feature'
+    : image.category === 'aerial' || image.category === 'reception'
+      ? 'wide'
+      : index % 7 === 0
+        ? 'tall'
+        : index % 5 === 0
+          ? 'wide'
+          : 'standard',
+}));
+
 const galleryItems: GalleryItem[] = [
-  {
-    title: galleryText.items[0][0],
-    category: 'camping',
-    image: siteAssets.camping.pitches,
-    alt: galleryText.items[0][1],
-    size: 'feature',
-  },
-  {
-    title: galleryText.items[1][0],
-    category: 'camping',
-    image: siteAssets.camping.camperArea,
-    alt: galleryText.items[1][1],
-    size: 'wide',
-  },
-  {
-    title: galleryText.items[2][0],
-    category: 'camping',
-    image: siteAssets.camping.tents,
-    alt: galleryText.items[2][1],
-    size: 'standard',
-  },
-  {
-    title: galleryText.items[3][0],
-    category: 'camping',
-    image: siteAssets.camping.electricity,
-    alt: galleryText.items[3][1],
-    size: 'tall',
-  },
-  {
-    title: galleryText.items[4][0],
-    category: 'bungalows',
-    image: siteAssets.bungalows.exterior,
-    alt: galleryText.items[4][1],
-    size: 'wide',
-  },
-  {
-    title: galleryText.items[5][0],
-    category: 'bungalows',
-    image: siteAssets.bungalows.room,
-    alt: galleryText.items[5][1],
-    size: 'standard',
-  },
-  {
-    title: galleryText.items[6][0],
-    category: 'bungalows',
-    image: siteAssets.bungalows.bungalow3,
-    alt: galleryText.items[6][1],
-    size: 'tall',
-  },
-  {
-    title: galleryText.items[7][0],
-    category: 'bungalows',
-    image: siteAssets.bungalows.bungalow4,
-    alt: galleryText.items[7][1],
-    size: 'standard',
-  },
-  {
-    title: galleryText.items[8][0],
-    category: 'sanitary',
-    image: siteAssets.sanitary.building,
-    alt: galleryText.items[8][1],
-    size: 'wide',
-  },
-  {
-    title: galleryText.items[9][0],
-    category: 'sanitary',
-    image: siteAssets.sanitary.showers,
-    alt: galleryText.items[9][1],
-    size: 'standard',
-  },
-  {
-    title: galleryText.items[10][0],
-    category: 'sanitary',
-    image: siteAssets.sanitary.kitchen,
-    alt: galleryText.items[10][1],
-    size: 'tall',
-  },
-  {
-    title: galleryText.items[11][0],
-    category: 'sanitary',
-    image: siteAssets.sanitary.laundry,
-    alt: galleryText.items[11][1],
-    size: 'standard',
-  },
-  {
-    title: galleryText.items[12][0],
-    category: 'transport',
-    image: siteAssets.transport.tramToCenter,
-    alt: galleryText.items[12][1],
-    size: 'wide',
-  },
-  {
-    title: galleryText.items[13][0],
-    category: 'transport',
-    image: siteAssets.transport.ticketMachine,
-    alt: galleryText.items[13][1],
-    size: 'standard',
-  },
-  {
-    title: galleryText.items[14][0],
-    category: 'family',
-    image: siteAssets.family.playground,
-    alt: galleryText.items[14][1],
-    size: 'wide',
-  },
+  ...sectionGalleryItems,
   {
     title: galleryText.items[15][0],
     category: 'krakow',

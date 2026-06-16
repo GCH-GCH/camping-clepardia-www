@@ -81,7 +81,7 @@ export const de = {
   },
   toursBooking: {
     reserve: 'Buchen',
-    reserveTitle: 'SeeKrakow-Ausflug buchen',
+    reserveTitle: 'Ausflug ab Krakau buchen',
     reserveDescription:
       'Prüfen Sie aktuelle Ausflüge, Verfügbarkeit und Buchungsdetails. Camping Clepardia ist ein bequemer Ausgangspunkt für Krakau und Małopolska.',
     sellingText:

@@ -19,6 +19,18 @@ export interface InquiryServiceLine {
   price: number;
 }
 
+export interface InquiryVehicleDetails {
+  model: string;
+  length: string;
+  width: string;
+  height: string;
+  weight: string;
+  large: boolean;
+  asphaltNeeded: boolean;
+  notes: string;
+  summary: string;
+}
+
 export interface ReservationInquiryPayload {
   fullName: string;
   email: string;
@@ -49,6 +61,7 @@ export interface ReservationInquiryPayload {
   services?: InquiryServiceLine[];
   estimatedTotal?: number | string;
   vehiclePlate?: string;
+  vehicleDetails?: Partial<InquiryVehicleDetails>;
   specialNeeds?: string;
   lateCheckout?: string;
   originalMessage?: string;
@@ -85,6 +98,7 @@ export interface NormalizedReservationInquiry extends ReservationInquiryPayload 
   services: InquiryServiceLine[];
   estimatedTotal: string;
   vehiclePlate: string;
+  vehicleDetails: InquiryVehicleDetails;
   specialNeeds: string;
   lateCheckout: string;
   originalMessage: string;
@@ -114,6 +128,7 @@ export interface CcSystemLeadDraft {
     services: InquiryServiceLine[];
     estimatedTotal: string;
     vehiclePlate: string;
+    vehicleDetails: InquiryVehicleDetails;
     specialNeeds: string;
     lateCheckout: string;
     summerNotice: boolean;

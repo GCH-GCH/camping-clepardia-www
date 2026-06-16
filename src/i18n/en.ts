@@ -79,7 +79,7 @@ export const en = {
   },
   toursBooking: {
     reserve: 'Book',
-    reserveTitle: 'Book a SeeKrakow tour',
+    reserveTitle: 'Book a tour from Krakow',
     reserveDescription:
       'Check current tours, availability and booking details. Camping Clepardia is a convenient base for exploring Krakow and Lesser Poland.',
     sellingText:

@@ -74,6 +74,7 @@ const reservationApiDevPlugin = () => ({
             departureIso: String(payload.departureIso || '').trim(),
             nights: Number(payload.nights || 0),
             estimatedTotal,
+            vehicleDetails: payload.vehicleDetails || {},
           },
           services,
           originalMessage: String(payload.message || '').trim(),

@@ -38,6 +38,21 @@ const servicesByScope = (inquiry: NormalizedReservationInquiry, scope: string) =
     .filter((service) => service.scope === scope)
     .map((service) => `${service.label} x ${service.qty} (${service.price} PLN / noc)`);
 
+const vehicleDetailsSummary = (inquiry: NormalizedReservationInquiry) => {
+  const details = inquiry.vehicleDetails;
+  const rows = [
+    line('Marka/model', details.model),
+    line('Dlugosc', details.length),
+    line('Szerokosc', details.width),
+    line('Wysokosc', details.height),
+    line('Masa/waga', details.weight),
+    line('Duzy/ciezki pojazd', yesNo(details.large)),
+    line('Potrzebuje asfaltu', yesNo(details.asphaltNeeded)),
+    line('Uwagi do pojazdu', details.notes || details.summary),
+  ];
+  return rows.filter((row) => !row.endsWith(': brak')).join('\n') || 'brak';
+};
+
 const peopleSummary = (inquiry: NormalizedReservationInquiry) => [
   line('Dorośli', inquiry.people.adults),
   line('Dzieci 4-14', inquiry.people.children),
@@ -105,6 +120,7 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
     line('Termin', `${inquiry.arrival} - ${inquiry.departure}`),
     line('Liczba nocy', inquiry.nights),
     line(plateLabel, inquiry.vehiclePlate),
+    vehicleDetailsSummary(inquiry),
     peopleSummary(inquiry),
     '',
     'USŁUGI I CENY',
@@ -173,6 +189,17 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
           ['Termin', `${inquiry.arrival} - ${inquiry.departure}`],
           ['Liczba nocy', inquiry.nights],
           [plateLabel, inquiry.vehiclePlate],
+        ])}
+
+        ${card('Dane pojazdu', [
+          ['Marka/model', inquiry.vehicleDetails.model],
+          ['Dlugosc', inquiry.vehicleDetails.length],
+          ['Szerokosc', inquiry.vehicleDetails.width],
+          ['Wysokosc', inquiry.vehicleDetails.height],
+          ['Masa/waga', inquiry.vehicleDetails.weight],
+          ['Duzy/ciezki pojazd', yesNo(inquiry.vehicleDetails.large)],
+          ['Potrzebuje asfaltu', yesNo(inquiry.vehicleDetails.asphaltNeeded)],
+          ['Uwagi', inquiry.vehicleDetails.notes || inquiry.vehicleDetails.summary],
         ])}
 
         ${card('Goście i cena', [

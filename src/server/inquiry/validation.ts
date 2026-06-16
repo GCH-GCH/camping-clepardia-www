@@ -81,6 +81,21 @@ const normalizeServices = (services?: InquiryServiceLine[]): InquiryServiceLine[
     .slice(0, 40);
 };
 
+const normalizeVehicleDetails = (details: ReservationInquiryPayload['vehicleDetails']) => {
+  const vehicle = details || {};
+  return {
+    model: sanitizeInlineText(vehicle.model, 120),
+    length: sanitizeInlineText(vehicle.length, 40),
+    width: sanitizeInlineText(vehicle.width, 40),
+    height: sanitizeInlineText(vehicle.height, 40),
+    weight: sanitizeInlineText(vehicle.weight, 40),
+    large: Boolean(vehicle.large),
+    asphaltNeeded: Boolean(vehicle.asphaltNeeded),
+    notes: sanitizeText(vehicle.notes, 700),
+    summary: sanitizeText(vehicle.summary, 900),
+  };
+};
+
 const createInquiryId = () => {
   const random = Math.random().toString(36).slice(2, 10).toUpperCase();
   return `WEB-${Date.now().toString(36).toUpperCase()}-${random}`;
@@ -106,6 +121,7 @@ export const normalizeReservationInquiry = (rawPayload: unknown) => {
   const services = normalizeServices(payload.services);
   const estimatedTotal = sanitizeInlineText(payload.estimatedTotal, 80);
   const vehiclePlate = sanitizeInlineText(payload.vehiclePlate, 80);
+  const vehicleDetails = normalizeVehicleDetails(payload.vehicleDetails);
   const specialNeeds = sanitizeText(payload.specialNeeds, 1200);
   const lateCheckout = sanitizeInlineText(payload.lateCheckout, 120);
   const originalMessage = sanitizeText(payload.originalMessage, 2400);
@@ -159,6 +175,7 @@ export const normalizeReservationInquiry = (rawPayload: unknown) => {
     services,
     estimatedTotal,
     vehiclePlate,
+    vehicleDetails,
     specialNeeds,
     lateCheckout,
     originalMessage,
@@ -201,6 +218,7 @@ export const createCcSystemLeadDraft = (inquiry: NormalizedReservationInquiry): 
     services: inquiry.services,
     estimatedTotal: inquiry.estimatedTotal,
     vehiclePlate: inquiry.vehiclePlate,
+    vehicleDetails: inquiry.vehicleDetails,
     specialNeeds: inquiry.specialNeeds,
     lateCheckout: inquiry.lateCheckout,
     summerNotice: inquiry.summerNotice,

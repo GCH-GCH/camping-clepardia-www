@@ -15,7 +15,7 @@ const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode) as SupportedLang;
 const attractionsPath = getLocalizedPath(pathContext.explicitLanguage, 'atrakcje');
-const seeKrakowHref = 'https://qr.codes/vksKBT';
+const tourBookingHref = 'https://qr.codes/vksKBT';
 
 const renderLucideIcon = (name: keyof typeof icons | string) => {
   const iconNode = icons[name as keyof typeof icons] ?? icons.CircleHelp;
@@ -496,7 +496,7 @@ const uxCopy = {
       adviceTitle: 'Podpowiedź na Twój pobyt',
       ctaAttractions: 'Zobacz atrakcje',
       ctaCampy: 'Zapytaj CAMPY o plan dnia',
-      ctaTours: 'Zarezerwuj wycieczkę SeeKrakow',
+      ctaTours: 'Wycieczki z Krakowa',
       past: 'Termin z przeszłości jest niedostępny',
       arrival: 'Przyjazd',
       departure: 'Wyjazd',
@@ -598,7 +598,7 @@ const uxCopy = {
       adviceTitle: 'Stay suggestion',
       ctaAttractions: 'See attractions',
       ctaCampy: 'Ask CAMPY for a day plan',
-      ctaTours: 'Book a SeeKrakow tour',
+      ctaTours: 'Tours from Krakow',
       past: 'Past dates are unavailable',
       arrival: 'Arrival',
       departure: 'Departure',
@@ -733,7 +733,7 @@ const config = {
   icons: iconHtml,
   links: {
     attractions: attractionsPath,
-    seeKrakow: seeKrakowHref,
+    tourBooking: tourBookingHref,
   },
   countries: countries.map((country) => ({
     code: country.code,
@@ -829,6 +829,14 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         countryCode: '',
         countryName: '',
         plate: '',
+        vehicleModel: '',
+        vehicleLength: '',
+        vehicleWidth: '',
+        vehicleHeight: '',
+        vehicleWeight: '',
+        vehicleLarge: false,
+        vehicleAsphalt: false,
+        vehicleNotes: '',
         message: '',
         specialNeeds: false,
         specialNeedsText: '',
@@ -965,6 +973,19 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           plate: 'Jeśli przyjeżdżasz autem, kamperem, vanem lub przyczepą, przygotuj numer rejestracyjny.',
           trailer: 'Przy przyczepie kempingowej wpisz numer rejestracyjny przyczepy.',
         },
+        vehicle: {
+          title: 'Dane pojazdu - opcjonalnie',
+          lead: 'Te informacje pomagają recepcji dobrać wygodne miejsce, szczególnie dla większych pojazdów.',
+          model: 'Marka/model pojazdu',
+          length: 'Długość',
+          width: 'Szerokość',
+          height: 'Wysokość',
+          weight: 'Masa / waga',
+          large: 'Pojazd jest duży lub ciężki',
+          asphalt: 'Potrzebuję miejsca na asfalcie',
+          notes: 'Uwagi do pojazdu',
+          trailer: 'Przy przyjeździe z przyczepą kempingową wpisz numer rejestracyjny przyczepy.',
+        },
         field: {
           name: { placeholder: 'np. Jan Kowalski', helper: 'Podaj imię i nazwisko osoby kontaktowej.' },
           email: { placeholder: 'np. jan@email.com', helper: 'Na ten adres recepcja wyśle odpowiedź. Podaj email lub telefon.' },
@@ -1019,6 +1040,19 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           document: 'At registration we will ask for one identity document.',
           plate: 'If you arrive by car, camper, van or caravan, prepare the registration plate.',
           trailer: 'For a camping trailer, enter the trailer registration plate.',
+        },
+        vehicle: {
+          title: 'Vehicle details - optional',
+          lead: 'These details help reception choose a comfortable pitch, especially for larger vehicles.',
+          model: 'Vehicle make/model',
+          length: 'Length',
+          width: 'Width',
+          height: 'Height',
+          weight: 'Weight',
+          large: 'The vehicle is large or heavy',
+          asphalt: 'I need an asphalt place',
+          notes: 'Vehicle notes',
+          trailer: 'When arriving with a camping trailer, enter the trailer registration plate.',
         },
         field: {
           name: { placeholder: 'e.g. Jan Kowalski', helper: 'Enter the contact person full name.' },
@@ -1326,6 +1360,11 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const estimatedTotal = () => perNightTotal() * Math.max(1, nights() || 1);
 
     const hasChosenService = () => selectedServices().length > 0;
+    const vehicleDetailServiceIds = ['camper', 'van', 'caravan', 'rooftop-tent', 'cargo-trailer', 'bus'];
+    const shouldShowVehicleDetails = () => {
+      if (!(state.mode === 'camping' || state.mode === 'combined')) return false;
+      return vehicleDetailServiceIds.some((id) => getQty('camping', id) > 0);
+    };
 
     const serviceSuggestions = () => {
       const text = ui.serviceSuggestions || {};
@@ -1665,7 +1704,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           <div class="reservation-stay-advice__actions">
             <a href="${esc(config.links?.attractions || '/atrakcje')}" class="reservation-mini-link">${esc(labels.ctaAttractions || 'See attractions')}</a>
             <button type="button" class="reservation-mini-link" data-ask-campy-plan>${esc(labels.ctaCampy || 'Ask CAMPY')}</button>
-            <a href="${esc(config.links?.seeKrakow || 'https://qr.codes/vksKBT')}" target="_blank" rel="noopener noreferrer" class="reservation-mini-link">${esc(labels.ctaTours || 'SeeKrakow')}</a>
+            <a href="${esc(config.links?.tourBooking || 'https://qr.codes/vksKBT')}" target="_blank" rel="noopener noreferrer" class="reservation-mini-link">${esc(labels.ctaTours || 'Wycieczki z Krakowa')}</a>
           </div>
         </div>
       `;
@@ -1874,6 +1913,71 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       </label>
     `;
 
+    const vehicleLabels = () => detailText.vehicle || detailTextByLang.en.vehicle;
+
+    const vehicleDetailsText = () => {
+      if (!shouldShowVehicleDetails()) return '';
+      const labels = vehicleLabels();
+      const rows = [
+        state.details.vehicleModel ? `${labels.model}: ${state.details.vehicleModel}` : '',
+        state.details.vehicleLength ? `${labels.length}: ${state.details.vehicleLength}` : '',
+        state.details.vehicleWidth ? `${labels.width}: ${state.details.vehicleWidth}` : '',
+        state.details.vehicleHeight ? `${labels.height}: ${state.details.vehicleHeight}` : '',
+        state.details.vehicleWeight ? `${labels.weight}: ${state.details.vehicleWeight}` : '',
+        state.details.vehicleLarge ? labels.large : '',
+        state.details.vehicleAsphalt ? labels.asphalt : '',
+        state.details.vehicleNotes ? `${labels.notes}: ${state.details.vehicleNotes}` : '',
+      ].filter(Boolean);
+      return rows.join(' | ');
+    };
+
+    const vehicleDetailsBlock = () => {
+      if (!shouldShowVehicleDetails()) return '';
+      const vehicle = vehicleLabels();
+      return `
+        <div class="reservation-vehicle-details">
+          <header>
+            <span aria-hidden="true">${detailIcon('plate')}</span>
+            <div>
+              <strong>${esc(vehicle.title)}</strong>
+              <p>${esc(vehicle.lead)}</p>
+            </div>
+          </header>
+          <div class="reservation-form-grid">
+            <label class="reservation-field">
+              ${fieldLabel({ icon: 'plate', label: vehicle.model, badge: 'optional' })}
+              <input type="text" data-field="details.vehicleModel" value="${esc(state.details.vehicleModel)}" placeholder="np. Fiat Ducato, VW California" autocomplete="off" />
+            </label>
+            <label class="reservation-field">
+              ${fieldLabel({ icon: 'stay', label: vehicle.length, badge: 'optional' })}
+              <input type="text" data-field="details.vehicleLength" value="${esc(state.details.vehicleLength)}" placeholder="np. 7 m" autocomplete="off" />
+            </label>
+            <label class="reservation-field">
+              ${fieldLabel({ icon: 'stay', label: vehicle.width, badge: 'optional' })}
+              <input type="text" data-field="details.vehicleWidth" value="${esc(state.details.vehicleWidth)}" placeholder="np. 2,3 m" autocomplete="off" />
+            </label>
+            <label class="reservation-field">
+              ${fieldLabel({ icon: 'stay', label: vehicle.height, badge: 'optional' })}
+              <input type="text" data-field="details.vehicleHeight" value="${esc(state.details.vehicleHeight)}" placeholder="np. 3,1 m" autocomplete="off" />
+            </label>
+            <label class="reservation-field">
+              ${fieldLabel({ icon: 'stay', label: vehicle.weight, badge: 'optional' })}
+              <input type="text" data-field="details.vehicleWeight" value="${esc(state.details.vehicleWeight)}" placeholder="np. 3,5 t" autocomplete="off" />
+            </label>
+          </div>
+          <div class="reservation-consents">
+            ${optionRow({ check: 'vehicleLarge', icon: 'plate', label: vehicle.large, helper: vehicle.lead })}
+            ${optionRow({ check: 'vehicleAsphalt', icon: 'plate', label: vehicle.asphalt, helper: vehicle.lead })}
+          </div>
+          <label class="reservation-field reservation-field--wide">
+            ${fieldLabel({ icon: 'message', label: vehicle.notes, badge: 'optional' })}
+            <textarea data-field="details.vehicleNotes" rows="3" placeholder="${esc(vehicle.trailer)}">${esc(state.details.vehicleNotes)}</textarea>
+            <small>${esc(vehicle.trailer)}</small>
+          </label>
+        </div>
+      `;
+    };
+
     const detailsStep = () => {
       const labels = detailsSectionCopy();
       return `
@@ -1943,6 +2047,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
                   <small>${esc(detailText.field.plate.helper)}</small>
                   <small data-plate-helper>${esc(vehiclePlateHelper())}</small>
                 </label>
+                ${vehicleDetailsBlock()}
                 <label class="reservation-field reservation-field--wide">
                   ${fieldLabel({ icon: 'message', label: t.fields.message, badge: 'optional' })}
                   <textarea data-field="details.message" rows="4" placeholder="${esc(detailText.field.message.placeholder)}">${esc(state.details.message)}</textarea>
@@ -2030,6 +2135,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             ${summaryRow('language', t.summary.language, state.details.language)}
             ${state.details.countryCode ? summaryRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
             ${state.details.plate ? summaryRow('plate', t.fields.plate, state.details.plate) : ''}
+            ${vehicleDetailsText() ? summaryRow('plate', vehicleLabels().title, vehicleDetailsText()) : ''}
             ${summaryRow('info', detailText.registration.title, `${detailText.registration.document} ${detailText.registration.trailer}`)}
             ${summaryRow('privacy', detailText.consentSectionTitle, consentsText())}
           </dl>
@@ -2057,6 +2163,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           ${state.details.countryCode ? summaryRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
           ${summaryRow('language', t.summary.language, state.details.language)}
           ${state.details.plate ? summaryRow('plate', t.fields.plate, state.details.plate) : ''}
+          ${vehicleDetailsText() ? summaryRow('plate', vehicleLabels().title, vehicleDetailsText()) : ''}
           ${summaryRow('info', detailText.registration.title, `${detailText.registration.document} ${detailText.registration.trailer}`)}
           ${state.details.specialNeeds ? summaryRow('accessibility', t.summary.specialNeeds, yesLabel()) : ''}
           ${state.details.lateCheckout ? summaryRow('late', t.summary.lateCheckout, state.details.lateTime) : ''}
@@ -2166,6 +2273,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         `Kraj: ${state.details.countryCode ? `${state.details.countryName} (${state.details.countryCode})` : '-'}`,
         `Język kontaktu: ${state.details.language}`,
         `Numer rejestracyjny: ${state.details.plate || '-'}`,
+        `Dane pojazdu: ${vehicleDetailsText() || '-'}`,
         `Specjalne potrzeby: ${state.details.specialNeeds ? (state.details.specialNeedsText || yesLabel()) : '-'}`,
         `Późniejszy wyjazd: ${state.details.lateCheckout ? state.details.lateTime : '-'}`,
         `Cisza nocna: ${state.details.quiet ? 'zaakceptowana' : '-'}`,
@@ -2219,6 +2327,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
               ${state.details.countryCode ? successRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
               ${successRow('language', t.summary.language, state.details.language)}
               ${state.details.plate ? successRow('plate', t.fields.plate, state.details.plate) : ''}
+              ${vehicleDetailsText() ? successRow('plate', vehicleLabels().title, vehicleDetailsText()) : ''}
               ${state.details.specialNeeds ? successRow('accessibility', t.summary.specialNeeds, state.details.specialNeedsText || yesLabel()) : ''}
               ${state.details.lateCheckout ? successRow('late', t.summary.lateCheckout, state.details.lateTime) : ''}
               ${successRow('quiet', 'Cisza nocna', state.details.quiet ? 'zaakceptowana' : 'brak')}
@@ -2294,6 +2403,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           };
       const lateCheckout = state.details.lateCheckout ? state.details.lateTime : '';
       const specialNeeds = state.details.specialNeeds ? state.details.specialNeedsText : '';
+      const vehicleDetailsEnabled = shouldShowVehicleDetails();
 
       return {
         fullName: state.details.name,
@@ -2313,6 +2423,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         message: [
           state.details.message,
           state.details.plate ? `Numer rejestracyjny: ${state.details.plate}` : '',
+          vehicleDetailsText() ? `Dane pojazdu: ${vehicleDetailsText()}` : '',
           specialNeeds ? `Specjalne potrzeby: ${specialNeeds}` : '',
           lateCheckout ? `Późniejszy wyjazd: ${lateCheckout}` : '',
         ].filter(Boolean).join('\n\n'),
@@ -2333,6 +2444,17 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         services,
         estimatedTotal: selectedServices().length ? fmt(estimatedTotal()) : '',
         vehiclePlate: state.details.plate,
+        vehicleDetails: vehicleDetailsEnabled ? {
+          model: state.details.vehicleModel,
+          length: state.details.vehicleLength,
+          width: state.details.vehicleWidth,
+          height: state.details.vehicleHeight,
+          weight: state.details.vehicleWeight,
+          large: state.details.vehicleLarge,
+          asphaltNeeded: state.details.vehicleAsphalt,
+          notes: state.details.vehicleNotes,
+          summary: vehicleDetailsText(),
+        } : undefined,
         specialNeeds,
         lateCheckout,
         originalMessage: state.details.message,
@@ -3886,6 +4008,48 @@ body.booking-app-page .main-content {
   grid-column: 1 / -1;
 }
 
+.reservation-vehicle-details {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 16px;
+  padding: clamp(16px, 2vw, 22px);
+  border: 1px solid rgba(143,224,180,.17);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(60,179,113,.12), transparent 34%),
+    rgba(6,18,13,.34);
+}
+
+.reservation-vehicle-details > header {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.reservation-vehicle-details > header > span {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: #8fe0b4;
+  background: rgba(60,179,113,.12);
+  border: 1px solid rgba(143,224,180,.20);
+}
+
+.reservation-vehicle-details > header strong {
+  display: block;
+  color: #fff;
+  font-size: 1.02rem;
+}
+
+.reservation-vehicle-details > header p {
+  margin: 3px 0 0;
+  color: rgba(245,255,248,.64);
+  line-height: 1.55;
+}
+
 .reservation-field span,
 .reservation-field small {
   display: block;
@@ -5383,6 +5547,7 @@ html[data-theme="light"] .reservation-choice-card,
 html[data-theme="light"] .stay-choice-card,
 html[data-theme="light"] .reservation-step-card,
 html[data-theme="light"] .reservation-details-section,
+html[data-theme="light"] .reservation-vehicle-details,
 html[data-theme="light"] .reservation-summary,
 html[data-theme="light"] .reservation-item-card,
 html[data-theme="light"] .reservation-final-summary,
@@ -5412,6 +5577,7 @@ html[data-theme="light"] .reservation-choice-card strong,
 html[data-theme="light"] .stay-choice-card strong,
 html[data-theme="light"] .reservation-presets strong,
 html[data-theme="light"] .reservation-details-section__head strong,
+html[data-theme="light"] .reservation-vehicle-details > header strong,
 html[data-theme="light"] .reservation-option-row strong,
 html[data-theme="light"] .reservation-help__sections article strong,
 html[data-theme="light"] .reservation-help__short strong,
@@ -5435,6 +5601,7 @@ html[data-theme="light"] .reservation-item-card small,
 html[data-theme="light"] .reservation-item-card em,
 html[data-theme="light"] .reservation-field small,
 html[data-theme="light"] .reservation-details-section__head p,
+html[data-theme="light"] .reservation-vehicle-details > header p,
 html[data-theme="light"] .reservation-option-row small,
 html[data-theme="light"] .reservation-date-helper small,
 html[data-theme="light"] .reservation-calendar__head p,
@@ -5467,6 +5634,7 @@ html[data-theme="light"] .reservation-option-row {
 html[data-theme="light"] .reservation-choice-card__icon,
 html[data-theme="light"] .reservation-item-card__icon,
 html[data-theme="light"] .reservation-details-section__head > span,
+html[data-theme="light"] .reservation-vehicle-details > header > span,
 html[data-theme="light"] .reservation-help__head > span,
 html[data-theme="light"] .reservation-date-helper > i,
 html[data-theme="light"] .reservation-success-modal__mark {

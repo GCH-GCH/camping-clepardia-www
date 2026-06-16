@@ -17,7 +17,7 @@ const pricingHref = getLocalizedPath(languageCode, 'cennik');
 const contactHref = getLocalizedPath(languageCode, 'kontakt');
 const transportHref = getLocalizedPath(languageCode, 'dojazd');
 const plannerHref = getPlannerLocalizedPath(languageCode);
-const seeKrakowHref = 'https://qr.codes/vksKBT';
+const tourBookingHref = 'https://qr.codes/vksKBT';
 const mapsHref = 'https://www.google.com/maps/search/?api=1&query=';
 
 const attractionDetailsByLanguage = {
@@ -482,7 +482,7 @@ const stayPlans = attractionsText.plans;
                     <span>{attractionDetailsCopy.metaLabels.route}</span>
                   </a>
                   {item.detail.showTour && (
-                    <a href={seeKrakowHref} target="_blank" rel="noopener noreferrer">
+                    <a href={tourBookingHref} target="_blank" rel="noopener noreferrer">
                       <Icon name="Ticket" size={16} strokeWidth={2} />
                       <span>{attractionDetailsCopy.metaLabels.tour}</span>
                     </a>
@@ -524,9 +524,9 @@ const stayPlans = attractionsText.plans;
   <div class="container">
     <div class="premium-card attractions-final-cta__panel">
       <ImageFrame
-        src={siteAssets.attractions.seeKrakow}
-        alt="SeeKrakow tours from Camping Clepardia"
-        label="SeeKrakow"
+        src={siteAssets.attractions.tours}
+        alt="Wycieczki z Krakowa z Camping Clepardia"
+        label="Wycieczki z Krakowa"
         className="attractions-final-cta__image"
       />
       <div class="attractions-final-cta__copy">

@@ -3,7 +3,7 @@ import ImageFrame from '@/components/ImageFrame.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { siteAssets } from '@/data/assets';
 import { resolveContentLanguage } from '@/i18n/config';
-import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
 interface Props {
   languageCode?: string;
@@ -14,7 +14,7 @@ const pathContext = getPathContext(Astro.url.pathname);
 const contentLanguage = resolveContentLanguage(languageCode ?? pathContext.languageCode);
 const linkLanguage = pathContext.explicitLanguage;
 const directionsHref = getLocalizedPath(linkLanguage, 'dojazd');
-const contactHref = getLocalizedPath(linkLanguage, 'kontakt');
+const bookingHref = getBookingLocalizedPath(linkLanguage);
 
 const textByLanguage = {
   pl: {
@@ -23,7 +23,7 @@ const textByLanguage = {
     copy:
       'Camping Clepardia pozwala zwiedzać Kraków jak turysta, a odpoczywać jak poza centrum. Zostaw auto, kampera albo przyczepę na miejscu, pojedź tramwajem do miasta i po dniu pełnym wrażeń wróć do zielonej przestrzeni.',
     primary: 'Jak dojechać',
-    secondary: 'Zapytaj o dostępność',
+    secondary: 'Zarezerwuj pobyt',
     imageMain: 'Camping Clepardia — spokojna baza w Krakowie',
     imageSmall: 'Tramwaj do centrum Krakowa',
     steps: [
@@ -38,7 +38,7 @@ const textByLanguage = {
     copy:
       'Camping Clepardia lets you explore Krakow like a traveller and rest away from the strict city centre. Leave your car, motorhome or caravan on site, take the tram into town and return to green space after a full day.',
     primary: 'How to get here',
-    secondary: 'Ask availability',
+    secondary: 'Book your stay',
     imageMain: 'Camping Clepardia — a calm base in Krakow',
     imageSmall: 'Tram to Krakow city centre',
     steps: [
@@ -53,7 +53,7 @@ const textByLanguage = {
     copy:
       'Camping Clepardia lässt Sie Krakau wie Reisende entdecken und abseits des engen Zentrums entspannen. Auto, Wohnmobil oder Wohnwagen bleiben vor Ort, mit der Straßenbahn geht es in die Stadt und nach einem vollen Tag zurück ins Grüne.',
     primary: 'Anfahrt ansehen',
-    secondary: 'Verfügbarkeit anfragen',
+    secondary: 'Aufenthalt buchen',
     imageMain: 'Camping Clepardia — ruhige Basis in Krakau',
     imageSmall: 'Straßenbahn ins Zentrum von Krakau',
     steps: [
@@ -68,7 +68,7 @@ const textByLanguage = {
     copy:
       'Camping Clepardia ti permette di visitare Cracovia come viaggiatore e riposare fuori dal centro più affollato. Lascia auto, camper o roulotte sul posto, prendi il tram verso la città e torna nel verde dopo una giornata intensa.',
     primary: 'Come arrivare',
-    secondary: 'Chiedi disponibilità',
+    secondary: 'Prenota il soggiorno',
     imageMain: 'Camping Clepardia — base tranquilla a Cracovia',
     imageSmall: 'Tram per il centro di Cracovia',
     steps: [
@@ -120,7 +120,7 @@ const text = textByLanguage[contentLanguage];
 
       <div class="section-actions">
         <a class="btn btn-primary premium-button" href={directionsHref}>{text.primary}</a>
-        <a class="btn btn-glass" href={contactHref}>{text.secondary}</a>
+        <a class="btn btn-glass" href={bookingHref}>{text.secondary}</a>
       </div>
     </div>
   </div>

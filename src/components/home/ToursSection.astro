@@ -39,14 +39,14 @@ type Copy = {
 
 const copyByLanguage: Record<string, Copy> = {
   pl: {
-    kicker: 'SeeKrakow experiences',
+    kicker: 'Wycieczki z Krakowa',
     title: 'Wycieczki i atrakcje z Krakowa',
     lead:
       'Camping Clepardia to dobra baza wypadowa do zwiedzania Krakowa i Małopolski. Z recepcji szybko zaplanujesz wycieczki do Wieliczki, Auschwitz-Birkenau, Zakopanego, Energylandii i centrum Krakowa.',
     featuredLabel: 'Polecana wycieczka',
     durationLabel: 'Czas',
     transportLabel: 'Transport',
-    powered: 'Powered by SeeKrakow',
+    powered: 'Partner wycieczek',
     cardsAria: 'Lista polecanych wycieczek z Krakowa',
     benefitsTitle: 'Wygodne zwiedzanie bez tracenia campingowego spokoju.',
     tours: [
@@ -131,14 +131,14 @@ const copyByLanguage: Record<string, Copy> = {
     ],
   },
   en: {
-    kicker: 'SeeKrakow experiences',
+    kicker: 'Tours from Krakow',
     title: 'Tours and attractions from Krakow',
     lead:
       'Camping Clepardia is a comfortable base for exploring Krakow and Lesser Poland. From reception you can plan trips to Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia and Krakow city centre.',
     featuredLabel: 'Featured tour',
     durationLabel: 'Duration',
     transportLabel: 'Transport',
-    powered: 'Powered by SeeKrakow',
+    powered: 'Tour booking partner',
     cardsAria: 'Recommended tours from Krakow',
     benefitsTitle: 'Easy sightseeing with a calm camping base to return to.',
     tours: [
@@ -223,14 +223,14 @@ const copyByLanguage: Record<string, Copy> = {
     ],
   },
   de: {
-    kicker: 'SeeKrakow experiences',
+    kicker: 'Ausflüge ab Krakau',
     title: 'Ausflüge und Attraktionen ab Krakau',
     lead:
       'Camping Clepardia ist ein guter Ausgangspunkt für Krakau und Małopolska. An der Rezeption können Sie Ausflüge nach Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia und ins Zentrum von Krakau planen.',
     featuredLabel: 'Empfohlener Ausflug',
     durationLabel: 'Dauer',
     transportLabel: 'Transport',
-    powered: 'Powered by SeeKrakow',
+    powered: 'Tour-Partner',
     cardsAria: 'Empfohlene Ausflüge ab Krakau',
     benefitsTitle: 'Bequemes Sightseeing mit einem ruhigen Campingplatz als Basis.',
     tours: [
@@ -315,14 +315,14 @@ const copyByLanguage: Record<string, Copy> = {
     ],
   },
   it: {
-    kicker: 'SeeKrakow experiences',
+    kicker: 'Tour da Cracovia',
     title: 'Tour ed attrazioni da Cracovia',
     lead:
       'Camping Clepardia è una base comoda per visitare Cracovia e la Małopolska. Alla reception puoi organizzare tour verso Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia e il centro di Cracovia.',
     featuredLabel: 'Tour consigliato',
     durationLabel: 'Durata',
     transportLabel: 'Trasporto',
-    powered: 'Powered by SeeKrakow',
+    powered: 'Partner tour',
     cardsAria: 'Tour consigliati da Cracovia',
     benefitsTitle: 'Visite comode con un campeggio tranquillo dove tornare.',
     tours: [
@@ -469,7 +469,7 @@ const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
 
       <aside class="tours-section__booking premium-card reveal-section" style="--reveal-delay: 160ms" aria-labelledby="tours-booking-title">
         <ImageFrame
-          src={siteAssets.attractions.seeKrakow}
+          src={siteAssets.attractions.tours}
           alt={bookingText.reserveTitle}
           label={copy.powered}
           className="tours-section__booking-media"

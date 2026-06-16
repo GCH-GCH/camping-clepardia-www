@@ -74,7 +74,7 @@ export const pl = {
   },
   toursBooking: {
     reserve: 'Zarezerwuj',
-    reserveTitle: 'Zarezerwuj wycieczkę z SeeKrakow',
+    reserveTitle: 'Zarezerwuj wycieczkę z Krakowa',
     reserveDescription:
       'Sprawdź aktualne wycieczki, dostępność i szczegóły rezerwacji. Camping Clepardia to wygodna baza wypadowa do zwiedzania Krakowa i Małopolski.',
     sellingText:
