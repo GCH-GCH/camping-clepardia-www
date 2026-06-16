@@ -358,7 +358,7 @@ const routeCards = [
 ];
 ---
 
-<section class="site-section transport-page-quick reveal-section" aria-label={transportText.quickAria}>
+<section class="site-section transport-page-quick" aria-label={transportText.quickAria}>
   <div class="container transport-page-quick__grid">
     {quickInfo.map((item, index) => (
       <article class="premium-card reveal-section transport-page-quick__card" style={`--reveal-delay: ${index * 80}ms`}>
@@ -1130,6 +1130,70 @@ html[data-theme="dark"] .transport-route-guide__actions a {
 }
 
 @media (max-width: 640px) {
+  .transport-page-quick,
+  .transport-route-guide,
+  .transport-center,
+  .transport-tickets,
+  .transport-car,
+  .transport-arrival,
+  .transport-final-cta {
+    overflow-x: clip;
+  }
+
+  .transport-page-quick {
+    padding-top: 72px;
+  }
+
+  :global(.transport-page-quick__card) {
+    min-height: auto;
+    gap: 14px;
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  :global(.transport-page-quick__card strong) {
+    max-width: 100%;
+    font-size: clamp(1rem, 5vw, 1.22rem);
+    overflow-wrap: anywhere;
+  }
+
+  .transport-route-guide__head,
+  .transport-tickets__head {
+    max-width: 100%;
+  }
+
+  .transport-route-guide .section-title,
+  .transport-center .section-title,
+  .transport-tickets .section-title,
+  .transport-car__panel h2,
+  .transport-arrival__panel h2,
+  .transport-final-cta__panel h2 {
+    max-width: 100%;
+    font-size: clamp(2rem, 10vw, 2.85rem);
+    line-height: 1.06;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  .transport-route-guide .section-copy,
+  .transport-center .section-copy,
+  .transport-car__panel p,
+  .transport-arrival__panel p,
+  .transport-final-cta__panel p {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+
+  .transport-route-guide__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .transport-route-guide__actions a {
+    width: 100%;
+    justify-content: center;
+  }
+
   .transport-car__actions,
   .transport-final-cta__actions {
     display: grid;

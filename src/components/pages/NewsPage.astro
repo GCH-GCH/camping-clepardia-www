@@ -28,7 +28,7 @@ const newsFilters = [
 ];
 ---
 
-<section class="site-section news-page reveal-section" data-news-page>
+<section class="site-section news-page" data-news-page>
   <div class="container news-page__inner">
     <header class="news-page__hero">
       <span class="section-kicker">Aktualności</span>
@@ -398,6 +398,71 @@ html[data-theme="dark"] .news-page__search input {
   .news-page__featured,
   .news-page__grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .news-page {
+    min-height: auto;
+    padding-top: 92px;
+    overflow-x: clip;
+  }
+
+  .news-page__inner {
+    gap: 18px;
+  }
+
+  .news-page__hero {
+    max-width: 100%;
+    padding-top: 0;
+  }
+
+  .news-page__hero h1 {
+    max-width: 100%;
+    font-size: clamp(2.05rem, 11vw, 3.15rem);
+    line-height: 1.03;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  .news-page__hero p {
+    max-width: 100%;
+    font-size: .98rem;
+    line-height: 1.58;
+  }
+
+  .news-page__featured,
+  .news-page__tools,
+  .news-page__card {
+    border-radius: 22px;
+  }
+
+  :global(.news-page__featured-image),
+  :global(.news-page__image) {
+    min-height: 220px;
+    border-radius: 18px;
+  }
+
+  .news-page__search {
+    min-width: 0;
+  }
+
+  .news-page__search input {
+    min-width: 0;
+    font-size: .92rem;
+  }
+
+  .news-page__filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .news-page__filters button {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
   }
 }
 </style>
