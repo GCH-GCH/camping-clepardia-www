@@ -44,7 +44,12 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
         return { entries: [], empty: '', noResults: '' };
       }
     };
-    const config = decodeConfig();
+    let config = null;
+    const getConfig = () => {
+      if (config) return config;
+      config = decodeConfig();
+      return config;
+    };
     const root = document.querySelector('[data-global-search]');
     if (!(root instanceof HTMLElement)) return;
 
@@ -59,13 +64,14 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
 
     const render = (query = '') => {
       if (!(results instanceof HTMLElement)) return;
+      const activeConfig = getConfig();
       const normalizedQuery = normalize(query.trim());
       if (!normalizedQuery) {
-        results.innerHTML = `<p class="global-search__empty">${config.empty}</p>`;
+        results.innerHTML = `<p class="global-search__empty">${activeConfig.empty}</p>`;
         return;
       }
 
-      const matches = config.entries
+      const matches = activeConfig.entries
         .map((entry) => {
           const haystack = normalize([entry.title, entry.description, entry.category, entry.badge, ...(entry.keywords || [])].filter(Boolean).join(' '));
           const score = haystack.includes(normalizedQuery)
@@ -81,13 +87,15 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
         .map((item) => item.entry);
 
       if (!matches.length) {
-        results.innerHTML = `<p class="global-search__empty">${config.noResults}</p>`;
+        results.innerHTML = `<p class="global-search__empty">${activeConfig.noResults}</p>`;
         return;
       }
 
       results.innerHTML = matches.map((entry) => `
         <a class="global-search__result" href="${entry.href}">
-          <span class="global-search__result-icon" aria-hidden="true"></span>
+          ${entry.image
+            ? `<img class="global-search__result-image" src="${entry.image}" alt="" width="84" height="84" loading="lazy" decoding="async">`
+            : '<span class="global-search__result-icon" aria-hidden="true"></span>'}
           <span>
             <small>${entry.category}${entry.badge ? ` · ${entry.badge}` : ''}</small>
             <strong>${entry.title}</strong>
@@ -145,7 +153,6 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
         open();
       }
     });
-    render('');
   })();
 </script>
 
@@ -268,6 +275,15 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
   border-radius: 15px;
   background: linear-gradient(135deg, #a8f0c7, #3CB371);
   box-shadow: 0 12px 30px rgba(60,179,113,.22);
+}
+
+.global-search__result-image {
+  width: 42px;
+  height: 42px;
+  display: block;
+  border-radius: 15px;
+  object-fit: cover;
+  box-shadow: 0 12px 30px rgba(20,50,33,.20);
 }
 
 .global-search__result small,

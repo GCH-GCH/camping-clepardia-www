@@ -113,7 +113,7 @@ export const siteNotices: SiteNotice[] = [
     shortDescription: '6-7 czerwca w Krakowie odbywa się Parada Smoków.',
     description:
       '6-7 czerwca w Krakowie odbywa się Parada Smoków. Z campingu do centrum dojedziesz tramwajem w ok. 14 minut, a dalej przejdziesz pieszo w stronę Starego Miasta.',
-    image: '/images/attractions/old-town-krakow.webp',
+    image: '/images/attractions/krakow-main-square.webp',
     imageAlt: 'Stare Miasto w Krakowie jako tło wydarzeń',
     startDate: '2026-06-01',
     endDate: '2026-06-16',
@@ -148,8 +148,8 @@ export const siteNotices: SiteNotice[] = [
     shortDescription: 'Przystanek Górnickiego jest ok. 40 m od bramy.',
     description:
       'Przystanek Górnickiego jest ok. 40 m od campingu. Tramwaj 18 jedzie do Starego Kleparza zwykle ok. 9 przystanków i ok. 14 minut.',
-    image: '/images/sections/tram-stop-near-camping.webp',
-    imageAlt: 'Przystanek tramwajowy blisko Camping Clepardia',
+    image: '/images/attractions/krakow-tram-city-trip.webp',
+    imageAlt: 'Tramwaj podczas przejazdu przez Kraków',
     startDate: '2026-01-01',
     endDate: '2026-12-31',
     isActive: true,
@@ -287,7 +287,7 @@ export const siteNotices: SiteNotice[] = [
     shortDescription: 'Nieaktywny wpis roboczy do weryfikacji.',
     description:
       'Nieaktywny przykład aktualności. Wydarzenia koncertowe wymagają weryfikacji daty, miejsca i źródła przed publikacją jako popup.',
-    image: '/images/attractions/old-town-krakow.webp',
+    image: '/images/attractions/krakow-wawel-castle.webp',
     imageAlt: 'Kraków jako tło wydarzeń koncertowych',
     startDate: '2026-06-01',
     endDate: '2026-12-31',

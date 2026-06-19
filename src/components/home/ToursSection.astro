@@ -3,7 +3,7 @@ import ImageFrame from '@/components/ImageFrame.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { siteAssets } from '@/data/assets';
 import { getTranslations, resolveContentLanguage } from '@/i18n/config';
-import { getPathContext } from '@/utils/localizedLinks';
+import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
 interface Props {
   languageCode?: string;
@@ -414,7 +414,7 @@ const activeLanguage = languageCode ?? pathContext.languageCode;
 const lang = resolveContentLanguage(activeLanguage);
 const copy = copyByLanguage[lang] ?? copyByLanguage.en;
 const bookingText = getTranslations(activeLanguage).toursBooking;
-const bookingUrl = 'https://qr.codes/vksKBT';
+const bookingUrl = getLocalizedPath(pathContext.explicitLanguage, 'atrakcje');
 const bookingChips = Object.values(bookingText.chips);
 const featuredTour = copy.tours.find((tour) => tour.featured) ?? copy.tours[0];
 const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
@@ -459,7 +459,7 @@ const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
               <dd><Icon name="route" size={16} /> {featuredTour.transport}</dd>
             </div>
           </dl>
-          <a class="btn btn-primary tours-section__book-link tours-section__book-link--featured" href={bookingUrl} target="_blank" rel="noopener noreferrer">
+          <a class="btn btn-primary tours-section__book-link tours-section__book-link--featured" href={bookingUrl}>
             <Icon name="CalendarCheck" size={18} />
             {bookingText.reserve}
             <Icon name="ArrowUpRight" size={16} />
@@ -486,7 +486,7 @@ const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
             <span><Icon name="check" size={14} /> {chip}</span>
           ))}
         </div>
-        <a class="btn btn-primary tours-section__booking-cta" href={bookingUrl} target="_blank" rel="noopener noreferrer">
+        <a class="btn btn-primary tours-section__booking-cta" href={bookingUrl}>
           <Icon name="CalendarCheck" size={18} />
           {bookingText.reserve}
           <Icon name="ArrowUpRight" size={16} />
@@ -515,7 +515,7 @@ const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
                 <span><Icon name="clock" size={14} /> {tour.duration}</span>
                 <span><Icon name="route" size={14} /> {tour.transport}</span>
               </div>
-              <a class="tours-section__card-cta" href={bookingUrl} target="_blank" rel="noopener noreferrer">
+              <a class="tours-section__card-cta" href={bookingUrl}>
                 {bookingText.reserve}
                 <Icon name="ArrowUpRight" size={14} />
               </a>

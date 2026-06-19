@@ -32,10 +32,11 @@ const {
   canonical
 } = Astro.props as Props;
 
-const shouldPreloadHero = publicAssetExists(siteAssets.hero.desktop);
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
 const seoLanguageMeta = getSeoLanguageMeta(Astro.url.pathname, siteOrigin, canonical);
 const pathContext = getPathContext(Astro.url.pathname);
+const shouldPreloadHero = !pathContext.slug && publicAssetExists(siteAssets.hero.desktop);
+const shouldPreloadMobileHero = !pathContext.slug && publicAssetExists(siteAssets.hero.mobile);
 const isBookingExperiencePage = isBookingSlug(pathContext.slug);
 const ogUrl = withOrigin(seoLanguageMeta.canonicalHref, siteOrigin ?? Astro.url.origin);
 const resolvedOgTitle = ogTitle ?? title;
@@ -58,8 +59,8 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		<meta name="description" content={description} />
 		<meta name="robots" content="index, follow" />
 		<meta name="theme-color" content="#3CB371" />
-		<meta name="clepardia-build" content="TASK-100-client-ux-stabilization" />
-		<meta name="clepardia-commit" content="task-100" />
+		<meta name="clepardia-build" content="TASK-102-campy-attractions-performance" />
+		<meta name="clepardia-commit" content="task-102" />
 		
 		<!-- Open Graph / Social Media -->
 		<meta property="og:type" content="website" />
@@ -87,7 +88,8 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		
 		<!-- Favicon -->
 		<link rel="preload" as="image" href={logoMain} type="image/svg+xml" />
-		{shouldPreloadHero && <link rel="preload" as="image" href={siteAssets.hero.desktop} type="image/webp" fetchpriority="high" />}
+		{shouldPreloadMobileHero && <link rel="preload" as="image" href={siteAssets.hero.mobile} type="image/webp" fetchpriority="high" media="(max-width: 767px)" />}
+		{shouldPreloadHero && <link rel="preload" as="image" href={siteAssets.hero.desktop} type="image/webp" fetchpriority="high" media="(min-width: 768px)" />}
 		<link rel="icon" type="image/svg+xml" href={logoMain} />
 		<link rel="apple-touch-icon" href={logoMainPng} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />

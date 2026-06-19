@@ -303,11 +303,7 @@ html[data-theme] body {
 
 .main-content,
 .site-navbar,
-.footer,
-.scroll-to-top,
-.floating-chat,
-.camper-scroll-progress,
-.page-scroll-hint {
+.footer {
   position: relative;
   z-index: 1;
 }

@@ -1,7 +1,7 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
 import Icon from '@/components/ui/Icon.astro';
-import { siteAssets } from '@/data/assets';
+import { attractionImages } from '@/data/attractionsImageRegistry';
 import { getLocalizedPath, getPlannerLocalizedPath } from '@/utils/localizedLinks';
 import { getTranslations, resolveContentLanguage } from '@/i18n/config';
 
@@ -17,7 +17,6 @@ const pricingHref = getLocalizedPath(languageCode, 'cennik');
 const contactHref = getLocalizedPath(languageCode, 'kontakt');
 const transportHref = getLocalizedPath(languageCode, 'dojazd');
 const plannerHref = getPlannerLocalizedPath(languageCode);
-const tourBookingHref = 'https://qr.codes/vksKBT';
 const mapsHref = 'https://www.google.com/maps/search/?api=1&query=';
 
 const attractionDetailsByLanguage = {
@@ -31,7 +30,7 @@ const attractionDetailsByLanguage = {
       see: 'Co zobaczyć',
       planner: 'Dodaj do planu',
       route: 'Sprawdź trasę',
-      tour: 'Zarezerwuj wycieczkę',
+      tour: 'Zapytaj recepcję',
     },
     details: [
       {
@@ -145,7 +144,7 @@ const attractionDetailsByLanguage = {
       see: 'What to see',
       planner: 'Add to planner',
       route: 'Check route',
-      tour: 'Book a tour',
+      tour: 'Ask reception',
     },
     details: [
       { id: 'old-town', type: 'classic Krakow', time: 'usually about 14 min by tram + 5 min walk', transport: 'tram 18 to Stary Kleparz', onSite: '2-4 h', forWhom: 'first visit, couples, families', see: 'Main Square, Cloth Hall, Floriańska, Planty', routeQuery: 'Old+Town+Krakow', showTour: false },
@@ -315,7 +314,7 @@ const attractions = [
     id: 'old-town',
     title: attractionsText.attractions[0].title,
     copy: attractionsText.attractions[0].copy,
-    image: siteAssets.attractions.oldTown,
+    image: attractionImages.mainSquare,
     label: attractionsText.attractions[0].label,
     detail: attractionDetailsById.get('old-town'),
   },
@@ -323,7 +322,7 @@ const attractions = [
     id: 'kazimierz',
     title: attractionsText.attractions[1].title,
     copy: attractionsText.attractions[1].copy,
-    image: siteAssets.attractions.kazimierz,
+    image: attractionImages.kazimierz,
     label: attractionsText.attractions[1].label,
     detail: attractionDetailsById.get('kazimierz'),
   },
@@ -331,7 +330,7 @@ const attractions = [
     id: 'wawel',
     title: attractionsText.attractions[2].title,
     copy: attractionsText.attractions[2].copy,
-    image: siteAssets.attractions.wawel,
+    image: attractionImages.wawel,
     label: attractionsText.attractions[2].label,
     detail: attractionDetailsById.get('wawel'),
   },
@@ -339,7 +338,7 @@ const attractions = [
     id: 'wieliczka',
     title: attractionsText.attractions[3].title,
     copy: attractionsText.attractions[3].copy,
-    image: siteAssets.attractions.wieliczka,
+    image: attractionImages.wieliczka,
     label: attractionsText.attractions[3].label,
     detail: attractionDetailsById.get('wieliczka'),
   },
@@ -347,7 +346,7 @@ const attractions = [
     id: 'schindler',
     title: attractionsText.attractions[4].title,
     copy: attractionsText.attractions[4].copy,
-    image: siteAssets.attractions.schindler,
+    image: attractionImages.schindler,
     label: attractionsText.attractions[4].label,
     detail: attractionDetailsById.get('schindler'),
   },
@@ -355,7 +354,7 @@ const attractions = [
     id: 'auschwitz',
     title: attractionsText.attractions[5].title,
     copy: attractionsText.attractions[5].copy,
-    image: siteAssets.attractions.auschwitz,
+    image: attractionImages.auschwitz,
     label: attractionsText.attractions[5].label,
     detail: attractionDetailsById.get('auschwitz'),
   },
@@ -363,7 +362,7 @@ const attractions = [
     id: 'energylandia',
     title: attractionsText.attractions[6].title,
     copy: attractionsText.attractions[6].copy,
-    image: siteAssets.attractions.energylandia,
+    image: attractionImages.energylandia,
     label: attractionsText.attractions[6].label,
     detail: attractionDetailsById.get('energylandia'),
   },
@@ -371,7 +370,7 @@ const attractions = [
     id: 'ojcow',
     title: attractionsText.attractions[7].title,
     copy: attractionsText.attractions[7].copy,
-    image: siteAssets.attractions.ojcow,
+    image: attractionImages.ojcow,
     label: attractionsText.attractions[7].label,
     detail: attractionDetailsById.get('ojcow'),
   },
@@ -379,7 +378,7 @@ const attractions = [
     id: 'zakopane',
     title: attractionsText.attractions[8].title,
     copy: attractionsText.attractions[8].copy,
-    image: siteAssets.attractions.zakopane,
+    image: attractionImages.zakopane,
     label: attractionsText.attractions[8].label,
     detail: attractionDetailsById.get('zakopane'),
   },
@@ -409,10 +408,13 @@ const stayPlans = attractionsText.plans;
 
     <div class="attractions-local__media">
       <ImageFrame
-        src={siteAssets.attractions.oldTown}
+        src={attractionImages.mainSquare.src}
         alt={attractionsText.localTitle}
         label={attractionsText.localKicker}
         className="attractions-local__image"
+        width={attractionImages.mainSquare.width}
+        height={attractionImages.mainSquare.height}
+        sizes={attractionImages.mainSquare.sizes}
       />
       <div class="premium-card attractions-local__route">
         <span>{attractionsText.routeCamping}</span><i></i><span>{attractionsText.routeTram}</span><i></i><span>{attractionsText.routeCenter}</span>
@@ -435,10 +437,13 @@ const stayPlans = attractionsText.plans;
       {attractions.map((item, index) => (
         <article class="premium-card reveal-section attractions-list__card" style={`--reveal-delay: ${index * 65}ms`}>
           <ImageFrame
-            src={item.image}
-            alt={item.title}
+            src={item.image.src}
+            alt={item.image.altPl || item.title}
             label={item.label}
             className="attractions-list__image"
+            width={item.image.width}
+            height={item.image.height}
+            sizes={item.image.sizes}
           />
           <div class="attractions-list__body">
             <span>{String(index + 1).padStart(2, '0')}</span>
@@ -482,7 +487,7 @@ const stayPlans = attractionsText.plans;
                     <span>{attractionDetailsCopy.metaLabels.route}</span>
                   </a>
                   {item.detail.showTour && (
-                    <a href={tourBookingHref} target="_blank" rel="noopener noreferrer">
+                    <a href={contactHref}>
                       <Icon name="Ticket" size={16} strokeWidth={2} />
                       <span>{attractionDetailsCopy.metaLabels.tour}</span>
                     </a>
@@ -524,10 +529,13 @@ const stayPlans = attractionsText.plans;
   <div class="container">
     <div class="premium-card attractions-final-cta__panel">
       <ImageFrame
-        src={siteAssets.attractions.tours}
+        src={attractionImages.mainSquare.src}
         alt="Wycieczki z Krakowa z Camping Clepardia"
         label="Wycieczki z Krakowa"
         className="attractions-final-cta__image"
+        width={attractionImages.mainSquare.width}
+        height={attractionImages.mainSquare.height}
+        sizes={attractionImages.mainSquare.sizes}
       />
       <div class="attractions-final-cta__copy">
         <span class="section-kicker">{attractionsText.ctaKicker}</span>

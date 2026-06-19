@@ -8,9 +8,25 @@ interface Props {
   label: string;
   className?: string;
   portrait?: boolean;
+  width?: number;
+  height?: number;
+  sizes?: string;
+  loading?: 'eager' | 'lazy';
+  fetchPriority?: 'high' | 'low' | 'auto';
 }
 
-const { src, alt, label, className = '', portrait = false } = Astro.props as Props;
+const {
+  src,
+  alt,
+  label,
+  className = '',
+  portrait = false,
+  width = 1600,
+  height = 1000,
+  sizes = '(max-width: 759px) calc(100vw - 32px), 50vw',
+  loading = 'lazy',
+  fetchPriority = 'auto',
+} = Astro.props as Props;
 const imageExists = publicAssetExists(src);
 const fallbackScope = `${src} ${label} ${alt}`.toLowerCase();
 const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('transport')
@@ -38,7 +54,16 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
 >
   {imageExists ? (
     <>
-      <img src={src} alt={alt} loading="lazy" decoding="async" />
+      <img
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        sizes={sizes}
+        loading={loading}
+        decoding="async"
+        fetchpriority={fetchPriority}
+      />
       <figcaption>{label}</figcaption>
     </>
   ) : (

@@ -1,7 +1,7 @@
 ---
 import { icons } from 'lucide';
 import { countries } from '@/data/countries';
-import { pricingConfig } from '@/data/pricing';
+import { currencyEstimateConfig, pricingConfig } from '@/data/pricing';
 import { resolveContentLanguage } from '@/i18n/config';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
@@ -15,7 +15,9 @@ const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode) as SupportedLang;
 const attractionsPath = getLocalizedPath(pathContext.explicitLanguage, 'atrakcje');
-const tourBookingHref = 'https://qr.codes/vksKBT';
+const plannerPath = getLocalizedPath(pathContext.explicitLanguage, 'planer-pobytu');
+const directionsPath = getLocalizedPath(pathContext.explicitLanguage, 'dojazd');
+const contactPath = getLocalizedPath(pathContext.explicitLanguage, 'kontakt');
 
 const renderLucideIcon = (name: keyof typeof icons | string) => {
   const iconNode = icons[name as keyof typeof icons] ?? icons.CircleHelp;
@@ -716,6 +718,7 @@ const config = {
   lang,
   t,
   currency: pricingConfig.currency,
+  currencyEstimate: currencyEstimateConfig,
   seasons: pricingConfig.seasons,
   people: {
     adults: { label: t.guests.adults, price: pricingConfig.people.adults.price },
@@ -733,7 +736,9 @@ const config = {
   icons: iconHtml,
   links: {
     attractions: attractionsPath,
-    tourBooking: tourBookingHref,
+    planner: plannerPath,
+    directions: directionsPath,
+    contact: contactPath,
   },
   countries: countries.map((country) => ({
     code: country.code,
@@ -774,6 +779,11 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           ))}
         </div>
         <button class="reservation-simple-link" type="button" data-simple-start>{ux.simple.cta}</button>
+        <div class="reservation-trip-ctas reservation-trip-ctas--start">
+          <a href={plannerPath} class="reservation-mini-link">Dodaj plan pobytu</a>
+          <a href={attractionsPath} class="reservation-mini-link">Zobacz atrakcje</a>
+          <a href={directionsPath} class="reservation-mini-link">Jak dojechać do centrum?</a>
+        </div>
         <p class="reservation-mini__note">{t.startLead}</p>
       </div>
     </div>
@@ -1099,6 +1109,13 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       .replace(/'/g, '&#39;');
 
     const fmt = (value) => `${Math.round(Number(value || 0))} ${currency}`;
+    const currencyEstimateText = (value) => {
+      const rates = config.currencyEstimate?.rates || {};
+      const pln = Math.max(0, Number(value) || 0);
+      if (!rates.EUR || !rates.USD || !rates.GBP) return '';
+      return `ok. ${Math.round(pln / rates.EUR)} EUR / ${Math.round(pln / rates.USD)} USD / ${Math.round(pln / rates.GBP)} GBP`;
+    };
+    const currencyDisclaimer = () => config.currencyEstimate?.disclaimer || 'Waluty obce pokazujemy wyłącznie orientacyjnie.';
 
     const normalize = (value) => String(value ?? '')
       .toLowerCase()
@@ -1197,6 +1214,45 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       return advice.five || '';
     };
 
+    const tripCtas = () => {
+      const count = nights();
+      if (!count) {
+        return [
+          { href: config.links?.planner || '/planer-pobytu', label: config.lang === 'pl' ? 'Dodaj plan pobytu' : 'Add a stay plan' },
+          { href: config.links?.attractions || '/atrakcje', label: config.lang === 'pl' ? 'Zobacz, co zwiedzić' : 'See what to visit' },
+        ];
+      }
+      if (count === 1) {
+        return [
+          { href: config.links?.directions || '/dojazd', label: config.lang === 'pl' ? 'Jak dojechać do centrum?' : 'How to reach the centre?' },
+          { href: config.links?.attractions || '/atrakcje', label: config.lang === 'pl' ? 'Stare Miasto i Wawel' : 'Old Town and Wawel' },
+        ];
+      }
+      if (count === 2) {
+        return [
+          { href: config.links?.planner || '/planer-pobytu', label: config.lang === 'pl' ? 'Plan na 2 noce' : '2-night plan' },
+          { href: config.links?.attractions || '/atrakcje', label: config.lang === 'pl' ? 'Kazimierz i centrum' : 'Kazimierz and centre' },
+        ];
+      }
+      if (count === 3) {
+        return [
+          { href: config.links?.attractions || '/atrakcje', label: config.lang === 'pl' ? 'Wieliczka / Auschwitz-Birkenau' : 'Wieliczka / Auschwitz-Birkenau' },
+          { href: config.links?.planner || '/planer-pobytu', label: config.lang === 'pl' ? 'Plan na 3 noce' : '3-night plan' },
+        ];
+      }
+      return [
+        { href: config.links?.planner || '/planer-pobytu', label: config.lang === 'pl' ? 'Plan pobytu 4+ nocy' : '4+ night stay plan' },
+        { href: config.links?.attractions || '/atrakcje', label: config.lang === 'pl' ? 'Kraków i Małopolska' : 'Krakow and Lesser Poland' },
+      ];
+    };
+
+    const tripCtaTemplate = (compact = false) => `
+      <div class="${compact ? 'reservation-trip-ctas reservation-trip-ctas--compact' : 'reservation-trip-ctas'}">
+        ${tripCtas().map((cta) => `<a href="${esc(cta.href)}" class="reservation-mini-link">${esc(cta.label)}</a>`).join('')}
+        <a href="${esc(config.links?.contact || '/kontakt')}" class="reservation-mini-link">${esc(config.lang === 'pl' ? 'Zapytaj recepcję o wycieczkę' : 'Ask reception about trips')}</a>
+      </div>
+    `;
+
     const nights = () => {
       const arrival = parseDate(state.dates.arrival);
       const departure = parseDate(state.dates.departure);
@@ -1252,10 +1308,11 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const presets = {
       camping: [
-        { id: 'camping-camper-power', icon: 'camper', label: '2 osoby + kamper + prąd', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:camper': 1, 'camping:electricity': 1 } },
-        { id: 'camping-van', icon: 'van', label: '2 osoby + van', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:van': 1 } },
-        { id: 'camping-caravan-power', icon: 'caravan', label: '2 osoby + auto + przyczepa + prąd', toast: 'Dodano zestaw: 2 osoby + auto + przyczepa + prąd 🌿', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:parking': 1, 'camping:caravan': 1, 'camping:electricity': 1 } },
-        { id: 'camping-tent', icon: 'tent-small', label: '2 osoby + namiot', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:tent-small': 1 } },
+        { id: 'camper-electricity', icon: 'camper', label: '2 osoby + kamper + prąd', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:camper': 1, 'camping:electricity': 1 } },
+        { id: 'van', icon: 'van', label: '2 osoby + van', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:van': 1 } },
+        { id: 'caravan-electricity', icon: 'caravan', label: '2 osoby + auto + przyczepa + prąd', toast: 'Dodano zestaw: 2 osoby + auto + przyczepa + prąd 🌿', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:parking': 1, 'camping:caravan': 1, 'camping:electricity': 1 } },
+        { id: 'tent-small', icon: 'tent-small', label: '2 osoby + namiot 1-2 os.', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:tent-small': 1 } },
+        { id: 'tent-large', icon: 'tent-large', label: '2 osoby + namiot 3-4 os.', guests: { adults: 2, children: 0, toddlers: 0 }, services: { 'camping:tent-large': 1 } },
         { id: 'camping-family', icon: 'camper', label: 'Rodzina: 2 dorosłych + 2 dzieci + kamper + prąd', guests: { adults: 2, children: 2, toddlers: 0 }, services: { 'camping:camper': 1, 'camping:electricity': 1 } },
       ],
       bungalow: [
@@ -1577,6 +1634,11 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           `).join('')}
         </div>
         <button class="reservation-simple-link" type="button" data-simple-start>${esc(ui.simple.cta)}</button>
+        <div class="reservation-trip-ctas reservation-trip-ctas--start">
+          <a href="${esc(config.links?.planner || '/planer-pobytu')}" class="reservation-mini-link">${esc(config.lang === 'pl' ? 'Dodaj plan pobytu' : 'Add a stay plan')}</a>
+          <a href="${esc(config.links?.attractions || '/atrakcje')}" class="reservation-mini-link">${esc(config.lang === 'pl' ? 'Zobacz atrakcje' : 'See attractions')}</a>
+          <a href="${esc(config.links?.directions || '/dojazd')}" class="reservation-mini-link">${esc(config.lang === 'pl' ? 'Jak dojechać do centrum?' : 'How to reach the centre?')}</a>
+        </div>
         <p class="reservation-mini__note">${esc(t.startLead)}</p>
       </div>
     `;
@@ -1704,7 +1766,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           <div class="reservation-stay-advice__actions">
             <a href="${esc(config.links?.attractions || '/atrakcje')}" class="reservation-mini-link">${esc(labels.ctaAttractions || 'See attractions')}</a>
             <button type="button" class="reservation-mini-link" data-ask-campy-plan>${esc(labels.ctaCampy || 'Ask CAMPY')}</button>
-            <a href="${esc(config.links?.tourBooking || 'https://qr.codes/vksKBT')}" target="_blank" rel="noopener noreferrer" class="reservation-mini-link">${esc(labels.ctaTours || 'Wycieczki z Krakowa')}</a>
+            ${tripCtaTemplate(true)}
           </div>
         </div>
       `;
@@ -2140,6 +2202,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             ${summaryRow('privacy', detailText.consentSectionTitle, consentsText())}
           </dl>
           ${missingListTemplate(true)}
+          ${tripCtaTemplate(true)}
           <small>${esc(t.summary.confirm)}</small>
           ${depositNote ? `<p class="reservation-summary__deposit">${esc(depositNote)}</p>` : ''}
         `;
@@ -2172,7 +2235,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <div class="reservation-summary__total">
           <span>${esc(t.summary.total)}</span>
           <strong>${fmt(estimatedTotal())}</strong>
+          <em>${esc(currencyEstimateText(estimatedTotal()))}</em>
         </div>
+        <p class="reservation-currency-disclaimer">${esc(currencyDisclaimer())}</p>
+        ${tripCtaTemplate(true)}
         ${missingListTemplate(true)}
         <small>${esc(t.summary.confirm)}</small>
         ${depositNote ? `<p class="reservation-summary__deposit">${esc(depositNote)}</p>` : ''}
@@ -2270,6 +2336,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         `Goście: ${guestsText()}`,
         `Usługi: ${selected.length ? servicesText() : '-'}`,
         `Cena orientacyjna: ${selected.length ? fmt(estimatedTotal()) : '-'}`,
+        selected.length ? `Waluty orientacyjnie: ${currencyEstimateText(estimatedTotal())}` : '',
+        selected.length ? currencyDisclaimer() : '',
         `Kraj: ${state.details.countryCode ? `${state.details.countryName} (${state.details.countryCode})` : '-'}`,
         `Język kontaktu: ${state.details.language}`,
         `Numer rejestracyjny: ${state.details.plate || '-'}`,
@@ -2324,6 +2392,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
               ${successRow('guests', t.summary.guests, guestsText())}
               ${selected.length ? successRow('services', t.summary.services, servicesText()) : ''}
               ${successRow('price', t.summary.total, selected.length ? fmt(estimatedTotal()) : '-')}
+              ${selected.length ? successRow('price', 'Waluty orientacyjnie', currencyEstimateText(estimatedTotal())) : ''}
               ${state.details.countryCode ? successRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
               ${successRow('language', t.summary.language, state.details.language)}
               ${state.details.plate ? successRow('plate', t.fields.plate, state.details.plate) : ''}
@@ -2335,7 +2404,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
               ${successRow('privacy', detailText.missing.privacy, state.details.privacy ? 'zaakceptowana' : 'brak')}
             </dl>
             <p class="reservation-success-modal__note">${esc(stayNote)}</p>
+            ${selected.length ? `<p class="reservation-success-modal__note">${esc(currencyDisclaimer())}</p>` : ''}
             ${depositNote ? `<p class="reservation-success-modal__note reservation-success-modal__note--deposit">${esc(depositNote)}</p>` : ''}
+            ${tripCtaTemplate(true)}
             <button class="reservation-btn reservation-btn--primary reservation-success-modal__copy" type="button" data-copy-summary>${detailIcon('copy')}${esc(detailText.copySummary)}</button>
             <p class="reservation-copy-status" data-copy-status hidden></p>
             <textarea class="reservation-copy-fallback" data-copy-fallback rows="8" readonly hidden>${esc(copySummaryText())}</textarea>
@@ -2437,12 +2508,16 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         calculatorSummary: {
           total: selectedServices().length ? fmt(estimatedTotal()) : '',
           pricePerNight: selectedServices().length ? fmt(perNightTotal()) : '',
+          currencyEstimate: selectedServices().length ? currencyEstimateText(estimatedTotal()) : '',
+          currencyDisclaimer: selectedServices().length ? currencyDisclaimer() : '',
           season: highSeason() ? 'high' : 'low',
           breakdown: services.map((item) => `${item.label} x ${item.qty}: ${fmt(item.price * item.qty)} / noc`),
         },
         stayMode: state.mode,
         services,
         estimatedTotal: selectedServices().length ? fmt(estimatedTotal()) : '',
+        currencyEstimate: selectedServices().length ? currencyEstimateText(estimatedTotal()) : '',
+        currencyDisclaimer: selectedServices().length ? currencyDisclaimer() : '',
         vehiclePlate: state.details.plate,
         vehicleDetails: vehicleDetailsEnabled ? {
           model: state.details.vehicleModel,
@@ -3231,11 +3306,14 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       }
     });
 
-    const queryMode = new URLSearchParams(window.location.search).get('stay');
+    const queryParams = new URLSearchParams(window.location.search);
+    const queryMode = queryParams.get('stay');
+    const queryPreset = queryParams.get('preset');
     if (stayModes.includes(queryMode)) {
       state.mode = queryMode;
-      state.step = 1;
+      state.step = queryPreset ? 3 : 1;
       render({ motion: 'step' });
+      if (queryPreset) applyPreset(queryPreset);
     }
 
     window.addEventListener('keydown', (event) => {
@@ -4403,6 +4481,22 @@ body.booking-app-page .main-content {
   gap: 10px;
 }
 
+.reservation-trip-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.reservation-trip-ctas--start {
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.reservation-trip-ctas--compact {
+  display: contents;
+}
+
 .reservation-mini-link,
 .reservation-smart-suggestions button {
   min-height: 38px;
@@ -5026,6 +5120,23 @@ body.booking-app-page .main-content {
 
 .reservation-summary__total strong {
   font-size: 2rem;
+}
+
+.reservation-summary__total em {
+  color: rgba(7,20,15,.78);
+  font-size: .86rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.reservation-currency-disclaimer {
+  margin: 0 0 12px !important;
+  padding: 11px 12px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 16px;
+  color: rgba(245,255,248,.72) !important;
+  background: rgba(60,179,113,.08);
+  font-size: .84rem;
 }
 
 .reservation-success {

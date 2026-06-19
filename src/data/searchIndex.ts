@@ -1,4 +1,6 @@
 import { getActiveSiteNotices, getNoticeCopy } from './siteNotices';
+import { currencyEstimateConfig, formatCurrencyEstimates, pricingConfig } from './pricing';
+import { attractionImages } from './attractionsImageRegistry';
 
 export interface SearchIndexEntry {
   id: string;
@@ -8,8 +10,16 @@ export interface SearchIndexEntry {
   category: string;
   badge?: string;
   icon?: string;
+  image?: string;
   keywords: string[];
 }
+
+const stayPrice = (id: string) => {
+  const item = pricingConfig.stayTypes.find((entry) => entry.id === id);
+  return item && 'price' in item ? item.price : 0;
+};
+const addonPrice = (id: string) => pricingConfig.addons.find((entry) => entry.id === id)?.price ?? 0;
+const camperExample = pricingConfig.people.adults.price * 2 + stayPrice('camper') + addonPrice('electricity');
 
 export const baseSearchIndex: SearchIndexEntry[] = [
   {
@@ -31,6 +41,46 @@ export const baseSearchIndex: SearchIndexEntry[] = [
     badge: '30 PLN',
     icon: 'PlugZap',
     keywords: ['prąd', 'prad', '10a', 'elektryczność', 'ev', 'ładowanie', 'cennik'],
+  },
+  {
+    id: 'tent-small-price',
+    title: 'Namiot 1-2 os.',
+    description: `Namiot 1-2 os. kosztuje ${stayPrice('tent-small')} PLN / noc. Przykład: 2 dorosłych + mały namiot = ${pricingConfig.people.adults.price * 2 + stayPrice('tent-small')} PLN / noc.`,
+    href: '/cennik',
+    category: 'Cennik',
+    badge: `${stayPrice('tent-small')} PLN`,
+    icon: 'Tent',
+    keywords: ['namiot', 'namiot maly', 'mały namiot', 'tent', 'small tent', '1-2', 'cena namiotu'],
+  },
+  {
+    id: 'tent-large-price',
+    title: 'Namiot 3-4 os.',
+    description: `Namiot 3-4 os. kosztuje ${stayPrice('tent-large')} PLN / noc. Przykład: 2 dorosłych + duży namiot = ${pricingConfig.people.adults.price * 2 + stayPrice('tent-large')} PLN / noc.`,
+    href: '/cennik',
+    category: 'Cennik',
+    badge: `${stayPrice('tent-large')} PLN`,
+    icon: 'Tent',
+    keywords: ['namiot', 'duzy namiot', 'duży namiot', 'tent large', '3-4', 'cena namiotu'],
+  },
+  {
+    id: 'cargo-trailer-price',
+    title: 'Przyczepa bagażowa',
+    description: `Przyczepa bagażowa kosztuje ${addonPrice('cargo-trailer')} PLN / noc. Przyczepa kempingowa pozostaje osobną pozycją w cenniku.`,
+    href: '/cennik',
+    category: 'Cennik',
+    badge: `${addonPrice('cargo-trailer')} PLN`,
+    icon: 'Container',
+    keywords: ['przyczepa bagażowa', 'trailer', 'cargo trailer', 'bagaż', 'przyczepka'],
+  },
+  {
+    id: 'currency-estimates',
+    title: 'Waluty orientacyjne EUR / USD / GBP',
+    description: `Ceny pokazujemy głównie w PLN. Przykład: ${camperExample} PLN to ${formatCurrencyEstimates(camperExample)}. ${currencyEstimateConfig.shortDisclaimer}`,
+    href: '/cennik',
+    category: 'Cennik',
+    badge: 'Orientacyjnie',
+    icon: 'Coins',
+    keywords: ['eur', 'euro', 'usd', 'dolar', 'dollar', 'gbp', 'funt', 'pound', 'waluty', 'currency', 'exchange'],
   },
   {
     id: 'dog',
@@ -100,7 +150,40 @@ export const baseSearchIndex: SearchIndexEntry[] = [
     category: 'Atrakcje',
     badge: 'Pół dnia',
     icon: 'Landmark',
+    image: attractionImages.wieliczka.src,
     keywords: ['wieliczka', 'kopalnia soli', 'wycieczka', 'wycieczki z krakowa'],
+  },
+  {
+    id: 'wawel',
+    title: 'Wawel',
+    description: 'Wawel pasuje nawet do krótkiego pobytu. Najwygodniej dojechać tramwajem do centrum i przejść przez Stare Miasto.',
+    href: '/atrakcje',
+    category: 'Atrakcje',
+    badge: 'Kraków',
+    icon: 'Landmark',
+    image: attractionImages.wawel.src,
+    keywords: ['wawel', 'zamek', 'katedra', 'stare miasto', 'kraków', 'krakow'],
+  },
+  {
+    id: 'schindler',
+    title: 'Fabryka Schindlera',
+    description: 'Muzeum historii XX wieku i dobry pomysł na deszczowy dzień w Krakowie.',
+    href: '/atrakcje',
+    category: 'Atrakcje',
+    badge: 'Muzeum',
+    icon: 'Building2',
+    image: attractionImages.schindler.src,
+    keywords: ['schindler', 'fabryka schindlera', 'muzeum', 'deszcz', 'history'],
+  },
+  {
+    id: 'stay-plans',
+    title: 'Plan pobytu 1 / 2 / 3 noce',
+    description: 'Planer podpowiada, co zwiedzić przy 1, 2, 3 lub 4+ nocach: centrum, Wawel, Kazimierz, Wieliczka, Auschwitz i Małopolska.',
+    href: '/planer-pobytu',
+    category: 'Planer',
+    badge: 'Wycieczki',
+    icon: 'CalendarDays',
+    keywords: ['plan', 'planer', '1 noc', '2 noce', '3 noce', 'wycieczki', 'trips', 'wieliczka', 'auschwitz', 'dzieci'],
   },
   {
     id: 'auschwitz',
@@ -110,7 +193,74 @@ export const baseSearchIndex: SearchIndexEntry[] = [
     category: 'Atrakcje',
     badge: 'Cały dzień',
     icon: 'Shield',
+    image: attractionImages.auschwitz.src,
     keywords: ['auschwitz', 'birkenau', 'oświęcim', 'wycieczka', 'wycieczki z krakowa'],
+  },
+  {
+    id: 'energylandia',
+    title: 'Energylandia',
+    description: 'Całodniowy kierunek dla rodzin i osób szukających parku rozrywki poza Krakowem.',
+    href: '/atrakcje',
+    category: 'Atrakcje',
+    badge: 'Cały dzień',
+    icon: 'Sparkles',
+    image: attractionImages.energylandia.src,
+    keywords: ['energylandia', 'zator', 'park rozrywki', 'dzieci', 'rodzina'],
+  },
+  {
+    id: 'ojcow',
+    title: 'Ojcowski Park Narodowy',
+    description: 'Spokojniejsza wycieczka z naturą, wapiennymi skałami i zamkami blisko Krakowa.',
+    href: '/atrakcje',
+    category: 'Atrakcje',
+    badge: 'Natura',
+    icon: 'Trees',
+    image: attractionImages.ojcow.src,
+    keywords: ['ojców', 'ojcow', 'park narodowy', 'natura', 'zamek', 'pieskowa skała'],
+  },
+  {
+    id: 'zakopane',
+    title: 'Zakopane i Tatry',
+    description: 'Całodniowa wycieczka dla dłuższych pobytów, najlepiej planowana z wyprzedzeniem.',
+    href: '/atrakcje',
+    category: 'Atrakcje',
+    badge: 'Góry',
+    icon: 'MountainSnow',
+    image: attractionImages.zakopane.src,
+    keywords: ['zakopane', 'tatry', 'góry', 'krupówki', 'wycieczka'],
+  },
+  {
+    id: 'bagry',
+    title: 'Zalew Bagry',
+    description: 'Miejska plaża i teren rekreacyjny na cieplejszy, spokojniejszy dzień w Krakowie.',
+    href: '/atrakcje',
+    category: 'Atrakcje',
+    badge: 'Plaża',
+    icon: 'Waves',
+    image: attractionImages.bagry.src,
+    keywords: ['bagry', 'zalew', 'plaża', 'woda', 'kraków', 'lato'],
+  },
+  {
+    id: 'kryspinow',
+    title: 'Kryspinów',
+    description: 'Kąpielisko i plaża pod Krakowem, dobre jako odpoczynek między dniami zwiedzania.',
+    href: '/atrakcje',
+    category: 'Atrakcje',
+    badge: 'Odpoczynek',
+    icon: 'Umbrella',
+    image: attractionImages.kryspinow.src,
+    keywords: ['kryspinów', 'kryspinow', 'plaża', 'kąpielisko', 'woda', 'lato'],
+  },
+  {
+    id: 'water-park',
+    title: 'Park Wodny w Krakowie',
+    description: 'Rodzinny plan na kilka godzin i jedna z opcji na dzień z gorszą pogodą.',
+    href: '/atrakcje',
+    category: 'Atrakcje',
+    badge: 'Z dziećmi',
+    icon: 'Waves',
+    image: attractionImages.waterPark.src,
+    keywords: ['park wodny', 'aquapark', 'dzieci', 'deszcz', 'kraków', 'basen'],
   },
   {
     id: 'season',

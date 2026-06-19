@@ -1,5 +1,5 @@
 ---
-import { pricingConfig } from '@/data/pricing';
+import { currencyEstimateConfig, formatCurrencyEstimates, pricingConfig } from '@/data/pricing';
 import Icon from '@/components/ui/Icon.astro';
 import { getBookingLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
@@ -13,6 +13,7 @@ const activeLanguage = languageCode ?? pathContext.languageCode;
 const bookingHref = getBookingLocalizedPath(activeLanguage);
 const currency = pricingConfig.currency;
 const formatPrice = (price: number) => `${price} ${currency}`;
+const formatEstimate = (price: number) => formatCurrencyEstimates(price);
 const findStayType = (id: string) => pricingConfig.stayTypes.find((item) => item.id === id);
 const findAddon = (id: string) => pricingConfig.addons.find((item) => item.id === id);
 const flatStay = (id: string) => {
@@ -56,6 +57,7 @@ const popularPrice = {
   van: adult.price * 2 + van.price,
   caravanElectricityCar: adult.price * 2 + caravan.price + electricity.price + parking.price,
   tentSmall: adult.price * 2 + tentSmall.price,
+  tentLarge: adult.price * 2 + tentLarge.price,
   bungalow2: bungalow2.seasonalPrices.low,
   bungalow4: bungalow4.seasonalPrices.low,
 };
@@ -212,6 +214,16 @@ const presets = [
     services: { 'tent-small': 1 },
   },
   {
+    id: 'tent-large',
+    mode: 'camping',
+    icon: 'tent',
+    title: '2 osoby + namiot 3-4 os.',
+    price: popularPrice.tentLarge,
+    href: `${bookingHref}?stay=camping&preset=tent-large`,
+    values: { adults: 2, children: 0, toddlers: 0 },
+    services: { 'tent-large': 1 },
+  },
+  {
     id: 'bungalow-2',
     mode: 'bungalow',
     icon: 'house',
@@ -273,6 +285,16 @@ const popularSpotlightCards = [
     composition: '2 dorosłych, namiot 1-2 os.',
     copy: 'Budżetowy wariant z pełnym dostępem do campingu.',
     href: `${bookingHref}?stay=camping&preset=tent-small`,
+  },
+  {
+    presetId: 'tent-large',
+    icon: 'tent',
+    label: 'Większy namiot',
+    title: '2 osoby + namiot 3-4 os.',
+    price: popularPrice.tentLarge,
+    composition: '2 dorosłych, namiot 3-4 os.',
+    copy: 'Wariant dla większego namiotu, bez zmiany ceny przyczepy campingowej.',
+    href: `${bookingHref}?stay=camping&preset=tent-large`,
   },
   {
     presetId: 'bungalow-2',
@@ -377,6 +399,7 @@ const faqItems = [
 
 const pricingAppConfig = {
   currency,
+  currencyEstimate: currencyEstimateConfig,
   people: {
     adults: adult.price,
     children: child.price,
@@ -419,6 +442,7 @@ const pricingAppConfig = {
               <em>{card.composition}</em>
             </div>
             <strong>{card.prefix ?? ''}{formatPrice(card.price)} <small>/ noc</small></strong>
+            <small class="pricing-currency-estimate">{formatEstimate(card.price)}</small>
             <div class="pricing-spotlight-card__actions">
               <button type="button" data-pricing-preset={card.presetId}>Użyj w kalkulatorze</button>
               <a href={card.href}>Zarezerwuj</a>
@@ -677,9 +701,11 @@ const pricingAppConfig = {
             <div class="pricing-app-summary__price">
               <span>Razem orientacyjnie</span>
               <h3 data-summary-total>{formatPrice(popularPrice.camperElectricity)}</h3>
+              <em data-summary-currency>{formatEstimate(popularPrice.camperElectricity)}</em>
             </div>
           </div>
           <p data-summary-hint>Wybrano domyślnie: 2 osoby + kamper + prąd 10A. Możesz od razu zmienić każdy element.</p>
+          <p class="pricing-currency-disclaimer">{currencyEstimateConfig.disclaimer}</p>
           <div class="pricing-app-summary__actions">
             <a class="pricing-app-summary__cta" href={bookingHref}>
               <Icon name="booking" size={18} strokeWidth={2.3} />
@@ -790,6 +816,7 @@ const pricingAppConfig = {
     const seasonButtons = Array.from(root.querySelectorAll('[data-pricing-season]'));
     const serviceGroups = Array.from(root.querySelectorAll('[data-service-group]'));
     const summaryTotals = Array.from(root.querySelectorAll('[data-summary-total]'));
+    const summaryCurrency = root.querySelector('[data-summary-currency]');
     const summaryHint = root.querySelector('[data-summary-hint]');
     const summaryTitle = root.querySelector('[data-summary-title]');
     const summaryMode = root.querySelector('[data-summary-mode]');
@@ -805,6 +832,12 @@ const pricingAppConfig = {
     let toastTimer = 0;
 
     const formatMoney = (value) => `${Math.round(Math.max(0, value)).toLocaleString('pl-PL')} ${config.currency}`;
+    const formatCurrencyEstimate = (value) => {
+      const rates = config.currencyEstimate?.rates || {};
+      const pln = Math.max(0, Number(value) || 0);
+      if (!rates.EUR || !rates.USD || !rates.GBP) return '';
+      return `ok. ${Math.round(pln / rates.EUR)} EUR / ${Math.round(pln / rates.USD)} USD / ${Math.round(pln / rates.GBP)} GBP`;
+    };
     const numberInput = (id) => root.querySelector(`[data-pricing-input="${id}"], [data-service-input="${id}"]`);
     const getValue = (id) => {
       const input = numberInput(id);
@@ -966,6 +999,7 @@ const pricingAppConfig = {
     const update = () => {
       const result = calculate();
       summaryTotals.forEach((element) => animateTextMoney(element, result.total));
+      if (summaryCurrency) summaryCurrency.textContent = formatCurrencyEstimate(result.total);
       if (summaryMode) summaryMode.textContent = config.modeLabels[state.mode] || state.mode;
       if (summaryNights) summaryNights.textContent = `${result.nights} ${result.nights === 1 ? 'noc' : 'noce'}`;
       summaryNightlyItems.forEach((element) => {
@@ -1666,6 +1700,27 @@ const pricingAppConfig = {
   font-weight: 950;
   letter-spacing: .12em;
   text-transform: uppercase;
+}
+
+.pricing-currency-estimate,
+.pricing-app-summary__price em {
+  display: block;
+  color: rgba(8,32,22,.76);
+  font-size: .84rem;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.pricing-spotlight-card .pricing-currency-estimate {
+  color: rgba(255,255,255,.78);
+}
+
+.pricing-currency-disclaimer {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid rgba(60,179,113,.22);
+  border-radius: 14px;
+  background: rgba(60,179,113,.08);
 }
 
 .pricing-app-summary p,

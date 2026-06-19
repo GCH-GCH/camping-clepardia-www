@@ -3,6 +3,7 @@ import { getTranslations } from '@/i18n/config';
 import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import Icon from '@/components/ui/Icon.astro';
 import { campyIcon, publicAssetExists } from '@/data/assets';
+import { currencyEstimateConfig, formatCurrencyEstimates, pricingConfig } from '@/data/pricing';
 import { getHomepageSiteNotices, getNoticeCopy } from '@/data/siteNotices';
 import { getSearchIndex } from '@/data/searchIndex';
 
@@ -18,6 +19,13 @@ const activeNoticesAnswer = activeNoticeCopy.length
   : (pathContext.languageCode === 'pl'
     ? 'Nie ma teraz specjalnego komunikatu. Warto sprawdzić dojazd tramwajem, Google Maps i aktualny cennik przed przyjazdem.'
     : 'There is no special notice right now. Check tram directions, Google Maps and current prices before arrival.');
+const stayPrice = (id: string) => {
+  const item = pricingConfig.stayTypes.find((entry) => entry.id === id);
+  return item && 'price' in item ? item.price : 0;
+};
+const addonPrice = (id: string) => pricingConfig.addons.find((entry) => entry.id === id)?.price ?? 0;
+const camperExamplePrice = pricingConfig.people.adults.price * 2 + stayPrice('camper') + addonPrice('electricity');
+const currencyExample = formatCurrencyEstimates(camperExamplePrice);
 const campyUxCopy = {
   pl: {
     actions: {
@@ -136,8 +144,16 @@ const finalCampyCopy = {
       tramTickets: 'Bilety tramwajowe',
       dayPlan: 'Zaplanuj dzień w Krakowie',
       stayLength: 'Ile dni zostać w Krakowie?',
+      oneNightPlan: 'Plan na 1 noc',
+      twoNightPlan: 'Plan na 2 noce',
+      threeNightPlan: 'Plan na 3 noce',
+      currency: 'EUR / USD / GBP',
       currentNotices: 'Co aktualnie w Krakowie?',
       familyAttractions: 'Co zwiedzić z dziećmi?',
+      wieliczka: 'Wieliczka',
+      auschwitz: 'Auschwitz',
+      wawel: 'Wawel',
+      schindler: 'Fabryka Schindlera',
       dog: 'Czy można z psem?',
       bungalowOptions: 'Domki 2/3/4-os.',
       combinedStay: 'Camping + domki razem',
@@ -153,21 +169,29 @@ const finalCampyCopy = {
       siteSearch: 'Otwieram wyszukiwarkę strony. Możesz wpisać: prąd, pies, tramwaj, dokument, rejestracja pojazdu, Wieliczka, Auschwitz albo sezon.',
       registration: 'Przy rejestracji na recepcji przygotuj jeden dokument tożsamości. Jeśli przyjeżdżasz autem, kamperem, vanem lub przyczepą, recepcja poprosi też o numer rejestracyjny. Przy przyczepie kempingowej wpisz numer rejestracyjny przyczepy.',
       prepareArrival: 'Przed przyjazdem przygotuj: dokument tożsamości, numer rejestracyjny pojazdu lub przyczepy, Google Maps, kabel/przedłużacz i adapter do prądu 10A oraz pamiętaj o ciszy nocnej 22:00-07:00.',
-      camperPrice: 'Kamper kosztuje 80 PLN / noc. Do tego: dorosły 35 PLN, dziecko 4-14 lat 20 PLN, prąd 30 PLN, pies 0 PLN. Przykład: 2 osoby + kamper + prąd = 180 PLN / noc. Pełny cennik jest w kalkulatorze.',
+      camperPrice: `Kamper kosztuje ${stayPrice('camper')} PLN / noc. Do tego: dorosły ${pricingConfig.people.adults.price} PLN, dziecko 4-14 lat ${pricingConfig.people.children.price} PLN, prąd ${addonPrice('electricity')} PLN, pies ${addonPrice('dog')} PLN. Przykład: 2 osoby + kamper + prąd = ${camperExamplePrice} PLN / noc (${currencyExample} orientacyjnie). Pełny cennik jest w kalkulatorze.`,
       stayCompare: 'Camping wybierz dla kampera, vana, namiotu lub przyczepy. Domki są 2-, 3- i 4-osobowe. Razem jest dla grup, gdzie część osób śpi w domku, a część przyjeżdża na camping.',
-      campingPricing: 'Cennik campingowy liczy pojazd lub namiot, osoby oraz dodatki. Przykład: kamper 80 PLN / noc, dorosły 35 PLN, dziecko 4-14 lat 20 PLN, prąd 30 PLN, pies 0 PLN.',
+      campingPricing: `Cennik campingowy liczy pojazd lub namiot, osoby oraz dodatki. Namiot 1-2 os.: ${stayPrice('tent-small')} PLN, namiot 3-4 os.: ${stayPrice('tent-large')} PLN, przyczepa bagażowa: ${addonPrice('cargo-trailer')} PLN. Przykład: kamper ${stayPrice('camper')} PLN / noc, dorosły ${pricingConfig.people.adults.price} PLN, prąd ${addonPrice('electricity')} PLN, pies ${addonPrice('dog')} PLN.`,
       powerDog: 'Prąd 10A kosztuje 30 PLN / noc. Pies kosztuje 0 PLN. Prosimy tylko o opiekę nad pupilem i sprzątanie po nim.',
       lateCheckout: 'Późniejszy wyjazd jest możliwy tylko po decyzji recepcji. Zależy od typu pojazdu, liczby dodatkowych godzin, dostępności miejsc i rezerwacji. Recepcja poda instrukcje oraz ewentualny koszt.',
       centerTransit: 'Z Camping Clepardia dojdziesz ok. 40 m do przystanku Górnickiego. Tramwaj 18 jedzie do Starego Kleparza ok. 14 minut. Ze Starego Kleparza do Starego Miasta dojdziesz pieszo w ok. 5 minut. Najwygodniej sprawdzić trasę w Google Maps lub Jakdojade.',
       tramTickets: 'Bilety tramwajowe możesz zwykle kupić w automatach albo aplikacji, ale nie zakładamy, że każdy automat zawsze działa. Do trasy i biletów najwygodniej sprawdzić Jakdojade.',
       dayPlan: 'Zaplanujmy dzień. Napisz proszę: ile macie czasu, czy jedziecie z dziećmi, czy plan ma być spokojny czy intensywny oraz czy wybieracie tramwaj czy auto.',
       stayLength: 'Na 1 noc najlepiej zrobić Stare Miasto + Wawel. 2 noce: centrum, Wawel i Kazimierz, a Wieliczka tylko jeśli chcecie intensywnie. 3 noce: Kraków + Wieliczka albo Auschwitz. 4 noce: Kraków, Kazimierz, Wieliczka i spokojniejszy dzień. 5+ nocy: Kraków + Małopolska, np. Ojców, Zakopane albo Energylandia.',
+      oneNightPlan: 'Na 1 noc wybierz city break: tramwaj do centrum, Stare Miasto, Rynek, Sukiennice i Wawel. Większe wycieczki zostaw na dłuższy pobyt.',
+      twoNightPlan: 'Na 2 noce dobrze działa centrum + Wawel + Kazimierz. Wieliczka jest możliwa, ale zrobi się intensywnie.',
+      threeNightPlan: 'Na 3 noce zaplanuj Kraków i jedną większą wycieczkę: Wieliczka albo Auschwitz-Birkenau. To dobry rytm bez przepakowywania auta.',
+      currency: `${currencyEstimateConfig.shortDisclaimer} Przykład: ${camperExamplePrice} PLN to ${currencyExample}. ${currencyEstimateConfig.disclaimer}`,
       currentNotices: activeNoticesAnswer,
       familyAttractions: 'Z dziećmi najczęściej sprawdza się Stare Miasto i Wawel, Wieliczka, Ojców albo Energylandia. Wybór zależy od czasu, pogody i energii ekipy.',
       dog: 'Tak, można z psem. Pies ma stawkę 0 PLN. Prosimy tylko o opiekę nad pupilem i sprzątanie po nim na terenie campingu.',
       bungalowOptions: 'Domki są tylko 2-, 3- i 4-osobowe. Mają osobną dostępność, a przy domkach może być wymagana zaliczka po potwierdzeniu terminu.',
       combinedStay: 'Wybierz wariant Razem, jeśli część osób śpi w domku, a część przyjeżdża kamperem, przyczepą albo namiotem. Formularz zbierze obie części w jednym zapytaniu.',
-      toursFromKrakow: 'Na gotowe wycieczki z Krakowa najlepiej sprawdzić sekcję wycieczek: Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia i trasy po centrum. Rezerwacja odbywa się przez link partnera wycieczek.',
+      wieliczka: 'Wieliczka to klasyczna wycieczka na pół dnia lub dłużej. Przy 3 nocach łatwo połączyć ją z Krakowem; przy 2 nocach będzie intensywnie.',
+      auschwitz: 'Auschwitz-Birkenau to poważna, całodniowa wycieczka. Najlepiej zaplanować ją wcześniej i zostawić spokojny wieczór po powrocie.',
+      wawel: 'Wawel pasuje nawet do krótkiego pobytu. Z campingu dojedź tramwajem do centrum, a potem przejdź spacerem przez Stare Miasto.',
+      schindler: 'Fabryka Schindlera jest dobra na historię XX wieku i deszczowy dzień. Warto wcześniej sprawdzić godziny i dostępność biletów.',
+      toursFromKrakow: 'Wycieczki z Krakowa najlepiej planować przez Atrakcje i Planer pobytu: Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia i centrum. Recepcję możesz dopytać o praktyczne wskazówki, ale nie potwierdzamy dostępności wycieczek w chacie.',
       quiet: 'Camping Clepardia jest spokojnym miejscem, nie imprezowym. Cisza nocna obowiązuje od 22:00 do 07:00.',
       sctEtoll: 'Przed przyjazdem sprawdź aktualne zasady SCT w Krakowie oraz e-TOLL, szczególnie przy większym pojeździe lub zestawie. Przepisy mogą się zmieniać, więc najlepiej korzystać z oficjalnych stron.',
       maps: 'Zalecamy Google Maps, ponieważ dojazd do campingu zmienił się w 2022 roku i starsze nawigacje mogą prowadzić nieprawidłowo.',
@@ -200,8 +224,16 @@ const finalCampyCopy = {
       tramTickets: 'Tram tickets',
       dayPlan: 'Plan a Krakow day',
       stayLength: 'How many days in Krakow?',
+      oneNightPlan: '1-night plan',
+      twoNightPlan: '2-night plan',
+      threeNightPlan: '3-night plan',
+      currency: 'EUR / USD / GBP',
       currentNotices: 'What is current in Krakow?',
       familyAttractions: 'Kids attractions',
+      wieliczka: 'Wieliczka',
+      auschwitz: 'Auschwitz',
+      wawel: 'Wawel',
+      schindler: 'Schindler Factory',
       dog: 'Can I bring a dog?',
       bungalowOptions: '2/3/4-person bungalows',
       combinedStay: 'Camping + bungalow',
@@ -217,21 +249,29 @@ const finalCampyCopy = {
       siteSearch: 'I am opening site search. Try: electricity, dog, tram, document, vehicle plate, Wieliczka, Auschwitz or season.',
       registration: 'For reception registration, prepare one identity document. If you arrive by car, camper, van or caravan, reception will also ask for the registration plate. With a camping trailer, enter the trailer registration plate.',
       prepareArrival: 'Before arrival, prepare: one identity document, vehicle or trailer registration plate, Google Maps, cable/extension lead and adapter for 10A electricity, and remember quiet hours 22:00-07:00.',
-      camperPrice: 'Camper: 80 PLN / night. Adults: 35 PLN, children 4-14: 20 PLN, electricity: 30 PLN, dog: 0 PLN. Example: 2 adults + camper + electricity = 180 PLN / night. The full calculator is on the price page.',
+      camperPrice: `Camper: ${stayPrice('camper')} PLN / night. Adults: ${pricingConfig.people.adults.price} PLN, children 4-14: ${pricingConfig.people.children.price} PLN, electricity: ${addonPrice('electricity')} PLN, dog: ${addonPrice('dog')} PLN. Example: 2 adults + camper + electricity = ${camperExamplePrice} PLN / night (${currencyExample} estimated). The full calculator is on the price page.`,
       stayCompare: 'Choose Camping for a camper, van, tent or caravan. Bungalows are 2-, 3- and 4-person units. Combined is for groups mixing a bungalow and a camping pitch.',
-      campingPricing: 'Camping price combines vehicle or tent, guests and extras. Example: camper 80 PLN / night, adult 35 PLN, child 4-14: 20 PLN, electricity 30 PLN, dog 0 PLN.',
+      campingPricing: `Camping price combines vehicle or tent, guests and extras. Tent 1-2: ${stayPrice('tent-small')} PLN, tent 3-4: ${stayPrice('tent-large')} PLN, cargo trailer: ${addonPrice('cargo-trailer')} PLN. Example: camper ${stayPrice('camper')} PLN / night, adult ${pricingConfig.people.adults.price} PLN, electricity ${addonPrice('electricity')} PLN, dog ${addonPrice('dog')} PLN.`,
       powerDog: '10A electricity is 30 PLN / night. Dog fee is 0 PLN. Please keep your dog under care and clean up after it.',
       lateCheckout: 'Later check-out is possible only after reception approval. It depends on vehicle type, extra hours, pitch and parking availability, and reservations. Reception will confirm instructions and any cost.',
       centerTransit: 'Walk about 40 m from Camping Clepardia to Górnickiego stop. Tram 18 reaches Stary Kleparz in about 14 minutes, then it is about a 5-minute walk to the Old Town. Google Maps or Jakdojade are the easiest way to check the route.',
       tramTickets: 'Tram tickets can usually be bought in machines or apps, but we do not promise every machine always works. Jakdojade is useful for routes and tickets.',
       dayPlan: 'Let us plan it. Tell me how much time you have, whether you travel with children, calm or intensive pace, and tram or car.',
       stayLength: 'For 1 night, choose Old Town + Wawel. 2 nights: centre, Wawel and Kazimierz, with Wieliczka only if you want an intense stay. 3 nights: Krakow + Wieliczka or Auschwitz. 4 nights: Krakow, Kazimierz, Wieliczka and a slower day. 5+ nights: Krakow + Lesser Poland, e.g. Ojców, Zakopane or Energylandia.',
+      oneNightPlan: 'For 1 night, keep it to Old Town, Main Square, Cloth Hall and Wawel. Leave bigger trips for a longer stay.',
+      twoNightPlan: 'For 2 nights, combine the centre, Wawel and Kazimierz. Wieliczka is possible but intense.',
+      threeNightPlan: 'For 3 nights, plan Krakow plus one bigger trip: Wieliczka or Auschwitz-Birkenau.',
+      currency: `${currencyEstimateConfig.shortDisclaimer} Example: ${camperExamplePrice} PLN is ${currencyExample}. ${currencyEstimateConfig.disclaimer}`,
       currentNotices: activeNoticesAnswer,
       familyAttractions: 'With children, Old Town and Wawel, Wieliczka, Ojców or Energylandia usually work well depending on time and weather.',
       dog: 'Yes, dogs are welcome. Dog fee is 0 PLN. Please keep your dog under care and clean up after it.',
       bungalowOptions: 'Bungalows are only 2-, 3- and 4-person units. Availability is separate, and a deposit may be required after confirmation.',
       combinedStay: 'Choose Combined if part of the group stays in a bungalow and part arrives with a camper, caravan or tent.',
-      toursFromKrakow: 'For organised tours from Krakow, check the tours section: Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia and city tours. Booking uses the tour partner link.',
+      wieliczka: 'Wieliczka is a classic half-day or longer trip. It fits well into a 3-night stay.',
+      auschwitz: 'Auschwitz-Birkenau is a serious full-day trip. Plan it in advance and keep the evening calm.',
+      wawel: 'Wawel fits even a short stay. Take the tram to the centre and walk through Old Town.',
+      schindler: 'Schindler Factory is good for 20th-century history and rainy days. Check opening hours and tickets in advance.',
+      toursFromKrakow: 'Plan trips from Krakow through Attractions and the Stay Planner: Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia and city routes. CAMPY can suggest a plan but cannot confirm tour availability.',
       quiet: 'Camping Clepardia is a calm campsite, not a party place. Quiet hours are 22:00-07:00.',
       sctEtoll: 'Before arrival, check current Krakow SCT and e-TOLL rules, especially for larger vehicles or combinations. Use official sources because rules can change.',
       maps: 'We recommend Google Maps because access to the campsite changed in 2022 and older navigation can be wrong.',
@@ -255,6 +295,13 @@ const finalCampy = finalCampyCopy[pathContext.languageCode as keyof typeof final
 const campyQuick = finalCampy.quick ?? finalCampyCopy.en.quick;
 const enhancedChatTexts = {
   ...chatTexts,
+  mobileTitle: pathContext.languageCode === 'pl'
+    ? 'CAMPY — pomocnik'
+    : pathContext.languageCode === 'de'
+      ? 'CAMPY — Hilfe'
+      : pathContext.languageCode === 'it'
+        ? 'CAMPY — assistente'
+        : 'CAMPY — assistant',
   actions: {
     ...chatTexts.actions,
     ...campyEnhancement.actions,
@@ -302,8 +349,10 @@ const quickActionGroups = [
     title: campyQuick.groups.prices,
     actions: [
       { key: 'camperPrice', icon: 'ReceiptText', label: enhancedChatTexts.actions.camperPrice },
+      { key: 'currency', icon: 'Coins', label: enhancedChatTexts.actions.currency },
       { key: 'campingPricing', icon: 'Calculator', label: enhancedChatTexts.actions.campingPricing },
       { key: 'powerDog', icon: 'PlugZap', label: enhancedChatTexts.actions.powerDog },
+      { key: 'dog', icon: 'PawPrint', label: enhancedChatTexts.actions.dog },
       { key: 'bungalowOptions', icon: 'House', label: enhancedChatTexts.actions.bungalowOptions },
     ],
   },
@@ -324,10 +373,18 @@ const quickActionGroups = [
     title: campyQuick.groups.attractions,
     actions: [
       { key: 'dayPlan', icon: 'Map', label: enhancedChatTexts.actions.dayPlan },
+      { key: 'oneNightPlan', icon: 'CalendarDays', label: enhancedChatTexts.actions.oneNightPlan },
+      { key: 'twoNightPlan', icon: 'CalendarRange', label: enhancedChatTexts.actions.twoNightPlan },
+      { key: 'threeNightPlan', icon: 'CalendarCheck', label: enhancedChatTexts.actions.threeNightPlan },
       { key: 'stayLength', icon: 'CalendarDays', label: enhancedChatTexts.actions.stayLength },
       { key: 'currentNotices', icon: 'BellRing', label: enhancedChatTexts.actions.currentNotices },
       { key: 'familyAttractions', icon: 'UsersRound', label: enhancedChatTexts.actions.familyAttractions },
+      { key: 'wawel', icon: 'Landmark', label: enhancedChatTexts.actions.wawel },
+      { key: 'wieliczka', icon: 'Mountain', label: enhancedChatTexts.actions.wieliczka },
+      { key: 'auschwitz', icon: 'Landmark', label: enhancedChatTexts.actions.auschwitz },
+      { key: 'schindler', icon: 'Building2', label: enhancedChatTexts.actions.schindler },
       { key: 'toursFromKrakow', icon: 'Ticket', label: enhancedChatTexts.actions.toursFromKrakow },
+      { key: 'quiet', icon: 'Moon', label: enhancedChatTexts.actions.quiet },
     ],
   },
   {
@@ -347,7 +404,11 @@ const quickRailOrder = [
   'bookStay',
   'camperPrice',
   'centerTransit',
+  'currency',
   'dayPlan',
+  'oneNightPlan',
+  'twoNightPlan',
+  'threeNightPlan',
   'familyAttractions',
   'dog',
   'bungalowOptions',
@@ -443,7 +504,8 @@ const quickRailActions = quickRailOrder
         aria-label={campyQuick.aria}
         tabindex="0"
         hidden
-      >
+      ></div>
+      <template data-chat-quick-template>
         {quickActionGroups.map((group) => (
           <section class="floating-chat__quick-section" aria-labelledby={`campyQuick-${group.key}`}>
             <h3 id={`campyQuick-${group.key}`}>
@@ -460,7 +522,7 @@ const quickRailActions = quickRailOrder
             </div>
           </section>
         ))}
-      </div>
+      </template>
     </div>
 
     <form class="floating-chat__form" data-chat-form>
@@ -488,8 +550,12 @@ const quickRailActions = quickRailOrder
       }
     };
 
-    const chatTexts = decodeChatTexts();
-    if (!chatTexts) return;
+    let chatTexts = null;
+    const getChatTexts = () => {
+      if (chatTexts) return chatTexts;
+      chatTexts = decodeChatTexts();
+      return chatTexts;
+    };
 
     const toggle = root.querySelector('[data-chat-toggle]');
     const panel = root.querySelector('[data-chat-panel]');
@@ -504,6 +570,7 @@ const quickRailActions = quickRailOrder
     const sendButton = root.querySelector('[data-chat-send]');
     const quickToggleButton = root.querySelector('[data-chat-quick-toggle]');
     const quickPanel = root.querySelector('[data-chat-quick-panel]');
+    const quickTemplate = root.querySelector('[data-chat-quick-template]');
     const quickRail = root.querySelector('[data-chat-quick-rail]');
     const quickScrollbar = root.querySelector('[data-chat-quick-scrollbar]');
     const quickThumb = root.querySelector('[data-chat-quick-scroll-thumb]');
@@ -513,6 +580,7 @@ const quickRailActions = quickRailOrder
     let open = false;
     let hideTimer = 0;
     let panelHydrated = false;
+    let quickPanelHydrated = false;
     let quickThumbDragging = false;
     let quickThumbStartX = 0;
     let quickThumbStartScroll = 0;
@@ -583,8 +651,22 @@ const quickRailActions = quickRailOrder
       panelHydrated = true;
     };
 
+    const hydrateQuickPanel = () => {
+      if (quickPanelHydrated || !(quickPanel instanceof HTMLElement) || !(quickTemplate instanceof HTMLTemplateElement)) return;
+      quickPanel.appendChild(quickTemplate.content.cloneNode(true));
+      quickPanelHydrated = true;
+    };
+
+    const syncPanelTitle = () => {
+      if (!(titleNode instanceof HTMLElement)) return;
+      titleNode.textContent = window.innerWidth <= 480
+        ? (chatTexts.mobileTitle || chatTexts.title)
+        : chatTexts.title;
+    };
+
     const setQuickPanelOpen = (nextOpen) => {
       if (!(quickToggleButton instanceof HTMLButtonElement) || !(quickPanel instanceof HTMLElement)) return;
+      if (nextOpen) hydrateQuickPanel();
       quickPanelOpen = nextOpen;
       quickToggleButton.setAttribute('aria-expanded', String(quickPanelOpen));
       quickPanel.hidden = !quickPanelOpen;
@@ -607,6 +689,7 @@ const quickRailActions = quickRailOrder
     };
 
     const setOpen = (nextOpen) => {
+      if (!getChatTexts()) return;
       open = nextOpen;
       window.clearTimeout(hideTimer);
       toggle.setAttribute('aria-expanded', String(open));
@@ -619,12 +702,15 @@ const quickRailActions = quickRailOrder
         panel.hidden = false;
         panel.removeAttribute('inert');
         hydratePanelCopy();
+        syncPanelTitle();
         initializeMessages();
         root.classList.add('is-open');
         window.setTimeout(updateQuickScrollbar, 80);
-        window.setTimeout(() => {
-          if (input instanceof HTMLInputElement) input.focus({ preventScroll: true });
-        }, 140);
+        if (window.innerWidth > 640) {
+          window.setTimeout(() => {
+            if (input instanceof HTMLInputElement) input.focus({ preventScroll: true });
+          }, 140);
+        }
         return;
       }
 
@@ -707,6 +793,7 @@ const quickRailActions = quickRailOrder
       if (key === 'siteSearch') return { text: answers.siteSearch };
       if (key === 'registration') return { text: answers.registration, actions: [{ label: actionLabels.booking, href: links.booking }, { label: actionLabels.contact, href: links.contact }] };
       if (key === 'camperPrice') return { text: answers.camperPrice, actions: [{ label: actionLabels.prices, href: links.prices }] };
+      if (key === 'currency') return { text: answers.currency, actions: [{ label: actionLabels.prices, href: links.prices }] };
       if (key === 'stayCompare') return { text: answers.stayCompare, actions: [{ label: actionLabels.camping, href: links.bookingCamping }, { label: actionLabels.bungalow, href: links.bookingBungalow }, { label: actionLabels.combined, href: links.bookingCombined }] };
       if (key === 'campingPricing') return { text: answers.campingPricing, actions: [{ label: actionLabels.prices, href: links.prices }] };
       if (key === 'powerDog') return { text: answers.powerDog, actions: [{ label: actionLabels.prices, href: links.prices }] };
@@ -714,9 +801,16 @@ const quickRailActions = quickRailOrder
       if (key === 'centerTransit') return { text: answers.centerTransit, actions: [{ label: actionLabels.maps, href: links.maps }, { label: actionLabels.jakdojade, href: links.jakdojade }, { label: actionLabels.directions, href: links.directions }] };
       if (key === 'tramTickets') return { text: answers.tramTickets, actions: [{ label: actionLabels.jakdojade, href: links.jakdojade }] };
       if (key === 'dayPlan') return { text: answers.dayPlan };
+      if (key === 'oneNightPlan') return { text: answers.oneNightPlan, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
+      if (key === 'twoNightPlan') return { text: answers.twoNightPlan, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
+      if (key === 'threeNightPlan') return { text: answers.threeNightPlan, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
       if (key === 'stayLength') return { text: answers.stayLength, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
       if (key === 'currentNotices') return { text: answers.currentNotices, actions: [{ label: actionLabels.directions, href: links.directions }, { label: actionLabels.booking, href: links.booking }] };
       if (key === 'familyAttractions') return { text: answers.familyAttractions };
+      if (key === 'wawel') return { text: answers.wawel, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
+      if (key === 'wieliczka') return { text: answers.wieliczka, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
+      if (key === 'auschwitz') return { text: answers.auschwitz, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
+      if (key === 'schindler') return { text: answers.schindler, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
       if (key === 'dog') return { text: answers.dog };
       if (key === 'bungalowOptions') return { text: answers.bungalowOptions, actions: [{ label: actionLabels.bungalow, href: links.bookingBungalow }] };
       if (key === 'combinedStay') return { text: answers.combinedStay, actions: [{ label: actionLabels.camping, href: links.bookingCamping }, { label: actionLabels.bungalow, href: links.bookingBungalow }, { label: actionLabels.combined, href: links.bookingCombined }] };
@@ -765,6 +859,7 @@ const quickRailActions = quickRailOrder
       if (rawPrompt === chatTexts.actions.siteSearch) return actionResponse('siteSearch');
       if (rawPrompt === chatTexts.actions.registration) return actionResponse('registration');
       if (rawPrompt === chatTexts.actions.pricing || rawPrompt === chatTexts.actions.camperPrice) return actionResponse('camperPrice') ?? chatTexts.answers.camperPrice ?? chatTexts.answers.pricing;
+      if (rawPrompt === chatTexts.actions.currency) return actionResponse('currency') ?? chatTexts.answers.currency ?? chatTexts.answers.pricing;
       if (rawPrompt === chatTexts.actions.directions || rawPrompt === chatTexts.actions.transit || rawPrompt === chatTexts.actions.centerTransit) return actionResponse('centerTransit') ?? chatTexts.answers.centerTransit ?? chatTexts.answers.transit ?? chatTexts.answers.directions;
       if (rawPrompt === chatTexts.actions.dog) return actionResponse('dog') ?? chatTexts.answers.dog ?? chatTexts.answers.camping;
       if (rawPrompt === chatTexts.actions.campingBooking) return chatTexts.answers.campingBooking ?? chatTexts.answers.camping;
@@ -779,6 +874,11 @@ const quickRailActions = quickRailOrder
       if (rawPrompt === chatTexts.actions.stayLength) return actionResponse('stayLength') ?? chatTexts.answers.stayLength ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.currentNotices) return actionResponse('currentNotices') ?? chatTexts.answers.currentNotices ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.familyAttractions) return chatTexts.answers.familyAttractions ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.oneNightPlan) return actionResponse('oneNightPlan') ?? chatTexts.answers.oneNightPlan ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.twoNightPlan) return actionResponse('twoNightPlan') ?? chatTexts.answers.twoNightPlan ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.threeNightPlan) return actionResponse('threeNightPlan') ?? chatTexts.answers.threeNightPlan ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.wawel) return actionResponse('wawel') ?? chatTexts.answers.wawel ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.schindler) return actionResponse('schindler') ?? chatTexts.answers.schindler ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.todayAttractions) return chatTexts.answers.todayAttractions ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.tramRoute) return chatTexts.answers.tramRoute ?? chatTexts.answers.centerTransit ?? chatTexts.answers.transit ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.etoll) return chatTexts.answers.etoll ?? chatTexts.answers.sctEtoll ?? chatTexts.answers.fallback;
@@ -790,6 +890,10 @@ const quickRailActions = quickRailOrder
 
       if (prompt.includes('prąd') || prompt.includes('prad') || prompt.includes('electric') || prompt.includes('10a')) {
         return actionResponse('powerDog') ?? chatTexts.answers.powerDog ?? chatTexts.answers.pricing;
+      }
+
+      if (prompt.includes('eur') || prompt.includes('euro') || prompt.includes('usd') || prompt.includes('dolar') || prompt.includes('dollar') || prompt.includes('gbp') || prompt.includes('funt') || prompt.includes('pound')) {
+        return actionResponse('currency') ?? chatTexts.answers.currency ?? chatTexts.answers.pricing;
       }
 
       if (prompt.includes('kamper') || prompt.includes('camper') || prompt.includes('motorhome') || prompt.includes('cennik') || prompt.includes('cena') || prompt.includes('koszt')) {
@@ -807,6 +911,10 @@ const quickRailActions = quickRailOrder
       if (prompt.includes('planuj') || prompt.includes('plan') || prompt.includes('dzień') || prompt.includes('day')) {
         return chatTexts.answers.dayPlan ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       }
+
+      if (prompt.includes('1 noc') || prompt.includes('jedna noc') || prompt.includes('one night')) return actionResponse('oneNightPlan') ?? chatTexts.answers.oneNightPlan ?? chatTexts.answers.fallback;
+      if (prompt.includes('2 noce') || prompt.includes('dwie noce') || prompt.includes('two nights')) return actionResponse('twoNightPlan') ?? chatTexts.answers.twoNightPlan ?? chatTexts.answers.fallback;
+      if (prompt.includes('3 noce') || prompt.includes('trzy noce') || prompt.includes('three nights')) return actionResponse('threeNightPlan') ?? chatTexts.answers.threeNightPlan ?? chatTexts.answers.fallback;
 
       if (prompt.includes('ile dni') || prompt.includes('ile nocy') || prompt.includes('how many days') || prompt.includes('how many nights')) {
         return actionResponse('stayLength') ?? chatTexts.answers.stayLength ?? chatTexts.answers.fallback;
@@ -844,6 +952,8 @@ const quickRailActions = quickRailOrder
       if (prompt.includes('energy')) return chatTexts.answers.energylandia ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (prompt.includes('wielicz')) return chatTexts.answers.wieliczka ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (prompt.includes('auschwitz') || prompt.includes('birkenau')) return chatTexts.answers.auschwitz ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (prompt.includes('wawel')) return actionResponse('wawel') ?? chatTexts.answers.wawel ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (prompt.includes('schindler')) return actionResponse('schindler') ?? chatTexts.answers.schindler ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
 
       if (prompt.includes('atrakc') || prompt.includes('krak') || prompt.includes('zwiedz')) {
         return chatTexts.answers.todayAttractions ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
@@ -945,9 +1055,6 @@ const quickRailActions = quickRailOrder
 
       quickRail.addEventListener('pointerdown', (event) => {
         if (event.button !== 0) return;
-        if (event.target instanceof Element && event.target.closest('[data-chat-action]')) {
-          return;
-        }
         dragging = true;
         dragged = false;
         startX = event.clientX;
@@ -984,6 +1091,11 @@ const quickRailActions = quickRailOrder
         quickRail.classList.remove('is-dragging');
       });
       quickRail.addEventListener('click', (event) => {
+        if (dragged) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
         const actionButton = event.target instanceof Element
           ? event.target.closest('[data-chat-action]')
           : null;
@@ -992,9 +1104,6 @@ const quickRailActions = quickRailOrder
           submitPrompt(actionButton.dataset.chatPrompt ?? actionButton.textContent ?? '', actionButton.dataset.chatAction ?? '');
           return;
         }
-        if (!dragged) return;
-        event.preventDefault();
-        event.stopPropagation();
       }, true);
       quickRail.addEventListener('keydown', (event) => {
         const step = event.shiftKey ? 240 : 120;
@@ -1096,6 +1205,7 @@ const quickRailActions = quickRailOrder
     window.addEventListener('resize', () => {
       updateStickyOffset();
       updateQuickScrollbar();
+      if (panelHydrated) syncPanelTitle();
     }, { passive: true });
     document.addEventListener('click', (event) => {
       const target = event.target;
@@ -1141,8 +1251,8 @@ body.has-floating-chat-open {
 .floating-chat__button {
   position: relative;
   z-index: 1;
-  width: 76px;
-  height: 76px;
+  width: 68px;
+  height: 68px;
   aspect-ratio: 1;
   flex: 0 0 auto;
   display: grid;
@@ -1197,8 +1307,8 @@ body.has-floating-chat-open {
 .floating-chat__button-image {
   position: relative;
   z-index: 1;
-  width: 64px;
-  height: 64px;
+  width: 58px;
+  height: 58px;
   display: block;
   object-fit: cover;
   border-radius: 999px;
@@ -1251,7 +1361,8 @@ body.has-floating-chat-open {
   bottom: max(104px, calc(104px + env(safe-area-inset-bottom)));
   z-index: 2;
   width: min(392px, calc(100vw - 32px));
-  max-height: min(680px, calc(100svh - 132px));
+  min-width: 0;
+  max-height: min(720px, calc(100svh - 116px));
   display: grid;
   grid-template-rows: auto minmax(180px, 1fr) auto auto;
   overflow: hidden;
@@ -1505,7 +1616,12 @@ body.has-floating-chat-open {
 .floating-chat__quick-hub {
   position: relative;
   z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
   padding: 0 16px 10px;
+  overflow: hidden;
 }
 
 .floating-chat__quick-toggle {
@@ -1643,6 +1759,9 @@ body.has-floating-chat-open {
 
 .floating-chat__quick {
   display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   gap: 8px;
   padding: 0 16px 10px;
   overflow-x: auto;
@@ -1650,7 +1769,7 @@ body.has-floating-chat-open {
   scroll-snap-type: x mandatory;
   overscroll-behavior-inline: contain;
   scrollbar-width: none;
-  touch-action: pan-x;
+  touch-action: pan-x pan-y;
   -webkit-overflow-scrolling: touch;
   user-select: none;
   mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
@@ -1777,7 +1896,7 @@ body.has-floating-chat-open {
     linear-gradient(90deg, #8fe0b4, #3CB371);
   box-shadow: 0 0 16px rgba(60,179,113,.34), inset 0 1px 0 rgba(255,255,255,.34);
   transform: translateX(0);
-  transition: width .18s cubic-bezier(.22, 1, .36, 1), transform .18s cubic-bezier(.22, 1, .36, 1), box-shadow .18s ease;
+  transition: width .18s cubic-bezier(.22, 1, .36, 1), box-shadow .18s ease;
   will-change: transform, width;
 }
 
@@ -2166,37 +2285,55 @@ body.booking-app-page .floating-chat__button-image {
   }
 
   .floating-chat__button {
-    width: 66px;
-    height: 66px;
+    width: 58px;
+    height: 58px;
   }
 
   .floating-chat__button-image {
-    width: 56px;
-    height: 56px;
+    width: 50px;
+    height: 50px;
   }
 
   .floating-chat__panel {
     top: auto;
-    right: 12px;
-    bottom: max(12px, env(safe-area-inset-bottom));
-    left: 12px;
+    right: 8px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: 8px;
     width: auto;
-    max-width: calc(100vw - 24px);
-    max-height: min(78dvh, 680px);
-    border-radius: 28px;
+    max-width: calc(100vw - 16px);
+    height: min(86dvh, 740px);
+    max-height: min(86dvh, 740px);
+    border-radius: 24px;
     transform-origin: bottom center;
-    backdrop-filter: blur(12px) saturate(130%);
-    -webkit-backdrop-filter: blur(12px) saturate(130%);
-    grid-template-rows: auto minmax(150px, 1fr) auto auto;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    grid-template-rows: auto minmax(112px, 1fr) auto auto;
+    background:
+      radial-gradient(circle at 16% 0%, rgba(143,224,180,.17), transparent 34%),
+      radial-gradient(circle at 90% 18%, rgba(242,192,120,.10), transparent 34%),
+      linear-gradient(145deg, rgba(9, 27, 19, .985), rgba(18, 51, 34, .98));
   }
 
   .floating-chat__header {
-    grid-template-columns: 56px 1fr 40px;
+    grid-template-columns: 48px minmax(0, 1fr) 40px;
+    gap: 10px;
+    padding: 14px 14px 12px;
   }
 
   .floating-chat__avatar {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
+    border-radius: 17px;
+    animation: none;
+  }
+
+  .floating-chat__identity > span {
+    font-size: .92rem;
+  }
+
+  .floating-chat__identity strong {
+    font-size: .65rem;
+    letter-spacing: .08em;
   }
 
   .floating-chat__messages {
@@ -2207,15 +2344,42 @@ body.booking-app-page .floating-chat__button-image {
   }
 
   .floating-chat__quick {
+    margin-inline: -2px;
     padding-bottom: 12px;
+    mask-image: none;
   }
 
   .floating-chat__quick-panel {
-    max-height: min(330px, 38dvh);
+    max-height: min(300px, 34dvh);
   }
 
   .floating-chat__quick-scrollbar {
     margin-bottom: 10px;
+  }
+
+  .floating-chat.has-quick-panel-open .floating-chat__messages {
+    min-height: 72px;
+    max-height: 92px;
+  }
+
+  .floating-chat__form {
+    padding: 12px 14px max(14px, env(safe-area-inset-bottom));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .floating-chat__panel::before,
+  .floating-chat__button::after {
+    display: none;
+  }
+
+  .floating-chat__header i {
+    animation: none;
+  }
+
+  .floating-chat__button {
+    animation-duration: 8s;
+    will-change: auto;
   }
 
   .floating-chat__scrim {

@@ -95,10 +95,14 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
 
   const calculatorRows = [
     ['Cena orientacyjna', inquiry.estimatedTotal || inquiry.calculatorSummary?.total || 'brak'],
+    ['Waluty orientacyjnie', inquiry.currencyEstimate || inquiry.calculatorSummary?.currencyEstimate || 'brak'],
     ['Cena / noc', inquiry.calculatorSummary?.pricePerNight || 'brak'],
     ['Sezon', inquiry.calculatorSummary?.season || 'brak'],
     ['Status', 'Do potwierdzenia przez recepcję'],
   ] as Array<[string, unknown]>;
+  const currencyDisclaimer = inquiry.currencyDisclaimer
+    || inquiry.calculatorSummary?.currencyDisclaimer
+    || 'Przeliczenia EUR / USD / GBP są orientacyjne i informacyjne. Finalna kwota, forma płatności i ewentualny kurs są potwierdzane przez recepcję.';
 
   const text = [
     'Nowe zapytanie rezerwacyjne - Camping Clepardia',
@@ -134,6 +138,8 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
       ...(campingServices.length ? campingServices.map((service) => `- ${service}`) : ['- brak']),
     ] : []),
     line('Suma orientacyjna', inquiry.estimatedTotal || inquiry.calculatorSummary?.total || 'brak'),
+    line('Waluty orientacyjnie', inquiry.currencyEstimate || inquiry.calculatorSummary?.currencyEstimate || 'brak'),
+    currencyDisclaimer,
     '',
     'DODATKOWE INFORMACJE',
     line('Specjalne potrzeby', inquiry.specialNeeds),
@@ -215,6 +221,12 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
           ${isCombined ? `${scopeList('Sekcja Domki', bungalowServices)}${scopeList('Sekcja Camping', campingServices)}` : ''}
         </section>
 
+        <section style="margin:18px 0;padding:16px 18px;border-radius:18px;background:#eef8f1;border:1px solid #dceee4;color:#102319;">
+          <h2 style="margin:0 0 8px;font-size:16px;">Waluty orientacyjne</h2>
+          <p style="margin:0 0 8px;line-height:1.55;font-weight:800;">${escapeHtml(inquiry.currencyEstimate || inquiry.calculatorSummary?.currencyEstimate || 'brak')}</p>
+          <p style="margin:0;line-height:1.55;color:#4b5b51;">${escapeHtml(currencyDisclaimer)}</p>
+        </section>
+
         <section style="margin:18px 0;padding:18px 20px;border:1px solid #dceee4;border-radius:18px;background:#ffffff;">
           <h2 style="margin:0 0 10px;font-size:17px;color:#102319;">Wiadomość i uwagi</h2>
           <p style="white-space:pre-wrap;line-height:1.65;margin:0 0 14px;color:#314238;">${escapeHtml(inquiry.originalMessage || inquiry.message || 'brak')}</p>
@@ -258,6 +270,8 @@ export const buildAutoresponderMail = (inquiry: NormalizedReservationInquiry): M
     `Termin: ${inquiry.arrival} - ${inquiry.departure}`,
     `Typ pobytu: ${inquiry.stayType}`,
     `Cena orientacyjna: ${inquiry.estimatedTotal || inquiry.calculatorSummary?.total || 'do potwierdzenia'}`,
+    `Waluty orientacyjnie: ${inquiry.currencyEstimate || inquiry.calculatorSummary?.currencyEstimate || 'brak'}`,
+    currencyDisclaimer,
     bungalowNote,
     '',
     'Camping Clepardia',
@@ -276,7 +290,9 @@ export const buildAutoresponderMail = (inquiry: NormalizedReservationInquiry): M
           <strong>Termin:</strong> ${escapeHtml(`${inquiry.arrival} - ${inquiry.departure}`)}<br />
           <strong>Typ pobytu:</strong> ${escapeHtml(inquiry.stayType)}<br />
           <strong>Cena orientacyjna:</strong> ${escapeHtml(inquiry.estimatedTotal || inquiry.calculatorSummary?.total || 'do potwierdzenia')}
+          <br /><strong>Waluty orientacyjnie:</strong> ${escapeHtml(inquiry.currencyEstimate || inquiry.calculatorSummary?.currencyEstimate || 'brak')}
         </div>
+        <p style="line-height:1.7;color:#4b5b51;">${escapeHtml(currencyDisclaimer)}</p>
         <p style="line-height:1.7;color:#4b5b51;">To nie jest automatyczne potwierdzenie rezerwacji. Finalną dostępność, cenę i szczegóły pobytu potwierdza recepcja.</p>
         ${bungalowNote ? `<p style="line-height:1.7;color:#4b5b51;">${escapeHtml(bungalowNote)}</p>` : ''}
       </div>

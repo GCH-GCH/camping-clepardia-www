@@ -120,6 +120,8 @@ export const normalizeReservationInquiry = (rawPayload: unknown) => {
   const message = sanitizeText(payload.message, 2400);
   const services = normalizeServices(payload.services);
   const estimatedTotal = sanitizeInlineText(payload.estimatedTotal, 80);
+  const currencyEstimate = sanitizeInlineText(payload.currencyEstimate || payload.calculatorSummary?.currencyEstimate, 160);
+  const currencyDisclaimer = sanitizeText(payload.currencyDisclaimer || payload.calculatorSummary?.currencyDisclaimer, 500);
   const vehiclePlate = sanitizeInlineText(payload.vehiclePlate, 80);
   const vehicleDetails = normalizeVehicleDetails(payload.vehicleDetails);
   const specialNeeds = sanitizeText(payload.specialNeeds, 1200);
@@ -174,6 +176,8 @@ export const normalizeReservationInquiry = (rawPayload: unknown) => {
     message,
     services,
     estimatedTotal,
+    currencyEstimate,
+    currencyDisclaimer,
     vehiclePlate,
     vehicleDetails,
     specialNeeds,
@@ -217,6 +221,8 @@ export const createCcSystemLeadDraft = (inquiry: NormalizedReservationInquiry): 
     addons: inquiry.addons,
     services: inquiry.services,
     estimatedTotal: inquiry.estimatedTotal,
+    currencyEstimate: inquiry.currencyEstimate,
+    currencyDisclaimer: inquiry.currencyDisclaimer,
     vehiclePlate: inquiry.vehiclePlate,
     vehicleDetails: inquiry.vehicleDetails,
     specialNeeds: inquiry.specialNeeds,

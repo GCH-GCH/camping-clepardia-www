@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { attractionImages } from './attractionsImageRegistry';
 
 export interface RequiredAsset {
   key: string;
@@ -76,16 +77,20 @@ export const siteAssets = {
     premium: '/images/sections/drone-overview-premium.webp',
   },
   attractions: {
-    oldTown: '/images/attractions/old-town-krakow.webp',
+    oldTown: attractionImages.mainSquare.src,
     kazimierz: '/images/attractions/kazimierz.webp',
-    wawel: '/images/attractions/wawel.webp',
-    wieliczka: '/images/attractions/wieliczka-salt-mine.webp',
-    auschwitz: '/images/attractions/auschwitz-birkenau.webp',
-    schindler: '/images/attractions/schindler-factory.webp',
-    energylandia: '/images/attractions/energylandia.webp',
-    ojcow: '/images/attractions/ojcow.webp',
-    zakopane: '/images/attractions/zakopane.webp',
-    tours: '/images/tours/krakow-tours.webp',
+    wawel: attractionImages.wawel.src,
+    wieliczka: attractionImages.wieliczka.src,
+    auschwitz: attractionImages.auschwitz.src,
+    schindler: attractionImages.schindler.src,
+    energylandia: attractionImages.energylandia.src,
+    ojcow: attractionImages.ojcow.src,
+    zakopane: attractionImages.zakopane.src,
+    bagry: attractionImages.bagry.src,
+    kryspinow: attractionImages.kryspinow.src,
+    tramCity: attractionImages.tramCity.src,
+    waterPark: attractionImages.waterPark.src,
+    tours: attractionImages.mainSquare.src,
   },
   gallery: {
     campingPitches: '/images/sections/camping-pitches.webp',
@@ -106,9 +111,9 @@ export const siteAssets = {
     receptionMain: '/images/sections/reception-main.webp',
     aerialOverview: '/images/sections/drone-overview-camping.webp',
     aerialPremium: '/images/sections/drone-overview-premium.webp',
-    oldTown: '/images/attractions/old-town-krakow.webp',
-    wieliczka: '/images/attractions/wieliczka-salt-mine.webp',
-    energylandia: '/images/attractions/energylandia.webp',
+    oldTown: attractionImages.mainSquare.src,
+    wieliczka: attractionImages.wieliczka.src,
+    energylandia: attractionImages.energylandia.src,
   },
   sections: {
     camping: {
@@ -151,15 +156,19 @@ export const siteAssets = {
       premium: '/images/sections/drone-overview-premium.webp',
     },
     attractions: {
-      oldTown: '/images/attractions/old-town-krakow.webp',
+      oldTown: attractionImages.mainSquare.src,
       kazimierz: '/images/attractions/kazimierz.webp',
-      wawel: '/images/attractions/wawel.webp',
-      wieliczka: '/images/attractions/wieliczka-salt-mine.webp',
-      auschwitz: '/images/attractions/auschwitz-birkenau.webp',
-      schindler: '/images/attractions/schindler-factory.webp',
-      energylandia: '/images/attractions/energylandia.webp',
-      ojcow: '/images/attractions/ojcow.webp',
-      zakopane: '/images/attractions/zakopane.webp',
+      wawel: attractionImages.wawel.src,
+      wieliczka: attractionImages.wieliczka.src,
+      auschwitz: attractionImages.auschwitz.src,
+      schindler: attractionImages.schindler.src,
+      energylandia: attractionImages.energylandia.src,
+      ojcow: attractionImages.ojcow.src,
+      zakopane: attractionImages.zakopane.src,
+      bagry: attractionImages.bagry.src,
+      kryspinow: attractionImages.kryspinow.src,
+      tramCity: attractionImages.tramCity.src,
+      waterPark: attractionImages.waterPark.src,
     },
   },
   seo: {

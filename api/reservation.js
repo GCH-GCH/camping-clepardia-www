@@ -185,6 +185,13 @@ const createInquiry = (payload, normalized) => {
     },
     services: normalized.services,
     estimatedTotal: oneLine(payload.estimatedTotal || payload.calculatorSummary?.total, 80),
+    currencyEstimate: oneLine(payload.currencyEstimate || payload.calculatorSummary?.currencyEstimate, 160),
+    currencyDisclaimer: longText(
+      payload.currencyDisclaimer
+        || payload.calculatorSummary?.currencyDisclaimer
+        || 'Przeliczenia EUR / USD / GBP są orientacyjne i informacyjne. Finalna kwota, forma płatności i ewentualny kurs są potwierdzane przez recepcję.',
+      500,
+    ),
     calculatorSummary: payload.calculatorSummary || null,
     vehiclePlate: oneLine(payload.vehiclePlate, 80),
     specialNeeds: longText(payload.specialNeeds, 1200),
@@ -225,6 +232,8 @@ const createCcSystemDraft = (inquiry) => ({
     people: inquiry.people,
     services: inquiry.services,
     estimatedTotal: inquiry.estimatedTotal,
+    currencyEstimate: inquiry.currencyEstimate,
+    currencyDisclaimer: inquiry.currencyDisclaimer,
     vehiclePlate: inquiry.vehiclePlate,
     specialNeeds: inquiry.specialNeeds,
     lateCheckout: inquiry.lateCheckout,
@@ -261,6 +270,7 @@ const buildReceptionMail = (inquiry) => {
     ['Noce', inquiry.nights],
     ['Goscie', guests],
     ['Cena orientacyjna', inquiry.estimatedTotal || 'brak'],
+    ['Waluty orientacyjnie', inquiry.currencyEstimate || 'brak'],
     ['Imie i nazwisko', inquiry.fullName],
     ['Email', inquiry.email],
     ['Telefon', inquiry.phone],
@@ -315,6 +325,11 @@ const buildReceptionMail = (inquiry) => {
           <ul style="list-style:none;margin:0;padding:0;">${serviceHtml}</ul>
           ${groupedServiceHtml}
         </section>
+        <section style="margin:18px 0;padding:16px 18px;border-radius:18px;background:#eef8f1;border:1px solid #dceee4;color:#102319;">
+          <h2 style="margin:0 0 8px;font-size:16px;">Waluty orientacyjne</h2>
+          <p style="margin:0 0 8px;line-height:1.55;font-weight:800;">${escapeHtml(inquiry.currencyEstimate || 'brak')}</p>
+          <p style="margin:0;line-height:1.55;color:#4b5b51;">${escapeHtml(inquiry.currencyDisclaimer)}</p>
+        </section>
         <section style="margin:18px 0;padding:18px 20px;border:1px solid #dceee4;border-radius:18px;background:#fff;">
           <h2 style="margin:0 0 12px;font-size:17px;">Wiadomosc klienta</h2>
           <p style="white-space:pre-wrap;line-height:1.65;margin:0;">${escapeHtml(inquiry.message || 'brak')}</p>
@@ -331,6 +346,9 @@ const buildReceptionMail = (inquiry) => {
     '',
     'USLUGI I CENY',
     ...(services.length ? services.map((service) => `- ${service}`) : ['- brak']),
+    '',
+    `Waluty orientacyjnie: ${inquiry.currencyEstimate || 'brak'}`,
+    inquiry.currencyDisclaimer,
     '',
     'SEKCJE',
     groupedServiceText,
@@ -368,6 +386,7 @@ const buildCustomerMail = (inquiry) => {
     ].filter(Boolean).join(', ') || 'brak'],
     ['Uslugi', services.length ? services.join(', ') : 'brak'],
     ['Cena orientacyjna', inquiry.estimatedTotal || 'do potwierdzenia'],
+    ['Waluty orientacyjnie', inquiry.currencyEstimate || 'brak'],
   ];
   const rowHtml = rows.map(([label, value]) => `
     <tr>
@@ -388,6 +407,11 @@ const buildCustomerMail = (inquiry) => {
           <table role="presentation" style="width:100%;border-collapse:collapse;">${rowHtml}</table>
         </section>
         ${depositNote ? `<section style="margin:18px 0;padding:18px 20px;border-radius:18px;background:#fff8ea;border:1px solid #f0d7a6;color:#4c3b13;"><strong>Zaliczka przy domkach</strong><p style="margin:8px 0 0;line-height:1.6;">${escapeHtml(depositNote)}</p></section>` : ''}
+        <section style="margin:18px 0;padding:16px 18px;border-radius:18px;background:#eef8f1;border:1px solid #dceee4;color:#102319;">
+          <strong>Waluty orientacyjne</strong>
+          <p style="margin:8px 0 0;line-height:1.6;">${escapeHtml(inquiry.currencyEstimate || 'brak')}</p>
+          <p style="margin:8px 0 0;line-height:1.6;color:#4b5b51;">${escapeHtml(inquiry.currencyDisclaimer)}</p>
+        </section>
         <section style="margin:18px 0;padding:18px 20px;border-radius:18px;background:#fff;border:1px solid #dceee4;color:#102319;">
           <p style="margin:0;line-height:1.65;">Cisza nocna obowiazuje od 22:00 do 07:00. Dojazd najlepiej sprawdzic w Google Maps: ul. Henryka Pachonskiego 28A, Krakow.</p>
         </section>
@@ -401,6 +425,7 @@ const buildCustomerMail = (inquiry) => {
     'To nie jest automatyczne potwierdzenie rezerwacji. Recepcja sprawdzi dostepnosc i odpowie mozliwie szybko.',
     '',
     ...rows.map(([label, value]) => `${label}: ${value || 'brak'}`),
+    inquiry.currencyDisclaimer,
     '',
     depositNote,
     'Cisza nocna: 22:00-07:00.',
@@ -484,6 +509,8 @@ const buildFormSubmitPayload = (message, inquiry) => ({
   ].filter(Boolean).join(', ') || 'brak',
   uslugi: inquiry.services.map((service) => `${service.scope ? `[${service.scope}] ` : ''}${service.label} x ${service.qty} - ${service.price} PLN / noc`).join('\n') || 'brak',
   cena_orientacyjna: inquiry.estimatedTotal || 'brak',
+  waluty_orientacyjnie: inquiry.currencyEstimate || 'brak',
+  informacja_o_walutach: inquiry.currencyDisclaimer || 'Waluty obce pokazujemy wylacznie orientacyjnie.',
   kraj: inquiry.country || 'brak',
   jezyk_kontaktu: inquiry.contactLanguage || 'brak',
   imie_i_nazwisko: inquiry.fullName || 'brak',

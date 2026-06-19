@@ -249,7 +249,7 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
 
   const completeLoader = () => {
     loaderLoaded = true;
-    const minimumDuration = reduceMotion.matches ? 160 : 1320;
+    const minimumDuration = reduceMotion.matches ? 160 : window.innerWidth < 768 ? 720 : 1320;
     const elapsed = performance.now() - loaderStartedAt;
     const wait = Math.max(reduceMotion.matches ? 0 : 240, minimumDuration - elapsed);
     window.setTimeout(finishLoading, wait);
@@ -264,7 +264,7 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
       node.style.setProperty('--reveal-delay', `${Math.min(index % 7, 6) * 55}ms`);
     });
 
-    if (reduceMotion.matches || !('IntersectionObserver' in window)) {
+    if (reduceMotion.matches || window.innerWidth < 768 || !('IntersectionObserver' in window)) {
       nodes.forEach((node) => node.classList.add('is-visible'));
       return;
     }
@@ -859,6 +859,20 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
 
   .page-loader__particles span:nth-child(n+5) {
     display: none;
+  }
+
+  .page-loader__light--warm,
+  .page-loader__particles span:nth-child(n+4) {
+    display: none;
+  }
+
+  .page-loader__light--green,
+  .page-loader__horizon,
+  .page-loader__orbit,
+  .page-loader__radar,
+  .page-loader__sweep,
+  .page-loader__glow {
+    animation: none;
   }
 }
 

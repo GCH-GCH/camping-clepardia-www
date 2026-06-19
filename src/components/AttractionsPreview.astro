@@ -1,7 +1,7 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
 import Icon from '@/components/ui/Icon.astro';
-import { siteAssets } from '@/data/assets';
+import { attractionImages } from '@/data/attractionsImageRegistry';
 import { getTranslations } from '@/i18n/config';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
@@ -36,7 +36,7 @@ const attractions = [
           : 'The classic Kraków route: Main Square, Cloth Hall, St. Mary’s Basilica and a walk toward Wawel.',
     meta: activeLanguage === 'pl' ? 'Tram + spacer' : activeLanguage === 'de' ? 'Tram + Spaziergang' : activeLanguage === 'it' ? 'Tram + passeggiata' : 'Tram + walk',
     metaIcon: 'tram',
-    image: siteAssets.attractions.oldTown,
+    image: attractionImages.mainSquare,
     alt: activeLanguage === 'de' ? 'Altstadt von Krakau' : activeLanguage === 'it' ? 'Città Vecchia di Cracovia' : activeLanguage === 'pl' ? 'Stare Miasto w Krakowie' : 'Kraków Old Town',
     icon: 'landmark',
     variant: 'old-town',
@@ -46,7 +46,7 @@ const attractions = [
     description: activeLanguage === 'pl' ? 'Kopalnia soli i jedna z najbardziej rozpoznawalnych wycieczek z Krakowa.' : 'Salt mine and one of the most recognisable trips from Kraków.',
     meta: activeLanguage === 'pl' ? 'Wycieczka poza miasto' : 'Day trip',
     metaIcon: 'route',
-    image: siteAssets.attractions.wieliczka,
+    image: attractionImages.wieliczka,
     alt: 'Kopalnia Soli Wieliczka',
     icon: 'map',
     variant: 'wieliczka',
@@ -56,7 +56,7 @@ const attractions = [
     description: activeLanguage === 'pl' ? 'Ważne miejsce pamięci, które warto zaplanować z wyprzedzeniem.' : 'An important memorial site worth planning in advance.',
     meta: activeLanguage === 'pl' ? 'Samochód / bus' : 'Car / tour bus',
     metaIcon: 'bus',
-    image: siteAssets.attractions.auschwitz,
+    image: attractionImages.auschwitz,
     alt: 'Muzeum Auschwitz-Birkenau',
     icon: 'shield',
     variant: 'auschwitz',
@@ -66,7 +66,7 @@ const attractions = [
     description: activeLanguage === 'pl' ? 'Muzeum historii Krakowa i okupacji, blisko Kazimierza i Podgórza.' : 'A museum about Kraków’s wartime history, close to Kazimierz and Podgórze.',
     meta: activeLanguage === 'pl' ? 'Miasto + muzeum' : 'City + museum',
     metaIcon: 'ticket',
-    image: siteAssets.attractions.schindler,
+    image: attractionImages.schindler,
     alt: 'Fabryka Schindlera w Krakowie',
     icon: 'info',
     variant: 'schindler',
@@ -76,7 +76,7 @@ const attractions = [
     description: activeLanguage === 'pl' ? 'Całodniowa wycieczka dla rodzin i osób szukających mocniejszych wrażeń.' : 'A full-day trip for families and guests looking for stronger thrills.',
     meta: activeLanguage === 'pl' ? 'Cały dzień' : 'Full-day trip',
     metaIcon: 'car',
-    image: siteAssets.attractions.energylandia,
+    image: attractionImages.energylandia,
     alt: 'Energylandia',
     icon: 'sparkle',
     variant: 'energylandia',
@@ -86,7 +86,7 @@ const attractions = [
     description: activeLanguage === 'pl' ? 'Dobre kierunki na jednodniową wycieczkę poza miasto.' : 'Good options for a day trip outside the city.',
     meta: activeLanguage === 'pl' ? 'Natura / góry' : 'Nature / mountains',
     metaIcon: 'leaf',
-    image: siteAssets.attractions.zakopane,
+    image: attractionImages.zakopane,
     alt: 'Ojców, Zakopane i okolice Krakowa',
     icon: 'leaf',
     variant: 'nature',
@@ -107,10 +107,13 @@ const secondary = attractions.slice(1);
     <div class="attractions__layout">
       <article class="attractions__feature reveal-section">
         <ImageFrame
-          src={featured.image}
-          alt={featured.alt}
+          src={featured.image.src}
+          alt={featured.image.altPl || featured.alt}
           label={featured.name}
           className={`attractions__media attractions__media--feature attractions__media--${featured.variant}`}
+          width={featured.image.width}
+          height={featured.image.height}
+          sizes={featured.image.sizes}
         />
         <div class="attractions__feature-copy">
           <span class="attractions__feature-icon" aria-hidden="true">
@@ -130,10 +133,13 @@ const secondary = attractions.slice(1);
         {secondary.map((attraction, index) => (
           <article class:list={['attractions__mini', `attractions__mini--${index + 1}`, 'reveal-section']} style={`--reveal-delay: ${(index + 1) * 80}ms`}>
             <ImageFrame
-              src={attraction.image}
-              alt={attraction.alt}
+              src={attraction.image.src}
+              alt={attraction.image.altPl || attraction.alt}
               label={attraction.name}
               className={`attractions__media attractions__media--mini attractions__media--${attraction.variant}`}
+              width={attraction.image.width}
+              height={attraction.image.height}
+              sizes={attraction.image.sizes}
             />
             <div class="attractions__mini-copy">
               <span aria-hidden="true">

@@ -1,5 +1,7 @@
 ---
+import ImageFrame from '@/components/ImageFrame.astro';
 import Icon from '@/components/ui/Icon.astro';
+import { attractionImages } from '@/data/attractionsImageRegistry';
 import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import { resolveContentLanguage } from '@/i18n/config';
 
@@ -16,7 +18,6 @@ const explicitLanguage = pathContext.explicitLanguage;
 const bookingHref = getBookingLocalizedPath(lang);
 const transportHref = getLocalizedPath(explicitLanguage, 'dojazd');
 const attractionsHref = getLocalizedPath(explicitLanguage, 'atrakcje');
-const tourBookingHref = 'https://qr.codes/vksKBT';
 
 const copyByLang = {
   pl: {
@@ -180,6 +181,37 @@ const copyByLang = {
 
 const copy = copyByLang[lang as keyof typeof copyByLang] ?? copyByLang.en;
 const plannerConfigEncoded = Buffer.from(JSON.stringify(copy), 'utf8').toString('base64');
+const inspirationCopy = {
+  pl: {
+    kicker: 'Inspiracje do planu',
+    title: 'Zobacz kierunki, zanim ułożysz tempo pobytu',
+    items: ['Kraków i Wawel', 'Wieliczka', 'Rodzinny dzień'],
+  },
+  en: {
+    kicker: 'Stay inspiration',
+    title: 'See the directions before choosing your pace',
+    items: ['Krakow and Wawel', 'Wieliczka', 'Family day'],
+  },
+  de: {
+    kicker: 'Inspiration',
+    title: 'Ziele ansehen, bevor Sie das Tempo wählen',
+    items: ['Krakau und Wawel', 'Wieliczka', 'Familientag'],
+  },
+  it: {
+    kicker: 'Ispirazioni',
+    title: 'Guarda le mete prima di scegliere il ritmo',
+    items: ['Cracovia e Wawel', 'Wieliczka', 'Giornata in famiglia'],
+  },
+}[lang as 'pl' | 'en' | 'de' | 'it'] ?? {
+  kicker: 'Stay inspiration',
+  title: 'See the directions before choosing your pace',
+  items: ['Krakow and Wawel', 'Wieliczka', 'Family day'],
+};
+const inspirationImages = [
+  attractionImages.wawel,
+  attractionImages.wieliczka,
+  attractionImages.energylandia,
+];
 ---
 
 <section class="site-section stay-planner reveal-section" data-stay-planner>
@@ -215,6 +247,26 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify(copy), 'utf8').toString(
         ))}
       </div>
     </div>
+
+    <section class="stay-planner__inspiration" aria-labelledby="stayPlannerInspirationTitle">
+      <div class="stay-planner__inspiration-copy">
+        <span class="section-kicker">{inspirationCopy.kicker}</span>
+        <h2 id="stayPlannerInspirationTitle">{inspirationCopy.title}</h2>
+      </div>
+      <div class="stay-planner__inspiration-grid">
+        {inspirationImages.map((image, index) => (
+          <ImageFrame
+            src={image.src}
+            alt={image.altPl}
+            label={inspirationCopy.items[index]}
+            className="stay-planner__inspiration-image"
+            width={image.width}
+            height={image.height}
+            sizes={image.sizes}
+          />
+        ))}
+      </div>
+    </section>
 
     <div class="stay-planner__layout">
       <div class="premium-card stay-planner__panel">
@@ -307,7 +359,7 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify(copy), 'utf8').toString(
       <button class="btn btn-glass" type="button" data-ask-campy-planner><Icon name="BotMessageSquare" size={18} strokeWidth={2} /> {copy.ctaCampy}</button>
       <a class="btn btn-glass" href={transportHref}><Icon name="TramFront" size={18} strokeWidth={2} /> {copy.ctaTram}</a>
       <a class="btn btn-glass" href={attractionsHref}><Icon name="Map" size={18} strokeWidth={2} /> {copy.ctaAttractions}</a>
-      <a class="btn btn-glass" href={tourBookingHref} target="_blank" rel="noopener noreferrer"><Icon name="Ticket" size={18} strokeWidth={2} /> {copy.ctaTours}</a>
+      <a class="btn btn-glass" href={attractionsHref}><Icon name="Ticket" size={18} strokeWidth={2} /> {copy.ctaTours}</a>
     </div>
   </div>
 </section>
@@ -560,6 +612,31 @@ const plannerConfigEncoded = Buffer.from(JSON.stringify(copy), 'utf8').toString(
   margin-bottom: 24px;
   padding: clamp(22px, 4vw, 34px);
   color: #fff;
+}
+
+.stay-planner__inspiration {
+  display: grid;
+  gap: 18px;
+  margin: 0 0 24px;
+}
+
+.stay-planner__inspiration-copy h2 {
+  max-width: 760px;
+  margin: 8px 0 0;
+  color: #f7fff9;
+  font-size: clamp(1.45rem, 3vw, 2.4rem);
+  line-height: 1.08;
+}
+
+.stay-planner__inspiration-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+:global(.stay-planner__inspiration-image.photo-frame) {
+  min-height: 190px;
+  border-radius: 24px;
 }
 
 .stay-planner__quiz h2,
@@ -853,6 +930,7 @@ html[data-theme="light"] .stay-planner {
 }
 
 html[data-theme="light"] .stay-planner__head h1,
+html[data-theme="light"] .stay-planner__inspiration-copy h2,
 html[data-theme="light"] .stay-planner__control h2,
 html[data-theme="light"] .stay-planner__result h2,
 html[data-theme="light"] .stay-planner__quiz h2,
@@ -946,6 +1024,20 @@ html[data-theme="light"] .stay-planner__arrival li {
 
   .stay-planner__result {
     position: static;
+  }
+
+  .stay-planner__inspiration-grid {
+    grid-template-columns: 1fr;
+  }
+
+  :global(.stay-planner__inspiration-image.photo-frame) {
+    min-height: 210px;
+  }
+
+  .stay-planner__ambient span {
+    animation: none;
+    filter: blur(14px);
+    opacity: .55;
   }
 
   .stay-planner__today,

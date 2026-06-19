@@ -7,6 +7,8 @@ export interface InquiryPeople {
 export interface InquiryCalculatorSummary {
   total?: string;
   pricePerNight?: string;
+  currencyEstimate?: string;
+  currencyDisclaimer?: string;
   season?: string;
   breakdown?: string[];
 }
@@ -60,6 +62,8 @@ export interface ReservationInquiryPayload {
   selectedStayMode?: string;
   services?: InquiryServiceLine[];
   estimatedTotal?: number | string;
+  currencyEstimate?: string;
+  currencyDisclaimer?: string;
   vehiclePlate?: string;
   vehicleDetails?: Partial<InquiryVehicleDetails>;
   specialNeeds?: string;
@@ -97,6 +101,8 @@ export interface NormalizedReservationInquiry extends ReservationInquiryPayload 
   selectedStayMode: string;
   services: InquiryServiceLine[];
   estimatedTotal: string;
+  currencyEstimate: string;
+  currencyDisclaimer: string;
   vehiclePlate: string;
   vehicleDetails: InquiryVehicleDetails;
   specialNeeds: string;
@@ -127,6 +133,8 @@ export interface CcSystemLeadDraft {
     addons: string[];
     services: InquiryServiceLine[];
     estimatedTotal: string;
+    currencyEstimate: string;
+    currencyDisclaimer: string;
     vehiclePlate: string;
     vehicleDetails: InquiryVehicleDetails;
     specialNeeds: string;
