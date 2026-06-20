@@ -79,6 +79,17 @@ const parseResponseBody = async (response) => {
   }
 };
 
+const networkErrorDetails = (error) => {
+  const cause = error?.cause;
+  return [
+    error instanceof Error ? error.message : String(error),
+    cause?.code,
+    cause?.syscall,
+    cause?.hostname,
+    cause?.message,
+  ].filter(Boolean).join(' | ');
+};
+
 export const supabaseRequest = async (path, options = {}) => {
   const { url, key } = supabaseConfig();
   let response;
@@ -95,7 +106,7 @@ export const supabaseRequest = async (path, options = {}) => {
   } catch (error) {
     throw new InboxApiError('SUPABASE_QUERY_FAILED', 'Nie udało się połączyć z Supabase.', {
       httpStatus: 502,
-      details: error instanceof Error ? error.message : String(error),
+      details: networkErrorDetails(error),
     });
   }
 
