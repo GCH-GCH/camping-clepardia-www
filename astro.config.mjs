@@ -31,7 +31,15 @@ const reservationApiDevPlugin = () => ({
         } catch {
           res.statusCode = 400;
           res.setHeader('content-type', 'application/json; charset=utf-8');
-          res.end(JSON.stringify({ ok: false, message: 'Invalid JSON payload.' }));
+          res.end(JSON.stringify({
+            ok: false,
+            provider: 'none',
+            delivered: false,
+            error: 'INVALID_JSON',
+            reason: 'Invalid JSON payload.',
+            inquiryId: null,
+            message: 'Invalid JSON payload.',
+          }));
           return;
         }
 
@@ -54,7 +62,15 @@ const reservationApiDevPlugin = () => ({
 
         if (Object.keys(errors).length) {
           res.statusCode = 400;
-          res.end(JSON.stringify({ ok: false, errors }));
+          res.end(JSON.stringify({
+            ok: false,
+            provider: 'none',
+            delivered: false,
+            error: 'VALIDATION_ERROR',
+            reason: 'Reservation payload validation failed.',
+            inquiryId: null,
+            errors,
+          }));
           return;
         }
 
@@ -79,12 +95,17 @@ const reservationApiDevPlugin = () => ({
             vehicleDetails: payload.vehicleDetails || {},
           },
           services,
+          tours: Array.isArray(payload.tours) ? payload.tours.filter(Boolean).slice(0, 12) : [],
           originalMessage: String(payload.message || '').trim(),
         };
 
         res.statusCode = 200;
         res.end(JSON.stringify({
           ok: true,
+          provider: 'mock',
+          delivered: false,
+          error: null,
+          reason: 'Local dev Vite mock - mail body prepared but not sent.',
           mode: 'mock',
           inquiryId: `LOCAL-${Date.now().toString(36).toUpperCase()}`,
           mail: {
@@ -120,7 +141,7 @@ const reservationApiDevPlugin = () => ({
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://www.clepardia.com.pl',
+  site: process.env.PUBLIC_SITE_URL || 'https://www.clepardia.com.pl',
   integrations: [
     sitemap({
       i18n: {

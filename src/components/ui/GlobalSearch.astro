@@ -62,6 +62,19 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
     let closeTimer = 0;
 
     const normalize = (value) => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const resultIcon = (entry) => {
+      const text = normalize(`${entry.icon || ''} ${entry.category || ''} ${entry.title || ''}`);
+      const path = text.includes('tram') || text.includes('transport')
+        ? '<path d="M7 16h10M8 20l2-4m6 4-2-4M7 3h10a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm-2 7h14M8 7h.01M16 7h.01"/>'
+        : text.includes('map') || text.includes('attraction') || text.includes('wielicz')
+          ? '<path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3Zm0 0V3m6 18V6"/>'
+          : text.includes('dog') || text.includes('pies') || text.includes('paw')
+            ? '<path d="M11.5 15.5c-1.5-2-4.5-1.5-5.2.8-.7 2.4 1.8 4.2 4 3.1 1.1-.5 2.3-.5 3.4 0 2.2 1.1 4.7-.7 4-3.1-.7-2.3-3.7-2.8-5.2-.8a.65.65 0 0 1-1 0ZM6 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm12 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM10 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm4 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>'
+            : text.includes('document') || text.includes('faq')
+              ? '<path d="M6 2h8l4 4v16H6V2Zm8 0v5h5M9 12h6M9 16h6"/>'
+              : '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>';
+      return `<svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
+    };
 
     const render = (query = '') => {
       if (!(results instanceof HTMLElement)) return;
@@ -96,12 +109,13 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
         <a class="global-search__result" href="${entry.href}">
           ${entry.image
             ? `<img class="global-search__result-image" src="${entry.image}" alt="" width="84" height="84" loading="lazy" decoding="async">`
-            : '<span class="global-search__result-icon" aria-hidden="true"></span>'}
+            : `<span class="global-search__result-icon" aria-hidden="true">${resultIcon(entry)}</span>`}
           <span>
             <small>${entry.category}${entry.badge ? ` · ${entry.badge}` : ''}</small>
             <strong>${entry.title}</strong>
             <em>${entry.description}</em>
           </span>
+          <b aria-hidden="true">→</b>
         </a>
       `).join('');
     };
@@ -330,31 +344,58 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
 
 .global-search__result {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-columns: 48px minmax(0, 1fr) auto;
   gap: 12px;
+  align-items: center;
   padding: 13px;
   border: 1px solid rgba(255,255,255,.10);
   border-radius: 20px;
   color: #fff;
   background: rgba(255,255,255,.075);
   text-decoration: none;
+  transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.global-search__result:hover {
+  transform: translateY(-2px);
+  border-color: rgba(143,224,180,.34);
+  background: rgba(255,255,255,.105);
+  box-shadow: 0 18px 42px rgba(0,0,0,.14);
 }
 
 .global-search__result-icon {
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
   border-radius: 15px;
+  color: #082016;
   background: linear-gradient(135deg, #a8f0c7, #3CB371);
   box-shadow: 0 12px 30px rgba(60,179,113,.22);
 }
 
+.global-search__result-icon svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .global-search__result-image {
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
   display: block;
   border-radius: 15px;
   object-fit: cover;
   box-shadow: 0 12px 30px rgba(20,50,33,.20);
+}
+
+.global-search__result > b {
+  color: #8fe0b4;
+  font-size: 1.2rem;
 }
 
 .global-search__result small,
@@ -408,6 +449,16 @@ html[data-theme="light"] .global-search__header:focus-within {
 html[data-theme="light"] .global-search__header input,
 html[data-theme="light"] .global-search__result strong {
   color: #102018;
+}
+
+html[data-theme="light"] .global-search__result:hover {
+  border-color: rgba(34,126,77,.24);
+  background: rgba(255,255,255,.90);
+  box-shadow: 0 18px 42px rgba(16,40,28,.10);
+}
+
+html[data-theme="light"] .global-search__result > b {
+  color: #23784d;
 }
 
 html[data-theme="light"] .global-search__header input::placeholder,

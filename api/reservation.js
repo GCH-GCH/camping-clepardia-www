@@ -184,6 +184,10 @@ const createInquiry = (payload, normalized) => {
       toddlers: Math.max(0, Math.floor(Number(payload.people?.toddlers || 0))),
     },
     services: normalized.services,
+    tours: (Array.isArray(payload.tours) ? payload.tours : [])
+      .map((tour) => oneLine(tour, 120))
+      .filter(Boolean)
+      .slice(0, 12),
     estimatedTotal: oneLine(payload.estimatedTotal || payload.calculatorSummary?.total, 80),
     currencyEstimate: oneLine(payload.currencyEstimate || payload.calculatorSummary?.currencyEstimate, 160),
     currencyDisclaimer: longText(
@@ -231,6 +235,7 @@ const createCcSystemDraft = (inquiry) => ({
     stayCategory: inquiry.stayCategory,
     people: inquiry.people,
     services: inquiry.services,
+    tours: inquiry.tours,
     estimatedTotal: inquiry.estimatedTotal,
     currencyEstimate: inquiry.currencyEstimate,
     currencyDisclaimer: inquiry.currencyDisclaimer,
@@ -279,6 +284,7 @@ const buildReceptionMail = (inquiry) => {
     ['Numer rejestracyjny', inquiry.vehiclePlate || 'brak'],
     ['Specjalne potrzeby', inquiry.specialNeeds || 'brak'],
     ['Pozniejszy wyjazd', inquiry.lateCheckout || 'brak'],
+    ['Wycieczki (bez doliczania ceny)', inquiry.tours.join(', ') || 'brak'],
     ['Cisza nocna', inquiry.quietConsent ? 'zaakceptowana' : 'brak'],
     ['Zgoda kontaktowa', inquiry.consent ? 'zaakceptowana' : 'brak'],
     ['Zgoda RODO', inquiry.privacyConsent ? 'zaakceptowana' : 'brak'],
@@ -519,6 +525,7 @@ const buildFormSubmitPayload = (message, inquiry) => ({
   numer_rejestracyjny: inquiry.vehiclePlate || 'brak',
   specjalne_potrzeby: inquiry.specialNeeds || 'brak',
   pozniejszy_wyjazd: inquiry.lateCheckout || 'brak',
+  wycieczki_bez_doliczania_ceny: inquiry.tours.join(', ') || 'brak',
   wiadomosc_klienta: inquiry.message || 'brak',
   zgoda_cisza_nocna: inquiry.quietConsent ? 'zaakceptowana' : 'brak',
   zgoda_kontaktowa: inquiry.consent ? 'zaakceptowana' : 'brak',
@@ -622,8 +629,8 @@ const sendWithFormSubmit = async (message, inquiry) => {
       provider: 'formsubmit',
       delivered: true,
       messageId: oneLine(body?.submission_id || body?.message || body?.next || '', 180),
-      activationNotice: true,
-      message: 'Sent through FormSubmit. If this is the first FormSubmit test, confirm activation in clepardia@gmail.com and submit again.',
+      activationNotice: false,
+      message: 'Sent through FormSubmit.',
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'FormSubmit request failed.';
@@ -678,12 +685,27 @@ const sendCustomerConfirmation = async (message) => {
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.setHeader('allow', 'POST, OPTIONS');
-    return sendJson(res, 200, { ok: true });
+    return sendJson(res, 200, {
+      ok: true,
+      provider: 'none',
+      delivered: false,
+      error: null,
+      reason: 'Preflight response.',
+      inquiryId: null,
+    });
   }
 
   if (req.method !== 'POST') {
     res.setHeader('allow', 'POST, OPTIONS');
-    return sendJson(res, 405, { ok: false, message: 'Method not allowed.' });
+    return sendJson(res, 405, {
+      ok: false,
+      provider: 'none',
+      delivered: false,
+      error: 'METHOD_NOT_ALLOWED',
+      reason: 'Method not allowed.',
+      inquiryId: null,
+      message: 'Method not allowed.',
+    });
   }
 
   try {
@@ -691,12 +713,28 @@ export default async function handler(req, res) {
     const normalized = validate(payload);
 
     if (Object.keys(normalized.errors).length) {
-      return sendJson(res, 400, { ok: false, errors: normalized.errors });
+      return sendJson(res, 400, {
+        ok: false,
+        provider: 'none',
+        delivered: false,
+        error: 'VALIDATION_ERROR',
+        reason: 'Reservation payload validation failed.',
+        inquiryId: null,
+        errors: normalized.errors,
+      });
     }
 
     const inquiry = createInquiry(payload, normalized);
     if (inquiry.website) {
-      return sendJson(res, 200, { ok: true, mode: 'spam-filtered', inquiryId: inquiry.inquiryId });
+      return sendJson(res, 200, {
+        ok: true,
+        provider: 'none',
+        delivered: false,
+        error: null,
+        reason: 'Spam-filtered submission.',
+        inquiryId: inquiry.inquiryId,
+        mode: 'spam-filtered',
+      });
     }
 
     logMailEnv(inquiry.inquiryId);
@@ -715,6 +753,10 @@ export default async function handler(req, res) {
     if (!reception.delivered && reception.provider === 'formsubmit' && reception.activationNotice) {
       return sendJson(res, 200, {
         ok: true,
+        provider: reception.fallbackFrom ? 'fallback' : 'formsubmit',
+        delivered: false,
+        error: reception.errorCode || 'formsubmit_activation_required',
+        reason: reception.reason || reception.message,
         mode: 'formsubmit',
         inquiryId: inquiry.inquiryId,
         message: reception.message,
@@ -734,7 +776,10 @@ export default async function handler(req, res) {
       return sendJson(res, 502, {
         ok: false,
         mode: 'error',
-        provider: reception.provider || 'unknown',
+        provider: reception.fallbackFrom ? 'fallback' : (reception.provider || 'none'),
+        delivered: false,
+        error: reception.errorCode || 'MAIL_ERROR',
+        reason: reception.reason || reception.message || 'Mail delivery failed.',
         errorCode: reception.errorCode || 'MAIL_ERROR',
         message: reception.message || reception.reason || 'Mail delivery failed.',
         inquiryId: inquiry.inquiryId,
@@ -765,6 +810,10 @@ export default async function handler(req, res) {
 
     return sendJson(res, 200, {
       ok: true,
+      provider: reception.fallbackFrom ? 'fallback' : (reception.provider || 'none'),
+      delivered: Boolean(reception.delivered),
+      error: reception.delivered ? null : (reception.errorCode || null),
+      reason: reception.delivered ? null : (reception.reason || 'Mail body prepared but not sent.'),
       mode: reception.delivered ? reception.provider : 'mock',
       inquiryId: inquiry.inquiryId,
       mail,
@@ -773,6 +822,10 @@ export default async function handler(req, res) {
   } catch (error) {
     return sendJson(res, 500, {
       ok: false,
+      provider: 'none',
+      delivered: false,
+      error: 'RESERVATION_ENDPOINT_FAILED',
+      inquiryId: null,
       mode: 'error',
       message: 'Reservation endpoint failed before accepting the enquiry.',
       reason: error instanceof Error ? error.message : 'Unknown reservation endpoint error.',

@@ -403,31 +403,6 @@ const quickActionGroups = [
     ],
   },
 ];
-const quickActionByKey = Object.fromEntries(
-  quickActionGroups.flatMap((group) => group.actions).map((action) => [action.key, action]),
-);
-const quickRailOrder = [
-  'bookStay',
-  'camperPrice',
-  'centerTransit',
-  'currency',
-  'dayPlan',
-  'oneNightPlan',
-  'twoNightPlan',
-  'threeNightPlan',
-  'familyAttractions',
-  'waterRelax',
-  'dog',
-  'bungalowOptions',
-  'combinedStay',
-  'quiet',
-  'sctEtoll',
-  'maps',
-  'reception',
-];
-const quickRailActions = quickRailOrder
-  .map((key) => quickActionByKey[key])
-  .filter(Boolean);
 ---
 
 <div class="floating-chat" data-floating-chat>
@@ -493,17 +468,6 @@ const quickRailActions = quickRailOrder
         <span>{campyQuick.toggle}</span>
         <Icon name="ChevronDown" size={17} strokeWidth={2} class="floating-chat__quick-chevron" />
       </button>
-      <div class="floating-chat__quick" data-chat-quick-rail role="list" tabindex="0" aria-label={campyQuick.aria}>
-        {quickRailActions.map((action) => (
-          <button type="button" data-chat-action={action.key} data-chat-prompt={action.label} aria-label={action.label} role="listitem">
-            <Icon name={action.icon} size={16} strokeWidth={1.9} />
-            <span>{action.label}</span>
-          </button>
-        ))}
-      </div>
-      <div class="floating-chat__quick-scrollbar" data-chat-quick-scrollbar aria-hidden="true">
-        <span data-chat-quick-scroll-thumb></span>
-      </div>
       <div
         class="floating-chat__quick-panel"
         id="floatingChatQuickPanel"
@@ -578,9 +542,6 @@ const quickRailActions = quickRailOrder
     const quickToggleButton = root.querySelector('[data-chat-quick-toggle]');
     const quickPanel = root.querySelector('[data-chat-quick-panel]');
     const quickTemplate = root.querySelector('[data-chat-quick-template]');
-    const quickRail = root.querySelector('[data-chat-quick-rail]');
-    const quickScrollbar = root.querySelector('[data-chat-quick-scrollbar]');
-    const quickThumb = root.querySelector('[data-chat-quick-scroll-thumb]');
 
     if (!(toggle instanceof HTMLButtonElement) || !(panel instanceof HTMLElement) || !(messages instanceof HTMLElement)) return;
 
@@ -588,59 +549,7 @@ const quickRailActions = quickRailOrder
     let hideTimer = 0;
     let panelHydrated = false;
     let quickPanelHydrated = false;
-    let quickThumbDragging = false;
-    let quickThumbStartX = 0;
-    let quickThumbStartScroll = 0;
-    let quickScrollTarget = 0;
-    let quickScrollRaf = 0;
     let quickPanelOpen = false;
-
-    const quickMaxScroll = () => quickRail instanceof HTMLElement
-      ? Math.max(0, quickRail.scrollWidth - quickRail.clientWidth)
-      : 0;
-
-    const updateQuickScrollbar = () => {
-      if (!(quickRail instanceof HTMLElement) || !(quickScrollbar instanceof HTMLElement) || !(quickThumb instanceof HTMLElement)) return;
-      const max = quickMaxScroll();
-      quickScrollbar.classList.toggle('is-hidden', max <= 4);
-      quickScrollbar.classList.toggle('is-at-start', quickRail.scrollLeft <= 2);
-      quickScrollbar.classList.toggle('is-at-end', max > 4 && quickRail.scrollLeft >= max - 2);
-      if (max <= 4) {
-        quickThumb.style.width = '100%';
-        quickThumb.style.transform = 'translateX(0)';
-        return;
-      }
-      const trackWidth = quickScrollbar.clientWidth;
-      const thumbWidth = Math.max(42, trackWidth * (quickRail.clientWidth / quickRail.scrollWidth));
-      const travel = Math.max(1, trackWidth - thumbWidth);
-      const left = (quickRail.scrollLeft / max) * travel;
-      quickThumb.style.width = `${thumbWidth}px`;
-      quickThumb.style.transform = `translate3d(${left}px,0,0)`;
-    };
-
-    const animateQuickScrollTo = (target) => {
-      if (!(quickRail instanceof HTMLElement)) return;
-      const max = quickMaxScroll();
-      quickScrollTarget = Math.max(0, Math.min(max, target));
-      if (quickScrollRaf) return;
-      const tick = () => {
-        if (!(quickRail instanceof HTMLElement)) {
-          quickScrollRaf = 0;
-          return;
-        }
-        const delta = quickScrollTarget - quickRail.scrollLeft;
-        if (Math.abs(delta) < 0.5) {
-          quickRail.scrollLeft = quickScrollTarget;
-          quickScrollRaf = 0;
-          updateQuickScrollbar();
-          return;
-        }
-        quickRail.scrollLeft += delta * 0.22;
-        updateQuickScrollbar();
-        quickScrollRaf = window.requestAnimationFrame(tick);
-      };
-      quickScrollRaf = window.requestAnimationFrame(tick);
-    };
 
     const hydratePanelCopy = () => {
       if (panelHydrated) return;
@@ -712,7 +621,6 @@ const quickRailActions = quickRailOrder
         syncPanelTitle();
         initializeMessages();
         root.classList.add('is-open');
-        window.setTimeout(updateQuickScrollbar, 80);
         if (window.innerWidth > 640) {
           window.setTimeout(() => {
             if (input instanceof HTMLInputElement) input.focus({ preventScroll: true });
@@ -1046,152 +954,6 @@ const quickRailActions = quickRailOrder
         submitPrompt(actionButton.dataset.chatPrompt ?? actionButton.textContent ?? '', actionButton.dataset.chatAction ?? '');
         setQuickPanelOpen(false);
       });
-    }
-
-    if (quickRail instanceof HTMLElement) {
-      let dragging = false;
-      let dragged = false;
-      let startX = 0;
-      let startScroll = 0;
-      const maxScroll = () => Math.max(0, quickRail.scrollWidth - quickRail.clientWidth);
-
-      quickRail.addEventListener('wheel', (event) => {
-        const max = maxScroll();
-        if (max <= 0) return;
-        const delta = (Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY) * 1.08;
-        const next = Math.max(0, Math.min(max, (quickScrollRaf ? quickScrollTarget : quickRail.scrollLeft) + delta));
-        if (next === quickRail.scrollLeft) return;
-        event.preventDefault();
-        animateQuickScrollTo(next);
-      }, { passive: false });
-
-      quickRail.addEventListener('pointerdown', (event) => {
-        if (event.button !== 0) return;
-        dragging = true;
-        dragged = false;
-        startX = event.clientX;
-        startScroll = quickRail.scrollLeft;
-        quickScrollTarget = quickRail.scrollLeft;
-        if (quickScrollRaf) {
-          window.cancelAnimationFrame(quickScrollRaf);
-          quickScrollRaf = 0;
-        }
-        quickRail.classList.add('is-dragging');
-        quickRail.setPointerCapture?.(event.pointerId);
-      });
-
-      quickRail.addEventListener('pointermove', (event) => {
-        if (!dragging) return;
-        const delta = event.clientX - startX;
-        if (Math.abs(delta) > 4) dragged = true;
-        event.preventDefault();
-        quickRail.scrollLeft = startScroll - delta;
-        updateQuickScrollbar();
-      });
-
-      const stopDrag = (event) => {
-        dragging = false;
-        quickRail.classList.remove('is-dragging');
-        if ('pointerId' in event) quickRail.releasePointerCapture?.(event.pointerId);
-        window.setTimeout(() => { dragged = false; }, 0);
-      };
-
-      quickRail.addEventListener('pointerup', stopDrag);
-      quickRail.addEventListener('pointercancel', stopDrag);
-      quickRail.addEventListener('mouseleave', () => {
-        dragging = false;
-        quickRail.classList.remove('is-dragging');
-      });
-      quickRail.addEventListener('click', (event) => {
-        if (dragged) {
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-        }
-        const actionButton = event.target instanceof Element
-          ? event.target.closest('[data-chat-action]')
-          : null;
-        if (actionButton instanceof HTMLButtonElement) {
-          event.preventDefault();
-          submitPrompt(actionButton.dataset.chatPrompt ?? actionButton.textContent ?? '', actionButton.dataset.chatAction ?? '');
-          return;
-        }
-      }, true);
-      quickRail.addEventListener('keydown', (event) => {
-        const step = event.shiftKey ? 240 : 120;
-        if (event.key === 'ArrowRight') {
-          event.preventDefault();
-          quickRail.scrollBy({ left: step, behavior: 'smooth' });
-          window.setTimeout(updateQuickScrollbar, 180);
-        }
-        if (event.key === 'ArrowLeft') {
-          event.preventDefault();
-          quickRail.scrollBy({ left: -step, behavior: 'smooth' });
-          window.setTimeout(updateQuickScrollbar, 180);
-        }
-        if (event.key === 'Home') {
-          event.preventDefault();
-          quickRail.scrollTo({ left: 0, behavior: 'smooth' });
-          window.setTimeout(updateQuickScrollbar, 180);
-        }
-        if (event.key === 'End') {
-          event.preventDefault();
-          quickRail.scrollTo({ left: maxScroll(), behavior: 'smooth' });
-          window.setTimeout(updateQuickScrollbar, 180);
-        }
-      });
-      quickRail.addEventListener('scroll', updateQuickScrollbar, { passive: true });
-    }
-
-    if (quickScrollbar instanceof HTMLElement && quickRail instanceof HTMLElement) {
-      const scrollFromTrack = (event) => {
-        const max = quickMaxScroll();
-        if (max <= 0) return;
-        const rect = quickScrollbar.getBoundingClientRect();
-        const thumbWidth = quickThumb instanceof HTMLElement ? quickThumb.getBoundingClientRect().width : 42;
-        const travel = Math.max(1, rect.width - thumbWidth);
-        const x = Math.max(0, Math.min(travel, event.clientX - rect.left - thumbWidth / 2));
-        quickRail.scrollLeft = (x / travel) * max;
-        quickScrollTarget = quickRail.scrollLeft;
-        updateQuickScrollbar();
-      };
-
-      quickScrollbar.addEventListener('pointerdown', (event) => {
-        if (event.button !== 0) return;
-        quickThumbDragging = true;
-        quickScrollbar.classList.add('is-dragging');
-        quickScrollbar.setPointerCapture?.(event.pointerId);
-        if (quickScrollRaf) {
-          window.cancelAnimationFrame(quickScrollRaf);
-          quickScrollRaf = 0;
-        }
-        scrollFromTrack(event);
-        quickThumbStartX = event.clientX;
-        quickThumbStartScroll = quickRail.scrollLeft;
-        event.preventDefault();
-      });
-
-      quickScrollbar.addEventListener('pointermove', (event) => {
-        if (!quickThumbDragging) return;
-        const max = quickMaxScroll();
-        const rect = quickScrollbar.getBoundingClientRect();
-        const thumbWidth = quickThumb instanceof HTMLElement ? quickThumb.getBoundingClientRect().width : 42;
-        const travel = Math.max(1, rect.width - thumbWidth);
-        const delta = event.clientX - quickThumbStartX;
-        quickRail.scrollLeft = quickThumbStartScroll + (delta / travel) * max;
-        quickScrollTarget = quickRail.scrollLeft;
-        updateQuickScrollbar();
-        event.preventDefault();
-      });
-
-      const stopThumbDrag = (event) => {
-        quickThumbDragging = false;
-        quickScrollbar.classList.remove('is-dragging');
-        if ('pointerId' in event) quickScrollbar.releasePointerCapture?.(event.pointerId);
-      };
-
-      quickScrollbar.addEventListener('pointerup', stopThumbDrag);
-      quickScrollbar.addEventListener('pointercancel', stopThumbDrag);
     }
 
     form?.addEventListener('submit', (event) => {

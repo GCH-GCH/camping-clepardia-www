@@ -830,6 +830,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       calendarHover: '',
       guests: { adults: 2, children: 0, toddlers: 0, bungalowGuests: 2, campingGuests: 0 },
       services: {},
+      tours: [],
       simple: { people: 2 },
       details: {
         name: '',
@@ -1590,6 +1591,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       return selected.length ? selected.map((item) => `${item.label} x ${item.qty}`).join(', ') : '';
     };
 
+    const tourOptions = config.lang === 'pl'
+      ? ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Park Wodny Kraków', 'Bagry', 'Kryspinów', 'Stare Miasto i Wawel', 'Nie wiem — proszę o propozycję']
+      : ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Krakow Water Park', 'Bagry', 'Kryspinów', 'Old Town and Wawel', 'I am not sure — please suggest'];
+
+    const toursText = () => state.tours.join(', ');
+
     const guestsText = () => guestRows().map(([key, label]) => `${label}: ${Number(state.guests[key] || 0)}`).join(', ');
 
     const consentsText = () => [
@@ -1917,6 +1924,20 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           `).join('')}
         </div>
         ${serviceSuggestionsTemplate()}
+        <section class="reservation-tour-options">
+          <div>
+            <strong>${esc(config.lang === 'pl' ? 'Czy chcesz zapytać też o wycieczkę?' : 'Would you also like to ask about a trip?')}</strong>
+            <p>${esc(config.lang === 'pl' ? 'Opcjonalnie — wybór nie zmienia ceny zapytania.' : 'Optional — this does not change the estimated price.')}</p>
+          </div>
+          <div class="reservation-tour-options__grid">
+            ${tourOptions.map((tour) => `
+              <label>
+                <input type="checkbox" data-tour-option="${esc(tour)}" ${state.tours.includes(tour) ? 'checked' : ''} />
+                <span>${esc(tour)}</span>
+              </label>
+            `).join('')}
+          </div>
+        </section>
       </section>
     `;
 
@@ -2205,6 +2226,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             ${summaryRow('stay', t.summary.stay, modeTitle())}
             ${summaryRow('calendar', t.summary.dates, dateText)}
             ${summaryRow('guests', t.summary.guests, guestsText())}
+            ${state.tours.length ? summaryRow('map', config.lang === 'pl' ? 'Wycieczki' : 'Trips', toursText()) : ''}
             ${summaryRow('language', t.summary.language, state.details.language)}
             ${state.details.countryCode ? summaryRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
             ${state.details.plate ? summaryRow('plate', t.fields.plate, state.details.plate) : ''}
@@ -2234,6 +2256,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           ${summaryRow('calendar', t.summary.dates, dateText)}
           ${summaryRow('guests', t.summary.guests, guestsText())}
           ${summaryRow('services', t.summary.services, servicesText())}
+          ${state.tours.length ? summaryRow('map', config.lang === 'pl' ? 'Wycieczki' : 'Trips', toursText()) : ''}
           ${state.details.countryCode ? summaryRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
           ${summaryRow('language', t.summary.language, state.details.language)}
           ${state.details.plate ? summaryRow('plate', t.fields.plate, state.details.plate) : ''}
@@ -2346,6 +2369,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         `Termin: ${state.dates.arrival || '-'} - ${state.dates.departure || '-'} (${nights()} n.)`,
         `Goście: ${guestsText()}`,
         `Usługi: ${selected.length ? servicesText() : '-'}`,
+        `Wycieczki: ${state.tours.length ? toursText() : '-'}`,
         `Cena orientacyjna: ${selected.length ? fmt(estimatedTotal()) : '-'}`,
         selected.length ? `Waluty orientacyjnie: ${currencyEstimateText(estimatedTotal())}` : '',
         selected.length ? currencyDisclaimer() : '',
@@ -2368,10 +2392,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
       const stayNote = state.mode === 'bungalow' || state.mode === 'combined' ? ui.success.bungalow : ui.success.camping;
       const mode = state.submitMode || 'mock';
-      const isErrorMode = mode === 'error' || mode === 'resend-error';
+      const isErrorMode = mode === 'error' || mode === 'resend-error' || mode === 'formsubmit-activation';
       const successText = mode === 'resend' || mode === 'sent'
         ? ui.success.text
-        : mode === 'formsubmit'
+        : mode === 'formsubmit' || mode === 'formsubmit-activation'
           ? (state.formSubmitActivationNotice ? ui.success.formsubmitActivationText : ui.success.formsubmitText)
           : isErrorMode
             ? (state.submitError || ui.success.resendErrorText || ui.success.errorText)
@@ -2380,6 +2404,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         ? (ui.success.resendBadge || ui.success.sentBadge || 'Email sent')
         : mode === 'formsubmit'
           ? (ui.success.formsubmitBadge || 'Secure form')
+          : mode === 'formsubmit-activation'
+            ? (ui.success.errorBadge || 'Activation required')
           : isErrorMode
             ? (ui.success.errorBadge || 'Email error')
             : (ui.success.mockBadge || 'Test mode');
@@ -2402,6 +2428,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
               ${successRow('calendar', t.summary.dates, `${state.dates.arrival || '-'} - ${state.dates.departure || '-'} (${nights()} n.)`)}
               ${successRow('guests', t.summary.guests, guestsText())}
               ${selected.length ? successRow('services', t.summary.services, servicesText()) : ''}
+              ${state.tours.length ? successRow('map', config.lang === 'pl' ? 'Wycieczki' : 'Trips', toursText()) : ''}
               ${successRow('price', t.summary.total, selected.length ? fmt(estimatedTotal()) : '-')}
               ${selected.length ? successRow('price', 'Waluty orientacyjnie', currencyEstimateText(estimatedTotal())) : ''}
               ${state.details.countryCode ? successRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
@@ -2501,6 +2528,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         stayCategory: state.mode,
         selectedStayMode: state.mode,
         people,
+        tours: [...state.tours],
         addons: services.map((item) => `${item.label} x ${item.qty}`),
         message: [
           state.details.message,
@@ -2930,9 +2958,16 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           render();
           return;
         }
-        state.submitMode = result.mode || 'mock';
+        const delivered = Boolean(result.delivered ?? result?.mail?.reception?.delivered);
+        const activationRequired = Boolean(
+          result?.error === 'formsubmit_activation_required'
+          || result?.errorCode === 'formsubmit_activation_required'
+          || result?.mail?.reception?.activationNotice
+          || result?.mail?.reception?.activationRequired
+        );
+        state.submitMode = activationRequired && !delivered ? 'formsubmit-activation' : (result.mode || 'mock');
         state.inquiryId = result.inquiryId || '';
-        state.formSubmitActivationNotice = Boolean(result?.mail?.reception?.activationNotice);
+        state.formSubmitActivationNotice = activationRequired;
         state.success = true;
       } catch {
         state.submitError = ui.success.errorText || 'Wysyłka nie powiodła się.';
@@ -3201,6 +3236,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (!(target instanceof Element)) return;
       const day = target.closest('[data-calendar-day]');
       if (!(day instanceof HTMLButtonElement) || day.disabled || event.button !== 0) return;
+      if (event.pointerType === 'touch' || window.matchMedia('(pointer: coarse)').matches) return;
+      if (!event.shiftKey) return;
       const iso = day.dataset.calendarDay || '';
       if (!iso || compareIso(iso, todayIso) < 0) return;
       event.preventDefault();
@@ -3282,6 +3319,14 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     mount.addEventListener('change', (event) => {
       const target = event.target;
       if (!(target instanceof HTMLInputElement)) return;
+      if (target.dataset.tourOption) {
+        const tour = target.dataset.tourOption;
+        state.tours = target.checked
+          ? [...new Set([...state.tours, tour])]
+          : state.tours.filter((item) => item !== tour);
+        updateSummaryDom();
+        return;
+      }
       if (target.dataset.check) {
         state.details[target.dataset.check] = target.checked;
         refreshControlDom();
@@ -5383,7 +5428,8 @@ body.booking-app-page .main-content {
 }
 
 .reservation-success-modal[data-submit-mode="resend-error"] .reservation-success-modal__badge,
-.reservation-success-modal[data-submit-mode="error"] .reservation-success-modal__badge {
+.reservation-success-modal[data-submit-mode="error"] .reservation-success-modal__badge,
+.reservation-success-modal[data-submit-mode="formsubmit-activation"] .reservation-success-modal__badge {
   border-color: rgba(242,192,120,.34);
   color: #ffe6bb;
   background: rgba(242,192,120,.12);
@@ -5495,6 +5541,49 @@ body.booking-app-page .main-content {
   padding: 12px;
 }
 
+.reservation-tour-options {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+  padding: clamp(16px, 2.4vw, 22px);
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 24px;
+  background: rgba(60,179,113,.08);
+}
+
+.reservation-tour-options > div:first-child strong {
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.reservation-tour-options > div:first-child p {
+  margin: 4px 0 0;
+  color: rgba(245,255,248,.64);
+}
+
+.reservation-tour-options__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.reservation-tour-options__grid label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 15px;
+  color: rgba(245,255,248,.86);
+  background: rgba(255,255,255,.055);
+  cursor: pointer;
+}
+
+.reservation-tour-options__grid input {
+  accent-color: #3CB371;
+}
+
 .reservation-success-modal__actions {
   display: flex;
   flex-wrap: wrap;
@@ -5577,7 +5666,8 @@ body.booking-app-page .main-content {
 
   .reservation-presets__grid,
   .reservation-success-modal__card dl,
-  .reservation-date-summary dl {
+  .reservation-date-summary dl,
+  .reservation-tour-options__grid {
     grid-template-columns: 1fr;
   }
 
@@ -5691,6 +5781,22 @@ html[data-theme="light"] .reservation-success-modal__card {
     linear-gradient(145deg, rgba(255,255,255,.84), rgba(255,255,255,.58)),
     radial-gradient(circle at 14% 0%, rgba(60,179,113,.12), transparent 36%);
   box-shadow: 0 24px 80px rgba(44,71,48,.14), inset 0 1px 0 rgba(255,255,255,.72);
+}
+
+html[data-theme="light"] .reservation-tour-options {
+  color: #122319;
+  border-color: rgba(22,56,36,.12);
+  background: rgba(60,179,113,.08);
+}
+
+html[data-theme="light"] .reservation-tour-options > div:first-child strong,
+html[data-theme="light"] .reservation-tour-options__grid label {
+  color: #122319;
+}
+
+html[data-theme="light"] .reservation-tour-options__grid label {
+  border-color: rgba(22,56,36,.13);
+  background: rgba(255,255,255,.70);
 }
 
 html[data-theme="light"] .reservation-mini h1,
