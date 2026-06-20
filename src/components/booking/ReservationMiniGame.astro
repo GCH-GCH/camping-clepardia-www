@@ -872,6 +872,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       submitError: '',
       formSubmitActivationNotice: false,
       inquiryId: '',
+      inquirySaved: false,
+      mailProvider: 'none',
+      mailDelivered: false,
+      mailReason: '',
     };
     let suppressCalendarClick = false;
 
@@ -2392,16 +2396,25 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
       const stayNote = state.mode === 'bungalow' || state.mode === 'combined' ? ui.success.bungalow : ui.success.camping;
       const mode = state.submitMode || 'mock';
-      const isErrorMode = mode === 'error' || mode === 'resend-error' || mode === 'formsubmit-activation';
-      const successText = mode === 'resend' || mode === 'sent'
-        ? ui.success.text
+      const isSavedWithoutMail = state.inquirySaved && !state.mailDelivered;
+      const isErrorMode = !state.inquirySaved && (mode === 'error' || mode === 'resend-error');
+      const successText = state.inquirySaved && state.mailDelivered
+        ? (config.lang === 'pl' ? 'Zapytanie zapisane i wysłane do recepcji.' : 'The enquiry was saved and sent to reception.')
+        : isSavedWithoutMail
+          ? (config.lang === 'pl' ? 'Zapytanie zapisane w panelu recepcji. Automatyczny mail nie został dostarczony.' : 'The enquiry was saved in the reception panel. Automatic email was not delivered.')
+        : mode === 'resend' || mode === 'sent'
+          ? ui.success.text
         : mode === 'formsubmit' || mode === 'formsubmit-activation'
           ? (state.formSubmitActivationNotice ? ui.success.formsubmitActivationText : ui.success.formsubmitText)
           : isErrorMode
             ? (state.submitError || ui.success.resendErrorText || ui.success.errorText)
             : (ui.success.mockText || ui.success.text);
-      const successBadge = mode === 'resend' || mode === 'sent'
-        ? (ui.success.resendBadge || ui.success.sentBadge || 'Email sent')
+      const successBadge = state.inquirySaved && state.mailDelivered
+        ? (config.lang === 'pl' ? 'Zapisano i wysłano' : 'Saved and sent')
+        : isSavedWithoutMail
+          ? (config.lang === 'pl' ? 'Zapisano w panelu — mail niedostarczony' : 'Saved — email not delivered')
+        : mode === 'resend' || mode === 'sent'
+          ? (ui.success.resendBadge || ui.success.sentBadge || 'Email sent')
         : mode === 'formsubmit'
           ? (ui.success.formsubmitBadge || 'Secure form')
           : mode === 'formsubmit-activation'
@@ -2422,6 +2435,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             <h2>${esc(modalTitle)}</h2>
             <p>${esc(successText)}</p>
             ${state.inquiryId ? `<p class="reservation-success-modal__id">ID: ${esc(state.inquiryId)}</p>` : ''}
+            <div class="reservation-success-modal__delivery">
+              <span><strong>${esc(config.lang === 'pl' ? 'Zapis w panelu' : 'Inbox save')}</strong><em>${state.inquirySaved ? 'OK' : 'NIE'}</em></span>
+              <span><strong>Provider</strong><em>${esc(state.mailProvider || 'none')}</em></span>
+              <span><strong>Delivered</strong><em>${state.mailDelivered ? 'true' : 'false'}</em></span>
+              ${state.mailReason ? `<p>${esc(state.mailReason)}</p>` : ''}
+            </div>
             <dl>
               ${successRow('status', ui.summary.statusLabel, detailText.statusConfirmedByReception)}
               ${successRow('stay', t.summary.stay, modeTitle())}
@@ -2729,6 +2748,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.submitMode = '';
       state.submitError = '';
       state.formSubmitActivationNotice = false;
+      state.inquirySaved = false;
+      state.mailProvider = 'none';
+      state.mailDelivered = false;
+      state.mailReason = '';
       state.submitAttempted = false;
       const url = new URL(window.location.href);
       url.searchParams.set('stay', mode);
@@ -2747,6 +2770,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.submitMode = '';
       state.submitError = '';
       state.formSubmitActivationNotice = false;
+      state.inquirySaved = false;
+      state.mailProvider = 'none';
+      state.mailDelivered = false;
+      state.mailReason = '';
       const url = new URL(window.location.href);
       url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
@@ -2765,6 +2792,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.submitMode = '';
       state.submitError = '';
       state.formSubmitActivationNotice = false;
+      state.inquirySaved = false;
+      state.mailProvider = 'none';
+      state.mailDelivered = false;
+      state.mailReason = '';
       const url = new URL(window.location.href);
       url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
@@ -2933,12 +2964,20 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         if (response.status === 404 && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname)) {
           state.submitMode = 'mock';
           state.inquiryId = `LOCAL-${Date.now().toString(36).toUpperCase()}`;
+          state.inquirySaved = true;
+          state.mailProvider = 'mock';
+          state.mailDelivered = false;
+          state.mailReason = 'Local dev mock - mail body prepared but not sent.';
           state.success = true;
           return;
         }
+        state.inquirySaved = Boolean(result?.inquirySaved);
+        state.mailProvider = String(result?.provider || result?.mail?.reception?.provider || 'none');
+        state.mailDelivered = Boolean(result?.delivered ?? result?.mail?.reception?.delivered);
+        state.mailReason = String(result?.reason || result?.error || result?.message || '');
         if (!response.ok || !result?.ok) {
           const errors = result?.errors ? Object.values(result.errors).join(' ') : '';
-          if (result?.mode === 'error' || result?.mode === 'resend-error') {
+          if (state.inquirySaved || result?.mode === 'error' || result?.mode === 'resend-error') {
             state.submitMode = 'error';
             state.inquiryId = result?.inquiryId || '';
             state.formSubmitActivationNotice = Boolean(result?.mail?.reception?.activationNotice || result?.errorCode === 'formsubmit_activation_required');
@@ -5451,6 +5490,44 @@ body.booking-app-page .main-content {
   color: rgba(245,255,248,.74);
 }
 
+.reservation-success-modal__delivery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin: 16px 0;
+}
+
+.reservation-success-modal__delivery span,
+.reservation-success-modal__delivery > p {
+  padding: 11px 12px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 15px;
+  background: rgba(255,255,255,.06);
+}
+
+.reservation-success-modal__delivery strong,
+.reservation-success-modal__delivery em {
+  display: block;
+}
+
+.reservation-success-modal__delivery strong {
+  color: rgba(245,255,248,.58);
+  font-size: .72rem;
+  text-transform: uppercase;
+}
+
+.reservation-success-modal__delivery em {
+  margin-top: 3px;
+  color: #fff;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.reservation-success-modal__delivery > p {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .reservation-success-modal__card dl {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -5667,7 +5744,8 @@ body.booking-app-page .main-content {
   .reservation-presets__grid,
   .reservation-success-modal__card dl,
   .reservation-date-summary dl,
-  .reservation-tour-options__grid {
+  .reservation-tour-options__grid,
+  .reservation-success-modal__delivery {
     grid-template-columns: 1fr;
   }
 
@@ -5845,6 +5923,21 @@ html[data-theme="light"] .reservation-success-modal__card dt,
 html[data-theme="light"] .reservation-help__sections article p,
 html[data-theme="light"] .reservation-success-modal__card p {
   color: rgba(18,35,25,.68);
+}
+
+html[data-theme="light"] .reservation-success-modal__delivery span,
+html[data-theme="light"] .reservation-success-modal__delivery > p {
+  color: #122319;
+  border-color: rgba(22,56,36,.13);
+  background: rgba(255,255,255,.70);
+}
+
+html[data-theme="light"] .reservation-success-modal__delivery strong {
+  color: rgba(18,35,25,.58);
+}
+
+html[data-theme="light"] .reservation-success-modal__delivery em {
+  color: #122319;
 }
 
 html[data-theme="light"] .reservation-choice-card__chips i,

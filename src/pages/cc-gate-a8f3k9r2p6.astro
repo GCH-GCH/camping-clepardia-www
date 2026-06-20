@@ -1,0 +1,398 @@
+---
+const title = 'Panel recepcji Camping Clepardia';
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="referrer" content="no-referrer" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <main class="inbox-shell">
+      <section class="login-card" data-login>
+        <span class="eyebrow">Prywatny mini-inbox</span>
+        <h1>{title}</h1>
+        <p>Wpisz kod dostępu skonfigurowany dla recepcji.</p>
+        <form data-login-form>
+          <label>
+            <span>Kod dostępu</span>
+            <input type="password" name="accessCode" autocomplete="current-password" required />
+          </label>
+          <button type="submit">Otwórz panel</button>
+          <p class="status" data-login-status aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="inbox-app" data-app hidden>
+        <header class="app-header">
+          <div>
+            <span class="eyebrow">Camping Clepardia</span>
+            <h1>Inbox recepcji</h1>
+            <p data-count>Ładowanie zapytań…</p>
+          </div>
+          <div class="header-actions">
+            <button type="button" data-refresh>Odśwież</button>
+            <button type="button" class="ghost" data-logout>Wyloguj</button>
+          </div>
+        </header>
+
+        <section class="filters" aria-label="Filtry zapytań">
+          <label class="search">
+            <span>Szukaj</span>
+            <input type="search" data-filter="search" placeholder="Imię, email, telefon, rejestracja, kraj, wiadomość…" />
+          </label>
+          <label><span>Status</span><select data-filter="status"><option value="">Wszystkie</option></select></label>
+          <label><span>Typ pobytu</span><select data-filter="stay"><option value="">Wszystkie</option></select></label>
+          <label><span>Kraj</span><select data-filter="country"><option value="">Wszystkie</option></select></label>
+          <label><span>Język</span><select data-filter="language"><option value="">Wszystkie</option></select></label>
+          <label><span>Przyjazd od</span><input type="date" data-filter="arrival" /></label>
+          <label><span>Sortowanie</span>
+            <select data-filter="sort">
+              <option value="newest">Najnowsze</option>
+              <option value="oldest">Najstarsze</option>
+              <option value="arrival">Przyjazd najbliżej</option>
+            </select>
+          </label>
+          <label class="check"><input type="checkbox" data-filter="mailFailed" /><span>Mail niedostarczony</span></label>
+          <label class="check"><input type="checkbox" data-filter="trips" /><span>Wycieczki</span></label>
+          <label class="check"><input type="checkbox" data-filter="special" /><span>Specjalne potrzeby</span></label>
+        </section>
+
+        <p class="app-status" data-app-status aria-live="polite"></p>
+        <section class="inquiry-list" data-list></section>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        const storageKey = 'cc-inbox-access-code';
+        const login = document.querySelector('[data-login]');
+        const app = document.querySelector('[data-app]');
+        const loginForm = document.querySelector('[data-login-form]');
+        const loginStatus = document.querySelector('[data-login-status]');
+        const appStatus = document.querySelector('[data-app-status]');
+        const list = document.querySelector('[data-list]');
+        const count = document.querySelector('[data-count]');
+        const filters = Array.from(document.querySelectorAll('[data-filter]'));
+        const statusLabels = {
+          new: 'Nowe',
+          needs_reply: 'Do odpowiedzi',
+          replied: 'Odpowiedziane',
+          confirmed: 'Potwierdzone',
+          rejected: 'Odrzucone',
+          spam: 'Spam/test',
+          archived: 'Archiwum',
+        };
+        let accessCode = '';
+        let inquiries = [];
+
+        const esc = (value) => String(value ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+        const jsonText = (value) => {
+          if (!value) return '-';
+          if (Array.isArray(value)) return value.length ? value.map((item) => typeof item === 'object' ? JSON.stringify(item) : item).join(', ') : '-';
+          if (typeof value === 'object') return Object.entries(value).map(([key, item]) => `${key}: ${typeof item === 'object' ? JSON.stringify(item) : item}`).join(', ') || '-';
+          return String(value);
+        };
+        const formatDate = (value, withTime = false) => {
+          if (!value) return '-';
+          const date = new Date(value);
+          if (Number.isNaN(date.getTime())) return String(value);
+          return new Intl.DateTimeFormat('pl-PL', withTime
+            ? { dateStyle: 'medium', timeStyle: 'short' }
+            : { dateStyle: 'medium' }).format(date);
+        };
+        const request = async (url, options = {}) => {
+          const response = await fetch(url, {
+            ...options,
+            headers: {
+              'content-type': 'application/json',
+              'x-cc-inbox-code': accessCode,
+              ...(options.headers || {}),
+            },
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok || !result.ok) {
+            const error = new Error(result.reason || result.error || 'Błąd panelu.');
+            error.status = response.status;
+            throw error;
+          }
+          return result;
+        };
+        const setSelectOptions = (filterName, values, labeler = (value) => value) => {
+          const select = document.querySelector(`[data-filter="${filterName}"]`);
+          if (!(select instanceof HTMLSelectElement)) return;
+          const current = select.value;
+          select.innerHTML = '<option value="">Wszystkie</option>' + [...new Set(values.filter(Boolean))]
+            .sort((a, b) => String(a).localeCompare(String(b), 'pl'))
+            .map((value) => `<option value="${esc(value)}">${esc(labeler(value))}</option>`).join('');
+          select.value = current;
+        };
+        const summaryText = (item) => [
+          `ID: ${item.id}`,
+          `Data: ${formatDate(item.created_at, true)}`,
+          `Status: ${statusLabels[item.status] || item.status}`,
+          `Pobyt: ${item.stay_type || '-'}`,
+          `Klient: ${item.full_name || '-'}`,
+          `Email: ${item.email || '-'}`,
+          `Telefon: ${item.phone || '-'}`,
+          `Kraj / język: ${item.country || '-'} / ${item.language || '-'}`,
+          `Termin: ${item.arrival_date || '-'} — ${item.departure_date || '-'} (${item.nights || 0} n.)`,
+          `Usługi: ${jsonText(item.services_json)}`,
+          `Cena orientacyjna: ${item.estimated_total_pln ?? '-'} PLN`,
+          `Rejestracja: ${item.vehicle_registration || '-'}`,
+          `Pojazd: ${jsonText(item.vehicle_details_json)}`,
+          `Specjalne potrzeby: ${item.special_needs || '-'}`,
+          `Wycieczki: ${jsonText(item.trips_interest_json)}`,
+          `Zgody: ${jsonText(item.consents_json)}`,
+          `Mail: ${item.mail_provider || 'none'} / delivered: ${Boolean(item.mail_delivered)}`,
+          `Błąd maila: ${item.mail_error || '-'}`,
+          `Wiadomość: ${item.message || '-'}`,
+          `Notatki: ${item.notes || '-'}`,
+        ].join('\n');
+        const copy = async (text, button) => {
+          await navigator.clipboard.writeText(text);
+          const old = button.textContent;
+          button.textContent = 'Skopiowano';
+          window.setTimeout(() => { button.textContent = old; }, 1200);
+        };
+        const filterValue = (name) => {
+          const field = document.querySelector(`[data-filter="${name}"]`);
+          if (field instanceof HTMLInputElement && field.type === 'checkbox') return field.checked;
+          return field instanceof HTMLInputElement || field instanceof HTMLSelectElement ? field.value.trim() : '';
+        };
+        const visibleItems = () => {
+          const search = filterValue('search').toLowerCase();
+          const status = filterValue('status');
+          const stay = filterValue('stay');
+          const country = filterValue('country');
+          const language = filterValue('language');
+          const arrival = filterValue('arrival');
+          const mailFailed = filterValue('mailFailed');
+          const trips = filterValue('trips');
+          const special = filterValue('special');
+          const sort = filterValue('sort');
+          const filtered = inquiries.filter((item) => {
+            const haystack = [item.full_name, item.email, item.phone, item.vehicle_registration, item.country, item.message].join(' ').toLowerCase();
+            return (!search || haystack.includes(search))
+              && (!status || item.status === status)
+              && (!stay || item.stay_type === stay)
+              && (!country || item.country === country)
+              && (!language || item.language === language)
+              && (!arrival || String(item.arrival_date || '') >= arrival)
+              && (!mailFailed || !item.mail_delivered)
+              && (!trips || (Array.isArray(item.trips_interest_json) && item.trips_interest_json.length))
+              && (!special || Boolean(String(item.special_needs || '').trim()));
+          });
+          return filtered.sort((a, b) => {
+            if (sort === 'oldest') return String(a.created_at).localeCompare(String(b.created_at));
+            if (sort === 'arrival') return String(a.arrival_date || '9999').localeCompare(String(b.arrival_date || '9999'));
+            return String(b.created_at).localeCompare(String(a.created_at));
+          });
+        };
+        const card = (item) => `
+          <article class="inquiry-card" data-id="${esc(item.id)}">
+            <header>
+              <div>
+                <span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span>
+                <small>${esc(formatDate(item.created_at, true))}</small>
+                <h2>${esc(item.full_name || 'Bez nazwy')}</h2>
+                <p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.nights || 0)} n.</p>
+              </div>
+              <strong class="${item.mail_delivered ? 'mail-ok' : 'mail-failed'}">Mail: ${item.mail_delivered ? 'dostarczony' : 'niedostarczony'}</strong>
+            </header>
+            <div class="details-grid">
+              <dl><dt>Kontakt</dt><dd>${esc(item.email || '-')}<br>${esc(item.phone || '-')}</dd></dl>
+              <dl><dt>Kraj / język</dt><dd>${esc(item.country || '-')} / ${esc(item.language || '-')}</dd></dl>
+              <dl><dt>Usługi</dt><dd>${esc(jsonText(item.services_json))}</dd></dl>
+              <dl><dt>Cena</dt><dd>${esc(item.estimated_total_pln ?? '-')} PLN</dd></dl>
+              <dl><dt>Rejestracja / pojazd</dt><dd>${esc(item.vehicle_registration || '-')}<br>${esc(jsonText(item.vehicle_details_json))}</dd></dl>
+              <dl><dt>Wycieczki</dt><dd>${esc(jsonText(item.trips_interest_json))}</dd></dl>
+              <dl><dt>Specjalne potrzeby</dt><dd>${esc(item.special_needs || '-')}</dd></dl>
+              <dl><dt>Zgody</dt><dd>${esc(jsonText(item.consents_json))}</dd></dl>
+              <dl class="wide"><dt>Wiadomość</dt><dd>${esc(item.message || '-')}</dd></dl>
+              <dl class="wide"><dt>Status maila</dt><dd>${esc(item.mail_provider || 'none')} / delivered: ${String(Boolean(item.mail_delivered))}<br>${esc(item.mail_error || '-')}</dd></dl>
+            </div>
+            <div class="edit-row">
+              <label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value, label]) => `<option value="${value}" ${item.status === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>
+              <label class="note"><span>Notatka recepcji</span><textarea data-notes rows="3">${esc(item.notes || '')}</textarea></label>
+              <button type="button" data-save>Zapisz status i notatkę</button>
+            </div>
+            <div class="card-actions">
+              <button type="button" data-copy-summary>Kopiuj podsumowanie</button>
+              <button type="button" data-copy-email ${item.email ? '' : 'disabled'}>Kopiuj email</button>
+              <button type="button" data-copy-phone ${item.phone ? '' : 'disabled'}>Kopiuj telefon</button>
+              ${item.email ? `<a href="mailto:${esc(item.email)}">Otwórz mailto</a>` : ''}
+              ${item.phone ? `<a href="tel:${esc(item.phone)}">Otwórz tel</a>` : ''}
+              <button type="button" data-quick-status="archived">Archiwizuj</button>
+              <button type="button" data-quick-status="spam">Spam/test</button>
+            </div>
+          </article>
+        `;
+        const render = () => {
+          const items = visibleItems();
+          if (count) count.textContent = `${items.length} z ${inquiries.length} zapytań`;
+          if (list) list.innerHTML = items.length ? items.map(card).join('') : '<div class="empty">Brak zapytań dla wybranych filtrów.</div>';
+        };
+        const load = async () => {
+          if (appStatus) appStatus.textContent = 'Ładowanie…';
+          try {
+            const result = await request('/api/inbox/list');
+            inquiries = result.inquiries || [];
+            setSelectOptions('status', Object.keys(statusLabels), (value) => statusLabels[value] || value);
+            setSelectOptions('stay', inquiries.map((item) => item.stay_type));
+            setSelectOptions('country', inquiries.map((item) => item.country));
+            setSelectOptions('language', inquiries.map((item) => item.language));
+            if (appStatus) appStatus.textContent = '';
+            render();
+          } catch (error) {
+            if (error.status === 401) {
+              sessionStorage.removeItem(storageKey);
+              accessCode = '';
+              if (app instanceof HTMLElement) app.hidden = true;
+              if (login instanceof HTMLElement) login.hidden = false;
+            }
+            if (appStatus) appStatus.textContent = error.message;
+            if (loginStatus) loginStatus.textContent = error.message;
+          }
+        };
+        const save = async (cardNode, statusOverride = '') => {
+          const id = cardNode.dataset.id;
+          const status = statusOverride || cardNode.querySelector('[data-status]')?.value;
+          const notes = cardNode.querySelector('[data-notes]')?.value || '';
+          const button = cardNode.querySelector('[data-save]');
+          if (button) button.disabled = true;
+          try {
+            const result = await request('/api/inbox/update', {
+              method: 'PATCH',
+              body: JSON.stringify({ id, status, notes }),
+            });
+            const index = inquiries.findIndex((item) => String(item.id) === String(id));
+            if (index >= 0) inquiries[index] = result.inquiry;
+            render();
+          } catch (error) {
+            if (appStatus) appStatus.textContent = error.message;
+          } finally {
+            if (button) button.disabled = false;
+          }
+        };
+
+        loginForm?.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const formData = new FormData(loginForm);
+          accessCode = String(formData.get('accessCode') || '').trim();
+          if (!accessCode) return;
+          if (loginStatus) loginStatus.textContent = 'Sprawdzanie kodu…';
+          try {
+            await load();
+            if (!accessCode) return;
+            sessionStorage.setItem(storageKey, accessCode);
+            if (login instanceof HTMLElement) login.hidden = true;
+            if (app instanceof HTMLElement) app.hidden = false;
+            if (loginStatus) loginStatus.textContent = '';
+          } catch {}
+        });
+        document.querySelector('[data-refresh]')?.addEventListener('click', load);
+        document.querySelector('[data-logout]')?.addEventListener('click', () => {
+          sessionStorage.removeItem(storageKey);
+          window.location.reload();
+        });
+        filters.forEach((filter) => filter.addEventListener(filter instanceof HTMLInputElement && filter.type === 'search' ? 'input' : 'change', render));
+        list?.addEventListener('click', (event) => {
+          const target = event.target;
+          if (!(target instanceof Element)) return;
+          const cardNode = target.closest('[data-id]');
+          if (!(cardNode instanceof HTMLElement)) return;
+          const item = inquiries.find((entry) => String(entry.id) === String(cardNode.dataset.id));
+          if (!item) return;
+          if (target.closest('[data-save]')) void save(cardNode);
+          const quickStatus = target.closest('[data-quick-status]');
+          if (quickStatus instanceof HTMLElement) void save(cardNode, quickStatus.dataset.quickStatus);
+          const summaryButton = target.closest('[data-copy-summary]');
+          if (summaryButton instanceof HTMLButtonElement) void copy(summaryText(item), summaryButton);
+          const emailButton = target.closest('[data-copy-email]');
+          if (emailButton instanceof HTMLButtonElement && item.email) void copy(item.email, emailButton);
+          const phoneButton = target.closest('[data-copy-phone]');
+          if (phoneButton instanceof HTMLButtonElement && item.phone) void copy(item.phone, phoneButton);
+        });
+
+        accessCode = sessionStorage.getItem(storageKey) || '';
+        if (accessCode) {
+          if (login instanceof HTMLElement) login.hidden = true;
+          if (app instanceof HTMLElement) app.hidden = false;
+          void load();
+        }
+      })();
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #07140f; color: #effbf3; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradient(circle at 15% 0%, rgba(60,179,113,.22), transparent 30%), linear-gradient(145deg, #07140f, #102b1d); }
+  button, input, select, textarea { font: inherit; }
+  button, .card-actions a { border: 0; cursor: pointer; }
+  [hidden] { display: none !important; }
+  .inbox-shell { width: min(1500px, calc(100% - 28px)); margin: 0 auto; padding: clamp(28px, 5vw, 64px) 0; }
+  .login-card { width: min(540px, 100%); margin: 8vh auto 0; padding: clamp(24px, 5vw, 42px); border: 1px solid rgba(143,224,180,.20); border-radius: 30px; background: rgba(15,42,28,.88); box-shadow: 0 30px 100px rgba(0,0,0,.32); }
+  .eyebrow { color: #8fe0b4; font-size: .76rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+  h1 { margin: 10px 0; font-size: clamp(2rem, 5vw, 4rem); line-height: 1; }
+  p { color: rgba(239,251,243,.70); line-height: 1.55; }
+  label { display: grid; gap: 7px; color: rgba(239,251,243,.76); font-size: .82rem; font-weight: 800; }
+  input, select, textarea { width: 100%; border: 1px solid rgba(255,255,255,.13); border-radius: 14px; color: #effbf3; background: rgba(255,255,255,.07); outline: none; }
+  input, select { min-height: 46px; padding: 0 12px; }
+  textarea { padding: 12px; resize: vertical; }
+  input:focus, select:focus, textarea:focus { border-color: rgba(143,224,180,.55); box-shadow: 0 0 0 4px rgba(60,179,113,.12); }
+  button, .card-actions a { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0 15px; border-radius: 13px; color: #07140f; background: #8fe0b4; font-weight: 900; text-decoration: none; }
+  button.ghost, .card-actions button, .card-actions a { color: #e7fff0; border: 1px solid rgba(143,224,180,.18); background: rgba(255,255,255,.07); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .login-card form { display: grid; gap: 14px; margin-top: 24px; }
+  .status, .app-status { min-height: 22px; margin: 0; color: #ffcf91; font-weight: 800; }
+  .app-header { display: flex; gap: 20px; align-items: end; justify-content: space-between; margin-bottom: 24px; }
+  .app-header h1 { margin-bottom: 5px; }
+  .app-header p { margin: 0; }
+  .header-actions { display: flex; gap: 9px; }
+  .filters { display: grid; grid-template-columns: 2fr repeat(6, minmax(130px, 1fr)); gap: 10px; padding: 16px; border: 1px solid rgba(143,224,180,.17); border-radius: 24px; background: rgba(8,28,18,.72); }
+  .filters .check { display: flex; align-items: center; gap: 8px; min-height: 42px; padding: 8px 10px; border-radius: 13px; background: rgba(255,255,255,.05); }
+  .filters .check input { width: 18px; min-height: 18px; accent-color: #3CB371; }
+  .inquiry-list { display: grid; gap: 16px; margin-top: 16px; }
+  .inquiry-card { padding: clamp(18px, 3vw, 28px); border: 1px solid rgba(255,255,255,.12); border-radius: 26px; background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.045)); box-shadow: 0 20px 60px rgba(0,0,0,.18); }
+  .inquiry-card > header { display: flex; justify-content: space-between; gap: 20px; align-items: start; }
+  .inquiry-card h2 { margin: 8px 0 4px; font-size: 1.5rem; }
+  .inquiry-card header p { margin: 0; }
+  .status-badge { display: inline-flex; min-height: 27px; align-items: center; padding: 0 10px; margin-right: 8px; border-radius: 999px; color: #07140f; background: #8fe0b4; font-size: .72rem; font-weight: 950; text-transform: uppercase; }
+  .status-spam, .status-rejected { background: #f2c078; }
+  .status-archived { color: #effbf3; background: #53665b; }
+  .mail-ok { color: #8fe0b4; }
+  .mail-failed { color: #ffca8a; }
+  .details-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 18px 0; }
+  dl { min-width: 0; margin: 0; padding: 12px; border-radius: 15px; background: rgba(255,255,255,.055); }
+  dl.wide { grid-column: span 2; }
+  dt { color: rgba(239,251,243,.52); font-size: .72rem; font-weight: 900; text-transform: uppercase; }
+  dd { margin: 5px 0 0; overflow-wrap: anywhere; line-height: 1.45; }
+  .edit-row { display: grid; grid-template-columns: 190px minmax(260px, 1fr) auto; gap: 10px; align-items: end; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.09); }
+  .card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .empty { padding: 40px; border: 1px dashed rgba(143,224,180,.22); border-radius: 22px; text-align: center; color: rgba(239,251,243,.65); }
+  @media (max-width: 1180px) {
+    .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .filters .search { grid-column: 1 / -1; }
+    .details-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 720px) {
+    .inbox-shell { width: min(100% - 16px, 1500px); padding-top: 18px; }
+    .app-header, .inquiry-card > header { align-items: stretch; flex-direction: column; }
+    .header-actions, .header-actions button { width: 100%; }
+    .filters, .details-grid, .edit-row { grid-template-columns: 1fr; }
+    .filters .search, dl.wide { grid-column: auto; }
+    .card-actions > * { width: 100%; }
+  }
+</style>

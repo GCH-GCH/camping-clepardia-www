@@ -5,9 +5,77 @@ import sitemap from '@astrojs/sitemap';
 
 import tailwindcss from '@tailwindcss/vite';
 
-const reservationApiDevPlugin = () => ({
-  name: 'reservation-api-dev-mock',
-  configureServer(server) {
+const reservationApiDevPlugin = () => {
+  const mockInquiries = [];
+  const readJson = (req) => new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+    req.on('end', () => {
+      try {
+        const raw = Buffer.concat(chunks).toString('utf8');
+        resolve(raw ? JSON.parse(raw) : {});
+      } catch (error) {
+        reject(error);
+      }
+    });
+    req.on('error', reject);
+  });
+  const authorized = (req) => {
+    const expected = String(process.env.CC_INBOX_ACCESS_CODE || '').trim();
+    return Boolean(expected) && String(req.headers['x-cc-inbox-code'] || '').trim() === expected;
+  };
+
+  return {
+    name: 'reservation-api-dev-mock',
+    configureServer(server) {
+    server.middlewares.use('/api/inbox/list', (req, res) => {
+      res.setHeader('content-type', 'application/json; charset=utf-8');
+      res.setHeader('cache-control', 'no-store');
+      if (req.method !== 'GET') {
+        res.statusCode = 405;
+        res.end(JSON.stringify({ ok: false, error: 'METHOD_NOT_ALLOWED', reason: 'Method not allowed.' }));
+        return;
+      }
+      if (!authorized(req)) {
+        res.statusCode = 401;
+        res.end(JSON.stringify({ ok: false, error: 'UNAUTHORIZED', reason: 'Nieprawidłowy kod dostępu.' }));
+        return;
+      }
+      res.statusCode = 200;
+      res.end(JSON.stringify({ ok: true, inquiries: mockInquiries }));
+    });
+
+    server.middlewares.use('/api/inbox/update', async (req, res) => {
+      res.setHeader('content-type', 'application/json; charset=utf-8');
+      res.setHeader('cache-control', 'no-store');
+      if (!['PATCH', 'POST'].includes(req.method || '')) {
+        res.statusCode = 405;
+        res.end(JSON.stringify({ ok: false, error: 'METHOD_NOT_ALLOWED', reason: 'Method not allowed.' }));
+        return;
+      }
+      if (!authorized(req)) {
+        res.statusCode = 401;
+        res.end(JSON.stringify({ ok: false, error: 'UNAUTHORIZED', reason: 'Nieprawidłowy kod dostępu.' }));
+        return;
+      }
+      try {
+        const payload = await readJson(req);
+        const inquiry = mockInquiries.find((item) => item.id === payload.id);
+        if (!inquiry) {
+          res.statusCode = 404;
+          res.end(JSON.stringify({ ok: false, error: 'NOT_FOUND', reason: 'Nie znaleziono zapytania.' }));
+          return;
+        }
+        inquiry.status = payload.status;
+        inquiry.notes = String(payload.notes || '');
+        res.statusCode = 200;
+        res.end(JSON.stringify({ ok: true, inquiry }));
+      } catch {
+        res.statusCode = 400;
+        res.end(JSON.stringify({ ok: false, error: 'INVALID_JSON', reason: 'Invalid JSON payload.' }));
+      }
+    });
+
     server.middlewares.use('/api/reservation', (req, res, next) => {
       if (req.method === 'OPTIONS') {
         res.statusCode = 204;
@@ -33,6 +101,7 @@ const reservationApiDevPlugin = () => ({
           res.setHeader('content-type', 'application/json; charset=utf-8');
           res.end(JSON.stringify({
             ok: false,
+            inquirySaved: false,
             provider: 'none',
             delivered: false,
             error: 'INVALID_JSON',
@@ -64,6 +133,7 @@ const reservationApiDevPlugin = () => ({
           res.statusCode = 400;
           res.end(JSON.stringify({
             ok: false,
+            inquirySaved: false,
             provider: 'none',
             delivered: false,
             error: 'VALIDATION_ERROR',
@@ -99,15 +169,46 @@ const reservationApiDevPlugin = () => ({
           originalMessage: String(payload.message || '').trim(),
         };
 
+        const inquiryId = `LOCAL-${Date.now().toString(36).toUpperCase()}`;
+        mockInquiries.unshift({
+          id: inquiryId,
+          created_at: new Date().toISOString(),
+          status: 'new',
+          source: 'website',
+          stay_type: String(payload.stayType || payload.selectedStayMode || '').trim(),
+          language: String(payload.contactLanguage || payload.locale || '').trim(),
+          country: String(payload.country || '').trim(),
+          full_name: String(payload.fullName || '').trim(),
+          email: String(payload.email || '').trim(),
+          phone: String(payload.phone || '').trim(),
+          arrival_date: String(payload.arrivalIso || '').trim(),
+          departure_date: String(payload.departureIso || '').trim(),
+          nights: Number(payload.nights || 0),
+          services_json: services,
+          estimated_total_pln: Number.parseFloat(estimatedTotal) || null,
+          estimated_currency_json: payload.calculatorSummary || null,
+          vehicle_registration: String(payload.vehiclePlate || '').trim(),
+          vehicle_details_json: payload.vehicleDetails || null,
+          special_needs: String(payload.specialNeeds || '').trim(),
+          trips_interest_json: Array.isArray(payload.tours) ? payload.tours.filter(Boolean).slice(0, 12) : [],
+          consents_json: { quiet: Boolean(payload.quietConsent), contact: Boolean(payload.consent), privacy: Boolean(payload.privacyConsent) },
+          message: String(payload.message || '').trim(),
+          notes: '',
+          mail_provider: 'mock',
+          mail_delivered: false,
+          mail_error: 'Local dev Vite mock - mail body prepared but not sent.',
+          raw_payload_json: payload,
+        });
         res.statusCode = 200;
         res.end(JSON.stringify({
           ok: true,
+          inquirySaved: true,
           provider: 'mock',
           delivered: false,
-          error: null,
+          error: 'MAIL_NOT_DELIVERED',
           reason: 'Local dev Vite mock - mail body prepared but not sent.',
           mode: 'mock',
-          inquiryId: `LOCAL-${Date.now().toString(36).toUpperCase()}`,
+          inquiryId,
           mail: {
             reception: {
               provider: 'mock',
@@ -136,14 +237,16 @@ const reservationApiDevPlugin = () => ({
         res.end(JSON.stringify({ ok: false, message: 'Invalid request stream.' }));
       });
     });
-  },
-});
+    },
+  };
+};
 
 // https://astro.build/config
 export default defineConfig({
   site: process.env.PUBLIC_SITE_URL || 'https://www.clepardia.com.pl',
   integrations: [
     sitemap({
+      filter: (page) => !page.includes('/cc-gate-a8f3k9r2p6'),
       i18n: {
         defaultLocale: 'pl',
         locales: {

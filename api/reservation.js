@@ -1,3 +1,5 @@
+import { inboxError, saveReservationInquiry, updateReservationMailStatus } from './_lib/inbox.js';
+
 const DAY = 24 * 60 * 60 * 1000;
 const MAX_BODY = 32_000;
 
@@ -251,6 +253,46 @@ const createCcSystemDraft = (inquiry) => ({
   createdAt: inquiry.submittedAt,
 });
 
+const numericTotal = (value) => {
+  const match = String(value || '').replace(',', '.').match(/\d+(?:\.\d+)?/);
+  return match ? Number(match[0]) : null;
+};
+
+const createSupabaseRecord = (inquiry, payload) => ({
+  status: inquiry.website ? 'spam' : 'new',
+  source: oneLine(payload.source || 'website', 80),
+  stay_type: inquiry.stayType,
+  language: inquiry.contactLanguage,
+  country: inquiry.country,
+  full_name: inquiry.fullName,
+  email: inquiry.email || null,
+  phone: inquiry.phone || null,
+  arrival_date: inquiry.arrivalIso,
+  departure_date: inquiry.departureIso,
+  nights: inquiry.nights,
+  services_json: inquiry.services,
+  estimated_total_pln: numericTotal(inquiry.estimatedTotal),
+  estimated_currency_json: inquiry.calculatorSummary || {
+    estimate: inquiry.currencyEstimate,
+    disclaimer: inquiry.currencyDisclaimer,
+  },
+  vehicle_registration: inquiry.vehiclePlate || null,
+  vehicle_details_json: payload.vehicleDetails || null,
+  special_needs: inquiry.specialNeeds || null,
+  trips_interest_json: inquiry.tours,
+  consents_json: {
+    quiet: inquiry.quietConsent,
+    contact: inquiry.consent,
+    privacy: inquiry.privacyConsent,
+  },
+  message: inquiry.message || null,
+  notes: '',
+  mail_provider: 'none',
+  mail_delivered: false,
+  mail_error: null,
+  raw_payload_json: payload,
+});
+
 const buildReceptionMail = (inquiry) => {
   const depositNote = hasBungalow(inquiry)
     ? 'W przypadku domkow moze byc wymagana zaliczka. Dane do zaliczki nalezy wyslac klientowi w odpowiedzi mailowej po potwierdzeniu dostepnosci.'
@@ -269,6 +311,7 @@ const buildReceptionMail = (inquiry) => {
   ].filter(Boolean).join(', ') || 'brak';
   const rows = [
     ['ID', inquiry.inquiryId],
+    ['Zapis do panelu', 'zapisano w reservation_inquiries'],
     ['Status', 'Do potwierdzenia przez recepcje'],
     ['Typ pobytu', inquiry.stayType],
     ['Termin', `${inquiry.arrival} - ${inquiry.departure}`],
@@ -504,6 +547,7 @@ const buildFormSubmitPayload = (message, inquiry) => ({
   _replyto: inquiry.email || '',
   _autoresponse: '',
   inquiry_id: inquiry.inquiryId,
+  zapis_do_panelu: 'zapisano w reservation_inquiries',
   status: 'Do potwierdzenia przez recepcje',
   typ_pobytu: inquiry.stayType,
   termin: `${inquiry.arrival} - ${inquiry.departure}`,
@@ -687,6 +731,7 @@ export default async function handler(req, res) {
     res.setHeader('allow', 'POST, OPTIONS');
     return sendJson(res, 200, {
       ok: true,
+      inquirySaved: false,
       provider: 'none',
       delivered: false,
       error: null,
@@ -699,6 +744,7 @@ export default async function handler(req, res) {
     res.setHeader('allow', 'POST, OPTIONS');
     return sendJson(res, 405, {
       ok: false,
+      inquirySaved: false,
       provider: 'none',
       delivered: false,
       error: 'METHOD_NOT_ALLOWED',
@@ -715,6 +761,7 @@ export default async function handler(req, res) {
     if (Object.keys(normalized.errors).length) {
       return sendJson(res, 400, {
         ok: false,
+        inquirySaved: false,
         provider: 'none',
         delivered: false,
         error: 'VALIDATION_ERROR',
@@ -725,9 +772,26 @@ export default async function handler(req, res) {
     }
 
     const inquiry = createInquiry(payload, normalized);
+    let saved;
+    try {
+      saved = await saveReservationInquiry(createSupabaseRecord(inquiry, payload));
+      inquiry.inquiryId = String(saved.id);
+    } catch (error) {
+      const diagnostic = inboxError(error);
+      return sendJson(res, error?.code === 'SUPABASE_NOT_CONFIGURED' ? 503 : 502, {
+        ok: false,
+        inquirySaved: false,
+        inquiryId: null,
+        provider: 'none',
+        delivered: false,
+        ...diagnostic,
+      });
+    }
+
     if (inquiry.website) {
       return sendJson(res, 200, {
         ok: true,
+        inquirySaved: true,
         provider: 'none',
         delivered: false,
         error: null,
@@ -739,6 +803,23 @@ export default async function handler(req, res) {
 
     logMailEnv(inquiry.inquiryId);
     const reception = await sendReceptionMail(buildReceptionMail(inquiry), inquiry);
+    const mailError = reception.delivered
+      ? null
+      : oneLine(reception.message || reception.reason || reception.errorCode || 'Mail delivery failed.', 1200);
+    let inboxUpdateError = '';
+    try {
+      await updateReservationMailStatus(inquiry.inquiryId, {
+        mail_provider: reception.fallbackFrom ? 'fallback' : (reception.provider || 'none'),
+        mail_delivered: Boolean(reception.delivered),
+        mail_error: mailError,
+      });
+    } catch (error) {
+      inboxUpdateError = inboxError(error).reason;
+      console.error('[reservation-api] inbox-mail-status-update-error', {
+        inquiryId: inquiry.inquiryId,
+        error: error?.code || 'INBOX_UPDATE_ERROR',
+      });
+    }
     const mail = {
       reception,
       autoresponder: {
@@ -753,10 +834,11 @@ export default async function handler(req, res) {
     if (!reception.delivered && reception.provider === 'formsubmit' && reception.activationNotice) {
       return sendJson(res, 200, {
         ok: true,
+        inquirySaved: true,
         provider: reception.fallbackFrom ? 'fallback' : 'formsubmit',
         delivered: false,
         error: reception.errorCode || 'formsubmit_activation_required',
-        reason: reception.reason || reception.message,
+        reason: [reception.reason || reception.message, inboxUpdateError].filter(Boolean).join(' | '),
         mode: 'formsubmit',
         inquiryId: inquiry.inquiryId,
         message: reception.message,
@@ -773,13 +855,14 @@ export default async function handler(req, res) {
         errorCode: reception.errorCode || 'MAIL_ERROR',
         message: reception.message || reception.reason || 'Mail delivery failed.',
       });
-      return sendJson(res, 502, {
-        ok: false,
-        mode: 'error',
+      return sendJson(res, 200, {
+        ok: true,
+        inquirySaved: true,
+        mode: 'mail-error',
         provider: reception.fallbackFrom ? 'fallback' : (reception.provider || 'none'),
         delivered: false,
         error: reception.errorCode || 'MAIL_ERROR',
-        reason: reception.reason || reception.message || 'Mail delivery failed.',
+        reason: [reception.reason || reception.message || 'Mail delivery failed.', inboxUpdateError].filter(Boolean).join(' | '),
         errorCode: reception.errorCode || 'MAIL_ERROR',
         message: reception.message || reception.reason || 'Mail delivery failed.',
         inquiryId: inquiry.inquiryId,
@@ -810,10 +893,13 @@ export default async function handler(req, res) {
 
     return sendJson(res, 200, {
       ok: true,
+      inquirySaved: true,
       provider: reception.fallbackFrom ? 'fallback' : (reception.provider || 'none'),
       delivered: Boolean(reception.delivered),
-      error: reception.delivered ? null : (reception.errorCode || null),
-      reason: reception.delivered ? null : (reception.reason || 'Mail body prepared but not sent.'),
+      error: reception.delivered ? null : (reception.errorCode || 'MAIL_NOT_DELIVERED'),
+      reason: reception.delivered
+        ? (inboxUpdateError || null)
+        : [reception.reason || 'Mail body prepared but not sent.', inboxUpdateError].filter(Boolean).join(' | '),
       mode: reception.delivered ? reception.provider : 'mock',
       inquiryId: inquiry.inquiryId,
       mail,
@@ -822,6 +908,7 @@ export default async function handler(req, res) {
   } catch (error) {
     return sendJson(res, 500, {
       ok: false,
+      inquirySaved: false,
       provider: 'none',
       delivered: false,
       error: 'RESERVATION_ENDPOINT_FAILED',
