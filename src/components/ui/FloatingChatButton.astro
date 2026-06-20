@@ -165,6 +165,7 @@ const finalCampyCopy = {
       maps: 'Google Maps',
       reception: 'Kontakt z recepcją',
       receptionHours: 'Godziny recepcji',
+      cityCamping: 'Camping w mieście',
     },
     answers: {
       bookStay: 'Jasne. Najwygodniej przejść do rezerwacji i wybrać Camping, Domki albo Razem. To zapytanie do recepcji, a dostępność i warunki potwierdza obiekt.',
@@ -200,6 +201,7 @@ const finalCampyCopy = {
       maps: 'Zalecamy Google Maps, ponieważ dojazd do campingu zmienił się w 2022 roku i starsze nawigacje mogą prowadzić nieprawidłowo.',
       reception: 'Recepcja: +48 795 294 486, email: clepardia@gmail.com. W sprawie pobytu możesz też przejść do kontaktu albo rezerwacji.',
       receptionHours: 'Godziny recepcji najlepiej potwierdzić bezpośrednio przed przyjazdem. Telefon: +48 795 294 486, email: clepardia@gmail.com.',
+      cityCamping: 'Camping Clepardia znajduje się w Krakowie, dlatego jest świetną bazą blisko tramwaju, sklepów i atrakcji. To nie jest camping w lesie: czasem słychać tramwaje, samoloty i normalne miejskie życie. W zamian zyskujesz wygodny dojazd do centrum i zieloną przestrzeń jak na warunki miejskie.',
     },
     quick: {
       toggle: 'Szybkie tematy ✨',
@@ -247,6 +249,7 @@ const finalCampyCopy = {
       maps: 'Google Maps',
       reception: 'Contact reception',
       receptionHours: 'Reception hours',
+      cityCamping: 'City campsite',
     },
     answers: {
       bookStay: 'Sure. Open the booking flow and choose Camping, Bungalows or Combined. It is an enquiry; reception confirms availability and final conditions.',
@@ -282,6 +285,7 @@ const finalCampyCopy = {
       maps: 'We recommend Google Maps because access to the campsite changed in 2022 and older navigation can be wrong.',
       reception: 'Reception: +48 795 294 486, email: clepardia@gmail.com. You can also open contact or booking.',
       receptionHours: 'Please confirm reception hours directly before arrival. Phone: +48 795 294 486, email: clepardia@gmail.com.',
+      cityCamping: 'Camping Clepardia is a green city campsite in Krakow, close to trams, shops and attractions. It is not a remote woodland campsite, so you may sometimes hear trams, aircraft and normal city life.',
     },
     quick: {
       toggle: 'Quick topics',
@@ -298,8 +302,26 @@ const finalCampyCopy = {
 };
 const finalCampy = finalCampyCopy[pathContext.languageCode as keyof typeof finalCampyCopy] ?? finalCampyCopy.en;
 const campyQuick = finalCampy.quick ?? finalCampyCopy.en.quick;
+const pageKey = Astro.url.pathname.replace(/^\/(?:pl|en|de|it)\b/, '').replace(/\/+$/, '') || '/';
+const pageWelcomePl: Record<string, string> = {
+  '/': 'Cześć! Jestem CAMPY 👋 Mogę pomóc znaleźć cenę, dojazd, atrakcje albo przejść do rezerwacji.',
+  '/cennik': 'Jesteś w cenniku — mogę pomóc obliczyć orientacyjny koszt pobytu.',
+  '/rezerwacja': 'Jesteś w rezerwacji — pomogę przejść formularz i przypomnę o ważnych rzeczach.',
+  '/atrakcje': 'Jesteś w atrakcjach — mogę pomóc zaplanować Kraków, Wieliczkę, Ojców albo wycieczkę.',
+  '/dojazd': 'Jesteś w dojeździe — najlepiej użyć Google Maps, bo trasa zmieniła się w 2022 roku.',
+  '/kontakt': 'Jesteś w kontakcie — mogę podpowiedzieć, co przygotować przed przyjazdem.',
+  '/domki': 'Jesteś przy domkach — mogę pomóc sprawdzić terminy i przypomnieć, co zabrać.',
+  '/camping': 'Jesteś na stronie campingu — mogę wyjaśnić zasady, prąd 10A i dojazd tramwajem.',
+};
+const pageWelcome = pathContext.languageCode === 'pl'
+  ? (pageWelcomePl[pageKey] ?? pageWelcomePl['/'])
+  : (pageKey === '/'
+    ? 'Hi! I’m CAMPY 👋 I can help with prices, directions, attractions or booking.'
+    : 'I’m CAMPY 👋 Ask me about this page, your stay or practical arrival details.');
 const enhancedChatTexts = {
   ...chatTexts,
+  pageWelcome,
+  pageWelcomeKey: `${pathContext.languageCode}:${pageKey}`,
   mobileTitle: pathContext.languageCode === 'pl'
     ? 'CAMPY — pomocnik'
     : pathContext.languageCode === 'de'
@@ -346,6 +368,7 @@ const quickActionGroups = [
       { key: 'stayCompare', icon: 'Split', label: enhancedChatTexts.actions.stayCompare },
       { key: 'combinedStay', icon: 'Combine', label: enhancedChatTexts.actions.combinedStay },
       { key: 'lateCheckout', icon: 'Clock', label: enhancedChatTexts.actions.lateCheckout },
+      { key: 'cityCamping', icon: 'MapPinned', label: enhancedChatTexts.actions.cityCamping || 'City campsite' },
     ],
   },
   {
@@ -420,6 +443,10 @@ const quickActionGroups = [
       <span class="floating-chat__button-fallback" aria-hidden="true">CAMPY</span>
     )}
   </button>
+  <aside class="floating-chat__welcome" data-chat-welcome hidden>
+    <button type="button" data-chat-welcome-close aria-label="Zamknij">×</button>
+    <p>{pageWelcome}</p>
+  </aside>
 
   <div class="floating-chat__scrim" data-chat-close aria-hidden="true"></div>
 
@@ -542,6 +569,8 @@ const quickActionGroups = [
     const quickToggleButton = root.querySelector('[data-chat-quick-toggle]');
     const quickPanel = root.querySelector('[data-chat-quick-panel]');
     const quickTemplate = root.querySelector('[data-chat-quick-template]');
+    const welcome = root.querySelector('[data-chat-welcome]');
+    const welcomeClose = root.querySelector('[data-chat-welcome-close]');
 
     if (!(toggle instanceof HTMLButtonElement) || !(panel instanceof HTMLElement) || !(messages instanceof HTMLElement)) return;
 
@@ -607,6 +636,7 @@ const quickActionGroups = [
     const setOpen = (nextOpen) => {
       if (!getChatTexts()) return;
       open = nextOpen;
+      if (welcome instanceof HTMLElement) welcome.hidden = true;
       window.clearTimeout(hideTimer);
       toggle.setAttribute('aria-expanded', String(open));
       toggle.setAttribute('aria-label', open ? chatTexts.close : chatTexts.open);
@@ -713,6 +743,7 @@ const quickActionGroups = [
       if (key === 'campingPricing') return { text: answers.campingPricing, actions: [{ label: actionLabels.prices, href: links.prices }] };
       if (key === 'powerDog') return { text: answers.powerDog, actions: [{ label: actionLabels.prices, href: links.prices }] };
       if (key === 'lateCheckout') return { text: answers.lateCheckout, actions: [{ label: actionLabels.booking, href: links.booking }] };
+      if (key === 'cityCamping') return { text: answers.cityCamping, actions: [{ label: actionLabels.camping, href: links.bookingCamping }, { label: actionLabels.directions, href: links.directions }] };
       if (key === 'centerTransit') return { text: answers.centerTransit, actions: [{ label: actionLabels.maps, href: links.maps }, { label: actionLabels.jakdojade, href: links.jakdojade }, { label: actionLabels.directions, href: links.directions }] };
       if (key === 'tramTickets') return { text: answers.tramTickets, actions: [{ label: actionLabels.jakdojade, href: links.jakdojade }] };
       if (key === 'dayPlan') return { text: answers.dayPlan };
@@ -943,6 +974,20 @@ const quickActionGroups = [
       button.addEventListener('click', () => setOpen(false));
     });
 
+    if (welcome instanceof HTMLElement) {
+      const welcomeCopy = getChatTexts();
+      const welcomeKey = `campy-welcome:${welcomeCopy?.pageWelcomeKey || location.pathname}`;
+      if (!sessionStorage.getItem(welcomeKey)) {
+        window.setTimeout(() => {
+          if (open) return;
+          welcome.hidden = false;
+          sessionStorage.setItem(welcomeKey, 'shown');
+          window.setTimeout(() => { welcome.hidden = true; }, 6500);
+        }, 1100);
+      }
+      welcomeClose?.addEventListener('click', () => { welcome.hidden = true; });
+    }
+
     if (quickToggleButton instanceof HTMLButtonElement && quickPanel instanceof HTMLElement) {
       quickToggleButton.addEventListener('click', () => setQuickPanelOpen(!quickPanelOpen));
       quickPanel.addEventListener('click', (event) => {
@@ -1065,6 +1110,55 @@ body.has-floating-chat-open {
 
 .floating-chat__button:active {
   transform: translateY(0) scale(.96);
+}
+
+.floating-chat__welcome {
+  position: absolute;
+  right: 78px;
+  bottom: 4px;
+  width: min(340px, calc(100vw - 118px));
+  padding: 15px 42px 15px 16px;
+  border: 1px solid rgba(143,224,180,.30);
+  border-radius: 20px 20px 6px 20px;
+  color: #edfff4;
+  background: linear-gradient(145deg, rgba(10,31,21,.96), rgba(24,61,42,.96));
+  box-shadow: 0 22px 62px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.12);
+  pointer-events: auto;
+  animation: campyMessageIn .3s cubic-bezier(.22,1,.36,1) both;
+}
+
+.floating-chat__welcome p {
+  margin: 0;
+  color: inherit;
+  font-size: .86rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.floating-chat__welcome button {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255,255,255,.08);
+  font-size: 1.1rem;
+}
+
+html[data-theme="light"] .floating-chat__welcome {
+  color: #173624;
+  border-color: rgba(25,54,38,.13);
+  background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(235,246,238,.98));
+}
+
+html[data-theme="light"] .floating-chat__welcome button {
+  color: #173624;
+  background: rgba(25,54,38,.08);
 }
 
 .floating-chat__icon {
@@ -2070,6 +2164,19 @@ body.booking-app-page .floating-chat__button-image {
   .floating-chat__button-image {
     width: 50px;
     height: 50px;
+  }
+
+  .floating-chat__welcome {
+    right: 66px;
+    bottom: 2px;
+    width: min(270px, calc(100vw - 92px));
+    padding: 12px 36px 12px 13px;
+    border-radius: 18px 18px 5px 18px;
+  }
+
+  .floating-chat__welcome p {
+    font-size: .76rem;
+    line-height: 1.42;
   }
 
   .floating-chat__panel {

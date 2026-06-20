@@ -61,7 +61,7 @@ const faqTextByLanguage = {
     toConfirm: 'do potwierdzenia',
     seasonalAnswer: (low: string, high: string) => `${low} w niskim sezonie i ${high} w wysokim sezonie`,
     items: {
-      reservations1: ['Czy trzeba rezerwować miejsce na polu campingowym?', 'W sezonie letnim rezerwacje pola campingowego mogą być ograniczone. Najlepiej skontaktować się z recepcją, aby potwierdzić aktualną dostępność.'],
+      reservations1: ['Czy trzeba rezerwować miejsce na polu campingowym?', 'W lipcu i sierpniu nie prowadzimy rezerwacji miejsc campingowych — kampery, vany, namioty i przyczepy przyjmujemy według kolejności przyjazdu. Najlepiej przyjechać w okolicach 12:00. W tym okresie z wyprzedzeniem rezerwujemy tylko domki.'],
       reservations2: ['Czy można rezerwować domki?', 'Tak, domki można rezerwować zgodnie z aktualną dostępnością. Finalną cenę i termin potwierdza recepcja.'],
       pricing1: ['Czy kalkulator pokazuje finalną cenę?', 'Kalkulator pokazuje cenę orientacyjną na podstawie wybranego terminu, liczby osób, typu pobytu i dodatków. Finalna cena i dostępność są potwierdzane przez recepcję.'],
       invoices: ['Czy wystawiacie faktury dla firm zagranicznych?', 'Nie. Faktury wystawiamy wyłącznie dla firm zarejestrowanych w Polsce. Nie wystawiamy faktur dla podmiotów zagranicznych.'],
@@ -113,7 +113,7 @@ const faqTextByLanguage = {
     toConfirm: 'to confirm',
     seasonalAnswer: (low: string, high: string) => `${low} in low season and ${high} in high season`,
     items: {
-      reservations1: ['Do I need to reserve a camping pitch?', 'In the summer season, camping pitch reservations may be limited. It is best to contact reception to confirm current availability.'],
+      reservations1: ['Do I need to reserve a camping pitch?', 'In July and August camping pitches are not reserved in advance. Motorhomes, vans, tents and caravans are accepted in arrival order, preferably around 12:00. Advance bookings in this period are available only for bungalows.'],
       reservations2: ['Can bungalows be booked?', 'Yes, bungalows can be booked according to current availability. Reception confirms the final price and dates.'],
       pricing1: ['Does the calculator show the final price?', 'The calculator shows an indicative price based on dates, number of guests, stay type and extras. Final price and availability are confirmed by reception.'],
       invoices: ['Do you issue invoices for foreign companies?', 'No. We issue invoices only for companies registered in Poland. We do not issue invoices for foreign entities.'],
@@ -330,6 +330,13 @@ const faqItems: FaqItem[] = [
     category: 'camping',
     question: faqText.items.power[0],
     answer: faqText.items.power[1],
+  },
+  {
+    category: 'camping',
+    question: contentLanguage === 'pl' ? 'Czy Camping Clepardia jest campingiem w mieście?' : 'Is Camping Clepardia a city campsite?',
+    answer: contentLanguage === 'pl'
+      ? 'Tak. Camping Clepardia znajduje się w Krakowie, blisko tramwaju, sklepów i atrakcji. To nie jest camping w lesie ani na odludnej polanie: czasem słychać tramwaje, samoloty i normalne miejskie życie. W zamian goście zyskują wygodny dojazd do centrum i spokojną, zieloną przestrzeń jak na warunki miejskie.'
+      : 'Yes. Camping Clepardia is in Krakow, close to trams, shops and attractions. It is not a remote woodland campsite, so guests may sometimes hear trams, aircraft and normal city life. In return, it offers easy access to the centre and a calm green space for an urban location.',
   },
   {
     category: 'bungalows',

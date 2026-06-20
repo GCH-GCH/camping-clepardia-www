@@ -851,6 +851,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         vehicleLarge: false,
         vehicleAsphalt: false,
         vehicleNotes: '',
+        arrivalTime: 'jeszcze nie wiem',
         message: '',
         specialNeeds: false,
         specialNeedsText: '',
@@ -1312,6 +1313,19 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (state.mode === 'combined') return `${ui.summerCamping} ${ui.summerBungalow}`;
       return '';
     };
+
+    const highSeasonCampingInfo = () => touchesSummer() && (state.mode === 'camping' || state.mode === 'combined');
+    const bungalowPersonalItemsNotice = () => state.mode === 'bungalow' || state.mode === 'combined';
+    const arrivalTimeLabel = () => state.details.arrivalTime || (config.lang === 'pl' ? 'jeszcze nie wiem' : 'not sure yet');
+    const cityCampingNotice = () => config.lang === 'pl'
+      ? 'Camping Clepardia znajduje się w Krakowie: blisko tramwaju, sklepów i atrakcji. To zielona baza w mieście, dlatego czasem słychać tramwaje, samoloty i normalne miejskie życie.'
+      : 'Camping Clepardia is a green city campsite close to trams, shops and attractions. You may sometimes hear trams, aircraft and normal city life.';
+    const bungalowItemsNotice = () => config.lang === 'pl'
+      ? 'Przy pobycie w domkach prosimy zabrać własne rzeczy osobiste, w tym ręczniki i kosmetyki.'
+      : 'For a bungalow stay, please bring personal items, including towels and toiletries.';
+    const highSeasonCampingNotice = () => config.lang === 'pl'
+      ? 'W lipcu i sierpniu nie prowadzimy rezerwacji miejsc campingowych. Camping działa według kolejności przyjazdu. Najlepiej przyjechać w okolicach godziny 12:00, ponieważ check-out z campingu jest do 12:00. Rezerwacje w tym okresie przyjmujemy tylko na domki.'
+      : 'In July and August camping pitches are not reserved in advance and operate in arrival order. It is best to arrive around 12:00. Advance bookings in this period are available only for bungalows.';
 
     const servicePrice = (item) => {
       if (item.seasonalPrices) return highSeason() ? item.seasonalPrices.high : item.seasonalPrices.low;
@@ -2153,8 +2167,26 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
                 <p>${esc(detailText.registration.document)}</p>
                 <p>${esc(detailText.registration.plate)}</p>
                 <p class="is-warm">${esc(detailText.registration.trailer)}</p>
+                <p class="is-warm"><strong>${esc(cityCampingNotice())}</strong></p>
+                ${highSeasonCampingInfo() ? `<p class="is-warm"><strong>${esc(highSeasonCampingNotice())}</strong></p>` : ''}
+                ${bungalowPersonalItemsNotice() ? `<p class="is-warm"><strong>${esc(bungalowItemsNotice())}</strong></p>` : ''}
               </div>
               <div class="reservation-form-grid">
+                <label class="reservation-field">
+                  ${fieldLabel({ icon: 'late', label: config.lang === 'pl' ? 'Orientacyjna godzina przyjazdu' : 'Estimated arrival time', badge: 'optional' })}
+                  <select data-field="details.arrivalTime">
+                    ${[
+                      ['przed 12:00', 'przed 12:00'],
+                      ['12:00–15:00', '12:00–15:00'],
+                      ['15:00–18:00', '15:00–18:00'],
+                      ['18:00–21:00', '18:00–21:00'],
+                      ['po 21:00 / skontaktuj się z recepcją', 'po 21:00 / skontaktuj się z recepcją'],
+                      ['jeszcze nie wiem', 'jeszcze nie wiem'],
+                    ].map(([value,label]) => `<option value="${esc(value)}" ${state.details.arrivalTime === value ? 'selected' : ''}>${esc(label)}</option>`).join('')}
+                  </select>
+                  <small>${esc(config.lang === 'pl' ? 'Godzina jest orientacyjna i pomaga recepcji przygotować przyjazd.' : 'The time is indicative and helps reception prepare your arrival.')}</small>
+                  ${state.details.arrivalTime.startsWith('po 21:00') ? `<small class="reservation-field-warning">${esc(config.lang === 'pl' ? 'Recepcja i brama mają określone godziny pracy. Przy późnym przyjeździe skontaktuj się z recepcją.' : 'Reception and gate have set opening hours. Contact reception before a late arrival.')}</small>` : ''}
+                </label>
                 <label class="reservation-field">
                   ${fieldLabel({ icon: 'plate', label: t.fields.plate, badge: 'optional' })}
                   <input type="text" data-field="details.plate" value="${esc(state.details.plate)}" placeholder="${esc(vehiclePlatePlaceholder())}" autocomplete="off" />
@@ -2245,6 +2277,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           <dl>
             ${summaryRow('stay', t.summary.stay, modeTitle())}
             ${summaryRow('calendar', t.summary.dates, dateText)}
+            ${summaryRow('late', config.lang === 'pl' ? 'Orientacyjna godzina przyjazdu' : 'Estimated arrival time', arrivalTimeLabel())}
             ${summaryRow('guests', t.summary.guests, guestsText())}
             ${state.tours.length ? summaryRow('map', config.lang === 'pl' ? 'Wycieczki' : 'Trips', toursText()) : ''}
             ${summaryRow('language', t.summary.language, state.details.language)}
@@ -2252,6 +2285,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             ${state.details.plate ? summaryRow('plate', t.fields.plate, state.details.plate) : ''}
             ${vehicleDetailsText() ? summaryRow('plate', vehicleLabels().title, vehicleDetailsText()) : ''}
             ${summaryRow('info', detailText.registration.title, `${detailText.registration.document} ${detailText.registration.trailer}`)}
+            ${summaryRow('info', config.lang === 'pl' ? 'Dobrze wiedzieć' : 'Good to know', cityCampingNotice())}
+            ${highSeasonCampingInfo() ? summaryRow('status', config.lang === 'pl' ? 'Lipiec/sierpień' : 'July/August', highSeasonCampingNotice()) : ''}
+            ${bungalowPersonalItemsNotice() ? summaryRow('info', config.lang === 'pl' ? 'Domki — co zabrać' : 'Bungalows — what to bring', bungalowItemsNotice()) : ''}
             ${summaryRow('privacy', detailText.consentSectionTitle, consentsText())}
           </dl>
           ${missingListTemplate(true)}
@@ -2274,6 +2310,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <dl>
           ${summaryRow('stay', t.summary.stay, modeTitle())}
           ${summaryRow('calendar', t.summary.dates, dateText)}
+          ${summaryRow('late', config.lang === 'pl' ? 'Orientacyjna godzina przyjazdu' : 'Estimated arrival time', arrivalTimeLabel())}
           ${summaryRow('guests', t.summary.guests, guestsText())}
           ${summaryRow('services', t.summary.services, servicesText())}
           ${state.tours.length ? summaryRow('map', config.lang === 'pl' ? 'Wycieczki' : 'Trips', toursText()) : ''}
@@ -2282,6 +2319,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           ${state.details.plate ? summaryRow('plate', t.fields.plate, state.details.plate) : ''}
           ${vehicleDetailsText() ? summaryRow('plate', vehicleLabels().title, vehicleDetailsText()) : ''}
           ${summaryRow('info', detailText.registration.title, `${detailText.registration.document} ${detailText.registration.trailer}`)}
+          ${summaryRow('info', config.lang === 'pl' ? 'Dobrze wiedzieć' : 'Good to know', cityCampingNotice())}
+          ${highSeasonCampingInfo() ? summaryRow('status', config.lang === 'pl' ? 'Lipiec/sierpień' : 'July/August', highSeasonCampingNotice()) : ''}
+          ${bungalowPersonalItemsNotice() ? summaryRow('info', config.lang === 'pl' ? 'Domki — co zabrać' : 'Bungalows — what to bring', bungalowItemsNotice()) : ''}
           ${state.details.specialNeeds ? summaryRow('accessibility', t.summary.specialNeeds, yesLabel()) : ''}
           ${state.details.lateCheckout ? summaryRow('late', t.summary.lateCheckout, state.details.lateTime) : ''}
           ${summaryRow('privacy', detailText.consentSectionTitle, consentsText())}
@@ -2387,6 +2427,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         `Status: ${detailText.statusConfirmedByReception}`,
         `Wariant: ${modeTitle()}`,
         `Termin: ${state.dates.arrival || '-'} - ${state.dates.departure || '-'} (${nights()} n.)`,
+        `Orientacyjna godzina przyjazdu: ${arrivalTimeLabel()}`,
         `Goście: ${guestsText()}`,
         `Usługi: ${selected.length ? servicesText() : '-'}`,
         `Wycieczki: ${state.tours.length ? toursText() : '-'}`,
@@ -2402,6 +2443,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         `Cisza nocna: ${state.details.quiet ? 'zaakceptowana' : '-'}`,
         `Zgoda kontaktowa: ${state.details.consent ? 'zaakceptowana' : '-'}`,
         `Polityka prywatności: ${state.details.privacy ? 'zaakceptowana' : '-'}`,
+        highSeasonCampingInfo() ? highSeasonCampingNotice() : '',
+        bungalowPersonalItemsNotice() ? bungalowItemsNotice() : '',
         depositNote,
         'Dostępność i finalne warunki potwierdza recepcja.',
       ].filter(Boolean).join('\n');
@@ -2461,6 +2504,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
               ${successRow('status', ui.summary.statusLabel, detailText.statusConfirmedByReception)}
               ${successRow('stay', t.summary.stay, modeTitle())}
               ${successRow('calendar', t.summary.dates, `${state.dates.arrival || '-'} - ${state.dates.departure || '-'} (${nights()} n.)`)}
+              ${successRow('late', config.lang === 'pl' ? 'Orientacyjna godzina przyjazdu' : 'Estimated arrival time', arrivalTimeLabel())}
               ${successRow('guests', t.summary.guests, guestsText())}
               ${selected.length ? successRow('services', t.summary.services, servicesText()) : ''}
               ${state.tours.length ? successRow('map', config.lang === 'pl' ? 'Wycieczki' : 'Trips', toursText()) : ''}
@@ -2472,6 +2516,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
               ${vehicleDetailsText() ? successRow('plate', vehicleLabels().title, vehicleDetailsText()) : ''}
               ${state.details.specialNeeds ? successRow('accessibility', t.summary.specialNeeds, state.details.specialNeedsText || yesLabel()) : ''}
               ${state.details.lateCheckout ? successRow('late', t.summary.lateCheckout, state.details.lateTime) : ''}
+              ${highSeasonCampingInfo() ? successRow('status', config.lang === 'pl' ? 'Lipiec/sierpień' : 'July/August', highSeasonCampingNotice()) : ''}
+              ${bungalowPersonalItemsNotice() ? successRow('info', config.lang === 'pl' ? 'Domki — co zabrać' : 'Bungalows — what to bring', bungalowItemsNotice()) : ''}
               ${successRow('quiet', 'Cisza nocna', state.details.quiet ? 'zaakceptowana' : 'brak')}
               ${successRow('contactConsent', detailText.missing.consent, state.details.consent ? 'zaakceptowana' : 'brak')}
               ${successRow('privacy', detailText.missing.privacy, state.details.privacy ? 'zaakceptowana' : 'brak')}
@@ -2564,6 +2610,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         selectedStayMode: state.mode,
         people,
         tours: [...state.tours],
+        arrivalTime: arrivalTimeLabel(),
         addons: services.map((item) => `${item.label} x ${item.qty}`),
         message: [
           state.details.message,
@@ -2573,6 +2620,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           lateCheckout ? `Późniejszy wyjazd: ${lateCheckout}` : '',
         ].filter(Boolean).join('\n\n'),
         summerNotice: touchesSummer(),
+        highSeasonCampingInfo: highSeasonCampingInfo(),
+        bungalowPersonalItemsNotice: bungalowPersonalItemsNotice(),
         quietConsent: state.details.quiet,
         consent: state.details.consent,
         privacyConsent: state.details.privacy,
@@ -2750,6 +2799,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const render = ({ motion = 'soft' } = {}) => {
       root.classList.toggle('is-soft-render', motion === 'soft');
+      document.documentElement.classList.toggle('reservation-modal-open', Boolean(state.success || state.helpOpen));
       mount.innerHTML = state.mode ? appTemplate() : startTemplate();
     };
 
@@ -3029,9 +3079,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         state.success = true;
         showViewportToast(
           state.inquirySaved
-            ? (state.mailDelivered ? 'Zapytanie zapisane i wysłane do recepcji.' : 'Zapytanie zapisane w panelu recepcji.')
+            ? (state.mailDelivered ? 'Zapytanie zapisane i wysłane do recepcji.' : 'Nie udało się wysłać maila, ale zapytanie zapisano w panelu recepcji.')
             : 'Nie udało się zapisać zapytania.',
-          state.inquirySaved ? 'success' : 'error',
+          state.inquirySaved ? (state.mailDelivered ? 'success' : 'warning') : 'error',
         );
       } catch {
         state.submitError = ui.success.errorText || 'Wysyłka nie powiodła się.';
@@ -3352,6 +3402,18 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         if (target.dataset.field.startsWith('dates.')) {
           normalizeDateRange();
           render();
+          if (highSeasonCampingInfo()) showViewportToast(highSeasonCampingNotice(), 'warning');
+        }
+        else if (target.dataset.field === 'details.arrivalTime') {
+          render();
+          if (state.details.arrivalTime.startsWith('po 21:00')) {
+            showViewportToast(
+              config.lang === 'pl'
+                ? 'Recepcja i brama mają określone godziny pracy. Przy późnym przyjeździe skontaktuj się z recepcją.'
+                : 'Reception and gate have set opening hours. Contact reception before a late arrival.',
+              'warning',
+            );
+          }
         }
         else {
           updateSummaryDom();
@@ -3966,6 +4028,29 @@ body.booking-app-page .main-content {
   border-color: rgba(255,255,255,.32);
   background: linear-gradient(135deg, #9ce8b9, #3CB371);
   box-shadow: 0 22px 70px rgba(17, 94, 53, .28);
+}
+
+.reservation-viewport-toast[data-type="warning"] {
+  color: #341d00;
+  border-color: rgba(255,255,255,.34);
+  background: linear-gradient(135deg, #ffd899, #f2a94a);
+  box-shadow: 0 22px 70px rgba(132, 75, 5, .28);
+}
+
+:global(html.reservation-modal-open),
+:global(html.reservation-modal-open body) {
+  overflow: hidden;
+}
+
+.reservation-field-warning {
+  display: block;
+  margin-top: 7px;
+  padding: 10px 12px;
+  border: 1px solid rgba(242,169,74,.34);
+  border-radius: 14px;
+  color: #ffe0ad !important;
+  background: rgba(242,169,74,.12);
+  font-weight: 850;
 }
 
 .reservation-viewport-toast.is-visible {

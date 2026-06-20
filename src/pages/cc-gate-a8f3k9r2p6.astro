@@ -14,14 +14,11 @@ const title = 'Panel recepcji Camping Clepardia';
   <body>
     <main class="inbox-shell">
       <section class="login-card" data-login>
-        <span class="eyebrow">Prywatny mini-inbox</span>
+        <span class="eyebrow">Prywatny mini CRM</span>
         <h1>{title}</h1>
         <p>Wpisz kod dostępu skonfigurowany dla recepcji.</p>
         <form data-login-form>
-          <label>
-            <span>Kod dostępu</span>
-            <input type="password" name="accessCode" autocomplete="current-password" required />
-          </label>
+          <label><span>Kod dostępu</span><input type="password" name="accessCode" autocomplete="current-password" required /></label>
           <button type="submit">Otwórz panel</button>
           <p class="status" data-login-status aria-live="polite"></p>
         </form>
@@ -29,37 +26,23 @@ const title = 'Panel recepcji Camping Clepardia';
 
       <section class="inbox-app" data-app hidden>
         <header class="app-header">
-          <div>
-            <span class="eyebrow">Camping Clepardia</span>
-            <h1>Inbox recepcji</h1>
-            <p data-count>Ładowanie zapytań…</p>
-          </div>
-          <div class="header-actions">
-            <button type="button" data-refresh>Odśwież</button>
-            <button type="button" class="ghost" data-logout>Wyloguj</button>
-          </div>
+          <div><span class="eyebrow">Camping Clepardia</span><h1>Inbox recepcji</h1><p data-count>Ładowanie zapytań…</p></div>
+          <div class="header-actions"><button type="button" data-refresh>Odśwież</button><button type="button" class="ghost" data-logout>Wyloguj</button></div>
         </header>
 
         <section class="filters" aria-label="Filtry zapytań">
-          <label class="search">
-            <span>Szukaj</span>
-            <input type="search" data-filter="search" placeholder="Imię, email, telefon, rejestracja, kraj, wiadomość…" />
-          </label>
+          <label class="search"><span>Szukaj</span><input type="search" data-filter="search" placeholder="Imię, email, telefon, rejestracja, kraj, wiadomość…" /></label>
           <label><span>Status</span><select data-filter="status"><option value="">Wszystkie</option></select></label>
           <label><span>Typ pobytu</span><select data-filter="stay"><option value="">Wszystkie</option></select></label>
           <label><span>Kraj</span><select data-filter="country"><option value="">Wszystkie</option></select></label>
           <label><span>Język</span><select data-filter="language"><option value="">Wszystkie</option></select></label>
           <label><span>Przyjazd od</span><input type="date" data-filter="arrival" /></label>
-          <label><span>Sortowanie</span>
-            <select data-filter="sort">
-              <option value="newest">Najnowsze</option>
-              <option value="oldest">Najstarsze</option>
-              <option value="arrival">Przyjazd najbliżej</option>
-            </select>
-          </label>
+          <label><span>Sortowanie</span><select data-filter="sort"><option value="newest">Najnowsze</option><option value="oldest">Najstarsze</option><option value="arrival">Przyjazd najbliżej</option></select></label>
           <label class="check"><input type="checkbox" data-filter="mailFailed" /><span>Mail niedostarczony</span></label>
           <label class="check"><input type="checkbox" data-filter="trips" /><span>Wycieczki</span></label>
           <label class="check"><input type="checkbox" data-filter="special" /><span>Specjalne potrzeby</span></label>
+          <label class="check"><input type="checkbox" data-filter="heavy" /><span>Ciężki pojazd</span></label>
+          <label class="check"><input type="checkbox" data-filter="summer" /><span>Lipiec / sierpień</span></label>
         </section>
 
         <p class="app-status" data-app-status aria-live="polite"></p>
@@ -78,47 +61,38 @@ const title = 'Panel recepcji Camping Clepardia';
         const list = document.querySelector('[data-list]');
         const count = document.querySelector('[data-count]');
         const filters = Array.from(document.querySelectorAll('[data-filter]'));
-        const statusLabels = {
-          new: 'Nowe',
-          needs_reply: 'Do odpowiedzi',
-          replied: 'Odpowiedziane',
-          confirmed: 'Potwierdzone',
-          rejected: 'Odrzucone',
-          spam: 'Spam/test',
-          archived: 'Archiwum',
-        };
+        const statusLabels = { new:'Nowe', needs_reply:'Do odpowiedzi', replied:'Odpowiedziane', confirmed:'Potwierdzone', rejected:'Odrzucone', spam:'Spam/test', archived:'Archiwum' };
         let accessCode = '';
         let inquiries = [];
 
-        const esc = (value) => String(value ?? '')
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#039;');
-        const jsonText = (value) => {
-          if (!value) return '-';
-          if (Array.isArray(value)) return value.length ? value.map((item) => typeof item === 'object' ? JSON.stringify(item) : item).join(', ') : '-';
-          if (typeof value === 'object') return Object.entries(value).map(([key, item]) => `${key}: ${typeof item === 'object' ? JSON.stringify(item) : item}`).join(', ') || '-';
-          return String(value);
-        };
+        const esc = (value) => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+        const raw = (item) => item?.raw_payload_json && typeof item.raw_payload_json === 'object' ? item.raw_payload_json : {};
+        const vehicle = (item) => item?.vehicle_details_json && typeof item.vehicle_details_json === 'object' ? item.vehicle_details_json : {};
+        const services = (item) => Array.isArray(item?.services_json) ? item.services_json : [];
+        const trips = (item) => Array.isArray(item?.trips_interest_json) ? item.trips_interest_json : [];
+        const consents = (item) => item?.consents_json && typeof item.consents_json === 'object' ? item.consents_json : {};
+        const yesNo = (value) => value ? 'Tak' : 'Nie';
         const formatDate = (value, withTime = false) => {
           if (!value) return '-';
           const date = new Date(value);
           if (Number.isNaN(date.getTime())) return String(value);
-          return new Intl.DateTimeFormat('pl-PL', withTime
-            ? { dateStyle: 'medium', timeStyle: 'short' }
-            : { dateStyle: 'medium' }).format(date);
+          return new Intl.DateTimeFormat('pl-PL', withTime ? { dateStyle:'medium', timeStyle:'short' } : { dateStyle:'medium' }).format(date);
         };
+        const isSummer = (item) => ['07','08'].includes(String(item.arrival_date || '').slice(5,7));
+        const serviceIcon = (service) => {
+          const id = `${service?.id || ''} ${service?.label || ''}`.toLowerCase();
+          if (/electric|prąd|power/.test(id)) return '⚡';
+          if (/dog|pies/.test(id)) return '🐕';
+          if (/adult|doros/.test(id)) return '🧑';
+          if (/child|dziec/.test(id)) return '🧒';
+          if (/tent|namiot/.test(id)) return '⛺';
+          if (/caravan|przyczep/.test(id)) return '🚙';
+          if (/bungalow|domek/.test(id)) return '🏡';
+          return '🚐';
+        };
+        const serviceText = (service) => `${service?.label || service?.id || 'Usługa'} × ${Math.max(1, Number(service?.qty || 1))} — ${Number(service?.price || 0) * Math.max(1, Number(service?.qty || 1))} PLN / noc`;
         const request = async (url, options = {}) => {
-          const response = await fetch(url, {
-            ...options,
-            headers: {
-              'content-type': 'application/json',
-              'x-cc-inbox-code': accessCode,
-              ...(options.headers || {}),
-            },
-          });
+          const response = await fetch(url, { ...options, headers:{ 'content-type':'application/json', 'x-cc-inbox-code':accessCode, ...(options.headers || {}) } });
           const result = await response.json().catch(() => ({}));
           if (!response.ok || !result.ok) {
             const error = new Error(result.reason || result.error || result.details || result.code || 'Błąd panelu.');
@@ -127,37 +101,25 @@ const title = 'Panel recepcji Camping Clepardia';
           }
           return result;
         };
-        const setSelectOptions = (filterName, values, labeler = (value) => value) => {
-          const select = document.querySelector(`[data-filter="${filterName}"]`);
-          if (!(select instanceof HTMLSelectElement)) return;
-          const current = select.value;
-          select.innerHTML = '<option value="">Wszystkie</option>' + [...new Set(values.filter(Boolean))]
-            .sort((a, b) => String(a).localeCompare(String(b), 'pl'))
-            .map((value) => `<option value="${esc(value)}">${esc(labeler(value))}</option>`).join('');
-          select.value = current;
+        const summaryText = (item) => {
+          const v = vehicle(item);
+          const c = consents(item);
+          return [
+            `ID: ${item.id}`, `Data: ${formatDate(item.created_at,true)}`, `Status: ${statusLabels[item.status] || item.status}`,
+            `Klient: ${item.full_name || '-'}`, `Email: ${item.email || '-'}`, `Telefon: ${item.phone || '-'}`,
+            `Kraj / język: ${item.country || '-'} / ${item.language || '-'}`, `Pobyt: ${item.stay_type || '-'}`,
+            `Termin: ${item.arrival_date || '-'} — ${item.departure_date || '-'} (${item.nights || 0} n.)`,
+            `Orientacyjna godzina przyjazdu: ${raw(item).arrivalTime || '-'}`,
+            `Usługi: ${services(item).map(serviceText).join(', ') || '-'}`, `Cena orientacyjna: ${item.estimated_total_pln ?? '-'} PLN`,
+            `Rejestracja: ${item.vehicle_registration || '-'}`, `Pojazd: ${v.summary || [v.model,v.length,v.width,v.height,v.weight].filter(Boolean).join(', ') || '-'}`,
+            `Ciężki pojazd: ${yesNo(v.large)}, asfalt: ${yesNo(v.asphaltNeeded)}`,
+            `Wycieczki: ${trips(item).join(', ') || '-'}`, `Specjalne potrzeby: ${item.special_needs || '-'}`,
+            `Zgody: cisza nocna ${c.quiet ? 'OK':'BRAK'}, kontakt ${c.contact ? 'OK':'BRAK'}, prywatność ${c.privacy ? 'OK':'BRAK'}`,
+            `Mail: ${item.mail_provider || 'none'} / ${item.mail_delivered ? 'dostarczony':'niedostarczony'}`, `Błąd maila: ${item.mail_error || '-'}`,
+            `Wiadomość: ${item.message || '-'}`, `Notatka: ${item.notes || '-'}`,
+          ].join('\n');
         };
-        const summaryText = (item) => [
-          `ID: ${item.id}`,
-          `Data: ${formatDate(item.created_at, true)}`,
-          `Status: ${statusLabels[item.status] || item.status}`,
-          `Pobyt: ${item.stay_type || '-'}`,
-          `Klient: ${item.full_name || '-'}`,
-          `Email: ${item.email || '-'}`,
-          `Telefon: ${item.phone || '-'}`,
-          `Kraj / język: ${item.country || '-'} / ${item.language || '-'}`,
-          `Termin: ${item.arrival_date || '-'} — ${item.departure_date || '-'} (${item.nights || 0} n.)`,
-          `Usługi: ${jsonText(item.services_json)}`,
-          `Cena orientacyjna: ${item.estimated_total_pln ?? '-'} PLN`,
-          `Rejestracja: ${item.vehicle_registration || '-'}`,
-          `Pojazd: ${jsonText(item.vehicle_details_json)}`,
-          `Specjalne potrzeby: ${item.special_needs || '-'}`,
-          `Wycieczki: ${jsonText(item.trips_interest_json)}`,
-          `Zgody: ${jsonText(item.consents_json)}`,
-          `Mail: ${item.mail_provider || 'none'} / delivered: ${Boolean(item.mail_delivered)}`,
-          `Błąd maila: ${item.mail_error || '-'}`,
-          `Wiadomość: ${item.message || '-'}`,
-          `Notatki: ${item.notes || '-'}`,
-        ].join('\n');
+        const mailText = (item) => `Nowe zapytanie rezerwacyjne — Camping Clepardia\n\n${summaryText(item)}\n\nSprawdź w panelu recepcji:\n${location.origin}/cc-gate-a8f3k9r2p6`;
         const copy = async (text, button) => {
           await navigator.clipboard.writeText(text);
           const old = button.textContent;
@@ -169,74 +131,67 @@ const title = 'Panel recepcji Camping Clepardia';
           if (field instanceof HTMLInputElement && field.type === 'checkbox') return field.checked;
           return field instanceof HTMLInputElement || field instanceof HTMLSelectElement ? field.value.trim() : '';
         };
+        const setOptions = (name, values, labeler = (value) => value) => {
+          const select = document.querySelector(`[data-filter="${name}"]`);
+          if (!(select instanceof HTMLSelectElement)) return;
+          const current = select.value;
+          select.innerHTML = '<option value="">Wszystkie</option>' + [...new Set(values.filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'pl')).map((value)=>`<option value="${esc(value)}">${esc(labeler(value))}</option>`).join('');
+          select.value = current;
+        };
         const visibleItems = () => {
           const search = filterValue('search').toLowerCase();
-          const status = filterValue('status');
-          const stay = filterValue('stay');
-          const country = filterValue('country');
-          const language = filterValue('language');
-          const arrival = filterValue('arrival');
-          const mailFailed = filterValue('mailFailed');
-          const trips = filterValue('trips');
-          const special = filterValue('special');
-          const sort = filterValue('sort');
           const filtered = inquiries.filter((item) => {
-            const haystack = [item.full_name, item.email, item.phone, item.vehicle_registration, item.country, item.message].join(' ').toLowerCase();
+            const v = vehicle(item);
+            const haystack = [item.full_name,item.email,item.phone,item.vehicle_registration,item.country,item.message,item.stay_type].join(' ').toLowerCase();
             return (!search || haystack.includes(search))
-              && (!status || item.status === status)
-              && (!stay || item.stay_type === stay)
-              && (!country || item.country === country)
-              && (!language || item.language === language)
-              && (!arrival || String(item.arrival_date || '') >= arrival)
-              && (!mailFailed || !item.mail_delivered)
-              && (!trips || (Array.isArray(item.trips_interest_json) && item.trips_interest_json.length))
-              && (!special || Boolean(String(item.special_needs || '').trim()));
+              && (!filterValue('status') || item.status === filterValue('status'))
+              && (!filterValue('stay') || item.stay_type === filterValue('stay'))
+              && (!filterValue('country') || item.country === filterValue('country'))
+              && (!filterValue('language') || item.language === filterValue('language'))
+              && (!filterValue('arrival') || String(item.arrival_date || '') >= filterValue('arrival'))
+              && (!filterValue('mailFailed') || !item.mail_delivered)
+              && (!filterValue('trips') || trips(item).length)
+              && (!filterValue('special') || Boolean(String(item.special_needs || '').trim()))
+              && (!filterValue('heavy') || Boolean(v.large))
+              && (!filterValue('summer') || isSummer(item));
           });
-          return filtered.sort((a, b) => {
-            if (sort === 'oldest') return String(a.created_at).localeCompare(String(b.created_at));
-            if (sort === 'arrival') return String(a.arrival_date || '9999').localeCompare(String(b.arrival_date || '9999'));
-            return String(b.created_at).localeCompare(String(a.created_at));
-          });
+          const sort = filterValue('sort');
+          return filtered.sort((a,b) => sort === 'oldest'
+            ? String(a.created_at).localeCompare(String(b.created_at))
+            : sort === 'arrival'
+              ? String(a.arrival_date || '9999').localeCompare(String(b.arrival_date || '9999'))
+              : String(b.created_at).localeCompare(String(a.created_at)));
         };
-        const card = (item) => `
-          <article class="inquiry-card" data-id="${esc(item.id)}">
+        const serviceCards = (item) => services(item).map((service) => `
+          <li><span aria-hidden="true">${serviceIcon(service)}</span><div><strong>${esc(service.label || service.id || 'Usługa')}</strong><small>${esc(service.scope || 'pobyt')}</small></div><b>× ${esc(service.qty || 1)}</b><em>${esc(Number(service.price || 0) * Math.max(1,Number(service.qty || 1)))} PLN / noc</em></li>
+        `).join('') || '<li class="empty-line">Brak usług</li>';
+        const card = (item) => {
+          const v = vehicle(item);
+          const payload = raw(item);
+          const c = consents(item);
+          const highSeason = Boolean(payload.highSeasonCampingInfo) || (isSummer(item) && /camping|kamper|van|namiot|przyczep|bus/i.test(item.stay_type || ''));
+          return `<article class="inquiry-card" data-id="${esc(item.id)}">
             <header>
-              <div>
-                <span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span>
-                <small>${esc(formatDate(item.created_at, true))}</small>
-                <h2>${esc(item.full_name || 'Bez nazwy')}</h2>
-                <p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.nights || 0)} n.</p>
-              </div>
-              <strong class="${item.mail_delivered ? 'mail-ok' : 'mail-failed'}">Mail: ${item.mail_delivered ? 'dostarczony' : 'niedostarczony'}</strong>
+              <div><div class="card-badges"><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span><span class="mail-badge ${item.mail_delivered ? 'is-ok':'is-failed'}">${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</span>${highSeason ? '<span class="season-badge">Lipiec/sierpień — camping bez rezerwacji</span>':''}</div><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.nights || 0)} nocy</p></div>
+              <div class="card-date"><small>Dodano</small><strong>${esc(formatDate(item.created_at,true))}</strong><code>${esc(item.id)}</code></div>
             </header>
             <div class="details-grid">
-              <dl><dt>Kontakt</dt><dd>${esc(item.email || '-')}<br>${esc(item.phone || '-')}</dd></dl>
-              <dl><dt>Kraj / język</dt><dd>${esc(item.country || '-')} / ${esc(item.language || '-')}</dd></dl>
-              <dl><dt>Usługi</dt><dd>${esc(jsonText(item.services_json))}</dd></dl>
-              <dl><dt>Cena</dt><dd>${esc(item.estimated_total_pln ?? '-')} PLN</dd></dl>
-              <dl><dt>Rejestracja / pojazd</dt><dd>${esc(item.vehicle_registration || '-')}<br>${esc(jsonText(item.vehicle_details_json))}</dd></dl>
-              <dl><dt>Wycieczki</dt><dd>${esc(jsonText(item.trips_interest_json))}</dd></dl>
-              <dl><dt>Specjalne potrzeby</dt><dd>${esc(item.special_needs || '-')}</dd></dl>
-              <dl><dt>Zgody</dt><dd>${esc(jsonText(item.consents_json))}</dd></dl>
-              <dl class="wide"><dt>Wiadomość</dt><dd>${esc(item.message || '-')}</dd></dl>
-              <dl class="wide"><dt>Status maila</dt><dd>${esc(item.mail_provider || 'none')} / delivered: ${String(Boolean(item.mail_delivered))}<br>${esc(item.mail_error || '-')}</dd></dl>
+              <section class="detail-card"><h3>📇 Kontakt</h3><p>${item.email ? `<a href="mailto:${esc(item.email)}">${esc(item.email)}</a>`:'-'}<br>${item.phone ? `<a href="tel:${esc(item.phone)}">${esc(item.phone)}</a>`:'-'}</p><small>${esc(item.country || '-')} · ${esc(item.language || '-')}</small></section>
+              <section class="detail-card"><h3>📅 Pobyt</h3><p><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><br>${esc(item.nights || 0)} nocy</p><small>Przyjazd: ${esc(payload.arrivalTime || 'jeszcze nie wiem')}</small></section>
+              <section class="detail-card"><h3>💰 Cena</h3><p><strong>${esc(item.estimated_total_pln ?? '-')} PLN</strong></p><small>Kwota orientacyjna</small></section>
+              <section class="detail-card"><h3>🗺️ Wycieczki</h3><p>${esc(trips(item).join(', ') || 'Brak')}</p></section>
+              <section class="detail-card detail-card--wide"><h3>🧾 Usługi</h3><ul class="service-list">${serviceCards(item)}</ul></section>
+              <section class="detail-card"><h3>🚐 Pojazd</h3><dl class="plain-list"><div><dt>Rejestracja</dt><dd>${esc(item.vehicle_registration || '-')}</dd></div><div><dt>Typ / model</dt><dd>${esc(v.model || '-')}</dd></div><div><dt>Wymiary</dt><dd>${esc([v.length,v.width,v.height].filter(Boolean).join(' × ') || '-')}</dd></div><div><dt>Masa</dt><dd>${esc(v.weight || '-')}</dd></div><div><dt>Ciężki pojazd</dt><dd>${yesNo(v.large)}</dd></div><div><dt>Potrzeba asfaltu</dt><dd>${yesNo(v.asphaltNeeded)}</dd></div><div><dt>Uwagi</dt><dd>${esc(v.notes || '-')}</dd></div></dl></section>
+              <section class="detail-card"><h3>♿ Specjalne potrzeby</h3><p>${esc(item.special_needs || 'Brak')}</p></section>
+              <section class="detail-card"><h3>✅ Zgody</h3><ul class="consent-list"><li>Cisza nocna: <b>${c.quiet ? 'OK':'BRAK'}</b></li><li>Kontakt: <b>${c.contact ? 'OK':'BRAK'}</b></li><li>Polityka prywatności: <b>${c.privacy ? 'OK':'BRAK'}</b></li></ul></section>
+              <section class="detail-card detail-card--wide"><h3>💬 Wiadomość</h3><p class="message-copy">${esc(item.message || 'Brak wiadomości')}</p></section>
+              <section class="detail-card detail-card--wide mail-status-card ${item.mail_delivered ? 'is-ok':'is-failed'}"><h3>✉️ Status maila</h3><p><strong>${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</strong> · provider: ${esc(item.mail_provider || 'none')}</p><small>${esc(item.mail_error || (item.mail_delivered ? 'Brak błędu.':'Brak szczegółów błędu.'))}</small><div class="inline-actions"><button type="button" data-copy-mail>Kopiuj treść maila</button><a href="mailto:clepardia@gmail.com?subject=${encodeURIComponent(`Zapytanie ${item.id}`)}">Otwórz Gmail / mailto</a></div></section>
+              <details class="technical-data"><summary>Dane techniczne</summary><pre>${esc(JSON.stringify({raw_payload_json:item.raw_payload_json,services_json:item.services_json,vehicle_details_json:item.vehicle_details_json,consents_json:item.consents_json},null,2))}</pre></details>
             </div>
-            <div class="edit-row">
-              <label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value, label]) => `<option value="${value}" ${item.status === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>
-              <label class="note"><span>Notatka recepcji</span><textarea data-notes rows="3">${esc(item.notes || '')}</textarea></label>
-              <button type="button" data-save>Zapisz status i notatkę</button>
-            </div>
-            <div class="card-actions">
-              <button type="button" data-copy-summary>Kopiuj podsumowanie</button>
-              <button type="button" data-copy-email ${item.email ? '' : 'disabled'}>Kopiuj email</button>
-              <button type="button" data-copy-phone ${item.phone ? '' : 'disabled'}>Kopiuj telefon</button>
-              ${item.email ? `<a href="mailto:${esc(item.email)}">Otwórz mailto</a>` : ''}
-              ${item.phone ? `<a href="tel:${esc(item.phone)}">Otwórz tel</a>` : ''}
-              <button type="button" data-quick-status="archived">Archiwizuj</button>
-              <button type="button" data-quick-status="spam">Spam/test</button>
-            </div>
-          </article>
-        `;
+            <div class="edit-row"><label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${item.status === value ? 'selected':''}>${label}</option>`).join('')}</select></label><label class="note"><span>Notatka recepcji</span><textarea data-notes rows="3">${esc(item.notes || '')}</textarea></label><button type="button" data-save>Zapisz status i notatkę</button></div>
+            <div class="card-actions"><button type="button" data-copy-summary>Kopiuj podsumowanie</button><button type="button" data-copy-email ${item.email ? '':'disabled'}>Kopiuj email</button><button type="button" data-copy-phone ${item.phone ? '':'disabled'}>Kopiuj telefon</button><button type="button" data-copy-mail>Kopiuj treść maila</button><button type="button" data-copy-id>Kopiuj link / ID</button>${item.email ? `<a href="mailto:${esc(item.email)}">Otwórz mailto</a>`:''}${item.phone ? `<a href="tel:${esc(item.phone)}">Otwórz tel</a>`:''}<button type="button" data-quick-status="archived">Archiwizuj</button><button type="button" data-quick-status="spam">Spam/test</button></div>
+          </article>`;
+        };
         const render = () => {
           const items = visibleItems();
           if (count) count.textContent = `${items.length} z ${inquiries.length} zapytań`;
@@ -247,19 +202,14 @@ const title = 'Panel recepcji Camping Clepardia';
           try {
             const result = await request('/api/inbox/list');
             inquiries = result.inquiries || [];
-            setSelectOptions('status', Object.keys(statusLabels), (value) => statusLabels[value] || value);
-            setSelectOptions('stay', inquiries.map((item) => item.stay_type));
-            setSelectOptions('country', inquiries.map((item) => item.country));
-            setSelectOptions('language', inquiries.map((item) => item.language));
+            setOptions('status',Object.keys(statusLabels),(value)=>statusLabels[value] || value);
+            setOptions('stay',inquiries.map((item)=>item.stay_type));
+            setOptions('country',inquiries.map((item)=>item.country));
+            setOptions('language',inquiries.map((item)=>item.language));
             if (appStatus) appStatus.textContent = '';
             render();
           } catch (error) {
-            if (error.status === 401) {
-              sessionStorage.removeItem(storageKey);
-              accessCode = '';
-              if (app instanceof HTMLElement) app.hidden = true;
-              if (login instanceof HTMLElement) login.hidden = false;
-            }
+            if (error.status === 401) { sessionStorage.removeItem(storageKey); accessCode=''; if (app instanceof HTMLElement) app.hidden=true; if (login instanceof HTMLElement) login.hidden=false; }
             if (appStatus) appStatus.textContent = error.message;
             if (loginStatus) loginStatus.textContent = error.message;
           }
@@ -271,128 +221,54 @@ const title = 'Panel recepcji Camping Clepardia';
           const button = cardNode.querySelector('[data-save]');
           if (button) button.disabled = true;
           try {
-            const result = await request('/api/inbox/update', {
-              method: 'PATCH',
-              body: JSON.stringify({ id, status, notes }),
-            });
-            const index = inquiries.findIndex((item) => String(item.id) === String(id));
+            const result = await request('/api/inbox/update',{method:'PATCH',body:JSON.stringify({id,status,notes})});
+            const index = inquiries.findIndex((item)=>String(item.id) === String(id));
             if (index >= 0) inquiries[index] = result.inquiry;
             render();
-          } catch (error) {
-            if (appStatus) appStatus.textContent = error.message;
-          } finally {
-            if (button) button.disabled = false;
-          }
+          } catch (error) { if (appStatus) appStatus.textContent = error.message; }
+          finally { if (button) button.disabled = false; }
         };
 
         loginForm?.addEventListener('submit', async (event) => {
           event.preventDefault();
-          const formData = new FormData(loginForm);
-          accessCode = String(formData.get('accessCode') || '').trim();
+          accessCode = String(new FormData(loginForm).get('accessCode') || '').trim();
           if (!accessCode) return;
           if (loginStatus) loginStatus.textContent = 'Sprawdzanie kodu…';
-          try {
-            await load();
-            if (!accessCode) return;
-            sessionStorage.setItem(storageKey, accessCode);
-            if (login instanceof HTMLElement) login.hidden = true;
-            if (app instanceof HTMLElement) app.hidden = false;
-            if (loginStatus) loginStatus.textContent = '';
-          } catch {}
+          await load();
+          if (!accessCode) return;
+          sessionStorage.setItem(storageKey,accessCode);
+          if (login instanceof HTMLElement) login.hidden=true;
+          if (app instanceof HTMLElement) app.hidden=false;
+          if (loginStatus) loginStatus.textContent='';
         });
-        document.querySelector('[data-refresh]')?.addEventListener('click', load);
-        document.querySelector('[data-logout]')?.addEventListener('click', () => {
-          sessionStorage.removeItem(storageKey);
-          window.location.reload();
-        });
-        filters.forEach((filter) => filter.addEventListener(filter instanceof HTMLInputElement && filter.type === 'search' ? 'input' : 'change', render));
-        list?.addEventListener('click', (event) => {
+        document.querySelector('[data-refresh]')?.addEventListener('click',load);
+        document.querySelector('[data-logout]')?.addEventListener('click',()=>{sessionStorage.removeItem(storageKey);location.reload();});
+        filters.forEach((filter)=>filter.addEventListener(filter instanceof HTMLInputElement && filter.type === 'search' ? 'input':'change',render));
+        list?.addEventListener('click',(event)=>{
           const target = event.target;
           if (!(target instanceof Element)) return;
-          const cardNode = target.closest('[data-id]');
-          if (!(cardNode instanceof HTMLElement)) return;
-          const item = inquiries.find((entry) => String(entry.id) === String(cardNode.dataset.id));
+          const node = target.closest('[data-id]');
+          if (!(node instanceof HTMLElement)) return;
+          const item = inquiries.find((entry)=>String(entry.id) === String(node.dataset.id));
           if (!item) return;
-          if (target.closest('[data-save]')) void save(cardNode);
-          const quickStatus = target.closest('[data-quick-status]');
-          if (quickStatus instanceof HTMLElement) void save(cardNode, quickStatus.dataset.quickStatus);
-          const summaryButton = target.closest('[data-copy-summary]');
-          if (summaryButton instanceof HTMLButtonElement) void copy(summaryText(item), summaryButton);
-          const emailButton = target.closest('[data-copy-email]');
-          if (emailButton instanceof HTMLButtonElement && item.email) void copy(item.email, emailButton);
-          const phoneButton = target.closest('[data-copy-phone]');
-          if (phoneButton instanceof HTMLButtonElement && item.phone) void copy(item.phone, phoneButton);
+          if (target.closest('[data-save]')) void save(node);
+          const quick = target.closest('[data-quick-status]');
+          if (quick instanceof HTMLElement) void save(node,quick.dataset.quickStatus);
+          const actions = [
+            ['[data-copy-summary]',summaryText(item)],['[data-copy-email]',item.email],['[data-copy-phone]',item.phone],
+            ['[data-copy-mail]',mailText(item)],['[data-copy-id]',`${location.origin}/cc-gate-a8f3k9r2p6#${item.id}\nID: ${item.id}`],
+          ];
+          actions.forEach(([selector,text])=>{const button=target.closest(selector);if(button instanceof HTMLButtonElement && text) void copy(text,button);});
         });
-
         accessCode = sessionStorage.getItem(storageKey) || '';
-        if (accessCode) {
-          if (login instanceof HTMLElement) login.hidden = true;
-          if (app instanceof HTMLElement) app.hidden = false;
-          void load();
-        }
+        if (accessCode) { if (login instanceof HTMLElement) login.hidden=true; if (app instanceof HTMLElement) app.hidden=false; void load(); }
       })();
     </script>
   </body>
 </html>
 
 <style is:global>
-  :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #07140f; color: #effbf3; }
-  * { box-sizing: border-box; }
-  body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradient(circle at 15% 0%, rgba(60,179,113,.22), transparent 30%), linear-gradient(145deg, #07140f, #102b1d); }
-  button, input, select, textarea { font: inherit; }
-  button, .card-actions a { border: 0; cursor: pointer; }
-  [hidden] { display: none !important; }
-  .inbox-shell { width: min(1500px, calc(100% - 28px)); margin: 0 auto; padding: clamp(28px, 5vw, 64px) 0; }
-  .login-card { width: min(540px, 100%); margin: 8vh auto 0; padding: clamp(24px, 5vw, 42px); border: 1px solid rgba(143,224,180,.20); border-radius: 30px; background: rgba(15,42,28,.88); box-shadow: 0 30px 100px rgba(0,0,0,.32); }
-  .eyebrow { color: #8fe0b4; font-size: .76rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
-  h1 { margin: 10px 0; font-size: clamp(2rem, 5vw, 4rem); line-height: 1; }
-  p { color: rgba(239,251,243,.70); line-height: 1.55; }
-  label { display: grid; gap: 7px; color: rgba(239,251,243,.76); font-size: .82rem; font-weight: 800; }
-  input, select, textarea { width: 100%; border: 1px solid rgba(255,255,255,.13); border-radius: 14px; color: #effbf3; background: rgba(255,255,255,.07); outline: none; }
-  input, select { min-height: 46px; padding: 0 12px; }
-  textarea { padding: 12px; resize: vertical; }
-  input:focus, select:focus, textarea:focus { border-color: rgba(143,224,180,.55); box-shadow: 0 0 0 4px rgba(60,179,113,.12); }
-  button, .card-actions a { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0 15px; border-radius: 13px; color: #07140f; background: #8fe0b4; font-weight: 900; text-decoration: none; }
-  button.ghost, .card-actions button, .card-actions a { color: #e7fff0; border: 1px solid rgba(143,224,180,.18); background: rgba(255,255,255,.07); }
-  button:disabled { opacity: .45; cursor: not-allowed; }
-  .login-card form { display: grid; gap: 14px; margin-top: 24px; }
-  .status, .app-status { min-height: 22px; margin: 0; color: #ffcf91; font-weight: 800; }
-  .app-header { display: flex; gap: 20px; align-items: end; justify-content: space-between; margin-bottom: 24px; }
-  .app-header h1 { margin-bottom: 5px; }
-  .app-header p { margin: 0; }
-  .header-actions { display: flex; gap: 9px; }
-  .filters { display: grid; grid-template-columns: 2fr repeat(6, minmax(130px, 1fr)); gap: 10px; padding: 16px; border: 1px solid rgba(143,224,180,.17); border-radius: 24px; background: rgba(8,28,18,.72); }
-  .filters .check { display: flex; align-items: center; gap: 8px; min-height: 42px; padding: 8px 10px; border-radius: 13px; background: rgba(255,255,255,.05); }
-  .filters .check input { width: 18px; min-height: 18px; accent-color: #3CB371; }
-  .inquiry-list { display: grid; gap: 16px; margin-top: 16px; }
-  .inquiry-card { padding: clamp(18px, 3vw, 28px); border: 1px solid rgba(255,255,255,.12); border-radius: 26px; background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.045)); box-shadow: 0 20px 60px rgba(0,0,0,.18); }
-  .inquiry-card > header { display: flex; justify-content: space-between; gap: 20px; align-items: start; }
-  .inquiry-card h2 { margin: 8px 0 4px; font-size: 1.5rem; }
-  .inquiry-card header p { margin: 0; }
-  .status-badge { display: inline-flex; min-height: 27px; align-items: center; padding: 0 10px; margin-right: 8px; border-radius: 999px; color: #07140f; background: #8fe0b4; font-size: .72rem; font-weight: 950; text-transform: uppercase; }
-  .status-spam, .status-rejected { background: #f2c078; }
-  .status-archived { color: #effbf3; background: #53665b; }
-  .mail-ok { color: #8fe0b4; }
-  .mail-failed { color: #ffca8a; }
-  .details-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 18px 0; }
-  dl { min-width: 0; margin: 0; padding: 12px; border-radius: 15px; background: rgba(255,255,255,.055); }
-  dl.wide { grid-column: span 2; }
-  dt { color: rgba(239,251,243,.52); font-size: .72rem; font-weight: 900; text-transform: uppercase; }
-  dd { margin: 5px 0 0; overflow-wrap: anywhere; line-height: 1.45; }
-  .edit-row { display: grid; grid-template-columns: 190px minmax(260px, 1fr) auto; gap: 10px; align-items: end; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.09); }
-  .card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-  .empty { padding: 40px; border: 1px dashed rgba(143,224,180,.22); border-radius: 22px; text-align: center; color: rgba(239,251,243,.65); }
-  @media (max-width: 1180px) {
-    .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .filters .search { grid-column: 1 / -1; }
-    .details-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  }
-  @media (max-width: 720px) {
-    .inbox-shell { width: min(100% - 16px, 1500px); padding-top: 18px; }
-    .app-header, .inquiry-card > header { align-items: stretch; flex-direction: column; }
-    .header-actions, .header-actions button { width: 100%; }
-    .filters, .details-grid, .edit-row { grid-template-columns: 1fr; }
-    .filters .search, dl.wide { grid-column: auto; }
-    .card-actions > * { width: 100%; }
-  }
+  :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#07140f;color:#effbf3}*{box-sizing:border-box}body{margin:0;min-width:320px;min-height:100vh;background:radial-gradient(circle at 15% 0%,rgba(60,179,113,.22),transparent 30%),linear-gradient(145deg,#07140f,#102b1d)}button,input,select,textarea{font:inherit}button,.card-actions a,.inline-actions a{border:0;cursor:pointer}[hidden]{display:none!important}.inbox-shell{width:min(1500px,calc(100% - 28px));margin:auto;padding:clamp(28px,5vw,64px) 0}.login-card{width:min(540px,100%);margin:8vh auto 0;padding:clamp(24px,5vw,42px);border:1px solid rgba(143,224,180,.2);border-radius:30px;background:rgba(15,42,28,.88);box-shadow:0 30px 100px rgba(0,0,0,.32)}.eyebrow{color:#8fe0b4;font-size:.76rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}h1{margin:10px 0;font-size:clamp(2rem,5vw,4rem);line-height:1}p{color:rgba(239,251,243,.72);line-height:1.55}label{display:grid;gap:7px;color:rgba(239,251,243,.76);font-size:.82rem;font-weight:800}input,select,textarea{width:100%;border:1px solid rgba(255,255,255,.13);border-radius:14px;color:#effbf3;background:rgba(255,255,255,.07);outline:0}input,select{min-height:46px;padding:0 12px}textarea{padding:12px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:rgba(143,224,180,.55);box-shadow:0 0 0 4px rgba(60,179,113,.12)}button,.card-actions a,.inline-actions a{min-height:42px;display:inline-flex;align-items:center;justify-content:center;padding:0 15px;border-radius:13px;color:#07140f;background:#8fe0b4;font-weight:900;text-decoration:none}button.ghost,.card-actions button,.card-actions a,.inline-actions button,.inline-actions a{color:#e7fff0;border:1px solid rgba(143,224,180,.18);background:rgba(255,255,255,.07)}button:disabled{opacity:.45;cursor:not-allowed}.login-card form{display:grid;gap:14px;margin-top:24px}.status,.app-status{min-height:22px;margin:0;color:#ffcf91;font-weight:800}.app-header{display:flex;gap:20px;align-items:end;justify-content:space-between;margin-bottom:24px}.app-header p{margin:0}.header-actions{display:flex;gap:9px}.filters{display:grid;grid-template-columns:2fr repeat(6,minmax(130px,1fr));gap:10px;padding:16px;border:1px solid rgba(143,224,180,.17);border-radius:24px;background:rgba(8,28,18,.72)}.filters .check{display:flex;align-items:center;gap:8px;min-height:42px;padding:8px 10px;border-radius:13px;background:rgba(255,255,255,.05)}.filters .check input{width:18px;min-height:18px;accent-color:#3CB371}.inquiry-list{display:grid;gap:20px;margin-top:16px}.inquiry-card{padding:clamp(18px,3vw,28px);border:1px solid rgba(255,255,255,.12);border-radius:28px;background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.045));box-shadow:0 20px 60px rgba(0,0,0,.18)}.inquiry-card>header{display:flex;justify-content:space-between;gap:20px;align-items:start}.inquiry-card h2{margin:12px 0 5px;font-size:clamp(1.45rem,3vw,2.1rem)}.inquiry-card header p{margin:0}.card-badges{display:flex;flex-wrap:wrap;gap:7px}.status-badge,.mail-badge,.season-badge{display:inline-flex;min-height:28px;align-items:center;padding:0 10px;border-radius:999px;color:#07140f;background:#8fe0b4;font-size:.7rem;font-weight:950;text-transform:uppercase}.status-spam,.status-rejected,.mail-badge.is-failed{background:#f2c078}.status-archived{color:#effbf3;background:#53665b}.mail-badge.is-ok{background:#7be3a8}.season-badge{color:#4a2b00;background:#ffd696}.card-date{display:grid;gap:5px;min-width:190px;text-align:right}.card-date small{color:rgba(239,251,243,.52)}.card-date code{color:#8fe0b4;font-size:.72rem}.details-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:20px 0}.detail-card{min-width:0;padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.055)}.detail-card--wide{grid-column:span 2}.detail-card h3{margin:0 0 12px;color:#9ee8bd;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase}.detail-card p{margin:0;color:#effbf3;overflow-wrap:anywhere}.detail-card a{color:#dffff0}.detail-card small{display:block;margin-top:8px;color:rgba(239,251,243,.58);line-height:1.5}.service-list,.consent-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}.service-list li{display:grid;grid-template-columns:38px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px;border-radius:14px;background:rgba(255,255,255,.055)}.service-list li>span{display:grid;width:38px;height:38px;place-items:center;border-radius:12px;background:rgba(60,179,113,.13);font-size:1.2rem}.service-list strong,.service-list small{display:block;margin:0}.service-list small{color:rgba(239,251,243,.5)}.service-list b{color:#8fe0b4}.service-list em{color:#fff;font-style:normal;font-weight:850}.plain-list{display:grid;gap:6px;margin:0}.plain-list div{display:grid;grid-template-columns:1fr 1.2fr;gap:8px}.plain-list dt{color:rgba(239,251,243,.5);font-size:.72rem}.plain-list dd{margin:0;text-align:right;overflow-wrap:anywhere}.consent-list b{color:#8fe0b4}.message-copy{white-space:pre-wrap}.mail-status-card.is-failed{border-color:rgba(242,192,120,.28);background:rgba(242,192,120,.08)}.mail-status-card.is-ok{border-color:rgba(123,227,168,.24)}.inline-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.technical-data{grid-column:1/-1;padding:12px 15px;border:1px dashed rgba(143,224,180,.2);border-radius:16px}.technical-data summary{cursor:pointer;color:rgba(239,251,243,.65);font-weight:850}.technical-data pre{max-height:320px;overflow:auto;white-space:pre-wrap;color:#bde8cd}.edit-row{display:grid;grid-template-columns:190px minmax(260px,1fr) auto;gap:10px;align-items:end;padding-top:16px;border-top:1px solid rgba(255,255,255,.09)}.card-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.empty{padding:40px;border:1px dashed rgba(143,224,180,.22);border-radius:22px;text-align:center;color:rgba(239,251,243,.65)}
+  @media(max-width:1180px){.filters{grid-template-columns:repeat(3,minmax(0,1fr))}.filters .search{grid-column:1/-1}.details-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:720px){.inbox-shell{width:min(100% - 16px,1500px);padding-top:18px}.app-header,.inquiry-card>header{align-items:stretch;flex-direction:column}.header-actions,.header-actions button{width:100%}.filters,.details-grid,.edit-row{grid-template-columns:1fr}.filters .search,.detail-card--wide{grid-column:auto}.card-date{text-align:left}.card-actions>*{width:100%}.service-list li{grid-template-columns:38px 1fr}.service-list b,.service-list em{grid-column:2}.inline-actions{display:grid}.inline-actions>*{width:100%}}
 </style>

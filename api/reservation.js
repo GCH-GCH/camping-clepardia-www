@@ -195,6 +195,9 @@ const createInquiry = (payload, normalized) => {
       .map((tour) => oneLine(tour, 120))
       .filter(Boolean)
       .slice(0, 12),
+    arrivalTime: oneLine(payload.arrivalTime, 120),
+    highSeasonCampingInfo: Boolean(payload.highSeasonCampingInfo),
+    bungalowPersonalItemsNotice: Boolean(payload.bungalowPersonalItemsNotice),
     estimatedTotal: oneLine(payload.estimatedTotal || payload.calculatorSummary?.total, 80),
     currencyEstimate: oneLine(payload.currencyEstimate || payload.calculatorSummary?.currencyEstimate, 160),
     currencyDisclaimer: longText(
@@ -243,6 +246,9 @@ const createCcSystemDraft = (inquiry) => ({
     people: inquiry.people,
     services: inquiry.services,
     tours: inquiry.tours,
+    arrivalTime: inquiry.arrivalTime,
+    highSeasonCampingInfo: inquiry.highSeasonCampingInfo,
+    bungalowPersonalItemsNotice: inquiry.bungalowPersonalItemsNotice,
     estimatedTotal: inquiry.estimatedTotal,
     currencyEstimate: inquiry.currencyEstimate,
     currencyDisclaimer: inquiry.currencyDisclaimer,
@@ -317,9 +323,11 @@ const buildReceptionMail = (inquiry) => {
   const rows = [
     ['ID', inquiry.inquiryId],
     ['Zapis do panelu', 'zapisano w reservation_inquiries'],
+    ['Panel recepcji', 'https://camping-clepardia-www.vercel.app/cc-gate-a8f3k9r2p6'],
     ['Status', 'Do potwierdzenia przez recepcje'],
     ['Typ pobytu', inquiry.stayType],
     ['Termin', `${inquiry.arrival} - ${inquiry.departure}`],
+    ['Orientacyjna godzina przyjazdu', inquiry.arrivalTime || 'jeszcze nie wiem'],
     ['Noce', inquiry.nights],
     ['Goscie', guests],
     ['Cena orientacyjna', inquiry.estimatedTotal || 'brak'],
@@ -333,6 +341,8 @@ const buildReceptionMail = (inquiry) => {
     ['Specjalne potrzeby', inquiry.specialNeeds || 'brak'],
     ['Pozniejszy wyjazd', inquiry.lateCheckout || 'brak'],
     ['Wycieczki (bez doliczania ceny)', inquiry.tours.join(', ') || 'brak'],
+    ['Lipiec/sierpień — camping bez rezerwacji', inquiry.highSeasonCampingInfo ? 'TAK — przekazano informację o kolejności przyjazdu' : 'nie dotyczy'],
+    ['Domki — własne ręczniki i rzeczy osobiste', inquiry.bungalowPersonalItemsNotice ? 'przekazano klientowi' : 'nie dotyczy'],
     ['Cisza nocna', inquiry.quietConsent ? 'zaakceptowana' : 'brak'],
     ['Zgoda kontaktowa', inquiry.consent ? 'zaakceptowana' : 'brak'],
     ['Zgoda RODO', inquiry.privacyConsent ? 'zaakceptowana' : 'brak'],
@@ -432,6 +442,7 @@ const buildCustomerMail = (inquiry) => {
   const rows = [
     ['Typ pobytu', inquiry.stayType],
     ['Termin', `${inquiry.arrival} - ${inquiry.departure}`],
+    ['Orientacyjna godzina przyjazdu', inquiry.arrivalTime || 'jeszcze nie wiem'],
     ['Noce', inquiry.nights],
     ['Goscie', [
       inquiry.people.adults ? `dorosli: ${inquiry.people.adults}` : '',
@@ -556,6 +567,7 @@ const buildFormSubmitPayload = (message, inquiry) => ({
   status: 'Do potwierdzenia przez recepcje',
   typ_pobytu: inquiry.stayType,
   termin: `${inquiry.arrival} - ${inquiry.departure}`,
+  orientacyjna_godzina_przyjazdu: inquiry.arrivalTime || 'jeszcze nie wiem',
   liczba_nocy: inquiry.nights,
   goscie: [
     inquiry.people.adults ? `Dorosli: ${inquiry.people.adults}` : '',
@@ -575,6 +587,8 @@ const buildFormSubmitPayload = (message, inquiry) => ({
   specjalne_potrzeby: inquiry.specialNeeds || 'brak',
   pozniejszy_wyjazd: inquiry.lateCheckout || 'brak',
   wycieczki_bez_doliczania_ceny: inquiry.tours.join(', ') || 'brak',
+  camping_lipiec_sierpien_bez_rezerwacji: inquiry.highSeasonCampingInfo ? 'TAK — według kolejności przyjazdu' : 'nie dotyczy',
+  domki_wlasne_reczniki_i_rzeczy_osobiste: inquiry.bungalowPersonalItemsNotice ? 'informacja przekazana' : 'nie dotyczy',
   wiadomosc_klienta: inquiry.message || 'brak',
   zgoda_cisza_nocna: inquiry.quietConsent ? 'zaakceptowana' : 'brak',
   zgoda_kontaktowa: inquiry.consent ? 'zaakceptowana' : 'brak',

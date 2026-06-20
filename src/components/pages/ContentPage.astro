@@ -401,6 +401,23 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   </section>
 )}
 
+{page.slug === 'camping' && (
+  <section class="site-section city-camping-note reveal-section">
+    <div class="container">
+      <article class="premium-card city-camping-note__card">
+        <span aria-hidden="true"><Icon name="MapPinned" size={28} strokeWidth={1.8} /></span>
+        <div>
+          <span class="section-kicker">{contentLanguage === 'pl' ? 'Dobrze wiedzieć' : 'Good to know'}</span>
+          <h2>{contentLanguage === 'pl' ? 'Zielony camping w mieście' : 'A green campsite in the city'}</h2>
+          <p>{contentLanguage === 'pl'
+            ? 'Camping Clepardia znajduje się w Krakowie, dlatego jest świetną bazą do zwiedzania miasta — blisko tramwaju, sklepów i atrakcji. To jednak nie jest camping w lesie ani na odludnej polanie: czasem słychać tramwaje, samoloty i normalne miejskie życie. W zamian goście zyskują wygodny dojazd do centrum i spokojną, zieloną przestrzeń jak na warunki miejskie.'
+            : 'Camping Clepardia is in Krakow, close to trams, shops and attractions. It is not a remote woodland campsite, so guests may sometimes hear trams, aircraft and normal city life. In return, it offers convenient access to the centre and a calm green space for an urban location.'}</p>
+        </div>
+      </article>
+    </div>
+  </section>
+)}
+
 {page.slug === 'kontakt' && (
   <section class="site-section contact-action-hub reveal-section">
     <div class="container">
@@ -583,6 +600,7 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 )}
 
 <style>
+.city-camping-note{padding-top:0}.city-camping-note__card{display:grid;grid-template-columns:56px minmax(0,1fr);gap:20px;padding:clamp(24px,4vw,38px);border-radius:28px}.city-camping-note__card>span{display:grid;width:56px;height:56px;place-items:center;border-radius:18px;color:#8fe0b4;background:rgba(60,179,113,.14)}.city-camping-note__card h2{margin:10px 0 12px;color:var(--theme-text-primary,#fff);font-size:clamp(1.6rem,4vw,2.8rem)}.city-camping-note__card p{max-width:920px;margin:0;color:var(--theme-text-muted,rgba(255,255,255,.72));line-height:1.75}@media(max-width:620px){.city-camping-note__card{grid-template-columns:1fr}}html[data-theme="light"] .city-camping-note__card h2{color:#102018}html[data-theme="light"] .city-camping-note__card p{color:#536359}
 .page-mini-hero {
   min-height: 58svh;
   display: grid;
