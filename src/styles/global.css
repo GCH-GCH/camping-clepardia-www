@@ -1169,6 +1169,80 @@ html[data-theme="light"] .premium-card {
   box-shadow: var(--theme-card-shadow);
 }
 
+html[data-theme="light"] :is(
+  .home-final-cta__panel,
+  .pricing__item,
+  .pricing-final-cta__panel,
+  .contact-action-hub__panel,
+  .operational-info__arrival,
+  .operational-info__card,
+  .page-cta__panel,
+  .attractions-itinerary__card,
+  .attractions-final-cta__panel,
+  .transport-car__panel,
+  .transport-arrival__panel,
+  .transport-final-cta__panel
+).premium-card {
+  color: #fff;
+  border-color: rgba(255,255,255,.14);
+  background:
+    radial-gradient(circle at 86% 10%, rgba(242,192,120,.17), transparent 34%),
+    radial-gradient(circle at 12% 88%, rgba(60,179,113,.20), transparent 36%),
+    linear-gradient(135deg, rgba(9,26,17,.96), rgba(18,48,31,.90)) !important;
+  box-shadow:
+    0 30px 90px rgba(17,40,28,.22),
+    0 0 42px rgba(60,179,113,.12),
+    inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+html[data-theme="light"] :is(
+  .home-final-cta__panel,
+  .pricing__item,
+  .pricing-final-cta__panel,
+  .contact-action-hub__panel,
+  .operational-info__arrival,
+  .operational-info__card,
+  .page-cta__panel,
+  .attractions-itinerary__card,
+  .attractions-final-cta__panel,
+  .transport-car__panel,
+  .transport-arrival__panel,
+  .transport-final-cta__panel
+).premium-card :is(h2, h3, strong) {
+  color: #fff;
+}
+
+html[data-theme="light"] :is(
+  .home-final-cta__panel,
+  .pricing__item,
+  .pricing-final-cta__panel,
+  .contact-action-hub__panel,
+  .operational-info__arrival,
+  .operational-info__card,
+  .page-cta__panel,
+  .attractions-itinerary__card,
+  .attractions-final-cta__panel,
+  .transport-car__panel,
+  .transport-arrival__panel,
+  .transport-final-cta__panel
+).premium-card :is(p, small, li) {
+  color: rgba(255,255,255,.78);
+}
+
+html[data-theme="light"] .tram-center-guide--page :is(
+  .tram-center-guide__route,
+  .tram-center-guide__fact
+).premium-card {
+  color: #fff;
+  border-color: rgba(255,255,255,.14);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(60,179,113,.20), transparent 36%),
+    rgba(255,255,255,.09) !important;
+  box-shadow:
+    0 24px 64px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.10);
+}
+
 html[data-theme="light"] .section-title {
   color: var(--theme-heading);
 }

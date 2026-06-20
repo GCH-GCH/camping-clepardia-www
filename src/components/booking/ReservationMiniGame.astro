@@ -1603,8 +1603,16 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const scrollBehavior = () => reducedMotion.matches ? 'auto' : 'smooth';
 
     const scrollToTop = () => {
-      const top = Math.max(0, root.getBoundingClientRect().top + window.scrollY - 92);
+      const target = mount.querySelector('.reservation-progress, .reservation-step-card, .reservation-mini__start');
+      const anchor = target instanceof HTMLElement ? target : root;
+      const top = Math.max(0, anchor.getBoundingClientRect().top + window.scrollY - 112);
       window.scrollTo({ top, behavior: scrollBehavior() });
+    };
+
+    const scheduleScrollToTop = () => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(scrollToTop);
+      });
     };
 
     const modeTitle = () => state.mode === 'simple' ? ui.simple.title : t.modes[state.mode]?.[0];
@@ -2698,7 +2706,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       url.searchParams.set('stay', mode);
       window.history.replaceState({}, '', url);
       render({ motion: 'step' });
-      scrollToTop();
+      scheduleScrollToTop();
     };
 
     const startSimpleFlow = () => {
@@ -2715,7 +2723,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
       render({ motion: 'step' });
-      scrollToTop();
+      scheduleScrollToTop();
     };
 
     const resetFlow = () => {
@@ -2733,7 +2741,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
       render({ motion: 'start' });
-      scrollToTop();
+      scheduleScrollToTop();
     };
 
     const updateField = (path, value) => {
@@ -3105,7 +3113,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           state.step = next;
           state.hint = '';
           render({ motion: 'step' });
-          scrollToTop();
+          scheduleScrollToTop();
         }
         return;
       }
@@ -3154,7 +3162,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         state.step = Math.max(1, state.step - 1);
         state.hint = '';
         render({ motion: 'step' });
-        scrollToTop();
+        scheduleScrollToTop();
         return;
       }
 
@@ -3162,7 +3170,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         event.preventDefault();
         if (!validateBeforeNext()) {
           render();
-          window.setTimeout(scrollFirstIssue, 50);
+          window.setTimeout(scrollFirstIssue, 90);
           return;
         }
         const previousStepKey = currentStepKey();
@@ -3178,7 +3186,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             }
           }, 1900);
         }
-        scrollToTop();
+        scheduleScrollToTop();
         return;
       }
 

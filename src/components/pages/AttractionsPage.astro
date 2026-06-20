@@ -658,6 +658,18 @@ const stayPlans = attractionsText.plans;
   align-items: center;
 }
 
+.attractions-local__content,
+.attractions-local__media,
+.attractions-final-cta__copy,
+.attractions-final-cta__actions {
+  min-width: 0;
+}
+
+.attractions-local__content .section-title {
+  max-width: 720px;
+  overflow-wrap: anywhere;
+}
+
 .attractions-local__cards {
   display: grid;
   grid-template-columns: 1fr;
@@ -707,6 +719,13 @@ const stayPlans = attractionsText.plans;
 .attractions-local__media {
   display: grid;
   gap: 14px;
+  width: 100%;
+  overflow: hidden;
+}
+
+:global(.attractions-local__image.photo-frame) {
+  width: 100%;
+  max-width: 100%;
 }
 
 .attractions-local__route {
@@ -1070,10 +1089,10 @@ html[data-theme="dark"] .attractions-list__actions button {
   }
 }
 
-@media (min-width: 980px) {
+@media (min-width: 1120px) {
   .attractions-local__grid,
   .attractions-itinerary__grid {
-    grid-template-columns: .95fr 1.05fr;
+    grid-template-columns: minmax(0, .92fr) minmax(440px, 1.08fr);
   }
 
   .attractions-list__grid {
@@ -1081,7 +1100,7 @@ html[data-theme="dark"] .attractions-list__actions button {
   }
 
   .attractions-final-cta__panel {
-    grid-template-columns: minmax(220px, .42fr) minmax(0, 1fr) auto;
+    grid-template-columns: minmax(240px, .42fr) minmax(0, 1fr) auto;
     align-items: center;
   }
 }

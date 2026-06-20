@@ -59,6 +59,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
     const openButtons = document.querySelectorAll('[data-search-open]');
     const hints = root.querySelectorAll('[data-search-hint]');
     let lastFocused = null;
+    let closeTimer = 0;
 
     const normalize = (value) => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
@@ -107,18 +108,29 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
 
     const open = () => {
       lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      window.clearTimeout(closeTimer);
       root.hidden = false;
       root.setAttribute('aria-hidden', 'false');
+      root.classList.remove('is-closing');
       document.body.classList.add('has-global-search-open');
       render(input instanceof HTMLInputElement ? input.value : '');
-      window.setTimeout(() => input instanceof HTMLInputElement && input.focus({ preventScroll: true }), 40);
+      window.requestAnimationFrame(() => {
+        root.classList.add('is-open');
+        window.setTimeout(() => input instanceof HTMLInputElement && input.focus({ preventScroll: true }), 90);
+      });
     };
 
     const close = () => {
-      root.hidden = true;
       root.setAttribute('aria-hidden', 'true');
+      root.classList.remove('is-open');
+      root.classList.add('is-closing');
       document.body.classList.remove('has-global-search-open');
-      lastFocused?.focus?.({ preventScroll: true });
+      window.clearTimeout(closeTimer);
+      closeTimer = window.setTimeout(() => {
+        root.hidden = true;
+        root.classList.remove('is-closing');
+        lastFocused?.focus?.({ preventScroll: true });
+      }, 260);
     };
 
     openButtons.forEach((button) => button.addEventListener('click', open));
@@ -168,6 +180,16 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
   display: grid;
   place-items: start center;
   padding: clamp(82px, 12vh, 132px) 16px 24px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .26s ease, visibility .26s ease;
+}
+
+.global-search.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .global-search__backdrop {
@@ -175,6 +197,12 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
   inset: 0;
   background: rgba(4, 15, 10, .66);
   backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity .26s ease;
+}
+
+.global-search.is-open .global-search__backdrop {
+  opacity: 1;
 }
 
 .global-search__panel {
@@ -192,6 +220,17 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
     radial-gradient(circle at 16% 0%, rgba(60,179,113,.22), transparent 34%),
     rgba(11, 29, 20, .96);
   box-shadow: 0 34px 120px rgba(0,0,0,.46), 0 0 54px rgba(60,179,113,.16);
+  opacity: 0;
+  transform: translateY(-16px) scale(.975);
+  transform-origin: top center;
+  transition:
+    opacity .28s cubic-bezier(.22, 1, .36, 1),
+    transform .28s cubic-bezier(.22, 1, .36, 1);
+}
+
+.global-search.is-open .global-search__panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 .global-search__header {
@@ -204,6 +243,12 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
   border-radius: 22px;
   background: rgba(255,255,255,.08);
   color: #fff;
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.global-search__header:focus-within {
+  border-color: rgba(143,224,180,.54);
+  box-shadow: 0 0 0 4px rgba(60,179,113,.14), 0 18px 42px rgba(0,0,0,.14);
 }
 
 .global-search__header input {
@@ -250,6 +295,32 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
   background: rgba(255,255,255,.09);
   font-size: .8rem;
   font-weight: 900;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity .24s ease,
+    transform .24s ease,
+    background .2s ease,
+    color .2s ease;
+}
+
+.global-search.is-open .global-search__hints button {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.global-search.is-open .global-search__hints button:nth-child(1) { transition-delay: 45ms; }
+.global-search.is-open .global-search__hints button:nth-child(2) { transition-delay: 65ms; }
+.global-search.is-open .global-search__hints button:nth-child(3) { transition-delay: 85ms; }
+.global-search.is-open .global-search__hints button:nth-child(4) { transition-delay: 105ms; }
+.global-search.is-open .global-search__hints button:nth-child(5) { transition-delay: 125ms; }
+.global-search.is-open .global-search__hints button:nth-child(6) { transition-delay: 145ms; }
+.global-search.is-open .global-search__hints button:nth-child(7) { transition-delay: 165ms; }
+.global-search.is-open .global-search__hints button:nth-child(8) { transition-delay: 185ms; }
+
+.global-search__hints button:hover {
+  color: #071b10;
+  background: #8fe0b4;
 }
 
 .global-search__results {
@@ -329,6 +400,11 @@ html[data-theme="light"] .global-search__empty {
   background: rgba(15, 45, 30, .06);
 }
 
+html[data-theme="light"] .global-search__header:focus-within {
+  border-color: rgba(34,126,77,.34);
+  box-shadow: 0 0 0 4px rgba(60,179,113,.13), 0 18px 42px rgba(16,40,28,.10);
+}
+
 html[data-theme="light"] .global-search__header input,
 html[data-theme="light"] .global-search__result strong {
   color: #102018;
@@ -349,5 +425,29 @@ html[data-theme="light"] .global-search__hints button {
 
 body.has-global-search-open {
   overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .global-search {
+    place-items: end center;
+    padding: 12px 8px max(8px, env(safe-area-inset-bottom));
+  }
+
+  .global-search__panel {
+    width: 100%;
+    max-height: min(84dvh, 720px);
+    border-radius: 26px 26px 18px 18px;
+    transform: translateY(24px) scale(.99);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .global-search,
+  .global-search__backdrop,
+  .global-search__panel,
+  .global-search__hints button {
+    transition-duration: .01ms !important;
+    transition-delay: 0ms !important;
+  }
 }
 </style>

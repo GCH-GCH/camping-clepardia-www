@@ -200,9 +200,13 @@ const label = isHome ? copy.home : copy.page;
 
 .page-scroll-hint:focus-visible {
   outline: none;
-  border-radius: 999px;
+  box-shadow: none;
+}
+
+.page-scroll-hint:focus-visible .page-scroll-hint__mouse,
+.page-scroll-hint:focus-visible .page-scroll-hint__label {
   box-shadow:
-    0 0 0 3px rgba(60, 179, 113, .34),
+    0 0 0 3px rgba(60, 179, 113, .32),
     0 0 30px rgba(60, 179, 113, .24);
 }
 
@@ -222,26 +226,29 @@ const label = isHome ? copy.home : copy.page;
 }
 
 html[data-theme="light"] .page-scroll-hint {
-  color: rgba(19,54,34,.72);
+  color: #0b3f27;
 }
 
 html[data-theme="light"] .page-scroll-hint__mouse {
-  border-color: rgba(34,126,77,.68);
-  background: rgba(255,255,255,.34);
+  border-color: #167447;
+  background: rgba(249,255,250,.94);
   box-shadow:
-    0 0 0 1px rgba(34,126,77,.08),
-    0 10px 28px rgba(16,58,36,.12),
-    0 0 22px rgba(60,179,113,.16);
+    0 0 0 1px rgba(22,116,71,.14),
+    0 12px 30px rgba(16,58,36,.16),
+    0 0 26px rgba(60,179,113,.22);
 }
 
 html[data-theme="light"] .page-scroll-hint__label {
-  border-color: rgba(34,126,77,.12);
-  background: rgba(255,255,255,.48);
-  box-shadow: 0 12px 26px rgba(16,58,36,.10), inset 0 1px 0 rgba(255,255,255,.68);
+  border-color: rgba(22,116,71,.28);
+  color: #0b3f27;
+  background: rgba(244,252,246,.96);
+  box-shadow: 0 12px 28px rgba(16,58,36,.14), inset 0 1px 0 rgba(255,255,255,.86);
+  text-shadow: none;
 }
 
 html[data-theme="light"] .page-scroll-hint__wheel {
-  background: #2b9b62;
+  background: #126f43;
+  box-shadow: 0 0 13px rgba(18,111,67,.42);
 }
 
 @keyframes page-scroll-wheel {

@@ -14,7 +14,6 @@ import QuickInquiryCTA from '@/components/home/QuickInquiryCTA.astro';
 import HomeFinalCTA from '@/components/home/HomeFinalCTA.astro';
 import ArrivalFlowSection from '@/components/home/ArrivalFlowSection.astro';
 import SiteNoticesSection from '@/components/home/SiteNoticesSection.astro';
-import ClientGuideTools from '@/components/home/ClientGuideTools.astro';
 
 interface Props {
   languageCode?: string;
@@ -33,7 +32,6 @@ const { languageCode } = Astro.props as Props;
 <PricingPreview languageCode={languageCode} />
 <TramCenterGuide languageCode={languageCode} variant="home" />
 <ArrivalFlowSection languageCode={languageCode} />
-<ClientGuideTools languageCode={languageCode} variant="home" />
 <AttractionsPreview languageCode={languageCode} />
 <ToursSection languageCode={languageCode} />
 <TrustSection languageCode={languageCode} />
