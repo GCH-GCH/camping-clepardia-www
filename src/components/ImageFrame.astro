@@ -57,6 +57,8 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
       <img
         src={src}
         alt={alt}
+        data-protected-image
+        draggable="false"
         width={width}
         height={height}
         sizes={sizes}
@@ -111,6 +113,8 @@ const fallbackIcon = fallbackScope.includes('tram') || fallbackScope.includes('t
   height: 100%;
   display: block;
   object-fit: cover;
+  -webkit-user-drag: none;
+  user-select: none;
   transform: scale(1.001);
   transition: transform .8s cubic-bezier(.2, .8, .2, 1), filter .8s ease;
 }

@@ -11,6 +11,7 @@ const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
 const chatTexts = t.chat;
 const hasCampyIcon = publicAssetExists(campyIcon);
+const campyIconSrc = `${campyIcon}?v=task103`;
 const activeNoticeCopy = getHomepageSiteNotices()
   .slice(0, 5)
   .map((notice) => getNoticeCopy(notice, pathContext.languageCode));
@@ -150,6 +151,7 @@ const finalCampyCopy = {
       currency: 'EUR / USD / GBP',
       currentNotices: 'Co aktualnie w Krakowie?',
       familyAttractions: 'Co zwiedzić z dziećmi?',
+      waterRelax: 'Woda i relaks',
       wieliczka: 'Wieliczka',
       auschwitz: 'Auschwitz',
       wawel: 'Wawel',
@@ -184,6 +186,7 @@ const finalCampyCopy = {
       currency: `${currencyEstimateConfig.shortDisclaimer} Przykład: ${camperExamplePrice} PLN to ${currencyExample}. ${currencyEstimateConfig.disclaimer}`,
       currentNotices: activeNoticesAnswer,
       familyAttractions: 'Z dziećmi najczęściej sprawdza się Stare Miasto i Wawel, Wieliczka, Ojców albo Energylandia. Wybór zależy od czasu, pogody i energii ekipy.',
+      waterRelax: 'Na wodę i relaks wybierz Park Wodny Kraków przy deszczu lub na krótszy rodzinny wypad, Bagry na miejską plażę i spacer albo Kryspinów na letni dzień poza centrum. Trasy i godziny sprawdź przed wyjazdem, bo zależą od sezonu i dnia.',
       dog: 'Tak, można z psem. Pies ma stawkę 0 PLN. Prosimy tylko o opiekę nad pupilem i sprzątanie po nim na terenie campingu.',
       bungalowOptions: 'Domki są tylko 2-, 3- i 4-osobowe. Mają osobną dostępność, a przy domkach może być wymagana zaliczka po potwierdzeniu terminu.',
       combinedStay: 'Wybierz wariant Razem, jeśli część osób śpi w domku, a część przyjeżdża kamperem, przyczepą albo namiotem. Formularz zbierze obie części w jednym zapytaniu.',
@@ -230,6 +233,7 @@ const finalCampyCopy = {
       currency: 'EUR / USD / GBP',
       currentNotices: 'What is current in Krakow?',
       familyAttractions: 'Kids attractions',
+      waterRelax: 'Water and relaxation',
       wieliczka: 'Wieliczka',
       auschwitz: 'Auschwitz',
       wawel: 'Wawel',
@@ -264,6 +268,7 @@ const finalCampyCopy = {
       currency: `${currencyEstimateConfig.shortDisclaimer} Example: ${camperExamplePrice} PLN is ${currencyExample}. ${currencyEstimateConfig.disclaimer}`,
       currentNotices: activeNoticesAnswer,
       familyAttractions: 'With children, Old Town and Wawel, Wieliczka, Ojców or Energylandia usually work well depending on time and weather.',
+      waterRelax: 'For water and relaxation choose Krakow Water Park on a rainy or shorter family day, Bagry for a city beach and walk, or Kryspinow for a summer day outside the centre. Check current routes and seasonal opening before leaving.',
       dog: 'Yes, dogs are welcome. Dog fee is 0 PLN. Please keep your dog under care and clean up after it.',
       bungalowOptions: 'Bungalows are only 2-, 3- and 4-person units. Availability is separate, and a deposit may be required after confirmation.',
       combinedStay: 'Choose Combined if part of the group stays in a bungalow and part arrives with a camper, caravan or tent.',
@@ -379,6 +384,7 @@ const quickActionGroups = [
       { key: 'stayLength', icon: 'CalendarDays', label: enhancedChatTexts.actions.stayLength },
       { key: 'currentNotices', icon: 'BellRing', label: enhancedChatTexts.actions.currentNotices },
       { key: 'familyAttractions', icon: 'UsersRound', label: enhancedChatTexts.actions.familyAttractions },
+      { key: 'waterRelax', icon: 'Waves', label: enhancedChatTexts.actions.waterRelax },
       { key: 'wawel', icon: 'Landmark', label: enhancedChatTexts.actions.wawel },
       { key: 'wieliczka', icon: 'Mountain', label: enhancedChatTexts.actions.wieliczka },
       { key: 'auschwitz', icon: 'Landmark', label: enhancedChatTexts.actions.auschwitz },
@@ -410,6 +416,7 @@ const quickRailOrder = [
   'twoNightPlan',
   'threeNightPlan',
   'familyAttractions',
+  'waterRelax',
   'dog',
   'bungalowOptions',
   'combinedStay',
@@ -433,7 +440,7 @@ const quickRailActions = quickRailOrder
     aria-controls="floatingChatPanel"
   >
     {hasCampyIcon ? (
-      <img class="floating-chat__button-image" src={campyIcon} alt="" width="62" height="62" loading="eager" decoding="async" />
+      <img class="floating-chat__button-image" src={campyIconSrc} alt="" width="62" height="62" loading="eager" decoding="async" draggable="false" />
     ) : (
       <span class="floating-chat__button-fallback" aria-hidden="true">CAMPY</span>
     )}
@@ -455,7 +462,7 @@ const quickRailActions = quickRailOrder
     <header class="floating-chat__header">
       <span class="floating-chat__avatar" aria-hidden="true">
         {hasCampyIcon ? (
-          <img class="floating-chat__avatar-image" src={campyIcon} alt="" width="62" height="62" loading="lazy" decoding="async" />
+          <img class="floating-chat__avatar-image" src={campyIconSrc} alt="" width="62" height="62" loading="lazy" decoding="async" draggable="false" />
         ) : (
           <>
             <Icon name="sparkle" size={21} strokeWidth={1.9} />
@@ -811,6 +818,7 @@ const quickRailActions = quickRailOrder
       if (key === 'wieliczka') return { text: answers.wieliczka, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
       if (key === 'auschwitz') return { text: answers.auschwitz, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
       if (key === 'schindler') return { text: answers.schindler, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
+      if (key === 'waterRelax') return { text: answers.waterRelax, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
       if (key === 'dog') return { text: answers.dog };
       if (key === 'bungalowOptions') return { text: answers.bungalowOptions, actions: [{ label: actionLabels.bungalow, href: links.bookingBungalow }] };
       if (key === 'combinedStay') return { text: answers.combinedStay, actions: [{ label: actionLabels.camping, href: links.bookingCamping }, { label: actionLabels.bungalow, href: links.bookingBungalow }, { label: actionLabels.combined, href: links.bookingCombined }] };
@@ -874,6 +882,7 @@ const quickRailActions = quickRailOrder
       if (rawPrompt === chatTexts.actions.stayLength) return actionResponse('stayLength') ?? chatTexts.answers.stayLength ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.currentNotices) return actionResponse('currentNotices') ?? chatTexts.answers.currentNotices ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.familyAttractions) return chatTexts.answers.familyAttractions ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.waterRelax) return actionResponse('waterRelax') ?? chatTexts.answers.waterRelax ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.oneNightPlan) return actionResponse('oneNightPlan') ?? chatTexts.answers.oneNightPlan ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.twoNightPlan) return actionResponse('twoNightPlan') ?? chatTexts.answers.twoNightPlan ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.threeNightPlan) return actionResponse('threeNightPlan') ?? chatTexts.answers.threeNightPlan ?? chatTexts.answers.fallback;
@@ -950,6 +959,9 @@ const quickRailActions = quickRailOrder
       if (prompt.includes('pogod') || prompt.includes('weather')) return chatTexts.answers.weather ?? chatTexts.answers.fallback;
       if (prompt.includes('deszcz') || prompt.includes('rain')) return chatTexts.answers.rain ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (prompt.includes('energy')) return chatTexts.answers.energylandia ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (prompt.includes('bagry') || prompt.includes('kryspin') || prompt.includes('park wodny') || prompt.includes('water park') || prompt.includes('plaż') || prompt.includes('plaz')) {
+        return actionResponse('waterRelax') ?? chatTexts.answers.waterRelax ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      }
       if (prompt.includes('wielicz')) return chatTexts.answers.wieliczka ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (prompt.includes('auschwitz') || prompt.includes('birkenau')) return chatTexts.answers.auschwitz ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (prompt.includes('wawel')) return actionResponse('wawel') ?? chatTexts.answers.wawel ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;

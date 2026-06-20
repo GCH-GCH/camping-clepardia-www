@@ -368,6 +368,12 @@ const loaderMessagesEncoded = Buffer.from(JSON.stringify(loaderMessages), 'utf-8
     history.pushState(null, '', href);
   });
 
+  document.addEventListener('contextmenu', (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target?.closest('[data-protected-image]')) return;
+    event.preventDefault();
+  });
+
   startLoaderProgress();
   revealElements();
   syncLenis();

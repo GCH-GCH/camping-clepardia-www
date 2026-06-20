@@ -31,6 +31,7 @@ const attractionDetailsByLanguage = {
       planner: 'Dodaj do planu',
       route: 'Sprawdź trasę',
       tour: 'Zapytaj recepcję',
+      campy: 'Zapytaj CAMPY',
     },
     details: [
       {
@@ -132,6 +133,39 @@ const attractionDetailsByLanguage = {
         routeQuery: 'Zakopane',
         showTour: true,
       },
+      {
+        id: 'water-park',
+        type: 'rodzina, woda, plan na deszcz',
+        time: 'ok. 5 km; orientacyjnie 10-20 min autem lub 25-40 min komunikacją',
+        transport: 'auto, taxi albo komunikacja miejska; sprawdź aktualną trasę',
+        onSite: '2-4 godz.',
+        forWhom: 'rodziny, dzieci, aktywny dzień i niepogoda',
+        see: 'baseny rekreacyjne, zjeżdżalnie i strefy rodzinne',
+        routeQuery: 'Park+Wodny+Krakow+Dobrego+Pasterza+126',
+        showTour: false,
+      },
+      {
+        id: 'bagry',
+        type: 'woda, relaks, lato w Krakowie',
+        time: 'ok. 11 km; orientacyjnie 20-35 min autem lub 45-65 min komunikacją',
+        transport: 'auto albo komunikacja miejska; w sezonie sprawdź aktualne połączenie',
+        onSite: '2-5 godz.',
+        forWhom: 'rodziny, spacer, plaża i spokojniejszy letni dzień',
+        see: 'plaża, kąpielisko sezonowe, spacer nad wodą i rekreacja',
+        routeQuery: 'Plaza+Bagry+Kozia+30+Krakow',
+        showTour: false,
+      },
+      {
+        id: 'kryspinow',
+        type: 'woda, plaża, wyjazd poza centrum',
+        time: 'ok. 20 km; orientacyjnie 25-40 min autem',
+        transport: 'najwygodniej auto lub taxi; komunikacja zależy od dnia i sezonu',
+        onSite: 'pół dnia lub cały dzień',
+        forWhom: 'rodziny, grupy i letni odpoczynek nad wodą',
+        see: 'piaszczyste plaże, strzeżone kąpielisko w sezonie i rekreacja',
+        routeQuery: 'Zalew+na+Piaskach+Kryspinow',
+        showTour: false,
+      },
     ],
   },
   en: {
@@ -145,6 +179,7 @@ const attractionDetailsByLanguage = {
       planner: 'Add to planner',
       route: 'Check route',
       tour: 'Ask reception',
+      campy: 'Ask CAMPY',
     },
     details: [
       { id: 'old-town', type: 'classic Krakow', time: 'usually about 14 min by tram + 5 min walk', transport: 'tram 18 to Stary Kleparz', onSite: '2-4 h', forWhom: 'first visit, couples, families', see: 'Main Square, Cloth Hall, Floriańska, Planty', routeQuery: 'Old+Town+Krakow', showTour: false },
@@ -156,6 +191,9 @@ const attractionDetailsByLanguage = {
       { id: 'energylandia', type: 'amusement park', time: 'about 1-1.5 h by car', transport: 'car or organised transfer', onSite: 'full day', forWhom: 'families, kids, teens', see: 'family zones, rollercoasters, seasonal water attractions', routeQuery: 'Energylandia+Zator', showTour: true },
       { id: 'ojcow', type: 'nature and castles', time: 'about 35-55 min by car', transport: 'car is easiest', onSite: '3-5 h', forWhom: 'slower day, nature, families', see: 'Prądnik Valley, Krakow Gate, Pieskowa Skała', routeQuery: 'Ojców+National+Park', showTour: false },
       { id: 'zakopane', type: 'Tatra Mountains day trip', time: 'usually 2-2.5 h by car one way, sometimes longer', transport: 'car, bus or organised tour', onSite: 'full day', forWhom: 'longer 4-5+ night stays', see: 'Krupówki, Tatra views, optional Gubałówka', routeQuery: 'Zakopane', showTour: true },
+      { id: 'water-park', type: 'family, water and rainy-day plan', time: 'about 5 km; roughly 10-20 min by car or 25-40 min by public transport', transport: 'car, taxi or public transport; check the current route', onSite: '2-4 h', forWhom: 'families, children and rainy days', see: 'recreation pools, slides and family zones', routeQuery: 'Park+Wodny+Krakow+Dobrego+Pasterza+126', showTour: false },
+      { id: 'bagry', type: 'water, relaxation and summer in Krakow', time: 'about 11 km; roughly 20-35 min by car or 45-65 min by public transport', transport: 'car or public transport; check seasonal connections', onSite: '2-5 h', forWhom: 'families, walks, beach and a slower summer day', see: 'beach, seasonal bathing area, waterside walks and recreation', routeQuery: 'Plaza+Bagry+Kozia+30+Krakow', showTour: false },
+      { id: 'kryspinow', type: 'water, beach and trip outside the centre', time: 'about 20 km; roughly 25-40 min by car', transport: 'car or taxi is easiest; public transport varies by day and season', onSite: 'half or full day', forWhom: 'families, groups and summer relaxation', see: 'sandy beaches, guarded seasonal bathing area and recreation', routeQuery: 'Zalew+na+Piaskach+Kryspinow', showTour: false },
     ],
   },
 };
@@ -189,6 +227,9 @@ const attractionsTextByLanguage = {
       { title: 'Energylandia', copy: 'Duży park rozrywki, popularny szczególnie wśród rodzin z dziećmi.', label: 'Energylandia' },
       { title: 'Ojców i Ojcowski Park Narodowy', copy: 'Dobry pomysł na spokojniejszy wyjazd poza miasto, z naturą i zamkami.', label: 'Ojców' },
       { title: 'Zakopane', copy: 'Popularny kierunek jednodniowej wycieczki w Tatry.', label: 'Zakopane' },
+      { title: 'Park Wodny Kraków', copy: 'Rodzinny i całoroczny plan na wodę, aktywność albo deszczowy dzień.', label: 'Park Wodny' },
+      { title: 'Zalew Bagry', copy: 'Miejska plaża, spacer i sezonowa rekreacja nad wodą w Krakowie.', label: 'Bagry' },
+      { title: 'Kryspinów', copy: 'Popularny letni kierunek pod Krakowem z plażą i kąpieliskiem.', label: 'Kryspinów' },
     ],
     plans: [
       { title: '1 dzień', items: ['Stare Miasto', 'Wawel', 'Kazimierz'] },
@@ -224,6 +265,9 @@ const attractionsTextByLanguage = {
       { title: 'Energylandia', copy: 'A large amusement park, especially popular with families with children.', label: 'Energylandia' },
       { title: 'Ojców National Park', copy: 'A good idea for a calmer trip outside the city with nature and castles.', label: 'Ojców' },
       { title: 'Zakopane', copy: 'A popular direction for a one-day trip to the Tatra Mountains.', label: 'Zakopane' },
+      { title: 'Krakow Water Park', copy: 'A year-round family option for water, activity or a rainy day.', label: 'Water Park' },
+      { title: 'Bagry Reservoir', copy: 'A city beach, walk and seasonal waterside recreation in Krakow.', label: 'Bagry' },
+      { title: 'Kryspinow', copy: 'A popular summer destination outside Krakow with beaches and a bathing area.', label: 'Kryspinow' },
     ],
     plans: [
       { title: '1 day', items: ['Old Town', 'Wawel', 'Kazimierz'] },
@@ -259,6 +303,9 @@ const attractionsTextByLanguage = {
       { title: 'Energylandia', copy: 'Großer Freizeitpark, besonders beliebt bei Familien mit Kindern.', label: 'Energylandia' },
       { title: 'Ojców-Nationalpark', copy: 'Gute Idee für einen ruhigeren Ausflug außerhalb der Stadt mit Natur und Burgen.', label: 'Ojców' },
       { title: 'Zakopane', copy: 'Beliebtes Ziel für einen Tagesausflug in die Tatra.', label: 'Zakopane' },
+      { title: 'Wasserpark Krakau', copy: 'Ganzjähriges Familienziel für Wasser, Aktivität oder einen Regentag.', label: 'Wasserpark' },
+      { title: 'Bagry-Stausee', copy: 'Stadtstrand, Spaziergang und saisonale Erholung am Wasser in Krakau.', label: 'Bagry' },
+      { title: 'Kryspinów', copy: 'Beliebtes Sommerziel bei Krakau mit Strand und Badestelle.', label: 'Kryspinów' },
     ],
     plans: [
       { title: '1 Tag', items: ['Altstadt', 'Wawel', 'Kazimierz'] },
@@ -294,6 +341,9 @@ const attractionsTextByLanguage = {
       { title: 'Energylandia', copy: 'Grande parco divertimenti, molto popolare tra le famiglie con bambini.', label: 'Energylandia' },
       { title: 'Parco Nazionale di Ojców', copy: 'Buona idea per una gita più tranquilla fuori città, tra natura e castelli.', label: 'Ojców' },
       { title: 'Zakopane', copy: 'Meta popolare per una gita di un giorno verso i Tatra.', label: 'Zakopane' },
+      { title: 'Parco Acquatico di Cracovia', copy: 'Meta per famiglie, acqua e attività anche durante una giornata di pioggia.', label: 'Parco Acquatico' },
+      { title: 'Lago Bagry', copy: 'Spiaggia urbana, passeggiata e relax stagionale sull’acqua a Cracovia.', label: 'Bagry' },
+      { title: 'Kryspinów', copy: 'Popolare meta estiva fuori Cracovia con spiagge e zona balneare.', label: 'Kryspinów' },
     ],
     plans: [
       { title: '1 giorno', items: ['Città Vecchia', 'Wawel', 'Kazimierz'] },
@@ -381,6 +431,30 @@ const attractions = [
     image: attractionImages.zakopane,
     label: attractionsText.attractions[8].label,
     detail: attractionDetailsById.get('zakopane'),
+  },
+  {
+    id: 'water-park',
+    title: attractionsText.attractions[9].title,
+    copy: attractionsText.attractions[9].copy,
+    image: attractionImages.waterPark,
+    label: attractionsText.attractions[9].label,
+    detail: attractionDetailsById.get('water-park'),
+  },
+  {
+    id: 'bagry',
+    title: attractionsText.attractions[10].title,
+    copy: attractionsText.attractions[10].copy,
+    image: attractionImages.bagry,
+    label: attractionsText.attractions[10].label,
+    detail: attractionDetailsById.get('bagry'),
+  },
+  {
+    id: 'kryspinow',
+    title: attractionsText.attractions[11].title,
+    copy: attractionsText.attractions[11].copy,
+    image: attractionImages.kryspinow,
+    label: attractionsText.attractions[11].label,
+    detail: attractionDetailsById.get('kryspinow'),
   },
 ];
 
@@ -486,12 +560,16 @@ const stayPlans = attractionsText.plans;
                     <Icon name="MapPin" size={16} strokeWidth={2} />
                     <span>{attractionDetailsCopy.metaLabels.route}</span>
                   </a>
-                  {item.detail.showTour && (
+                  {(item.detail.showTour || ['water-park', 'bagry', 'kryspinow'].includes(item.id)) && (
                     <a href={contactHref}>
                       <Icon name="Ticket" size={16} strokeWidth={2} />
                       <span>{attractionDetailsCopy.metaLabels.tour}</span>
                     </a>
                   )}
+                  <button type="button" data-attraction-campy={item.title}>
+                    <Icon name="BotMessageSquare" size={16} strokeWidth={2} />
+                    <span>{attractionDetailsCopy.metaLabels.campy}</span>
+                  </button>
                 </div>
               </>
             )}
@@ -501,6 +579,17 @@ const stayPlans = attractionsText.plans;
     </div>
   </div>
 </section>
+
+<script>
+  document.querySelectorAll('[data-attraction-campy]').forEach((button) => {
+    if (!(button instanceof HTMLButtonElement)) return;
+    button.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('campy:prompt', {
+        detail: { prompt: `Opowiedz mi o atrakcji: ${button.dataset.attractionCampy ?? ''}` },
+      }));
+    });
+  });
+</script>
 
 <section class="site-section attractions-itinerary reveal-section">
   <div class="container attractions-itinerary__grid">
@@ -749,7 +838,8 @@ const stayPlans = attractionsText.plans;
   margin-top: 18px;
 }
 
-.attractions-list__actions a {
+.attractions-list__actions a,
+.attractions-list__actions button {
   min-height: 42px;
   display: inline-flex;
   align-items: center;
@@ -762,10 +852,12 @@ const stayPlans = attractionsText.plans;
   font-size: .84rem;
   font-weight: 950;
   text-decoration: none;
+  cursor: pointer;
   transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
 
-.attractions-list__actions a:hover {
+.attractions-list__actions a:hover,
+.attractions-list__actions button:hover {
   transform: translateY(-2px);
   border-color: rgba(60,179,113,.42);
   background: linear-gradient(135deg, rgba(168,240,199,.86), rgba(60,179,113,.22));
@@ -949,7 +1041,8 @@ html[data-theme="dark"] .attractions-list__meta div {
     rgba(255,255,255,.07);
 }
 
-html[data-theme="dark"] .attractions-list__actions a {
+html[data-theme="dark"] .attractions-list__actions a,
+html[data-theme="dark"] .attractions-list__actions button {
   color: #d8ffe8;
   border-color: rgba(143,224,180,.22);
   background: rgba(143,224,180,.09);
@@ -1014,7 +1107,8 @@ html[data-theme="dark"] .attractions-list__actions a {
     display: grid;
   }
 
-  .attractions-list__actions a {
+  .attractions-list__actions a,
+  .attractions-list__actions button {
     justify-content: center;
   }
 }

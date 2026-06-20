@@ -290,6 +290,11 @@ canvas {
   height: auto;
 }
 
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
 body {
   background:
     radial-gradient(circle at 10% 8%, rgba(60, 179, 113, .08), transparent 28%),

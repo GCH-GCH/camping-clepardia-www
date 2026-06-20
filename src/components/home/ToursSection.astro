@@ -2,8 +2,8 @@
 import ImageFrame from '@/components/ImageFrame.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { siteAssets } from '@/data/assets';
-import { getTranslations, resolveContentLanguage } from '@/i18n/config';
-import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { resolveContentLanguage } from '@/i18n/config';
+import { getLocalizedPath, getPathContext, getPlannerLocalizedPath } from '@/utils/localizedLinks';
 
 interface Props {
   languageCode?: string;
@@ -46,7 +46,7 @@ const copyByLanguage: Record<string, Copy> = {
     featuredLabel: 'Polecana wycieczka',
     durationLabel: 'Czas',
     transportLabel: 'Transport',
-    powered: 'Partner wycieczek',
+    powered: 'Pomoc recepcji',
     cardsAria: 'Lista polecanych wycieczek z Krakowa',
     benefitsTitle: 'Wygodne zwiedzanie bez tracenia campingowego spokoju.',
     tours: [
@@ -55,8 +55,8 @@ const copyByLanguage: Record<string, Copy> = {
         title: 'Auschwitz-Birkenau',
         eyebrow: 'Miejsce pamieci',
         duration: 'Całodniowo',
-        transport: 'Transport + przewodnik',
-        description: 'Całodniowa wycieczka z transportem i przewodnikiem.',
+        transport: 'Wycieczka / dojazd indywidualny',
+        description: 'Miejsce pamięci wymagające spokojnego, wcześniejszego zaplanowania wizyty.',
         alt: 'Auschwitz-Birkenau - wycieczka z Krakowa',
         icon: 'shield',
         featured: true,
@@ -114,13 +114,13 @@ const copyByLanguage: Record<string, Copy> = {
     ],
     benefits: [
       {
-        title: 'Transport z campingu',
-        text: 'Bez stresu związanego z dojazdem i parkingiem.',
+        title: 'Praktyczny plan dojazdu',
+        text: 'Recepcja pomoże uporządkować wariant dojazdu i czas wyjazdu.',
         icon: 'bus',
       },
       {
-        title: 'Lokalni przewodnicy',
-        text: 'Sprawdzone wycieczki i doświadczeni przewodnicy.',
+        title: 'Neutralne wskazówki',
+        text: 'Porównaj wycieczkę, transfer i dojazd własny bez presji sprzedażowej.',
         icon: 'users',
       },
       {
@@ -138,7 +138,7 @@ const copyByLanguage: Record<string, Copy> = {
     featuredLabel: 'Featured tour',
     durationLabel: 'Duration',
     transportLabel: 'Transport',
-    powered: 'Tour booking partner',
+    powered: 'Reception support',
     cardsAria: 'Recommended tours from Krakow',
     benefitsTitle: 'Easy sightseeing with a calm camping base to return to.',
     tours: [
@@ -147,8 +147,8 @@ const copyByLanguage: Record<string, Copy> = {
         title: 'Auschwitz-Birkenau',
         eyebrow: 'Memorial site',
         duration: 'Full day',
-        transport: 'Transport + guide',
-        description: 'A full-day trip with transport and a guide.',
+        transport: 'Tour / independent travel',
+        description: 'A memorial visit that benefits from calm, advance planning.',
         alt: 'Auschwitz-Birkenau tour from Krakow',
         icon: 'shield',
         featured: true,
@@ -206,13 +206,13 @@ const copyByLanguage: Record<string, Copy> = {
     ],
     benefits: [
       {
-        title: 'Transport from the campsite',
-        text: 'Less stress with routes, parking and transfers.',
+        title: 'A practical travel plan',
+        text: 'Reception can help organise route options and departure timing.',
         icon: 'bus',
       },
       {
-        title: 'Local guides',
-        text: 'Proven tours and experienced guides.',
+        title: 'Neutral guidance',
+        text: 'Compare a tour, transfer or independent trip without sales pressure.',
         icon: 'users',
       },
       {
@@ -230,7 +230,7 @@ const copyByLanguage: Record<string, Copy> = {
     featuredLabel: 'Empfohlener Ausflug',
     durationLabel: 'Dauer',
     transportLabel: 'Transport',
-    powered: 'Tour-Partner',
+    powered: 'Hilfe der Rezeption',
     cardsAria: 'Empfohlene Ausflüge ab Krakau',
     benefitsTitle: 'Bequemes Sightseeing mit einem ruhigen Campingplatz als Basis.',
     tours: [
@@ -239,8 +239,8 @@ const copyByLanguage: Record<string, Copy> = {
         title: 'Auschwitz-Birkenau',
         eyebrow: 'Gedenkstatte',
         duration: 'Ganztagig',
-        transport: 'Transport + Guide',
-        description: 'Ganztagiger Ausflug mit Transport und Guide.',
+        transport: 'Tour / individuelle Anreise',
+        description: 'Ein Gedenkstättenbesuch, der eine ruhige, frühzeitige Planung erfordert.',
         alt: 'Auschwitz-Birkenau Ausflug ab Krakau',
         icon: 'shield',
         featured: true,
@@ -298,13 +298,13 @@ const copyByLanguage: Record<string, Copy> = {
     ],
     benefits: [
       {
-        title: 'Transport vom Campingplatz',
-        text: 'Weniger Stress mit Anfahrt und Parken.',
+        title: 'Praktischer Anreiseplan',
+        text: 'Die Rezeption hilft bei Routenoptionen und der passenden Abfahrtszeit.',
         icon: 'bus',
       },
       {
-        title: 'Lokale Guides',
-        text: 'Geprüfte Ausflüge und erfahrene Guides.',
+        title: 'Neutrale Hinweise',
+        text: 'Tour, Transfer und eigene Anreise ohne Verkaufsdruck vergleichen.',
         icon: 'users',
       },
       {
@@ -322,7 +322,7 @@ const copyByLanguage: Record<string, Copy> = {
     featuredLabel: 'Tour consigliato',
     durationLabel: 'Durata',
     transportLabel: 'Trasporto',
-    powered: 'Partner tour',
+    powered: 'Supporto reception',
     cardsAria: 'Tour consigliati da Cracovia',
     benefitsTitle: 'Visite comode con un campeggio tranquillo dove tornare.',
     tours: [
@@ -331,8 +331,8 @@ const copyByLanguage: Record<string, Copy> = {
         title: 'Auschwitz-Birkenau',
         eyebrow: 'Memoriale',
         duration: 'Giornata intera',
-        transport: 'Trasporto + guida',
-        description: 'Tour di un giorno con trasporto e guida.',
+        transport: 'Tour / viaggio autonomo',
+        description: 'Una visita al memoriale da pianificare con calma e in anticipo.',
         alt: 'Tour Auschwitz-Birkenau da Cracovia',
         icon: 'shield',
         featured: true,
@@ -390,13 +390,13 @@ const copyByLanguage: Record<string, Copy> = {
     ],
     benefits: [
       {
-        title: 'Trasporto dal campeggio',
-        text: 'Meno stress per spostamenti e parcheggio.',
+        title: 'Piano di viaggio pratico',
+        text: 'La reception aiuta a confrontare il percorso e l’orario di partenza.',
         icon: 'bus',
       },
       {
-        title: 'Guide locali',
-        text: 'Tour verificati e guide esperte.',
+        title: 'Indicazioni neutrali',
+        text: 'Confronta tour, transfer e viaggio autonomo senza pressione commerciale.',
         icon: 'users',
       },
       {
@@ -413,11 +413,51 @@ const pathContext = getPathContext(Astro.url.pathname);
 const activeLanguage = languageCode ?? pathContext.languageCode;
 const lang = resolveContentLanguage(activeLanguage);
 const copy = copyByLanguage[lang] ?? copyByLanguage.en;
-const bookingText = getTranslations(activeLanguage).toursBooking;
-const bookingUrl = getLocalizedPath(pathContext.explicitLanguage, 'atrakcje');
-const bookingChips = Object.values(bookingText.chips);
+const contactUrl = getLocalizedPath(pathContext.explicitLanguage, 'kontakt');
+const plannerUrl = getPlannerLocalizedPath(pathContext.explicitLanguage);
+const neutralBookingText = {
+  pl: {
+    reserveTitle: 'Zapytaj o wycieczki i transfery',
+    reserveDescription: 'W recepcji możesz zapytać o dostępne wycieczki i praktyczne opcje dojazdu do popularnych miejsc.',
+    sellingText: 'Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców i rodzinne atrakcje możesz połączyć z pobytem bez zewnętrznego brandowania.',
+    reserve: 'Zapytaj recepcję',
+    planner: 'Otwórz planer',
+    cards: 'Dodaj do planera',
+    chips: ['Praktyczne wskazówki', 'Plan dnia', 'Transport', 'Spokojny powrót'],
+  },
+  en: {
+    reserveTitle: 'Ask about trips and transfers',
+    reserveDescription: 'Reception can help with practical information about available trips and transport to popular destinations.',
+    sellingText: 'Combine Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców and family attractions with your stay without external partner branding.',
+    reserve: 'Ask reception',
+    planner: 'Open planner',
+    cards: 'Add to planner',
+    chips: ['Practical guidance', 'Day plan', 'Transport', 'Calm return'],
+  },
+  de: {
+    reserveTitle: 'Ausflüge und Transfers anfragen',
+    reserveDescription: 'Die Rezeption hilft mit praktischen Informationen zu Ausflügen und Transportmöglichkeiten.',
+    sellingText: 'Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców und Familienziele lassen sich ohne externes Partner-Branding planen.',
+    reserve: 'Rezeption fragen',
+    planner: 'Planer öffnen',
+    cards: 'Zum Planer',
+    chips: ['Praktische Hinweise', 'Tagesplan', 'Transport', 'Ruhige Rückkehr'],
+  },
+  it: {
+    reserveTitle: 'Chiedi informazioni su tour e transfer',
+    reserveDescription: 'La reception può aiutare con informazioni pratiche su escursioni e trasporti.',
+    sellingText: 'Combina Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców e mete per famiglie senza marchi di partner esterni.',
+    reserve: 'Chiedi alla reception',
+    planner: 'Apri planner',
+    cards: 'Aggiungi al planner',
+    chips: ['Consigli pratici', 'Piano del giorno', 'Trasporto', 'Ritorno tranquillo'],
+  },
+};
+const bookingText = neutralBookingText[lang] ?? neutralBookingText.en;
+const bookingChips = bookingText.chips;
 const featuredTour = copy.tours.find((tour) => tour.featured) ?? copy.tours[0];
 const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
+const featuredRouteUrl = 'https://www.google.com/maps/search/?api=1&query=Auschwitz-Birkenau+Memorial';
 ---
 
 <section class="site-section tours-section reveal-section" id="wycieczki" aria-labelledby="tours-title">
@@ -459,11 +499,25 @@ const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
               <dd><Icon name="route" size={16} /> {featuredTour.transport}</dd>
             </div>
           </dl>
-          <a class="btn btn-primary tours-section__book-link tours-section__book-link--featured" href={bookingUrl}>
-            <Icon name="CalendarCheck" size={18} />
-            {bookingText.reserve}
-            <Icon name="ArrowUpRight" size={16} />
-          </a>
+          <div class="tours-section__featured-actions">
+            <a class="btn btn-primary tours-section__book-link tours-section__book-link--featured" href={contactUrl}>
+              <Icon name="CalendarCheck" size={18} />
+              {bookingText.reserve}
+              <Icon name="ArrowUpRight" size={16} />
+            </a>
+            <a class="tours-section__planner-cta" href={plannerUrl}>
+              <Icon name="Map" size={17} />
+              {bookingText.cards}
+            </a>
+            <a class="tours-section__planner-cta" href={featuredRouteUrl} target="_blank" rel="noopener noreferrer">
+              <Icon name="MapPin" size={17} />
+              {copy.transportLabel}
+            </a>
+            <button class="tours-section__planner-cta" type="button" data-tour-campy={featuredTour.title}>
+              <Icon name="BotMessageSquare" size={17} />
+              CAMPY
+            </button>
+          </div>
         </div>
       </article>
 
@@ -486,11 +540,21 @@ const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
             <span><Icon name="check" size={14} /> {chip}</span>
           ))}
         </div>
-        <a class="btn btn-primary tours-section__booking-cta" href={bookingUrl}>
-          <Icon name="CalendarCheck" size={18} />
+        <div class="tours-section__booking-actions">
+        <a class="btn btn-primary tours-section__booking-cta" href={contactUrl}>
+          <Icon name="MessageCircle" size={18} />
           {bookingText.reserve}
           <Icon name="ArrowUpRight" size={16} />
         </a>
+        <a class="tours-section__planner-cta" href={plannerUrl}>
+          <Icon name="Map" size={17} />
+          {bookingText.planner}
+        </a>
+        <button class="tours-section__planner-cta" type="button" data-tour-campy={bookingText.reserveTitle}>
+          <Icon name="BotMessageSquare" size={17} />
+          CAMPY
+        </button>
+        </div>
       </aside>
 
       <div class="tours-section__cards" aria-label={copy.cardsAria}>
@@ -515,8 +579,8 @@ const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
                 <span><Icon name="clock" size={14} /> {tour.duration}</span>
                 <span><Icon name="route" size={14} /> {tour.transport}</span>
               </div>
-              <a class="tours-section__card-cta" href={bookingUrl}>
-                {bookingText.reserve}
+              <a class="tours-section__card-cta" href={plannerUrl}>
+                {bookingText.cards}
                 <Icon name="ArrowUpRight" size={14} />
               </a>
             </div>
@@ -544,6 +608,17 @@ const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
     </div>
   </div>
 </section>
+
+<script>
+  document.querySelectorAll('[data-tour-campy]').forEach((button) => {
+    if (!(button instanceof HTMLButtonElement)) return;
+    button.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('campy:prompt', {
+        detail: { prompt: `Opowiedz mi o: ${button.dataset.tourCampy ?? ''}` },
+      }));
+    });
+  });
+</script>
 
 <style>
 .tours-section {
@@ -586,6 +661,19 @@ html[data-theme="dark"] .tours-section {
   width: min(34vw, 460px);
   aspect-ratio: 1;
   background: rgba(242,192,120,.15);
+}
+
+.tours-section__featured-actions,
+.tours-section__booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tours-section__planner-cta {
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
 }
 
 .tours-section__container {
@@ -881,6 +969,29 @@ html[data-theme="dark"] .tours-section__booking-chips span {
   margin-top: 4px;
 }
 
+.tours-section__booking-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tours-section__planner-cta {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 1px solid rgba(60,179,113,.28);
+  border-radius: 999px;
+  color: var(--color-accent, #3CB371);
+  background: rgba(60,179,113,.09);
+  font-size: .86rem;
+  font-weight: 950;
+}
+
 .tours-section__cards {
   grid-area: cards;
   display: grid;
@@ -1138,7 +1249,8 @@ html[data-theme="dark"] .tours-section__benefit h4 {
   }
 
   .tours-section__booking-cta,
-  .tours-section__book-link {
+  .tours-section__book-link,
+  .tours-section__planner-cta {
     width: 100%;
     justify-content: center;
   }

@@ -816,6 +816,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const modeChips = config.modeChips;
     const stepHints = t.progressHints;
     const stepRewards = ui.stepRewards || {};
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const today = new Date();
     today.setHours(12, 0, 0, 0);
     const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -1599,9 +1600,11 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const yesLabel = () => config.lang === 'pl' ? 'Tak' : 'Yes';
 
+    const scrollBehavior = () => reducedMotion.matches ? 'auto' : 'smooth';
+
     const scrollToTop = () => {
       const top = Math.max(0, root.getBoundingClientRect().top + window.scrollY - 92);
-      window.scrollTo({ top, behavior: 'smooth' });
+      window.scrollTo({ top, behavior: scrollBehavior() });
     };
 
     const modeTitle = () => state.mode === 'simple' ? ui.simple.title : t.modes[state.mode]?.[0];
@@ -2868,7 +2871,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const scrollFirstIssue = () => {
       const issue = mount.querySelector('.reservation-field.is-invalid, .reservation-option-row.is-invalid, .reservation-missing-card');
       if (issue instanceof HTMLElement) {
-        issue.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        issue.scrollIntoView({ behavior: scrollBehavior(), block: 'center' });
       }
     };
 
@@ -3102,6 +3105,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           state.step = next;
           state.hint = '';
           render({ motion: 'step' });
+          scrollToTop();
         }
         return;
       }
@@ -3158,6 +3162,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         event.preventDefault();
         if (!validateBeforeNext()) {
           render();
+          window.setTimeout(scrollFirstIssue, 50);
           return;
         }
         const previousStepKey = currentStepKey();

@@ -1,6 +1,7 @@
 ---
 import { publicAssetExists, siteAssets } from '@/data/assets';
 import { sectionImages, type SectionImageCategory } from '@/data/imageRegistry';
+import { attractionImages } from '@/data/attractionsImageRegistry';
 import Icon from '@/components/ui/Icon.astro';
 import { getLocalizedPath } from '@/utils/localizedLinks';
 import { getTranslations, resolveContentLanguage } from '@/i18n/config';
@@ -210,6 +211,32 @@ const galleryTextByLanguage = {
 };
 
 const galleryText = galleryTextByLanguage[contentLanguage];
+const recreationGalleryCopy = {
+  pl: [
+    ['Park Wodny Kraków', 'Rodzinna strefa wodna w Krakowie'],
+    ['Zalew Bagry', 'Plaża i rekreacja nad Zalewem Bagry'],
+    ['Kryspinów', 'Plaża i kąpielisko nad Zalewem Kryspinowskim'],
+  ],
+  en: [
+    ['Krakow Water Park', 'Family water attraction in Krakow'],
+    ['Bagry Reservoir', 'Beach and recreation at Bagry Reservoir'],
+    ['Kryspinow', 'Beach and bathing area at Kryspinow Reservoir'],
+  ],
+  de: [
+    ['Wasserpark Krakau', 'Familien-Wasserattraktion in Krakau'],
+    ['Bagry-Stausee', 'Strand und Erholung am Bagry-Stausee'],
+    ['Kryspinów', 'Strand und Badestelle am Kryspinów-Stausee'],
+  ],
+  it: [
+    ['Parco Acquatico di Cracovia', 'Attrazione acquatica per famiglie a Cracovia'],
+    ['Lago Bagry', 'Spiaggia e relax sul Lago Bagry'],
+    ['Kryspinów', 'Spiaggia e zona balneare sul Lago Kryspinów'],
+  ],
+}[contentLanguage] ?? [
+  ['Krakow Water Park', 'Family water attraction in Krakow'],
+  ['Bagry Reservoir', 'Beach and recreation at Bagry Reservoir'],
+  ['Kryspinow', 'Beach and bathing area at Kryspinow Reservoir'],
+];
 
 const categories: Array<{ id: 'all' | GalleryCategory; label: string }> = [
   { id: 'all', label: galleryText.category.all },
@@ -274,6 +301,27 @@ const galleryItems: GalleryItem[] = [
     alt: galleryText.items[17][1],
     size: 'wide',
   },
+  {
+    title: recreationGalleryCopy[0][0],
+    category: 'krakow',
+    image: attractionImages.waterPark.src,
+    alt: recreationGalleryCopy[0][1],
+    size: 'standard',
+  },
+  {
+    title: recreationGalleryCopy[1][0],
+    category: 'krakow',
+    image: attractionImages.bagry.src,
+    alt: recreationGalleryCopy[1][1],
+    size: 'wide',
+  },
+  {
+    title: recreationGalleryCopy[2][0],
+    category: 'krakow',
+    image: attractionImages.kryspinow.src,
+    alt: recreationGalleryCopy[2][1],
+    size: 'standard',
+  },
 ];
 
 const resolvedGalleryItems = galleryItems.map((item) => ({
@@ -325,7 +373,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
           aria-label={`${galleryText.openPhoto}: ${item.title}`}
         >
           {item.imageExists ? (
-            <img src={item.image} alt={item.alt} loading="lazy" decoding="async" />
+            <img src={item.image} alt={item.alt} loading="lazy" decoding="async" draggable="false" />
           ) : (
             <span class="gallery-card__mood" aria-hidden="true">
               <span class="gallery-card__mood-light"></span>
@@ -409,6 +457,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
     const closeButtons = Array.from(galleryRoot.querySelectorAll('[data-gallery-close]')) as HTMLElement[];
     const prevButton = galleryRoot.querySelector('[data-gallery-prev]') as HTMLButtonElement | null;
     const nextButton = galleryRoot.querySelector('[data-gallery-next]') as HTMLButtonElement | null;
+    if (lightbox) document.body.append(lightbox);
     let activeFilter = 'all';
     let activeIndex = 0;
     let lastFocused: HTMLElement | null = null;
@@ -454,9 +503,12 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
       media.innerHTML = '';
       if (image) {
         const img = document.createElement('img');
+        img.className = 'gallery-lightbox__image';
         img.src = image;
         img.alt = imageAlt;
         img.decoding = 'async';
+        img.draggable = false;
+        img.dataset.protectedImage = '';
         media.append(img);
       } else {
         const fallback = document.createElement('div');
@@ -487,7 +539,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
       lightbox.setAttribute('aria-hidden', 'false');
       lightbox.classList.add('is-open');
       renderLightbox();
-      window.setTimeout(() => (galleryRoot.querySelector('[data-gallery-close]') as HTMLButtonElement | null)?.focus(), 40);
+      window.setTimeout(() => (lightbox.querySelector('.gallery-lightbox__close') as HTMLButtonElement | null)?.focus(), 40);
     };
 
     const closeLightbox = () => {
@@ -516,6 +568,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 
     items.forEach((item) => {
       item.addEventListener('click', () => openLightbox(item));
+      item.addEventListener('contextmenu', (event) => event.preventDefault());
     });
 
     closeButtons.forEach((button) => {
@@ -546,6 +599,26 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
       if (event.key === 'Escape') closeLightbox();
       if (event.key === 'ArrowLeft') moveLightbox(-1);
       if (event.key === 'ArrowRight') moveLightbox(1);
+      if (event.key === 'Tab') {
+        const focusable = Array.from(lightbox.querySelectorAll('button, a[href]'))
+          .filter((item): item is HTMLElement => item instanceof HTMLElement && !item.hasAttribute('disabled'));
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    });
+
+    lightbox?.addEventListener('contextmenu', (event) => {
+      if (event.target instanceof Element && event.target.closest('img, [data-gallery-media]')) {
+        event.preventDefault();
+      }
     });
   }
 </script>
@@ -821,6 +894,8 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   opacity: 0;
   visibility: hidden;
   transition: opacity .26s ease, visibility .26s ease;
+  overscroll-behavior: contain;
+  overflow-y: auto;
 }
 
 .gallery-lightbox.is-open {
@@ -845,10 +920,14 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: clamp(10px, 2vw, 18px);
   align-items: center;
+  max-height: calc(100dvh - 36px);
 }
 
 .gallery-lightbox__figure {
   margin: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  max-height: calc(100dvh - 36px);
   overflow: hidden;
   border-radius: 28px;
   border: 1px solid rgba(255,255,255,.14);
@@ -858,7 +937,9 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 
 .gallery-lightbox__media {
   width: 100%;
-  min-height: min(70vh, 680px);
+  min-height: 0;
+  height: min(70vh, 680px);
+  max-height: calc(100dvh - 148px);
   display: grid;
   place-items: center;
   background:
@@ -867,15 +948,17 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
     linear-gradient(135deg, #25412f, #0c1912);
 }
 
-.gallery-lightbox__media img {
+:global(.gallery-lightbox__media .gallery-lightbox__image) {
   width: 100%;
   height: 100%;
-  max-height: 70vh;
+  max-height: calc(100dvh - 148px);
   display: block;
   object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
-.gallery-lightbox__fallback {
+:global(.gallery-lightbox__fallback) {
   min-height: min(70vh, 680px);
   width: 100%;
   display: grid;
@@ -887,7 +970,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   text-align: center;
 }
 
-.gallery-lightbox__fallback span {
+:global(.gallery-lightbox__fallback span) {
   color: #8fe0b4;
   font-size: .78rem;
   font-weight: 950;
@@ -895,14 +978,14 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   text-transform: uppercase;
 }
 
-.gallery-lightbox__fallback strong {
+:global(.gallery-lightbox__fallback strong) {
   max-width: 680px;
   font-size: clamp(2rem, 6vw, 4.4rem);
   line-height: .98;
   font-weight: 950;
 }
 
-.gallery-lightbox__fallback p {
+:global(.gallery-lightbox__fallback p) {
   margin: 0;
   padding: 8px 13px;
   border: 1px solid rgba(143,224,180,.24);
@@ -913,7 +996,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   font-weight: 900;
 }
 
-.gallery-lightbox__fallback small {
+:global(.gallery-lightbox__fallback small) {
   max-width: 620px;
   color: rgba(255,255,255,.72);
   font-size: 1rem;
@@ -1118,7 +1201,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
     max-height: 80dvh;
   }
 
-  .gallery-lightbox__media img {
+  :global(.gallery-lightbox__media .gallery-lightbox__image) {
     width: auto;
     height: auto;
     max-width: calc(100vw - 24px);
