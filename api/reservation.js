@@ -1,4 +1,9 @@
-import { inboxError, inboxErrorStatus, saveReservationInquiry, updateReservationMailStatus } from './_lib/inbox.js';
+import {
+  logInboxError,
+  saveReservationInquiry,
+  serializeInboxError,
+  updateReservationMailStatus,
+} from './_lib/inbox.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 const MAX_BODY = 32_000;
@@ -727,34 +732,35 @@ const sendCustomerConfirmation = async (message) => {
 };
 
 export default async function handler(req, res) {
-  if (req.method === 'OPTIONS') {
-    res.setHeader('allow', 'POST, OPTIONS');
-    return sendJson(res, 200, {
-      ok: true,
-      inquirySaved: false,
-      provider: 'none',
-      delivered: false,
-      error: null,
-      reason: 'Preflight response.',
-      inquiryId: null,
-    });
-  }
-
-  if (req.method !== 'POST') {
-    res.setHeader('allow', 'POST, OPTIONS');
-    return sendJson(res, 405, {
-      ok: false,
-      inquirySaved: false,
-      provider: 'none',
-      delivered: false,
-      error: 'METHOD_NOT_ALLOWED',
-      reason: 'Method not allowed.',
-      inquiryId: null,
-      message: 'Method not allowed.',
-    });
-  }
-
   try {
+    if (req.method === 'OPTIONS') {
+      res.setHeader('allow', 'POST, OPTIONS');
+      return sendJson(res, 200, {
+        ok: true,
+        inquirySaved: false,
+        provider: 'none',
+        delivered: false,
+        error: null,
+        reason: 'Preflight response.',
+        inquiryId: null,
+      });
+    }
+
+    if (req.method !== 'POST') {
+      res.setHeader('allow', 'POST, OPTIONS');
+      return sendJson(res, 405, {
+        ok: false,
+        inquirySaved: false,
+        provider: 'none',
+        delivered: false,
+        code: 'METHOD_NOT_ALLOWED',
+        error: 'METHOD_NOT_ALLOWED',
+        reason: 'Method not allowed.',
+        inquiryId: null,
+        message: 'Method not allowed.',
+      });
+    }
+
     const payload = await readPayload(req);
     const normalized = validate(payload);
 
@@ -777,14 +783,21 @@ export default async function handler(req, res) {
       saved = await saveReservationInquiry(createSupabaseRecord(inquiry, payload));
       inquiry.inquiryId = String(saved.id);
     } catch (error) {
-      const diagnostic = inboxError(error);
-      return sendJson(res, inboxErrorStatus(error), {
+      logInboxError('reservation-save', error);
+      const diagnostic = serializeInboxError(error);
+      return sendJson(res, diagnostic.status, {
         ok: false,
         inquirySaved: false,
         inquiryId: null,
         provider: 'none',
         delivered: false,
-        ...diagnostic,
+        code: diagnostic.payload.code,
+        error: diagnostic.payload.error,
+        reason: diagnostic.payload.error,
+        details: diagnostic.payload.details,
+        ...(diagnostic.payload.missing ? { missing: diagnostic.payload.missing } : {}),
+        ...(diagnostic.payload.valuePreview ? { valuePreview: diagnostic.payload.valuePreview } : {}),
+        ...(diagnostic.payload.supabaseStatus ? { supabaseStatus: diagnostic.payload.supabaseStatus } : {}),
       });
     }
 
@@ -814,11 +827,9 @@ export default async function handler(req, res) {
         mail_error: mailError,
       });
     } catch (error) {
-      inboxUpdateError = inboxError(error).reason;
-      console.error('[reservation-api] inbox-mail-status-update-error', {
-        inquiryId: inquiry.inquiryId,
-        error: error?.code || 'INBOX_UPDATE_ERROR',
-      });
+      const diagnostic = serializeInboxError(error);
+      inboxUpdateError = diagnostic.payload.error;
+      logInboxError('reservation-mail-status-update', error, { inquiryId: inquiry.inquiryId });
     }
     const mail = {
       reception,
@@ -906,12 +917,17 @@ export default async function handler(req, res) {
       ccSystemDraft: createCcSystemDraft(inquiry),
     });
   } catch (error) {
+    console.error('[reservation-api-unhandled]', {
+      code: error?.code || 'RESERVATION_ENDPOINT_FAILED',
+      error: error instanceof Error ? error.message : String(error),
+    });
     return sendJson(res, 500, {
       ok: false,
       inquirySaved: false,
       provider: 'none',
       delivered: false,
-      error: 'RESERVATION_ENDPOINT_FAILED',
+      code: 'RESERVATION_ENDPOINT_FAILED',
+      error: error instanceof Error ? error.message : 'Unknown reservation endpoint error.',
       inquiryId: null,
       mode: 'error',
       message: 'Reservation endpoint failed before accepting the enquiry.',

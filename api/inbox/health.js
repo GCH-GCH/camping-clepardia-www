@@ -1,6 +1,7 @@
 import {
   authorizeInboxRequest,
-  listReservationInquiries,
+  checkReservationInquiriesTable,
+  getInboxEnvHealth,
   logInboxError,
   serializeInboxError,
 } from '../_lib/inbox.js';
@@ -21,10 +22,28 @@ export default async function handler(req, res) {
     if (!authorizeInboxRequest(req)) {
       return sendJson(res, 401, { ok: false, code: 'UNAUTHORIZED' });
     }
-    const inquiries = await listReservationInquiries();
-    return sendJson(res, 200, { ok: true, inquiries });
+
+    const env = getInboxEnvHealth();
+    try {
+      const tableCheck = await checkReservationInquiriesTable();
+      return sendJson(res, 200, { ok: true, env, tableCheck });
+    } catch (error) {
+      logInboxError('inbox-health-table', error);
+      const diagnostic = serializeInboxError(error);
+      return sendJson(res, diagnostic.status, {
+        ok: false,
+        env,
+        tableCheck: {
+          ok: false,
+          status: diagnostic.payload.supabaseStatus ?? null,
+          error: diagnostic.payload.error,
+        },
+        code: diagnostic.payload.code,
+        details: diagnostic.payload.details,
+      });
+    }
   } catch (error) {
-    logInboxError('inbox-list', error, { method: req.method || '' });
+    logInboxError('inbox-health', error);
     const diagnostic = serializeInboxError(error);
     return sendJson(res, diagnostic.status, diagnostic.payload);
   }

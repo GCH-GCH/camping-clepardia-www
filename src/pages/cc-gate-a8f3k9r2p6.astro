@@ -121,7 +121,7 @@ const title = 'Panel recepcji Camping Clepardia';
           });
           const result = await response.json().catch(() => ({}));
           if (!response.ok || !result.ok) {
-            const error = new Error(result.reason || result.error || 'Błąd panelu.');
+            const error = new Error(result.reason || result.error || result.details || result.code || 'Błąd panelu.');
             error.status = response.status;
             throw error;
           }

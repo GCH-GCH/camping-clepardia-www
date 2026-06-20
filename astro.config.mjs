@@ -38,11 +38,41 @@ const reservationApiDevPlugin = () => {
       }
       if (!authorized(req)) {
         res.statusCode = 401;
-        res.end(JSON.stringify({ ok: false, error: 'UNAUTHORIZED', reason: 'Nieprawidłowy kod dostępu.' }));
+        res.end(JSON.stringify({ ok: false, code: 'UNAUTHORIZED' }));
         return;
       }
       res.statusCode = 200;
       res.end(JSON.stringify({ ok: true, inquiries: mockInquiries }));
+    });
+
+    server.middlewares.use('/api/inbox/health', (req, res) => {
+      res.setHeader('content-type', 'application/json; charset=utf-8');
+      res.setHeader('cache-control', 'no-store');
+      if (req.method !== 'GET') {
+        res.statusCode = 405;
+        res.end(JSON.stringify({ ok: false, code: 'METHOD_NOT_ALLOWED' }));
+        return;
+      }
+      if (!authorized(req)) {
+        res.statusCode = 401;
+        res.end(JSON.stringify({ ok: false, code: 'UNAUTHORIZED' }));
+        return;
+      }
+      let supabaseHost = '';
+      try {
+        supabaseHost = process.env.SUPABASE_URL ? new URL(process.env.SUPABASE_URL).hostname : '';
+      } catch {}
+      res.statusCode = 200;
+      res.end(JSON.stringify({
+        ok: true,
+        env: {
+          supabaseUrlPresent: Boolean(String(process.env.SUPABASE_URL || '').trim()),
+          serviceRolePresent: Boolean(String(process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim()),
+          inboxCodePresent: Boolean(String(process.env.CC_INBOX_ACCESS_CODE || '').trim()),
+          supabaseHost,
+        },
+        tableCheck: { ok: true, status: 200, error: null },
+      }));
     });
 
     server.middlewares.use('/api/inbox/update', async (req, res) => {
@@ -55,7 +85,7 @@ const reservationApiDevPlugin = () => {
       }
       if (!authorized(req)) {
         res.statusCode = 401;
-        res.end(JSON.stringify({ ok: false, error: 'UNAUTHORIZED', reason: 'Nieprawidłowy kod dostępu.' }));
+        res.end(JSON.stringify({ ok: false, code: 'UNAUTHORIZED' }));
         return;
       }
       try {
