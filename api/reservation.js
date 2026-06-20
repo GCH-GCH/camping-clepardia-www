@@ -1,4 +1,4 @@
-import { inboxError, saveReservationInquiry, updateReservationMailStatus } from './_lib/inbox.js';
+import { inboxError, inboxErrorStatus, saveReservationInquiry, updateReservationMailStatus } from './_lib/inbox.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 const MAX_BODY = 32_000;
@@ -778,7 +778,7 @@ export default async function handler(req, res) {
       inquiry.inquiryId = String(saved.id);
     } catch (error) {
       const diagnostic = inboxError(error);
-      return sendJson(res, error?.code === 'SUPABASE_NOT_CONFIGURED' ? 503 : 502, {
+      return sendJson(res, inboxErrorStatus(error), {
         ok: false,
         inquirySaved: false,
         inquiryId: null,

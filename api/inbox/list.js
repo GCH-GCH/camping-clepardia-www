@@ -1,4 +1,4 @@
-import { authorizeInboxRequest, inboxError, listReservationInquiries } from '../_lib/inbox.js';
+import { authorizeInboxRequest, inboxError, inboxErrorStatus, listReservationInquiries } from '../_lib/inbox.js';
 
 const sendJson = (res, status, payload) => {
   res.status(status);
@@ -19,10 +19,9 @@ export default async function handler(req, res) {
     const inquiries = await listReservationInquiries();
     return sendJson(res, 200, { ok: true, inquiries: Array.isArray(inquiries) ? inquiries : [] });
   } catch (error) {
-    return sendJson(res, error?.code === 'SUPABASE_NOT_CONFIGURED' ? 503 : 502, {
+    return sendJson(res, inboxErrorStatus(error), {
       ok: false,
       ...inboxError(error),
     });
   }
 }
-

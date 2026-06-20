@@ -13,6 +13,24 @@ const supabaseConfig = () => {
     error.code = 'SUPABASE_NOT_CONFIGURED';
     throw error;
   }
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    const error = new Error('SUPABASE_URL ma nieprawidłową wartość. Wklej pełny Project URL z Supabase, np. https://project-ref.supabase.co.');
+    error.code = 'SUPABASE_URL_INVALID';
+    throw error;
+  }
+  if (parsedUrl.protocol !== 'https:' || !parsedUrl.hostname.includes('supabase')) {
+    const error = new Error('SUPABASE_URL nie wygląda jak Project URL Supabase.');
+    error.code = 'SUPABASE_URL_INVALID';
+    throw error;
+  }
+  if (/^(service.role.key|your.|project.|supabase.)/i.test(key.replace(/[_-]+/g, '.')) || key.length < 20) {
+    const error = new Error('SUPABASE_SERVICE_ROLE_KEY ma wartość zastępczą albo jest nieprawidłowy.');
+    error.code = 'SUPABASE_SERVICE_ROLE_KEY_INVALID';
+    throw error;
+  }
   return { url, key };
 };
 
@@ -97,3 +115,7 @@ export const inboxError = (error) => ({
   reason: error instanceof Error ? error.message : 'Nieznany błąd inboxu.',
 });
 
+export const inboxErrorStatus = (error) =>
+  ['SUPABASE_NOT_CONFIGURED', 'SUPABASE_URL_INVALID', 'SUPABASE_SERVICE_ROLE_KEY_INVALID'].includes(error?.code)
+    ? 503
+    : 502;

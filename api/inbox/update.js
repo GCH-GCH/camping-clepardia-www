@@ -1,4 +1,4 @@
-import { authorizeInboxRequest, inboxError, updateReservationInquiry } from '../_lib/inbox.js';
+import { authorizeInboxRequest, inboxError, inboxErrorStatus, updateReservationInquiry } from '../_lib/inbox.js';
 
 const ALLOWED_STATUSES = new Set(['new', 'needs_reply', 'replied', 'confirmed', 'rejected', 'spam', 'archived']);
 
@@ -30,10 +30,9 @@ export default async function handler(req, res) {
     if (!inquiry) return sendJson(res, 404, { ok: false, error: 'NOT_FOUND', reason: 'Nie znaleziono zapytania.' });
     return sendJson(res, 200, { ok: true, inquiry });
   } catch (error) {
-    return sendJson(res, error?.code === 'SUPABASE_NOT_CONFIGURED' ? 503 : 502, {
+    return sendJson(res, inboxErrorStatus(error), {
       ok: false,
       ...inboxError(error),
     });
   }
 }
-
