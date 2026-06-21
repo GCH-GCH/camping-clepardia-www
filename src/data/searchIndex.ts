@@ -1,6 +1,7 @@
 import { getActiveSiteNotices, getNoticeCopy } from './siteNotices';
 import { currencyEstimateConfig, formatCurrencyEstimates, pricingConfig } from './pricing';
 import { attractionImages } from './attractionsImageRegistry';
+import { tourBookingHref } from '@/i18n/coreUi';
 
 export interface SearchIndexEntry {
   id: string;
@@ -22,6 +23,16 @@ const addonPrice = (id: string) => pricingConfig.addons.find((entry) => entry.id
 const camperExample = pricingConfig.people.adults.price * 2 + stayPrice('camper') + addonPrice('electricity');
 
 export const baseSearchIndex: SearchIndexEntry[] = [
+  {
+    id: 'tour-booking',
+    title: 'Sprawdź i zarezerwuj wycieczkę',
+    description: 'Aktualne warianty wycieczek do Wieliczki, Auschwitz-Birkenau, Zakopanego, Ojcowa i Energylandii.',
+    href: tourBookingHref,
+    category: 'Wycieczki',
+    badge: 'Sprawdź dostępność',
+    icon: 'TicketCheck',
+    keywords: ['wycieczka', 'wycieczki', 'tour', 'wieliczka', 'auschwitz', 'zakopane', 'ojców', 'energylandia', 'rezerwacja wycieczki'],
+  },
   {
     id: 'booking',
     title: 'Rezerwacja pobytu',

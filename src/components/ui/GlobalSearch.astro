@@ -1,61 +1,20 @@
 ---
 import Icon from '@/components/ui/Icon.astro';
 import { getSearchIndex } from '@/data/searchIndex';
+import { getCoreUi } from '@/i18n/coreUi';
 import { getPathContext } from '@/utils/localizedLinks';
 
 const pathContext = getPathContext(Astro.url.pathname);
 const entries = getSearchIndex(pathContext.languageCode);
-const searchCopyByLanguage = {
-  pl: {
-    dialog: 'Wyszukiwarka strony',
-    label: 'Szukaj na stronie',
-    placeholder: 'Szukaj: prąd, pies, tramwaj, Google Maps...',
-    close: 'Zamknij wyszukiwarkę',
-    heading: 'Wyszukiwarka Camping Clepardia',
-    empty: 'Wpisz np. prąd, pies, tramwaj, dokument, Wieliczka, Kazimierz...',
-    noResultsHeading: 'Brak dokładnego wyniku',
-    noResults: 'Nie znaleziono wyniku. Spróbuj: cennik, dojazd, pies, tramwaj.',
-    loading: 'Szukam...',
-    hints: ['prąd', 'pies', 'tramwaj', 'Google Maps', 'dokument', 'Wieliczka', 'Auschwitz', 'sezon', 'ręczniki', 'po 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Park Wodny'],
-  },
-  en: {
-    dialog: 'Site search',
-    label: 'Search the site',
-    placeholder: 'Search: electricity, dog, tram, Google Maps...',
-    close: 'Close search',
-    heading: 'Camping Clepardia search',
-    empty: 'Try electricity, dog, tram, document, Wieliczka or Kazimierz...',
-    noResultsHeading: 'No exact result',
-    noResults: 'No result found. Try: prices, directions, dog or tram.',
-    loading: 'Searching...',
-    hints: ['electricity', 'dog', 'tram', 'Google Maps', 'document', 'Wieliczka', 'Auschwitz', 'season', 'towels', 'after 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Water Park'],
-  },
-  de: {
-    dialog: 'Seitensuche',
-    label: 'Website durchsuchen',
-    placeholder: 'Suchen: Strom, Hund, Straßenbahn, Google Maps...',
-    close: 'Suche schließen',
-    heading: 'Camping-Clepardia-Suche',
-    empty: 'Versuche Strom, Hund, Straßenbahn, Dokument, Wieliczka oder Kazimierz...',
-    noResultsHeading: 'Kein genauer Treffer',
-    noResults: 'Kein Ergebnis. Versuche: Preise, Anfahrt, Hund oder Straßenbahn.',
-    loading: 'Suche...',
-    hints: ['Strom', 'Hund', 'Straßenbahn', 'Google Maps', 'Dokument', 'Wieliczka', 'Auschwitz', 'Saison', 'Handtücher', 'nach 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Wasserpark'],
-  },
-  it: {
-    dialog: 'Ricerca nel sito',
-    label: 'Cerca nel sito',
-    placeholder: 'Cerca: elettricità, cane, tram, Google Maps...',
-    close: 'Chiudi ricerca',
-    heading: 'Ricerca Camping Clepardia',
-    empty: 'Prova elettricità, cane, tram, documento, Wieliczka o Kazimierz...',
-    noResultsHeading: 'Nessun risultato esatto',
-    noResults: 'Nessun risultato. Prova: prezzi, indicazioni, cane o tram.',
-    loading: 'Ricerca...',
-    hints: ['elettricità', 'cane', 'tram', 'Google Maps', 'documento', 'Wieliczka', 'Auschwitz', 'stagione', 'asciugamani', 'dopo le 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Parco acquatico'],
-  },
+const [dialog, label, placeholder, close, heading, empty, noResultsHeading, noResults, loading] = getCoreUi(pathContext.languageCode).search;
+const localizedHints = {
+  pl: ['prąd', 'pies', 'tramwaj', 'Google Maps', 'dokument', 'Wieliczka', 'Auschwitz', 'sezon', 'ręczniki', 'po 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Park Wodny'],
+  de: ['Strom', 'Hund', 'Straßenbahn', 'Google Maps', 'Dokument', 'Wieliczka', 'Auschwitz', 'Saison', 'Handtücher', 'nach 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Wasserpark'],
+  it: ['elettricità', 'cane', 'tram', 'Google Maps', 'documento', 'Wieliczka', 'Auschwitz', 'stagione', 'asciugamani', 'dopo le 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Parco acquatico'],
 } as const;
-const searchCopy = searchCopyByLanguage[pathContext.languageCode as keyof typeof searchCopyByLanguage] ?? searchCopyByLanguage.en;
+const hints = localizedHints[pathContext.languageCode as keyof typeof localizedHints]
+  ?? ['electricity', 'dog', 'tram', 'Google Maps', 'document', 'Wieliczka', 'Auschwitz', 'season', 'towels', 'after 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Water Park'];
+const searchCopy = { dialog, label, placeholder, close, heading, empty, noResultsHeading, noResults, loading, hints };
 const searchConfig = {
   entries,
   ...searchCopy,
@@ -157,7 +116,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
       }
 
       results.innerHTML = matches.map((entry) => `
-        <a class="global-search__result" href="${entry.href}">
+        <a class="global-search__result" href="${entry.href}" ${/^https?:\/\//.test(entry.href) ? 'target="_blank" rel="noopener noreferrer"' : ''}>
           <span class="global-search__result-icon" aria-hidden="true">${resultIcon(entry)}</span>
           <span>
             <small>${entry.category}${entry.badge ? ` · ${entry.badge}` : ''}</small>
@@ -191,7 +150,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
       document.body.classList.add('has-global-search-open');
       queueRender(input instanceof HTMLInputElement ? input.value : '');
       window.requestAnimationFrame(() => {
-        root.classList.add('is-open');
+        window.requestAnimationFrame(() => root.classList.add('is-open'));
         window.setTimeout(() => input instanceof HTMLInputElement && input.focus({ preventScroll: true }), 90);
       });
     };
@@ -206,7 +165,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
         root.hidden = true;
         root.classList.remove('is-closing');
         lastFocused?.focus?.({ preventScroll: true });
-      }, 260);
+      }, 380);
     };
 
     openButtons.forEach((button) => button.addEventListener('click', open));
@@ -259,7 +218,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity .26s ease, visibility .26s ease;
+  transition: opacity .38s cubic-bezier(.22, 1, .36, 1), visibility .38s ease;
   font-family: inherit;
 }
 
@@ -273,13 +232,14 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
   position: absolute;
   inset: 0;
   background: rgba(4, 15, 10, .66);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(0);
   opacity: 0;
-  transition: opacity .26s ease;
+  transition: opacity .4s cubic-bezier(.22, 1, .36, 1), backdrop-filter .4s cubic-bezier(.22, 1, .36, 1);
 }
 
 .global-search.is-open .global-search__backdrop {
   opacity: 1;
+  backdrop-filter: blur(12px);
 }
 
 .global-search__panel {
@@ -298,16 +258,27 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
     rgba(11, 29, 20, .96);
   box-shadow: 0 34px 120px rgba(0,0,0,.46), 0 0 54px rgba(60,179,113,.16);
   opacity: 0;
-  transform: translateY(-16px) scale(.975);
+  filter: blur(7px);
+  transform: translateY(-30px) scale(.96);
   transform-origin: top center;
   transition:
-    opacity .28s cubic-bezier(.22, 1, .36, 1),
-    transform .28s cubic-bezier(.22, 1, .36, 1);
+    opacity .42s cubic-bezier(.22, 1, .36, 1),
+    transform .42s cubic-bezier(.22, 1, .36, 1),
+    filter .34s ease,
+    box-shadow .42s ease;
 }
 
 .global-search.is-open .global-search__panel {
   opacity: 1;
+  filter: blur(0);
   transform: translateY(0) scale(1);
+  box-shadow: 0 40px 130px rgba(0,0,0,.50), 0 0 70px rgba(60,179,113,.22);
+}
+
+.global-search.is-closing .global-search__panel {
+  opacity: 0;
+  filter: blur(3px);
+  transform: translateY(-10px) scale(.98);
 }
 
 .global-search__header {
@@ -373,16 +344,19 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
   font-size: .8rem;
   font-weight: 900;
   opacity: 0;
-  transform: translateY(8px);
+  filter: blur(3px);
+  transform: translateY(10px) scale(.96);
   transition:
     opacity .24s ease,
     transform .24s ease,
+    filter .24s ease,
     background .2s ease,
     color .2s ease;
 }
 
 .global-search.is-open .global-search__hints button {
   opacity: 1;
+  filter: blur(0);
   transform: translateY(0);
 }
 
@@ -408,7 +382,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
 
 .global-search.is-open .global-search__result,
 .global-search.is-open .global-search__empty {
-  animation: globalSearchResultIn .28s cubic-bezier(.22, 1, .36, 1) both;
+  animation: globalSearchResultIn .38s cubic-bezier(.22, 1, .36, 1) both;
 }
 
 .global-search.is-open .global-search__result:nth-child(2) { animation-delay: 35ms; }
@@ -579,8 +553,8 @@ html[data-theme="light"] .global-search__loading {
 }
 
 @keyframes globalSearchResultIn {
-  from { opacity: 0; transform: translateY(8px) scale(.985); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; filter: blur(4px); transform: translateY(12px) scale(.975); }
+  to { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
 }
 
 @keyframes globalSearchSpin {
@@ -607,7 +581,7 @@ body.has-global-search-open {
     width: 100%;
     max-height: min(84dvh, 720px);
     border-radius: 26px 26px 18px 18px;
-    transform: translateY(24px) scale(.99);
+    transform: translateY(42px) scale(.97);
   }
 }
 
@@ -618,6 +592,12 @@ body.has-global-search-open {
   .global-search__hints button {
     transition-duration: .01ms !important;
     transition-delay: 0ms !important;
+  }
+
+  .global-search__result,
+  .global-search__empty,
+  .global-search__loading {
+    animation: none !important;
   }
 }
 </style>

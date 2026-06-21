@@ -1,6 +1,7 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
 import Icon from '@/components/ui/Icon.astro';
+import { getCoreUi, tourBookingHref } from '@/i18n/coreUi';
 import { siteAssets } from '@/data/assets';
 import { resolveContentLanguage } from '@/i18n/config';
 import { getLocalizedPath, getPathContext, getPlannerLocalizedPath } from '@/utils/localizedLinks';
@@ -454,6 +455,7 @@ const neutralBookingText = {
   },
 };
 const bookingText = neutralBookingText[lang] ?? neutralBookingText.en;
+const tourUi = getCoreUi(activeLanguage).tour;
 const bookingChips = bookingText.chips;
 const featuredTour = copy.tours.find((tour) => tour.featured) ?? copy.tours[0];
 const secondaryTours = copy.tours.filter((tour) => tour !== featuredTour);
@@ -500,9 +502,9 @@ const featuredRouteUrl = 'https://www.google.com/maps/search/?api=1&query=Auschw
             </div>
           </dl>
           <div class="tours-section__featured-actions">
-            <a class="btn btn-primary tours-section__book-link tours-section__book-link--featured" href={contactUrl}>
+            <a class="btn btn-primary tours-section__book-link tours-section__book-link--featured" href={tourBookingHref} target="_blank" rel="noopener noreferrer">
               <Icon name="CalendarCheck" size={18} />
-              {bookingText.reserve}
+              {tourUi[1]}
               <Icon name="ArrowUpRight" size={16} />
             </a>
             <a class="tours-section__planner-cta" href={plannerUrl}>
@@ -541,9 +543,9 @@ const featuredRouteUrl = 'https://www.google.com/maps/search/?api=1&query=Auschw
           ))}
         </div>
         <div class="tours-section__booking-actions">
-        <a class="btn btn-primary tours-section__booking-cta" href={contactUrl}>
+        <a class="btn btn-primary tours-section__booking-cta" href={tourBookingHref} target="_blank" rel="noopener noreferrer">
           <Icon name="MessageCircle" size={18} />
-          {bookingText.reserve}
+          {tourUi[0]}
           <Icon name="ArrowUpRight" size={16} />
         </a>
         <a class="tours-section__planner-cta" href={plannerUrl}>

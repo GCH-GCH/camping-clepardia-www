@@ -27,6 +27,12 @@ export const bookingSlugByLanguage: Partial<Record<LanguageCode, string>> = {
   en: 'booking',
   de: 'buchung',
   it: 'prenotazione',
+  fr: 'booking',
+  es: 'booking',
+  nl: 'booking',
+  cs: 'booking',
+  sk: 'booking',
+  sv: 'booking',
 };
 
 const bookingSlugSet = new Set(Object.values(bookingSlugByLanguage));

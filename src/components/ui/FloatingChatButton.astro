@@ -1,5 +1,6 @@
 ---
 import { getTranslations } from '@/i18n/config';
+import { getCoreUi, tourBookingHref } from '@/i18n/coreUi';
 import { getBookingLocalizedPath, getLocalizedPath, getPathContext, isBookingSlug, isPlannerSlug } from '@/utils/localizedLinks';
 import Icon from '@/components/ui/Icon.astro';
 import { campyIcon, publicAssetExists } from '@/data/assets';
@@ -10,6 +11,7 @@ import { getSearchIndex } from '@/data/searchIndex';
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(pathContext.languageCode);
 const chatTexts = t.chat;
+const coreCopy = getCoreUi(pathContext.languageCode);
 const hasCampyIcon = publicAssetExists(campyIcon);
 const campyIconSrc = `${campyIcon}?v=task103`;
 const activeNoticeCopy = getHomepageSiteNotices()
@@ -200,7 +202,8 @@ const finalCampyCopy = {
       sctEtoll: 'Przed przyjazdem sprawdź aktualne zasady SCT w Krakowie oraz e-TOLL, szczególnie przy większym pojeździe lub zestawie. Przepisy mogą się zmieniać, więc najlepiej korzystać z oficjalnych stron.',
       maps: 'Zalecamy Google Maps, ponieważ dojazd do campingu zmienił się w 2022 roku i starsze nawigacje mogą prowadzić nieprawidłowo.',
       reception: 'Recepcja: +48 795 294 486, email: clepardia@gmail.com. W sprawie pobytu możesz też przejść do kontaktu albo rezerwacji.',
-      receptionHours: 'Godziny recepcji najlepiej potwierdzić bezpośrednio przed przyjazdem. Telefon: +48 795 294 486, email: clepardia@gmail.com.',
+      receptionHours: 'Recepcja jest czynna od 9:00 do 21:00. Brama jest otwarta od 8:00 do 22:00. Przy przyjeździe po 21:00 skontaktuj się wcześniej z recepcją.',
+      gateHours: 'Recepcja jest czynna od 9:00 do 21:00, a brama od 8:00 do 22:00. Przy przyjeździe po 21:00 skontaktuj się wcześniej z recepcją.',
       cityCamping: 'Camping Clepardia znajduje się w Krakowie, dlatego jest świetną bazą blisko tramwaju, sklepów i atrakcji. To nie jest camping w lesie: czasem słychać tramwaje, samoloty i normalne miejskie życie. W zamian zyskujesz wygodny dojazd do centrum i zieloną przestrzeń jak na warunki miejskie.',
     },
     quick: {
@@ -284,7 +287,8 @@ const finalCampyCopy = {
       sctEtoll: 'Before arrival, check current Krakow SCT and e-TOLL rules, especially for larger vehicles or combinations. Use official sources because rules can change.',
       maps: 'We recommend Google Maps because access to the campsite changed in 2022 and older navigation can be wrong.',
       reception: 'Reception: +48 795 294 486, email: clepardia@gmail.com. You can also open contact or booking.',
-      receptionHours: 'Please confirm reception hours directly before arrival. Phone: +48 795 294 486, email: clepardia@gmail.com.',
+      receptionHours: 'Reception is open 09:00-21:00. The gate is open 08:00-22:00. Contact reception in advance for arrival after 21:00.',
+      gateHours: 'Reception is open 09:00-21:00 and the gate is open 08:00-22:00.',
       cityCamping: 'Camping Clepardia is a green city campsite in Krakow, close to trams, shops and attractions. It is not a remote woodland campsite, so you may sometimes hear trams, aircraft and normal city life.',
     },
     quick: {
@@ -301,35 +305,27 @@ const finalCampyCopy = {
   },
 };
 const finalCampy = finalCampyCopy[pathContext.languageCode as keyof typeof finalCampyCopy] ?? finalCampyCopy.en;
-const campyQuick = finalCampy.quick ?? finalCampyCopy.en.quick;
+const campyQuick = {
+  ...(finalCampy.quick ?? finalCampyCopy.en.quick),
+  toggle: coreCopy.quick[0],
+  groups: {
+    booking: coreCopy.quick[1],
+    prices: coreCopy.quick[2],
+    transport: coreCopy.quick[3],
+    attractions: coreCopy.quick[4],
+    contact: coreCopy.quick[5],
+  },
+};
 const pageKey = isBookingSlug(pathContext.slug)
   ? '/rezerwacja'
   : isPlannerSlug(pathContext.slug)
     ? '/planer-pobytu'
     : `/${pathContext.slug}`.replace(/\/+$/, '') || '/';
-const pageWelcomePl: Record<string, string> = {
-  '/': 'Cześć! Jestem CAMPY 👋 Mogę pomóc znaleźć cenę, dojazd, atrakcje albo przejść do rezerwacji.',
-  '/cennik': 'Jesteś w cenniku — mogę pomóc obliczyć orientacyjny koszt pobytu.',
-  '/rezerwacja': 'Jesteś w rezerwacji — pomogę przejść formularz i przypomnę o ważnych rzeczach.',
-  '/atrakcje': 'Jesteś w atrakcjach — mogę pomóc zaplanować Kraków, Kazimierz, Wieliczkę, Ojców albo wycieczkę.',
-  '/dojazd': 'Jesteś w dojeździe — najlepiej użyć Google Maps, bo trasa wjazdu zmieniła się w 2022 roku.',
-  '/kontakt': 'Jesteś w kontakcie — mogę podpowiedzieć, co przygotować przed przyjazdem.',
-  '/domki': 'Jesteś przy domkach — pamiętaj o własnych ręcznikach i rzeczach osobistych.',
-  '/camping': 'Jesteś na stronie campingu — mogę wyjaśnić prąd 10A, zasady pobytu i dojazd tramwajem.',
-  '/galeria': 'Jesteś w galerii — mogę pokazać, gdzie znajdziesz domki, camping i dojazd.',
-  '/faq': 'Jesteś w FAQ — mogę szybko odpowiedzieć o rezerwacji, ciszy nocnej, psie, prądzie i dokumentach.',
-  '/planer-pobytu': 'Jesteś w planerze — pomogę dobrać atrakcje do liczby nocy w Krakowie.',
-  '/aktualnosci': 'Jesteś w aktualnościach — sprawdzisz tu ważne informacje o sezonie, dojeździe i pobycie.',
-};
-const pageWelcome = pathContext.languageCode === 'pl'
-  ? (pageWelcomePl[pageKey] ?? pageWelcomePl['/'])
-  : (pageKey === '/'
-    ? 'Hi! I’m CAMPY 👋 I can help with prices, directions, attractions or booking.'
-    : 'I’m CAMPY 👋 Ask me about this page, your stay or practical arrival details.');
+const pageWelcome = coreCopy.welcome[pageKey as keyof typeof coreCopy.welcome] ?? coreCopy.welcome['/'];
 const enhancedChatTexts = {
   ...chatTexts,
   pageWelcome,
-  pageWelcomeKey: `${pathContext.languageCode}:${pageKey}`,
+  pageWelcomeKey: `${pathContext.explicitLanguage ?? 'root'}:${pathContext.languageCode}:${pageKey}`,
   mobileTitle: pathContext.languageCode === 'pl'
     ? 'CAMPY — pomocnik'
     : pathContext.languageCode === 'de'
@@ -360,11 +356,13 @@ const enhancedChatTexts = {
     jakdojade: jakdojadeHref,
     sct: sctHref,
     etoll: etollHref,
+    tours: tourBookingHref,
   },
   searchIndex: getSearchIndex(pathContext.languageCode),
+  tourLabels: coreCopy.tour,
 };
 const chatConfigEncoded = Buffer.from(JSON.stringify(enhancedChatTexts), 'utf8').toString('base64');
-const quickActionGroups = [
+const allQuickActionGroups = [
   {
     key: 'booking',
     icon: 'CalendarCheck',
@@ -434,6 +432,21 @@ const quickActionGroups = [
     ],
   },
 ];
+const contextualQuickKeys: Record<string, string[]> = {
+  '/cennik': ['camperPrice', 'bungalowOptions', 'powerDog', 'dog', 'currency'],
+  '/dojazd': ['maps', 'centerTransit', 'tramTickets', 'sctEtoll', 'receptionHours'],
+  '/atrakcje': ['twoNightPlan', 'wawel', 'wieliczka', 'auschwitz', 'waterRelax', 'toursFromKrakow'],
+  '/rezerwacja': ['bookStay', 'registration', 'receptionHours', 'bungalowOptions', 'toursFromKrakow'],
+  '/kontakt': ['reception', 'receptionHours', 'maps', 'bookStay'],
+  '/camping': ['powerDog', 'cityCamping', 'quiet', 'registration', 'sctEtoll'],
+  '/domki': ['bungalowOptions', 'receptionHours', 'bookStay', 'registration'],
+};
+const preferredQuickKeys = contextualQuickKeys[pageKey];
+const quickActionGroups = preferredQuickKeys
+  ? allQuickActionGroups
+      .map((group) => ({ ...group, actions: group.actions.filter((action) => preferredQuickKeys.includes(action.key)) }))
+      .filter((group) => group.actions.length)
+  : allQuickActionGroups;
 ---
 
 <div class="floating-chat" data-floating-chat>
@@ -745,6 +758,7 @@ const quickActionGroups = [
         combined: 'Razem',
         sct: 'SCT Kraków',
         etoll: 'e-TOLL',
+        tours: chatTexts.tourLabels?.[0] || 'Sprawdź wycieczki',
       };
 
       if (key === 'bookStay') return { text: answers.bookStay, actions: [{ label: actionLabels.booking, href: links.booking }] };
@@ -767,14 +781,14 @@ const quickActionGroups = [
       if (key === 'currentNotices') return { text: answers.currentNotices, actions: [{ label: actionLabels.directions, href: links.directions }, { label: actionLabels.booking, href: links.booking }] };
       if (key === 'familyAttractions') return { text: answers.familyAttractions };
       if (key === 'wawel') return { text: answers.wawel, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
-      if (key === 'wieliczka') return { text: answers.wieliczka, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
-      if (key === 'auschwitz') return { text: answers.auschwitz, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
+      if (key === 'wieliczka') return { text: answers.wieliczka, actions: [{ label: actionLabels.attractions, href: links.attractions }, { label: actionLabels.tours, href: links.tours, external: true }] };
+      if (key === 'auschwitz') return { text: answers.auschwitz, actions: [{ label: actionLabels.attractions, href: links.attractions }, { label: actionLabels.tours, href: links.tours, external: true }] };
       if (key === 'schindler') return { text: answers.schindler, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
       if (key === 'waterRelax') return { text: answers.waterRelax, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
       if (key === 'dog') return { text: answers.dog };
       if (key === 'bungalowOptions') return { text: answers.bungalowOptions, actions: [{ label: actionLabels.bungalow, href: links.bookingBungalow }] };
       if (key === 'combinedStay') return { text: answers.combinedStay, actions: [{ label: actionLabels.camping, href: links.bookingCamping }, { label: actionLabels.bungalow, href: links.bookingBungalow }, { label: actionLabels.combined, href: links.bookingCombined }] };
-      if (key === 'toursFromKrakow') return { text: answers.toursFromKrakow, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
+      if (key === 'toursFromKrakow') return { text: answers.toursFromKrakow, actions: [{ label: actionLabels.tours, href: links.tours, external: true }, { label: actionLabels.attractions, href: links.attractions }] };
       if (key === 'quiet') return { text: answers.quiet };
       if (key === 'sctEtoll') return { text: answers.sctEtoll, actions: [{ label: actionLabels.sct, href: links.sct }, { label: actionLabels.etoll, href: links.etoll }] };
       if (key === 'maps') return { text: answers.maps, actions: [{ label: actionLabels.maps, href: links.maps }] };
@@ -813,6 +827,38 @@ const quickActionGroups = [
       const prompt = rawPrompt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       const hasAny = (...parts) => parts.some((part) => prompt.includes(part));
 
+      if (hasAny('godziny recepcji', 'otwarta recepcja', 'czynna recepcja', 'reception hours', 'offnungszeiten rezeption', 'orari reception')) {
+        return {
+          text: chatTexts.answers.receptionHours,
+          actions: [{ label: 'Kontakt z recepcją', href: chatTexts.links?.contact }],
+        };
+      }
+
+      if (hasAny('do ktorej brama', 'do ktorej jest brama', 'godziny bramy', 'brama otwarta', 'gate hours', 'gate open')) {
+        return {
+          text: chatTexts.answers.gateHours || 'Recepcja jest czynna 9:00–21:00, a brama 8:00–22:00.',
+          actions: [{ label: 'Kontakt z recepcją', href: chatTexts.links?.contact }],
+        };
+      }
+
+      if (hasAny('wycieczk', 'tour', 'excursion') && hasAny('wielicz', 'auschwitz', 'zakop', 'ojcow', 'ojców', 'energy', 'zarezerw', 'sprawdz', 'check', 'book')) {
+        return {
+          text: 'Recepcja może pomóc w informacji o wycieczkach do Wieliczki, Auschwitz-Birkenau, Zakopanego, Ojcowa i Energylandii. Aktualne warianty oraz dostępność sprawdzisz przez bezpieczne CTA.',
+          actions: [{ label: chatTexts.tourLabels?.[0] || 'Sprawdź wycieczki', href: chatTexts.links?.tours, external: true }, { label: chatTexts.tourLabels?.[2] || 'Zapytaj recepcję', href: chatTexts.links?.contact }],
+        };
+      }
+
+      if (hasAny('najlepiej przyjechac', 'o ktorej przyjechac', 'pora przyjazdu') && hasAny('sezon', 'lipiec', 'sierpien', 'kamper', 'camping')) {
+        return {
+          text: 'W wysokim sezonie najlepiej przyjechać na camping około 12:00, ponieważ check-out z campingu jest do 12:00 i wtedy zwalniają się miejsca. W lipcu i sierpniu miejsca campingowe działają według kolejności przyjazdu.',
+          actions: [{ label: 'Kontakt z recepcją', href: chatTexts.links?.contact }, { label: 'Sprawdź dojazd', href: chatTexts.links?.directions }],
+        };
+      }
+
+      if (hasAny('2 dni', 'dwa dni', '2 noce', 'dwie noce', 'two days', 'two nights')) {
+        return actionResponse('twoNightPlan') ?? chatTexts.answers.twoNightPlan;
+      }
+
       if (hasAny('auto elektryczne', 'samochod elektryczny', 'ladowac auto', 'ladowanie auta', 'charge an electric', 'electric vehicle', 'ev charging')) {
         return {
           text: 'Prąd 10A na stanowiskach campingowych służy do wyposażenia kampera lub przyczepy i nie jest przeznaczony do ładowania samochodów elektrycznych. Zaplanuj ładowanie auta w publicznej stacji ładowania.',
@@ -844,7 +890,7 @@ const quickActionGroups = [
 
       if (hasAny('po 21', 'po21', '21:00', '21.00', 'pozny przyjazd', 'pozno przyjech', 'late arrival')) {
         return {
-          text: 'Przy przyjeździe po 21:00 trzeba wcześniej skontaktować się z recepcją. Recepcja i brama mają określone godziny pracy, dlatego najlepiej ustalić szczegóły późnego przyjazdu przed podróżą.',
+          text: 'Recepcja jest czynna 9:00–21:00, a brama 8:00–22:00. Przy przyjeździe po 21:00 trzeba wcześniej skontaktować się z recepcją i ustalić szczegóły przed podróżą.',
           actions: [{ label: 'Kontakt z recepcją', href: chatTexts.links?.contact }, { label: 'Wyślij zapytanie', href: chatTexts.links?.booking }],
         };
       }
@@ -1058,6 +1104,7 @@ const quickActionGroups = [
     if (welcome instanceof HTMLElement) {
       const welcomeCopy = getChatTexts();
       const welcomeKey = `campy-welcome:${welcomeCopy?.pageWelcomeKey || location.pathname}`;
+      const forceWelcome = new URLSearchParams(location.search).get('campyBubble') === '1';
       const hideWelcome = () => {
         welcome.hidden = true;
         root.classList.remove('has-welcome');
@@ -1074,7 +1121,7 @@ const quickActionGroups = [
         sessionStorage.setItem(welcomeKey, 'shown');
         welcomeTimer = window.setTimeout(hideWelcome, 6500);
       };
-      if (!sessionStorage.getItem(welcomeKey)) {
+      if (forceWelcome || !sessionStorage.getItem(welcomeKey)) {
         welcomeTimer = window.setTimeout(showWelcome, 1100);
       }
       welcomeClose?.addEventListener('click', hideWelcome);

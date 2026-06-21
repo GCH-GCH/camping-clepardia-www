@@ -5,8 +5,32 @@
   <span class="ambient-background__glow ambient-background__glow--soft"></span>
   <span class="ambient-background__particles ambient-background__particles--near"></span>
   <span class="ambient-background__particles ambient-background__particles--far"></span>
+  <span class="ambient-background__orb ambient-background__orb--1"></span>
+  <span class="ambient-background__orb ambient-background__orb--2"></span>
+  <span class="ambient-background__orb ambient-background__orb--3"></span>
+  <span class="ambient-background__orb ambient-background__orb--4"></span>
+  <span class="ambient-background__orb ambient-background__orb--5"></span>
+  <span class="ambient-background__orb ambient-background__orb--6"></span>
   <span class="ambient-background__grain"></span>
 </div>
+
+<script>
+  (() => {
+    const root = document.querySelector('.ambient-background');
+    if (!(root instanceof HTMLElement) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let queued = false;
+    const update = () => {
+      queued = false;
+      root.style.setProperty('--ambient-scroll', `${Math.min(80, scrollY * .025)}px`);
+    };
+    addEventListener('scroll', () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(update);
+    }, { passive: true });
+    update();
+  })();
+</script>
 
 <style is:global>
 .ambient-background {
@@ -94,6 +118,26 @@
   mask-image: radial-gradient(circle at 50% 22%, #000, transparent 74%);
 }
 
+.ambient-background__orb {
+  position: absolute;
+  width: var(--orb-size, 16px);
+  height: var(--orb-size, 16px);
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.22), rgba(60,179,113,.08) 48%, transparent 74%);
+  box-shadow: 0 0 24px rgba(60,179,113,.10);
+  opacity: var(--orb-opacity, .22);
+  transform: translate3d(0, var(--ambient-scroll, 0), 0);
+  animation: ambientOrb 22s ease-in-out infinite alternate;
+}
+
+.ambient-background__orb--1 { --orb-size: 12px; left: 8%; top: 19%; animation-delay: -4s; }
+.ambient-background__orb--2 { --orb-size: 28px; right: 12%; top: 14%; --orb-opacity: .16; animation-delay: -11s; animation-duration: 29s; }
+.ambient-background__orb--3 { --orb-size: 18px; left: 22%; top: 63%; animation-delay: -17s; animation-duration: 26s; }
+.ambient-background__orb--4 { --orb-size: 36px; right: 24%; top: 72%; --orb-opacity: .12; animation-delay: -8s; animation-duration: 34s; }
+.ambient-background__orb--5 { --orb-size: 9px; left: 62%; top: 38%; animation-delay: -14s; animation-duration: 18s; }
+.ambient-background__orb--6 { --orb-size: 20px; right: 5%; top: 48%; --orb-opacity: .14; animation-delay: -22s; animation-duration: 31s; }
+
 @keyframes ambientFloat {
   0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
   45% { transform: translate3d(24px, 18px, 0) scale(1.06); }
@@ -105,10 +149,22 @@
   100% { transform: translate3d(-120px, 80px, 0); }
 }
 
+@keyframes ambientOrb {
+  0% { translate: 0 0; scale: .92; }
+  50% { translate: 18px -22px; scale: 1.08; }
+  100% { translate: -14px 26px; scale: .98; }
+}
+
 html[data-theme="light"] .ambient-background {
   background:
     radial-gradient(circle at 50% -10%, rgba(60,179,113,.10), transparent 34%),
     var(--theme-body-background, var(--color-bg-primary));
+}
+
+html[data-theme="light"] .ambient-background__orb {
+  border-color: rgba(54,122,82,.12);
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.75), rgba(92,154,111,.08) 54%, transparent 76%);
+  box-shadow: 0 0 22px rgba(108,139,92,.08);
 }
 
 @media (max-width: 760px) {
@@ -129,12 +185,26 @@ html[data-theme="light"] .ambient-background {
     opacity: .15;
     background-size: 148px 148px, 190px 190px, 236px 236px;
   }
+
+  .ambient-background__orb:nth-of-type(n+10) {
+    display: none;
+  }
+
+  .ambient-background__orb {
+    animation-duration: 36s;
+    opacity: .12;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ambient-background__glow,
   .ambient-background__particles {
     animation: none !important;
+  }
+
+  .ambient-background__orb {
+    animation: none !important;
+    transform: none !important;
   }
 }
 </style>

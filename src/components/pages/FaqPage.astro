@@ -2,6 +2,7 @@
 import { pricingConfig } from '@/data/pricing';
 import { getLocalizedPath } from '@/utils/localizedLinks';
 import { getTranslations, resolveContentLanguage } from '@/i18n/config';
+import { getCoreUi, tourBookingHref } from '@/i18n/coreUi';
 
 interface Props {
   languageCode?: string;
@@ -31,6 +32,7 @@ const bungalow3 = findStayType('bungalow-3');
 const bungalow4 = findStayType('bungalow-4');
 const dog = findAddon('dog');
 const electricity = findAddon('electricity');
+const tourUi = getCoreUi(languageCode).tour;
 
 const faqTextByLanguage = {
   pl: {
@@ -333,6 +335,27 @@ const faqItems: FaqItem[] = [
   },
   {
     category: 'camping',
+    question: contentLanguage === 'pl' ? 'Czy można ładować auto elektryczne?' : 'Can I charge an electric car?',
+    answer: contentLanguage === 'pl'
+      ? 'Nie. Przyłącze campingowe 10A służy do wyposażenia kampera lub przyczepy i nie jest przeznaczone do ładowania EV ani hybryd plug-in.'
+      : 'No. The 10A campsite hook-up is for camper or caravan equipment and is not intended for EV or plug-in hybrid charging.',
+  },
+  {
+    category: 'arrival',
+    question: contentLanguage === 'pl' ? 'Czy można przyjechać po 21:00?' : 'Can I arrive after 21:00?',
+    answer: contentLanguage === 'pl'
+      ? 'Recepcja działa 9:00-21:00, a brama 8:00-22:00. Przy przyjeździe po 21:00 skontaktuj się wcześniej z recepcją.'
+      : 'Reception is open 09:00-21:00 and the gate 08:00-22:00. Contact reception in advance if you plan to arrive after 21:00.',
+  },
+  {
+    category: 'arrival',
+    question: contentLanguage === 'pl' ? 'Co przygotować do rejestracji?' : 'What should I prepare for registration?',
+    answer: contentLanguage === 'pl'
+      ? 'Przygotuj dokument tożsamości oraz numer rejestracyjny pojazdu. Przy przyczepie potrzebny jest numer rejestracyjny przyczepy.'
+      : 'Prepare an identity document and vehicle registration plate. For a caravan, prepare the trailer registration plate.',
+  },
+  {
+    category: 'camping',
     question: contentLanguage === 'pl' ? 'Czy Camping Clepardia jest campingiem w mieście?' : 'Is Camping Clepardia a city campsite?',
     answer: contentLanguage === 'pl'
       ? 'Tak. Camping Clepardia znajduje się w Krakowie, blisko tramwaju, sklepów i atrakcji. To nie jest camping w lesie ani na odludnej polanie: czasem słychać tramwaje, samoloty i normalne miejskie życie. W zamian goście zyskują wygodny dojazd do centrum i spokojną, zieloną przestrzeń jak na warunki miejskie.'
@@ -367,6 +390,13 @@ const faqItems: FaqItem[] = [
     category: 'facilities',
     question: faqText.items.sanitary[0],
     answer: faqText.items.sanitary[1],
+  },
+  {
+    category: 'reservations',
+    question: contentLanguage === 'pl' ? 'Jak zapytać o wycieczkę?' : 'How can I ask about a tour?',
+    answer: contentLanguage === 'pl'
+      ? 'W formularzu rezerwacji zaznacz interesującą wycieczkę albo użyj przycisku „Sprawdź wycieczki”. Wybór nie dolicza ceny pobytu.'
+      : 'Select a trip in the booking form or use the “Check tours” button. This does not add a tour price to the stay estimate.',
   },
   {
     category: 'facilities',
@@ -502,6 +532,7 @@ const faqSchema = {
       <div class="faq-final-cta__actions">
         <a class="btn btn-primary premium-button" href={pricingHref}>{page.cta.primaryLabel}</a>
         <a class="btn btn-glass faq-final-cta__secondary" href={contactHref}>{page.cta.secondaryLabel}</a>
+        <a class="btn btn-glass faq-final-cta__secondary" href={tourBookingHref} target="_blank" rel="noopener noreferrer">{tourUi[0]}</a>
       </div>
     </div>
   </div>

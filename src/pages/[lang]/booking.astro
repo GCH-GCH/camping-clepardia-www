@@ -1,0 +1,22 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import ReservationMiniGame from '@/components/booking/ReservationMiniGame.astro';
+import ClientGuideTools from '@/components/home/ClientGuideTools.astro';
+
+export function getStaticPaths() {
+  return ['fr', 'es', 'nl', 'cs', 'sk', 'sv'].map((lang) => ({
+    params: { lang },
+    props: { lang },
+  }));
+}
+
+const { lang } = Astro.props;
+---
+
+<Layout
+  title="Booking enquiry — Camping Clepardia Krakow"
+  description="Choose camping, bungalows or a combined stay and send an enquiry to Camping Clepardia reception."
+>
+  <ReservationMiniGame languageCode={lang} />
+  <ClientGuideTools languageCode={lang} variant="reservation" />
+</Layout>

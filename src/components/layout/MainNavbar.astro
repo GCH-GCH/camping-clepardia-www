@@ -12,16 +12,25 @@ const plannerLabels = {
   de: 'Planer',
   it: 'Planner',
 };
+const coreNavLabels = {
+  fr: ['Accueil', 'Camping', 'Bungalows', 'Tarifs', 'Accès', 'Attractions', 'Galerie', 'Planificateur', 'Contact', 'Réserver'],
+  es: ['Inicio', 'Camping', 'Bungalows', 'Precios', 'Cómo llegar', 'Atracciones', 'Galería', 'Planificador', 'Contacto', 'Reservar'],
+  nl: ['Start', 'Camping', 'Bungalows', 'Prijzen', 'Route', 'Attracties', 'Galerij', 'Planner', 'Contact', 'Boeken'],
+  cs: ['Úvod', 'Camping', 'Bungalovy', 'Ceny', 'Doprava', 'Atrakce', 'Galerie', 'Plánovač', 'Kontakt', 'Rezervovat'],
+  sk: ['Úvod', 'Camping', 'Bungalovy', 'Ceny', 'Doprava', 'Atrakcie', 'Galéria', 'Plánovač', 'Kontakt', 'Rezervovať'],
+  sv: ['Start', 'Camping', 'Stugor', 'Priser', 'Vägbeskrivning', 'Sevärdheter', 'Galleri', 'Planerare', 'Kontakt', 'Boka'],
+} as const;
+const coreNav = coreNavLabels[pathContext.languageCode as keyof typeof coreNavLabels];
 const navItems = [
-  { slug: '', label: t.nav.items.start, icon: 'home' },
-  { slug: 'camping', label: t.nav.items.camping, icon: 'tent' },
-  { slug: 'domki', label: t.nav.items.domki, icon: 'house' },
-  { slug: 'cennik', label: t.nav.items.cennik, icon: 'pricing' },
-  { slug: 'dojazd', label: t.nav.items.dojazd, icon: 'tram' },
-  { slug: 'atrakcje', label: t.nav.items.atrakcje, icon: 'landmark' },
-  { slug: 'galeria', label: t.nav.items.galeria, icon: 'gallery' },
-  { slug: '__planner__', label: plannerLabels[pathContext.languageCode as keyof typeof plannerLabels] ?? plannerLabels.en, icon: 'planner' },
-  { slug: 'kontakt', label: t.nav.items.kontakt, icon: 'phone' },
+  { slug: '', label: coreNav?.[0] ?? t.nav.items.start, icon: 'home' },
+  { slug: 'camping', label: coreNav?.[1] ?? t.nav.items.camping, icon: 'tent' },
+  { slug: 'domki', label: coreNav?.[2] ?? t.nav.items.domki, icon: 'house' },
+  { slug: 'cennik', label: coreNav?.[3] ?? t.nav.items.cennik, icon: 'pricing' },
+  { slug: 'dojazd', label: coreNav?.[4] ?? t.nav.items.dojazd, icon: 'tram' },
+  { slug: 'atrakcje', label: coreNav?.[5] ?? t.nav.items.atrakcje, icon: 'landmark' },
+  { slug: 'galeria', label: coreNav?.[6] ?? t.nav.items.galeria, icon: 'gallery' },
+  { slug: '__planner__', label: coreNav?.[7] ?? plannerLabels[pathContext.languageCode as keyof typeof plannerLabels] ?? plannerLabels.en, icon: 'planner' },
+  { slug: 'kontakt', label: coreNav?.[8] ?? t.nav.items.kontakt, icon: 'phone' },
 ];
 
 const currentLanguage = pathContext.currentLanguage;
@@ -93,7 +102,7 @@ const navMessages = {
             >
               <span class:list={['flag-icon', 'main-navbar-flag', 'fi', language.flagClass]} data-code={language.code.toUpperCase()} aria-hidden="true"></span>
               <span>{language.name}</span>
-              <strong>{language.translation === 'full' ? language.code.toUpperCase() : 'EN fallback'}</strong>
+              <strong>{language.code.toUpperCase()}</strong>
             </a>
           ))}
         </div>
@@ -123,7 +132,7 @@ const navMessages = {
         </span>
       </button>
 
-      <a href={bookingHref} class="main-navbar__cta">{t.nav.cta}</a>
+      <a href={bookingHref} class="main-navbar__cta">{coreNav?.[9] ?? t.nav.cta}</a>
     </div>
 
     <div class="main-navbar__mobile-controls" aria-label={t.nav.mobileMenu}>
@@ -215,16 +224,15 @@ const navMessages = {
             <a
               href={language.href}
               class:list={['main-navbar-mobile__language', language.active && 'is-active']}
-              aria-label={`${language.name} ${language.code.toUpperCase()}${language.translation === 'full' ? '' : ' — English content fallback'}`}
+              aria-label={`${language.name} ${language.code.toUpperCase()}`}
               aria-current={language.active ? 'page' : undefined}
             >
               <span class:list={['flag-icon', 'main-navbar-flag', 'fi', language.flagClass]} data-code={language.code.toUpperCase()} aria-hidden="true"></span>
               <span>{language.code.toUpperCase()}</span>
-              {language.translation !== 'full' && <small>EN</small>}
             </a>
           ))}
         </div>
-        <a href={bookingHref} class="main-navbar__cta main-navbar__cta--mobile">{t.nav.cta}</a>
+        <a href={bookingHref} class="main-navbar__cta main-navbar__cta--mobile">{coreNav?.[9] ?? t.nav.cta}</a>
       </div>
     </div>
   </div>

@@ -3,6 +3,7 @@ import { icons } from 'lucide';
 import { countries } from '@/data/countries';
 import { currencyEstimateConfig, pricingConfig } from '@/data/pricing';
 import { resolveContentLanguage } from '@/i18n/config';
+import { getCoreUi, tourBookingHref } from '@/i18n/coreUi';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
 interface Props {
@@ -14,6 +15,9 @@ type SupportedLang = 'pl' | 'en' | 'de' | 'it';
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode) as SupportedLang;
+const requestedLanguage = languageCode ?? pathContext.languageCode;
+const uiLang = requestedLanguage;
+const tourUi = getCoreUi(requestedLanguage).tour;
 const attractionsPath = getLocalizedPath(pathContext.explicitLanguage, 'atrakcje');
 const plannerPath = getLocalizedPath(pathContext.explicitLanguage, 'planer-pobytu');
 const directionsPath = getLocalizedPath(pathContext.explicitLanguage, 'dojazd');
@@ -386,7 +390,53 @@ const copy = {
   },
 } as const;
 
-const t = copy[lang] ?? copy.en;
+const reservationCoreCopy: Record<string, any> = {
+  fr: {
+    kicker: 'Demande de réservation', title: 'Réservez votre séjour au Camping Clepardia', lead: 'Choisissez votre type de séjour et le formulaire s’adaptera.', startLead: 'Ceci est une demande à la réception, pas une réservation automatique.',
+    modes: { camping: ['Camping', 'Camping-car, van, tente, caravane ou bus.'], bungalow: ['Bungalows', 'Bungalows pour 2, 3 ou 4 personnes.'], combined: ['Combiné', 'Bungalow et emplacement dans une demande.'] },
+    steps: ['Dates', 'Voyageurs', 'Services', 'Coordonnées', 'Résumé'], actions: { change: 'Modifier', back: 'Retour', next: 'Suivant', send: 'Envoyer à la réception', decrease: 'Diminuer', increase: 'Augmenter', choose: 'Choisir' },
+    hints: { chooseService: 'Choisissez au moins un service.', required: 'Complétez les consentements requis.' },
+  },
+  es: {
+    kicker: 'Solicitud de reserva', title: 'Reserva tu estancia en Camping Clepardia', lead: 'Elige el tipo de estancia y el formulario se adaptará.', startLead: 'Es una consulta a recepción, no una reserva automática.',
+    modes: { camping: ['Camping', 'Autocaravana, van, tienda, caravana o bus.'], bungalow: ['Bungalows', 'Bungalows para 2, 3 o 4 personas.'], combined: ['Combinado', 'Bungalow y parcela en una consulta.'] },
+    steps: ['Fechas', 'Huéspedes', 'Servicios', 'Datos', 'Resumen'], actions: { change: 'Cambiar', back: 'Atrás', next: 'Siguiente', send: 'Enviar a recepción', decrease: 'Reducir', increase: 'Aumentar', choose: 'Elegir' },
+    hints: { chooseService: 'Elige al menos un servicio.', required: 'Completa los consentimientos obligatorios.' },
+  },
+  nl: {
+    kicker: 'Boekingsaanvraag', title: 'Boek je verblijf bij Camping Clepardia', lead: 'Kies je verblijfstype; het formulier past zich aan.', startLead: 'Dit is een aanvraag aan de receptie, geen automatische boeking.',
+    modes: { camping: ['Camping', 'Camper, van, tent, caravan of bus.'], bungalow: ['Bungalows', 'Bungalows voor 2, 3 of 4 personen.'], combined: ['Gecombineerd', 'Bungalow en kampeerplaats in één aanvraag.'] },
+    steps: ['Datums', 'Gasten', 'Diensten', 'Gegevens', 'Overzicht'], actions: { change: 'Wijzigen', back: 'Terug', next: 'Volgende', send: 'Naar receptie sturen', decrease: 'Verminderen', increase: 'Verhogen', choose: 'Kiezen' },
+    hints: { chooseService: 'Kies minimaal één dienst.', required: 'Vul de verplichte toestemmingen in.' },
+  },
+  cs: {
+    kicker: 'Rezervační dotaz', title: 'Rezervujte pobyt v Camping Clepardia', lead: 'Vyberte typ pobytu a formulář se přizpůsobí.', startLead: 'Jde o dotaz recepci, nikoli automatickou rezervaci.',
+    modes: { camping: ['Camping', 'Obytný vůz, van, stan, karavan nebo autobus.'], bungalow: ['Bungalovy', 'Bungalovy pro 2, 3 nebo 4 osoby.'], combined: ['Kombinace', 'Bungalov a místo v jednom dotazu.'] },
+    steps: ['Termín', 'Hosté', 'Služby', 'Údaje', 'Shrnutí'], actions: { change: 'Změnit', back: 'Zpět', next: 'Další', send: 'Odeslat recepci', decrease: 'Snížit', increase: 'Zvýšit', choose: 'Vybrat' },
+    hints: { chooseService: 'Vyberte alespoň jednu službu.', required: 'Vyplňte povinné souhlasy.' },
+  },
+  sk: {
+    kicker: 'Rezervačný dopyt', title: 'Rezervujte pobyt v Camping Clepardia', lead: 'Vyberte typ pobytu a formulár sa prispôsobí.', startLead: 'Ide o dopyt recepcii, nie automatickú rezerváciu.',
+    modes: { camping: ['Camping', 'Karavan, van, stan, príves alebo autobus.'], bungalow: ['Bungalovy', 'Bungalovy pre 2, 3 alebo 4 osoby.'], combined: ['Kombinácia', 'Bungalov a miesto v jednom dopyte.'] },
+    steps: ['Termín', 'Hostia', 'Služby', 'Údaje', 'Zhrnutie'], actions: { change: 'Zmeniť', back: 'Späť', next: 'Ďalej', send: 'Odoslať recepcii', decrease: 'Znížiť', increase: 'Zvýšiť', choose: 'Vybrať' },
+    hints: { chooseService: 'Vyberte aspoň jednu službu.', required: 'Vyplňte povinné súhlasy.' },
+  },
+  sv: {
+    kicker: 'Bokningsförfrågan', title: 'Boka din vistelse på Camping Clepardia', lead: 'Välj vistelsetyp så anpassas formuläret.', startLead: 'Detta är en förfrågan till receptionen, inte en automatisk bokning.',
+    modes: { camping: ['Camping', 'Husbil, van, tält, husvagn eller buss.'], bungalow: ['Stugor', 'Stugor för 2, 3 eller 4 personer.'], combined: ['Kombinerat', 'Stuga och campingplats i samma förfrågan.'] },
+    steps: ['Datum', 'Gäster', 'Tjänster', 'Uppgifter', 'Sammanfattning'], actions: { change: 'Ändra', back: 'Tillbaka', next: 'Nästa', send: 'Skicka till receptionen', decrease: 'Minska', increase: 'Öka', choose: 'Välj' },
+    hints: { chooseService: 'Välj minst en tjänst.', required: 'Fyll i obligatoriska samtycken.' },
+  },
+};
+const coreReservation = reservationCoreCopy[uiLang];
+const baseCopy = copy[lang] ?? copy.en;
+const t = coreReservation ? {
+  ...baseCopy,
+  ...coreReservation,
+  modes: { ...baseCopy.modes, ...coreReservation.modes },
+  actions: { ...baseCopy.actions, ...coreReservation.actions },
+  hints: { ...baseCopy.hints, ...coreReservation.hints },
+} : baseCopy;
 const modeChipsCopy = {
   pl: {
     camping: ['Kamper', 'Van', 'Namiot', 'Prąd 10A'],
@@ -408,8 +458,38 @@ const modeChipsCopy = {
     bungalow: ['2 pers.', '3 pers.', '4 pers.', 'Check-in 16:00'],
     combined: ['Bungalow', 'Camper', 'Famiglia/gruppo', 'Una richiesta'],
   },
+  fr: {
+    camping: ['Camping-car', 'Van', 'Tente', 'Électricité 10A'],
+    bungalow: ['2 personnes', '3 personnes', '4 personnes', 'Arrivée 16:00'],
+    combined: ['Bungalow', 'Camping-car', 'Famille/groupe', 'Une demande'],
+  },
+  es: {
+    camping: ['Autocaravana', 'Van', 'Tienda', 'Electricidad 10A'],
+    bungalow: ['2 personas', '3 personas', '4 personas', 'Entrada 16:00'],
+    combined: ['Bungalow', 'Autocaravana', 'Familia/grupo', 'Una consulta'],
+  },
+  nl: {
+    camping: ['Camper', 'Van', 'Tent', '10A-stroom'],
+    bungalow: ['2 personen', '3 personen', '4 personen', 'Incheck 16:00'],
+    combined: ['Bungalow', 'Camper', 'Familie/groep', 'Eén aanvraag'],
+  },
+  cs: {
+    camping: ['Obytný vůz', 'Van', 'Stan', 'Elektřina 10A'],
+    bungalow: ['2 osoby', '3 osoby', '4 osoby', 'Příjezd 16:00'],
+    combined: ['Bungalov', 'Obytný vůz', 'Rodina/skupina', 'Jeden dotaz'],
+  },
+  sk: {
+    camping: ['Karavan', 'Van', 'Stan', 'Elektrina 10A'],
+    bungalow: ['2 osoby', '3 osoby', '4 osoby', 'Príchod 16:00'],
+    combined: ['Bungalov', 'Karavan', 'Rodina/skupina', 'Jeden dopyt'],
+  },
+  sv: {
+    camping: ['Husbil', 'Van', 'Tält', '10A-el'],
+    bungalow: ['2 personer', '3 personer', '4 personer', 'Incheckning 16:00'],
+    combined: ['Stuga', 'Husbil', 'Familj/grupp', 'En förfrågan'],
+  },
 } as const;
-const modeChips = modeChipsCopy[lang] ?? modeChipsCopy.en;
+const modeChips = modeChipsCopy[uiLang as keyof typeof modeChipsCopy] ?? modeChipsCopy[lang] ?? modeChipsCopy.en;
 
 const iconHtml = {
   modes: {
@@ -715,7 +795,7 @@ const bungalowServices = [
 ];
 
 const config = {
-  lang,
+  lang: uiLang,
   t,
   currency: pricingConfig.currency,
   currencyEstimate: currencyEstimateConfig,
@@ -739,7 +819,9 @@ const config = {
     planner: plannerPath,
     directions: directionsPath,
     contact: contactPath,
+    tours: tourBookingHref,
   },
+  tourUi,
   countries: countries.map((country) => ({
     code: country.code,
     flagClass: country.flagClass,
@@ -1283,7 +1365,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const tripCtaTemplate = (compact = false) => `
       <div class="${compact ? 'reservation-trip-ctas reservation-trip-ctas--compact' : 'reservation-trip-ctas'}">
         ${tripCtas().map((cta) => `<a href="${esc(cta.href)}" class="reservation-mini-link">${esc(cta.label)}</a>`).join('')}
-        <a href="${esc(config.links?.contact || '/kontakt')}" class="reservation-mini-link">${esc(config.lang === 'pl' ? 'Zapytaj recepcję o wycieczkę' : 'Ask reception about trips')}</a>
+        <a href="${esc(config.links?.tours)}" class="reservation-mini-link" target="_blank" rel="noopener noreferrer">${esc(config.tourUi?.[0] || 'Check tours')}</a>
       </div>
     `;
 
@@ -1637,8 +1719,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     };
 
     const tourOptions = config.lang === 'pl'
-      ? ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Park Wodny Kraków', 'Bagry', 'Kryspinów', 'Stare Miasto i Wawel', 'Nie wiem — proszę o propozycję']
-      : ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Krakow Water Park', 'Bagry', 'Kryspinów', 'Old Town and Wawel', 'I am not sure — please suggest'];
+      ? ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Kazimierz / Stare Miasto', 'Nie wiem — proszę o propozycję']
+      : ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Kazimierz / Old Town', 'I am not sure — please suggest'];
 
     const toursText = () => state.tours.join(', ');
 
@@ -2007,6 +2089,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
               </label>
             `).join('')}
           </div>
+          <a class="reservation-mini-link" href="${esc(config.links?.tours)}" target="_blank" rel="noopener noreferrer">${esc(config.tourUi?.[1] || 'Book a tour')}</a>
         </section>
       </section>
     `;
@@ -2536,6 +2619,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
               <span><strong>Delivered</strong><em>${state.mailDelivered ? 'true' : 'false'}</em></span>
               ${state.mailReason ? `<p>${esc(state.mailReason)}</p>` : ''}
             </div>
+            ${isSavedWithoutMail ? `<p class="reservation-success-modal__note">${esc(config.lang === 'pl' ? 'Zapytanie jest zapisane w panelu recepcji. Recepcja może skopiować treść maila lub użyć przycisku mailto.' : 'The enquiry is saved in the reception inbox. Reception can copy the email content or use the mailto button.')}</p>` : ''}
             <dl>
               ${successRow('status', ui.summary.statusLabel, detailText.statusConfirmedByReception)}
               ${successRow('stay', t.summary.stay, modeTitle())}

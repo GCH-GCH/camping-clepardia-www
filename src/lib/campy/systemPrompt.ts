@@ -20,6 +20,8 @@ export const campyKnowledge = {
     address: 'Henryka Pachońskiego 28A, 31-322 Kraków',
   },
   rules: {
+    receptionHours: '09:00-21:00',
+    gateHours: '08:00-22:00',
     quietHours: '22:00-07:00',
     noParty: true,
     noEvCharging: true,
@@ -47,15 +49,25 @@ export const campyKnowledge = {
   },
   stay: {
     bungalows: 'Tylko domki 2-, 3- i 4-osobowe. Brak domku rodzinnego i brak tarasów.',
+    bungalowItems: 'Goście domków zabierają własne ręczniki, kosmetyki i rzeczy osobiste.',
+    bungalowCheckIn: 'od 16:00',
+    bungalowCheckOut: 'do 11:00',
+    campingCheckOut: 'do 12:00',
+    highSeason: 'W lipcu i sierpniu rezerwacje z wyprzedzeniem dotyczą tylko domków. Camping działa według kolejności przyjazdu; najlepiej przyjechać około 12:00.',
     camperPitches: 'Miejsca dla kamperów są głównie na płytach betonowych.',
     heavyVehicles: 'Busy, trucki, autobusy i ciężkie pojazdy ustawiamy na asfalcie, aby uniknąć zakopania się pojazdu.',
   },
   transport: {
     tramStop: 'Przystanek ok. 40 m od bramy.',
     center: 'Do Starego Kleparza / centrum ok. 9 przystanków i ok. 14 minut tramwajem.',
+    oldTownWalk: 'Ze Starego Kleparza około 5 minut pieszo do Starego Miasta.',
     maps: 'Zalecamy Google Maps, bo dojazd zmienił się w 2022 roku.',
     sct: 'https://ztp.krakow.pl/sct',
     etoll: 'Sprawdź e-TOLL przed trasą, jeśli podróżujesz większym pojazdem lub zestawem.',
+  },
+  tours: {
+    bookingHref: 'https://qr.codes/vksKBT',
+    destinations: ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia'],
   },
 };
 
@@ -77,18 +89,23 @@ If the question needs confirmation, direct the guest to reception: ${campyKnowle
 Knowledge:
 - Address: ${campyKnowledge.contact.address}
 - Quiet hours: ${campyKnowledge.rules.quietHours}. Camping Clepardia is not a party campsite.
+- Reception: ${campyKnowledge.rules.receptionHours}. Gate: ${campyKnowledge.rules.gateHours}. Arrival after 21:00 requires prior contact.
 - Bookings: ${campyKnowledge.rules.bookings}
+- High season: ${campyKnowledge.stay.highSeason}
 - Bungalows: ${campyKnowledge.stay.bungalows}
+- Bungalow personal items: ${campyKnowledge.stay.bungalowItems}
+- Stay hours: camping check-out ${campyKnowledge.stay.campingCheckOut}; bungalow check-in ${campyKnowledge.stay.bungalowCheckIn}; bungalow check-out ${campyKnowledge.stay.bungalowCheckOut}.
 - Pricing: adult ${campyKnowledge.pricing.adult} PLN, child 4-14 ${campyKnowledge.pricing.child4to14} PLN, child under 4 ${campyKnowledge.pricing.childUnder4} PLN, camper ${campyKnowledge.pricing.camper} PLN, van ${campyKnowledge.pricing.van} PLN, caravan ${campyKnowledge.pricing.caravan} PLN, tent 1-2 ${campyKnowledge.pricing.tentSmall} PLN, tent 3-4 ${campyKnowledge.pricing.tentLarge} PLN, rooftop tent ${campyKnowledge.pricing.rooftopTent} PLN, cargo trailer ${campyKnowledge.pricing.cargoTrailer} PLN, bus/truck ${campyKnowledge.pricing.busTruck} PLN, electricity ${campyKnowledge.pricing.electricity} PLN, dog ${campyKnowledge.pricing.dog} PLN.
 - Currency estimates: ${campyKnowledge.pricing.currencies} ${currencyEstimateConfig.disclaimer}
 - Bungalow prices: 2-person ${campyKnowledge.pricing.bungalow2}; 3-person ${campyKnowledge.pricing.bungalow3}; 4-person ${campyKnowledge.pricing.bungalow4}.
 - Camper pitches: ${campyKnowledge.stay.camperPitches}
 - Heavy vehicles: ${campyKnowledge.stay.heavyVehicles}
-- Tram: ${campyKnowledge.transport.tramStop} ${campyKnowledge.transport.center}
+- Tram: ${campyKnowledge.transport.tramStop} ${campyKnowledge.transport.center} ${campyKnowledge.transport.oldTownWalk}
 - Navigation: ${campyKnowledge.transport.maps}
 - SCT: ${campyKnowledge.transport.sct}
 - e-TOLL: ${campyKnowledge.transport.etoll}
 - EV/hybrid charging from campsite electricity is not allowed.
+- Tours: reception can provide information. Destinations: ${campyKnowledge.tours.destinations.join(', ')}. Booking CTA: ${campyKnowledge.tours.bookingHref}
 - ${campyKnowledge.rules.invoices}
 `.trim();
 
