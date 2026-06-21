@@ -520,11 +520,11 @@ const normalizeResendError = (body, status) => {
     };
   }
 
-  if (normalized.includes('domain') || normalized.includes('sender') || normalized.includes('from') || normalized.includes('verify')) {
+  if (status === 403 || normalized.includes('domain') || normalized.includes('sender') || normalized.includes('from') || normalized.includes('verify')) {
     return {
       errorCode: 'sender_rejected',
-      message: 'Resend rejected the sender. Check RESERVATION_FROM_EMAIL or domain verification.',
-      reason: rawMessage,
+      message: 'Resend wymaga zweryfikowanego nadawcy/domeny.',
+      reason: 'Resend wymaga zweryfikowanego nadawcy/domeny.',
     };
   }
 
@@ -545,8 +545,8 @@ const normalizeFormSubmitError = (body, status) => {
   if (status === 403 || normalized.includes('activate') || normalized.includes('activation') || normalized.includes('confirm')) {
     return {
       errorCode: 'formsubmit_activation_required',
-      message: 'FormSubmit may require first-use activation in the clepardia@gmail.com mailbox. Confirm the activation email and submit the form again.',
-      reason: rawMessage,
+      message: 'FormSubmit zwrócił 403 — prawdopodobnie wymagana ponowna aktywacja lub endpoint jest zablokowany.',
+      reason: 'FormSubmit zwrócił 403 — prawdopodobnie wymagana ponowna aktywacja lub endpoint jest zablokowany.',
     };
   }
   return {
@@ -627,6 +627,11 @@ const sendWithResend = async (message) => {
 
     if (!response.ok) {
       const normalizedError = normalizeResendError(body, response.status);
+      console.error('[reservation-api] resend-provider-error', {
+        status: response.status,
+        errorCode: normalizedError.errorCode,
+        reason: normalizedError.reason,
+      });
       return {
         provider: 'resend',
         delivered: false,
@@ -678,6 +683,11 @@ const sendWithFormSubmit = async (message, inquiry) => {
 
     if (!response.ok || body?.success === false) {
       const normalizedError = normalizeFormSubmitError(body, response.status);
+      console.error('[reservation-api] formsubmit-provider-error', {
+        status: response.status,
+        errorCode: normalizedError.errorCode,
+        reason: normalizedError.reason,
+      });
       return {
         provider: 'formsubmit',
         delivered: false,

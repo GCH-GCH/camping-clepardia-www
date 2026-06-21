@@ -93,7 +93,7 @@ const googleMapsHref = footerSocialLinks[1].href;
           <a
             href={language.href}
             class:list={[language.active && 'is-active']}
-            aria-label={`${language.name} ${language.code.toUpperCase()}`}
+            aria-label={`${language.name} ${language.code.toUpperCase()}${language.translation === 'full' ? '' : ' — English content fallback'}`}
             aria-current={language.active ? 'page' : undefined}
           >
             <span class:list={['footer__flag', 'fi', language.flagClass]} data-code={language.code.toUpperCase()} aria-hidden="true"></span>

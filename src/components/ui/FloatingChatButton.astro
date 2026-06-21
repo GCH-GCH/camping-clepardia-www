@@ -1,6 +1,6 @@
 ---
 import { getTranslations } from '@/i18n/config';
-import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getBookingLocalizedPath, getLocalizedPath, getPathContext, isBookingSlug, isPlannerSlug } from '@/utils/localizedLinks';
 import Icon from '@/components/ui/Icon.astro';
 import { campyIcon, publicAssetExists } from '@/data/assets';
 import { currencyEstimateConfig, formatCurrencyEstimates, pricingConfig } from '@/data/pricing';
@@ -302,16 +302,24 @@ const finalCampyCopy = {
 };
 const finalCampy = finalCampyCopy[pathContext.languageCode as keyof typeof finalCampyCopy] ?? finalCampyCopy.en;
 const campyQuick = finalCampy.quick ?? finalCampyCopy.en.quick;
-const pageKey = Astro.url.pathname.replace(/^\/(?:pl|en|de|it)\b/, '').replace(/\/+$/, '') || '/';
+const pageKey = isBookingSlug(pathContext.slug)
+  ? '/rezerwacja'
+  : isPlannerSlug(pathContext.slug)
+    ? '/planer-pobytu'
+    : `/${pathContext.slug}`.replace(/\/+$/, '') || '/';
 const pageWelcomePl: Record<string, string> = {
   '/': 'Cześć! Jestem CAMPY 👋 Mogę pomóc znaleźć cenę, dojazd, atrakcje albo przejść do rezerwacji.',
   '/cennik': 'Jesteś w cenniku — mogę pomóc obliczyć orientacyjny koszt pobytu.',
   '/rezerwacja': 'Jesteś w rezerwacji — pomogę przejść formularz i przypomnę o ważnych rzeczach.',
-  '/atrakcje': 'Jesteś w atrakcjach — mogę pomóc zaplanować Kraków, Wieliczkę, Ojców albo wycieczkę.',
-  '/dojazd': 'Jesteś w dojeździe — najlepiej użyć Google Maps, bo trasa zmieniła się w 2022 roku.',
+  '/atrakcje': 'Jesteś w atrakcjach — mogę pomóc zaplanować Kraków, Kazimierz, Wieliczkę, Ojców albo wycieczkę.',
+  '/dojazd': 'Jesteś w dojeździe — najlepiej użyć Google Maps, bo trasa wjazdu zmieniła się w 2022 roku.',
   '/kontakt': 'Jesteś w kontakcie — mogę podpowiedzieć, co przygotować przed przyjazdem.',
-  '/domki': 'Jesteś przy domkach — mogę pomóc sprawdzić terminy i przypomnieć, co zabrać.',
-  '/camping': 'Jesteś na stronie campingu — mogę wyjaśnić zasady, prąd 10A i dojazd tramwajem.',
+  '/domki': 'Jesteś przy domkach — pamiętaj o własnych ręcznikach i rzeczach osobistych.',
+  '/camping': 'Jesteś na stronie campingu — mogę wyjaśnić prąd 10A, zasady pobytu i dojazd tramwajem.',
+  '/galeria': 'Jesteś w galerii — mogę pokazać, gdzie znajdziesz domki, camping i dojazd.',
+  '/faq': 'Jesteś w FAQ — mogę szybko odpowiedzieć o rezerwacji, ciszy nocnej, psie, prądzie i dokumentach.',
+  '/planer-pobytu': 'Jesteś w planerze — pomogę dobrać atrakcje do liczby nocy w Krakowie.',
+  '/aktualnosci': 'Jesteś w aktualnościach — sprawdzisz tu ważne informacje o sezonie, dojeździe i pobycie.',
 };
 const pageWelcome = pathContext.languageCode === 'pl'
   ? (pageWelcomePl[pageKey] ?? pageWelcomePl['/'])
@@ -576,6 +584,7 @@ const quickActionGroups = [
 
     let open = false;
     let hideTimer = 0;
+    let welcomeTimer = 0;
     let panelHydrated = false;
     let quickPanelHydrated = false;
     let quickPanelOpen = false;
@@ -619,7 +628,7 @@ const quickActionGroups = [
     };
 
     const updateMobileAvailability = () => {
-      const available = window.innerWidth > 640 || window.scrollY > 320 || open;
+      const available = window.innerWidth > 640 || window.scrollY > 320 || open || root.classList.contains('has-welcome');
       root.classList.toggle('is-available', available);
     };
 
@@ -636,7 +645,11 @@ const quickActionGroups = [
     const setOpen = (nextOpen) => {
       if (!getChatTexts()) return;
       open = nextOpen;
-      if (welcome instanceof HTMLElement) welcome.hidden = true;
+      if (welcome instanceof HTMLElement) {
+        welcome.hidden = true;
+        root.classList.remove('has-welcome');
+        window.clearTimeout(welcomeTimer);
+      }
       window.clearTimeout(hideTimer);
       toggle.setAttribute('aria-expanded', String(open));
       toggle.setAttribute('aria-label', open ? chatTexts.close : chatTexts.open);
@@ -799,6 +812,20 @@ const quickActionGroups = [
       if (keyed) return keyed;
       const prompt = rawPrompt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       const hasAny = (...parts) => parts.some((part) => prompt.includes(part));
+
+      if (hasAny('auto elektryczne', 'samochod elektryczny', 'ladowac auto', 'ladowanie auta', 'charge an electric', 'electric vehicle', 'ev charging')) {
+        return {
+          text: 'Prąd 10A na stanowiskach campingowych służy do wyposażenia kampera lub przyczepy i nie jest przeznaczony do ładowania samochodów elektrycznych. Zaplanuj ładowanie auta w publicznej stacji ładowania.',
+          actions: [{ label: 'Sprawdź dojazd', href: chatTexts.links?.directions }, { label: 'Kontakt z recepcją', href: chatTexts.links?.contact }],
+        };
+      }
+
+      if (hasAny('ciezki pojazd', 'ciezkim pojazdem', 'ciezarow', 'autobus', 'heavy vehicle', 'heavy motorhome', 'na trawie', 'on grass')) {
+        return {
+          text: 'Ciężkie pojazdy muszą stanąć na utwardzonej lub asfaltowej powierzchni — nie na trawie. Miejsca dla kamperów są głównie na płytach betonowych. Jeśli pojazd jest wyjątkowo duży lub ciężki, skontaktuj się z recepcją przed przyjazdem.',
+          actions: [{ label: 'Kontakt z recepcją', href: chatTexts.links?.contact }, { label: 'Sprawdź dojazd', href: chatTexts.links?.directions }],
+        };
+      }
 
       if (hasAny('lipiec', 'lipcu', 'sierpien', 'sierpniu', 'july', 'august')
         && hasAny('kamper', 'camper', 'motorhome', 'van', 'namiot', 'tent', 'przyczep', 'caravan', 'camping')) {
@@ -1031,15 +1058,26 @@ const quickActionGroups = [
     if (welcome instanceof HTMLElement) {
       const welcomeCopy = getChatTexts();
       const welcomeKey = `campy-welcome:${welcomeCopy?.pageWelcomeKey || location.pathname}`;
+      const hideWelcome = () => {
+        welcome.hidden = true;
+        root.classList.remove('has-welcome');
+        updateMobileAvailability();
+      };
+      const showWelcome = () => {
+        if (open) {
+          welcomeTimer = window.setTimeout(showWelcome, 900);
+          return;
+        }
+        welcome.hidden = false;
+        root.classList.add('has-welcome');
+        updateMobileAvailability();
+        sessionStorage.setItem(welcomeKey, 'shown');
+        welcomeTimer = window.setTimeout(hideWelcome, 6500);
+      };
       if (!sessionStorage.getItem(welcomeKey)) {
-        window.setTimeout(() => {
-          if (open) return;
-          welcome.hidden = false;
-          sessionStorage.setItem(welcomeKey, 'shown');
-          window.setTimeout(() => { welcome.hidden = true; }, 6500);
-        }, 1100);
+        welcomeTimer = window.setTimeout(showWelcome, 1100);
       }
-      welcomeClose?.addEventListener('click', () => { welcome.hidden = true; });
+      welcomeClose?.addEventListener('click', hideWelcome);
     }
 
     if (quickToggleButton instanceof HTMLButtonElement && quickPanel instanceof HTMLElement) {
@@ -1179,6 +1217,10 @@ body.has-floating-chat-open {
   box-shadow: 0 22px 62px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.12);
   pointer-events: auto;
   animation: campyMessageIn .3s cubic-bezier(.22,1,.36,1) both;
+}
+
+.floating-chat.has-welcome {
+  z-index: 1290;
 }
 
 .floating-chat__welcome p {

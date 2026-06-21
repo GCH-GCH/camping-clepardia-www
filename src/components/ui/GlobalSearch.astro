@@ -5,27 +5,77 @@ import { getPathContext } from '@/utils/localizedLinks';
 
 const pathContext = getPathContext(Astro.url.pathname);
 const entries = getSearchIndex(pathContext.languageCode);
+const searchCopyByLanguage = {
+  pl: {
+    dialog: 'Wyszukiwarka strony',
+    label: 'Szukaj na stronie',
+    placeholder: 'Szukaj: prąd, pies, tramwaj, Google Maps...',
+    close: 'Zamknij wyszukiwarkę',
+    heading: 'Wyszukiwarka Camping Clepardia',
+    empty: 'Wpisz np. prąd, pies, tramwaj, dokument, Wieliczka, Kazimierz...',
+    noResultsHeading: 'Brak dokładnego wyniku',
+    noResults: 'Nie znaleziono wyniku. Spróbuj: cennik, dojazd, pies, tramwaj.',
+    loading: 'Szukam...',
+    hints: ['prąd', 'pies', 'tramwaj', 'Google Maps', 'dokument', 'Wieliczka', 'Auschwitz', 'sezon', 'ręczniki', 'po 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Park Wodny'],
+  },
+  en: {
+    dialog: 'Site search',
+    label: 'Search the site',
+    placeholder: 'Search: electricity, dog, tram, Google Maps...',
+    close: 'Close search',
+    heading: 'Camping Clepardia search',
+    empty: 'Try electricity, dog, tram, document, Wieliczka or Kazimierz...',
+    noResultsHeading: 'No exact result',
+    noResults: 'No result found. Try: prices, directions, dog or tram.',
+    loading: 'Searching...',
+    hints: ['electricity', 'dog', 'tram', 'Google Maps', 'document', 'Wieliczka', 'Auschwitz', 'season', 'towels', 'after 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Water Park'],
+  },
+  de: {
+    dialog: 'Seitensuche',
+    label: 'Website durchsuchen',
+    placeholder: 'Suchen: Strom, Hund, Straßenbahn, Google Maps...',
+    close: 'Suche schließen',
+    heading: 'Camping-Clepardia-Suche',
+    empty: 'Versuche Strom, Hund, Straßenbahn, Dokument, Wieliczka oder Kazimierz...',
+    noResultsHeading: 'Kein genauer Treffer',
+    noResults: 'Kein Ergebnis. Versuche: Preise, Anfahrt, Hund oder Straßenbahn.',
+    loading: 'Suche...',
+    hints: ['Strom', 'Hund', 'Straßenbahn', 'Google Maps', 'Dokument', 'Wieliczka', 'Auschwitz', 'Saison', 'Handtücher', 'nach 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Wasserpark'],
+  },
+  it: {
+    dialog: 'Ricerca nel sito',
+    label: 'Cerca nel sito',
+    placeholder: 'Cerca: elettricità, cane, tram, Google Maps...',
+    close: 'Chiudi ricerca',
+    heading: 'Ricerca Camping Clepardia',
+    empty: 'Prova elettricità, cane, tram, documento, Wieliczka o Kazimierz...',
+    noResultsHeading: 'Nessun risultato esatto',
+    noResults: 'Nessun risultato. Prova: prezzi, indicazioni, cane o tram.',
+    loading: 'Ricerca...',
+    hints: ['elettricità', 'cane', 'tram', 'Google Maps', 'documento', 'Wieliczka', 'Auschwitz', 'stagione', 'asciugamani', 'dopo le 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Parco acquatico'],
+  },
+} as const;
+const searchCopy = searchCopyByLanguage[pathContext.languageCode as keyof typeof searchCopyByLanguage] ?? searchCopyByLanguage.en;
 const searchConfig = {
   entries,
-  empty: pathContext.languageCode === 'pl' ? 'Wpisz frazę, np. prąd, pies, tramwaj, dokument, Wieliczka.' : 'Try electricity, dog, tram, document or Wieliczka.',
-  noResults: pathContext.languageCode === 'pl' ? 'Nie znalazłem wyniku. Spróbuj innej frazy.' : 'No result. Try another phrase.',
+  ...searchCopy,
 };
 const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').toString('base64');
 ---
 
 <div class="global-search" data-global-search hidden aria-hidden="true">
   <div class="global-search__backdrop" data-search-close></div>
-  <section class="global-search__panel" role="dialog" aria-modal="true" aria-label="Wyszukiwarka strony">
+  <section class="global-search__panel" role="dialog" aria-modal="true" aria-label={searchCopy.dialog}>
     <header class="global-search__header">
       <span aria-hidden="true"><Icon name="Search" size={22} strokeWidth={2} /></span>
-      <label class="sr-only" for="globalSearchInput">Szukaj na stronie</label>
-      <input id="globalSearchInput" type="search" data-search-input autocomplete="off" placeholder="Szukaj: prąd, pies, tramwaj, Google Maps..." />
-      <button type="button" data-search-close aria-label="Zamknij wyszukiwarkę">
+      <label class="sr-only" for="globalSearchInput">{searchCopy.label}</label>
+      <input id="globalSearchInput" type="search" data-search-input autocomplete="off" placeholder={searchCopy.placeholder} />
+      <button type="button" data-search-close aria-label={searchCopy.close}>
         <Icon name="X" size={22} strokeWidth={2} />
       </button>
     </header>
     <div class="global-search__hints">
-      {['prąd', 'pies', 'tramwaj', 'Google Maps', 'dokument', 'Wieliczka', 'Auschwitz', 'sezon', 'ręczniki', 'po 21', 'Kazimierz'].map((hint) => (
+      {searchCopy.hints.map((hint) => (
         <button type="button" data-search-hint={hint}>{hint}</button>
       ))}
     </div>
@@ -60,6 +110,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
     const hints = root.querySelectorAll('[data-search-hint]');
     let lastFocused = null;
     let closeTimer = 0;
+    let renderToken = 0;
 
     const normalize = (value) => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const resultIcon = (entry) => {
@@ -81,7 +132,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
       const activeConfig = getConfig();
       const normalizedQuery = normalize(query.trim());
       if (!normalizedQuery) {
-        results.innerHTML = `<div class="global-search__empty"><strong>Wyszukiwarka Camping Clepardia</strong><span>${activeConfig.empty}</span></div>`;
+        results.innerHTML = `<div class="global-search__empty"><strong>${activeConfig.heading}</strong><span>${activeConfig.empty}</span></div>`;
         return;
       }
 
@@ -101,7 +152,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
         .map((item) => item.entry);
 
       if (!matches.length) {
-        results.innerHTML = `<div class="global-search__empty"><strong>Brak dokładnego wyniku</strong><span>${activeConfig.noResults}</span></div>`;
+        results.innerHTML = `<div class="global-search__empty"><strong>${activeConfig.noResultsHeading}</strong><span>${activeConfig.noResults}</span></div>`;
         return;
       }
 
@@ -118,6 +169,19 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
       `).join('');
     };
 
+    const queueRender = (query = '') => {
+      if (!(results instanceof HTMLElement) || !query.trim()) {
+        render(query);
+        return;
+      }
+      const token = ++renderToken;
+      const activeConfig = getConfig();
+      results.innerHTML = `<div class="global-search__loading" role="status"><span aria-hidden="true"></span><strong>${activeConfig.loading}</strong></div>`;
+      window.requestAnimationFrame(() => {
+        if (token === renderToken) render(query);
+      });
+    };
+
     const open = () => {
       lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       window.clearTimeout(closeTimer);
@@ -125,7 +189,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
       root.setAttribute('aria-hidden', 'false');
       root.classList.remove('is-closing');
       document.body.classList.add('has-global-search-open');
-      render(input instanceof HTMLInputElement ? input.value : '');
+      queueRender(input instanceof HTMLInputElement ? input.value : '');
       window.requestAnimationFrame(() => {
         root.classList.add('is-open');
         window.setTimeout(() => input instanceof HTMLInputElement && input.focus({ preventScroll: true }), 90);
@@ -150,18 +214,18 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
     hints.forEach((button) => button.addEventListener('click', () => {
       if (!(input instanceof HTMLInputElement)) return;
       input.value = button.dataset.searchHint || '';
-      render(input.value);
+      queueRender(input.value);
       input.focus();
     }));
     if (input instanceof HTMLInputElement) {
-      input.addEventListener('input', () => render(input.value));
+      input.addEventListener('input', () => queueRender(input.value));
     }
     window.addEventListener('global-search:open', (event) => {
       const detail = event instanceof CustomEvent ? event.detail : {};
       open();
       if (input instanceof HTMLInputElement && typeof detail?.query === 'string') {
         input.value = detail.query;
-        render(input.value);
+        queueRender(input.value);
       }
     });
     document.addEventListener('keydown', (event) => {
@@ -180,7 +244,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
   })();
 </script>
 
-<style>
+<style is:global>
 .global-search[hidden] {
   display: none;
 }
@@ -339,6 +403,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
 .global-search__results {
   display: grid;
   gap: 10px;
+  min-height: 84px;
 }
 
 .global-search.is-open .global-search__result,
@@ -383,13 +448,36 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
 }
 
 .global-search__result-icon svg {
+  display: block;
   width: 23px;
   height: 23px;
+  max-width: 23px;
+  max-height: 23px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.9;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.global-search__loading {
+  min-height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: rgba(255,255,255,.72);
+  font-size: .86rem;
+}
+
+.global-search__loading > span {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  border: 2px solid rgba(143,224,180,.24);
+  border-top-color: #8fe0b4;
+  border-radius: 50%;
+  animation: globalSearchSpin .72s linear infinite;
 }
 
 .global-search__result-image {
@@ -485,13 +573,18 @@ html[data-theme="light"] .global-search__header input::placeholder,
 html[data-theme="light"] .global-search__result small,
 html[data-theme="light"] .global-search__result em,
 html[data-theme="light"] .global-search__empty,
-html[data-theme="light"] .global-search__empty span {
+html[data-theme="light"] .global-search__empty span,
+html[data-theme="light"] .global-search__loading {
   color: rgba(16,32,24,.64);
 }
 
 @keyframes globalSearchResultIn {
   from { opacity: 0; transform: translateY(8px) scale(.985); }
   to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes globalSearchSpin {
+  to { transform: rotate(360deg); }
 }
 
 html[data-theme="light"] .global-search__header button,

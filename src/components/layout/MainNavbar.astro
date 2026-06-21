@@ -93,7 +93,7 @@ const navMessages = {
             >
               <span class:list={['flag-icon', 'main-navbar-flag', 'fi', language.flagClass]} data-code={language.code.toUpperCase()} aria-hidden="true"></span>
               <span>{language.name}</span>
-              <strong>{language.code.toUpperCase()}</strong>
+              <strong>{language.translation === 'full' ? language.code.toUpperCase() : 'EN fallback'}</strong>
             </a>
           ))}
         </div>
@@ -215,11 +215,12 @@ const navMessages = {
             <a
               href={language.href}
               class:list={['main-navbar-mobile__language', language.active && 'is-active']}
-              aria-label={`${language.name} ${language.code.toUpperCase()}`}
+              aria-label={`${language.name} ${language.code.toUpperCase()}${language.translation === 'full' ? '' : ' — English content fallback'}`}
               aria-current={language.active ? 'page' : undefined}
             >
               <span class:list={['flag-icon', 'main-navbar-flag', 'fi', language.flagClass]} data-code={language.code.toUpperCase()} aria-hidden="true"></span>
               <span>{language.code.toUpperCase()}</span>
+              {language.translation !== 'full' && <small>EN</small>}
             </a>
           ))}
         </div>
@@ -993,6 +994,13 @@ html[data-theme="light"] .main-navbar-theme__icon--moon {
   font-weight: 850;
   letter-spacing: .08em;
   transition: background .22s ease, border-color .22s ease, transform .22s ease;
+}
+
+.main-navbar-mobile__language small {
+  color: #8fe0b4;
+  font-size: 8px;
+  line-height: 1;
+  letter-spacing: .04em;
 }
 
 .main-navbar-mobile__language:hover,
