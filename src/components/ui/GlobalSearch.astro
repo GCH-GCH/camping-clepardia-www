@@ -7,7 +7,7 @@ const pathContext = getPathContext(Astro.url.pathname);
 const entries = getSearchIndex(pathContext.languageCode);
 const searchConfig = {
   entries,
-  empty: pathContext.languageCode === 'pl' ? 'Wpisz np. prąd, pies, tramwaj, dokument, Wieliczka...' : 'Try electricity, dog, tram, document, Wieliczka...',
+  empty: pathContext.languageCode === 'pl' ? 'Wpisz frazę, np. prąd, pies, tramwaj, dokument, Wieliczka.' : 'Try electricity, dog, tram, document or Wieliczka.',
   noResults: pathContext.languageCode === 'pl' ? 'Nie znalazłem wyniku. Spróbuj innej frazy.' : 'No result. Try another phrase.',
 };
 const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').toString('base64');
@@ -25,7 +25,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
       </button>
     </header>
     <div class="global-search__hints">
-      {['prąd', 'pies', 'tramwaj', 'Google Maps', 'dokument', 'Wieliczka', 'Auschwitz', 'sezon'].map((hint) => (
+      {['prąd', 'pies', 'tramwaj', 'Google Maps', 'dokument', 'Wieliczka', 'Auschwitz', 'sezon', 'ręczniki', 'po 21'].map((hint) => (
         <button type="button" data-search-hint={hint}>{hint}</button>
       ))}
     </div>
@@ -81,7 +81,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
       const activeConfig = getConfig();
       const normalizedQuery = normalize(query.trim());
       if (!normalizedQuery) {
-        results.innerHTML = `<p class="global-search__empty">${activeConfig.empty}</p>`;
+        results.innerHTML = `<div class="global-search__empty"><strong>Wyszukiwarka Camping Clepardia</strong><span>${activeConfig.empty}</span></div>`;
         return;
       }
 
@@ -101,15 +101,13 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
         .map((item) => item.entry);
 
       if (!matches.length) {
-        results.innerHTML = `<p class="global-search__empty">${activeConfig.noResults}</p>`;
+        results.innerHTML = `<div class="global-search__empty"><strong>Brak dokładnego wyniku</strong><span>${activeConfig.noResults}</span></div>`;
         return;
       }
 
       results.innerHTML = matches.map((entry) => `
         <a class="global-search__result" href="${entry.href}">
-          ${entry.image
-            ? `<img class="global-search__result-image" src="${entry.image}" alt="" width="84" height="84" loading="lazy" decoding="async">`
-            : `<span class="global-search__result-icon" aria-hidden="true">${resultIcon(entry)}</span>`}
+          <span class="global-search__result-icon" aria-hidden="true">${resultIcon(entry)}</span>
           <span>
             <small>${entry.category}${entry.badge ? ` · ${entry.badge}` : ''}</small>
             <strong>${entry.title}</strong>
@@ -198,6 +196,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
   visibility: hidden;
   pointer-events: none;
   transition: opacity .26s ease, visibility .26s ease;
+  font-family: inherit;
 }
 
 .global-search.is-open {
@@ -342,6 +341,15 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
   gap: 10px;
 }
 
+.global-search.is-open .global-search__result,
+.global-search.is-open .global-search__empty {
+  animation: globalSearchResultIn .28s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.global-search.is-open .global-search__result:nth-child(2) { animation-delay: 35ms; }
+.global-search.is-open .global-search__result:nth-child(3) { animation-delay: 70ms; }
+.global-search.is-open .global-search__result:nth-child(4) { animation-delay: 105ms; }
+
 .global-search__result {
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr) auto;
@@ -414,12 +422,23 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
 }
 
 .global-search__empty {
-  margin: 0;
+  display: grid;
+  gap: 5px;
   padding: 18px;
   border: 1px dashed rgba(143,224,180,.24);
   border-radius: 20px;
   color: rgba(255,255,255,.70);
   background: rgba(255,255,255,.06);
+}
+
+.global-search__empty strong {
+  color: #effff5;
+  font-size: .92rem;
+}
+
+.global-search__empty span {
+  color: rgba(255,255,255,.70);
+  line-height: 1.55;
 }
 
 html[data-theme="light"] .global-search__backdrop {
@@ -447,7 +466,8 @@ html[data-theme="light"] .global-search__header:focus-within {
 }
 
 html[data-theme="light"] .global-search__header input,
-html[data-theme="light"] .global-search__result strong {
+html[data-theme="light"] .global-search__result strong,
+html[data-theme="light"] .global-search__empty strong {
   color: #102018;
 }
 
@@ -464,8 +484,14 @@ html[data-theme="light"] .global-search__result > b {
 html[data-theme="light"] .global-search__header input::placeholder,
 html[data-theme="light"] .global-search__result small,
 html[data-theme="light"] .global-search__result em,
-html[data-theme="light"] .global-search__empty {
+html[data-theme="light"] .global-search__empty,
+html[data-theme="light"] .global-search__empty span {
   color: rgba(16,32,24,.64);
+}
+
+@keyframes globalSearchResultIn {
+  from { opacity: 0; transform: translateY(8px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 html[data-theme="light"] .global-search__header button,

@@ -188,7 +188,7 @@ const finalCampyCopy = {
       currentNotices: activeNoticesAnswer,
       familyAttractions: 'Z dziećmi najczęściej sprawdza się Stare Miasto i Wawel, Wieliczka, Ojców albo Energylandia. Wybór zależy od czasu, pogody i energii ekipy.',
       waterRelax: 'Na wodę i relaks wybierz Park Wodny Kraków przy deszczu lub na krótszy rodzinny wypad, Bagry na miejską plażę i spacer albo Kryspinów na letni dzień poza centrum. Trasy i godziny sprawdź przed wyjazdem, bo zależą od sezonu i dnia.',
-      dog: 'Tak, można z psem. Pies ma stawkę 0 PLN. Prosimy tylko o opiekę nad pupilem i sprzątanie po nim na terenie campingu.',
+      dog: 'Tak, można przyjechać z psem. Pobyt psa kosztuje 0 PLN. Prosimy o opiekę nad pupilem, sprzątanie po nim oraz używanie smyczy i — zależnie od sytuacji lub przepisów — kagańca.',
       bungalowOptions: 'Domki są tylko 2-, 3- i 4-osobowe. Mają osobną dostępność, a przy domkach może być wymagana zaliczka po potwierdzeniu terminu.',
       combinedStay: 'Wybierz wariant Razem, jeśli część osób śpi w domku, a część przyjeżdża kamperem, przyczepą albo namiotem. Formularz zbierze obie części w jednym zapytaniu.',
       wieliczka: 'Wieliczka to klasyczna wycieczka na pół dnia lub dłużej. Przy 3 nocach łatwo połączyć ją z Krakowem; przy 2 nocach będzie intensywnie.',
@@ -196,7 +196,7 @@ const finalCampyCopy = {
       wawel: 'Wawel pasuje nawet do krótkiego pobytu. Z campingu dojedź tramwajem do centrum, a potem przejdź spacerem przez Stare Miasto.',
       schindler: 'Fabryka Schindlera jest dobra na historię XX wieku i deszczowy dzień. Warto wcześniej sprawdzić godziny i dostępność biletów.',
       toursFromKrakow: 'Wycieczki z Krakowa najlepiej planować przez Atrakcje i Planer pobytu: Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia i centrum. Recepcję możesz dopytać o praktyczne wskazówki, ale nie potwierdzamy dostępności wycieczek w chacie.',
-      quiet: 'Camping Clepardia jest spokojnym miejscem, nie imprezowym. Cisza nocna obowiązuje od 22:00 do 07:00.',
+      quiet: 'Cisza nocna obowiązuje od 22:00 do 07:00, a Camping Clepardia nie jest miejscem imprezowym. Obsługa dba o spokojny pobyt. To jednocześnie camping w mieście, dlatego czasem słychać tramwaje, samoloty i normalne miejskie życie.',
       sctEtoll: 'Przed przyjazdem sprawdź aktualne zasady SCT w Krakowie oraz e-TOLL, szczególnie przy większym pojeździe lub zestawie. Przepisy mogą się zmieniać, więc najlepiej korzystać z oficjalnych stron.',
       maps: 'Zalecamy Google Maps, ponieważ dojazd do campingu zmienił się w 2022 roku i starsze nawigacje mogą prowadzić nieprawidłowo.',
       reception: 'Recepcja: +48 795 294 486, email: clepardia@gmail.com. W sprawie pobytu możesz też przejść do kontaktu albo rezerwacji.',
@@ -779,11 +779,8 @@ const quickActionGroups = [
       const matches = entries
         .map((entry) => {
           const haystack = normalize([entry.title, entry.description, entry.category, entry.badge, ...(entry.keywords || [])].filter(Boolean).join(' '));
-          const score = haystack.includes(query)
-            ? 5
-            : parts.some((part) => haystack.includes(part))
-              ? 2
-              : 0;
+          const matchingParts = parts.filter((part) => haystack.includes(part)).length;
+          const score = haystack.includes(query) ? 8 : matchingParts >= Math.max(1, Math.ceil(parts.length * .6)) ? matchingParts : 0;
           return { entry, score };
         })
         .filter((item) => item.score > 0)
@@ -792,7 +789,7 @@ const quickActionGroups = [
         .map((item) => item.entry);
       if (!matches.length) return null;
       return {
-        text: `Znalazłem ${matches.length} wynik${matches.length === 1 ? '' : 'i'} na stronie. Najbliżej pasuje: ${matches.map((entry) => entry.title).join(', ')}.`,
+        text: `Znalazłem podobne tematy: ${matches.map((entry) => entry.title).join(', ')}.`,
         actions: matches.map((entry) => ({ label: entry.title, href: entry.href })),
       };
     };
@@ -800,7 +797,50 @@ const quickActionGroups = [
     const resolveAnswer = (rawPrompt, actionKey = '') => {
       const keyed = actionResponse(actionKey);
       if (keyed) return keyed;
-      const prompt = rawPrompt.toLowerCase();
+      const prompt = rawPrompt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const hasAny = (...parts) => parts.some((part) => prompt.includes(part));
+
+      if (hasAny('lipiec', 'lipcu', 'sierpien', 'sierpniu', 'july', 'august')
+        && hasAny('kamper', 'camper', 'motorhome', 'van', 'namiot', 'tent', 'przyczep', 'caravan', 'camping')) {
+        return {
+          text: 'W lipcu i sierpniu nie przyjmujemy rezerwacji miejsc campingowych. Dotyczy to kamperów, vanów, namiotów i przyczep. Camping działa według kolejności przyjazdu — najlepiej przyjechać około 12:00, ponieważ check-out z campingu jest do 12:00. W lipcu i sierpniu można rezerwować z wyprzedzeniem tylko domki.',
+          actions: [{ label: 'Zobacz domki', href: chatTexts.links?.bookingBungalow }, { label: 'Kontakt z recepcją', href: chatTexts.links?.contact }],
+        };
+      }
+
+      if (hasAny('recznik', 'reczniki', 'towel', 'kosmetyk') && hasAny('domk', 'bungalow', 'cabin')) {
+        return {
+          text: 'Przy pobycie w domkach prosimy zabrać własne rzeczy osobiste, w tym ręczniki i kosmetyki. Dostępne są wyłącznie domki 2-, 3- i 4-osobowe — nie używamy kategorii „domek rodzinny”.',
+          actions: [{ label: 'Zobacz domki', href: chatTexts.links?.bookingBungalow }, { label: 'Wyślij zapytanie', href: chatTexts.links?.booking }],
+        };
+      }
+
+      if (hasAny('po 21', 'po21', '21:00', '21.00', 'pozny przyjazd', 'pozno przyjech', 'late arrival')) {
+        return {
+          text: 'Przy przyjeździe po 21:00 trzeba wcześniej skontaktować się z recepcją. Recepcja i brama mają określone godziny pracy, dlatego najlepiej ustalić szczegóły późnego przyjazdu przed podróżą.',
+          actions: [{ label: 'Kontakt z recepcją', href: chatTexts.links?.contact }, { label: 'Wyślij zapytanie', href: chatTexts.links?.booking }],
+        };
+      }
+
+      if (hasAny('camping w miescie', 'camping miejski', 'w krakowie', 'city campsite', 'city camping')) {
+        return actionResponse('cityCamping') ?? chatTexts.answers.cityCamping;
+      }
+
+      if (hasAny('cichy', 'cisza', 'spokojny', 'imprez', 'quiet', 'party')) {
+        return actionResponse('quiet') ?? chatTexts.answers.quiet;
+      }
+
+      if (hasAny('dokument', 'document', 'dowod', 'paszport', 'rejestracj', 'tablic')) {
+        return actionResponse('registration') ?? chatTexts.answers.registration;
+      }
+
+      if (hasAny('pies', 'psa', 'platny pies', 'dog', 'hund', 'cane')) {
+        return actionResponse('dog') ?? chatTexts.answers.dog;
+      }
+
+      if (hasAny('jak dojechac tramwajem', 'tramwajem', 'tram 18', 'gornickiego', 'stary kleparz')) {
+        return actionResponse('centerTransit') ?? chatTexts.answers.centerTransit;
+      }
 
       if (rawPrompt === chatTexts.actions.bookStay) return actionResponse('bookStay');
       if (rawPrompt === chatTexts.actions.siteSearch) return actionResponse('siteSearch');

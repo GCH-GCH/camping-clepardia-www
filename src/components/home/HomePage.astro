@@ -1,6 +1,5 @@
 ---
 import Hero from '@/components/Hero.astro';
-import GuestReviewsSection from '@/components/home/GuestReviewsSection.astro';
 import HomeStorySection from '@/components/home/HomeStorySection.astro';
 import WhyClepardia from '@/components/home/WhyClepardia.astro';
 import CampingSection from '@/components/home/CampingSection.astro';
@@ -23,7 +22,6 @@ const { languageCode } = Astro.props as Props;
 ---
 
 <Hero languageCode={languageCode} />
-<GuestReviewsSection languageCode={languageCode} />
 <SiteNoticesSection languageCode={languageCode} />
 <HomeStorySection languageCode={languageCode} />
 <WhyClepardia languageCode={languageCode} />

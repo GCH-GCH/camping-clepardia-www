@@ -882,6 +882,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     };
     let suppressCalendarClick = false;
     let viewportToastTimer = 0;
+    let activeScrollAnimation = 0;
+    let modalReturnScrollY = 0;
+    let modalWasOpen = false;
 
     const showViewportToast = (message, type = 'error') => {
       if (!(viewportToast instanceof HTMLElement) || !message) return;
@@ -901,12 +904,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         privacy: 'Wyrażam zgodę na przetwarzanie danych osobowych w celu obsługi zapytania.',
         privacyHelper: 'Wymagane. Dane wykorzystamy tylko do odpowiedzi na zapytanie.',
         validation: {
-          name: 'Podaj imię i nazwisko.',
-          contact: 'Podaj email albo telefon.',
-          country: 'Wybierz kraj z listy.',
+          name: 'Uzupełnij imię i nazwisko.',
+          contact: 'Podaj e-mail albo telefon.',
+          country: 'Wybierz kraj.',
           dates: 'Wybierz datę przyjazdu i wyjazdu.',
-          service: 'Wybierz przynajmniej jedną opcję pobytu lub usługę.',
-          consents: 'Zaznacz wymagane zgody przed wysłaniem zapytania.',
+          service: 'Wybierz opcję pobytu lub usługę.',
+          consents: 'Zaznacz wymagane zgody.',
         },
         plateHints: {
           camper: 'Przy kamperze wpisz rejestrację kampera.',
@@ -1641,13 +1644,52 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const yesLabel = () => config.lang === 'pl' ? 'Tak' : 'Yes';
 
-    const scrollBehavior = () => reducedMotion.matches ? 'auto' : 'smooth';
+    const findScrollContainer = (element) => {
+      let parent = element?.parentElement;
+      while (parent && parent !== document.body && parent !== document.documentElement) {
+        const style = window.getComputedStyle(parent);
+        if (/(auto|scroll)/.test(style.overflowY) && parent.scrollHeight > parent.clientHeight + 2) return parent;
+        parent = parent.parentElement;
+      }
+      return null;
+    };
+
+    const animateScrollTo = (target, { offset = 112, center = false } = {}) => {
+      if (!(target instanceof HTMLElement)) return;
+      window.cancelAnimationFrame(activeScrollAnimation);
+      const container = findScrollContainer(target);
+      const targetRect = target.getBoundingClientRect();
+      const start = container ? container.scrollTop : window.scrollY;
+      const viewportHeight = container ? container.clientHeight : window.innerHeight;
+      const containerTop = container ? container.getBoundingClientRect().top : 0;
+      const relativeTop = targetRect.top - containerTop;
+      const destination = Math.max(
+        0,
+        start + relativeTop - (center ? Math.max(24, (viewportHeight - targetRect.height) / 2) : offset),
+      );
+
+      if (reducedMotion.matches || Math.abs(destination - start) < 2) {
+        if (container) container.scrollTo({ top: destination, behavior: 'auto' });
+        else window.scrollTo({ top: destination, behavior: 'auto' });
+        return;
+      }
+
+      const startedAt = performance.now();
+      const duration = Math.min(620, Math.max(380, Math.abs(destination - start) * .45));
+      const ease = (progress) => 1 - Math.pow(1 - progress, 4);
+      const tick = (now) => {
+        const progress = Math.min(1, (now - startedAt) / duration);
+        const next = start + (destination - start) * ease(progress);
+        if (container) container.scrollTop = next;
+        else window.scrollTo(0, next);
+        if (progress < 1) activeScrollAnimation = window.requestAnimationFrame(tick);
+      };
+      activeScrollAnimation = window.requestAnimationFrame(tick);
+    };
 
     const scrollToTop = () => {
-      const target = mount.querySelector('.reservation-progress, .reservation-step-card, .reservation-mini__start');
-      const anchor = target instanceof HTMLElement ? target : root;
-      const top = Math.max(0, anchor.getBoundingClientRect().top + window.scrollY - 112);
-      window.scrollTo({ top, behavior: scrollBehavior() });
+      const target = mount.querySelector('.reservation-step-card, .reservation-mini__start, .reservation-progress');
+      animateScrollTo(target instanceof HTMLElement ? target : root);
     };
 
     const scheduleScrollToTop = () => {
@@ -2799,7 +2841,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const render = ({ motion = 'soft' } = {}) => {
       root.classList.toggle('is-soft-render', motion === 'soft');
-      document.documentElement.classList.toggle('reservation-modal-open', Boolean(state.success || state.helpOpen));
+      const modalOpen = Boolean(state.success || state.helpOpen);
+      if (modalOpen && !modalWasOpen) modalReturnScrollY = window.scrollY;
+      document.documentElement.classList.toggle('reservation-modal-open', modalOpen);
+      modalWasOpen = modalOpen;
       mount.innerHTML = state.mode ? appTemplate() : startTemplate();
     };
 
@@ -3004,7 +3049,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const scrollFirstIssue = () => {
       const issue = mount.querySelector('.reservation-field.is-invalid, .reservation-option-row.is-invalid, .reservation-missing-card');
       if (issue instanceof HTMLElement) {
-        issue.scrollIntoView({ behavior: scrollBehavior(), block: 'center' });
+        animateScrollTo(issue, { center: true });
+        const field = issue.querySelector('input, select, textarea, button');
+        if (field instanceof HTMLElement) field.focus({ preventScroll: true });
       }
     };
 
@@ -3079,8 +3126,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         state.success = true;
         showViewportToast(
           state.inquirySaved
-            ? (state.mailDelivered ? 'Zapytanie zapisane i wysłane do recepcji.' : 'Nie udało się wysłać maila, ale zapytanie zapisano w panelu recepcji.')
-            : 'Nie udało się zapisać zapytania.',
+            ? (state.mailDelivered ? 'Zapytanie zapisane i wysłane do recepcji.' : 'Zapytanie zapisano w panelu recepcji, ale mail automatyczny nie został dostarczony.')
+            : 'Nie udało się zapisać zapytania. Skontaktuj się z recepcją.',
           state.inquirySaved ? (state.mailDelivered ? 'success' : 'warning') : 'error',
         );
       } catch {
@@ -3193,6 +3240,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         event.preventDefault();
         state.success = false;
         render();
+        window.requestAnimationFrame(() => window.scrollTo({ top: modalReturnScrollY, behavior: 'auto' }));
         return;
       }
 
@@ -3726,10 +3774,8 @@ body.booking-app-page .main-content {
   overflow: hidden;
   transform: translateZ(0);
   transition: transform .26s cubic-bezier(.22, 1, .36, 1), border-color .26s ease, box-shadow .26s ease;
-  animation:
-    reservationCardIn .72s cubic-bezier(.22, 1, .36, 1) both,
-    reservationChoiceFloat 7.4s ease-in-out infinite;
-  animation-delay: var(--choice-delay, .28s), calc(var(--choice-delay, .28s) + .9s);
+  animation: reservationCardIn .72s cubic-bezier(.22, 1, .36, 1) both;
+  animation-delay: var(--choice-delay, .28s);
 }
 
 .reservation-mini__choices .reservation-choice-card:nth-child(1) { --choice-delay: .22s; }
@@ -4003,7 +4049,7 @@ body.booking-app-page .main-content {
 
 .reservation-viewport-toast {
   position: fixed;
-  z-index: 100500;
+  z-index: 2147483000;
   top: max(18px, env(safe-area-inset-top));
   left: 50%;
   width: min(520px, calc(100vw - 24px));
@@ -5453,18 +5499,19 @@ body.booking-app-page .main-content {
 .reservation-success-modal {
   position: fixed;
   inset: 0;
-  z-index: 100000;
+  z-index: 2147482000;
   display: grid;
   pointer-events: auto;
 }
 
 .reservation-help__scrim,
 .reservation-success-modal::before {
+  content: '';
   position: absolute;
   inset: 0;
-  background: rgba(2, 8, 5, .62);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(2, 8, 5, .88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .reservation-help__panel,
@@ -5525,10 +5572,10 @@ body.booking-app-page .main-content {
 }
 
 .reservation-success-modal__close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 2;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: -6px -6px 0 auto;
   width: 42px;
   height: 42px;
   display: grid;
@@ -5591,6 +5638,7 @@ body.booking-app-page .main-content {
   width: min(760px, 100%);
   max-height: min(760px, calc(100dvh - 40px));
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: clamp(22px, 4vw, 34px);
   border-radius: 30px;
   animation: reservationStepIn .28s cubic-bezier(.22,1,.36,1) both;
@@ -6006,8 +6054,8 @@ html[data-theme="light"] .reservation-success-modal__card {
   color: #122319;
   border-color: rgba(22,56,36,.12);
   background:
-    linear-gradient(145deg, rgba(255,255,255,.84), rgba(255,255,255,.58)),
-    radial-gradient(circle at 14% 0%, rgba(60,179,113,.12), transparent 36%);
+    radial-gradient(circle at 14% 0%, rgba(60,179,113,.12), transparent 36%),
+    #fff;
   box-shadow: 0 24px 80px rgba(44,71,48,.14), inset 0 1px 0 rgba(255,255,255,.72);
 }
 
@@ -6140,6 +6188,48 @@ html[data-theme="light"] .reservation-copy-fallback {
   color: #122319;
   border-color: rgba(22,56,36,.14);
   background: rgba(255,255,255,.72);
+}
+
+html[data-theme="light"] .reservation-country__list {
+  border-color: rgba(18,56,34,.22);
+  background: #fff;
+  box-shadow: 0 24px 64px rgba(27,74,46,.20);
+}
+
+html[data-theme="light"] .reservation-country__list button {
+  color: #122319;
+  border-color: rgba(18,56,34,.10);
+  background: #f6faf7;
+}
+
+html[data-theme="light"] .reservation-country__list button:hover,
+html[data-theme="light"] .reservation-country__list button:focus-visible,
+html[data-theme="light"] .reservation-country__list button.is-active {
+  color: #092416;
+  border-color: rgba(35,120,77,.34);
+  background: #dff5e7;
+  box-shadow: inset 4px 0 0 #3CB371;
+}
+
+html[data-theme="light"] .reservation-country__list img {
+  border: 1px solid rgba(18,56,34,.18);
+  background: #fff;
+}
+
+html[data-theme="light"] .reservation-summary {
+  border-color: rgba(22,83,49,.18);
+  background: #fff;
+  box-shadow: 0 26px 72px rgba(35,84,52,.16);
+}
+
+html[data-theme="light"] .reservation-summary-row {
+  background: #f4f9f5;
+}
+
+html[data-theme="light"] .reservation-success-modal__close {
+  color: #122319;
+  border-color: rgba(18,56,34,.16);
+  background: #eef6f0;
 }
 
 html[data-theme="light"] .reservation-calendar__day,
