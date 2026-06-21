@@ -28,8 +28,11 @@ const label = isHome ? copy.home : copy.page;
     if (!(hint instanceof HTMLButtonElement)) return;
 
     const getTarget = () => {
-      const preferred = document.querySelector('#after-hero, [data-after-hero]');
-      if (preferred instanceof HTMLElement && preferred.getBoundingClientRect().top > 96) return preferred;
+      const preferred = document.querySelector('#start-content');
+      if (preferred instanceof HTMLElement) return preferred;
+
+      const legacyTarget = document.querySelector('#after-hero, [data-after-hero]');
+      if (legacyTarget instanceof HTMLElement) return legacyTarget;
 
       const main = document.querySelector('main');
       const sections = Array.from((main ?? document).querySelectorAll('section'))
@@ -69,13 +72,7 @@ const label = isHome ? copy.home : copy.page;
       }
       const navbar = document.querySelector('[data-main-navbar], #mainNavbarShell, #mainNavbar');
       const offset = navbar instanceof HTMLElement ? navbar.getBoundingClientRect().height + 16 : 92;
-      const targetTop = Math.max(0, window.scrollY + target.getBoundingClientRect().top - offset);
-      const fallbackTop = Math.min(
-        document.documentElement.scrollHeight - window.innerHeight,
-        window.scrollY + Math.max(window.innerHeight * 0.72, 320),
-      );
-      const top = targetTop > window.scrollY + 8 ? targetTop : fallbackTop;
-      scrollTo(top);
+      scrollTo(Math.max(0, window.scrollY + target.getBoundingClientRect().top - offset));
     };
 
     const updateVisibility = () => {

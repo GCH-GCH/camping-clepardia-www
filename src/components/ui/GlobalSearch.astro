@@ -25,7 +25,7 @@ const searchConfigEncoded = Buffer.from(JSON.stringify(searchConfig), 'utf-8').t
       </button>
     </header>
     <div class="global-search__hints">
-      {['prąd', 'pies', 'tramwaj', 'Google Maps', 'dokument', 'Wieliczka', 'Auschwitz', 'sezon', 'ręczniki', 'po 21'].map((hint) => (
+      {['prąd', 'pies', 'tramwaj', 'Google Maps', 'dokument', 'Wieliczka', 'Auschwitz', 'sezon', 'ręczniki', 'po 21', 'Kazimierz'].map((hint) => (
         <button type="button" data-search-hint={hint}>{hint}</button>
       ))}
     </div>

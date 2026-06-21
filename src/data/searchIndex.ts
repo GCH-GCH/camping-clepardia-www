@@ -185,6 +185,17 @@ export const baseSearchIndex: SearchIndexEntry[] = [
     keywords: ['wawel', 'zamek', 'katedra', 'stare miasto', 'kraków', 'krakow'],
   },
   {
+    id: 'kazimierz',
+    title: 'Kazimierz — klimatyczna dzielnica Krakowa',
+    description: 'Dawna dzielnica żydowska z synagogami, restauracjami, kawiarniami i dobrym planem na popołudnie lub wieczór.',
+    href: '/atrakcje',
+    category: 'Atrakcje',
+    badge: 'Kraków',
+    icon: 'Landmark',
+    image: attractionImages.kazimierz.src,
+    keywords: ['kazimierz', 'dzielnica żydowska', 'synagogi', 'szeroka', 'plac nowy', 'restauracje', 'kawiarnie', 'wieczór'],
+  },
+  {
     id: 'schindler',
     title: 'Fabryka Schindlera',
     description: 'Muzeum historii XX wieku i dobry pomysł na deszczowy dzień w Krakowie.',

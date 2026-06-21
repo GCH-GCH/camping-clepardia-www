@@ -1431,3 +1431,8 @@ html[data-theme="dark"] .section-overline {
     border-radius: 22px;
   }
 }
+html.reservation-modal-open,
+html.reservation-modal-open body {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}

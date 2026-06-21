@@ -19,9 +19,9 @@ export const attractionImages = {
   },
   kazimierz: {
     src: '/images/attractions/kazimierz.webp',
-    altPl: 'Ulice i zabudowa krakowskiego Kazimierza',
-    width: 1200,
-    height: 760,
+    altPl: 'Ulica Szeroka i restauracje na krakowskim Kazimierzu wieczorem',
+    width: 1536,
+    height: 1024,
     sizes: cardSizes,
   },
   wawel: {

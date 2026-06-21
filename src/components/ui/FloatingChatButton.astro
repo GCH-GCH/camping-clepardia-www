@@ -842,6 +842,20 @@ const quickActionGroups = [
         return actionResponse('centerTransit') ?? chatTexts.answers.centerTransit;
       }
 
+      if (hasAny('kazimierz')) {
+        return {
+          text: 'Kazimierz to klimatyczna, historyczna dzielnica Krakowa — dawna dzielnica żydowska, dziś pełna restauracji, kawiarni, synagog i miejsc na spacer. Dobrze pasuje na popołudnie lub wieczór. Z campingu najlepiej dojechać tramwajem w stronę centrum, a dalej przejść pieszo lub przesiąść się zgodnie z Google Maps albo Jakdojade.',
+          actions: [{ label: 'Zobacz atrakcje', href: chatTexts.links?.attractions }, { label: 'Sprawdź dojazd', href: chatTexts.links?.directions }],
+        };
+      }
+
+      if (/^(czesc|hej|hejka|dzien dobry|witam|hello|hi)[!,. ]*$/.test(prompt.trim())) {
+        return {
+          text: 'Cześć! Pomogę Ci z rezerwacją, cennikiem, dojazdem tramwajem, domkami, zasadami pobytu i atrakcjami Krakowa. O co chcesz zapytać?',
+          actions: [{ label: 'Rezerwacja', href: chatTexts.links?.booking }, { label: 'Atrakcje', href: chatTexts.links?.attractions }],
+        };
+      }
+
       if (rawPrompt === chatTexts.actions.bookStay) return actionResponse('bookStay');
       if (rawPrompt === chatTexts.actions.siteSearch) return actionResponse('siteSearch');
       if (rawPrompt === chatTexts.actions.registration) return actionResponse('registration');

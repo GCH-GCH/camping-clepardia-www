@@ -788,7 +788,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       </div>
     </div>
   </div>
-  <div class="reservation-viewport-toast" data-reservation-viewport-toast role="status" aria-live="assertive" hidden></div>
+  <div class="reservation-viewport-toast" data-reservation-viewport-toast role="alert" aria-live="assertive" hidden>
+    <span data-reservation-viewport-toast-message></span>
+    <button type="button" data-reservation-toast-close aria-label="Zamknij komunikat">×</button>
+  </div>
 
   <script id="reservation-mini-config" type="application/json" set:html={safeConfig}></script>
 </section>
@@ -799,6 +802,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     if (!(root instanceof HTMLElement)) return;
     const mount = root.querySelector('[data-reservation-mini-mount]');
     const viewportToast = root.querySelector('[data-reservation-viewport-toast]');
+    const viewportToastMessage = root.querySelector('[data-reservation-viewport-toast-message]');
     const configNode = document.getElementById('reservation-mini-config');
     if (!(mount instanceof HTMLElement) || !configNode?.textContent) return;
 
@@ -882,21 +886,25 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     };
     let suppressCalendarClick = false;
     let viewportToastTimer = 0;
-    let activeScrollAnimation = 0;
     let modalReturnScrollY = 0;
     let modalWasOpen = false;
+    let modalScrollLock = null;
+
+    const hideViewportToast = () => {
+      if (!(viewportToast instanceof HTMLElement)) return;
+      window.clearTimeout(viewportToastTimer);
+      viewportToast.classList.remove('is-visible');
+      window.setTimeout(() => { viewportToast.hidden = true; }, 220);
+    };
 
     const showViewportToast = (message, type = 'error') => {
-      if (!(viewportToast instanceof HTMLElement) || !message) return;
+      if (!(viewportToast instanceof HTMLElement) || !(viewportToastMessage instanceof HTMLElement) || !message) return;
       window.clearTimeout(viewportToastTimer);
-      viewportToast.textContent = String(message);
+      viewportToastMessage.textContent = String(message);
       viewportToast.dataset.type = type;
       viewportToast.hidden = false;
       window.requestAnimationFrame(() => viewportToast.classList.add('is-visible'));
-      viewportToastTimer = window.setTimeout(() => {
-        viewportToast.classList.remove('is-visible');
-        window.setTimeout(() => { viewportToast.hidden = true; }, 220);
-      }, 4600);
+      viewportToastTimer = window.setTimeout(hideViewportToast, 4600);
     };
 
     const formTextByLang = {
@@ -1654,42 +1662,28 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       return null;
     };
 
-    const animateScrollTo = (target, { offset = 112, center = false } = {}) => {
+    const scrollToReservationSection = (target, { center = false } = {}) => {
       if (!(target instanceof HTMLElement)) return;
-      window.cancelAnimationFrame(activeScrollAnimation);
       const container = findScrollContainer(target);
       const targetRect = target.getBoundingClientRect();
       const start = container ? container.scrollTop : window.scrollY;
       const viewportHeight = container ? container.clientHeight : window.innerHeight;
       const containerTop = container ? container.getBoundingClientRect().top : 0;
       const relativeTop = targetRect.top - containerTop;
+      const navbar = document.querySelector('[data-main-navbar], #mainNavbarShell, #mainNavbar');
+      const stickyOffset = navbar instanceof HTMLElement ? navbar.getBoundingClientRect().height + 18 : 112;
       const destination = Math.max(
         0,
-        start + relativeTop - (center ? Math.max(24, (viewportHeight - targetRect.height) / 2) : offset),
+        start + relativeTop - (center ? Math.max(24, (viewportHeight - targetRect.height) / 2) : stickyOffset),
       );
-
-      if (reducedMotion.matches || Math.abs(destination - start) < 2) {
-        if (container) container.scrollTo({ top: destination, behavior: 'auto' });
-        else window.scrollTo({ top: destination, behavior: 'auto' });
-        return;
-      }
-
-      const startedAt = performance.now();
-      const duration = Math.min(620, Math.max(380, Math.abs(destination - start) * .45));
-      const ease = (progress) => 1 - Math.pow(1 - progress, 4);
-      const tick = (now) => {
-        const progress = Math.min(1, (now - startedAt) / duration);
-        const next = start + (destination - start) * ease(progress);
-        if (container) container.scrollTop = next;
-        else window.scrollTo(0, next);
-        if (progress < 1) activeScrollAnimation = window.requestAnimationFrame(tick);
-      };
-      activeScrollAnimation = window.requestAnimationFrame(tick);
+      const behavior = reducedMotion.matches ? 'auto' : 'smooth';
+      if (container) container.scrollTo({ top: destination, behavior });
+      else window.scrollTo({ top: destination, behavior });
     };
 
     const scrollToTop = () => {
       const target = mount.querySelector('.reservation-step-card, .reservation-mini__start, .reservation-progress');
-      animateScrollTo(target instanceof HTMLElement ? target : root);
+      scrollToReservationSection(target instanceof HTMLElement ? target : root);
     };
 
     const scheduleScrollToTop = () => {
@@ -1741,7 +1735,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const percent = Math.max(0, Math.min(100, (state.step / steps.length) * 100));
       const activeHint = state.toast || stepHints[state.step - 1] || '';
       return `
-        <div class="reservation-progress" aria-label="Booking progress">
+        <div class="reservation-progress" data-reservation-progress aria-label="Booking progress">
           <div class="reservation-progress__meter">
             <span>${esc(ui.progressLabel || 'Progress')}</span>
             <strong>${Math.round(percent)}%</strong>
@@ -2408,7 +2402,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     };
 
     const navTemplate = () => `
-      <div class="reservation-nav">
+      <div class="reservation-nav" data-reservation-nav>
         <button class="reservation-btn reservation-btn--ghost" type="button" data-back ${state.step <= 1 ? 'disabled' : ''}>${esc(t.actions.back)}</button>
         ${state.step < 5
           ? `<button class="reservation-btn reservation-btn--primary" type="button" data-next>${esc(t.actions.next)}</button>`
@@ -2599,7 +2593,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <div class="reservation-mini__layout">
           <div>
             <div class="reservation-mini__toast" aria-live="polite">${esc(state.toast || stepHints[state.step - 1])}</div>
-            ${activeStepTemplate()}
+            <div data-reservation-active-step>${activeStepTemplate()}</div>
             ${navTemplate()}
           </div>
           ${summaryTemplate()}
@@ -2839,11 +2833,43 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       updateToastDom();
     };
 
+    const syncModalScrollLock = (open) => {
+      if (open && !modalScrollLock) {
+        modalScrollLock = {
+          htmlOverflow: document.documentElement.style.overflow,
+          bodyOverflow: document.body.style.overflow,
+        };
+        window.scrollTo({ top: window.scrollY, behavior: 'auto' });
+        document.documentElement.style.setProperty('overflow', 'hidden', 'important');
+        document.body.style.setProperty('overflow', 'hidden', 'important');
+        return;
+      }
+      if (!open && modalScrollLock) {
+        document.documentElement.style.overflow = modalScrollLock.htmlOverflow;
+        document.body.style.overflow = modalScrollLock.bodyOverflow;
+        modalScrollLock = null;
+      }
+    };
+
+    const renderStepDom = ({ motion = 'step' } = {}) => {
+      root.classList.toggle('is-soft-render', motion === 'soft');
+      const progress = mount.querySelector('[data-reservation-progress]');
+      if (progress instanceof HTMLElement) progress.outerHTML = progressTemplate();
+      const activeStep = mount.querySelector('[data-reservation-active-step]');
+      if (activeStep instanceof HTMLElement) activeStep.innerHTML = activeStepTemplate();
+      const nav = mount.querySelector('[data-reservation-nav]');
+      if (nav instanceof HTMLElement) nav.outerHTML = navTemplate();
+      updateSummaryDom();
+      updateValidationDom();
+      updateToastDom();
+    };
+
     const render = ({ motion = 'soft' } = {}) => {
       root.classList.toggle('is-soft-render', motion === 'soft');
       const modalOpen = Boolean(state.success || state.helpOpen);
       if (modalOpen && !modalWasOpen) modalReturnScrollY = window.scrollY;
       document.documentElement.classList.toggle('reservation-modal-open', modalOpen);
+      syncModalScrollLock(modalOpen);
       modalWasOpen = modalOpen;
       mount.innerHTML = state.mode ? appTemplate() : startTemplate();
     };
@@ -3049,7 +3075,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const scrollFirstIssue = () => {
       const issue = mount.querySelector('.reservation-field.is-invalid, .reservation-option-row.is-invalid, .reservation-missing-card');
       if (issue instanceof HTMLElement) {
-        animateScrollTo(issue, { center: true });
+        scrollToReservationSection(issue, { center: true });
         const field = issue.querySelector('input, select, textarea, button');
         if (field instanceof HTMLElement) field.focus({ preventScroll: true });
       }
@@ -3059,7 +3085,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (state.submitting) return;
       if (!validateForSubmit()) {
         showViewportToast(state.hint, 'error');
-        render();
+        renderStepDom();
         window.setTimeout(scrollFirstIssue, 50);
         return;
       }
@@ -3239,8 +3265,15 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (target.closest('[data-success-close]')) {
         event.preventDefault();
         state.success = false;
-        render();
-        window.requestAnimationFrame(() => window.scrollTo({ top: modalReturnScrollY, behavior: 'auto' }));
+        target.closest('.reservation-success-modal')?.remove();
+        document.documentElement.classList.remove('reservation-modal-open');
+        syncModalScrollLock(false);
+        modalWasOpen = false;
+        window.requestAnimationFrame(() => {
+          const currentStep = mount.querySelector('.reservation-step-card, .reservation-progress');
+          if (currentStep instanceof HTMLElement) scrollToReservationSection(currentStep);
+          else window.scrollTo({ top: modalReturnScrollY, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+        });
         return;
       }
 
@@ -3310,7 +3343,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         if (next >= 1 && next <= state.step) {
           state.step = next;
           state.hint = '';
-          render({ motion: 'step' });
+          renderStepDom({ motion: 'step' });
           scheduleScrollToTop();
         }
         return;
@@ -3359,7 +3392,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         event.preventDefault();
         state.step = Math.max(1, state.step - 1);
         state.hint = '';
-        render({ motion: 'step' });
+        renderStepDom({ motion: 'step' });
         scheduleScrollToTop();
         return;
       }
@@ -3368,7 +3401,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         event.preventDefault();
         if (!validateBeforeNext()) {
           showViewportToast(state.hint, 'error');
-          render();
+          renderStepDom();
           window.setTimeout(scrollFirstIssue, 90);
           return;
         }
@@ -3376,7 +3409,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         const reward = stepRewards[previousStepKey] || '';
         state.step = Math.min(5, state.step + 1);
         state.toast = reward;
-        render({ motion: 'step' });
+        renderStepDom({ motion: 'step' });
         if (reward) {
           window.setTimeout(() => {
             if (state.toast === reward) {
@@ -3392,6 +3425,14 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (target.closest('[data-submit]')) {
         event.preventDefault();
         void submit();
+      }
+    });
+
+    root.addEventListener('click', (event) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest('[data-reservation-toast-close]')) {
+        event.preventDefault();
+        hideViewportToast();
       }
     });
 
@@ -4050,10 +4091,15 @@ body.booking-app-page .main-content {
 .reservation-viewport-toast {
   position: fixed;
   z-index: 2147483000;
-  top: max(18px, env(safe-area-inset-top));
+  top: 50%;
   left: 50%;
   width: min(520px, calc(100vw - 24px));
-  padding: 15px 18px;
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 38px;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 14px 14px 18px;
   border: 1px solid rgba(255,255,255,.20);
   border-radius: 18px;
   color: #fff;
@@ -4064,7 +4110,7 @@ body.booking-app-page .main-content {
   font-weight: 900;
   line-height: 1.45;
   opacity: 0;
-  transform: translate(-50%, -18px) scale(.97);
+  transform: translate(-50%, calc(-50% - 18px)) scale(.97);
   pointer-events: none;
   transition: opacity .22s ease, transform .22s cubic-bezier(.22, 1, .36, 1);
 }
@@ -4083,9 +4129,10 @@ body.booking-app-page .main-content {
   box-shadow: 0 22px 70px rgba(132, 75, 5, .28);
 }
 
-:global(html.reservation-modal-open),
-:global(html.reservation-modal-open body) {
-  overflow: hidden;
+html.reservation-modal-open,
+html.reservation-modal-open body {
+  overflow: hidden !important;
+  overscroll-behavior: none;
 }
 
 .reservation-field-warning {
@@ -4101,11 +4148,32 @@ body.booking-app-page .main-content {
 
 .reservation-viewport-toast.is-visible {
   opacity: 1;
-  transform: translate(-50%, 0) scale(1);
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
 }
 
 .reservation-viewport-toast[hidden] {
   display: none !important;
+}
+
+.reservation-viewport-toast button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.34);
+  border-radius: 999px;
+  color: inherit;
+  background: rgba(255,255,255,.15);
+  font-size: 1.25rem;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.reservation-viewport-toast button:hover,
+.reservation-viewport-toast button:focus-visible {
+  background: rgba(255,255,255,.28);
+  box-shadow: 0 0 0 4px rgba(255,255,255,.15);
 }
 
 .reservation-progress__mobile {
@@ -6238,6 +6306,34 @@ html[data-theme="light"] .reservation-smart-suggestions article {
   color: #122319;
   border-color: rgba(22,56,36,.13);
   background: rgba(255,255,255,.68);
+}
+
+html[data-theme="light"] .reservation-calendar__nav {
+  border-color: rgba(22,83,49,.22);
+  background: #eef7f0;
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+html[data-theme="light"] .reservation-calendar__nav em {
+  color: #102d1d;
+  font-weight: 950;
+}
+
+html[data-theme="light"] .reservation-calendar__nav button {
+  color: #0b4429;
+  border: 1px solid rgba(35,120,77,.22);
+  background: #d9f1e1;
+}
+
+html[data-theme="light"] .reservation-summary__total {
+  color: #102d1d;
+  border-color: rgba(35,120,77,.24);
+  background: #def3e5;
+}
+
+html[data-theme="light"] .reservation-summary__total strong,
+html[data-theme="light"] .reservation-summary__total em {
+  color: #102d1d;
 }
 
 html[data-theme="light"] .reservation-calendar__day.is-range {
