@@ -491,6 +491,316 @@ const modeChipsCopy = {
 } as const;
 const modeChips = modeChipsCopy[uiLang as keyof typeof modeChipsCopy] ?? modeChipsCopy[lang] ?? modeChipsCopy.en;
 
+const beforeArrivalCopy = {
+  pl: {
+    title: 'Dobrze wiedzieć przed przyjazdem',
+    items: [
+      'Dokument tożsamości',
+      'Numer rejestracyjny pojazdu i przyczepy',
+      'Google Maps — wjazd zmienił się w 2022',
+      'Cisza nocna 22:00–07:00',
+      'Prąd 10A, nie do EV',
+      'Pies 0 PLN — prosimy sprzątać po pupilu',
+      'To zielony camping w mieście',
+      'Domki: własne ręczniki i rzeczy osobiste',
+      'Przyjazd po 21:00: kontakt z recepcją',
+      'Camping: check-out do 12:00',
+    ],
+  },
+  en: {
+    title: 'Good to know before arrival',
+    items: [
+      'Identity document',
+      'Vehicle and caravan registration numbers',
+      'Use Google Maps — the entrance changed in 2022',
+      'Quiet hours 22:00–07:00',
+      '10A power, not for EV charging',
+      'Dog 0 PLN — please clean up after your pet',
+      'This is a green urban campsite',
+      'Bungalows: bring towels and personal items',
+      'Arrival after 21:00: contact reception',
+      'Camping check-out by 12:00',
+    ],
+  },
+  de: {
+    title: 'Gut zu wissen vor der Anreise',
+    items: [
+      'Ausweisdokument',
+      'Kennzeichen von Fahrzeug und Wohnwagen',
+      'Google Maps nutzen — Zufahrt seit 2022 geändert',
+      'Nachtruhe 22:00–07:00',
+      '10A Strom, nicht zum Laden von Elektroautos',
+      'Hund 0 PLN — bitte Hinterlassenschaften entfernen',
+      'Ein grüner Campingplatz in der Stadt',
+      'Bungalows: eigene Handtücher und persönliche Dinge',
+      'Anreise nach 21:00: Rezeption kontaktieren',
+      'Camping Check-out bis 12:00',
+    ],
+  },
+  it: {
+    title: 'Da sapere prima dell’arrivo',
+    items: [
+      'Documento di identità',
+      'Targa del veicolo e della roulotte',
+      'Usa Google Maps — ingresso cambiato nel 2022',
+      'Silenzio 22:00–07:00',
+      'Corrente 10A, non per ricarica EV',
+      'Cane 0 PLN — raccogliere i bisogni',
+      'È un campeggio verde in città',
+      'Bungalow: porta asciugamani ed effetti personali',
+      'Arrivo dopo le 21:00: contatta la reception',
+      'Check-out camping entro le 12:00',
+    ],
+  },
+} as const;
+const beforeArrival = beforeArrivalCopy[lang] ?? beforeArrivalCopy.en;
+
+const clientSuccessCopy = {
+  pl: {
+    badge: 'Zapytanie wysłane',
+    title: 'Dziękujemy! Zapytanie zostało wysłane do recepcji.',
+    text: 'Recepcja odpowie możliwie szybko. Jeśli sprawa jest pilna, prosimy o kontakt telefoniczny.',
+    errorTitle: 'Nie udało się wysłać zapytania',
+    errorText: 'Spróbuj ponownie lub skontaktuj się z recepcją.',
+    home: 'Wróć na stronę główną',
+    directions: 'Zobacz dojazd',
+    campy: 'Zapytaj CAMPY',
+    attractions: 'Sprawdź atrakcje',
+  },
+  en: {
+    badge: 'Enquiry sent',
+    title: 'Thank you! Your enquiry has been sent to reception.',
+    text: 'Reception will reply as soon as possible. If your request is urgent, please call us.',
+    errorTitle: 'We could not send your enquiry',
+    errorText: 'Please try again or contact reception.',
+    home: 'Back to homepage',
+    directions: 'See directions',
+    campy: 'Ask CAMPY',
+    attractions: 'See attractions',
+  },
+  de: {
+    badge: 'Anfrage gesendet',
+    title: 'Vielen Dank! Ihre Anfrage wurde an die Rezeption gesendet.',
+    text: 'Die Rezeption antwortet so schnell wie möglich. In dringenden Fällen rufen Sie uns bitte an.',
+    errorTitle: 'Ihre Anfrage konnte nicht gesendet werden',
+    errorText: 'Bitte versuchen Sie es erneut oder kontaktieren Sie die Rezeption.',
+    home: 'Zur Startseite',
+    directions: 'Anreise ansehen',
+    campy: 'CAMPY fragen',
+    attractions: 'Attraktionen ansehen',
+  },
+  it: {
+    badge: 'Richiesta inviata',
+    title: 'Grazie! La richiesta è stata inviata alla reception.',
+    text: 'La reception risponderà il prima possibile. Se è urgente, chiamaci.',
+    errorTitle: 'Non è stato possibile inviare la richiesta',
+    errorText: 'Riprova oppure contatta la reception.',
+    home: 'Torna alla homepage',
+    directions: 'Vedi indicazioni',
+    campy: 'Chiedi a CAMPY',
+    attractions: 'Vedi attrazioni',
+  },
+  fr: {
+    badge: 'Demande envoyée',
+    title: 'Merci ! Votre demande a été envoyée à la réception.',
+    text: 'La réception répondra dès que possible. En cas d’urgence, veuillez nous appeler.',
+    errorTitle: 'Votre demande n’a pas pu être envoyée',
+    errorText: 'Veuillez réessayer ou contacter la réception.',
+    home: 'Retour à l’accueil',
+    directions: 'Voir l’accès',
+    campy: 'Demander à CAMPY',
+    attractions: 'Voir les attractions',
+  },
+  es: {
+    badge: 'Consulta enviada',
+    title: '¡Gracias! Tu consulta se ha enviado a recepción.',
+    text: 'Recepción responderá lo antes posible. Si es urgente, llámanos.',
+    errorTitle: 'No se pudo enviar la consulta',
+    errorText: 'Inténtalo de nuevo o contacta con recepción.',
+    home: 'Volver al inicio',
+    directions: 'Ver cómo llegar',
+    campy: 'Preguntar a CAMPY',
+    attractions: 'Ver atracciones',
+  },
+  nl: {
+    badge: 'Aanvraag verzonden',
+    title: 'Bedankt! Je aanvraag is naar de receptie gestuurd.',
+    text: 'De receptie antwoordt zo snel mogelijk. Bel ons als het dringend is.',
+    errorTitle: 'Je aanvraag kon niet worden verzonden',
+    errorText: 'Probeer het opnieuw of neem contact op met de receptie.',
+    home: 'Terug naar homepage',
+    directions: 'Route bekijken',
+    campy: 'Vraag CAMPY',
+    attractions: 'Attracties bekijken',
+  },
+  cs: {
+    badge: 'Dotaz odeslán',
+    title: 'Děkujeme! Váš dotaz byl odeslán na recepci.',
+    text: 'Recepce odpoví co nejdříve. Pokud je záležitost naléhavá, zavolejte nám.',
+    errorTitle: 'Dotaz se nepodařilo odeslat',
+    errorText: 'Zkuste to znovu nebo kontaktujte recepci.',
+    home: 'Zpět na hlavní stránku',
+    directions: 'Zobrazit dopravu',
+    campy: 'Zeptat se CAMPY',
+    attractions: 'Zobrazit atrakce',
+  },
+  sk: {
+    badge: 'Dopyt odoslaný',
+    title: 'Ďakujeme! Váš dopyt bol odoslaný na recepciu.',
+    text: 'Recepcia odpovie čo najskôr. Ak je záležitosť naliehavá, zavolajte nám.',
+    errorTitle: 'Dopyt sa nepodarilo odoslať',
+    errorText: 'Skúste to znova alebo kontaktujte recepciu.',
+    home: 'Späť na hlavnú stránku',
+    directions: 'Zobraziť dopravu',
+    campy: 'Opýtať sa CAMPY',
+    attractions: 'Zobraziť atrakcie',
+  },
+  sv: {
+    badge: 'Förfrågan skickad',
+    title: 'Tack! Din förfrågan har skickats till receptionen.',
+    text: 'Receptionen svarar så snart som möjligt. Ring oss om ärendet är brådskande.',
+    errorTitle: 'Förfrågan kunde inte skickas',
+    errorText: 'Försök igen eller kontakta receptionen.',
+    home: 'Till startsidan',
+    directions: 'Se vägbeskrivning',
+    campy: 'Fråga CAMPY',
+    attractions: 'Se sevärdheter',
+  },
+} as const;
+
+const feedbackCopy = {
+  pl: {
+    kicker: 'Opcjonalnie',
+    title: 'Jak podoba Ci się nasza nowa strona?',
+    lead: 'Krótka opinia pomoże nam ulepszać stronę. Nie wpływa na wysłanie zapytania.',
+    rating: 'Ocena strony',
+    liked: 'Co Ci się podobało?',
+    improve: 'Co możemy poprawić?',
+    improvePlaceholder: 'Napisz krótko, jeśli chcesz.',
+    easyInfo: 'Czy łatwo było znaleźć informacje?',
+    easyForm: 'Czy formularz był prosty?',
+    options: ['Szybka rezerwacja', 'Wygląd strony', 'CAMPY', 'Cennik', 'Dojazd', 'Atrakcje', 'Języki', 'Inne'],
+    answers: ['Tak', 'Raczej tak', 'Raczej nie', 'Nie'],
+  },
+  en: {
+    kicker: 'Optional',
+    title: 'How do you like our new website?',
+    lead: 'A short review helps us improve. It does not affect your enquiry.',
+    rating: 'Website rating',
+    liked: 'What did you like?',
+    improve: 'What could we improve?',
+    improvePlaceholder: 'Write a short note if you wish.',
+    easyInfo: 'Was it easy to find information?',
+    easyForm: 'Was the form easy to use?',
+    options: ['Quick booking', 'Website design', 'CAMPY', 'Prices', 'Directions', 'Attractions', 'Languages', 'Other'],
+    answers: ['Yes', 'Mostly yes', 'Mostly no', 'No'],
+  },
+  de: {
+    kicker: 'Optional',
+    title: 'Wie gefällt Ihnen unsere neue Website?',
+    lead: 'Eine kurze Meinung hilft uns bei Verbesserungen und beeinflusst Ihre Anfrage nicht.',
+    rating: 'Bewertung der Website',
+    liked: 'Was hat Ihnen gefallen?',
+    improve: 'Was können wir verbessern?',
+    improvePlaceholder: 'Schreiben Sie uns gern einen kurzen Hinweis.',
+    easyInfo: 'Waren die Informationen leicht zu finden?',
+    easyForm: 'War das Formular einfach?',
+    options: ['Schnelle Buchung', 'Design', 'CAMPY', 'Preise', 'Anreise', 'Attraktionen', 'Sprachen', 'Sonstiges'],
+    answers: ['Ja', 'Eher ja', 'Eher nein', 'Nein'],
+  },
+  it: {
+    kicker: 'Facoltativo',
+    title: 'Ti piace il nostro nuovo sito?',
+    lead: 'Una breve opinione ci aiuta a migliorare e non influisce sulla richiesta.',
+    rating: 'Valutazione del sito',
+    liked: 'Cosa ti è piaciuto?',
+    improve: 'Cosa possiamo migliorare?',
+    improvePlaceholder: 'Scrivi una breve nota, se vuoi.',
+    easyInfo: 'È stato facile trovare le informazioni?',
+    easyForm: 'Il modulo era semplice?',
+    options: ['Prenotazione rapida', 'Aspetto del sito', 'CAMPY', 'Prezzi', 'Indicazioni', 'Attrazioni', 'Lingue', 'Altro'],
+    answers: ['Sì', 'Abbastanza sì', 'Abbastanza no', 'No'],
+  },
+  fr: {
+    kicker: 'Facultatif',
+    title: 'Que pensez-vous de notre nouveau site ?',
+    lead: 'Un court avis nous aide à progresser et n’influence pas votre demande.',
+    rating: 'Note du site',
+    liked: 'Qu’avez-vous apprécié ?',
+    improve: 'Que pouvons-nous améliorer ?',
+    improvePlaceholder: 'Écrivez une courte remarque si vous le souhaitez.',
+    easyInfo: 'Les informations étaient-elles faciles à trouver ?',
+    easyForm: 'Le formulaire était-il simple ?',
+    options: ['Réservation rapide', 'Design du site', 'CAMPY', 'Tarifs', 'Accès', 'Attractions', 'Langues', 'Autre'],
+    answers: ['Oui', 'Plutôt oui', 'Plutôt non', 'Non'],
+  },
+  es: {
+    kicker: 'Opcional',
+    title: '¿Qué te parece nuestra nueva web?',
+    lead: 'Una opinión breve nos ayuda a mejorar y no afecta a tu consulta.',
+    rating: 'Valoración de la web',
+    liked: '¿Qué te gustó?',
+    improve: '¿Qué podemos mejorar?',
+    improvePlaceholder: 'Escribe una nota breve si quieres.',
+    easyInfo: '¿Fue fácil encontrar la información?',
+    easyForm: '¿El formulario fue sencillo?',
+    options: ['Reserva rápida', 'Diseño web', 'CAMPY', 'Precios', 'Cómo llegar', 'Atracciones', 'Idiomas', 'Otro'],
+    answers: ['Sí', 'Más bien sí', 'Más bien no', 'No'],
+  },
+  nl: {
+    kicker: 'Optioneel',
+    title: 'Wat vind je van onze nieuwe website?',
+    lead: 'Een korte mening helpt ons verbeteren en heeft geen invloed op je aanvraag.',
+    rating: 'Beoordeling website',
+    liked: 'Wat vond je goed?',
+    improve: 'Wat kunnen we verbeteren?',
+    improvePlaceholder: 'Schrijf gerust een korte opmerking.',
+    easyInfo: 'Was de informatie makkelijk te vinden?',
+    easyForm: 'Was het formulier eenvoudig?',
+    options: ['Snel boeken', 'Websiteontwerp', 'CAMPY', 'Prijzen', 'Route', 'Attracties', 'Talen', 'Overig'],
+    answers: ['Ja', 'Meestal wel', 'Meestal niet', 'Nee'],
+  },
+  cs: {
+    kicker: 'Volitelné',
+    title: 'Jak se vám líbí náš nový web?',
+    lead: 'Krátký názor nám pomůže web zlepšit a nemá vliv na váš dotaz.',
+    rating: 'Hodnocení webu',
+    liked: 'Co se vám líbilo?',
+    improve: 'Co můžeme zlepšit?',
+    improvePlaceholder: 'Pokud chcete, napište krátkou poznámku.',
+    easyInfo: 'Bylo snadné najít informace?',
+    easyForm: 'Byl formulář jednoduchý?',
+    options: ['Rychlá rezervace', 'Vzhled webu', 'CAMPY', 'Ceny', 'Doprava', 'Atrakce', 'Jazyky', 'Jiné'],
+    answers: ['Ano', 'Spíše ano', 'Spíše ne', 'Ne'],
+  },
+  sk: {
+    kicker: 'Voliteľné',
+    title: 'Ako sa vám páči náš nový web?',
+    lead: 'Krátky názor nám pomôže web zlepšiť a neovplyvní váš dopyt.',
+    rating: 'Hodnotenie webu',
+    liked: 'Čo sa vám páčilo?',
+    improve: 'Čo môžeme zlepšiť?',
+    improvePlaceholder: 'Ak chcete, napíšte krátku poznámku.',
+    easyInfo: 'Bolo ľahké nájsť informácie?',
+    easyForm: 'Bol formulár jednoduchý?',
+    options: ['Rýchla rezervácia', 'Vzhľad webu', 'CAMPY', 'Ceny', 'Doprava', 'Atrakcie', 'Jazyky', 'Iné'],
+    answers: ['Áno', 'Skôr áno', 'Skôr nie', 'Nie'],
+  },
+  sv: {
+    kicker: 'Valfritt',
+    title: 'Vad tycker du om vår nya webbplats?',
+    lead: 'Ett kort omdöme hjälper oss förbättra sidan och påverkar inte din förfrågan.',
+    rating: 'Betyg på webbplatsen',
+    liked: 'Vad tyckte du om?',
+    improve: 'Vad kan vi förbättra?',
+    improvePlaceholder: 'Skriv gärna en kort kommentar.',
+    easyInfo: 'Var informationen lätt att hitta?',
+    easyForm: 'Var formuläret enkelt?',
+    options: ['Snabb bokning', 'Webbdesign', 'CAMPY', 'Priser', 'Vägbeskrivning', 'Sevärdheter', 'Språk', 'Annat'],
+    answers: ['Ja', 'För det mesta', 'Inte riktigt', 'Nej'],
+  },
+} as const;
+
 const iconHtml = {
   modes: {
     camping: renderLucideIcon('Caravan'),
@@ -812,6 +1122,12 @@ const config = {
     bungalow: bungalowServices,
   },
   modeChips,
+  beforeArrival: {
+    ...beforeArrival,
+    icon: renderLucideIcon('CheckCircle2'),
+  },
+  clientSuccess: clientSuccessCopy[uiLang as keyof typeof clientSuccessCopy] ?? clientSuccessCopy.en,
+  feedback: feedbackCopy[uiLang as keyof typeof feedbackCopy] ?? feedbackCopy.en,
   ux,
   icons: iconHtml,
   links: {
@@ -866,6 +1182,14 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           <a href={attractionsPath} class="reservation-mini-link">Zobacz atrakcje</a>
           <a href={directionsPath} class="reservation-mini-link">Jak dojechać do centrum?</a>
         </div>
+        <aside class="reservation-before-arrival">
+          <strong>{beforeArrival.title}</strong>
+          <div>
+            {beforeArrival.items.map((item) => (
+              <span><i set:html={renderLucideIcon('CheckCircle2')} />{item}</span>
+            ))}
+          </div>
+        </aside>
         <p class="reservation-mini__note">{t.startLead}</p>
       </div>
     </div>
@@ -919,6 +1243,13 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       guests: { adults: 2, children: 0, toddlers: 0, bungalowGuests: 2, campingGuests: 0 },
       services: {},
       tours: [],
+      feedback: {
+        rating: 0,
+        liked: [],
+        improve: '',
+        easyInfo: '',
+        easyForm: '',
+      },
       simple: { people: 2 },
       details: {
         name: '',
@@ -957,14 +1288,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       success: false,
       submitting: false,
       submitAttempted: false,
-      submitMode: '',
       submitError: '',
-      formSubmitActivationNotice: false,
       inquiryId: '',
       inquirySaved: false,
-      mailProvider: 'none',
-      mailDelivered: false,
-      mailReason: '',
     };
     let suppressCalendarClick = false;
     let viewportToastTimer = 0;
@@ -1809,6 +2135,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           <a href="${esc(config.links?.attractions || '/atrakcje')}" class="reservation-mini-link">${esc(config.lang === 'pl' ? 'Zobacz atrakcje' : 'See attractions')}</a>
           <a href="${esc(config.links?.directions || '/dojazd')}" class="reservation-mini-link">${esc(config.lang === 'pl' ? 'Jak dojechać do centrum?' : 'How to reach the centre?')}</a>
         </div>
+        <aside class="reservation-before-arrival">
+          <strong>${esc(config.beforeArrival.title)}</strong>
+          <div>
+            ${config.beforeArrival.items.map((item) => `<span><i aria-hidden="true">${config.beforeArrival.icon}</i>${esc(item)}</span>`).join('')}
+          </div>
+        </aside>
         <p class="reservation-mini__note">${esc(t.startLead)}</p>
       </div>
     `;
@@ -2162,6 +2494,74 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const vehicleLabels = () => detailText.vehicle || detailTextByLang.en.vehicle;
 
+    const feedbackTemplate = () => {
+      const feedback = config.feedback;
+      const answerGroup = (field, label) => `
+        <fieldset class="reservation-feedback__question">
+          <legend>${esc(label)}</legend>
+          <div class="reservation-feedback__answers">
+            ${feedback.answers.map((answer) => `
+              <button
+                type="button"
+                data-feedback-answer="${esc(field)}"
+                data-feedback-value="${esc(answer)}"
+                class="${state.feedback[field] === answer ? 'is-active' : ''}"
+                aria-pressed="${state.feedback[field] === answer ? 'true' : 'false'}"
+              >${esc(answer)}</button>
+            `).join('')}
+          </div>
+        </fieldset>
+      `;
+
+      return `
+        <section class="reservation-details-section reservation-feedback">
+          <header class="reservation-details-section__head">
+            <span aria-hidden="true">${detailIcon('success')}</span>
+            <div>
+              <small class="reservation-feedback__kicker">${esc(feedback.kicker)}</small>
+              <strong>${esc(feedback.title)}</strong>
+              <p>${esc(feedback.lead)}</p>
+            </div>
+          </header>
+          <div class="reservation-feedback__grid">
+            <fieldset class="reservation-feedback__question reservation-feedback__question--wide">
+              <legend>${esc(feedback.rating)}</legend>
+              <div class="reservation-feedback__stars" aria-label="${esc(feedback.rating)}">
+                ${[1,2,3,4,5].map((rating) => `
+                  <button
+                    type="button"
+                    data-feedback-rating="${rating}"
+                    class="${state.feedback.rating >= rating ? 'is-active' : ''}"
+                    aria-label="${rating}/5"
+                    aria-pressed="${state.feedback.rating === rating ? 'true' : 'false'}"
+                  >★</button>
+                `).join('')}
+              </div>
+            </fieldset>
+            <fieldset class="reservation-feedback__question reservation-feedback__question--wide">
+              <legend>${esc(feedback.liked)}</legend>
+              <div class="reservation-feedback__chips">
+                ${feedback.options.map((option) => `
+                  <button
+                    type="button"
+                    data-feedback-liked="${esc(option)}"
+                    class="${state.feedback.liked.includes(option) ? 'is-active' : ''}"
+                    aria-pressed="${state.feedback.liked.includes(option) ? 'true' : 'false'}"
+                  >${esc(option)}</button>
+                `).join('')}
+              </div>
+            </fieldset>
+            ${answerGroup('easyInfo', feedback.easyInfo)}
+            ${answerGroup('easyForm', feedback.easyForm)}
+            <label class="reservation-field reservation-field--wide">
+              ${fieldLabel({ icon: 'message', label: feedback.improve, badge: 'optional' })}
+              <textarea data-feedback-improve rows="3" placeholder="${esc(feedback.improvePlaceholder)}">${esc(state.feedback.improve)}</textarea>
+            </label>
+          </div>
+        </section>
+      `;
+    };
+
     const vehicleDetailsText = () => {
       if (!shouldShowVehicleDetails()) return '';
       const labels = vehicleLabels();
@@ -2264,7 +2664,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
                 <div class="reservation-field">
                   ${fieldLabel({ icon: 'language', label: t.fields.language, badge: 'required' })}
                   <div class="reservation-pills">
-                    ${['PL','EN','DE','IT'].map((language) => `
+                    ${['PL','EN','DE','IT','FR','ES','NL','CS','SK','SV'].map((language) => `
                       <button type="button" data-language="${language}" class="${state.details.language === language ? 'is-active' : ''}">${language}</button>
                     `).join('')}
                   </div>
@@ -2346,6 +2746,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
                   </div>
               </div>
             </section>
+            ${feedbackTemplate()}
             <section class="reservation-details-section reservation-details-section--required">
               <header class="reservation-details-section__head">
                 <span aria-hidden="true">${detailIcon('privacy')}</span>
@@ -2523,137 +2924,23 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       </div>
     `;
 
-    const successRow = (icon, label, value) => {
-      const hasValue = value !== undefined && value !== null && String(value).trim() !== '';
-      if (!hasValue) return '';
-      return `
-        <div class="reservation-success-row">
-          <i aria-hidden="true">${detailIcon(icon)}</i>
-          <span>
-            <dt>${esc(label)}</dt>
-            <dd>${esc(value)}</dd>
-          </span>
-        </div>
-      `;
-    };
-
-    const copySummaryText = () => {
-      const selected = selectedServices();
-      const depositNote = state.mode === 'bungalow' ? ui.summary.depositBungalow : state.mode === 'combined' ? ui.summary.depositCombined : '';
-      return [
-        'Camping Clepardia - podsumowanie zapytania',
-        state.inquiryId ? `ID: ${state.inquiryId}` : '',
-        `Status: ${detailText.statusConfirmedByReception}`,
-        `Wariant: ${modeTitle()}`,
-        `Termin: ${state.dates.arrival || '-'} - ${state.dates.departure || '-'} (${nights()} n.)`,
-        `Orientacyjna godzina przyjazdu: ${arrivalTimeLabel()}`,
-        `Goście: ${guestsText()}`,
-        `Usługi: ${selected.length ? servicesText() : '-'}`,
-        `Wycieczki: ${state.tours.length ? toursText() : '-'}`,
-        `Cena orientacyjna: ${selected.length ? fmt(estimatedTotal()) : '-'}`,
-        selected.length ? `Waluty orientacyjnie: ${currencyEstimateText(estimatedTotal())}` : '',
-        selected.length ? currencyDisclaimer() : '',
-        `Kraj: ${state.details.countryCode ? `${state.details.countryName} (${state.details.countryCode})` : '-'}`,
-        `Język kontaktu: ${state.details.language}`,
-        `Numer rejestracyjny: ${state.details.plate || '-'}`,
-        `Dane pojazdu: ${vehicleDetailsText() || '-'}`,
-        `Specjalne potrzeby: ${state.details.specialNeeds ? (state.details.specialNeedsText || yesLabel()) : '-'}`,
-        `Późniejszy wyjazd: ${state.details.lateCheckout ? state.details.lateTime : '-'}`,
-        `Cisza nocna: ${state.details.quiet ? 'zaakceptowana' : '-'}`,
-        `Zgoda kontaktowa: ${state.details.consent ? 'zaakceptowana' : '-'}`,
-        `Polityka prywatności: ${state.details.privacy ? 'zaakceptowana' : '-'}`,
-        highSeasonCampingInfo() ? highSeasonCampingNotice() : '',
-        bungalowPersonalItemsNotice() ? bungalowItemsNotice() : '',
-        depositNote,
-        'Dostępność i finalne warunki potwierdza recepcja.',
-      ].filter(Boolean).join('\n');
-    };
-
     const successModalTemplate = () => {
-      const selected = selectedServices();
-      const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
-      const stayNote = state.mode === 'bungalow' || state.mode === 'combined' ? ui.success.bungalow : ui.success.camping;
-      const mode = state.submitMode || 'mock';
-      const isSavedWithoutMail = state.inquirySaved && !state.mailDelivered;
-      const isErrorMode = !state.inquirySaved && (mode === 'error' || mode === 'resend-error');
-      const successText = state.inquirySaved && state.mailDelivered
-        ? (config.lang === 'pl' ? 'Zapytanie zapisane i wysłane do recepcji.' : 'The enquiry was saved and sent to reception.')
-        : isSavedWithoutMail
-          ? (config.lang === 'pl' ? 'Zapytanie zapisane w panelu recepcji. Automatyczny mail nie został dostarczony.' : 'The enquiry was saved in the reception panel. Automatic email was not delivered.')
-        : mode === 'resend' || mode === 'sent'
-          ? ui.success.text
-        : mode === 'formsubmit' || mode === 'formsubmit-activation'
-          ? (state.formSubmitActivationNotice ? ui.success.formsubmitActivationText : ui.success.formsubmitText)
-          : isErrorMode
-            ? (state.submitError || ui.success.resendErrorText || ui.success.errorText)
-            : (ui.success.mockText || ui.success.text);
-      const successBadge = state.inquirySaved && state.mailDelivered
-        ? (config.lang === 'pl' ? 'Zapisano i wysłano' : 'Saved and sent')
-        : isSavedWithoutMail
-          ? (config.lang === 'pl' ? 'Zapisano w panelu — mail niedostarczony' : 'Saved — email not delivered')
-        : mode === 'resend' || mode === 'sent'
-          ? (ui.success.resendBadge || ui.success.sentBadge || 'Email sent')
-        : mode === 'formsubmit'
-          ? (ui.success.formsubmitBadge || 'Secure form')
-          : mode === 'formsubmit-activation'
-            ? (ui.success.errorBadge || 'Activation required')
-          : isErrorMode
-            ? (ui.success.errorBadge || 'Email error')
-            : (ui.success.mockBadge || 'Test mode');
-      const modalTitle = isErrorMode
-        ? (ui.success.resendErrorTitle || ui.success.title)
-        : ui.success.title;
-      const depositNote = state.mode === 'bungalow' ? ui.summary.depositBungalow : state.mode === 'combined' ? ui.summary.depositCombined : '';
+      const copy = config.clientSuccess;
+      const isSaved = Boolean(state.inquirySaved);
+      const modalTitle = isSaved ? copy.title : copy.errorTitle;
       return `
-        <div class="reservation-success-modal" role="dialog" aria-modal="true" aria-label="${esc(modalTitle)}" data-submit-mode="${esc(mode)}">
+        <div class="reservation-success-modal" role="dialog" aria-modal="true" aria-label="${esc(modalTitle)}" data-submit-mode="${isSaved ? 'success' : 'error'}">
           <div class="reservation-success-modal__card">
             <button class="reservation-success-modal__close" type="button" data-success-close aria-label="${esc(ui.help.close)}">×</button>
-            <span class="reservation-success-modal__mark" aria-hidden="true">${detailIcon('success')}</span>
-            <span class="reservation-success-modal__badge">${esc(successBadge)}</span>
+            <span class="reservation-success-modal__mark" aria-hidden="true">${detailIcon(isSaved ? 'success' : 'status')}</span>
+            <span class="reservation-success-modal__badge">${esc(isSaved ? copy.badge : copy.errorTitle)}</span>
             <h2>${esc(modalTitle)}</h2>
-            <p>${esc(successText)}</p>
-            ${state.inquiryId ? `<p class="reservation-success-modal__id">ID: ${esc(state.inquiryId)}</p>` : ''}
-            <div class="reservation-success-modal__delivery">
-              <span><strong>${esc(config.lang === 'pl' ? 'Zapis w panelu' : 'Inbox save')}</strong><em>${state.inquirySaved ? 'OK' : 'NIE'}</em></span>
-              <span><strong>Provider</strong><em>${esc(state.mailProvider || 'none')}</em></span>
-              <span><strong>Delivered</strong><em>${state.mailDelivered ? 'true' : 'false'}</em></span>
-              ${state.mailReason ? `<p>${esc(state.mailReason)}</p>` : ''}
-            </div>
-            ${isSavedWithoutMail ? `<p class="reservation-success-modal__note">${esc(config.lang === 'pl' ? 'Zapytanie jest zapisane w panelu recepcji. Recepcja może skopiować treść maila lub użyć przycisku mailto.' : 'The enquiry is saved in the reception inbox. Reception can copy the email content or use the mailto button.')}</p>` : ''}
-            <dl>
-              ${successRow('status', ui.summary.statusLabel, detailText.statusConfirmedByReception)}
-              ${successRow('stay', t.summary.stay, modeTitle())}
-              ${successRow('calendar', t.summary.dates, `${state.dates.arrival || '-'} - ${state.dates.departure || '-'} (${nights()} n.)`)}
-              ${successRow('late', config.lang === 'pl' ? 'Orientacyjna godzina przyjazdu' : 'Estimated arrival time', arrivalTimeLabel())}
-              ${successRow('guests', t.summary.guests, guestsText())}
-              ${selected.length ? successRow('services', t.summary.services, servicesText()) : ''}
-              ${state.tours.length ? successRow('map', config.lang === 'pl' ? 'Wycieczki' : 'Trips', toursText()) : ''}
-              ${successRow('price', t.summary.total, selected.length ? fmt(estimatedTotal()) : '-')}
-              ${selected.length ? successRow('price', 'Waluty orientacyjnie', currencyEstimateText(estimatedTotal())) : ''}
-              ${state.details.countryCode ? successRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
-              ${successRow('language', t.summary.language, state.details.language)}
-              ${state.details.plate ? successRow('plate', t.fields.plate, state.details.plate) : ''}
-              ${vehicleDetailsText() ? successRow('plate', vehicleLabels().title, vehicleDetailsText()) : ''}
-              ${state.details.specialNeeds ? successRow('accessibility', t.summary.specialNeeds, state.details.specialNeedsText || yesLabel()) : ''}
-              ${state.details.lateCheckout ? successRow('late', t.summary.lateCheckout, state.details.lateTime) : ''}
-              ${highSeasonCampingInfo() ? successRow('status', config.lang === 'pl' ? 'Lipiec/sierpień' : 'July/August', highSeasonCampingNotice()) : ''}
-              ${bungalowPersonalItemsNotice() ? successRow('info', config.lang === 'pl' ? 'Domki — co zabrać' : 'Bungalows — what to bring', bungalowItemsNotice()) : ''}
-              ${successRow('quiet', 'Cisza nocna', state.details.quiet ? 'zaakceptowana' : 'brak')}
-              ${successRow('contactConsent', detailText.missing.consent, state.details.consent ? 'zaakceptowana' : 'brak')}
-              ${successRow('privacy', detailText.missing.privacy, state.details.privacy ? 'zaakceptowana' : 'brak')}
-            </dl>
-            <p class="reservation-success-modal__note">${esc(stayNote)}</p>
-            ${selected.length ? `<p class="reservation-success-modal__note">${esc(currencyDisclaimer())}</p>` : ''}
-            ${depositNote ? `<p class="reservation-success-modal__note reservation-success-modal__note--deposit">${esc(depositNote)}</p>` : ''}
-            ${tripCtaTemplate(true)}
-            <button class="reservation-btn reservation-btn--primary reservation-success-modal__copy" type="button" data-copy-summary>${detailIcon('copy')}${esc(detailText.copySummary)}</button>
-            <p class="reservation-copy-status" data-copy-status hidden></p>
-            <textarea class="reservation-copy-fallback" data-copy-fallback rows="8" readonly hidden>${esc(copySummaryText())}</textarea>
+            <p>${esc(isSaved ? copy.text : copy.errorText)}</p>
             <div class="reservation-success-modal__actions">
-              <a class="reservation-btn reservation-btn--ghost" href="/">${esc(ui.success.home)}</a>
-              <a class="reservation-btn reservation-btn--ghost" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">${esc(ui.success.maps)}</a>
-              <a class="reservation-btn reservation-btn--ghost" href="mailto:clepardia@gmail.com">${esc(ui.success.contact)}</a>
-              <button class="reservation-btn reservation-btn--primary" type="button" data-new-inquiry>${esc(ui.success.again)}</button>
+              <a class="reservation-btn reservation-btn--ghost" href="/">${esc(copy.home)}</a>
+              <a class="reservation-btn reservation-btn--ghost" href="${esc(config.links.directions)}">${esc(copy.directions)}</a>
+              <button class="reservation-btn reservation-btn--primary" type="button" data-success-campy>${esc(copy.campy)}</button>
+              <a class="reservation-btn reservation-btn--ghost" href="${esc(config.links.attractions)}">${esc(copy.attractions)}</a>
             </div>
           </div>
         </div>
@@ -2730,6 +3017,13 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         selectedStayMode: state.mode,
         people,
         tours: [...state.tours],
+        feedback: {
+          rating: Number(state.feedback.rating || 0),
+          liked: [...state.feedback.liked],
+          improve: state.feedback.improve.trim(),
+          easyInfo: state.feedback.easyInfo,
+          easyForm: state.feedback.easyForm,
+        },
         arrivalTime: arrivalTimeLabel(),
         addons: services.map((item) => `${item.label} x ${item.qty}`),
         message: [
@@ -2966,13 +3260,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.toast = '';
       state.helpOpen = false;
       state.success = false;
-      state.submitMode = '';
       state.submitError = '';
-      state.formSubmitActivationNotice = false;
       state.inquirySaved = false;
-      state.mailProvider = 'none';
-      state.mailDelivered = false;
-      state.mailReason = '';
       state.submitAttempted = false;
       const url = new URL(window.location.href);
       url.searchParams.set('stay', mode);
@@ -2988,13 +3277,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.toast = '';
       state.helpOpen = false;
       state.success = false;
-      state.submitMode = '';
       state.submitError = '';
-      state.formSubmitActivationNotice = false;
       state.inquirySaved = false;
-      state.mailProvider = 'none';
-      state.mailDelivered = false;
-      state.mailReason = '';
       const url = new URL(window.location.href);
       url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
@@ -3010,13 +3294,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.helpOpen = false;
       state.success = false;
       state.submitAttempted = false;
-      state.submitMode = '';
       state.submitError = '';
-      state.formSubmitActivationNotice = false;
       state.inquirySaved = false;
-      state.mailProvider = 'none';
-      state.mailDelivered = false;
-      state.mailReason = '';
       const url = new URL(window.location.href);
       url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
@@ -3175,7 +3454,6 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       }
       state.submitting = true;
       state.submitError = '';
-      state.formSubmitActivationNotice = false;
       state.toast = '';
       render();
       try {
@@ -3186,64 +3464,36 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         });
         const result = await response.json().catch(() => ({}));
         if (response.status === 404 && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname)) {
-          state.submitMode = 'mock';
           state.inquiryId = `LOCAL-${Date.now().toString(36).toUpperCase()}`;
           state.inquirySaved = true;
-          state.mailProvider = 'mock';
-          state.mailDelivered = false;
-          state.mailReason = 'Local dev mock - mail body prepared but not sent.';
           state.success = true;
           return;
         }
         state.inquirySaved = Boolean(result?.inquirySaved);
-        state.mailProvider = String(result?.provider || result?.mail?.reception?.provider || 'none');
-        state.mailDelivered = Boolean(result?.delivered ?? result?.mail?.reception?.delivered);
-        state.mailReason = String(result?.reason || result?.error || result?.message || '');
         if (!response.ok || !result?.ok) {
           const errors = result?.errors ? Object.values(result.errors).join(' ') : '';
-          if (state.inquirySaved || result?.mode === 'error' || result?.mode === 'resend-error') {
-            state.submitMode = 'error';
+          if (state.inquirySaved) {
             state.inquiryId = result?.inquiryId || '';
-            state.formSubmitActivationNotice = Boolean(result?.mail?.reception?.activationNotice || result?.errorCode === 'formsubmit_activation_required');
-            state.submitError = result?.errorCode === 'invalid_api_key'
-              ? (ui.success.invalidKeyText || result?.message || ui.success.resendErrorText)
-              : result?.errorCode === 'sender_rejected'
-                ? (ui.success.senderRejectedText || result?.message || ui.success.resendErrorText)
-                : (result?.message || ui.success.resendErrorText || ui.success.errorText || 'Wysyłka maila nie powiodła się.');
             state.success = true;
             state.step = 5;
-            showViewportToast(state.submitError, 'error');
+            showViewportToast(config.clientSuccess.badge, 'success');
             return;
           }
-          state.submitError = errors || result?.message || ui.success.errorText || 'Wysyłka nie powiodła się.';
+          state.submitError = errors || config.clientSuccess.errorText;
           state.hint = state.submitError;
-          showViewportToast(state.submitError, 'error');
+          showViewportToast(config.clientSuccess.errorText, 'error');
           state.step = 4;
           state.submitting = false;
           render();
           return;
         }
-        const delivered = Boolean(result.delivered ?? result?.mail?.reception?.delivered);
-        const activationRequired = Boolean(
-          result?.error === 'formsubmit_activation_required'
-          || result?.errorCode === 'formsubmit_activation_required'
-          || result?.mail?.reception?.activationNotice
-          || result?.mail?.reception?.activationRequired
-        );
-        state.submitMode = activationRequired && !delivered ? 'formsubmit-activation' : (result.mode || 'mock');
         state.inquiryId = result.inquiryId || '';
-        state.formSubmitActivationNotice = activationRequired;
         state.success = true;
-        showViewportToast(
-          state.inquirySaved
-            ? (state.mailDelivered ? 'Zapytanie zapisane i wysłane do recepcji.' : 'Zapytanie zapisano w panelu recepcji, ale mail automatyczny nie został dostarczony.')
-            : 'Nie udało się zapisać zapytania. Skontaktuj się z recepcją.',
-          state.inquirySaved ? (state.mailDelivered ? 'success' : 'warning') : 'error',
-        );
+        showViewportToast(state.inquirySaved ? config.clientSuccess.badge : config.clientSuccess.errorText, state.inquirySaved ? 'success' : 'error');
       } catch {
-        state.submitError = ui.success.errorText || 'Wysyłka nie powiodła się.';
+        state.submitError = config.clientSuccess.errorText;
         state.hint = state.submitError;
-        showViewportToast('Nie udało się wysłać zapytania. Spróbuj ponownie albo skontaktuj się z recepcją.', 'error');
+        showViewportToast(config.clientSuccess.errorText, 'error');
         state.step = 4;
       } finally {
         state.submitting = false;
@@ -3273,33 +3523,6 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       updateCountryDom();
       updateSummaryDom();
       updateValidationDom();
-    };
-
-    const copySuccessSummary = async () => {
-      const text = copySummaryText();
-      const status = mount.querySelector('[data-copy-status]');
-      const fallback = mount.querySelector('[data-copy-fallback]');
-      if (fallback instanceof HTMLTextAreaElement) fallback.value = text;
-
-      try {
-        if (!navigator.clipboard?.writeText) throw new Error('Clipboard API unavailable');
-        await navigator.clipboard.writeText(text);
-        if (status instanceof HTMLElement) {
-          status.hidden = false;
-          status.textContent = detailText.copied;
-        }
-        if (fallback instanceof HTMLTextAreaElement) fallback.hidden = true;
-      } catch {
-        if (fallback instanceof HTMLTextAreaElement) {
-          fallback.hidden = false;
-          fallback.focus();
-          fallback.select();
-        }
-        if (status instanceof HTMLElement) {
-          status.hidden = false;
-          status.textContent = detailText.copyFallback;
-        }
-      }
     };
 
     mount.addEventListener('click', (event) => {
@@ -3361,9 +3584,18 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         return;
       }
 
-      if (target.closest('[data-copy-summary]')) {
+      if (target.closest('[data-success-campy]')) {
         event.preventDefault();
-        void copySuccessSummary();
+        state.success = false;
+        render();
+        window.requestAnimationFrame(() => {
+          window.dispatchEvent(new CustomEvent('campy:prompt', {
+            detail: {
+              prompt: config.lang === 'pl' ? 'Pomóż mi przygotować pobyt' : 'Help me prepare my stay',
+              actionKey: 'reservationHelp',
+            },
+          }));
+        });
         return;
       }
 
@@ -3469,6 +3701,36 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         event.preventDefault();
         state.details.language = language.dataset.language || state.details.language;
         refreshControlDom();
+        return;
+      }
+
+      const feedbackRating = target.closest('[data-feedback-rating]');
+      if (feedbackRating instanceof HTMLElement) {
+        event.preventDefault();
+        state.feedback.rating = Number(feedbackRating.dataset.feedbackRating || 0);
+        renderStepDom({ motion: 'soft' });
+        return;
+      }
+
+      const feedbackLiked = target.closest('[data-feedback-liked]');
+      if (feedbackLiked instanceof HTMLElement) {
+        event.preventDefault();
+        const value = feedbackLiked.dataset.feedbackLiked || '';
+        state.feedback.liked = state.feedback.liked.includes(value)
+          ? state.feedback.liked.filter((item) => item !== value)
+          : [...state.feedback.liked, value];
+        renderStepDom({ motion: 'soft' });
+        return;
+      }
+
+      const feedbackAnswer = target.closest('[data-feedback-answer]');
+      if (feedbackAnswer instanceof HTMLElement) {
+        event.preventDefault();
+        const field = feedbackAnswer.dataset.feedbackAnswer;
+        if (field === 'easyInfo' || field === 'easyForm') {
+          state.feedback[field] = feedbackAnswer.dataset.feedbackValue || '';
+          renderStepDom({ motion: 'soft' });
+        }
         return;
       }
 
@@ -3592,6 +3854,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           updateSummaryDom();
           updateValidationDom();
         }
+        return;
+      }
+      if (target.hasAttribute('data-feedback-improve')) {
+        state.feedback.improve = target.value;
         return;
       }
       if (target.hasAttribute('data-country-search')) {
@@ -4054,6 +4320,58 @@ body.booking-app-page .main-content {
   border-radius: 999px;
   background: rgba(60,179,113,.09);
   font-size: .92rem;
+}
+
+.reservation-before-arrival {
+  width: 100%;
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 22px;
+  color: #f4fff7;
+  background: rgba(60,179,113,.08);
+  text-align: left;
+}
+
+.reservation-before-arrival > strong {
+  font-size: 1rem;
+}
+
+.reservation-before-arrival > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px 14px;
+}
+
+.reservation-before-arrival span {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: rgba(245,255,248,.74);
+  font-size: .85rem;
+  line-height: 1.45;
+}
+
+.reservation-before-arrival i {
+  display: inline-grid;
+  color: #8fe0b4;
+}
+
+.reservation-before-arrival svg {
+  width: 17px;
+  height: 17px;
+}
+
+html[data-theme="light"] .reservation-before-arrival {
+  color: #173123;
+  border-color: rgba(46,126,78,.18);
+  background: rgba(60,179,113,.08);
+}
+
+html[data-theme="light"] .reservation-before-arrival span {
+  color: #536359;
 }
 
 .reservation-simple-link {
@@ -5268,6 +5586,86 @@ html.reservation-modal-open body {
   background: #8fe0b4;
 }
 
+.reservation-feedback__kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: #8fe0b4;
+  font-size: .7rem;
+  font-weight: 950;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.reservation-feedback__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.reservation-feedback__question {
+  min-width: 0;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 18px;
+  background: rgba(255,255,255,.04);
+}
+
+.reservation-feedback__question--wide {
+  grid-column: 1 / -1;
+}
+
+.reservation-feedback__question legend {
+  padding: 0 5px;
+  color: rgba(245,255,248,.8);
+  font-size: .82rem;
+  font-weight: 900;
+}
+
+.reservation-feedback__stars,
+.reservation-feedback__chips,
+.reservation-feedback__answers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reservation-feedback__stars button,
+.reservation-feedback__chips button,
+.reservation-feedback__answers button {
+  min-height: 42px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 999px;
+  color: rgba(245,255,248,.82);
+  background: rgba(255,255,255,.065);
+  font-weight: 850;
+}
+
+.reservation-feedback__stars button {
+  width: 46px;
+  padding: 0;
+  color: rgba(255,255,255,.3);
+  font-size: 1.45rem;
+}
+
+.reservation-feedback__chips button,
+.reservation-feedback__answers button {
+  padding: 0 14px;
+}
+
+.reservation-feedback__stars button.is-active {
+  border-color: rgba(255,211,111,.65);
+  color: #ffd36f;
+  background: rgba(255,211,111,.12);
+}
+
+.reservation-feedback__chips button.is-active,
+.reservation-feedback__answers button.is-active {
+  border-color: rgba(143,224,180,.55);
+  color: #07140f;
+  background: #8fe0b4;
+}
+
 .reservation-consents {
   display: grid;
   gap: 12px;
@@ -6049,6 +6447,10 @@ html.reservation-modal-open body {
     grid-template-columns: 1fr;
   }
 
+  .reservation-before-arrival > div {
+    grid-template-columns: 1fr;
+  }
+
   .reservation-mini__top {
     display: grid;
   }
@@ -6097,6 +6499,15 @@ html.reservation-modal-open body {
   .reservation-tour-options__grid,
   .reservation-success-modal__delivery {
     grid-template-columns: 1fr;
+  }
+
+  .reservation-feedback__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reservation-feedback__question,
+  .reservation-feedback__question--wide {
+    grid-column: 1;
   }
 
   .reservation-calendar__head,
@@ -6322,6 +6733,10 @@ html[data-theme="light"] .reservation-success-modal__mark {
 html[data-theme="light"] .reservation-field,
 html[data-theme="light"] .reservation-field__label,
 html[data-theme="light"] .reservation-pills button,
+html[data-theme="light"] .reservation-feedback__question legend,
+html[data-theme="light"] .reservation-feedback__stars button,
+html[data-theme="light"] .reservation-feedback__chips button,
+html[data-theme="light"] .reservation-feedback__answers button,
 html[data-theme="light"] .reservation-btn--ghost {
   color: #122319;
 }
@@ -6333,6 +6748,10 @@ html[data-theme="light"] .reservation-pills button,
 html[data-theme="light"] .reservation-progress__desktop button,
 html[data-theme="light"] .reservation-progress__mobile,
 html[data-theme="light"] .reservation-presets button,
+html[data-theme="light"] .reservation-feedback__question,
+html[data-theme="light"] .reservation-feedback__stars button,
+html[data-theme="light"] .reservation-feedback__chips button,
+html[data-theme="light"] .reservation-feedback__answers button,
 html[data-theme="light"] .reservation-country__list,
 html[data-theme="light"] .reservation-summary-row,
 html[data-theme="light"] .reservation-success-row,
@@ -6340,6 +6759,23 @@ html[data-theme="light"] .reservation-copy-fallback {
   color: #122319;
   border-color: rgba(22,56,36,.14);
   background: rgba(255,255,255,.72);
+}
+
+html[data-theme="light"] .reservation-feedback__kicker {
+  color: #24794e;
+}
+
+html[data-theme="light"] .reservation-feedback__stars button.is-active {
+  border-color: rgba(145,102,0,.35);
+  color: #8a6200;
+  background: #fff1c8;
+}
+
+html[data-theme="light"] .reservation-feedback__chips button.is-active,
+html[data-theme="light"] .reservation-feedback__answers button.is-active {
+  border-color: rgba(35,120,77,.34);
+  color: #092416;
+  background: #dff5e7;
 }
 
 html[data-theme="light"] .reservation-country__list {

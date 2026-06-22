@@ -1,0 +1,19 @@
+{
+  "name": "Camping Clepardia Kraków",
+  "short_name": "Clepardia",
+  "description": "Camping i domki w Krakowie, blisko centrum.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#091a13",
+  "theme_color": "#3CB371",
+  "lang": "pl",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

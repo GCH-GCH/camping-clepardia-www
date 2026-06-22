@@ -11,31 +11,57 @@ const bookingFooterLabels = {
   en: 'Booking',
   de: 'Buchung',
   it: 'Prenotazione',
+  fr: 'Réservation', es: 'Reserva', nl: 'Boeken', cs: 'Rezervace', sk: 'Rezervácia', sv: 'Bokning',
 };
 const plannerFooterLabels = {
   pl: 'Planer pobytu',
   en: 'Stay planner',
   de: 'Aufenthaltsplaner',
   it: 'Planner soggiorno',
+  fr: 'Planificateur de séjour', es: 'Planificador de estancia', nl: 'Verblijfsplanner', cs: 'Plánovač pobytu', sk: 'Plánovač pobytu', sv: 'Vistelseplanerare',
 };
 const footerCtaLabels = {
   pl: { booking: 'Zarezerwuj pobyt', maps: 'Otwórz Google Maps' },
   en: { booking: 'Book your stay', maps: 'Open Google Maps' },
   de: { booking: 'Aufenthalt buchen', maps: 'Google Maps öffnen' },
   it: { booking: 'Prenota soggiorno', maps: 'Apri Google Maps' },
+  fr: { booking: 'Réserver un séjour', maps: 'Ouvrir Google Maps' },
+  es: { booking: 'Reservar estancia', maps: 'Abrir Google Maps' },
+  nl: { booking: 'Boek je verblijf', maps: 'Open Google Maps' },
+  cs: { booking: 'Rezervovat pobyt', maps: 'Otevřít Google Maps' },
+  sk: { booking: 'Rezervovať pobyt', maps: 'Otvoriť Google Maps' },
+  sv: { booking: 'Boka din vistelse', maps: 'Öppna Google Maps' },
 };
 const footerCta = footerCtaLabels[pathContext.languageCode as keyof typeof footerCtaLabels] ?? footerCtaLabels.en;
+const footerCoreNavLabels = {
+  fr: ['Accueil','Camping','Bungalows','Tarifs','Accès','Attractions','Galerie','Contact'],
+  es: ['Inicio','Camping','Bungalows','Precios','Cómo llegar','Atracciones','Galería','Contacto'],
+  nl: ['Start','Camping','Bungalows','Prijzen','Route','Attracties','Galerij','Contact'],
+  cs: ['Úvod','Camping','Bungalovy','Ceny','Doprava','Atrakce','Galerie','Kontakt'],
+  sk: ['Úvod','Camping','Bungalovy','Ceny','Doprava','Atrakcie','Galéria','Kontakt'],
+  sv: ['Start','Camping','Stugor','Priser','Vägbeskrivning','Sevärdheter','Galleri','Kontakt'],
+} as const;
+const footerCoreNav = footerCoreNavLabels[pathContext.languageCode as keyof typeof footerCoreNavLabels];
+const footerDescriptionLabels = {
+  fr: 'Camping verdoyant et bungalows à Cracovie, près du tramway et du centre-ville.',
+  es: 'Camping verde y bungalows en Cracovia, cerca del tranvía y del centro.',
+  nl: 'Groene camping en bungalows in Krakau, dicht bij tram en centrum.',
+  cs: 'Zelený kemp a bungalovy v Krakově, blízko tramvaje a centra.',
+  sk: 'Zelený kemp a bungalovy v Krakove, blízko električky a centra.',
+  sv: 'Grön camping och bungalower i Kraków, nära spårvagn och centrum.',
+} as const;
+const footerDescription = footerDescriptionLabels[pathContext.languageCode as keyof typeof footerDescriptionLabels] ?? t.footer.description;
 const footerNavItems = [
-  { slug: '', label: t.nav.items.start, icon: 'home' },
-  { slug: 'camping', label: t.nav.items.camping, icon: 'tent' },
-  { slug: 'domki', label: t.nav.items.domki, icon: 'house' },
-  { slug: 'cennik', label: t.nav.items.cennik, icon: 'pricing' },
-  { slug: 'dojazd', label: t.nav.items.dojazd, icon: 'tram' },
-  { slug: 'atrakcje', label: t.nav.items.atrakcje, icon: 'landmark' },
-  { slug: 'galeria', label: t.nav.items.galeria, icon: 'gallery' },
+  { slug: '', label: footerCoreNav?.[0] ?? t.nav.items.start, icon: 'home' },
+  { slug: 'camping', label: footerCoreNav?.[1] ?? t.nav.items.camping, icon: 'tent' },
+  { slug: 'domki', label: footerCoreNav?.[2] ?? t.nav.items.domki, icon: 'house' },
+  { slug: 'cennik', label: footerCoreNav?.[3] ?? t.nav.items.cennik, icon: 'pricing' },
+  { slug: 'dojazd', label: footerCoreNav?.[4] ?? t.nav.items.dojazd, icon: 'tram' },
+  { slug: 'atrakcje', label: footerCoreNav?.[5] ?? t.nav.items.atrakcje, icon: 'landmark' },
+  { slug: 'galeria', label: footerCoreNav?.[6] ?? t.nav.items.galeria, icon: 'gallery' },
   { slug: '__planner__', label: plannerFooterLabels[pathContext.languageCode as keyof typeof plannerFooterLabels] ?? plannerFooterLabels.en, icon: 'planner' },
   { slug: '__booking__', label: bookingFooterLabels[pathContext.languageCode as keyof typeof bookingFooterLabels] ?? bookingFooterLabels.en, icon: 'reservation' },
-  { slug: 'kontakt', label: t.nav.items.kontakt, icon: 'phone' },
+  { slug: 'kontakt', label: footerCoreNav?.[7] ?? t.nav.items.kontakt, icon: 'phone' },
 ];
 
 const footerNavLinks = footerNavItems.map((item) => ({
@@ -51,6 +77,12 @@ const footerLegalLabels = {
   en: { rules: 'Rules', privacy: 'Privacy policy', faq: 'FAQ' },
   de: { rules: 'Regeln', privacy: 'Datenschutz', faq: 'FAQ' },
   it: { rules: 'Regolamento', privacy: 'Privacy policy', faq: 'FAQ' },
+  fr: { rules: 'Règlement', privacy: 'Confidentialité', faq: 'FAQ' },
+  es: { rules: 'Normas', privacy: 'Privacidad', faq: 'FAQ' },
+  nl: { rules: 'Regels', privacy: 'Privacybeleid', faq: 'FAQ' },
+  cs: { rules: 'Pravidla', privacy: 'Ochrana soukromí', faq: 'FAQ' },
+  sk: { rules: 'Pravidlá', privacy: 'Ochrana súkromia', faq: 'FAQ' },
+  sv: { rules: 'Regler', privacy: 'Integritetspolicy', faq: 'FAQ' },
 };
 const footerLegalText = footerLegalLabels[pathContext.languageCode as keyof typeof footerLegalLabels] ?? footerLegalLabels.en;
 const footerLegalLinks = [
@@ -77,7 +109,7 @@ const googleMapsHref = footerSocialLinks[1].href;
     <div class="footer__brand">
       <img class="footer__logo" src={logoMain} alt="Camping Clepardia" width="196" height="52" onerror={`this.onerror=null;this.src='${logoMainPng}'`} />
       <h2>Camping Clepardia</h2>
-      <p>{t.footer.description}</p>
+      <p>{footerDescription}</p>
       <div class="footer__cta-row">
         <a class="footer__cta footer__cta--primary" href={getBookingLocalizedPath(pathContext.languageCode)}>
           <Icon name="reservation" size={18} strokeWidth={2.1} />

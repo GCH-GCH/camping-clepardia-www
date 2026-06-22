@@ -130,13 +130,19 @@ export const getSeoLanguageMeta = (pathname: string, origin?: string, canonicalO
   const context = getPathContext(pathname);
   const isBookingPage = isBookingSlug(context.slug);
   const isPlannerPage = isPlannerSlug(context.slug);
+  const seoPathForLanguage = (languageCode: LanguageCode) =>
+    isBookingPage
+      ? getBookingLocalizedPath(languageCode)
+      : isPlannerPage
+      ? getPlannerLocalizedPath(languageCode)
+      : languageCode === defaultLanguage.code
+      ? getLocalizedPath(undefined, context.slug)
+      : getLocalizedPath(languageCode, context.slug);
   const currentPath = isBookingPage
     ? getBookingLocalizedPath(context.languageCode)
     : isPlannerPage
     ? getPlannerLocalizedPath(context.languageCode)
-    : context.explicitLanguage
-    ? getLocalizedPath(context.explicitLanguage, context.slug)
-    : getLocalizedPath(undefined, context.slug);
+    : seoPathForLanguage(context.languageCode);
 
   return {
     lang: context.languageCode,
@@ -145,14 +151,7 @@ export const getSeoLanguageMeta = (pathname: string, origin?: string, canonicalO
     alternateLinks: [
       ...languages.map((language) => ({
         hrefLang: language.code,
-        href: withOrigin(
-          isBookingPage
-            ? getBookingLocalizedPath(language.code)
-            : isPlannerPage
-            ? getPlannerLocalizedPath(language.code)
-            : getLocalizedPath(language.code, context.slug),
-          origin
-        ),
+        href: withOrigin(seoPathForLanguage(language.code), origin),
       })),
       {
         hrefLang: 'x-default',

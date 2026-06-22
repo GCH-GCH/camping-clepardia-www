@@ -134,6 +134,24 @@ const dogAddon = pricingConfig.addons.find((addon) => addon.id === 'dog');
 const electricityAddon = pricingConfig.addons.find((addon) => addon.id === 'electricity');
 const googleMapsHref = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
 const bookingHref = getBookingLocalizedPath(contentLanguage);
+const campingSummerNotice = {
+  pl: {
+    title: 'Lipiec i sierpień — ważna zasada',
+    text: 'W lipcu i sierpniu rezerwacje z wyprzedzeniem przyjmujemy tylko na domki. Miejsca campingowe dla kamperów, vanów, namiotów i przyczep są dostępne według kolejności przyjazdu. Check-out z campingu jest do 12:00, dlatego przyjazd około południa daje największą szansę na miejsce.',
+  },
+  en: {
+    title: 'July and August — important rule',
+    text: 'In July and August, advance reservations are accepted only for bungalows. Camping pitches for motorhomes, vans, tents and caravans are available in order of arrival. Camping check-out is by 12:00, so arriving around noon gives you the best chance of finding a place.',
+  },
+  de: {
+    title: 'Juli und August — wichtige Regel',
+    text: 'Im Juli und August nehmen wir Vorausbuchungen nur für Bungalows an. Stellplätze für Wohnmobile, Vans, Zelte und Wohnwagen sind nach Ankunftsreihenfolge verfügbar. Check-out ist bis 12:00 Uhr; eine Anreise um die Mittagszeit bietet die beste Chance auf einen Platz.',
+  },
+  it: {
+    title: 'Luglio e agosto — regola importante',
+    text: 'A luglio e agosto accettiamo prenotazioni anticipate solo per i bungalow. Le piazzole per camper, van, tende e roulotte sono disponibili in ordine di arrivo. Il check-out è entro le 12:00, quindi arrivare verso mezzogiorno offre la migliore possibilità di trovare posto.',
+  },
+}[resolvedContentLanguage];
 const flatPricingStayPrice = (id: string) => {
   const item = pricingConfig.stayTypes.find((type) => type.id === id);
   return item && 'price' in item ? item.price : 0;
@@ -171,7 +189,7 @@ const contactCards = [
   { label: t.content.contactCards.phone, value: '+48 795 294 486', href: 'tel:+48795294486' },
   { label: t.content.contactCards.email, value: 'clepardia@gmail.com', href: 'mailto:clepardia@gmail.com' },
   { label: t.content.contactCards.address, value: 'Henryka Pachońskiego 28A, 31-322 Kraków' },
-  { label: t.content.contactCards.receptionHours, value: '9:00–20:00' },
+  { label: t.content.contactCards.receptionHours, value: '9:00–21:00' },
 ];
 const contactActionTextByLanguage = {
   pl: {
@@ -402,6 +420,20 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 )}
 
 {page.slug === 'camping' && (
+  <section class="camping-summer-notice reveal-section">
+    <div class="container">
+      <article>
+        <span aria-hidden="true"><Icon name="Sun" size={26} strokeWidth={2} /></span>
+        <div>
+          <h2>{campingSummerNotice.title}</h2>
+          <p>{campingSummerNotice.text}</p>
+        </div>
+      </article>
+    </div>
+  </section>
+)}
+
+{page.slug === 'camping' && (
   <section class="site-section city-camping-note reveal-section">
     <div class="container">
       <article class="premium-card city-camping-note__card">
@@ -601,6 +633,7 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
 
 <style>
 .city-camping-note{padding-top:0}.city-camping-note__card{display:grid;grid-template-columns:56px minmax(0,1fr);gap:20px;padding:clamp(24px,4vw,38px);border-radius:28px}.city-camping-note__card>span{display:grid;width:56px;height:56px;place-items:center;border-radius:18px;color:#8fe0b4;background:rgba(60,179,113,.14)}.city-camping-note__card h2{margin:10px 0 12px;color:var(--theme-text-primary,#fff);font-size:clamp(1.6rem,4vw,2.8rem)}.city-camping-note__card p{max-width:920px;margin:0;color:var(--theme-text-muted,rgba(255,255,255,.72));line-height:1.75}@media(max-width:620px){.city-camping-note__card{grid-template-columns:1fr}}html[data-theme="light"] .city-camping-note__card h2{color:#102018}html[data-theme="light"] .city-camping-note__card p{color:#536359}
+.camping-summer-notice{padding:0 0 clamp(34px,5vw,64px)}.camping-summer-notice article{display:grid;grid-template-columns:auto 1fr;gap:18px;padding:clamp(22px,4vw,34px);border:1px solid rgba(229,153,58,.35);border-radius:28px;color:#3b2a12;background:linear-gradient(135deg,#fff3d5,#f6d99c);box-shadow:0 22px 62px rgba(155,105,32,.13)}.camping-summer-notice article>span{width:54px;height:54px;display:grid;place-items:center;border-radius:19px;color:#80561e;background:rgba(255,255,255,.52)}.camping-summer-notice h2{margin:0 0 8px;color:#382712;font-size:clamp(1.35rem,3vw,2rem)}.camping-summer-notice p{margin:0;color:#5e4827;line-height:1.72}@media(max-width:620px){.camping-summer-notice article{grid-template-columns:1fr}}
 .page-mini-hero {
   min-height: 58svh;
   display: grid;

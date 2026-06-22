@@ -1103,7 +1103,7 @@ const quickActionGroups = preferredQuickKeys
 
     if (welcome instanceof HTMLElement) {
       const welcomeCopy = getChatTexts();
-      const welcomeKey = `campy-welcome:${welcomeCopy?.pageWelcomeKey || location.pathname}`;
+      const welcomeKey = 'campy-welcome:session';
       const forceWelcome = new URLSearchParams(location.search).get('campyBubble') === '1';
       const hideWelcome = () => {
         welcome.hidden = true;

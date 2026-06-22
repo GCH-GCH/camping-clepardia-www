@@ -52,7 +52,7 @@ export const it = {
     addressLabel: 'Indirizzo',
     receptionHoursLabel: 'Orari reception',
     mapsLabel: 'Apri in Google Maps',
-    reception: '9:00–20:00',
+    reception: '9:00–21:00',
     social: 'Social media',
     rights: 'Tutti i diritti riservati.',
     bookingReady: 'Sito Camping Clepardia — informazioni, prezzi e richieste di disponibilità.',

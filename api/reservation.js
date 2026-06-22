@@ -163,6 +163,20 @@ const validate = (payload) => {
   return { errors, arrival, departure, services, email, phone };
 };
 
+const normalizeFeedback = (value) => {
+  if (!value || typeof value !== 'object') return null;
+  const rating = Math.min(5, Math.max(0, Math.floor(Number(value.rating || 0))));
+  const liked = (Array.isArray(value.liked) ? value.liked : [])
+    .map((item) => oneLine(item, 100))
+    .filter(Boolean)
+    .slice(0, 12);
+  const improve = longText(value.improve, 1200);
+  const easyInfo = oneLine(value.easyInfo, 100);
+  const easyForm = oneLine(value.easyForm, 100);
+  if (!rating && !liked.length && !improve && !easyInfo && !easyForm) return null;
+  return { rating, liked, improve, easyInfo, easyForm };
+};
+
 const createInquiry = (payload, normalized) => {
   const nights = normalized.arrival && normalized.departure
     ? Math.max(1, Math.round((normalized.departure.getTime() - normalized.arrival.getTime()) / DAY))
@@ -195,6 +209,7 @@ const createInquiry = (payload, normalized) => {
       .map((tour) => oneLine(tour, 120))
       .filter(Boolean)
       .slice(0, 12),
+    feedback: normalizeFeedback(payload.feedback),
     arrivalTime: oneLine(payload.arrivalTime, 120),
     highSeasonCampingInfo: Boolean(payload.highSeasonCampingInfo),
     bungalowPersonalItemsNotice: Boolean(payload.bungalowPersonalItemsNotice),
@@ -246,6 +261,7 @@ const createCcSystemDraft = (inquiry) => ({
     people: inquiry.people,
     services: inquiry.services,
     tours: inquiry.tours,
+    feedback: inquiry.feedback,
     arrivalTime: inquiry.arrivalTime,
     highSeasonCampingInfo: inquiry.highSeasonCampingInfo,
     bungalowPersonalItemsNotice: inquiry.bungalowPersonalItemsNotice,
@@ -341,6 +357,11 @@ const buildReceptionMail = (inquiry) => {
     ['Specjalne potrzeby', inquiry.specialNeeds || 'brak'],
     ['Pozniejszy wyjazd', inquiry.lateCheckout || 'brak'],
     ['Wycieczki (bez doliczania ceny)', inquiry.tours.join(', ') || 'brak'],
+    ['Ocena strony', inquiry.feedback?.rating ? `${inquiry.feedback.rating}/5` : 'brak'],
+    ['Co sie podobalo', inquiry.feedback?.liked?.join(', ') || 'brak'],
+    ['Latwo znalezc informacje', inquiry.feedback?.easyInfo || 'brak'],
+    ['Prosty formularz', inquiry.feedback?.easyForm || 'brak'],
+    ['Sugestia ulepszenia', inquiry.feedback?.improve || 'brak'],
     ['Lipiec/sierpień — camping bez rezerwacji', inquiry.highSeasonCampingInfo ? 'TAK — przekazano informację o kolejności przyjazdu' : 'nie dotyczy'],
     ['Domki — własne ręczniki i rzeczy osobiste', inquiry.bungalowPersonalItemsNotice ? 'przekazano klientowi' : 'nie dotyczy'],
     ['Cisza nocna', inquiry.quietConsent ? 'zaakceptowana' : 'brak'],
@@ -587,6 +608,11 @@ const buildFormSubmitPayload = (message, inquiry) => ({
   specjalne_potrzeby: inquiry.specialNeeds || 'brak',
   pozniejszy_wyjazd: inquiry.lateCheckout || 'brak',
   wycieczki_bez_doliczania_ceny: inquiry.tours.join(', ') || 'brak',
+  ocena_strony: inquiry.feedback?.rating ? `${inquiry.feedback.rating}/5` : 'brak',
+  co_sie_podobalo: inquiry.feedback?.liked?.join(', ') || 'brak',
+  latwo_znalezc_informacje: inquiry.feedback?.easyInfo || 'brak',
+  prosty_formularz: inquiry.feedback?.easyForm || 'brak',
+  sugestia_ulepszenia: inquiry.feedback?.improve || 'brak',
   camping_lipiec_sierpien_bez_rezerwacji: inquiry.highSeasonCampingInfo ? 'TAK — według kolejności przyjazdu' : 'nie dotyczy',
   domki_wlasne_reczniki_i_rzeczy_osobiste: inquiry.bungalowPersonalItemsNotice ? 'informacja przekazana' : 'nie dotyczy',
   wiadomosc_klienta: inquiry.message || 'brak',

@@ -7,9 +7,10 @@ interface Props {
 }
 
 const { languageCode } = Astro.props as Props;
-const lang = resolveContentLanguage(languageCode);
+const requestedLang = languageCode ?? 'pl';
+const lang = resolveContentLanguage(requestedLang);
 
-const copy = {
+const baseCopy = {
   pl: {
     aria: 'Najważniejsze informacje Camping Clepardia',
     prev: 'Poprzednia informacja',
@@ -203,6 +204,64 @@ const copy = {
     ],
   },
 }[lang];
+
+const compactCopy = {
+  fr: {
+    aria: 'Informations essentielles Camping Clepardia', prev: 'Information précédente', next: 'Information suivante', of: 'sur',
+    slides: [
+      { icon: 'tram', kicker: 'Tramway vers le centre', title: '9 arrêts jusqu’à Stary Kleparz', detail: 'Environ 14 minutes, arrêt à près de 40 m de l’entrée.' },
+      { icon: 'bungalow', kicker: 'Camping + bungalows', title: 'Camping-cars, caravanes, tentes et bungalows', detail: 'Choisissez votre séjour et consultez un prix indicatif.' },
+      { icon: 'map', kicker: 'Google Maps', title: 'Nous recommandons Google Maps', detail: 'L’accès a changé en 2022 ; les anciens GPS peuvent se tromper.' },
+      { icon: 'route', kicker: 'Avant le trajet', title: 'Vérifiez SCT et e-TOLL', detail: 'Les règles peuvent concerner certains véhicules et évoluer.' },
+    ],
+  },
+  es: {
+    aria: 'Información esencial Camping Clepardia', prev: 'Información anterior', next: 'Información siguiente', of: 'de',
+    slides: [
+      { icon: 'tram', kicker: 'Tranvía al centro', title: '9 paradas hasta Stary Kleparz', detail: 'Unos 14 minutos; parada a aproximadamente 40 m de la entrada.' },
+      { icon: 'bungalow', kicker: 'Camping + bungalows', title: 'Autocaravanas, caravanas, tiendas y bungalows', detail: 'Elige tu estancia y consulta un precio orientativo.' },
+      { icon: 'map', kicker: 'Google Maps', title: 'Recomendamos Google Maps', detail: 'El acceso cambió en 2022; los GPS antiguos pueden indicar mal.' },
+      { icon: 'route', kicker: 'Antes del viaje', title: 'Comprueba SCT y e-TOLL', detail: 'Las normas pueden afectar a algunos vehículos y cambiar.' },
+    ],
+  },
+  nl: {
+    aria: 'Belangrijkste informatie Camping Clepardia', prev: 'Vorige informatie', next: 'Volgende informatie', of: 'van',
+    slides: [
+      { icon: 'tram', kicker: 'Met de tram naar het centrum', title: '9 haltes tot Stary Kleparz', detail: 'Ongeveer 14 minuten; halte op circa 40 m van de ingang.' },
+      { icon: 'bungalow', kicker: 'Camping + bungalows', title: 'Campers, caravans, tenten en bungalows', detail: 'Kies je verblijf en bekijk een indicatieve prijs.' },
+      { icon: 'map', kicker: 'Google Maps', title: 'Wij adviseren Google Maps', detail: 'De toegang veranderde in 2022; oudere navigatie kan verkeerd sturen.' },
+      { icon: 'route', kicker: 'Voor vertrek', title: 'Controleer SCT en e-TOLL', detail: 'Regels kunnen voor sommige voertuigen gelden en wijzigen.' },
+    ],
+  },
+  cs: {
+    aria: 'Důležité informace Camping Clepardia', prev: 'Předchozí informace', next: 'Další informace', of: 'z',
+    slides: [
+      { icon: 'tram', kicker: 'Tramvají do centra', title: '9 zastávek na Stary Kleparz', detail: 'Asi 14 minut; zastávka přibližně 40 m od vjezdu.' },
+      { icon: 'bungalow', kicker: 'Kemp + bungalovy', title: 'Obytné vozy, karavany, stany a bungalovy', detail: 'Vyberte pobyt a zjistěte orientační cenu.' },
+      { icon: 'map', kicker: 'Google Maps', title: 'Doporučujeme Google Maps', detail: 'Vjezd se v roce 2022 změnil; starší navigace může vést špatně.' },
+      { icon: 'route', kicker: 'Před cestou', title: 'Zkontrolujte SCT a e-TOLL', detail: 'Pravidla se mohou týkat některých vozidel a měnit se.' },
+    ],
+  },
+  sk: {
+    aria: 'Dôležité informácie Camping Clepardia', prev: 'Predchádzajúca informácia', next: 'Ďalšia informácia', of: 'z',
+    slides: [
+      { icon: 'tram', kicker: 'Električkou do centra', title: '9 zastávok na Stary Kleparz', detail: 'Asi 14 minút; zastávka približne 40 m od vjazdu.' },
+      { icon: 'bungalow', kicker: 'Kemp + bungalovy', title: 'Obytné autá, karavany, stany a bungalovy', detail: 'Vyberte pobyt a zistite orientačnú cenu.' },
+      { icon: 'map', kicker: 'Google Maps', title: 'Odporúčame Google Maps', detail: 'Vjazd sa v roku 2022 zmenil; staršia navigácia môže viesť zle.' },
+      { icon: 'route', kicker: 'Pred cestou', title: 'Skontrolujte SCT a e-TOLL', detail: 'Pravidlá sa môžu týkať niektorých vozidiel a meniť sa.' },
+    ],
+  },
+  sv: {
+    aria: 'Viktig information Camping Clepardia', prev: 'Föregående information', next: 'Nästa information', of: 'av',
+    slides: [
+      { icon: 'tram', kicker: 'Spårvagn till centrum', title: '9 hållplatser till Stary Kleparz', detail: 'Cirka 14 minuter; hållplats ungefär 40 m från infarten.' },
+      { icon: 'bungalow', kicker: 'Camping + bungalower', title: 'Husbilar, husvagnar, tält och bungalower', detail: 'Välj vistelse och se ett ungefärligt pris.' },
+      { icon: 'map', kicker: 'Google Maps', title: 'Vi rekommenderar Google Maps', detail: 'Infarten ändrades 2022; äldre navigation kan visa fel.' },
+      { icon: 'route', kicker: 'Före resan', title: 'Kontrollera SCT och e-TOLL', detail: 'Regler kan gälla vissa fordon och ändras.' },
+    ],
+  },
+} as const;
+const copy = compactCopy[requestedLang as keyof typeof compactCopy] ?? baseCopy;
 ---
 
 <aside class="hero-experience-slider" data-hero-experience-slider aria-label={copy.aria}>

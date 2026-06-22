@@ -17,10 +17,21 @@ const bookingLabel = {
   de: 'Aufenthalt buchen',
   it: 'Prenota il soggiorno',
 }[activeLanguage as 'pl' | 'en' | 'de' | 'it'] ?? 'Book your stay';
+const campyLabel = {
+  pl: 'Zapytaj CAMPY',
+  en: 'Ask CAMPY',
+  de: 'CAMPY fragen',
+  it: 'Chiedi a CAMPY',
+  fr: 'Demander à CAMPY',
+  es: 'Preguntar a CAMPY',
+  nl: 'Vraag CAMPY',
+  cs: 'Zeptat se CAMPY',
+  sk: 'Opýtať sa CAMPY',
+  sv: 'Fråga CAMPY',
+}[activeLanguage] ?? 'Ask CAMPY';
 const actions = [
   { label: bookingLabel, href: getBookingLocalizedPath(activeLanguage), primary: true },
   { label: t.cta.pricing, href: getLocalizedPath(explicitLanguage, 'cennik') },
-  { label: t.cta.gallery, href: getLocalizedPath(explicitLanguage, 'galeria') },
 ];
 ---
 
@@ -38,10 +49,21 @@ const actions = [
             {action.label}
           </a>
         ))}
+        <button class="btn btn-glass home-final-cta__secondary" type="button" data-final-campy>{campyLabel}</button>
       </div>
     </div>
   </div>
 </section>
+
+<script>
+  document.querySelectorAll('[data-final-campy]').forEach((button) => {
+    button.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('campy:prompt', {
+        detail: { prompt: 'Pomóż mi wybrać pobyt w Camping Clepardia.' },
+      }));
+    });
+  });
+</script>
 
 <style>
 .home-final-cta {
@@ -161,6 +183,10 @@ const actions = [
   .home-final-cta__actions a {
     width: 100%;
   }
+
+  .home-final-cta__actions button {
+    width: 100%;
+  }
 }
 
 @media (max-width: 640px) {
@@ -177,6 +203,10 @@ const actions = [
   }
 
   .home-final-cta__actions a {
+    width: 100%;
+  }
+
+  .home-final-cta__actions button {
     width: 100%;
   }
 }

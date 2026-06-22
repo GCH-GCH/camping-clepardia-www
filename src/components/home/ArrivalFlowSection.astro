@@ -69,35 +69,63 @@ const copy = {
 
 const arrivalDocsByLanguage = {
   pl: {
-    title: 'Do rejestracji przygotuj',
+    title: 'Dobrze wiedzieć przed przyjazdem',
     items: [
-      'jeden dokument tożsamości dla recepcji',
-      'numer rejestracyjny auta, kampera, vana lub pojazdu',
-      'przy przyczepie kempingowej: numer rejestracyjny przyczepy',
+      ['IdCard', 'Dokument tożsamości'],
+      ['CarFront', 'Numer rejestracyjny pojazdu'],
+      ['Container', 'Przy przyczepie: numer rejestracyjny przyczepy'],
+      ['Navigation', 'Google Maps — wjazd zmienił się w 2022'],
+      ['Moon', 'Cisza nocna 22:00–07:00'],
+      ['PlugZap', 'Prąd 10A, nie do ładowania EV'],
+      ['PawPrint', 'Pies 0 PLN — prosimy sprzątać po pupilu'],
+      ['Building2', 'To zielony camping w mieście'],
+      ['Briefcase', 'Domki: własne ręczniki, kosmetyki i rzeczy osobiste'],
+      ['Clock3', 'Przyjazd po 21:00: skontaktuj się z recepcją'],
     ],
   },
   en: {
-    title: 'For registration prepare',
+    title: 'Good to know before arrival',
     items: [
-      'one identity document for reception',
-      'the registration plate of your car, camper, van or vehicle',
-      'with a camping trailer: the trailer registration plate',
+      ['IdCard', 'Identity document'],
+      ['CarFront', 'Vehicle registration number'],
+      ['Container', 'For a caravan: caravan registration number'],
+      ['Navigation', 'Use Google Maps — the entrance changed in 2022'],
+      ['Moon', 'Quiet hours 22:00–07:00'],
+      ['PlugZap', '10A power, not for EV charging'],
+      ['PawPrint', 'Dog 0 PLN — please clean up after your pet'],
+      ['Building2', 'This is a green urban campsite'],
+      ['Briefcase', 'Bungalows: bring towels, toiletries and personal items'],
+      ['Clock3', 'Arrival after 21:00: contact reception'],
     ],
   },
   de: {
-    title: 'Für die Anmeldung vorbereiten',
+    title: 'Gut zu wissen vor der Anreise',
     items: [
-      'ein Ausweisdokument für die Rezeption',
-      'das Kennzeichen von Auto, Wohnmobil, Van oder Fahrzeug',
-      'bei Wohnwagen: das Kennzeichen des Wohnwagens/Anhängers',
+      ['IdCard', 'Ausweisdokument'],
+      ['CarFront', 'Kennzeichen des Fahrzeugs'],
+      ['Container', 'Bei Wohnwagen: Kennzeichen des Wohnwagens'],
+      ['Navigation', 'Google Maps nutzen — Zufahrt seit 2022 geändert'],
+      ['Moon', 'Nachtruhe 22:00–07:00'],
+      ['PlugZap', '10A Strom, nicht zum Laden von Elektroautos'],
+      ['PawPrint', 'Hund 0 PLN — bitte Hinterlassenschaften entfernen'],
+      ['Building2', 'Ein grüner Campingplatz in der Stadt'],
+      ['Briefcase', 'Bungalows: eigene Handtücher, Kosmetik und persönliche Dinge'],
+      ['Clock3', 'Anreise nach 21:00: Rezeption kontaktieren'],
     ],
   },
   it: {
-    title: 'Per la registrazione prepara',
+    title: 'Da sapere prima dell’arrivo',
     items: [
-      'un documento di identità per la reception',
-      'la targa di auto, camper, van o veicolo',
-      'con una roulotte: la targa della roulotte/rimorchio',
+      ['IdCard', 'Documento di identità'],
+      ['CarFront', 'Targa del veicolo'],
+      ['Container', 'Con roulotte: targa della roulotte'],
+      ['Navigation', 'Usa Google Maps — ingresso cambiato nel 2022'],
+      ['Moon', 'Silenzio 22:00–07:00'],
+      ['PlugZap', 'Corrente 10A, non per ricarica EV'],
+      ['PawPrint', 'Cane 0 PLN — raccogliere i bisogni'],
+      ['Building2', 'È un campeggio verde in città'],
+      ['Briefcase', 'Bungalow: porta asciugamani, cosmetici ed effetti personali'],
+      ['Clock3', 'Arrivo dopo le 21:00: contatta la reception'],
     ],
   },
 };
@@ -114,7 +142,7 @@ const arrivalDocs = arrivalDocsByLanguage[lang as keyof typeof arrivalDocsByLang
       <div class="arrival-flow__docs">
         <strong>{arrivalDocs.title}</strong>
         <ul>
-          {arrivalDocs.items.map((item) => <li>{item}</li>)}
+          {arrivalDocs.items.map((item) => <li><Icon name={item[0]} size={17} strokeWidth={1.9} /> <span>{item[1]}</span></li>)}
         </ul>
       </div>
       {guideExists ? (
@@ -193,6 +221,7 @@ const arrivalDocs = arrivalDocsByLanguage[lang as keyof typeof arrivalDocsByLang
 
 .arrival-flow__docs ul {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin: 0;
   padding: 0;
@@ -200,23 +229,19 @@ const arrivalDocs = arrivalDocsByLanguage[lang as keyof typeof arrivalDocsByLang
 }
 
 .arrival-flow__docs li {
-  position: relative;
-  padding-left: 22px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px;
+  border-radius: 13px;
+  background: rgba(60,179,113,.07);
   color: var(--theme-copy, #536359);
   line-height: 1.52;
   font-weight: 760;
 }
 
-.arrival-flow__docs li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: .58em;
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: #3CB371;
-  box-shadow: 0 0 0 5px rgba(60,179,113,.12);
+.arrival-flow__docs li svg {
+  color: #3CB371;
 }
 
 .arrival-flow__guide-pending {
@@ -280,6 +305,13 @@ html[data-theme="dark"] .arrival-flow__docs strong {
 
 html[data-theme="dark"] .arrival-flow__docs li {
   color: rgba(245,255,248,.72);
+  background: rgba(60,179,113,.09);
+}
+
+@media (max-width: 620px) {
+  .arrival-flow__docs ul {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (min-width: 980px) {

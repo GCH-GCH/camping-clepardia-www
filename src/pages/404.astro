@@ -1,0 +1,84 @@
+---
+import Layout from '@/layouts/Layout.astro';
+---
+
+<Layout
+  title="Nie znaleziono strony — Camping Clepardia"
+  description="Ta strona nie istnieje. Wróć na stronę główną Camping Clepardia w Krakowie."
+>
+  <section class="not-found">
+    <div class="container not-found__panel">
+      <span>404</span>
+      <h1>Ta ścieżka prowadzi donikąd.</h1>
+      <p>Wróć do Camping Clepardia albo przejdź od razu do rezerwacji.</p>
+      <div>
+        <a class="btn btn-primary premium-button" href="/">Strona główna</a>
+        <a class="btn btn-glass" href="/rezerwacja">Wyślij zapytanie</a>
+        <a class="btn btn-glass" href="/kontakt">Kontakt</a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+.not-found {
+  min-height: 75svh;
+  display: grid;
+  place-items: center;
+  padding: 140px 16px 80px;
+}
+
+.not-found__panel {
+  max-width: 760px;
+  padding: clamp(28px, 6vw, 64px);
+  border: 1px solid rgba(60,179,113,.2);
+  border-radius: 32px;
+  background: var(--theme-card-background, rgba(255,255,255,.78));
+  text-align: center;
+}
+
+.not-found__panel > span {
+  color: #3CB371;
+  font-size: .82rem;
+  font-weight: 950;
+  letter-spacing: .18em;
+}
+
+.not-found h1 {
+  margin: 16px 0;
+  color: var(--theme-heading, #102018);
+  font-size: clamp(2.2rem, 7vw, 4.8rem);
+  line-height: 1;
+}
+
+.not-found p {
+  color: var(--theme-muted, #5d6f64);
+  line-height: 1.7;
+}
+
+.not-found__panel div {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+html[data-theme="dark"] .not-found__panel {
+  background: rgba(255,255,255,.055);
+}
+
+html[data-theme="dark"] .not-found h1 {
+  color: #f4fff7;
+}
+
+html[data-theme="dark"] .not-found p {
+  color: rgba(245,255,248,.7);
+}
+
+@media (max-width: 520px) {
+  .not-found__panel div {
+    display: grid;
+  }
+}
+</style>

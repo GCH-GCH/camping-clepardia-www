@@ -61,7 +61,7 @@ export const siteAssets = {
   },
   transport: {
     tramToCenter: '/images/sections/tram-stop-near-camping.webp',
-    ticketMachine: '/images/attractions/tram-ticket-machine.webp.webp',
+    ticketMachine: '/images/attractions/tram-ticket-machine.webp',
     googleMaps: '/images/sections/tram-stop-near-camping.webp',
     jakdojade: '/images/sections/tram-stop-near-camping.webp',
   },
@@ -106,7 +106,7 @@ export const siteAssets = {
     kitchen: '/images/sections/camping-kitchen-main.webp',
     laundry: '/images/sections/camping-laundry-room.webp',
     tramToCenter: '/images/sections/tram-stop-near-camping.webp',
-    ticketMachine: '/images/attractions/tram-ticket-machine.webp.webp',
+    ticketMachine: '/images/attractions/tram-ticket-machine.webp',
     familyPlayground: '/images/sections/family-playground-main.webp',
     receptionMain: '/images/sections/reception-main.webp',
     aerialOverview: '/images/sections/drone-overview-camping.webp',

@@ -196,6 +196,7 @@ const reservationApiDevPlugin = () => {
           },
           services,
           tours: Array.isArray(payload.tours) ? payload.tours.filter(Boolean).slice(0, 12) : [],
+          feedback: payload.feedback && typeof payload.feedback === 'object' ? payload.feedback : null,
           originalMessage: String(payload.message || '').trim(),
         };
 
@@ -276,7 +277,13 @@ export default defineConfig({
   site: process.env.PUBLIC_SITE_URL || 'https://www.clepardia.com.pl',
   integrations: [
     sitemap({
-      filter: (page) => !page.includes('/cc-gate-a8f3k9r2p6'),
+      filter: (page) => {
+        let pathname = page;
+        try {
+          pathname = new URL(page).pathname;
+        } catch {}
+        return !pathname.includes('/cc-gate-a8f3k9r2p6') && !/^\/pl(?:\/|$)/.test(pathname);
+      },
       i18n: {
         defaultLocale: 'pl',
         locales: {

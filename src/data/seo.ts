@@ -2,7 +2,9 @@ import { publicAssetExists, siteAssets } from './assets';
 
 export const siteUrl = 'https://www.clepardia.com.pl';
 export const siteName = 'Camping Clepardia';
-export const defaultOgImage = siteAssets.seo.ogHomePl;
+export const defaultOgImage = publicAssetExists(siteAssets.seo.ogHomePl)
+  ? siteAssets.seo.ogHomePl
+  : siteAssets.hero.desktop;
 export const fallbackOgImage = siteAssets.seo.ogFallback;
 
 export const homeSeo = {
@@ -40,17 +42,12 @@ export const getCampgroundJsonLd = ({ image, pageUrl }: BusinessJsonLdOptions) =
     addressLocality: 'Kraków',
     addressCountry: 'PL',
   },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: 'TODO: add exact latitude',
-    longitude: 'TODO: add exact longitude',
-  },
   openingHoursSpecification: [
     {
       '@type': 'OpeningHoursSpecification',
       dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
       opens: '09:00',
-      closes: '20:00',
+      closes: '21:00',
     },
   ],
 });

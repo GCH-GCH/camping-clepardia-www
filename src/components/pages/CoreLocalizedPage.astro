@@ -1,0 +1,179 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { corePages, getCorePage } from '@/i18n/corePages';
+import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode: string;
+  slug: string;
+}
+
+const { languageCode, slug } = Astro.props as Props;
+const copy = corePages[languageCode];
+const page = getCorePage(languageCode, slug);
+const context = getPathContext(Astro.url.pathname);
+const route = (value: string) => getLocalizedPath(context.explicitLanguage, value);
+const bookingHref = getBookingLocalizedPath(languageCode);
+const mapsHref = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
+const galleryImages = [
+  '/images/sections/camping-pitches.webp',
+  '/images/sections/campers-under-trees.webp',
+  '/images/sections/bungalows-main.webp',
+  '/images/sections/domek-4os-living-dining.webp',
+  '/images/sections/sanitary-facilities-main.webp',
+  '/images/sections/reception-main.webp',
+];
+---
+
+{page && copy && (
+  <main class="core-page">
+    <section class="core-page__hero">
+      <div class="container">
+        <nav aria-label="Breadcrumb"><a href={route('')}>{copy.home}</a><span>/</span><span>{page.title}</span></nav>
+        <span class="section-kicker">{page.overline}</span>
+        <h1>{page.title}</h1>
+        <p>{page.lead}</p>
+        <div class="core-page__actions">
+          <a class="btn btn-primary premium-button" href={bookingHref}><Icon name="CalendarCheck" size={18} /> {copy.booking}</a>
+          {slug === 'dojazd' || slug === 'kontakt'
+            ? <a class="btn btn-glass" href={mapsHref} target="_blank" rel="noopener noreferrer"><Icon name="MapPin" size={18} /> {copy.maps}</a>
+            : <a class="btn btn-glass" href={route('cennik')}><Icon name="WalletCards" size={18} /> {copy.prices}</a>}
+        </div>
+      </div>
+    </section>
+
+    <section class="core-page__content site-section">
+      <div class="container">
+        <header>
+          <span class="section-kicker">{copy.info}</span>
+          <h2>{page.title}</h2>
+        </header>
+        <div class="core-page__grid">
+          {page.highlights.map(([title, text], index) => (
+            <article class="premium-card">
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+
+        {slug === 'galeria' && (
+          <div class="core-page__gallery" aria-label={copy.gallery}>
+            {galleryImages.map((src, index) => <img src={src} alt={`${copy.gallery} ${index + 1}`} width="720" height="480" loading="lazy" decoding="async" />)}
+          </div>
+        )}
+
+        {slug === 'kontakt' && (
+          <div class="core-page__contact">
+            <a href="tel:+48795294486"><Icon name="Phone" size={18} /> +48 795 294 486</a>
+            <a href="mailto:clepardia@gmail.com"><Icon name="Mail" size={18} /> clepardia@gmail.com</a>
+            <a href={mapsHref} target="_blank" rel="noopener noreferrer"><Icon name="MapPin" size={18} /> Henryka Pachońskiego 28A, Kraków</a>
+          </div>
+        )}
+      </div>
+    </section>
+  </main>
+)}
+
+<style>
+.core-page {
+  min-width: 0;
+  overflow: clip;
+}
+.core-page__hero {
+  padding: clamp(140px, 15vw, 210px) 0 clamp(70px, 9vw, 120px);
+  background: radial-gradient(circle at 12% 10%, rgba(60,179,113,.18), transparent 35%), var(--theme-section-background, #f7fbf4);
+}
+.core-page__hero .container,
+.core-page__content .container {
+  min-width: 0;
+}
+.core-page__hero nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+  color: var(--theme-muted, #617167);
+  font-size: .82rem;
+}
+.core-page__hero nav a { color: inherit; }
+.core-page__hero h1 {
+  max-width: 980px;
+  margin: 14px 0 20px;
+  color: var(--theme-heading, #102018);
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  line-height: .98;
+  overflow-wrap: anywhere;
+}
+.core-page__hero p {
+  max-width: 760px;
+  color: var(--theme-muted, #617167);
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  line-height: 1.7;
+}
+.core-page__actions,
+.core-page__contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+.core-page__content { padding: clamp(70px, 10vw, 130px) 0; }
+.core-page__content header { max-width: 850px; }
+.core-page__content h2 {
+  margin: 12px 0 36px;
+  color: var(--theme-heading, #102018);
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1.04;
+}
+.core-page__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.core-page__grid article {
+  min-width: 0;
+  padding: clamp(22px, 3vw, 34px);
+  border-radius: 26px;
+}
+.core-page__grid article > span { color: #3CB371; font-size: .72rem; font-weight: 950; }
+.core-page__grid h3 { margin: 14px 0 10px; color: var(--theme-heading, #102018); font-size: 1.25rem; }
+.core-page__grid p { margin: 0; color: var(--theme-muted, #617167); line-height: 1.7; }
+.core-page__gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 28px;
+}
+.core-page__gallery img { width: 100%; aspect-ratio: 3/2; object-fit: cover; border-radius: 22px; }
+.core-page__contact a {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 14px 18px;
+  border: 1px solid rgba(60,179,113,.22);
+  border-radius: 15px;
+  color: var(--theme-heading, #102018);
+  background: var(--theme-card-background, #fff);
+  font-weight: 850;
+  text-decoration: none;
+}
+html[data-theme="dark"] .core-page__hero h1,
+html[data-theme="dark"] .core-page__content h2,
+html[data-theme="dark"] .core-page__grid h3,
+html[data-theme="dark"] .core-page__contact a { color: #f4fff7; }
+html[data-theme="dark"] .core-page__hero p,
+html[data-theme="dark"] .core-page__grid p { color: rgba(245,255,248,.68); }
+@media (max-width: 760px) {
+  .core-page__hero { padding-inline: 0; }
+  .core-page__grid,
+  .core-page__gallery { grid-template-columns: 1fr; }
+  .core-page__actions,
+  .core-page__actions > *,
+  .core-page__contact,
+  .core-page__contact > * { width: 100%; }
+  .core-page__actions > *,
+  .core-page__contact > * { justify-content: center; }
+}
+</style>

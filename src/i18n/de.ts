@@ -52,7 +52,7 @@ export const de = {
     addressLabel: 'Adresse',
     receptionHoursLabel: 'Öffnungszeiten der Rezeption',
     mapsLabel: 'In Google Maps öffnen',
-    reception: '9:00–20:00',
+    reception: '9:00–21:00',
     social: 'Social Media',
     rights: 'Alle Rechte vorbehalten.',
     bookingReady: 'Camping Clepardia Website — Informationen, Preise und Verfügbarkeitsanfragen.',

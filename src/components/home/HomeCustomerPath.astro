@@ -1,0 +1,1169 @@
+---
+import ImageFrame from '@/components/ImageFrame.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { attractionImages } from '@/data/attractionsImageRegistry';
+import { formatCurrencyEstimates, pricingConfig } from '@/data/pricing';
+import { tourBookingHref } from '@/i18n/coreUi';
+import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+
+interface Props {
+  languageCode?: string;
+}
+
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const language = languageCode ?? pathContext.languageCode;
+const explicitLanguage = pathContext.explicitLanguage ?? (language !== 'pl' ? language : undefined);
+const route = (slug: string) => getLocalizedPath(explicitLanguage, slug);
+const booking = (stay?: string) => getBookingLocalizedPath(language, stay);
+
+const copyByLanguage = {
+  pl: {
+    kicker: 'Szybki start',
+    chooseTitle: 'Co chcesz zrobić?',
+    chooseLead: 'Wybierz najkrótszą drogę do informacji, której potrzebujesz.',
+    choices: [
+      ['Przyjeżdżam kamperem', 'Kamper, prąd 10A, check-out do 12:00.', 'camper'],
+      ['Szukam domku', 'Domki 2-, 3- i 4-osobowe.', 'House'],
+      ['Sprawdzam ceny', 'Pełny cennik i przykładowe pobyty.', 'WalletCards'],
+      ['Chcę do centrum', 'Tramwaj 18, około 14 minut.', 'TramFront'],
+      ['Chcę wycieczkę', 'Wieliczka, Auschwitz, Zakopane i więcej.', 'TicketCheck'],
+    ],
+    infoKicker: 'Najważniejsze informacje',
+    infoTitle: 'Camping i domki w Krakowie — bez niespodzianek',
+    facts: [
+      ['MapPinned', 'Camping w Krakowie'],
+      ['TramFront', 'Tramwaj blisko'],
+      ['Navigation', 'Google Maps — wjazd zmieniony w 2022'],
+      ['Moon', 'Cisza nocna 22:00–07:00'],
+      ['PawPrint', 'Pies 0 PLN'],
+      ['PlugZap', 'Prąd 10A, nie do EV'],
+    ],
+    summerTitle: 'Lipiec i sierpień — ważna zasada',
+    summerText: 'W lipcu i sierpniu rezerwacje z wyprzedzeniem przyjmujemy tylko na domki. Miejsca campingowe dla kamperów, vanów, namiotów i przyczep są dostępne według kolejności przyjazdu. Check-out z campingu jest do 12:00, dlatego przyjazd około południa daje największą szansę na miejsce.',
+    pricesKicker: 'Prościej o cenach',
+    pricesTitle: 'Najczęstsze pobyty',
+    pricesLead: 'Szybkie przykłady kosztu jednej nocy według aktualnego cennika.',
+    perNight: '/ noc',
+    from: 'od',
+    priceDisclaimer: 'Ceny są orientacyjne. Ostateczną dostępność i warunki potwierdza recepcja.',
+    fullPricing: 'Zobacz pełny cennik',
+    directionsKicker: 'Dojazd',
+    directionsTitle: 'Blisko centrum, łatwo tramwajem',
+    directionsText: 'Przystanek Górnickiego znajduje się około 40 m od bramy. Tramwaj 18 jedzie do Starego Kleparza około 14 minut, a stamtąd do centrum dojdziesz w około 5 minut.',
+    maps: 'Otwórz Google Maps',
+    directions: 'Sprawdź dojazd',
+    cityKicker: 'Camping w mieście',
+    cityTitle: 'Zielona baza w Krakowie',
+    cityText: 'Camping Clepardia znajduje się w mieście — blisko tramwaju, sklepów i atrakcji. To nie jest odludna polana, więc czasem słychać tramwaje, samoloty i normalne życie Krakowa. W zamian masz szybki dojazd do centrum i spokojną, zieloną przestrzeń jak na warunki miejskie.',
+    askCampy: 'Zapytaj CAMPY',
+    attractionsKicker: 'Kraków i okolice',
+    attractionsTitle: 'Najmocniejsze kierunki na dobry pobyt',
+    attractionsLead: 'Na stronie głównej pokazujemy tylko najważniejsze propozycje. Pełna lista czeka w atrakcjach.',
+    allAttractions: 'Zobacz wszystkie atrakcje',
+    tours: 'Sprawdź wycieczki',
+    checklistKicker: 'Przed podróżą',
+    checklistTitle: 'Dobrze wiedzieć przed przyjazdem',
+    checklist: [
+      ['IdCard', 'Dokument tożsamości'],
+      ['CarFront', 'Numer rejestracyjny pojazdu'],
+      ['Container', 'Przy przyczepie: numer rejestracyjny przyczepy'],
+      ['Navigation', 'Użyj Google Maps — wjazd zmienił się w 2022'],
+      ['Moon', 'Cisza nocna 22:00–07:00'],
+      ['PlugZap', 'Prąd 10A, nie do ładowania EV'],
+      ['PawPrint', 'Pies 0 PLN — prosimy sprzątać po pupilu'],
+      ['Building2', 'To zielony camping w mieście'],
+      ['Briefcase', 'Domki: własne ręczniki, kosmetyki i rzeczy osobiste'],
+      ['Clock3', 'Przyjazd po 21:00: skontaktuj się z recepcją'],
+    ],
+  },
+  en: {
+    kicker: 'Quick start',
+    chooseTitle: 'What would you like to do?',
+    chooseLead: 'Choose the shortest route to the information you need.',
+    choices: [
+      ['I am coming by motorhome', 'Motorhome, 10A power, check-out by 12:00.', 'camper'],
+      ['I need a bungalow', 'Bungalows for 2, 3 and 4 guests.', 'House'],
+      ['I want to check prices', 'Full price list and sample stays.', 'WalletCards'],
+      ['I want to reach the centre', 'Tram 18, about 14 minutes.', 'TramFront'],
+      ['I want a tour', 'Wieliczka, Auschwitz, Zakopane and more.', 'TicketCheck'],
+    ],
+    infoKicker: 'Key information',
+    infoTitle: 'Camping and bungalows in Krakow — no surprises',
+    facts: [
+      ['MapPinned', 'Camping in Krakow'],
+      ['TramFront', 'Tram stop nearby'],
+      ['Navigation', 'Google Maps — entrance changed in 2022'],
+      ['Moon', 'Quiet hours 22:00–07:00'],
+      ['PawPrint', 'Dog 0 PLN'],
+      ['PlugZap', '10A power, not for EV charging'],
+    ],
+    summerTitle: 'July and August — important rule',
+    summerText: 'In July and August, advance reservations are accepted only for bungalows. Camping pitches for motorhomes, vans, tents and caravans are available in order of arrival. Camping check-out is by 12:00, so arriving around noon gives you the best chance of finding a place.',
+    pricesKicker: 'Prices made simple',
+    pricesTitle: 'Most common stays',
+    pricesLead: 'Quick examples for one night based on the current price list.',
+    perNight: '/ night',
+    from: 'from',
+    priceDisclaimer: 'Prices are estimates. Final availability and conditions are confirmed by reception.',
+    fullPricing: 'See full price list',
+    directionsKicker: 'Getting here',
+    directionsTitle: 'Close to the centre, easy by tram',
+    directionsText: 'Górnickiego tram stop is about 40 m from the gate. Tram 18 reaches Stary Kleparz in about 14 minutes, followed by a 5-minute walk to the centre.',
+    maps: 'Open Google Maps',
+    directions: 'See directions',
+    cityKicker: 'Urban camping',
+    cityTitle: 'A green base in Krakow',
+    cityText: 'Camping Clepardia is in the city, close to trams, shops and attractions. It is not a remote meadow, so you may sometimes hear trams, aircraft and normal Krakow life. In return, you get quick access to the centre and a calm green space for an urban location.',
+    askCampy: 'Ask CAMPY',
+    attractionsKicker: 'Krakow and nearby',
+    attractionsTitle: 'The strongest ideas for a great stay',
+    attractionsLead: 'The homepage shows only the highlights. The full list is available on the attractions page.',
+    allAttractions: 'See all attractions',
+    tours: 'Check tours',
+    checklistKicker: 'Before your trip',
+    checklistTitle: 'Good to know before arrival',
+    checklist: [
+      ['IdCard', 'Identity document'],
+      ['CarFront', 'Vehicle registration number'],
+      ['Container', 'For a caravan: caravan registration number'],
+      ['Navigation', 'Use Google Maps — the entrance changed in 2022'],
+      ['Moon', 'Quiet hours 22:00–07:00'],
+      ['PlugZap', '10A power, not for EV charging'],
+      ['PawPrint', 'Dog 0 PLN — please clean up after your pet'],
+      ['Building2', 'This is a green urban campsite'],
+      ['Briefcase', 'Bungalows: bring towels, toiletries and personal items'],
+      ['Clock3', 'Arrival after 21:00: contact reception'],
+    ],
+  },
+  de: {
+    kicker: 'Schnellstart',
+    chooseTitle: 'Was möchten Sie tun?',
+    chooseLead: 'Wählen Sie den kürzesten Weg zu den benötigten Informationen.',
+    choices: [
+      ['Ich komme mit dem Wohnmobil', 'Wohnmobil, 10A Strom, Check-out bis 12:00.', 'camper'],
+      ['Ich suche einen Bungalow', 'Bungalows für 2, 3 und 4 Personen.', 'House'],
+      ['Ich prüfe die Preise', 'Preisliste und Beispielaufenthalte.', 'WalletCards'],
+      ['Ich möchte ins Zentrum', 'Straßenbahn 18, etwa 14 Minuten.', 'TramFront'],
+      ['Ich möchte einen Ausflug', 'Wieliczka, Auschwitz, Zakopane und mehr.', 'TicketCheck'],
+    ],
+    infoKicker: 'Wichtige Informationen',
+    infoTitle: 'Camping und Bungalows in Krakau — ohne Überraschungen',
+    facts: [
+      ['MapPinned', 'Camping in Krakau'],
+      ['TramFront', 'Straßenbahn in der Nähe'],
+      ['Navigation', 'Google Maps — Zufahrt seit 2022 geändert'],
+      ['Moon', 'Nachtruhe 22:00–07:00'],
+      ['PawPrint', 'Hund 0 PLN'],
+      ['PlugZap', '10A Strom, nicht für Elektroautos'],
+    ],
+    summerTitle: 'Juli und August — wichtige Regel',
+    summerText: 'Im Juli und August nehmen wir Vorausbuchungen nur für Bungalows an. Stellplätze für Wohnmobile, Vans, Zelte und Wohnwagen sind nach Ankunftsreihenfolge verfügbar. Check-out vom Campingplatz ist bis 12:00 Uhr; eine Anreise um die Mittagszeit bietet daher die beste Chance auf einen Platz.',
+    pricesKicker: 'Preise einfach erklärt',
+    pricesTitle: 'Häufigste Aufenthalte',
+    pricesLead: 'Schnelle Beispiele für eine Nacht nach aktueller Preisliste.',
+    perNight: '/ Nacht',
+    from: 'ab',
+    priceDisclaimer: 'Die Preise sind Richtwerte. Verfügbarkeit und Bedingungen bestätigt die Rezeption.',
+    fullPricing: 'Vollständige Preisliste',
+    directionsKicker: 'Anreise',
+    directionsTitle: 'Zentrumsnah und einfach mit der Straßenbahn',
+    directionsText: 'Die Haltestelle Górnickiego liegt etwa 40 m vom Tor entfernt. Die Linie 18 fährt in ca. 14 Minuten zum Stary Kleparz, von dort sind es etwa 5 Minuten zu Fuß ins Zentrum.',
+    maps: 'Google Maps öffnen',
+    directions: 'Anreise prüfen',
+    cityKicker: 'Camping in der Stadt',
+    cityTitle: 'Eine grüne Basis in Krakau',
+    cityText: 'Camping Clepardia liegt in der Stadt, nahe Straßenbahn, Geschäften und Sehenswürdigkeiten. Es ist keine abgelegene Wiese; manchmal hört man Straßenbahnen, Flugzeuge und das normale Krakauer Leben. Dafür erreichen Sie das Zentrum schnell und wohnen für eine Stadtlage ruhig und grün.',
+    askCampy: 'CAMPY fragen',
+    attractionsKicker: 'Krakau und Umgebung',
+    attractionsTitle: 'Die besten Ziele für einen gelungenen Aufenthalt',
+    attractionsLead: 'Auf der Startseite zeigen wir nur die Highlights. Die vollständige Liste finden Sie unter Attraktionen.',
+    allAttractions: 'Alle Attraktionen',
+    tours: 'Ausflüge prüfen',
+    checklistKicker: 'Vor der Reise',
+    checklistTitle: 'Gut zu wissen vor der Anreise',
+    checklist: [
+      ['IdCard', 'Ausweisdokument'],
+      ['CarFront', 'Kennzeichen des Fahrzeugs'],
+      ['Container', 'Bei Wohnwagen: Kennzeichen des Wohnwagens'],
+      ['Navigation', 'Google Maps nutzen — Zufahrt seit 2022 geändert'],
+      ['Moon', 'Nachtruhe 22:00–07:00'],
+      ['PlugZap', '10A Strom, nicht zum Laden von Elektroautos'],
+      ['PawPrint', 'Hund 0 PLN — bitte Hinterlassenschaften entfernen'],
+      ['Building2', 'Ein grüner Campingplatz in der Stadt'],
+      ['Briefcase', 'Bungalows: eigene Handtücher, Kosmetik und persönliche Dinge'],
+      ['Clock3', 'Anreise nach 21:00: Rezeption kontaktieren'],
+    ],
+  },
+  it: {
+    kicker: 'Partenza rapida',
+    chooseTitle: 'Cosa vuoi fare?',
+    chooseLead: 'Scegli il percorso più breve verso le informazioni che ti servono.',
+    choices: [
+      ['Arrivo in camper', 'Camper, corrente 10A, check-out entro le 12:00.', 'camper'],
+      ['Cerco un bungalow', 'Bungalow per 2, 3 e 4 persone.', 'House'],
+      ['Controllo i prezzi', 'Listino completo e soggiorni di esempio.', 'WalletCards'],
+      ['Voglio andare in centro', 'Tram 18, circa 14 minuti.', 'TramFront'],
+      ['Voglio un tour', 'Wieliczka, Auschwitz, Zakopane e altro.', 'TicketCheck'],
+    ],
+    infoKicker: 'Informazioni essenziali',
+    infoTitle: 'Camping e bungalow a Cracovia — senza sorprese',
+    facts: [
+      ['MapPinned', 'Camping a Cracovia'],
+      ['TramFront', 'Tram vicino'],
+      ['Navigation', 'Google Maps — ingresso cambiato nel 2022'],
+      ['Moon', 'Silenzio 22:00–07:00'],
+      ['PawPrint', 'Cane 0 PLN'],
+      ['PlugZap', 'Corrente 10A, non per EV'],
+    ],
+    summerTitle: 'Luglio e agosto — regola importante',
+    summerText: 'A luglio e agosto accettiamo prenotazioni anticipate solo per i bungalow. Le piazzole per camper, van, tende e roulotte sono disponibili in ordine di arrivo. Il check-out dal campeggio è entro le 12:00, quindi arrivare verso mezzogiorno offre la migliore possibilità di trovare posto.',
+    pricesKicker: 'Prezzi semplici',
+    pricesTitle: 'Soggiorni più comuni',
+    pricesLead: 'Esempi rapidi per una notte secondo il listino attuale.',
+    perNight: '/ notte',
+    from: 'da',
+    priceDisclaimer: 'I prezzi sono indicativi. Disponibilità e condizioni finali sono confermate dalla reception.',
+    fullPricing: 'Vedi il listino completo',
+    directionsKicker: 'Come arrivare',
+    directionsTitle: 'Vicino al centro, comodo in tram',
+    directionsText: 'La fermata Górnickiego è a circa 40 m dal cancello. Il tram 18 arriva a Stary Kleparz in circa 14 minuti; da lì il centro è a circa 5 minuti a piedi.',
+    maps: 'Apri Google Maps',
+    directions: 'Vedi indicazioni',
+    cityKicker: 'Camping in città',
+    cityTitle: 'Una base verde a Cracovia',
+    cityText: 'Camping Clepardia si trova in città, vicino a tram, negozi e attrazioni. Non è un prato isolato, quindi a volte si sentono tram, aerei e la normale vita di Cracovia. In cambio hai un accesso rapido al centro e uno spazio tranquillo e verde per una posizione urbana.',
+    askCampy: 'Chiedi a CAMPY',
+    attractionsKicker: 'Cracovia e dintorni',
+    attractionsTitle: 'Le migliori mete per un bel soggiorno',
+    attractionsLead: 'In homepage mostriamo solo i punti forti. La lista completa è nella pagina delle attrazioni.',
+    allAttractions: 'Vedi tutte le attrazioni',
+    tours: 'Scopri i tour',
+    checklistKicker: 'Prima del viaggio',
+    checklistTitle: 'Da sapere prima dell’arrivo',
+    checklist: [
+      ['IdCard', 'Documento di identità'],
+      ['CarFront', 'Targa del veicolo'],
+      ['Container', 'Con roulotte: targa della roulotte'],
+      ['Navigation', 'Usa Google Maps — ingresso cambiato nel 2022'],
+      ['Moon', 'Silenzio 22:00–07:00'],
+      ['PlugZap', 'Corrente 10A, non per ricarica EV'],
+      ['PawPrint', 'Cane 0 PLN — raccogliere i bisogni'],
+      ['Building2', 'È un campeggio verde in città'],
+      ['Briefcase', 'Bungalow: porta asciugamani, cosmetici ed effetti personali'],
+      ['Clock3', 'Arrivo dopo le 21:00: contatta la reception'],
+    ],
+  },
+  fr: {
+    kicker: 'Démarrage rapide',
+    chooseTitle: 'Que souhaitez-vous faire ?',
+    chooseLead: 'Choisissez le chemin le plus court vers l’information recherchée.',
+    choices: [
+      ['Je viens en camping-car', 'Camping-car, électricité 10A, départ avant 12h00.', 'camper'],
+      ['Je cherche un bungalow', 'Bungalows pour 2, 3 ou 4 personnes.', 'House'],
+      ['Je consulte les tarifs', 'Tarifs complets et exemples de séjours.', 'WalletCards'],
+      ['Je vais au centre', 'Tram 18, environ 14 minutes.', 'TramFront'],
+      ['Je veux une excursion', 'Wieliczka, Auschwitz, Zakopane et plus.', 'TicketCheck'],
+    ],
+    infoKicker: 'Informations essentielles',
+    infoTitle: 'Camping et bungalows à Cracovie — sans surprise',
+    facts: [
+      ['MapPinned', 'Camping à Cracovie'], ['TramFront', 'Tramway tout près'],
+      ['Navigation', 'Google Maps — accès modifié en 2022'], ['Moon', 'Calme 22h00–07h00'],
+      ['PawPrint', 'Chien 0 PLN'], ['PlugZap', 'Électricité 10A, pas pour les VE'],
+    ],
+    summerTitle: 'Juillet et août — règle importante',
+    summerText: 'En juillet et août, les réservations à l’avance sont acceptées uniquement pour les bungalows. Les emplacements pour camping-cars, vans, tentes et caravanes sont attribués par ordre d’arrivée. Le départ du camping est avant 12h00 ; arriver vers midi offre donc les meilleures chances de trouver une place.',
+    pricesKicker: 'Des tarifs simples',
+    pricesTitle: 'Les séjours les plus fréquents',
+    pricesLead: 'Exemples rapides pour une nuit selon le tarif actuel.',
+    perNight: '/ nuit', from: 'à partir de',
+    priceDisclaimer: 'Les prix sont indicatifs. La réception confirme la disponibilité et les conditions finales.',
+    fullPricing: 'Voir tous les tarifs',
+    directionsKicker: 'Accès',
+    directionsTitle: 'Près du centre, facilement en tramway',
+    directionsText: 'L’arrêt Górnickiego se trouve à environ 40 m de l’entrée. Le tram 18 rejoint Stary Kleparz en environ 14 minutes, puis le centre est à 5 minutes à pied.',
+    maps: 'Ouvrir Google Maps', directions: 'Voir l’accès',
+    cityKicker: 'Camping urbain',
+    cityTitle: 'Une base verte à Cracovie',
+    cityText: 'Camping Clepardia se trouve en ville, près du tramway, des commerces et des attractions. Ce n’est pas une prairie isolée : on entend parfois les tramways, les avions et la vie normale de Cracovie. En échange, le centre est rapidement accessible et le site reste calme et verdoyant pour un emplacement urbain.',
+    askCampy: 'Demander à CAMPY',
+    attractionsKicker: 'Cracovie et environs',
+    attractionsTitle: 'Les meilleures idées pour un beau séjour',
+    attractionsLead: 'La page d’accueil présente les incontournables. La liste complète se trouve dans les attractions.',
+    allAttractions: 'Voir toutes les attractions', tours: 'Voir les excursions',
+    checklistKicker: 'Avant le voyage', checklistTitle: 'À savoir avant l’arrivée',
+    checklist: [
+      ['IdCard', 'Pièce d’identité'], ['CarFront', 'Immatriculation du véhicule'],
+      ['Container', 'Avec une caravane : son immatriculation'], ['Navigation', 'Utilisez Google Maps — accès modifié en 2022'],
+      ['Moon', 'Calme 22h00–07h00'], ['PlugZap', 'Électricité 10A, pas pour recharger un VE'],
+      ['PawPrint', 'Chien 0 PLN — merci de ramasser'], ['Building2', 'Camping vert en ville'],
+      ['Briefcase', 'Bungalows : apportez serviettes et effets personnels'], ['Clock3', 'Arrivée après 21h00 : contactez la réception'],
+    ],
+  },
+  es: {
+    kicker: 'Inicio rápido',
+    chooseTitle: '¿Qué quieres hacer?',
+    chooseLead: 'Elige el camino más corto hacia la información que necesitas.',
+    choices: [
+      ['Llego en autocaravana', 'Autocaravana, electricidad 10A, salida antes de las 12:00.', 'camper'],
+      ['Busco un bungalow', 'Bungalows para 2, 3 y 4 personas.', 'House'],
+      ['Quiero ver los precios', 'Tarifas completas y ejemplos de estancias.', 'WalletCards'],
+      ['Quiero ir al centro', 'Tranvía 18, unos 14 minutos.', 'TramFront'],
+      ['Quiero una excursión', 'Wieliczka, Auschwitz, Zakopane y más.', 'TicketCheck'],
+    ],
+    infoKicker: 'Información esencial',
+    infoTitle: 'Camping y bungalows en Cracovia — sin sorpresas',
+    facts: [
+      ['MapPinned', 'Camping en Cracovia'], ['TramFront', 'Tranvía muy cerca'],
+      ['Navigation', 'Google Maps — acceso cambiado en 2022'], ['Moon', 'Silencio 22:00–07:00'],
+      ['PawPrint', 'Perro 0 PLN'], ['PlugZap', 'Electricidad 10A, no para VE'],
+    ],
+    summerTitle: 'Julio y agosto — norma importante',
+    summerText: 'En julio y agosto solo aceptamos reservas anticipadas para los bungalows. Las parcelas para autocaravanas, furgonetas, tiendas y caravanas se asignan por orden de llegada. La salida del camping es antes de las 12:00; llegar hacia el mediodía ofrece la mejor posibilidad de encontrar plaza.',
+    pricesKicker: 'Precios sencillos', pricesTitle: 'Estancias más habituales',
+    pricesLead: 'Ejemplos rápidos para una noche según la tarifa actual.',
+    perNight: '/ noche', from: 'desde',
+    priceDisclaimer: 'Los precios son orientativos. Recepción confirma disponibilidad y condiciones finales.',
+    fullPricing: 'Ver todos los precios',
+    directionsKicker: 'Cómo llegar', directionsTitle: 'Cerca del centro y fácil en tranvía',
+    directionsText: 'La parada Górnickiego está a unos 40 m de la entrada. El tranvía 18 llega a Stary Kleparz en unos 14 minutos y desde allí hay 5 minutos a pie al centro.',
+    maps: 'Abrir Google Maps', directions: 'Ver cómo llegar',
+    cityKicker: 'Camping urbano',
+    cityTitle: 'Una base verde en Cracovia',
+    cityText: 'Camping Clepardia está en la ciudad, cerca del tranvía, tiendas y atracciones. No es un prado aislado, por lo que a veces se oyen tranvías, aviones y la vida normal de Cracovia. A cambio, tendrás acceso rápido al centro y un espacio tranquilo y verde para una ubicación urbana.',
+    askCampy: 'Preguntar a CAMPY',
+    attractionsKicker: 'Cracovia y alrededores', attractionsTitle: 'Las mejores ideas para una gran estancia',
+    attractionsLead: 'En la portada mostramos lo más destacado. La lista completa está en atracciones.',
+    allAttractions: 'Ver todas las atracciones', tours: 'Ver excursiones',
+    checklistKicker: 'Antes del viaje', checklistTitle: 'Conviene saberlo antes de llegar',
+    checklist: [
+      ['IdCard', 'Documento de identidad'], ['CarFront', 'Matrícula del vehículo'],
+      ['Container', 'Con caravana: matrícula de la caravana'], ['Navigation', 'Usa Google Maps — acceso cambiado en 2022'],
+      ['Moon', 'Silencio 22:00–07:00'], ['PlugZap', 'Electricidad 10A, no para cargar VE'],
+      ['PawPrint', 'Perro 0 PLN — recoge sus excrementos'], ['Building2', 'Camping verde dentro de la ciudad'],
+      ['Briefcase', 'Bungalows: trae toallas y objetos personales'], ['Clock3', 'Llegada después de las 21:00: contacta con recepción'],
+    ],
+  },
+  nl: {
+    kicker: 'Snel beginnen', chooseTitle: 'Wat wil je doen?',
+    chooseLead: 'Kies de kortste route naar de informatie die je nodig hebt.',
+    choices: [
+      ['Ik kom met een camper', 'Camper, 10A stroom, uitchecken vóór 12.00 uur.', 'camper'],
+      ['Ik zoek een bungalow', 'Bungalows voor 2, 3 en 4 personen.', 'House'],
+      ['Ik bekijk de prijzen', 'Volledige prijslijst en voorbeeldverblijven.', 'WalletCards'],
+      ['Ik wil naar het centrum', 'Tram 18, ongeveer 14 minuten.', 'TramFront'],
+      ['Ik wil een excursie', 'Wieliczka, Auschwitz, Zakopane en meer.', 'TicketCheck'],
+    ],
+    infoKicker: 'Belangrijkste informatie', infoTitle: 'Camping en bungalows in Krakau — zonder verrassingen',
+    facts: [
+      ['MapPinned', 'Camping in Krakau'], ['TramFront', 'Tramhalte vlakbij'],
+      ['Navigation', 'Google Maps — ingang gewijzigd in 2022'], ['Moon', 'Nachtrust 22.00–07.00'],
+      ['PawPrint', 'Hond 0 PLN'], ['PlugZap', '10A stroom, niet voor EV'],
+    ],
+    summerTitle: 'Juli en augustus — belangrijke regel',
+    summerText: 'In juli en augustus accepteren we vooraf alleen reserveringen voor bungalows. Kampeerplaatsen voor campers, vans, tenten en caravans zijn beschikbaar op volgorde van aankomst. Uitchecken van de camping is vóór 12.00 uur; aankomst rond de middag geeft daarom de beste kans op een plek.',
+    pricesKicker: 'Prijzen eenvoudig uitgelegd', pricesTitle: 'Meest gekozen verblijven',
+    pricesLead: 'Snelle voorbeelden voor één nacht volgens de actuele prijslijst.',
+    perNight: '/ nacht', from: 'vanaf',
+    priceDisclaimer: 'Prijzen zijn indicatief. De receptie bevestigt beschikbaarheid en voorwaarden.',
+    fullPricing: 'Bekijk alle prijzen',
+    directionsKicker: 'Route', directionsTitle: 'Dicht bij het centrum, makkelijk met de tram',
+    directionsText: 'De halte Górnickiego ligt ongeveer 40 m van de poort. Tram 18 bereikt Stary Kleparz in circa 14 minuten; daarna is het ongeveer 5 minuten lopen naar het centrum.',
+    maps: 'Open Google Maps', directions: 'Bekijk de route',
+    cityKicker: 'Stadscamping',
+    cityTitle: 'Een groene uitvalsbasis in Krakau',
+    cityText: 'Camping Clepardia ligt in de stad, dicht bij tram, winkels en bezienswaardigheden. Het is geen afgelegen veld, dus soms hoor je trams, vliegtuigen en het gewone leven van Krakau. Daarvoor krijg je snelle toegang tot het centrum en een rustige, groene plek voor een stedelijke locatie.',
+    askCampy: 'Vraag CAMPY',
+    attractionsKicker: 'Krakau en omgeving', attractionsTitle: 'De beste ideeën voor een fijn verblijf',
+    attractionsLead: 'Op de homepage staan de hoogtepunten. De volledige lijst vind je bij attracties.',
+    allAttractions: 'Bekijk alle attracties', tours: 'Bekijk excursies',
+    checklistKicker: 'Voor vertrek', checklistTitle: 'Goed om te weten vóór aankomst',
+    checklist: [
+      ['IdCard', 'Identiteitsbewijs'], ['CarFront', 'Kenteken van het voertuig'],
+      ['Container', 'Met caravan: kenteken van de caravan'], ['Navigation', 'Gebruik Google Maps — ingang gewijzigd in 2022'],
+      ['Moon', 'Nachtrust 22.00–07.00'], ['PlugZap', '10A stroom, niet voor EV-laden'],
+      ['PawPrint', 'Hond 0 PLN — graag opruimen'], ['Building2', 'Een groene camping in de stad'],
+      ['Briefcase', 'Bungalows: neem handdoeken en persoonlijke spullen mee'], ['Clock3', 'Aankomst na 21.00 uur: neem contact op met de receptie'],
+    ],
+  },
+  cs: {
+    kicker: 'Rychlý start', chooseTitle: 'Co chcete udělat?',
+    chooseLead: 'Vyberte nejkratší cestu k informacím, které potřebujete.',
+    choices: [
+      ['Přijíždím obytným vozem', 'Obytný vůz, elektřina 10A, odjezd do 12:00.', 'camper'],
+      ['Hledám bungalov', 'Bungalovy pro 2, 3 a 4 osoby.', 'House'],
+      ['Chci znát ceny', 'Kompletní ceník a příklady pobytů.', 'WalletCards'],
+      ['Chci do centra', 'Tramvaj 18, asi 14 minut.', 'TramFront'],
+      ['Chci výlet', 'Wieliczka, Auschwitz, Zakopane a další.', 'TicketCheck'],
+    ],
+    infoKicker: 'Nejdůležitější informace', infoTitle: 'Kemp a bungalovy v Krakově — bez překvapení',
+    facts: [
+      ['MapPinned', 'Kemp v Krakově'], ['TramFront', 'Tramvaj blízko'],
+      ['Navigation', 'Google Maps — vjezd změněn v roce 2022'], ['Moon', 'Noční klid 22:00–07:00'],
+      ['PawPrint', 'Pes 0 PLN'], ['PlugZap', 'Elektřina 10A, ne pro EV'],
+    ],
+    summerTitle: 'Červenec a srpen — důležité pravidlo',
+    summerText: 'V červenci a srpnu přijímáme rezervace předem pouze na bungalovy. Místa pro obytné vozy, dodávky, stany a karavany jsou k dispozici podle pořadí příjezdu. Odjezd z kempu je do 12:00, proto příjezd kolem poledne nabízí největší šanci na místo.',
+    pricesKicker: 'Ceny jednoduše', pricesTitle: 'Nejčastější pobyty',
+    pricesLead: 'Rychlé příklady ceny jedné noci podle aktuálního ceníku.',
+    perNight: '/ noc', from: 'od',
+    priceDisclaimer: 'Ceny jsou orientační. Dostupnost a podmínky potvrdí recepce.',
+    fullPricing: 'Zobrazit celý ceník',
+    directionsKicker: 'Doprava', directionsTitle: 'Blízko centra, snadno tramvají',
+    directionsText: 'Zastávka Górnickiego je asi 40 m od brány. Tramvaj 18 jede na Stary Kleparz přibližně 14 minut, odtud je centrum asi 5 minut pěšky.',
+    maps: 'Otevřít Google Maps', directions: 'Zobrazit dopravu',
+    cityKicker: 'Městský kemp',
+    cityTitle: 'Zelená základna v Krakově',
+    cityText: 'Camping Clepardia se nachází ve městě, blízko tramvaje, obchodů a atrakcí. Není to odlehlá louka, takže je někdy slyšet tramvaje, letadla a běžný život Krakova. Na oplátku máte rychlé spojení do centra a klidný zelený prostor v městském prostředí.',
+    askCampy: 'Zeptat se CAMPY',
+    attractionsKicker: 'Krakov a okolí', attractionsTitle: 'Nejlepší tipy pro příjemný pobyt',
+    attractionsLead: 'Na hlavní stránce jsou jen hlavní tipy. Úplný seznam najdete v atrakcích.',
+    allAttractions: 'Zobrazit všechny atrakce', tours: 'Zobrazit výlety',
+    checklistKicker: 'Před cestou', checklistTitle: 'Co je dobré vědět před příjezdem',
+    checklist: [
+      ['IdCard', 'Doklad totožnosti'], ['CarFront', 'Registrační značka vozidla'],
+      ['Container', 'U karavanu: jeho registrační značka'], ['Navigation', 'Použijte Google Maps — vjezd změněn v roce 2022'],
+      ['Moon', 'Noční klid 22:00–07:00'], ['PlugZap', 'Elektřina 10A, ne pro nabíjení EV'],
+      ['PawPrint', 'Pes 0 PLN — ukliďte po něm'], ['Building2', 'Zelený kemp ve městě'],
+      ['Briefcase', 'Bungalovy: vlastní ručníky a osobní věci'], ['Clock3', 'Příjezd po 21:00: kontaktujte recepci'],
+    ],
+  },
+  sk: {
+    kicker: 'Rýchly štart', chooseTitle: 'Čo chcete urobiť?',
+    chooseLead: 'Vyberte najkratšiu cestu k informáciám, ktoré potrebujete.',
+    choices: [
+      ['Prichádzam obytným autom', 'Obytné auto, elektrina 10A, odchod do 12:00.', 'camper'],
+      ['Hľadám bungalov', 'Bungalovy pre 2, 3 a 4 osoby.', 'House'],
+      ['Chcem poznať ceny', 'Kompletný cenník a príklady pobytov.', 'WalletCards'],
+      ['Chcem ísť do centra', 'Električka 18, asi 14 minút.', 'TramFront'],
+      ['Chcem výlet', 'Wieliczka, Auschwitz, Zakopane a ďalšie.', 'TicketCheck'],
+    ],
+    infoKicker: 'Najdôležitejšie informácie', infoTitle: 'Kemp a bungalovy v Krakove — bez prekvapení',
+    facts: [
+      ['MapPinned', 'Kemp v Krakove'], ['TramFront', 'Električka blízko'],
+      ['Navigation', 'Google Maps — vjazd zmenený v roku 2022'], ['Moon', 'Nočný pokoj 22:00–07:00'],
+      ['PawPrint', 'Pes 0 PLN'], ['PlugZap', 'Elektrina 10A, nie pre EV'],
+    ],
+    summerTitle: 'Júl a august — dôležité pravidlo',
+    summerText: 'V júli a auguste prijímame rezervácie vopred iba na bungalovy. Miesta pre obytné autá, dodávky, stany a karavany sú dostupné podľa poradia príchodu. Check-out z kempu je do 12:00, preto príchod okolo poludnia ponúka najväčšiu šancu na miesto.',
+    pricesKicker: 'Ceny jednoducho', pricesTitle: 'Najčastejšie pobyty',
+    pricesLead: 'Rýchle príklady ceny jednej noci podľa aktuálneho cenníka.',
+    perNight: '/ noc', from: 'od',
+    priceDisclaimer: 'Ceny sú orientačné. Dostupnosť a podmienky potvrdí recepcia.',
+    fullPricing: 'Zobraziť celý cenník',
+    directionsKicker: 'Doprava', directionsTitle: 'Blízko centra, jednoducho električkou',
+    directionsText: 'Zastávka Górnickiego je asi 40 m od brány. Električka 18 ide na Stary Kleparz približne 14 minút, odtiaľ je centrum asi 5 minút pešo.',
+    maps: 'Otvoriť Google Maps', directions: 'Zobraziť dopravu',
+    cityKicker: 'Mestský kemp',
+    cityTitle: 'Zelená základňa v Krakove',
+    cityText: 'Camping Clepardia sa nachádza v meste, blízko električky, obchodov a atrakcií. Nie je to odľahlá lúka, preto je niekedy počuť električky, lietadlá a bežný život Krakova. Na oplátku máte rýchle spojenie do centra a pokojný zelený priestor v mestskom prostredí.',
+    askCampy: 'Opýtať sa CAMPY',
+    attractionsKicker: 'Krakov a okolie', attractionsTitle: 'Najlepšie tipy na príjemný pobyt',
+    attractionsLead: 'Na hlavnej stránke sú len hlavné tipy. Úplný zoznam nájdete v atrakciách.',
+    allAttractions: 'Zobraziť všetky atrakcie', tours: 'Zobraziť výlety',
+    checklistKicker: 'Pred cestou', checklistTitle: 'Čo je dobré vedieť pred príchodom',
+    checklist: [
+      ['IdCard', 'Doklad totožnosti'], ['CarFront', 'Evidenčné číslo vozidla'],
+      ['Container', 'Pri karavane: jeho evidenčné číslo'], ['Navigation', 'Použite Google Maps — vjazd zmenený v roku 2022'],
+      ['Moon', 'Nočný pokoj 22:00–07:00'], ['PlugZap', 'Elektrina 10A, nie na nabíjanie EV'],
+      ['PawPrint', 'Pes 0 PLN — upracte po ňom'], ['Building2', 'Zelený kemp v meste'],
+      ['Briefcase', 'Bungalovy: vlastné uteráky a osobné veci'], ['Clock3', 'Príchod po 21:00: kontaktujte recepciu'],
+    ],
+  },
+  sv: {
+    kicker: 'Snabbstart', chooseTitle: 'Vad vill du göra?',
+    chooseLead: 'Välj den kortaste vägen till informationen du behöver.',
+    choices: [
+      ['Jag kommer med husbil', 'Husbil, 10A el, utcheckning senast 12.00.', 'camper'],
+      ['Jag söker en bungalow', 'Bungalower för 2, 3 och 4 personer.', 'House'],
+      ['Jag vill se priser', 'Fullständig prislista och exempel på vistelser.', 'WalletCards'],
+      ['Jag vill till centrum', 'Spårvagn 18, cirka 14 minuter.', 'TramFront'],
+      ['Jag vill göra en utflykt', 'Wieliczka, Auschwitz, Zakopane och mer.', 'TicketCheck'],
+    ],
+    infoKicker: 'Viktig information', infoTitle: 'Camping och bungalower i Kraków — utan överraskningar',
+    facts: [
+      ['MapPinned', 'Camping i Kraków'], ['TramFront', 'Spårvagn nära'],
+      ['Navigation', 'Google Maps — infarten ändrades 2022'], ['Moon', 'Nattro 22.00–07.00'],
+      ['PawPrint', 'Hund 0 PLN'], ['PlugZap', '10A el, inte för elbil'],
+    ],
+    summerTitle: 'Juli och augusti — viktig regel',
+    summerText: 'I juli och augusti tar vi emot förhandsbokningar endast för bungalower. Platser för husbilar, vans, tält och husvagnar finns i ankomstordning. Utcheckning från campingen är senast 12.00, så ankomst omkring lunch ger bäst chans att få en plats.',
+    pricesKicker: 'Enkla priser', pricesTitle: 'Vanligaste vistelserna',
+    pricesLead: 'Snabba exempel för en natt enligt aktuell prislista.',
+    perNight: '/ natt', from: 'från',
+    priceDisclaimer: 'Priserna är ungefärliga. Receptionen bekräftar tillgänglighet och villkor.',
+    fullPricing: 'Se hela prislistan',
+    directionsKicker: 'Vägbeskrivning', directionsTitle: 'Nära centrum, enkelt med spårvagn',
+    directionsText: 'Hållplatsen Górnickiego ligger cirka 40 m från grinden. Spårvagn 18 når Stary Kleparz på cirka 14 minuter, därefter är det ungefär 5 minuters promenad till centrum.',
+    maps: 'Öppna Google Maps', directions: 'Se vägbeskrivning',
+    cityKicker: 'Stadscamping',
+    cityTitle: 'En grön bas i Kraków',
+    cityText: 'Camping Clepardia ligger i staden, nära spårvagn, butiker och sevärdheter. Det är ingen avskild äng, så ibland hörs spårvagnar, flygplan och det vanliga livet i Kraków. I gengäld får du snabb tillgång till centrum och en lugn, grön plats i stadsmiljö.',
+    askCampy: 'Fråga CAMPY',
+    attractionsKicker: 'Kraków med omnejd', attractionsTitle: 'De bästa tipsen för en fin vistelse',
+    attractionsLead: 'På startsidan visar vi höjdpunkterna. Hela listan finns under sevärdheter.',
+    allAttractions: 'Se alla sevärdheter', tours: 'Se utflykter',
+    checklistKicker: 'Före resan', checklistTitle: 'Bra att veta före ankomst',
+    checklist: [
+      ['IdCard', 'Identitetshandling'], ['CarFront', 'Fordonets registreringsnummer'],
+      ['Container', 'Med husvagn: husvagnens registreringsnummer'], ['Navigation', 'Använd Google Maps — infarten ändrades 2022'],
+      ['Moon', 'Nattro 22.00–07.00'], ['PlugZap', '10A el, inte för laddning av elbil'],
+      ['PawPrint', 'Hund 0 PLN — plocka upp efter hunden'], ['Building2', 'En grön camping i staden'],
+      ['Briefcase', 'Bungalower: ta med handdukar och personliga saker'], ['Clock3', 'Ankomst efter 21.00: kontakta receptionen'],
+    ],
+  },
+} as const;
+
+const baseCopy = copyByLanguage.en;
+const localCopy = copyByLanguage[language as keyof typeof copyByLanguage] ?? baseCopy;
+const copy = { ...baseCopy, ...localCopy };
+
+const stayPrice = (id: string) => {
+  const item = pricingConfig.stayTypes.find((entry) => entry.id === id);
+  return item && 'price' in item ? item.price : 0;
+};
+const bungalowPrice = (id: string) => {
+  const item = pricingConfig.stayTypes.find((entry) => entry.id === id);
+  return item && 'seasonalPrices' in item ? item.seasonalPrices.low : 0;
+};
+const addonPrice = (id: string) => pricingConfig.addons.find((entry) => entry.id === id)?.price ?? 0;
+const adult = pricingConfig.people.adults.price;
+
+const stayLabels = {
+  pl: ['2 osoby + kamper + prąd', '2 osoby + van', '2 osoby + namiot 1–2 os.', '2 osoby + przyczepa + auto + prąd', 'Domek 2-os.', 'Domek 3-os.', 'Domek 4-os.'],
+  en: ['2 people + motorhome + power', '2 people + van', '2 people + small tent', '2 people + caravan + car + power', '2-person bungalow', '3-person bungalow', '4-person bungalow'],
+  de: ['2 Personen + Wohnmobil + Strom', '2 Personen + Van', '2 Personen + kleines Zelt', '2 Personen + Wohnwagen + Auto + Strom', 'Bungalow für 2', 'Bungalow für 3', 'Bungalow für 4'],
+  it: ['2 persone + camper + corrente', '2 persone + van', '2 persone + tenda piccola', '2 persone + roulotte + auto + corrente', 'Bungalow per 2', 'Bungalow per 3', 'Bungalow per 4'],
+  fr: ['2 personnes + camping-car + électricité', '2 personnes + van', '2 personnes + petite tente', '2 personnes + caravane + voiture + électricité', 'Bungalow 2 personnes', 'Bungalow 3 personnes', 'Bungalow 4 personnes'],
+  es: ['2 personas + autocaravana + electricidad', '2 personas + furgoneta', '2 personas + tienda pequeña', '2 personas + caravana + coche + electricidad', 'Bungalow para 2', 'Bungalow para 3', 'Bungalow para 4'],
+  nl: ['2 personen + camper + stroom', '2 personen + van', '2 personen + kleine tent', '2 personen + caravan + auto + stroom', 'Bungalow voor 2', 'Bungalow voor 3', 'Bungalow voor 4'],
+  cs: ['2 osoby + obytný vůz + elektřina', '2 osoby + dodávka', '2 osoby + malý stan', '2 osoby + karavan + auto + elektřina', 'Bungalov pro 2', 'Bungalov pro 3', 'Bungalov pro 4'],
+  sk: ['2 osoby + obytné auto + elektrina', '2 osoby + dodávka', '2 osoby + malý stan', '2 osoby + karavan + auto + elektrina', 'Bungalov pre 2', 'Bungalov pre 3', 'Bungalov pre 4'],
+  sv: ['2 personer + husbil + el', '2 personer + van', '2 personer + litet tält', '2 personer + husvagn + bil + el', 'Bungalow för 2', 'Bungalow för 3', 'Bungalow för 4'],
+} as const;
+const localizedStayLabels = stayLabels[language as keyof typeof stayLabels] ?? stayLabels.en;
+const stays = [
+  { icon: 'Caravan', label: localizedStayLabels[0], price: adult * 2 + stayPrice('camper') + addonPrice('electricity'), estimates: true },
+  { icon: 'BusFront', label: localizedStayLabels[1], price: adult * 2 + stayPrice('van'), estimates: true },
+  { icon: 'Tent', label: localizedStayLabels[2], price: adult * 2 + stayPrice('tent-small'), estimates: true },
+  { icon: 'CarFront', label: localizedStayLabels[3], price: adult * 2 + stayPrice('caravan') + addonPrice('parking') + addonPrice('electricity'), estimates: true },
+  { icon: 'House', label: localizedStayLabels[4], price: bungalowPrice('bungalow-2') },
+  { icon: 'House', label: localizedStayLabels[5], price: bungalowPrice('bungalow-3') },
+  { icon: 'House', label: localizedStayLabels[6], price: bungalowPrice('bungalow-4') },
+];
+
+const attractions = [
+  { title: language === 'pl' ? 'Stare Miasto' : 'Old Town', image: attractionImages.mainSquare },
+  { title: 'Kazimierz', image: attractionImages.kazimierz },
+  { title: 'Wawel', image: attractionImages.wawel },
+  { title: 'Wieliczka', image: attractionImages.wieliczka },
+  { title: 'Auschwitz-Birkenau', image: attractionImages.auschwitz },
+  { title: language === 'pl' ? 'Ojców' : 'Ojców National Park', image: attractionImages.ojcow },
+];
+
+const choiceLinks = [
+  booking('camping'),
+  booking('bungalow'),
+  route('cennik'),
+  route('dojazd'),
+  tourBookingHref,
+];
+const mapsHref = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
+---
+
+<section class="home-path site-section" id="start-content" data-after-hero>
+  <div class="container">
+    <header class="home-path__header reveal-section">
+      <span class="section-kicker">{copy.kicker}</span>
+      <h2 class="section-title">{copy.chooseTitle}</h2>
+      <p class="section-copy">{copy.chooseLead}</p>
+    </header>
+
+    <div class="home-path__choices">
+      {copy.choices.map((choice, index) => (
+        <a
+          class="home-path__choice premium-card reveal-section"
+          href={choiceLinks[index]}
+          target={index === 4 ? '_blank' : undefined}
+          rel={index === 4 ? 'noopener noreferrer' : undefined}
+          style={`--reveal-delay:${index * 55}ms`}
+        >
+          <span><Icon name={choice[2]} size={24} strokeWidth={1.9} /></span>
+          <strong>{choice[0]}</strong>
+          <small>{choice[1]}</small>
+          <Icon name="ArrowUpRight" size={18} strokeWidth={2} />
+        </a>
+      ))}
+    </div>
+
+    <div class="home-path__info reveal-section">
+      <header>
+        <span class="section-kicker">{copy.infoKicker}</span>
+        <h2 class="section-title">{copy.infoTitle}</h2>
+      </header>
+      <div class="home-path__facts">
+        {copy.facts.map((fact) => (
+          <div><Icon name={fact[0]} size={21} strokeWidth={1.9} /><span>{fact[1]}</span></div>
+        ))}
+      </div>
+      <article class="home-path__summer">
+        <span><Icon name="Sun" size={26} strokeWidth={2} /></span>
+        <div>
+          <h3>{copy.summerTitle}</h3>
+          <p>{copy.summerText}</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="home-path__prices reveal-section">
+      <header>
+        <span class="section-kicker">{copy.pricesKicker}</span>
+        <h2 class="section-title">{copy.pricesTitle}</h2>
+        <p class="section-copy">{copy.pricesLead}</p>
+      </header>
+      <div class="home-path__price-grid">
+        {stays.map((stay) => (
+          <article class="home-path__price-card">
+            <Icon name={stay.icon} size={22} strokeWidth={1.9} />
+            <div>
+              <h3>{stay.label}</h3>
+              <strong>{stay.icon === 'House' ? `${copy.from} ` : ''}{stay.price} PLN <small>{copy.perNight}</small></strong>
+              {stay.estimates && <span>{formatCurrencyEstimates(stay.price)}</span>}
+            </div>
+          </article>
+        ))}
+      </div>
+      <div class="home-path__price-footer">
+        <p>{copy.priceDisclaimer}</p>
+        <a class="btn btn-primary premium-button" href={route('cennik')}>{copy.fullPricing}</a>
+      </div>
+    </div>
+
+    <div class="home-path__split reveal-section">
+      <article class="home-path__directions premium-card">
+        <span class="section-kicker">{copy.directionsKicker}</span>
+        <h2>{copy.directionsTitle}</h2>
+        <p>{copy.directionsText}</p>
+        <div>
+          <a class="btn btn-primary premium-button" href={mapsHref} target="_blank" rel="noopener noreferrer">
+            <Icon name="MapPin" size={18} /> {copy.maps}
+          </a>
+          <a class="btn btn-glass" href={route('dojazd')}>{copy.directions}</a>
+        </div>
+      </article>
+      <article class="home-path__city premium-card">
+        <span class="section-kicker">{copy.cityKicker}</span>
+        <h2>{copy.cityTitle}</h2>
+        <p>{copy.cityText}</p>
+        <div>
+          <a href={route('dojazd')}>{copy.directions}</a>
+          <a href={route('atrakcje')}>{copy.allAttractions}</a>
+          <button type="button" data-home-campy>{copy.askCampy}</button>
+        </div>
+      </article>
+    </div>
+
+    <div class="home-path__attractions reveal-section">
+      <header>
+        <span class="section-kicker">{copy.attractionsKicker}</span>
+        <h2 class="section-title">{copy.attractionsTitle}</h2>
+        <p class="section-copy">{copy.attractionsLead}</p>
+      </header>
+      <div class="home-path__attraction-grid">
+        {attractions.map((item) => (
+          <a href={route('atrakcje')} class="home-path__attraction">
+            <ImageFrame
+              src={item.image.src}
+              alt={language === 'pl' ? item.image.altPl : item.title}
+              label={item.title}
+              width={item.image.width}
+              height={item.image.height}
+              sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 980px) 50vw, 33vw"
+            />
+          </a>
+        ))}
+      </div>
+      <div class="home-path__attraction-actions">
+        <a class="btn btn-glass" href={route('atrakcje')}>{copy.allAttractions}</a>
+        <a class="btn btn-primary premium-button" href={tourBookingHref} target="_blank" rel="noopener noreferrer">{copy.tours}</a>
+      </div>
+    </div>
+
+    <div class="home-path__checklist reveal-section">
+      <header>
+        <span class="section-kicker">{copy.checklistKicker}</span>
+        <h2 class="section-title">{copy.checklistTitle}</h2>
+      </header>
+      <div>
+        {copy.checklist.map((item) => (
+          <article><Icon name={item[0]} size={20} strokeWidth={1.9} /><span>{item[1]}</span></article>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll('[data-home-campy]').forEach((button) => {
+    button.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('campy:prompt', {
+        detail: { prompt: 'Pomóż mi zaplanować pobyt w Camping Clepardia.' },
+      }));
+    });
+  });
+</script>
+
+<style>
+.home-path {
+  position: relative;
+  padding: clamp(64px, 8vw, 116px) 0;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(60,179,113,.12), transparent 25%),
+    radial-gradient(circle at 92% 32%, rgba(242,192,120,.10), transparent 25%),
+    var(--theme-section-background, #f7fbf4);
+}
+
+.home-path > .container {
+  display: grid;
+  gap: clamp(64px, 9vw, 120px);
+}
+
+.home-path__header,
+.home-path__prices > header,
+.home-path__attractions > header,
+.home-path__checklist > header {
+  max-width: 820px;
+}
+
+.home-path__choices {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: -76px;
+}
+
+.home-path__choice {
+  position: relative;
+  min-width: 0;
+  min-height: 210px;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  align-content: start;
+  gap: 12px;
+  padding: 22px;
+  border-radius: 26px;
+  color: var(--theme-text, #183023);
+  text-decoration: none;
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+
+.home-path__choice:hover,
+.home-path__choice:focus-visible {
+  color: var(--theme-heading, #102018);
+  transform: translateY(-5px);
+  border-color: rgba(60,179,113,.42);
+  box-shadow: 0 24px 64px rgba(25,72,45,.16);
+}
+
+.home-path__choice > span {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  color: #1f774d;
+  background: rgba(60,179,113,.13);
+}
+
+.home-path__choice > strong {
+  font-size: 1.03rem;
+  line-height: 1.25;
+}
+
+.home-path__choice > small {
+  color: var(--theme-muted, #5d6f64);
+  line-height: 1.5;
+}
+
+.home-path__choice > .cc-icon:last-child {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  color: #3CB371;
+}
+
+.home-path__info {
+  display: grid;
+  gap: 28px;
+}
+
+.home-path__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.home-path__facts div {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px solid rgba(60,179,113,.16);
+  border-radius: 20px;
+  color: var(--theme-heading, #102018);
+  background: var(--theme-card-background, rgba(255,255,255,.76));
+  font-weight: 850;
+}
+
+.home-path__facts svg {
+  color: #3CB371;
+}
+
+.home-path__summer {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  padding: clamp(22px, 4vw, 34px);
+  border: 1px solid rgba(229,153,58,.35);
+  border-radius: 28px;
+  color: #3b2a12;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(255,255,255,.42), transparent 34%),
+    linear-gradient(135deg, #fff3d5, #f6d99c);
+  box-shadow: 0 22px 62px rgba(155,105,32,.13);
+}
+
+.home-path__summer > span {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 19px;
+  color: #80561e;
+  background: rgba(255,255,255,.52);
+}
+
+.home-path__summer h3 {
+  margin: 0 0 8px;
+  color: #382712;
+}
+
+.home-path__summer p {
+  margin: 0;
+  color: #5e4827;
+  line-height: 1.72;
+}
+
+.home-path__prices {
+  display: grid;
+  gap: 26px;
+}
+
+.home-path__price-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.home-path__price-card {
+  min-width: 0;
+  display: flex;
+  gap: 13px;
+  padding: 20px;
+  border: 1px solid rgba(60,179,113,.17);
+  border-radius: 22px;
+  color: var(--theme-heading, #102018);
+  background: var(--theme-card-background, rgba(255,255,255,.8));
+}
+
+.home-path__price-card > svg {
+  color: #3CB371;
+}
+
+.home-path__price-card h3 {
+  min-height: 2.7em;
+  margin: 0 0 10px;
+  font-size: .92rem;
+  line-height: 1.35;
+}
+
+.home-path__price-card strong {
+  display: block;
+  font-size: 1.2rem;
+}
+
+.home-path__price-card strong small {
+  color: var(--theme-muted, #5d6f64);
+  font-size: .72rem;
+}
+
+.home-path__price-card span {
+  display: block;
+  margin-top: 7px;
+  color: var(--theme-muted, #5d6f64);
+  font-size: .73rem;
+  line-height: 1.35;
+}
+
+.home-path__price-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+}
+
+.home-path__price-footer p {
+  margin: 0;
+  color: var(--theme-muted, #5d6f64);
+}
+
+.home-path__split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.home-path__directions,
+.home-path__city {
+  padding: clamp(26px, 4vw, 42px);
+  border-radius: 30px;
+}
+
+.home-path__split h2 {
+  margin: 9px 0 14px;
+  color: var(--theme-heading, #102018);
+  font-size: clamp(1.7rem, 3vw, 2.5rem);
+}
+
+.home-path__split p {
+  margin: 0;
+  color: var(--theme-muted, #5d6f64);
+  line-height: 1.7;
+}
+
+.home-path__directions > div,
+.home-path__city > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.home-path__city {
+  color: #fff;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(242,192,120,.18), transparent 35%),
+    linear-gradient(140deg, #0e2b1c, #173f2a);
+}
+
+.home-path__city .section-kicker {
+  color: #8fe0b4;
+}
+
+.home-path__city h2,
+.home-path__city p {
+  color: #fff;
+}
+
+.home-path__city p {
+  color: rgba(255,255,255,.76);
+}
+
+.home-path__city a,
+.home-path__city button {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 15px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255,255,255,.08);
+  font: inherit;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.home-path__city a:hover,
+.home-path__city button:hover {
+  background: rgba(255,255,255,.15);
+}
+
+.home-path__attractions {
+  display: grid;
+  gap: 26px;
+}
+
+.home-path__attraction-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.home-path__attraction {
+  min-width: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  transition: transform .25s ease;
+}
+
+.home-path__attraction:hover {
+  transform: translateY(-4px);
+}
+
+.home-path__attraction :global(.asset-frame.photo-frame) {
+  height: 100%;
+  min-height: 230px;
+  border-radius: 24px;
+}
+
+.home-path__attraction-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.home-path__checklist {
+  display: grid;
+  gap: 24px;
+  padding: clamp(26px, 5vw, 48px);
+  border: 1px solid rgba(60,179,113,.18);
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(242,192,120,.12), transparent 28%),
+    var(--theme-card-background, rgba(255,255,255,.78));
+}
+
+.home-path__checklist > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.home-path__checklist article {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 15px;
+  border-radius: 16px;
+  color: var(--theme-heading, #102018);
+  background: rgba(60,179,113,.075);
+  line-height: 1.45;
+}
+
+.home-path__checklist article svg {
+  color: #3CB371;
+}
+
+html[data-theme="dark"] .home-path {
+  background:
+    radial-gradient(circle at 8% 8%, rgba(60,179,113,.15), transparent 25%),
+    radial-gradient(circle at 92% 32%, rgba(242,192,120,.09), transparent 25%),
+    #091a13;
+}
+
+html[data-theme="dark"] .home-path__choice,
+html[data-theme="dark"] .home-path__facts div,
+html[data-theme="dark"] .home-path__price-card,
+html[data-theme="dark"] .home-path__directions,
+html[data-theme="dark"] .home-path__checklist {
+  color: #effaf2;
+  background: rgba(255,255,255,.055);
+  border-color: rgba(143,224,180,.16);
+}
+
+html[data-theme="dark"] .home-path__choice:hover,
+html[data-theme="dark"] .home-path__choice:focus-visible,
+html[data-theme="dark"] .home-path__facts div,
+html[data-theme="dark"] .home-path__price-card h3,
+html[data-theme="dark"] .home-path__price-card strong,
+html[data-theme="dark"] .home-path__split h2,
+html[data-theme="dark"] .home-path__checklist article {
+  color: #f4fff7;
+}
+
+html[data-theme="dark"] .home-path__choice small,
+html[data-theme="dark"] .home-path__price-card span,
+html[data-theme="dark"] .home-path__price-card strong small,
+html[data-theme="dark"] .home-path__price-footer p,
+html[data-theme="dark"] .home-path__split p {
+  color: rgba(239,250,242,.68);
+}
+
+html[data-theme="dark"] .home-path__checklist article {
+  background: rgba(60,179,113,.10);
+}
+
+@media (max-width: 1100px) {
+  .home-path__choices {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: -54px;
+  }
+  .home-path__price-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .home-path > .container {
+    gap: 68px;
+  }
+  .home-path__choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: -34px;
+  }
+  .home-path__choice {
+    min-height: 190px;
+    padding: 18px;
+  }
+  .home-path__facts,
+  .home-path__attraction-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .home-path__split {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .home-path {
+    padding-inline: 0;
+  }
+  .home-path__choices,
+  .home-path__facts,
+  .home-path__price-grid,
+  .home-path__attraction-grid,
+  .home-path__checklist > div {
+    grid-template-columns: 1fr;
+  }
+  .home-path__choice {
+    min-height: 0;
+  }
+  .home-path__price-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .home-path__price-footer .btn,
+  .home-path__attraction-actions .btn,
+  .home-path__directions .btn {
+    width: 100%;
+  }
+  .home-path__summer {
+    grid-template-columns: 1fr;
+  }
+  .home-path__directions > div,
+  .home-path__attraction-actions {
+    display: grid;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-path__choice,
+  .home-path__attraction {
+    transition: none;
+  }
+}
+</style>

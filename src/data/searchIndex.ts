@@ -164,6 +164,26 @@ export const baseSearchIndex: SearchIndexEntry[] = [
     keywords: ['po 21', '21:00', 'późny przyjazd', 'pozny przyjazd', 'późno', 'brama', 'godziny recepcji', 'zameldowanie'],
   },
   {
+    id: 'reception-gate-hours',
+    title: 'Recepcja i brama — godziny',
+    description: 'Recepcja działa 9:00–21:00, a brama 8:00–22:00. Przy przyjeździe po 21:00 skontaktuj się wcześniej.',
+    href: '/kontakt',
+    category: 'Recepcja',
+    badge: '9:00–21:00',
+    icon: 'Clock3',
+    keywords: ['recepcja', 'brama', 'godziny recepcji', 'godziny bramy', 'otwarcie', 'kontakt', 'po 21'],
+  },
+  {
+    id: 'summer-arrival-rules',
+    title: 'Lipiec i sierpień — zasady campingu',
+    description: 'Z wyprzedzeniem rezerwujemy tylko domki. Kampery, vany, namioty i przyczepy przyjmujemy według kolejności przyjazdu; najlepiej około 12:00.',
+    href: '/faq',
+    category: 'Sezon',
+    badge: 'Lipiec–sierpień',
+    icon: 'Sun',
+    keywords: ['sezon', 'wysoki sezon', 'lipiec', 'sierpień', 'rezerwacja campingu', 'około 12', 'kolejność przyjazdu'],
+  },
+  {
     id: 'documents',
     title: 'Dokument i rejestracja pojazdu',
     description: 'Do meldunku przygotuj dokument tożsamości oraz numer rejestracyjny pojazdu lub przyczepy.',
@@ -332,7 +352,7 @@ export const baseSearchIndex: SearchIndexEntry[] = [
     category: 'Przyjazd',
     badge: 'Pojazd',
     icon: 'CarFront',
-    keywords: ['parking', 'auto', 'samochód', 'bus', 'ciężarówka', 'asfalt', 'pojazd'],
+    keywords: ['parking', 'auto', 'samochód', 'bus', 'ciężarówka', 'ciężki pojazd', 'ciezki pojazd', 'asfalt', 'pojazd'],
   },
   {
     id: 'adapter-cable',
@@ -388,10 +408,15 @@ export const searchEntries = (query: string, entries: SearchIndexEntry[] = searc
 
   return entries
     .map((entry) => {
+      const normalizedTitle = normalize(entry.title);
+      const normalizedKeywords = entry.keywords.map(normalize);
       const haystack = normalize([entry.title, entry.description, entry.category, entry.badge, ...entry.keywords].filter(Boolean).join(' '));
       const score =
-        haystack.includes(normalizedQuery) ? 4 :
-        entry.keywords.some((keyword) => normalize(keyword).includes(normalizedQuery)) ? 3 :
+        normalizedTitle === normalizedQuery ? 7 :
+        normalizedTitle.includes(normalizedQuery) ? 6 :
+        normalizedKeywords.some((keyword) => keyword === normalizedQuery) ? 5 :
+        normalizedKeywords.some((keyword) => keyword.includes(normalizedQuery)) ? 4 :
+        haystack.includes(normalizedQuery) ? 3 :
         normalizedQuery.split(/\s+/).some((part) => part.length > 2 && haystack.includes(part)) ? 2 :
         0;
 

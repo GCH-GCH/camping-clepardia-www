@@ -1,6 +1,5 @@
 ---
 import { publicAssetExists, siteAssets } from '@/data/assets';
-import { getTranslations } from '@/i18n/config';
 import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import HeroExperienceCard from '@/components/home/HeroExperienceCard.astro';
 import { getCurrentYear } from '@/utils/currentYear';
@@ -13,16 +12,42 @@ const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const activeLanguage = languageCode ?? pathContext.languageCode;
 const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
-const t = getTranslations(activeLanguage);
 const bookingHref = getBookingLocalizedPath(activeLanguage);
 const pricingHref = getLocalizedPath(explicitLanguage, 'cennik');
+const directionsHref = getLocalizedPath(explicitLanguage, 'dojazd');
 const currentYear = getCurrentYear();
+const heroClientCopy = {
+  pl: { badge: `Premium camping ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Zielony camping i domki w Krakowie', copy: 'Spokojna baza blisko tramwaju, centrum i najważniejszych atrakcji.', primary: 'Wyślij zapytanie', secondary: 'Sprawdź ceny' },
+  en: { badge: `Premium camping ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Green camping and bungalows in Krakow', copy: 'A calm base close to the tram, city centre and major attractions.', primary: 'Send an enquiry', secondary: 'Check prices' },
+  de: { badge: `Premium-Camping ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Grüner Campingplatz und Bungalows in Krakau', copy: 'Eine ruhige Basis nahe Straßenbahn, Zentrum und wichtigen Sehenswürdigkeiten.', primary: 'Anfrage senden', secondary: 'Preise prüfen' },
+  it: { badge: `Camping premium ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Camping verde e bungalow a Cracovia', copy: 'Una base tranquilla vicino al tram, al centro e alle principali attrazioni.', primary: 'Invia una richiesta', secondary: 'Controlla i prezzi' },
+  fr: { badge: `Camping premium ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Camping verdoyant et bungalows à Cracovie', copy: 'Une base calme près du tramway, du centre et des principales attractions.', primary: 'Envoyer une demande', secondary: 'Voir les tarifs' },
+  es: { badge: `Camping premium ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Camping verde y bungalows en Cracovia', copy: 'Una base tranquila cerca del tranvía, el centro y las principales atracciones.', primary: 'Enviar una consulta', secondary: 'Ver precios' },
+  nl: { badge: `Premium camping ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Groene camping en bungalows in Krakau', copy: 'Een rustige uitvalsbasis dicht bij tram, centrum en belangrijke bezienswaardigheden.', primary: 'Stuur een aanvraag', secondary: 'Bekijk prijzen' },
+  cs: { badge: `Prémiový kemp ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Zelený kemp a bungalovy v Krakově', copy: 'Klidná základna blízko tramvaje, centra a hlavních atrakcí.', primary: 'Odeslat dotaz', secondary: 'Zobrazit ceny' },
+  sk: { badge: `Prémiový kemp ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Zelený kemp a bungalovy v Krakove', copy: 'Pokojná základňa blízko električky, centra a hlavných atrakcií.', primary: 'Odoslať dopyt', secondary: 'Zobraziť ceny' },
+  sv: { badge: `Premiumcamping ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Grön camping och bungalower i Kraków', copy: 'En lugn bas nära spårvagn, centrum och de viktigaste sevärdheterna.', primary: 'Skicka en förfrågan', secondary: 'Se priser' },
+} as const;
+const heroClient = heroClientCopy[activeLanguage as keyof typeof heroClientCopy] ?? heroClientCopy.en;
+const heroBadges = {
+  pl: ['Tramwaj 40 m', 'Centrum ok. 14 min', 'Pies 0 PLN', 'Prąd 10A'],
+  en: ['Tram 40 m', 'Centre about 14 min', 'Dog 0 PLN', '10A power'],
+  de: ['Straßenbahn 40 m', 'Zentrum ca. 14 Min.', 'Hund 0 PLN', '10A Strom'],
+  it: ['Tram a 40 m', 'Centro circa 14 min', 'Cane 0 PLN', 'Corrente 10A'],
+  fr: ['Tramway à 40 m', 'Centre env. 14 min', 'Chien 0 PLN', 'Électricité 10A'],
+  es: ['Tranvía a 40 m', 'Centro unos 14 min', 'Perro 0 PLN', 'Electricidad 10A'],
+  nl: ['Tram op 40 m', 'Centrum ca. 14 min', 'Hond 0 PLN', '10A stroom'],
+  cs: ['Tramvaj 40 m', 'Centrum asi 14 min', 'Pes 0 PLN', 'Elektřina 10A'],
+  sk: ['Električka 40 m', 'Centrum asi 14 min', 'Pes 0 PLN', 'Elektrina 10A'],
+  sv: ['Spårvagn 40 m', 'Centrum ca 14 min', 'Hund 0 PLN', '10A el'],
+} as const;
+const localizedHeroBadges = heroBadges[activeLanguage as keyof typeof heroBadges] ?? heroBadges.en;
 const heroYearBadge = {
   pl: `Premium camping ${currentYear}`,
   en: `Premium camping ${currentYear}`,
   de: `Premium-Camping ${currentYear}`,
   it: `Camping premium ${currentYear}`,
-}[activeLanguage as 'pl' | 'en' | 'de' | 'it'] ?? `Premium camping ${currentYear}`;
+}[activeLanguage as 'pl' | 'en' | 'de' | 'it'] ?? heroClient.badge;
 
 const heroDesktopExists = publicAssetExists(siteAssets.hero.desktop);
 const heroMobileExists = publicAssetExists(siteAssets.hero.mobile);
@@ -65,18 +90,32 @@ const heroStyle = [
     <div class="hero__content">
       <span class="hero__badge">{heroYearBadge}</span>
       <h1 class="hero__headline" aria-label="Camping Clepardia">
-        <span class="hero__headline-line">{t.home.hero.title.split(' ')[0] ?? 'Camping'}</span>
-        <span class="hero__headline-line">{t.home.hero.title.split(' ').slice(1).join(' ') || 'Clepardia'}</span>
+        <span class="hero__headline-line">{heroClient.title.split(' ')[0] ?? 'Camping'}</span>
+        <span class="hero__headline-line">{heroClient.title.split(' ').slice(1).join(' ') || 'Clepardia'}</span>
       </h1>
       <p class="hero__subheadline">
-        <span>{t.home.hero.subtitle}</span>
+        <span>{heroClient.subtitle}</span>
       </p>
       <p class="hero__description">
-        {t.home.hero.copy}
+        {heroClient.copy}
       </p>
       <div class="hero__cta">
-        <a href={bookingHref} class="btn btn-primary btn-large hero__button hero__button--primary">{t.home.hero.primary}</a>
-        <a href={pricingHref} class="btn btn-glass btn-large hero__button hero__button--secondary">{t.home.hero.secondary}</a>
+        <a href={bookingHref} class="btn btn-primary btn-large hero__button hero__button--primary">{heroClient.primary}</a>
+        <a href={pricingHref} class="btn btn-glass btn-large hero__button hero__button--secondary">{heroClient.secondary}</a>
+        <a href={directionsHref} class="btn btn-glass btn-large hero__button hero__button--secondary">
+          {{
+            pl: 'Jak dojechać',
+            en: 'How to get here',
+            de: 'Anreise',
+            it: 'Come arrivare',
+            fr: 'Comment venir',
+            es: 'Cómo llegar',
+            nl: 'Route',
+            cs: 'Jak se sem dostat',
+            sk: 'Ako sa sem dostať',
+            sv: 'Hitta hit',
+          }[activeLanguage] ?? 'How to get here'}
+        </a>
       </div>
     </div>
 
@@ -84,7 +123,7 @@ const heroStyle = [
   </div>
 
   <div class="hero__floating-badges" aria-label="Camping Clepardia">
-    {t.home.hero.badges.map((badge) => <span>{badge}</span>)}
+    {localizedHeroBadges.map((badge) => <span>{badge}</span>)}
   </div>
 </section>
 
@@ -931,6 +970,10 @@ const heroStyle = [
 }
 
 @media (max-width: 860px) {
+  .hero__particles {
+    display: none;
+  }
+
   .hero__parallax {
     inset: 0;
     transform: translate3d(0, 0, 0) scale(1.02);
@@ -965,6 +1008,9 @@ const heroStyle = [
     align-self: start;
     padding: 18px;
     border-radius: 30px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    animation: none;
   }
   .hero-experience-card__top {
     grid-template-columns: 50px 1fr;
@@ -981,6 +1027,7 @@ const heroStyle = [
   .hero-experience-card__chip,
   .hero-experience-card__chip--award {
     min-height: auto;
+    animation: none;
   }
   .benefits-wrapper { grid-template-columns: repeat(2, 1fr); }
   .hero__floating-badges {

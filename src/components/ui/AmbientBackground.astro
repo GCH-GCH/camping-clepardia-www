@@ -170,29 +170,18 @@ html[data-theme="light"] .ambient-background__orb {
 @media (max-width: 760px) {
   .ambient-background__glow {
     width: 78vw;
-    filter: blur(34px);
-    opacity: .36;
+    filter: blur(24px);
+    opacity: .24;
+    animation: none;
   }
 
   .ambient-background__glow--warm,
   .ambient-background__glow--deep,
   .ambient-background__glow--soft,
-  .ambient-background__particles--far {
+  .ambient-background__particles,
+  .ambient-background__orb,
+  .ambient-background__grain {
     display: none;
-  }
-
-  .ambient-background__particles {
-    opacity: .15;
-    background-size: 148px 148px, 190px 190px, 236px 236px;
-  }
-
-  .ambient-background__orb:nth-of-type(n+10) {
-    display: none;
-  }
-
-  .ambient-background__orb {
-    animation-duration: 36s;
-    opacity: .12;
   }
 }
 

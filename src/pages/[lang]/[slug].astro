@@ -1,9 +1,11 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import ContentPage from '@/components/pages/ContentPage.astro';
+import CoreLocalizedPage from '@/components/pages/CoreLocalizedPage.astro';
 import { languages } from '@/data/languages';
 import { pageSlugs } from '@/data/sitePages';
 import { getSitePage } from '@/i18n/config';
+import { coreCustomerSlugs, getCorePage } from '@/i18n/corePages';
 
 export function getStaticPaths() {
   return languages.flatMap((language) =>
@@ -15,13 +17,19 @@ export function getStaticPaths() {
 }
 
 const { language, page } = Astro.props;
+const compactPage = getCorePage(language.code, page.slug);
+const useCompactPage = language.translation === 'core-ui' && coreCustomerSlugs.includes(page.slug);
+const seoTitle = compactPage?.title ?? page.seoTitle;
+const seoDescription = compactPage?.lead ?? page.seoDescription;
 ---
 
 <Layout
-  title={`${page.seoTitle} | ${language.name}`}
-  description={page.seoDescription}
-  ogTitle={page.seoTitle}
-  ogDescription={page.seoDescription}
+  title={`${seoTitle} | ${language.name}`}
+  description={seoDescription}
+  ogTitle={seoTitle}
+  ogDescription={seoDescription}
 >
-  <ContentPage page={page} languageCode={language.code} languageName={language.name} />
+  {useCompactPage
+    ? <CoreLocalizedPage languageCode={language.code} slug={page.slug} />
+    : <ContentPage page={page} languageCode={language.code} languageName={language.name} />}
 </Layout>
