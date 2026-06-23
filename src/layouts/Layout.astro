@@ -10,7 +10,7 @@ import CamperScrollProgress from '@/components/ui/CamperScrollProgress.astro';
 import AmbientBackground from '@/components/ui/AmbientBackground.astro';
 import PageScrollHint from '@/components/ui/PageScrollHint.astro';
 import GlobalSearch from '@/components/ui/GlobalSearch.astro';
-import { logoMain, logoMainPng, publicAssetExists, siteAssets } from '@/data/assets';
+import { logoMain, publicAssetExists, siteAssets } from '@/data/assets';
 import { getCampgroundJsonLd, homeSeo, resolveOgImage, siteName } from '@/data/seo';
 import { getPathContext, getSeoLanguageMeta, isBookingSlug, withOrigin } from '@/utils/localizedLinks';
 
@@ -59,7 +59,7 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		<meta name="description" content={description} />
 		<meta name="robots" content="index, follow" />
 		<meta name="theme-color" content="#3CB371" />
-		<meta name="clepardia-build" content="TASK-114-client-ready" />
+		<meta name="clepardia-build" content="TASK-115-homepage-mobile-i18n" />
 		
 		<!-- Open Graph / Social Media -->
 		<meta property="og:type" content="website" />
@@ -89,11 +89,11 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		<link rel="preload" as="image" href={logoMain} type="image/svg+xml" />
 		{shouldPreloadMobileHero && <link rel="preload" as="image" href={siteAssets.hero.mobile} type="image/webp" fetchpriority="high" media="(max-width: 767px)" />}
 		{shouldPreloadHero && <link rel="preload" as="image" href={siteAssets.hero.desktop} type="image/webp" fetchpriority="high" media="(min-width: 768px)" />}
-		<link rel="icon" type="image/svg+xml" href={logoMain} />
-		<link rel="apple-touch-icon" href={logoMainPng} />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<link rel="manifest" href="/manifest.webmanifest" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=115" />
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=115" />
+		<link rel="icon" href="/favicon.ico?v=115" sizes="32x32" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=115" />
+		<link rel="manifest" href="/manifest.webmanifest?v=115" />
 		
 		<!-- Preconnect -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />

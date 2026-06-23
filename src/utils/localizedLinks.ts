@@ -42,6 +42,12 @@ export const plannerSlugByLanguage: Partial<Record<LanguageCode, string>> = {
   en: 'stay-planner',
   de: 'aufenthaltsplaner',
   it: 'pianificatore-soggiorno',
+  fr: 'planificateur-sejour',
+  es: 'planificador-estancia',
+  nl: 'verblijfsplanner',
+  cs: 'planovac-pobytu',
+  sk: 'planovac-pobytu',
+  sv: 'vistelseplanerare',
 };
 
 const plannerSlugSet = new Set(Object.values(plannerSlugByLanguage));

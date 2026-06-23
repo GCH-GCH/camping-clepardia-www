@@ -1,15 +1,46 @@
 ---
 import Hero from '@/components/Hero.astro';
-import HomeCustomerPath from '@/components/home/HomeCustomerPath.astro';
+import HomeStorySection from '@/components/home/HomeStorySection.astro';
+import WhyClepardia from '@/components/home/WhyClepardia.astro';
+import CampingSection from '@/components/home/CampingSection.astro';
+import BungalowsSection from '@/components/home/BungalowsSection.astro';
+import PricingPreview from '@/components/PricingPreview.astro';
+import TramCenterGuide from '@/components/TramCenterGuide.astro';
+import AttractionsPreview from '@/components/AttractionsPreview.astro';
+import ToursSection from '@/components/home/ToursSection.astro';
+import TrustSection from '@/components/TrustSection.astro';
+import QuickInquiryCTA from '@/components/home/QuickInquiryCTA.astro';
 import HomeFinalCTA from '@/components/home/HomeFinalCTA.astro';
+import ArrivalFlowSection from '@/components/home/ArrivalFlowSection.astro';
+import SiteNoticesSection from '@/components/home/SiteNoticesSection.astro';
+import HomeCustomerPath from '@/components/home/HomeCustomerPath.astro';
 
 interface Props {
   languageCode?: string;
 }
 
 const { languageCode } = Astro.props as Props;
+const richHomeLanguages = ['pl', 'en', 'de', 'it'];
+const useRichHomepage = !languageCode || richHomeLanguages.includes(languageCode);
 ---
 
 <Hero languageCode={languageCode} />
-<HomeCustomerPath languageCode={languageCode} />
-<HomeFinalCTA languageCode={languageCode} />
+{useRichHomepage ? (
+  <>
+    <SiteNoticesSection languageCode={languageCode} />
+    <HomeStorySection languageCode={languageCode} />
+    <WhyClepardia languageCode={languageCode} />
+    <CampingSection languageCode={languageCode} />
+    <BungalowsSection languageCode={languageCode} />
+    <PricingPreview languageCode={languageCode} />
+    <TramCenterGuide languageCode={languageCode} variant="home" />
+    <ArrivalFlowSection languageCode={languageCode} />
+    <AttractionsPreview languageCode={languageCode} />
+    <ToursSection languageCode={languageCode} />
+    <TrustSection languageCode={languageCode} />
+    <QuickInquiryCTA languageCode={languageCode} />
+    <HomeFinalCTA languageCode={languageCode} />
+  </>
+) : (
+  <HomeCustomerPath languageCode={languageCode} />
+)}

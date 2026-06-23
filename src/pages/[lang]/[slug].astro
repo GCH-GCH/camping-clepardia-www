@@ -2,34 +2,104 @@
 import Layout from '@/layouts/Layout.astro';
 import ContentPage from '@/components/pages/ContentPage.astro';
 import CoreLocalizedPage from '@/components/pages/CoreLocalizedPage.astro';
+import StayPlannerPage from '@/components/pages/StayPlannerPage.astro';
 import { languages } from '@/data/languages';
 import { pageSlugs } from '@/data/sitePages';
 import { getSitePage } from '@/i18n/config';
 import { coreCustomerSlugs, getCorePage } from '@/i18n/corePages';
+import { plannerSlugByLanguage } from '@/utils/localizedLinks';
 
 export function getStaticPaths() {
-  return languages.flatMap((language) =>
-    pageSlugs.map((slug) => ({
+  return languages.flatMap((language) => {
+    const contentPages = pageSlugs.map((slug) => ({
       params: { lang: language.code, slug },
       props: { language, page: getSitePage(slug, language.code) },
-    }))
-  );
+    }));
+    const shouldRenderPlannerAlias = language.code === 'pl' || language.translation === 'core-ui';
+    const plannerSlug = shouldRenderPlannerAlias ? plannerSlugByLanguage[language.code] : undefined;
+
+    return plannerSlug
+      ? [
+          ...contentPages,
+          {
+            params: { lang: language.code, slug: plannerSlug },
+            props: { language, isPlanner: true },
+          },
+        ]
+      : contentPages;
+  });
 }
 
-const { language, page } = Astro.props;
-const compactPage = getCorePage(language.code, page.slug);
-const useCompactPage = language.translation === 'core-ui' && coreCustomerSlugs.includes(page.slug);
-const seoTitle = compactPage?.title ?? page.seoTitle;
-const seoDescription = compactPage?.lead ?? page.seoDescription;
+const { language, page, isPlanner } = Astro.props;
+const plannerSeo = {
+  pl: {
+    title: 'Planer pobytu - Camping Clepardia Kraków',
+    description: 'Mini planer pobytu Camping Clepardia: wybierz tempo, liczbę nocy i atrakcje, a strona podpowie realny plan zwiedzania Krakowa i Małopolski.',
+  },
+  en: {
+    title: 'Stay planner - Camping Clepardia Krakow',
+    description: 'Camping Clepardia mini stay planner: choose pace, nights and attractions to shape a realistic Krakow and Lesser Poland itinerary.',
+  },
+  de: {
+    title: 'Aufenthaltsplaner - Camping Clepardia Krakau',
+    description: 'Mini-Aufenthaltsplaner von Camping Clepardia: Tempo, Nächte und Attraktionen wählen und einen realistischen Plan für Krakau erstellen.',
+  },
+  it: {
+    title: 'Planner soggiorno - Camping Clepardia Cracovia',
+    description: 'Mini planner di Camping Clepardia: scegli ritmo, notti e attrazioni per preparare un programma realistico a Cracovia.',
+  },
+  fr: {
+    title: 'Planificateur de séjour - Camping Clepardia Cracovie',
+    description: 'Mini planificateur Camping Clepardia : choisissez le rythme, les nuits et les attractions pour organiser Cracovie et la Petite-Pologne.',
+  },
+  es: {
+    title: 'Planificador de estancia - Camping Clepardia Cracovia',
+    description: 'Mini planificador de Camping Clepardia: elige ritmo, noches y atracciones para preparar un plan realista en Cracovia.',
+  },
+  nl: {
+    title: 'Verblijfsplanner - Camping Clepardia Krakau',
+    description: 'Mini verblijfsplanner van Camping Clepardia: kies tempo, nachten en bezienswaardigheden voor een realistisch plan in Krakau.',
+  },
+  cs: {
+    title: 'Plánovač pobytu - Camping Clepardia Krakov',
+    description: 'Mini plánovač Camping Clepardia: vyberte tempo, počet nocí a atrakce pro reálný plán Krakova a Malopolska.',
+  },
+  sk: {
+    title: 'Plánovač pobytu - Camping Clepardia Krakov',
+    description: 'Mini plánovač Camping Clepardia: vyberte tempo, počet nocí a atrakcie pre reálny plán Krakova a Malopoľska.',
+  },
+  sv: {
+    title: 'Vistelseplanerare - Camping Clepardia Kraków',
+    description: 'Mini planerare för Camping Clepardia: välj tempo, nätter och sevärdheter för en realistisk plan i Kraków.',
+  },
+}[language.code] ?? {
+  title: 'Stay planner - Camping Clepardia Krakow',
+  description: 'Camping Clepardia mini stay planner.',
+};
+const compactPage = !isPlanner && page ? getCorePage(language.code, page.slug) : undefined;
+const useCompactPage = !isPlanner && page && language.translation === 'core-ui' && coreCustomerSlugs.includes(page.slug);
+const seoTitle = compactPage?.title ?? page?.seoTitle ?? plannerSeo.title;
+const seoDescription = compactPage?.lead ?? page?.seoDescription ?? plannerSeo.description;
 ---
 
-<Layout
-  title={`${seoTitle} | ${language.name}`}
-  description={seoDescription}
-  ogTitle={seoTitle}
-  ogDescription={seoDescription}
->
-  {useCompactPage
-    ? <CoreLocalizedPage languageCode={language.code} slug={page.slug} />
-    : <ContentPage page={page} languageCode={language.code} languageName={language.name} />}
-</Layout>
+{isPlanner ? (
+  <Layout
+    title={plannerSeo.title}
+    description={plannerSeo.description}
+    ogTitle={plannerSeo.title}
+    ogDescription={plannerSeo.description}
+  >
+    <StayPlannerPage languageCode={language.code} />
+  </Layout>
+) : (
+  <Layout
+    title={`${seoTitle} | ${language.name}`}
+    description={seoDescription}
+    ogTitle={seoTitle}
+    ogDescription={seoDescription}
+  >
+    {useCompactPage
+      ? <CoreLocalizedPage languageCode={language.code} slug={page.slug} />
+      : <ContentPage page={page} languageCode={language.code} languageName={language.name} />}
+  </Layout>
+)}

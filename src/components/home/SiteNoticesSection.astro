@@ -2,7 +2,7 @@
 import ImageFrame from '@/components/ImageFrame.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { getHomepageSiteNotices, getNoticeCopy, siteNoticeCategories } from '@/data/siteNotices';
-import { getBookingLocalizedPath, getLocalizedPath } from '@/utils/localizedLinks';
+import { getBookingLocalizedPath, getLocalizedPath, getPlannerLocalizedPath } from '@/utils/localizedLinks';
 
 interface Props {
   languageCode?: string;
@@ -23,7 +23,7 @@ const resolveHref = (href?: string) => {
   if (href === '/dojazd') return localizedDirectionsHref;
   if (href === '/rezerwacja') return localizedBookingHref;
   if (href === '/cennik') return getLocalizedPath(localizedLanguage, 'cennik');
-  if (href === '/planer-pobytu') return isPl ? '/planer-pobytu' : '/en/stay-planner';
+  if (href === '/planer-pobytu') return getPlannerLocalizedPath(languageCode);
   return href ?? localizedDirectionsHref;
 };
 const categoryLabel = (category: string) =>

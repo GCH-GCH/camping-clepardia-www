@@ -1123,6 +1123,12 @@ html[data-theme="dark"] .home-path__checklist article {
   .home-path__attraction-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .home-path__attraction :global(.asset-frame.photo-frame) {
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    aspect-ratio: 16 / 10;
+  }
   .home-path__split {
     grid-template-columns: 1fr;
   }

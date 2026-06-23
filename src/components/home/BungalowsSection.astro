@@ -113,13 +113,17 @@ const mediaLabels = {
 
 .bungalows-section__grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(42px, 6vw, 78px);
   align-items: center;
 }
 
-.bungalows-section__content {
+.bungalows-section__content,
+.bungalows-section__media,
+.bungalows-section__cards,
+.bungalows-section__cta {
   min-width: 0;
+  max-width: 100%;
 }
 
 .bungalows-section__cards {
@@ -273,17 +277,24 @@ const mediaLabels = {
     min-height: auto;
     display: grid;
     gap: 14px;
+    width: 100%;
+    padding: 0;
   }
 
   .bungalows-section__floating {
     position: static;
     width: 100%;
+    max-width: 100%;
     transform: none;
   }
 
   :global(.bungalows-section__main-photo),
   .bungalows-section__floating :global(.asset-frame) {
-    min-height: 240px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 0;
+    aspect-ratio: 16 / 10;
     transform: none;
     border-radius: 24px;
   }

@@ -1,4 +1,4 @@
-export const coreCustomerSlugs = ['camping', 'domki', 'cennik', 'dojazd', 'atrakcje', 'galeria', 'kontakt', 'faq'] as const;
+export const coreCustomerSlugs = ['camping', 'domki', 'cennik', 'dojazd', 'atrakcje', 'galeria', 'kontakt', 'faq', 'dla-kamperow', 'dla-rodzin', 'regulamin', 'polityka-prywatnosci'] as const;
 export type CoreCustomerSlug = typeof coreCustomerSlugs[number];
 
 type CorePage = {
@@ -16,7 +16,7 @@ type CoreLanguage = {
   maps: string;
   contact: string;
   gallery: string;
-  pages: Record<CoreCustomerSlug, CorePage>;
+  pages: Partial<Record<CoreCustomerSlug, CorePage>>;
 };
 
 export const corePages: Record<string, CoreLanguage> = {
@@ -100,8 +100,49 @@ export const corePages: Record<string, CoreLanguage> = {
   },
 };
 
+Object.assign(corePages.fr.pages, {
+  'dla-kamperow': { overline: 'Pour camping-cars', title: 'Informations pour camping-cars et caravanes', lead: 'Préparez un séjour simple : accès, électricité, documents et règles de calme.', highlights: [['Avant l’arrivée', 'Utilisez Google Maps, car l’accès a changé en 2022. Préparez votre pièce d’identité et l’immatriculation du véhicule.'], ['Sur place', 'Électricité 10A disponible, non destinée à la recharge des véhicules électriques. Les véhicules lourds sont dirigés vers une surface adaptée.'], ['Séjour', 'En juillet et août, les emplacements de camping sont attribués par ordre d’arrivée. Départ camping avant 12h00.']] },
+  'dla-rodzin': { overline: 'Familles', title: 'Séjour familial à Camping Clepardia', lead: 'Une base verte en ville pour visiter Cracovie en tramway et revenir au calme.', highlights: [['Rythme', 'La ligne de tram est proche, vous pouvez visiter le centre sans déplacer la voiture.'], ['Règles', 'Calme de 22h00 à 07h00. Le camping n’est pas un lieu de fête.'], ['Bungalows', 'Arrivée à partir de 16h00. Apportez serviettes, produits de toilette et effets personnels.']] },
+  regulamin: { overline: 'Règles', title: 'Règlement de séjour', lead: 'Les règles les plus importantes avant votre arrivée à Camping Clepardia.', highlights: [['Calme', 'Calme de 22h00 à 07h00 ; respectez les autres clients.'], ['Documents', 'La réception peut demander une pièce d’identité et les immatriculations du véhicule ou de la caravane.'], ['Animaux', 'Les chiens sont acceptés à 0 PLN ; merci de nettoyer après votre animal.']] },
+  'polityka-prywatnosci': { overline: 'Confidentialité', title: 'Politique de confidentialité', lead: 'Données utilisées uniquement pour traiter les demandes de séjour et le contact avec la réception.', highlights: [['Contact', 'Nous utilisons les coordonnées pour répondre à votre demande.'], ['Réservation', 'Les informations de séjour aident la réception à vérifier la disponibilité.'], ['Sécurité', 'Les données techniques de diagnostic ne sont pas affichées dans l’interface publique.']] },
+});
+
+Object.assign(corePages.es.pages, {
+  'dla-kamperow': { overline: 'Para autocaravanas', title: 'Información para autocaravanas y caravanas', lead: 'Prepara una estancia sencilla: acceso, electricidad, documentos y normas de silencio.', highlights: [['Antes de llegar', 'Usa Google Maps porque el acceso cambió en 2022. Prepara documento de identidad y matrícula.'], ['En el camping', 'Electricidad 10A disponible, no para cargar vehículos eléctricos. Los vehículos pesados se dirigen a una superficie adecuada.'], ['Estancia', 'En julio y agosto las parcelas se asignan por orden de llegada. Salida del camping antes de las 12:00.']] },
+  'dla-rodzin': { overline: 'Familias', title: 'Estancia familiar en Camping Clepardia', lead: 'Una base verde en la ciudad para visitar Cracovia en tranvía y volver a un lugar tranquilo.', highlights: [['Ritmo', 'La parada de tranvía está cerca y permite visitar el centro sin mover el coche.'], ['Normas', 'Silencio de 22:00 a 07:00. No es un camping de fiestas.'], ['Bungalows', 'Entrada desde las 16:00. Trae toallas, productos de aseo y objetos personales.']] },
+  regulamin: { overline: 'Normas', title: 'Normas de estancia', lead: 'Las reglas más importantes antes de llegar a Camping Clepardia.', highlights: [['Silencio', 'Silencio de 22:00 a 07:00; respeta a otros huéspedes.'], ['Documentos', 'Recepción puede pedir documento de identidad y matrículas del vehículo o caravana.'], ['Mascotas', 'Los perros son aceptados a 0 PLN; recoge siempre sus excrementos.']] },
+  'polityka-prywatnosci': { overline: 'Privacidad', title: 'Política de privacidad', lead: 'Los datos se usan para gestionar consultas de estancia y el contacto con recepción.', highlights: [['Contacto', 'Usamos los datos de contacto para responder a la consulta.'], ['Reserva', 'Los datos de estancia ayudan a verificar disponibilidad.'], ['Seguridad', 'Los diagnósticos técnicos no se muestran en la interfaz pública.']] },
+});
+
+Object.assign(corePages.nl.pages, {
+  'dla-kamperow': { overline: 'Voor campers', title: 'Informatie voor campers en caravans', lead: 'Bereid je verblijf voor: route, stroom, documenten en rustige campingregels.', highlights: [['Voor aankomst', 'Gebruik Google Maps, want de toegang veranderde in 2022. Neem ID en kenteken mee.'], ['Op locatie', '10A stroom beschikbaar, niet voor het laden van elektrische voertuigen. Zware voertuigen gaan naar een geschikte ondergrond.'], ['Verblijf', 'In juli en augustus zijn kampeerplaatsen op volgorde van aankomst. Check-out camping vóór 12.00 uur.']] },
+  'dla-rodzin': { overline: 'Gezinnen', title: 'Familieverblijf op Camping Clepardia', lead: 'Een groene stadsbasis om Krakau per tram te bezoeken en rustig terug te komen.', highlights: [['Tempo', 'De tramhalte is dichtbij; bezoek het centrum zonder de auto te verplaatsen.'], ['Regels', 'Nachtrust 22.00–07.00 uur. Dit is geen feestcamping.'], ['Bungalows', 'Inchecken vanaf 16.00 uur. Neem handdoeken, toiletartikelen en persoonlijke spullen mee.']] },
+  regulamin: { overline: 'Regels', title: 'Verblijfsregels', lead: 'De belangrijkste regels vóór aankomst bij Camping Clepardia.', highlights: [['Rust', 'Nachtrust 22.00–07.00 uur; respecteer andere gasten.'], ['Documenten', 'De receptie kan ID en kentekens van voertuig of caravan vragen.'], ['Dieren', 'Honden zijn welkom voor 0 PLN; ruim altijd op na je hond.']] },
+  'polityka-prywatnosci': { overline: 'Privacy', title: 'Privacybeleid', lead: 'Gegevens worden gebruikt voor verblijfsaanvragen en contact met de receptie.', highlights: [['Contact', 'Contactgegevens gebruiken we om te antwoorden.'], ['Boeking', 'Verblijfsgegevens helpen beschikbaarheid te controleren.'], ['Veiligheid', 'Technische diagnostiek wordt niet getoond in de openbare UI.']] },
+});
+
+Object.assign(corePages.cs.pages, {
+  'dla-kamperow': { overline: 'Pro obytné vozy', title: 'Informace pro obytné vozy a karavany', lead: 'Připravte si příjezd: doprava, elektřina, doklady a pravidla klidu.', highlights: [['Před příjezdem', 'Použijte Google Maps, protože vjezd se změnil v roce 2022. Připravte doklad totožnosti a registrační značku.'], ['V kempu', 'K dispozici je 10A elektřina, ne pro nabíjení elektromobilů. Těžká vozidla směřujeme na vhodný povrch.'], ['Pobyt', 'V červenci a srpnu jsou místa podle pořadí příjezdu. Odjezd z kempu do 12:00.']] },
+  'dla-rodzin': { overline: 'Rodiny', title: 'Rodinný pobyt v Camping Clepardia', lead: 'Zelená městská základna pro návštěvu Krakova tramvají a klidný návrat.', highlights: [['Rytmus', 'Tramvaj je blízko, centrum navštívíte bez přesunu auta.'], ['Pravidla', 'Noční klid 22:00–07:00. Kemp není párty místo.'], ['Bungalovy', 'Příjezd od 16:00. Vezměte ručníky, hygienické potřeby a osobní věci.']] },
+  regulamin: { overline: 'Pravidla', title: 'Pravidla pobytu', lead: 'Nejdůležitější pravidla před příjezdem do Camping Clepardia.', highlights: [['Klid', 'Noční klid 22:00–07:00; respektujte ostatní hosty.'], ['Doklady', 'Recepce může požádat o doklad totožnosti a registrační značky vozidla nebo karavanu.'], ['Zvířata', 'Psi jsou povoleni za 0 PLN; vždy po nich ukliďte.']] },
+  'polityka-prywatnosci': { overline: 'Soukromí', title: 'Zásady ochrany soukromí', lead: 'Údaje slouží ke zpracování dotazů na pobyt a kontaktu s recepcí.', highlights: [['Kontakt', 'Kontaktní údaje používáme k odpovědi.'], ['Rezervace', 'Údaje o pobytu pomáhají ověřit dostupnost.'], ['Bezpečnost', 'Technická diagnostika se nezobrazuje ve veřejném rozhraní.']] },
+});
+
+Object.assign(corePages.sk.pages, {
+  'dla-kamperow': { overline: 'Pre obytné autá', title: 'Informácie pre obytné autá a karavany', lead: 'Pripravte si príchod: doprava, elektrina, doklady a pravidlá pokoja.', highlights: [['Pred príchodom', 'Použite Google Maps, pretože vjazd sa zmenil v roku 2022. Pripravte doklad totožnosti a evidenčné číslo.'], ['V kempe', 'K dispozícii je 10A elektrina, nie na nabíjanie elektromobilov. Ťažké vozidlá smerujeme na vhodný povrch.'], ['Pobyt', 'V júli a auguste sú miesta podľa poradia príchodu. Odchod z kempu do 12:00.']] },
+  'dla-rodzin': { overline: 'Rodiny', title: 'Rodinný pobyt v Camping Clepardia', lead: 'Zelená mestská základňa na návštevu Krakova električkou a pokojný návrat.', highlights: [['Rytmus', 'Električka je blízko, centrum navštívite bez presunu auta.'], ['Pravidlá', 'Nočný pokoj 22:00–07:00. Kemp nie je párty miesto.'], ['Bungalovy', 'Príchod od 16:00. Vezmite uteráky, hygienické potreby a osobné veci.']] },
+  regulamin: { overline: 'Pravidlá', title: 'Pravidlá pobytu', lead: 'Najdôležitejšie pravidlá pred príchodom do Camping Clepardia.', highlights: [['Pokoj', 'Nočný pokoj 22:00–07:00; rešpektujte ostatných hostí.'], ['Doklady', 'Recepcia môže požiadať o doklad totožnosti a evidenčné čísla vozidla alebo karavanu.'], ['Zvieratá', 'Psy sú povolené za 0 PLN; vždy po nich upracte.']] },
+  'polityka-prywatnosci': { overline: 'Súkromie', title: 'Zásady ochrany súkromia', lead: 'Údaje slúžia na spracovanie dopytov na pobyt a kontakt s recepciou.', highlights: [['Kontakt', 'Kontaktné údaje používame na odpoveď.'], ['Rezervácia', 'Údaje o pobyte pomáhajú overiť dostupnosť.'], ['Bezpečnosť', 'Technická diagnostika sa nezobrazuje vo verejnom rozhraní.']] },
+});
+
+Object.assign(corePages.sv.pages, {
+  'dla-kamperow': { overline: 'För husbilar', title: 'Information för husbilar och husvagnar', lead: 'Förbered ankomst: väg, el, dokument och lugna campingregler.', highlights: [['Före ankomst', 'Använd Google Maps eftersom infarten ändrades 2022. Ha ID och registreringsnummer redo.'], ['På plats', '10A el finns, inte för laddning av elfordon. Tunga fordon hänvisas till lämpligt underlag.'], ['Vistelse', 'I juli och augusti gäller ankomstordning för campingplatser. Utcheckning camping senast 12.00.']] },
+  'dla-rodzin': { overline: 'Familjer', title: 'Familjevistelse på Camping Clepardia', lead: 'En grön bas i staden för att besöka Kraków med spårvagn och komma tillbaka lugnt.', highlights: [['Tempo', 'Spårvagnen är nära, så centrum nås utan att flytta bilen.'], ['Regler', 'Nattro 22.00–07.00. Campingen är inte en festplats.'], ['Bungalower', 'Incheckning från 16.00. Ta med handdukar, hygienartiklar och personliga saker.']] },
+  regulamin: { overline: 'Regler', title: 'Vistelseregler', lead: 'De viktigaste reglerna före ankomst till Camping Clepardia.', highlights: [['Lugn', 'Nattro 22.00–07.00; respektera andra gäster.'], ['Dokument', 'Receptionen kan be om ID och registreringsnummer för fordon eller husvagn.'], ['Djur', 'Hundar är välkomna för 0 PLN; plocka alltid upp efter hunden.']] },
+  'polityka-prywatnosci': { overline: 'Integritet', title: 'Integritetspolicy', lead: 'Uppgifter används för vistelseförfrågningar och kontakt med receptionen.', highlights: [['Kontakt', 'Kontaktuppgifter används för att svara på din fråga.'], ['Bokning', 'Vistelseuppgifter hjälper receptionen att kontrollera tillgänglighet.'], ['Säkerhet', 'Teknisk diagnostik visas inte i offentlig UI.']] },
+});
+
 export const getCorePage = (language: string, slug: string) =>
   coreCustomerSlugs.includes(slug as CoreCustomerSlug)
     ? corePages[language]?.pages[slug as CoreCustomerSlug]
     : undefined;
-

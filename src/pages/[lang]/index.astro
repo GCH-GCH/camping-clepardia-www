@@ -12,7 +12,45 @@ export function getStaticPaths() {
 }
 
 const { language } = Astro.props;
-const homeSeo = getHomeSeo(language.code);
+const coreHomeSeo = {
+  fr: {
+    title: 'Camping Clepardia Cracovie - camping et bungalows près du centre',
+    description: 'Camping verdoyant et bungalows à Cracovie, près du tramway, du centre et des principales attractions.',
+    ogTitle: 'Camping Clepardia Cracovie',
+    ogDescription: 'Camping et bungalows à Cracovie, avec accès facile au centre en tramway.',
+  },
+  es: {
+    title: 'Camping Clepardia Cracovia - camping y bungalows cerca del centro',
+    description: 'Camping verde y bungalows en Cracovia, cerca del tranvía, del centro y de las principales atracciones.',
+    ogTitle: 'Camping Clepardia Cracovia',
+    ogDescription: 'Camping y bungalows en Cracovia con fácil acceso al centro en tranvía.',
+  },
+  nl: {
+    title: 'Camping Clepardia Krakau - camping en bungalows dicht bij het centrum',
+    description: 'Groene camping en bungalows in Krakau, dicht bij tram, centrum en belangrijke bezienswaardigheden.',
+    ogTitle: 'Camping Clepardia Krakau',
+    ogDescription: 'Camping en bungalows in Krakau met snelle tramverbinding naar het centrum.',
+  },
+  cs: {
+    title: 'Camping Clepardia Krakov - kemp a bungalovy blízko centra',
+    description: 'Zelený kemp a bungalovy v Krakově, blízko tramvaje, centra a hlavních atrakcí.',
+    ogTitle: 'Camping Clepardia Krakov',
+    ogDescription: 'Kemp a bungalovy v Krakově se snadným spojením tramvají do centra.',
+  },
+  sk: {
+    title: 'Camping Clepardia Krakov - kemp a bungalovy blízko centra',
+    description: 'Zelený kemp a bungalovy v Krakove, blízko električky, centra a hlavných atrakcií.',
+    ogTitle: 'Camping Clepardia Krakov',
+    ogDescription: 'Kemp a bungalovy v Krakove s jednoduchým spojením električkou do centra.',
+  },
+  sv: {
+    title: 'Camping Clepardia Kraków - camping och bungalower nära centrum',
+    description: 'Grön camping och bungalower i Kraków, nära spårvagn, centrum och viktiga sevärdheter.',
+    ogTitle: 'Camping Clepardia Kraków',
+    ogDescription: 'Camping och bungalower i Kraków med enkel spårvagn till centrum.',
+  },
+}[language.code];
+const homeSeo = coreHomeSeo ?? getHomeSeo(language.code);
 ---
 
 <Layout

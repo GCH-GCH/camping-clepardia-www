@@ -131,7 +131,7 @@ const heroStyle = [
   const hero = document.querySelector('.hero');
   const heroParallax = document.querySelector('[data-hero-parallax]');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const wideViewport = window.matchMedia('(min-width: 768px)');
+  const wideViewport = window.matchMedia('(min-width: 861px)');
 
   if (hero instanceof HTMLElement && heroParallax instanceof HTMLElement && !reducedMotion.matches && wideViewport.matches) {
     let ticking = false;
