@@ -59,7 +59,7 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		<meta name="description" content={description} />
 		<meta name="robots" content="index, follow" />
 		<meta name="theme-color" content="#3CB371" />
-		<meta name="clepardia-build" content="TASK-115-homepage-mobile-i18n" />
+		<meta name="clepardia-build" content="TASK-116-icons-seo-files" />
 		
 		<!-- Open Graph / Social Media -->
 		<meta property="og:type" content="website" />
@@ -85,22 +85,21 @@ const campgroundJsonLd = getCampgroundJsonLd({
 			<link rel="alternate" hreflang={alternate.hrefLang} href={alternate.href} />
 		))}
 		
-		<!-- Favicon -->
+		<!-- Favicon / PWA icons -->
 		<link rel="preload" as="image" href={logoMain} type="image/svg+xml" />
 		{shouldPreloadMobileHero && <link rel="preload" as="image" href={siteAssets.hero.mobile} type="image/webp" fetchpriority="high" media="(max-width: 767px)" />}
 		{shouldPreloadHero && <link rel="preload" as="image" href={siteAssets.hero.desktop} type="image/webp" fetchpriority="high" media="(min-width: 768px)" />}
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=115" />
-		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=115" />
-		<link rel="icon" href="/favicon.ico?v=115" sizes="32x32" />
-		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=115" />
-		<link rel="manifest" href="/manifest.webmanifest?v=115" />
+		<link rel="icon" href="/favicon.ico" sizes="any" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/site.webmanifest" />
 		
 		<!-- Preconnect -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		
-		<!-- Generator -->
-		<meta name="generator" content={Astro.generator} />
 		<script is:inline>
 			(() => {
 				const storageKey = 'cc-theme';

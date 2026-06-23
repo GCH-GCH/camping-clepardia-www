@@ -1,5 +1,6 @@
 ---
 import Layout from '@/layouts/Layout.astro';
+import { logoMain } from '@/data/assets';
 ---
 
 <Layout
@@ -8,6 +9,7 @@ import Layout from '@/layouts/Layout.astro';
 >
   <section class="not-found">
     <div class="container not-found__panel">
+      <img class="not-found__logo" src={logoMain} alt="Camping Clepardia" loading="eager" decoding="async" />
       <span>404</span>
       <h1>Ta ścieżka prowadzi donikąd.</h1>
       <p>Wróć do Camping Clepardia albo przejdź od razu do rezerwacji.</p>
@@ -35,6 +37,13 @@ import Layout from '@/layouts/Layout.astro';
   border-radius: 32px;
   background: var(--theme-card-background, rgba(255,255,255,.78));
   text-align: center;
+}
+
+.not-found__logo {
+  width: clamp(110px, 26vw, 168px);
+  height: auto;
+  margin: 0 auto 20px;
+  filter: drop-shadow(0 16px 26px rgba(10, 31, 18, .14));
 }
 
 .not-found__panel > span {

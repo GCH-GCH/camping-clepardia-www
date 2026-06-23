@@ -172,6 +172,7 @@ export const siteAssets = {
     },
   },
   seo: {
+    ogImage: '/og-image.png',
     ogHomePl: '/seo/og/og-home-pl.jpg',
     ogHomeEn: '/seo/og/og-home-en.jpg',
     ogFallback: '/brand/logo/clepardia-logo-main.png',
@@ -219,12 +220,13 @@ export const requiredAssets: RequiredAsset[] = [
   { key: 'attractions.energylandia', path: siteAssets.attractions.energylandia, group: 'attractions', label: 'Energylandia', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
   { key: 'attractions.ojcow', path: siteAssets.attractions.ojcow, group: 'attractions', label: 'Ojców', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
   { key: 'attractions.zakopane', path: siteAssets.attractions.zakopane, group: 'attractions', label: 'Zakopane', recommendedSize: '1600x1000', format: 'webp', priority: 'recommended' },
-  { key: 'seo.ogHomePl', path: siteAssets.seo.ogHomePl, group: 'seo', label: 'OpenGraph PL', recommendedSize: '1200x630', format: 'jpg', priority: 'required' },
+  { key: 'seo.ogImage', path: siteAssets.seo.ogImage, group: 'seo', label: 'OpenGraph / social preview', recommendedSize: '1200x630', format: 'png', priority: 'required' },
+  { key: 'seo.ogHomePl', path: siteAssets.seo.ogHomePl, group: 'seo', label: 'OpenGraph PL', recommendedSize: '1200x630', format: 'jpg', priority: 'recommended' },
   { key: 'seo.ogHomeEn', path: siteAssets.seo.ogHomeEn, group: 'seo', label: 'OpenGraph EN', recommendedSize: '1200x630', format: 'jpg', priority: 'recommended' },
   { key: 'pwa.appleTouchIcon', path: '/apple-touch-icon.png', group: 'pwa', label: 'Apple touch icon', recommendedSize: '180x180', format: 'png', priority: 'recommended' },
-  { key: 'pwa.manifest', path: '/manifest.webmanifest', group: 'pwa', label: 'Manifest PWA', recommendedSize: 'JSON manifest', format: 'webmanifest', priority: 'recommended' },
-  { key: 'pwa.icon192', path: '/icons/icon-192.png', group: 'pwa', label: 'PWA icon 192', recommendedSize: '192x192', format: 'png', priority: 'recommended' },
-  { key: 'pwa.icon512', path: '/icons/icon-512.png', group: 'pwa', label: 'PWA icon 512', recommendedSize: '512x512', format: 'png', priority: 'recommended' },
+  { key: 'pwa.manifest', path: '/site.webmanifest', group: 'pwa', label: 'Manifest PWA', recommendedSize: 'JSON manifest', format: 'webmanifest', priority: 'recommended' },
+  { key: 'pwa.icon192', path: '/android-chrome-192x192.png', group: 'pwa', label: 'PWA icon 192', recommendedSize: '192x192', format: 'png', priority: 'recommended' },
+  { key: 'pwa.icon512', path: '/android-chrome-512x512.png', group: 'pwa', label: 'PWA icon 512', recommendedSize: '512x512', format: 'png', priority: 'recommended' },
 ];
 
 export const getMissingRequiredAssets = () =>

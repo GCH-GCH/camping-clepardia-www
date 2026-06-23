@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /cc-gate-a8f3k9r2p6
-Disallow: /api/inbox/
+Disallow: /api/
 
-Sitemap: https://www.clepardia.com.pl/sitemap-index.xml
+Sitemap: https://www.clepardia.com.pl/sitemap.xml

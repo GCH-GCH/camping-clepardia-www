@@ -2,7 +2,9 @@ import { publicAssetExists, siteAssets } from './assets';
 
 export const siteUrl = 'https://www.clepardia.com.pl';
 export const siteName = 'Camping Clepardia';
-export const defaultOgImage = publicAssetExists(siteAssets.seo.ogHomePl)
+export const defaultOgImage = publicAssetExists('/og-image.png')
+  ? '/og-image.png'
+  : publicAssetExists(siteAssets.seo.ogHomePl)
   ? siteAssets.seo.ogHomePl
   : siteAssets.hero.desktop;
 export const fallbackOgImage = siteAssets.seo.ogFallback;
