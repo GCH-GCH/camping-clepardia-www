@@ -10,7 +10,7 @@ interface Props {
 }
 
 const { languageCode = 'pl', variant = 'home' } = Astro.props as Props;
-const lang = ['pl', 'en', 'de', 'it'].includes(languageCode) ? languageCode : 'en';
+const lang = ['pl', 'en', 'de', 'it', 'fr', 'es', 'nl', 'cs', 'sk', 'sv'].includes(languageCode) ? languageCode : 'en';
 const mapsHref = 'https://www.google.com/maps/dir/?api=1&origin=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w&destination=Stary+Kleparz+Krak%C3%B3w&travelmode=transit';
 const jakdojadeHref = 'https://jakdojade.pl/krakow';
 const attractionsHref = getLocalizedPath(languageCode === 'pl' ? undefined : languageCode, 'atrakcje');
@@ -104,9 +104,141 @@ const copyByLang = {
     attractions: 'Vedi attrazioni',
     campyPrompt: 'Come arrivo in tram dal Camping Clepardia al centro?',
   },
+  fr: {
+    kicker: 'Cracovie sans stress de parking',
+    title: 'Le centre sans voiture — environ 14 minutes en tramway',
+    lead:
+      'Laissez voiture, camping-car ou caravane au camping. L’arrêt Górnickiego est tout près et le tram 18 mène à Stary Kleparz, à quelques minutes de la Vieille Ville.',
+    route: ['Camping Clepardia', '40 m à pied', 'Górnickiego', 'Tram 18', 'Stary Kleparz', '5 min à pied', 'Vieille Ville'],
+    routeImage: 'Arrêt de tramway près de Camping Clepardia',
+    facts: [
+      { icon: 'MapPin', title: 'Arrêt à env. 40 m', copy: 'Górnickiego est très proche de la porte du camping.' },
+      { icon: 'Clock', title: 'Environ 14 minutes', copy: 'Le tram 18 rejoint Stary Kleparz en environ 9 arrêts.' },
+      { icon: 'Footprints', title: '450 m du centre', copy: 'Depuis Stary Kleparz, la Vieille Ville est à environ 5 minutes à pied.' },
+      { icon: 'Ticket', title: 'Billet en distributeur', copy: 'Achetez le billet au distributeur ou dans le tram, souvent par carte. Vérifiez MPK ou Jakdojade.' },
+      { icon: 'CreditCard', title: 'Carte acceptée', copy: 'Dans de nombreux trams, le paiement par carte fonctionne.' },
+      { icon: 'Info', title: 'Retour simple', copy: 'La ligne 18 revient dans l’autre sens. Les chiens voyagent selon les règles locales.' },
+    ],
+    note: 'Stary Kleparz est le 9e arrêt, pas le terminus.',
+    maps: 'Ouvrir Google Maps',
+    jakdojade: 'Vérifier Jakdojade',
+    campy: 'Demander à CAMPY',
+    attractions: 'Voir les attractions',
+    campyPrompt: 'Comment aller en tramway de Camping Clepardia au centre ?',
+  },
+  es: {
+    kicker: 'Cracovia sin estrés de aparcamiento',
+    title: 'Al centro sin coche — unos 14 minutos en tranvía',
+    lead:
+      'Deja coche, autocaravana o caravana en el camping. La parada Górnickiego está muy cerca y el tranvía 18 llega a Stary Kleparz, junto al casco antiguo.',
+    route: ['Camping Clepardia', '40 m a pie', 'Górnickiego', 'Tranvía 18', 'Stary Kleparz', '5 min a pie', 'Casco antiguo'],
+    routeImage: 'Parada de tranvía cerca de Camping Clepardia',
+    facts: [
+      { icon: 'MapPin', title: 'Parada a unos 40 m', copy: 'Górnickiego está muy cerca de la puerta del camping.' },
+      { icon: 'Clock', title: 'Unos 14 minutos', copy: 'El tranvía 18 tarda unas 9 paradas hasta Stary Kleparz.' },
+      { icon: 'Footprints', title: '450 m al centro', copy: 'Desde Stary Kleparz hay unos 5 minutos a pie al casco antiguo.' },
+      { icon: 'Ticket', title: 'Billete en máquina', copy: 'Compra el billete en máquina o en el tranvía, normalmente con tarjeta. Comprueba MPK o Jakdojade.' },
+      { icon: 'CreditCard', title: 'Máquina y tarjeta', copy: 'En muchos tranvías funciona el pago con tarjeta.' },
+      { icon: 'Info', title: 'Vuelta sencilla', copy: 'La línea 18 vuelve en sentido contrario. Los perros viajan según normas locales.' },
+    ],
+    note: 'Stary Kleparz es la 9ª parada, no la última.',
+    maps: 'Abrir Google Maps',
+    jakdojade: 'Comprobar Jakdojade',
+    campy: 'Preguntar a CAMPY',
+    attractions: 'Ver atracciones',
+    campyPrompt: '¿Cómo llego en tranvía desde Camping Clepardia al centro?',
+  },
+  nl: {
+    kicker: 'Krakau zonder parkeerstress',
+    title: 'Zonder auto naar het centrum — ongeveer 14 minuten met de tram',
+    lead:
+      'Laat auto, camper of caravan op de camping. Halte Górnickiego is vlakbij en tram 18 rijdt naar Stary Kleparz, op loopafstand van de Oude Stad.',
+    route: ['Camping Clepardia', '40 m lopen', 'Górnickiego', 'Tram 18', 'Stary Kleparz', '5 min lopen', 'Oude Stad'],
+    routeImage: 'Tramhalte bij Camping Clepardia',
+    facts: [
+      { icon: 'MapPin', title: 'Halte ca. 40 m', copy: 'Górnickiego ligt zeer dicht bij de poort.' },
+      { icon: 'Clock', title: 'Ongeveer 14 minuten', copy: 'Tram 18 doet ongeveer 9 haltes tot Stary Kleparz.' },
+      { icon: 'Footprints', title: '450 m naar centrum', copy: 'Vanaf Stary Kleparz loop je in circa 5 minuten naar de Oude Stad.' },
+      { icon: 'Ticket', title: 'Ticketautomaat', copy: 'Koop kaartjes bij automaten of in de tram, vaak met kaart. Check MPK of Jakdojade.' },
+      { icon: 'CreditCard', title: 'Kaartbetaling', copy: 'In veel trams werkt betalen met kaart.' },
+      { icon: 'Info', title: 'Eenvoudig terug', copy: 'Lijn 18 keert in tegenovergestelde richting terug.' },
+    ],
+    note: 'Stary Kleparz is de 9e halte, niet de eindhalte.',
+    maps: 'Open Google Maps',
+    jakdojade: 'Check Jakdojade',
+    campy: 'Vraag CAMPY',
+    attractions: 'Bekijk attracties',
+    campyPrompt: 'Hoe kom ik met de tram van Camping Clepardia naar het centrum?',
+  },
+  cs: {
+    kicker: 'Krakov bez stresu z parkování',
+    title: 'Do centra bez auta — asi 14 minut tramvají',
+    lead:
+      'Auto, obytný vůz nebo karavan nechte v kempu. Zastávka Górnickiego je velmi blízko a linka 18 jede na Stary Kleparz.',
+    route: ['Camping Clepardia', '40 m pěšky', 'Górnickiego', 'Tramvaj 18', 'Stary Kleparz', '5 min pěšky', 'Staré Město'],
+    routeImage: 'Tramvajová zastávka blízko Camping Clepardia',
+    facts: [
+      { icon: 'MapPin', title: 'Zastávka cca 40 m', copy: 'Górnickiego je velmi blízko brány kempu.' },
+      { icon: 'Clock', title: 'Asi 14 minut', copy: 'Tramvaj 18 jede přibližně 9 zastávek na Stary Kleparz.' },
+      { icon: 'Footprints', title: '450 m do centra', copy: 'Ze Stary Kleparz je to asi 5 minut pěšky do Starého Města.' },
+      { icon: 'Ticket', title: 'Automat na jízdenky', copy: 'Jízdenku koupíte v automatu nebo v tramvaji, často kartou. Ověřte MPK nebo Jakdojade.' },
+      { icon: 'CreditCard', title: 'Platba kartou', copy: 'V mnoha tramvajích funguje platba kartou.' },
+      { icon: 'Info', title: 'Jednoduchý návrat', copy: 'Linka 18 se vrací opačným směrem.' },
+    ],
+    note: 'Stary Kleparz je 9. zastávka, ne konečná.',
+    maps: 'Otevřít Google Maps',
+    jakdojade: 'Zkontrolovat Jakdojade',
+    campy: 'Zeptat se CAMPY',
+    attractions: 'Zobrazit atrakce',
+    campyPrompt: 'Jak se dostanu tramvají z Camping Clepardia do centra?',
+  },
+  sk: {
+    kicker: 'Krakov bez stresu z parkovania',
+    title: 'Do centra bez auta — asi 14 minút električkou',
+    lead:
+      'Auto, obytné vozidlo alebo karavan nechajte v kempe. Zastávka Górnickiego je veľmi blízko a linka 18 ide na Stary Kleparz.',
+    route: ['Camping Clepardia', '40 m pešo', 'Górnickiego', 'Električka 18', 'Stary Kleparz', '5 min pešo', 'Staré Mesto'],
+    routeImage: 'Električková zastávka blízko Camping Clepardia',
+    facts: [
+      { icon: 'MapPin', title: 'Zastávka cca 40 m', copy: 'Górnickiego je veľmi blízko brány kempu.' },
+      { icon: 'Clock', title: 'Asi 14 minút', copy: 'Električka 18 ide približne 9 zastávok na Stary Kleparz.' },
+      { icon: 'Footprints', title: '450 m do centra', copy: 'Zo Stary Kleparz je to asi 5 minút pešo do Starého Mesta.' },
+      { icon: 'Ticket', title: 'Automat na lístky', copy: 'Lístok kúpite v automate alebo v električke, často kartou. Overte MPK alebo Jakdojade.' },
+      { icon: 'CreditCard', title: 'Platba kartou', copy: 'V mnohých električkách funguje platba kartou.' },
+      { icon: 'Info', title: 'Jednoduchý návrat', copy: 'Linka 18 sa vracia opačným smerom.' },
+    ],
+    note: 'Stary Kleparz je 9. zastávka, nie konečná.',
+    maps: 'Otvoriť Google Maps',
+    jakdojade: 'Skontrolovať Jakdojade',
+    campy: 'Opýtať sa CAMPY',
+    attractions: 'Zobraziť atrakcie',
+    campyPrompt: 'Ako sa dostanem električkou z Camping Clepardia do centra?',
+  },
+  sv: {
+    kicker: 'Kraków utan parkeringsstress',
+    title: 'Till centrum utan bil — cirka 14 minuter med spårvagn',
+    lead:
+      'Lämna bil, husbil eller husvagn på campingen. Hållplatsen Górnickiego ligger mycket nära och spårvagn 18 går till Stary Kleparz.',
+    route: ['Camping Clepardia', '40 m gång', 'Górnickiego', 'Spårvagn 18', 'Stary Kleparz', '5 min gång', 'Gamla stan'],
+    routeImage: 'Spårvagnshållplats nära Camping Clepardia',
+    facts: [
+      { icon: 'MapPin', title: 'Hållplats ca 40 m', copy: 'Górnickiego ligger mycket nära campingporten.' },
+      { icon: 'Clock', title: 'Cirka 14 minuter', copy: 'Spårvagn 18 tar cirka 9 hållplatser till Stary Kleparz.' },
+      { icon: 'Footprints', title: '450 m till centrum', copy: 'Från Stary Kleparz är det cirka 5 minuters promenad till Gamla stan.' },
+      { icon: 'Ticket', title: 'Biljettautomat', copy: 'Biljett kan köpas i automat eller på spårvagnen, ofta med kort. Kontrollera MPK eller Jakdojade.' },
+      { icon: 'CreditCard', title: 'Kortbetalning', copy: 'I många spårvagnar fungerar kortbetalning.' },
+      { icon: 'Info', title: 'Enkel återresa', copy: 'Linje 18 går tillbaka i motsatt riktning.' },
+    ],
+    note: 'Stary Kleparz är 9:e hållplatsen, inte ändstationen.',
+    maps: 'Öppna Google Maps',
+    jakdojade: 'Kontrollera Jakdojade',
+    campy: 'Fråga CAMPY',
+    attractions: 'Se sevärdheter',
+    campyPrompt: 'Hur tar jag spårvagn från Camping Clepardia till centrum?',
+  },
 };
 
-const copy = copyByLang[lang as keyof typeof copyByLang];
+const copy = copyByLang[lang as keyof typeof copyByLang] ?? copyByLang.en;
 ---
 
 <section class:list={['site-section tram-center-guide reveal-section', `tram-center-guide--${variant}`]} aria-labelledby={`tramCenterTitle-${variant}`}>

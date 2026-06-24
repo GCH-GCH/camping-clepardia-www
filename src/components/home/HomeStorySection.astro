@@ -2,7 +2,6 @@
 import ImageFrame from '@/components/ImageFrame.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { siteAssets } from '@/data/assets';
-import { resolveContentLanguage } from '@/i18n/config';
 import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
 interface Props {
@@ -11,7 +10,7 @@ interface Props {
 
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
-const contentLanguage = resolveContentLanguage(languageCode ?? pathContext.languageCode);
+const requestedLanguage = languageCode ?? pathContext.languageCode;
 const linkLanguage = pathContext.explicitLanguage;
 const directionsHref = getLocalizedPath(linkLanguage, 'dojazd');
 const bookingHref = getBookingLocalizedPath(linkLanguage);
@@ -77,9 +76,99 @@ const textByLanguage = {
       { icon: 'leaf', title: 'Torna nel verde', copy: 'La sera riposi in una zona più tranquilla della città.' },
     ],
   },
+  fr: {
+    overline: 'Cracovie sans stress de parking',
+    title: 'Laissez votre véhicule dans une base verte et revenez au calme le soir',
+    copy:
+      'Camping Clepardia permet de visiter Cracovie facilement et de se reposer hors du centre strict. Laissez voiture, camping-car ou caravane sur place, prenez le tramway et revenez dans la verdure.',
+    primary: 'Comment venir',
+    secondary: 'Envoyer une demande',
+    imageMain: 'Camping Clepardia — base calme à Cracovie',
+    imageSmall: 'Tramway vers le centre de Cracovie',
+    steps: [
+      { icon: 'parking', title: 'Laissez le véhicule', copy: 'Camping-car, voiture ou caravane restent au camping.' },
+      { icon: 'tram', title: 'Prenez le tramway', copy: 'Rejoignez le centre sans chercher de parking.' },
+      { icon: 'leaf', title: 'Revenez au vert', copy: 'Le soir, reposez-vous dans une partie plus calme de la ville.' },
+    ],
+  },
+  es: {
+    overline: 'Cracovia sin estrés de aparcamiento',
+    title: 'Deja tu vehículo en una base verde y vuelve por la tarde a un lugar tranquilo',
+    copy:
+      'Camping Clepardia permite visitar Cracovia cómodamente y descansar fuera del centro más intenso. Deja coche, autocaravana o caravana en el camping, toma el tranvía y vuelve a una zona verde.',
+    primary: 'Cómo llegar',
+    secondary: 'Enviar consulta',
+    imageMain: 'Camping Clepardia — base tranquila en Cracovia',
+    imageSmall: 'Tranvía al centro de Cracovia',
+    steps: [
+      { icon: 'parking', title: 'Deja el vehículo', copy: 'Autocaravana, coche o caravana se quedan en el camping.' },
+      { icon: 'tram', title: 'Toma el tranvía', copy: 'Llega al centro sin buscar aparcamiento.' },
+      { icon: 'leaf', title: 'Vuelve al verde', copy: 'Por la tarde descansas en una zona más tranquila.' },
+    ],
+  },
+  nl: {
+    overline: 'Krakau zonder parkeerstress',
+    title: 'Laat je voertuig op een groene basis en keer ’s avonds terug naar rust',
+    copy:
+      'Camping Clepardia laat je Krakau bezoeken zonder parkeerdruk. Laat auto, camper of caravan op de camping, neem de tram naar de stad en kom terug naar groen.',
+    primary: 'Route bekijken',
+    secondary: 'Aanvraag sturen',
+    imageMain: 'Camping Clepardia — rustige basis in Krakau',
+    imageSmall: 'Tram naar centrum Krakau',
+    steps: [
+      { icon: 'parking', title: 'Laat het voertuig staan', copy: 'Camper, auto of caravan blijft op de camping.' },
+      { icon: 'tram', title: 'Neem de tram', copy: 'Ga comfortabel naar het centrum zonder parkeren.' },
+      { icon: 'leaf', title: 'Terug naar groen', copy: '’s Avonds rust je in een kalmere stadszone.' },
+    ],
+  },
+  cs: {
+    overline: 'Krakov bez stresu z parkování',
+    title: 'Nechte vozidlo v zelené základně a večer se vraťte do klidu',
+    copy:
+      'Camping Clepardia umožní poznat Krakov bez hledání parkování. Auto, obytný vůz nebo karavan nechte v kempu, do centra jeďte tramvají a vraťte se do zeleně.',
+    primary: 'Jak se dostat',
+    secondary: 'Odeslat dotaz',
+    imageMain: 'Camping Clepardia — klidná základna v Krakově',
+    imageSmall: 'Tramvaj do centra Krakova',
+    steps: [
+      { icon: 'parking', title: 'Nechte vozidlo', copy: 'Obytný vůz, auto nebo karavan zůstane v kempu.' },
+      { icon: 'tram', title: 'Jeďte tramvají', copy: 'Do centra bez hledání parkování.' },
+      { icon: 'leaf', title: 'Zpět do zeleně', copy: 'Večer odpočíváte v klidnější části města.' },
+    ],
+  },
+  sk: {
+    overline: 'Krakov bez stresu z parkovania',
+    title: 'Nechajte vozidlo v zelenej základni a večer sa vráťte do pokoja',
+    copy:
+      'Camping Clepardia umožní spoznať Krakov bez hľadania parkovania. Auto, obytné vozidlo alebo karavan nechajte v kempe, do centra choďte električkou a vráťte sa do zelene.',
+    primary: 'Ako sa dostať',
+    secondary: 'Odoslať dopyt',
+    imageMain: 'Camping Clepardia — pokojná základňa v Krakove',
+    imageSmall: 'Električka do centra Krakova',
+    steps: [
+      { icon: 'parking', title: 'Nechajte vozidlo', copy: 'Obytné auto, auto alebo karavan zostane v kempe.' },
+      { icon: 'tram', title: 'Choďte električkou', copy: 'Do centra bez hľadania parkovania.' },
+      { icon: 'leaf', title: 'Späť do zelene', copy: 'Večer oddychujete v pokojnejšej časti mesta.' },
+    ],
+  },
+  sv: {
+    overline: 'Kraków utan parkeringsstress',
+    title: 'Lämna fordonet på en grön bas och återvänd till lugnet på kvällen',
+    copy:
+      'Camping Clepardia gör det enkelt att upptäcka Kraków utan parkering i centrum. Lämna bil, husbil eller husvagn på campingen, ta spårvagnen och kom tillbaka till grönska.',
+    primary: 'Hitta hit',
+    secondary: 'Skicka förfrågan',
+    imageMain: 'Camping Clepardia — lugn bas i Kraków',
+    imageSmall: 'Spårvagn till Krakóws centrum',
+    steps: [
+      { icon: 'parking', title: 'Lämna fordonet', copy: 'Husbil, bil eller husvagn stannar på campingen.' },
+      { icon: 'tram', title: 'Ta spårvagnen', copy: 'Nå centrum bekvämt utan parkering.' },
+      { icon: 'leaf', title: 'Tillbaka till grönt', copy: 'På kvällen vilar du i en lugnare del av staden.' },
+    ],
+  },
 };
 
-const text = textByLanguage[contentLanguage];
+const text = textByLanguage[requestedLanguage as keyof typeof textByLanguage] ?? textByLanguage.en;
 ---
 
 <section class="site-section home-story reveal-section">

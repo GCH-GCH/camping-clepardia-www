@@ -1,7 +1,6 @@
 ---
 import Icon from '@/components/ui/Icon.astro';
 import { publicAssetExists, siteAssets } from '@/data/assets';
-import { resolveContentLanguage } from '@/i18n/config';
 import { getPathContext } from '@/utils/localizedLinks';
 
 interface Props {
@@ -10,9 +9,9 @@ interface Props {
 
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
-const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode);
+const lang = languageCode ?? pathContext.languageCode;
 const guideExists = publicAssetExists(siteAssets.documents.campingGuidePdf);
-const copy = {
+const copyByLanguage = {
   pl: {
     kicker: 'Przyjazd bez stresu',
     title: 'Jak wygląda przyjazd?',
@@ -65,7 +64,86 @@ const copy = {
     guideReady: 'Scarica Camping Guide PDF',
     guidePending: 'Camping Guide PDF — in preparazione.',
   },
-}[lang];
+  fr: {
+    kicker: 'Arrivée sans stress',
+    title: 'Comment se passe l’arrivée ?',
+    lead: 'Arrivez tranquillement et arrêtez-vous près de la réception ou du parking. L’équipe vous guidera sur place.',
+    steps: [
+      { title: 'Arrêtez-vous près de la réception', copy: 'Après l’arrivée, restez près de la réception ou du parking.' },
+      { title: 'L’équipe indique la place', copy: 'La réception vient vers vous, montre la place et explique le camping.' },
+      { title: 'Enregistrement ensuite', copy: 'L’enregistrement se fait après l’installation ou l’arrivée au bungalow.' },
+    ],
+    maps: 'Nous recommandons Google Maps, car l’accès a changé en 2022.',
+    guideReady: 'Télécharger Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — en préparation.',
+  },
+  es: {
+    kicker: 'Llegada sin estrés',
+    title: '¿Cómo es la llegada?',
+    lead: 'Llega con calma y detente cerca de recepción o del aparcamiento. El equipo te guiará en los primeros pasos.',
+    steps: [
+      { title: 'Detente en recepción', copy: 'Al llegar, párate cerca de recepción o del aparcamiento.' },
+      { title: 'El equipo indica el lugar', copy: 'Recepción se acercará, indicará la parcela y explicará el camping.' },
+      { title: 'Registro después', copy: 'El registro se completa después de colocarte o llegar al bungalow.' },
+    ],
+    maps: 'Recomendamos Google Maps porque el acceso cambió en 2022.',
+    guideReady: 'Descargar Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — en preparación.',
+  },
+  nl: {
+    kicker: 'Zorgeloos aankomen',
+    title: 'Hoe verloopt aankomst?',
+    lead: 'Kom rustig aan en stop bij de receptie of parkeerzone. Het team begeleidt je op het terrein.',
+    steps: [
+      { title: 'Stop bij de receptie', copy: 'Stop na aankomst bij de receptie of parkeerzone.' },
+      { title: 'Team wijst je plaats', copy: 'De receptie komt naar je toe, wijst de plaats en legt de camping uit.' },
+      { title: 'Registratie daarna', copy: 'Registratie gebeurt na het opstellen of na aankomst bij de bungalow.' },
+    ],
+    maps: 'Wij adviseren Google Maps, want de toegang veranderde in 2022.',
+    guideReady: 'Download Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — binnenkort.',
+  },
+  cs: {
+    kicker: 'Příjezd bez stresu',
+    title: 'Jak probíhá příjezd?',
+    lead: 'Přijeďte v klidu a zastavte u recepce nebo parkoviště. Personál vás provede prvními kroky.',
+    steps: [
+      { title: 'Zastavte u recepce', copy: 'Po příjezdu zastavte poblíž recepce nebo parkoviště.' },
+      { title: 'Tým ukáže místo', copy: 'Recepce přijde za vámi, ukáže místo a vysvětlí kemp.' },
+      { title: 'Registrace potom', copy: 'Registrace proběhne po postavení vozidla nebo příchodu k bungalovu.' },
+    ],
+    maps: 'Doporučujeme Google Maps, protože vjezd se změnil v roce 2022.',
+    guideReady: 'Stáhnout Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — připravujeme.',
+  },
+  sk: {
+    kicker: 'Príchod bez stresu',
+    title: 'Ako prebieha príchod?',
+    lead: 'Príďte v pokoji a zastavte pri recepcii alebo parkovisku. Personál vás prevedie prvými krokmi.',
+    steps: [
+      { title: 'Zastavte pri recepcii', copy: 'Po príchode zastavte blízko recepcie alebo parkoviska.' },
+      { title: 'Tím ukáže miesto', copy: 'Recepcia príde za vami, ukáže miesto a vysvetlí kemp.' },
+      { title: 'Registrácia potom', copy: 'Registrácia prebehne po umiestnení vozidla alebo príchode k bungalovu.' },
+    ],
+    maps: 'Odporúčame Google Maps, pretože vjazd sa zmenil v roku 2022.',
+    guideReady: 'Stiahnuť Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — pripravujeme.',
+  },
+  sv: {
+    kicker: 'Ankomst utan stress',
+    title: 'Hur går ankomsten till?',
+    lead: 'Kom lugnt och stanna vid receptionen eller parkeringen. Personalen guidar dig på plats.',
+    steps: [
+      { title: 'Stanna vid receptionen', copy: 'Efter ankomst, stanna nära receptionen eller parkeringen.' },
+      { title: 'Teamet visar platsen', copy: 'Receptionen kommer till dig, visar platsen och förklarar campingen.' },
+      { title: 'Registrering efteråt', copy: 'Registrering görs efter att du ställt upp eller nått bungalowen.' },
+    ],
+    maps: 'Vi rekommenderar Google Maps eftersom infarten ändrades 2022.',
+    guideReady: 'Ladda ner Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — kommer snart.',
+  },
+};
+const copy = copyByLanguage[lang as keyof typeof copyByLanguage] ?? copyByLanguage.en;
 
 const arrivalDocsByLanguage = {
   pl: {
@@ -126,6 +204,96 @@ const arrivalDocsByLanguage = {
       ['Building2', 'È un campeggio verde in città'],
       ['Briefcase', 'Bungalow: porta asciugamani, cosmetici ed effetti personali'],
       ['Clock3', 'Arrivo dopo le 21:00: contatta la reception'],
+    ],
+  },
+  fr: {
+    title: 'Bon à savoir avant l’arrivée',
+    items: [
+      ['IdCard', 'Pièce d’identité'],
+      ['CarFront', 'Numéro d’immatriculation du véhicule'],
+      ['Container', 'Avec caravane : immatriculation de la caravane'],
+      ['Navigation', 'Google Maps — l’accès a changé en 2022'],
+      ['Moon', 'Calme 22:00–07:00'],
+      ['PlugZap', 'Électricité 10A, pas pour recharge EV'],
+      ['PawPrint', 'Chien 0 PLN — merci de nettoyer'],
+      ['Building2', 'Camping vert en ville'],
+      ['Briefcase', 'Bungalows : serviettes, produits et effets personnels'],
+      ['Clock3', 'Arrivée après 21:00 : contactez la réception'],
+    ],
+  },
+  es: {
+    title: 'Conviene saber antes de llegar',
+    items: [
+      ['IdCard', 'Documento de identidad'],
+      ['CarFront', 'Matrícula del vehículo'],
+      ['Container', 'Con caravana: matrícula de la caravana'],
+      ['Navigation', 'Google Maps — el acceso cambió en 2022'],
+      ['Moon', 'Silencio 22:00–07:00'],
+      ['PlugZap', 'Electricidad 10A, no para cargar EV'],
+      ['PawPrint', 'Perro 0 PLN — recoge sus excrementos'],
+      ['Building2', 'Camping verde en la ciudad'],
+      ['Briefcase', 'Bungalows: toallas, aseo y objetos personales'],
+      ['Clock3', 'Llegada después de 21:00: contacta con recepción'],
+    ],
+  },
+  nl: {
+    title: 'Goed om te weten voor aankomst',
+    items: [
+      ['IdCard', 'Identiteitsbewijs'],
+      ['CarFront', 'Kenteken van het voertuig'],
+      ['Container', 'Met caravan: kenteken van de caravan'],
+      ['Navigation', 'Google Maps — ingang gewijzigd in 2022'],
+      ['Moon', 'Nachtrust 22:00–07:00'],
+      ['PlugZap', '10A stroom, niet voor EV-laden'],
+      ['PawPrint', 'Hond 0 PLN — ruim op na je hond'],
+      ['Building2', 'Groene stadscamping'],
+      ['Briefcase', 'Bungalows: handdoeken, toiletartikelen en persoonlijke spullen'],
+      ['Clock3', 'Aankomst na 21:00: neem contact op'],
+    ],
+  },
+  cs: {
+    title: 'Dobré vědět před příjezdem',
+    items: [
+      ['IdCard', 'Doklad totožnosti'],
+      ['CarFront', 'Registrační značka vozidla'],
+      ['Container', 'U karavanu: registrační značka karavanu'],
+      ['Navigation', 'Google Maps — vjezd se změnil v roce 2022'],
+      ['Moon', 'Noční klid 22:00–07:00'],
+      ['PlugZap', 'Elektřina 10A, ne pro nabíjení EV'],
+      ['PawPrint', 'Pes 0 PLN — prosíme uklízet'],
+      ['Building2', 'Zelený kemp ve městě'],
+      ['Briefcase', 'Bungalovy: ručníky, hygienické potřeby a osobní věci'],
+      ['Clock3', 'Příjezd po 21:00: kontaktujte recepci'],
+    ],
+  },
+  sk: {
+    title: 'Dobré vedieť pred príchodom',
+    items: [
+      ['IdCard', 'Doklad totožnosti'],
+      ['CarFront', 'Evidenčné číslo vozidla'],
+      ['Container', 'Pri karavane: evidenčné číslo karavanu'],
+      ['Navigation', 'Google Maps — vjazd sa zmenil v roku 2022'],
+      ['Moon', 'Nočný pokoj 22:00–07:00'],
+      ['PlugZap', 'Elektrina 10A, nie na nabíjanie EV'],
+      ['PawPrint', 'Pes 0 PLN — prosíme upratať'],
+      ['Building2', 'Zelený kemp v meste'],
+      ['Briefcase', 'Bungalovy: uteráky, hygienické potreby a osobné veci'],
+      ['Clock3', 'Príchod po 21:00: kontaktujte recepciu'],
+    ],
+  },
+  sv: {
+    title: 'Bra att veta före ankomst',
+    items: [
+      ['IdCard', 'ID-handling'],
+      ['CarFront', 'Fordonets registreringsnummer'],
+      ['Container', 'Med husvagn: husvagnens registreringsnummer'],
+      ['Navigation', 'Google Maps — infarten ändrades 2022'],
+      ['Moon', 'Nattro 22:00–07:00'],
+      ['PlugZap', '10A el, inte för EV-laddning'],
+      ['PawPrint', 'Hund 0 PLN — plocka upp efter hunden'],
+      ['Building2', 'Grön stadscamping'],
+      ['Briefcase', 'Bungalower: handdukar, hygienartiklar och personliga saker'],
+      ['Clock3', 'Ankomst efter 21:00: kontakta receptionen'],
     ],
   },
 };

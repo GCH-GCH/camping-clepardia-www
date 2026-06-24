@@ -3,7 +3,6 @@ import ImageFrame from '@/components/ImageFrame.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { getCoreUi, tourBookingHref } from '@/i18n/coreUi';
 import { siteAssets } from '@/data/assets';
-import { resolveContentLanguage } from '@/i18n/config';
 import { getLocalizedPath, getPathContext, getPlannerLocalizedPath } from '@/utils/localizedLinks';
 
 interface Props {
@@ -409,10 +408,305 @@ const copyByLanguage: Record<string, Copy> = {
   },
 };
 
+type CompactTourLabels = {
+  kicker: string;
+  title: string;
+  lead: string;
+  featuredLabel: string;
+  durationLabel: string;
+  transportLabel: string;
+  powered: string;
+  cardsAria: string;
+  benefitsTitle: string;
+  memorial: string;
+  underground: string;
+  city: string;
+  park: string;
+  history: string;
+  outside: string;
+  fullDay: string;
+  halfDay: string;
+  twoFour: string;
+  twoThree: string;
+  tourTravel: string;
+  transferBus: string;
+  tramWalk: string;
+  carTransfer: string;
+  busCar: string;
+  auschwitz: string;
+  wieliczka: string;
+  oldTown: string;
+  energylandia: string;
+  schindler: string;
+  zakopane: string;
+  benefitPlan: string;
+  benefitPlanText: string;
+  benefitNeutral: string;
+  benefitNeutralText: string;
+  benefitReturn: string;
+  benefitReturnText: string;
+};
+
+const makeCompactTourCopy = (text: CompactTourLabels): Copy => ({
+  kicker: text.kicker,
+  title: text.title,
+  lead: text.lead,
+  featuredLabel: text.featuredLabel,
+  durationLabel: text.durationLabel,
+  transportLabel: text.transportLabel,
+  powered: text.powered,
+  cardsAria: text.cardsAria,
+  benefitsTitle: text.benefitsTitle,
+  tours: [
+    { key: 'auschwitz', title: 'Auschwitz-Birkenau', eyebrow: text.memorial, duration: text.fullDay, transport: text.tourTravel, description: text.auschwitz, alt: 'Auschwitz-Birkenau', icon: 'shield', featured: true },
+    { key: 'wieliczka', title: 'Wieliczka', eyebrow: text.underground, duration: text.halfDay, transport: text.transferBus, description: text.wieliczka, alt: 'Wieliczka Salt Mine', icon: 'landmark' },
+    { key: 'oldTown', title: text.oldTown.split('|')[0], eyebrow: text.city, duration: text.twoFour, transport: text.tramWalk, description: text.oldTown.split('|')[1], alt: text.oldTown.split('|')[0], icon: 'tram' },
+    { key: 'energylandia', title: 'Energylandia', eyebrow: text.park, duration: text.fullDay, transport: text.carTransfer, description: text.energylandia, alt: 'Energylandia', icon: 'sparkle' },
+    { key: 'schindler', title: text.schindler.split('|')[0], eyebrow: text.history, duration: text.twoThree, transport: text.tramWalk, description: text.schindler.split('|')[1], alt: text.schindler.split('|')[0], icon: 'ticket' },
+    { key: 'zakopane', title: 'Zakopane / Ojców', eyebrow: text.outside, duration: text.fullDay, transport: text.busCar, description: text.zakopane, alt: 'Zakopane / Ojców', icon: 'route' },
+  ],
+  benefits: [
+    { title: text.benefitPlan, text: text.benefitPlanText, icon: 'bus' },
+    { title: text.benefitNeutral, text: text.benefitNeutralText, icon: 'users' },
+    { title: text.benefitReturn, text: text.benefitReturnText, icon: 'leaf' },
+  ],
+});
+
+Object.assign(copyByLanguage, {
+  fr: makeCompactTourCopy({
+    kicker: 'Excursions depuis Cracovie',
+    title: 'Excursions et attractions depuis Cracovie',
+    lead: 'Camping Clepardia est une base pratique pour visiter Cracovie et la région : Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia et le centre.',
+    featuredLabel: 'Excursion recommandée',
+    durationLabel: 'Durée',
+    transportLabel: 'Transport',
+    powered: 'Aide réception',
+    cardsAria: 'Excursions recommandées depuis Cracovie',
+    benefitsTitle: 'Visiter facilement, puis revenir au calme du camping.',
+    memorial: 'Lieu de mémoire',
+    underground: 'Sous terre',
+    city: 'Centre-ville',
+    park: 'Parc d’attractions',
+    history: 'Histoire',
+    outside: 'Hors ville',
+    fullDay: 'Journée entière',
+    halfDay: 'Demi-journée',
+    twoFour: '2–4 h',
+    twoThree: '2–3 h',
+    tourTravel: 'Tour / trajet individuel',
+    transferBus: 'Transfert / bus',
+    tramWalk: 'Tramway + marche',
+    carTransfer: 'Voiture / transfert',
+    busCar: 'Bus / voiture',
+    auschwitz: 'Une visite de mémoire à planifier calmement et à l’avance.',
+    wieliczka: 'Parcours souterrains et histoire de la mine de sel.',
+    oldTown: 'Vieille Ville|Promenade dans le centre de Cracovie et ses monuments clés.',
+    energylandia: 'Le plus grand parc d’attractions de Pologne.',
+    schindler: 'Usine de Schindler|Histoire de Cracovie et de la Seconde Guerre mondiale.',
+    zakopane: 'Montagnes, vues et excursion d’une journée.',
+    benefitPlan: 'Plan pratique',
+    benefitPlanText: 'La réception aide à organiser trajet et horaire.',
+    benefitNeutral: 'Conseils neutres',
+    benefitNeutralText: 'Comparez excursion, transfert et trajet individuel sans pression.',
+    benefitReturn: 'Retour au calme',
+    benefitReturnText: 'Après la visite, retournez dans une base verte tranquille.',
+  }),
+  es: makeCompactTourCopy({
+    kicker: 'Excursiones desde Cracovia',
+    title: 'Excursiones y atracciones desde Cracovia',
+    lead: 'Camping Clepardia es una base cómoda para visitar Cracovia y la región: Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia y el centro.',
+    featuredLabel: 'Excursión recomendada',
+    durationLabel: 'Duración',
+    transportLabel: 'Transporte',
+    powered: 'Ayuda de recepción',
+    cardsAria: 'Excursiones recomendadas desde Cracovia',
+    benefitsTitle: 'Visita cómodamente y vuelve a la calma del camping.',
+    memorial: 'Lugar de memoria',
+    underground: 'Subterráneo',
+    city: 'Centro',
+    park: 'Parque temático',
+    history: 'Historia',
+    outside: 'Fuera de la ciudad',
+    fullDay: 'Día completo',
+    halfDay: 'Medio día',
+    twoFour: '2–4 h',
+    twoThree: '2–3 h',
+    tourTravel: 'Tour / viaje propio',
+    transferBus: 'Transfer / bus',
+    tramWalk: 'Tranvía + paseo',
+    carTransfer: 'Coche / transfer',
+    busCar: 'Bus / coche',
+    auschwitz: 'Visita de memoria que conviene planificar con calma.',
+    wieliczka: 'Rutas subterráneas e historia de la mina de sal.',
+    oldTown: 'Casco antiguo|Paseo por el centro de Cracovia y sus monumentos principales.',
+    energylandia: 'El mayor parque de atracciones de Polonia.',
+    schindler: 'Fábrica de Schindler|Historia de Cracovia y la Segunda Guerra Mundial.',
+    zakopane: 'Montañas, vistas y excursión de día completo.',
+    benefitPlan: 'Plan práctico',
+    benefitPlanText: 'Recepción ayuda a ordenar ruta y horario.',
+    benefitNeutral: 'Consejos neutrales',
+    benefitNeutralText: 'Compara tour, transfer y viaje propio sin presión.',
+    benefitReturn: 'Vuelta tranquila',
+    benefitReturnText: 'Después de visitar, vuelve a una base verde y calmada.',
+  }),
+  nl: makeCompactTourCopy({
+    kicker: 'Tours vanuit Krakau',
+    title: 'Tours en attracties vanuit Krakau',
+    lead: 'Camping Clepardia is een handige basis voor Krakau en de regio: Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia en het centrum.',
+    featuredLabel: 'Aanbevolen tour',
+    durationLabel: 'Duur',
+    transportLabel: 'Transport',
+    powered: 'Hulp receptie',
+    cardsAria: 'Aanbevolen tours vanuit Krakau',
+    benefitsTitle: 'Makkelijk bezoeken en rustig terug naar de camping.',
+    memorial: 'Herdenkingsplek',
+    underground: 'Ondergronds',
+    city: 'Centrum',
+    park: 'Pretpark',
+    history: 'Geschiedenis',
+    outside: 'Buiten de stad',
+    fullDay: 'Hele dag',
+    halfDay: 'Halve dag',
+    twoFour: '2–4 uur',
+    twoThree: '2–3 uur',
+    tourTravel: 'Tour / eigen vervoer',
+    transferBus: 'Transfer / bus',
+    tramWalk: 'Tram + wandeling',
+    carTransfer: 'Auto / transfer',
+    busCar: 'Bus / auto',
+    auschwitz: 'Een herdenkingsbezoek dat je rustig vooraf plant.',
+    wieliczka: 'Ondergrondse routes en geschiedenis van de zoutmijn.',
+    oldTown: 'Oude Stad|Wandeling door het centrum en de belangrijkste monumenten.',
+    energylandia: 'Het grootste pretpark van Polen.',
+    schindler: 'Schindlerfabriek|Geschiedenis van Krakau en de Tweede Wereldoorlog.',
+    zakopane: 'Bergen, uitzichten en een dagtrip.',
+    benefitPlan: 'Praktisch plan',
+    benefitPlanText: 'De receptie helpt met route en vertrektijd.',
+    benefitNeutral: 'Neutrale tips',
+    benefitNeutralText: 'Vergelijk tour, transfer en eigen reis zonder druk.',
+    benefitReturn: 'Rustig terug',
+    benefitReturnText: 'Na sightseeing keer je terug naar een groene rustige basis.',
+  }),
+  cs: makeCompactTourCopy({
+    kicker: 'Výlety z Krakova',
+    title: 'Výlety a atrakce z Krakova',
+    lead: 'Camping Clepardia je pohodlná základna pro Krakov a region: Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia a centrum.',
+    featuredLabel: 'Doporučený výlet',
+    durationLabel: 'Doba',
+    transportLabel: 'Doprava',
+    powered: 'Pomoc recepce',
+    cardsAria: 'Doporučené výlety z Krakova',
+    benefitsTitle: 'Snadné výlety a klidný návrat do kempu.',
+    memorial: 'Pamětní místo',
+    underground: 'Pod zemí',
+    city: 'Centrum',
+    park: 'Zábavní park',
+    history: 'Historie',
+    outside: 'Mimo město',
+    fullDay: 'Celý den',
+    halfDay: 'Půl dne',
+    twoFour: '2–4 h',
+    twoThree: '2–3 h',
+    tourTravel: 'Výlet / vlastní doprava',
+    transferBus: 'Transfer / bus',
+    tramWalk: 'Tramvaj + pěšky',
+    carTransfer: 'Auto / transfer',
+    busCar: 'Bus / auto',
+    auschwitz: 'Pamětní návštěva vhodná k plánování předem.',
+    wieliczka: 'Podzemní trasy a historie solného dolu.',
+    oldTown: 'Staré Město|Procházka centrem Krakova a hlavními památkami.',
+    energylandia: 'Největší zábavní park v Polsku.',
+    schindler: 'Schindlerova továrna|Historie Krakova a druhé světové války.',
+    zakopane: 'Hory, výhledy a celodenní výlet.',
+    benefitPlan: 'Praktický plán',
+    benefitPlanText: 'Recepce pomůže s trasou a časem odjezdu.',
+    benefitNeutral: 'Neutrální tipy',
+    benefitNeutralText: 'Porovnejte výlet, transfer a vlastní cestu bez tlaku.',
+    benefitReturn: 'Klidný návrat',
+    benefitReturnText: 'Po dni výletů se vrátíte do zeleného kempu.',
+  }),
+  sk: makeCompactTourCopy({
+    kicker: 'Výlety z Krakova',
+    title: 'Výlety a atrakcie z Krakova',
+    lead: 'Camping Clepardia je pohodlná základňa pre Krakov a región: Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia a centrum.',
+    featuredLabel: 'Odporúčaný výlet',
+    durationLabel: 'Trvanie',
+    transportLabel: 'Doprava',
+    powered: 'Pomoc recepcie',
+    cardsAria: 'Odporúčané výlety z Krakova',
+    benefitsTitle: 'Jednoduché výlety a pokojný návrat do kempu.',
+    memorial: 'Pamätné miesto',
+    underground: 'Pod zemou',
+    city: 'Centrum',
+    park: 'Zábavný park',
+    history: 'História',
+    outside: 'Mimo mesta',
+    fullDay: 'Celý deň',
+    halfDay: 'Pol dňa',
+    twoFour: '2–4 h',
+    twoThree: '2–3 h',
+    tourTravel: 'Výlet / vlastná doprava',
+    transferBus: 'Transfer / bus',
+    tramWalk: 'Električka + pešo',
+    carTransfer: 'Auto / transfer',
+    busCar: 'Bus / auto',
+    auschwitz: 'Pamätná návšteva vhodná na plánovanie vopred.',
+    wieliczka: 'Podzemné trasy a história soľnej bane.',
+    oldTown: 'Staré Mesto|Prechádzka centrom Krakova a hlavnými pamiatkami.',
+    energylandia: 'Najväčší zábavný park v Poľsku.',
+    schindler: 'Schindlerova továreň|História Krakova a druhej svetovej vojny.',
+    zakopane: 'Hory, výhľady a celodenný výlet.',
+    benefitPlan: 'Praktický plán',
+    benefitPlanText: 'Recepcia pomôže s trasou a časom odchodu.',
+    benefitNeutral: 'Neutrálne tipy',
+    benefitNeutralText: 'Porovnajte výlet, transfer a vlastnú cestu bez tlaku.',
+    benefitReturn: 'Pokojný návrat',
+    benefitReturnText: 'Po dni výletov sa vrátite do zeleného kempu.',
+  }),
+  sv: makeCompactTourCopy({
+    kicker: 'Utflykter från Kraków',
+    title: 'Utflykter och sevärdheter från Kraków',
+    lead: 'Camping Clepardia är en praktisk bas för Kraków och regionen: Wieliczka, Auschwitz-Birkenau, Zakopane, Energylandia och centrum.',
+    featuredLabel: 'Rekommenderad utflykt',
+    durationLabel: 'Tid',
+    transportLabel: 'Transport',
+    powered: 'Receptionens hjälp',
+    cardsAria: 'Rekommenderade utflykter från Kraków',
+    benefitsTitle: 'Enkla utflykter och lugn återkomst till campingen.',
+    memorial: 'Minnesplats',
+    underground: 'Under jord',
+    city: 'Centrum',
+    park: 'Nöjespark',
+    history: 'Historia',
+    outside: 'Utanför staden',
+    fullDay: 'Heldag',
+    halfDay: 'Halvdag',
+    twoFour: '2–4 h',
+    twoThree: '2–3 h',
+    tourTravel: 'Tur / egen resa',
+    transferBus: 'Transfer / buss',
+    tramWalk: 'Spårvagn + promenad',
+    carTransfer: 'Bil / transfer',
+    busCar: 'Buss / bil',
+    auschwitz: 'Ett minnesbesök som bör planeras lugnt i förväg.',
+    wieliczka: 'Underjordiska rutter och saltgruvans historia.',
+    oldTown: 'Gamla stan|Promenad genom Krakóws centrum och viktigaste monument.',
+    energylandia: 'Polens största nöjespark.',
+    schindler: 'Schindlers fabrik|Krakóws historia och andra världskriget.',
+    zakopane: 'Berg, utsikter och en heldagsutflykt.',
+    benefitPlan: 'Praktisk plan',
+    benefitPlanText: 'Receptionen hjälper med rutt och avgångstid.',
+    benefitNeutral: 'Neutrala råd',
+    benefitNeutralText: 'Jämför tur, transfer och egen resa utan press.',
+    benefitReturn: 'Lugn återkomst',
+    benefitReturnText: 'Efter sightseeing återvänder du till en grön lugn bas.',
+  }),
+});
+
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const activeLanguage = languageCode ?? pathContext.languageCode;
-const lang = resolveContentLanguage(activeLanguage);
+const lang = activeLanguage;
 const copy = copyByLanguage[lang] ?? copyByLanguage.en;
 const contactUrl = getLocalizedPath(pathContext.explicitLanguage, 'kontakt');
 const plannerUrl = getPlannerLocalizedPath(pathContext.explicitLanguage);
@@ -454,7 +748,63 @@ const neutralBookingText = {
     chips: ['Consigli pratici', 'Piano del giorno', 'Trasporto', 'Ritorno tranquillo'],
   },
 };
-const bookingText = neutralBookingText[lang] ?? neutralBookingText.en;
+Object.assign(neutralBookingText, {
+  fr: {
+    reserveTitle: 'Demander des excursions et transferts',
+    reserveDescription: 'La réception peut aider avec des informations pratiques sur les excursions et les transports.',
+    sellingText: 'Combinez Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców et les attractions familiales avec votre séjour.',
+    reserve: 'Demander à la réception',
+    planner: 'Ouvrir le planificateur',
+    cards: 'Ajouter au plan',
+    chips: ['Conseils pratiques', 'Plan de journée', 'Transport', 'Retour au calme'],
+  },
+  es: {
+    reserveTitle: 'Preguntar por excursiones y transfers',
+    reserveDescription: 'Recepción puede ayudar con información práctica sobre excursiones y transporte.',
+    sellingText: 'Combina Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców y atracciones familiares con tu estancia.',
+    reserve: 'Preguntar a recepción',
+    planner: 'Abrir planificador',
+    cards: 'Añadir al plan',
+    chips: ['Consejos prácticos', 'Plan del día', 'Transporte', 'Vuelta tranquila'],
+  },
+  nl: {
+    reserveTitle: 'Vraag naar tours en transfers',
+    reserveDescription: 'De receptie helpt met praktische informatie over excursies en vervoer.',
+    sellingText: 'Combineer Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców en familie-attracties met je verblijf.',
+    reserve: 'Vraag receptie',
+    planner: 'Open planner',
+    cards: 'Toevoegen aan planner',
+    chips: ['Praktische tips', 'Dagplan', 'Transport', 'Rustige terugkeer'],
+  },
+  cs: {
+    reserveTitle: 'Zeptat se na výlety a transfery',
+    reserveDescription: 'Recepce pomůže s praktickými informacemi o výletech a dopravě.',
+    sellingText: 'Spojte pobyt s Wieliczkou, Auschwitz-Birkenau, Zakopaným, Ojcówem a rodinnými atrakcemi.',
+    reserve: 'Zeptat se recepce',
+    planner: 'Otevřít plánovač',
+    cards: 'Přidat do plánu',
+    chips: ['Praktické tipy', 'Denní plán', 'Doprava', 'Klidný návrat'],
+  },
+  sk: {
+    reserveTitle: 'Opýtať sa na výlety a transfery',
+    reserveDescription: 'Recepcia pomôže s praktickými informáciami o výletoch a doprave.',
+    sellingText: 'Spojte pobyt s Wieliczkou, Auschwitz-Birkenau, Zakopaným, Ojcówom a rodinnými atrakciami.',
+    reserve: 'Opýtať sa recepcie',
+    planner: 'Otvoriť plánovač',
+    cards: 'Pridať do plánu',
+    chips: ['Praktické tipy', 'Denný plán', 'Doprava', 'Pokojný návrat'],
+  },
+  sv: {
+    reserveTitle: 'Fråga om utflykter och transfer',
+    reserveDescription: 'Receptionen hjälper med praktisk information om utflykter och transport.',
+    sellingText: 'Kombinera vistelsen med Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców och familjeattraktioner.',
+    reserve: 'Fråga receptionen',
+    planner: 'Öppna planeraren',
+    cards: 'Lägg till i plan',
+    chips: ['Praktiska tips', 'Dagsplan', 'Transport', 'Lugn återkomst'],
+  },
+});
+const bookingText = (neutralBookingText as Record<string, typeof neutralBookingText.en>)[lang] ?? neutralBookingText.en;
 const tourUi = getCoreUi(activeLanguage).tour;
 const bookingChips = bookingText.chips;
 const featuredTour = copy.tours.find((tour) => tour.featured) ?? copy.tours[0];

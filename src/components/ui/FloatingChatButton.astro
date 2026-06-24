@@ -326,13 +326,18 @@ const enhancedChatTexts = {
   ...chatTexts,
   pageWelcome,
   pageWelcomeKey: `${pathContext.explicitLanguage ?? 'root'}:${pathContext.languageCode}:${pageKey}`,
-  mobileTitle: pathContext.languageCode === 'pl'
-    ? 'CAMPY — pomocnik'
-    : pathContext.languageCode === 'de'
-      ? 'CAMPY — Hilfe'
-      : pathContext.languageCode === 'it'
-        ? 'CAMPY — assistente'
-        : 'CAMPY — assistant',
+  mobileTitle: {
+    pl: 'CAMPY — pomocnik',
+    en: 'CAMPY — helper',
+    de: 'CAMPY — Hilfe',
+    it: 'CAMPY — assistente',
+    fr: 'CAMPY — aide',
+    es: 'CAMPY — ayuda',
+    nl: 'CAMPY — hulp',
+    cs: 'CAMPY — pomocník',
+    sk: 'CAMPY — pomocník',
+    sv: 'CAMPY — hjälp',
+  }[pathContext.languageCode] ?? 'CAMPY — helper',
   actions: {
     ...chatTexts.actions,
     ...campyEnhancement.actions,
@@ -1103,7 +1108,9 @@ const quickActionGroups = preferredQuickKeys
 
     if (welcome instanceof HTMLElement) {
       const welcomeCopy = getChatTexts();
-      const welcomeKey = 'campy-welcome:session';
+      const welcomeText = welcome.querySelector('p');
+      const normalizedRuntimePath = location.pathname.replace(/\/{2,}/g, '/').replace(/\/+$/, '') || '/';
+      const welcomeKey = `campy-welcome:${welcomeCopy?.pageWelcomeKey || `${welcomeCopy?.language || 'auto'}:${normalizedRuntimePath}`}`;
       const forceWelcome = new URLSearchParams(location.search).get('campyBubble') === '1';
       const hideWelcome = () => {
         welcome.hidden = true;
@@ -1115,10 +1122,13 @@ const quickActionGroups = preferredQuickKeys
           welcomeTimer = window.setTimeout(showWelcome, 900);
           return;
         }
+        if (welcomeText instanceof HTMLElement && welcomeCopy?.pageWelcome) {
+          welcomeText.textContent = welcomeCopy.pageWelcome;
+        }
         welcome.hidden = false;
         root.classList.add('has-welcome');
         updateMobileAvailability();
-        sessionStorage.setItem(welcomeKey, 'shown');
+        if (!forceWelcome) sessionStorage.setItem(welcomeKey, 'shown');
         welcomeTimer = window.setTimeout(hideWelcome, 6500);
       };
       if (forceWelcome || !sessionStorage.getItem(welcomeKey)) {

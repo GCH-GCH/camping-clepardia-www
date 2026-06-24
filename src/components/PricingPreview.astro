@@ -1,6 +1,6 @@
 ---
 import { pricingConfig } from '@/data/pricing';
-import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import { getTranslations } from '@/i18n/config';
 import Icon from '@/components/ui/Icon.astro';
 
@@ -50,23 +50,81 @@ const prices = [
 ];
 
 const fullPricingHref = getLocalizedPath(pathContext.explicitLanguage, 'cennik');
-const bookingHref = getLocalizedPath(pathContext.explicitLanguage, 'rezerwacja');
+const bookingHref = getBookingLocalizedPath(pathContext.languageCode);
 const pricingCalculatorHref = `${fullPricingHref}#oblicz-koszt`;
-const sectionCopy = pathContext.languageCode === 'pl'
-  ? {
-      badge: 'Ceny orientacyjne',
-      lead: 'Zbuduj własny wariant pobytu i zobacz koszt jednej nocy przed wysłaniem zapytania do recepcji.',
-      calculate: 'Oblicz koszt',
-      booking: 'Zarezerwuj pobyt',
-      disclaimer: 'Ceny są orientacyjne. Finalne warunki potwierdza recepcja.',
-    }
-  : {
-      badge: 'Estimated prices',
-      lead: 'Build your stay and check an estimated nightly cost before sending an enquiry to reception.',
-      calculate: 'Calculate cost',
-      booking: 'Book your stay',
-      disclaimer: 'Prices are estimates. Final conditions are confirmed by reception.',
-    };
+const sectionCopyByLanguage = {
+  pl: {
+    badge: 'Ceny orientacyjne',
+    lead: 'Zbuduj własny wariant pobytu i zobacz koszt jednej nocy przed wysłaniem zapytania do recepcji.',
+    calculate: 'Oblicz koszt',
+    booking: 'Zarezerwuj pobyt',
+    disclaimer: 'Ceny są orientacyjne. Finalne warunki potwierdza recepcja.',
+  },
+  en: {
+    badge: 'Estimated prices',
+    lead: 'Build your stay and check an estimated nightly cost before sending an enquiry to reception.',
+    calculate: 'Calculate cost',
+    booking: 'Book your stay',
+    disclaimer: 'Prices are estimates. Final conditions are confirmed by reception.',
+  },
+  de: {
+    badge: 'Richtpreise',
+    lead: 'Stellen Sie Ihren Aufenthalt zusammen und sehen Sie den geschätzten Nachtpreis vor der Anfrage.',
+    calculate: 'Kosten berechnen',
+    booking: 'Aufenthalt buchen',
+    disclaimer: 'Preise sind Richtwerte. Die Rezeption bestätigt die finalen Bedingungen.',
+  },
+  it: {
+    badge: 'Prezzi indicativi',
+    lead: 'Costruisci il soggiorno e controlla il costo stimato di una notte prima della richiesta.',
+    calculate: 'Calcola costo',
+    booking: 'Prenota il soggiorno',
+    disclaimer: 'I prezzi sono indicativi. La reception conferma le condizioni finali.',
+  },
+  fr: {
+    badge: 'Tarifs indicatifs',
+    lead: 'Composez votre séjour et consultez le coût estimé d’une nuit avant d’envoyer la demande.',
+    calculate: 'Calculer le coût',
+    booking: 'Envoyer une demande',
+    disclaimer: 'Les tarifs sont indicatifs. La réception confirme les conditions finales.',
+  },
+  es: {
+    badge: 'Precios orientativos',
+    lead: 'Construye tu estancia y consulta el coste estimado por noche antes de enviar la consulta.',
+    calculate: 'Calcular coste',
+    booking: 'Enviar consulta',
+    disclaimer: 'Los precios son orientativos. Recepción confirma las condiciones finales.',
+  },
+  nl: {
+    badge: 'Indicatieve prijzen',
+    lead: 'Stel je verblijf samen en bekijk de geschatte nachtprijs voordat je een aanvraag stuurt.',
+    calculate: 'Kosten berekenen',
+    booking: 'Aanvraag sturen',
+    disclaimer: 'Prijzen zijn indicatief. De receptie bevestigt de definitieve voorwaarden.',
+  },
+  cs: {
+    badge: 'Orientační ceny',
+    lead: 'Sestavte pobyt a zjistěte odhad ceny za noc před odesláním dotazu.',
+    calculate: 'Spočítat cenu',
+    booking: 'Odeslat dotaz',
+    disclaimer: 'Ceny jsou orientační. Konečné podmínky potvrzuje recepce.',
+  },
+  sk: {
+    badge: 'Orientačné ceny',
+    lead: 'Zostavte pobyt a zistite odhad ceny za noc pred odoslaním dopytu.',
+    calculate: 'Spočítať cenu',
+    booking: 'Odoslať dopyt',
+    disclaimer: 'Ceny sú orientačné. Konečné podmienky potvrdzuje recepcia.',
+  },
+  sv: {
+    badge: 'Ungefärliga priser',
+    lead: 'Bygg din vistelse och se uppskattad nattkostnad innan du skickar en förfrågan.',
+    calculate: 'Beräkna kostnad',
+    booking: 'Skicka förfrågan',
+    disclaimer: 'Priserna är uppskattningar. Receptionen bekräftar slutliga villkor.',
+  },
+};
+const sectionCopy = sectionCopyByLanguage[pathContext.languageCode as keyof typeof sectionCopyByLanguage] ?? sectionCopyByLanguage.en;
 ---
 
 <section class="site-section pricing reveal-section" id="cennik">

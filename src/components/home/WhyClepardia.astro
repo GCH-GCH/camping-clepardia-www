@@ -1,5 +1,5 @@
 ---
-import { getTranslations, resolveContentLanguage } from '@/i18n/config';
+import { getTranslations } from '@/i18n/config';
 import { getPathContext } from '@/utils/localizedLinks';
 import Icon from '@/components/ui/Icon.astro';
 
@@ -10,7 +10,7 @@ interface Props {
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const t = getTranslations(languageCode ?? pathContext.languageCode);
-const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode);
+const lang = languageCode ?? pathContext.languageCode;
 
 const copyByLanguage = {
   pl: [
@@ -45,9 +45,57 @@ const copyByLanguage = {
     { title: 'Google Maps 2022', copy: 'L’accesso è cambiato nel 2022, consigliamo Google Maps.', icon: 'map', tone: 'compact' },
     { title: 'Base per Małopolska', copy: 'Cracovia, Wieliczka, Ojców, Zakopane ed Energylandia per gite in giornata.', icon: 'landmark', tone: 'hero' },
   ],
+  fr: [
+    { title: 'Près du centre', copy: 'Laissez la voiture au camping et prenez le tramway vers la Vieille Ville.', icon: 'MapPinned', tone: 'hero' },
+    { title: '9 arrêts de tram', copy: 'Arrêt à env. 40 m de la porte, Stary Kleparz en env. 14 minutes.', icon: 'tram', tone: 'wide' },
+    { title: 'Camping + bungalows', copy: 'Camping-cars, vans, caravanes, tentes et bungalows 2/3/4 personnes.', icon: 'HousePlus', tone: 'wide' },
+    { title: 'Camping calme', copy: 'Calme 22:00–07:00. Ce n’est pas un lieu de fête.', icon: 'moon', tone: 'compact' },
+    { title: 'Google Maps 2022', copy: 'L’accès a changé en 2022, nous recommandons Google Maps.', icon: 'map', tone: 'compact' },
+    { title: 'Base pour la région', copy: 'Cracovie, Wieliczka, Ojców, Zakopane et Energylandia à portée de journée.', icon: 'landmark', tone: 'hero' },
+  ],
+  es: [
+    { title: 'Cerca del centro', copy: 'Deja el coche en el camping y toma el tranvía hacia el casco antiguo.', icon: 'MapPinned', tone: 'hero' },
+    { title: '9 paradas de tranvía', copy: 'Parada a unos 40 m; Stary Kleparz en aprox. 14 minutos.', icon: 'tram', tone: 'wide' },
+    { title: 'Camping + bungalows', copy: 'Autocaravanas, vans, caravanas, tiendas y bungalows 2/3/4 personas.', icon: 'HousePlus', tone: 'wide' },
+    { title: 'Camping tranquilo', copy: 'Silencio 22:00–07:00. No es un lugar de fiestas.', icon: 'moon', tone: 'compact' },
+    { title: 'Google Maps 2022', copy: 'El acceso cambió en 2022, recomendamos Google Maps.', icon: 'map', tone: 'compact' },
+    { title: 'Base para la región', copy: 'Cracovia, Wieliczka, Ojców, Zakopane y Energylandia para excursiones.', icon: 'landmark', tone: 'hero' },
+  ],
+  nl: [
+    { title: 'Dicht bij centrum', copy: 'Laat de auto op de camping en neem de tram naar de Oude Stad.', icon: 'MapPinned', tone: 'hero' },
+    { title: '9 tramhaltes', copy: 'Halte op ca. 40 m van de poort, ca. 14 minuten naar Stary Kleparz.', icon: 'tram', tone: 'wide' },
+    { title: 'Camping + bungalows', copy: 'Plaatsen voor campers, vans, caravans, tenten en bungalows 2/3/4 pers.', icon: 'HousePlus', tone: 'wide' },
+    { title: 'Rustige camping', copy: 'Nachtrust 22:00–07:00. Geen feestcamping.', icon: 'moon', tone: 'compact' },
+    { title: 'Google Maps 2022', copy: 'De toegang veranderde in 2022, daarom adviseren we Google Maps.', icon: 'map', tone: 'compact' },
+    { title: 'Basis voor regio', copy: 'Krakau, Wieliczka, Ojców, Zakopane en Energylandia binnen dagbereik.', icon: 'landmark', tone: 'hero' },
+  ],
+  cs: [
+    { title: 'Blízko centra', copy: 'Nechte auto v kempu a jeďte tramvají do Starého Města.', icon: 'MapPinned', tone: 'hero' },
+    { title: '9 zastávek tramvaje', copy: 'Zastávka asi 40 m od brány, Stary Kleparz za cca 14 minut.', icon: 'tram', tone: 'wide' },
+    { title: 'Kemp + bungalovy', copy: 'Místa pro obytné vozy, dodávky, karavany, stany a bungalovy 2/3/4 os.', icon: 'HousePlus', tone: 'wide' },
+    { title: 'Klidný kemp', copy: 'Noční klid 22:00–07:00. Není to párty místo.', icon: 'moon', tone: 'compact' },
+    { title: 'Google Maps 2022', copy: 'Vjezd se změnil v roce 2022, doporučujeme Google Maps.', icon: 'map', tone: 'compact' },
+    { title: 'Základna pro region', copy: 'Krakov, Wieliczka, Ojców, Zakopane a Energylandia na denní výlety.', icon: 'landmark', tone: 'hero' },
+  ],
+  sk: [
+    { title: 'Blízko centra', copy: 'Nechajte auto v kempe a choďte električkou do Starého Mesta.', icon: 'MapPinned', tone: 'hero' },
+    { title: '9 zastávok električky', copy: 'Zastávka asi 40 m od brány, Stary Kleparz za cca 14 minút.', icon: 'tram', tone: 'wide' },
+    { title: 'Kemp + bungalovy', copy: 'Miesta pre obytné autá, dodávky, karavany, stany a bungalovy 2/3/4 os.', icon: 'HousePlus', tone: 'wide' },
+    { title: 'Pokojný kemp', copy: 'Nočný pokoj 22:00–07:00. Nie je to párty miesto.', icon: 'moon', tone: 'compact' },
+    { title: 'Google Maps 2022', copy: 'Vjazd sa zmenil v roku 2022, odporúčame Google Maps.', icon: 'map', tone: 'compact' },
+    { title: 'Základňa pre región', copy: 'Krakov, Wieliczka, Ojców, Zakopane a Energylandia na denné výlety.', icon: 'landmark', tone: 'hero' },
+  ],
+  sv: [
+    { title: 'Nära centrum', copy: 'Lämna bilen på campingen och ta spårvagnen mot Gamla stan.', icon: 'MapPinned', tone: 'hero' },
+    { title: '9 spårvagnshållplatser', copy: 'Hållplats ca 40 m från porten, ca 14 minuter till Stary Kleparz.', icon: 'tram', tone: 'wide' },
+    { title: 'Camping + bungalower', copy: 'Platser för husbilar, vans, husvagnar, tält och bungalower 2/3/4 pers.', icon: 'HousePlus', tone: 'wide' },
+    { title: 'Lugn camping', copy: 'Nattro 22:00–07:00. Det är ingen festplats.', icon: 'moon', tone: 'compact' },
+    { title: 'Google Maps 2022', copy: 'Infarten ändrades 2022, därför rekommenderar vi Google Maps.', icon: 'map', tone: 'compact' },
+    { title: 'Bas för regionen', copy: 'Kraków, Wieliczka, Ojców, Zakopane och Energylandia inom dagsutflykt.', icon: 'landmark', tone: 'hero' },
+  ],
 };
 
-const cards = copyByLanguage[lang];
+const cards = copyByLanguage[lang as keyof typeof copyByLanguage] ?? copyByLanguage.en;
 ---
 
 <section class="site-section why reveal-section" id="dlaczego" data-why-clepardia>

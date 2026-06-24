@@ -10,13 +10,32 @@ interface Props {
 
 const { languageCode = 'pl' } = Astro.props as Props;
 const notices = getHomepageSiteNotices().slice(0, 4);
-const isPl = languageCode === 'pl';
-const heading = isPl ? 'Aktualnie na campingu i w Krakowie' : 'Current updates in Krakow and at the campsite';
-const lead = isPl
-  ? 'Najważniejsze komunikaty, wydarzenia i podpowiedzi dla gości Camping Clepardia.'
-  : 'Important events, notices and seasonal tips for Camping Clepardia guests.';
-const fallbackCta = isPl ? 'Zobacz szczegóły' : 'See details';
-const localizedLanguage = isPl ? undefined : languageCode;
+const noticesCopyByLanguage = {
+  pl: { kicker: 'Aktualności', heading: 'Aktualnie na campingu i w Krakowie', lead: 'Najważniejsze komunikaty, wydarzenia i podpowiedzi dla gości Camping Clepardia.', all: 'Zobacz wszystkie aktualności', details: 'Zobacz szczegóły' },
+  en: { kicker: 'Updates', heading: 'Current updates in Krakow and at the campsite', lead: 'Important events, notices and seasonal tips for Camping Clepardia guests.', all: 'See all updates', details: 'See details' },
+  de: { kicker: 'Neuigkeiten', heading: 'Aktuelles am Campingplatz und in Krakau', lead: 'Wichtige Hinweise, Ereignisse und saisonale Tipps für Gäste von Camping Clepardia.', all: 'Alle Neuigkeiten ansehen', details: 'Details ansehen' },
+  it: { kicker: 'Novità', heading: 'Aggiornamenti dal camping e da Cracovia', lead: 'Avvisi importanti, eventi e consigli stagionali per gli ospiti di Camping Clepardia.', all: 'Vedi tutte le novità', details: 'Vedi dettagli' },
+  fr: { kicker: 'Actualités', heading: 'Actualités du camping et de Cracovie', lead: 'Informations importantes, événements et conseils de saison pour les clients de Camping Clepardia.', all: 'Voir toutes les actualités', details: 'Voir les détails' },
+  es: { kicker: 'Noticias', heading: 'Actualidad del camping y de Cracovia', lead: 'Avisos importantes, eventos y consejos de temporada para huéspedes de Camping Clepardia.', all: 'Ver todas las noticias', details: 'Ver detalles' },
+  nl: { kicker: 'Updates', heading: 'Actueel op de camping en in Krakau', lead: 'Belangrijke meldingen, evenementen en seizoenstips voor gasten van Camping Clepardia.', all: 'Bekijk alle updates', details: 'Bekijk details' },
+  cs: { kicker: 'Novinky', heading: 'Aktuálně v kempu a v Krakově', lead: 'Důležitá oznámení, akce a sezónní tipy pro hosty Camping Clepardia.', all: 'Zobrazit všechny novinky', details: 'Zobrazit detail' },
+  sk: { kicker: 'Novinky', heading: 'Aktuálne v kempe a v Krakove', lead: 'Dôležité oznamy, akcie a sezónne tipy pre hostí Camping Clepardia.', all: 'Zobraziť všetky novinky', details: 'Zobraziť detail' },
+  sv: { kicker: 'Nyheter', heading: 'Aktuellt på campingen och i Kraków', lead: 'Viktiga meddelanden, evenemang och säsongstips för gäster på Camping Clepardia.', all: 'Se alla nyheter', details: 'Se detaljer' },
+};
+const noticesCopy = noticesCopyByLanguage[languageCode as keyof typeof noticesCopyByLanguage] ?? noticesCopyByLanguage.en;
+const categoryLabelsByLanguage = {
+  pl: { sezon: 'Sezon', camping: 'Camping', domki: 'Domki', dojazd: 'Dojazd', atrakcje: 'Atrakcje', wydarzenia: 'Wydarzenia', koncerty: 'Koncerty', rodzina: 'Rodzina', alerty: 'Alerty', oferty: 'Oferty', pogoda: 'Pogoda', recepcja: 'Recepcja', info: 'Info' },
+  en: { sezon: 'Season', camping: 'Camping', domki: 'Bungalows', dojazd: 'Directions', atrakcje: 'Attractions', wydarzenia: 'Events', koncerty: 'Concerts', rodzina: 'Family', alerty: 'Alerts', oferty: 'Offers', pogoda: 'Weather', recepcja: 'Reception', info: 'Info' },
+  de: { sezon: 'Saison', camping: 'Camping', domki: 'Bungalows', dojazd: 'Anreise', atrakcje: 'Attraktionen', wydarzenia: 'Events', koncerty: 'Konzerte', rodzina: 'Familie', alerty: 'Hinweise', oferty: 'Angebote', pogoda: 'Wetter', recepcja: 'Rezeption', info: 'Info' },
+  it: { sezon: 'Stagione', camping: 'Camping', domki: 'Bungalow', dojazd: 'Accesso', atrakcje: 'Attrazioni', wydarzenia: 'Eventi', koncerty: 'Concerti', rodzina: 'Famiglia', alerty: 'Avvisi', oferty: 'Offerte', pogoda: 'Meteo', recepcja: 'Reception', info: 'Info' },
+  fr: { sezon: 'Saison', camping: 'Camping', domki: 'Bungalows', dojazd: 'Accès', atrakcje: 'Attractions', wydarzenia: 'Événements', koncerty: 'Concerts', rodzina: 'Famille', alerty: 'Alertes', oferty: 'Offres', pogoda: 'Météo', recepcja: 'Réception', info: 'Info' },
+  es: { sezon: 'Temporada', camping: 'Camping', domki: 'Bungalows', dojazd: 'Acceso', atrakcje: 'Atracciones', wydarzenia: 'Eventos', koncerty: 'Conciertos', rodzina: 'Familia', alerty: 'Avisos', oferty: 'Ofertas', pogoda: 'Tiempo', recepcja: 'Recepción', info: 'Info' },
+  nl: { sezon: 'Seizoen', camping: 'Camping', domki: 'Bungalows', dojazd: 'Route', atrakcje: 'Attracties', wydarzenia: 'Evenementen', koncerty: 'Concerten', rodzina: 'Gezin', alerty: 'Meldingen', oferty: 'Aanbiedingen', pogoda: 'Weer', recepcja: 'Receptie', info: 'Info' },
+  cs: { sezon: 'Sezóna', camping: 'Camping', domki: 'Bungalovy', dojazd: 'Doprava', atrakcje: 'Atrakce', wydarzenia: 'Akce', koncerty: 'Koncerty', rodzina: 'Rodina', alerty: 'Upozornění', oferty: 'Nabídky', pogoda: 'Počasí', recepcja: 'Recepce', info: 'Info' },
+  sk: { sezon: 'Sezóna', camping: 'Camping', domki: 'Bungalovy', dojazd: 'Doprava', atrakcje: 'Atrakcie', wydarzenia: 'Akcie', koncerty: 'Koncerty', rodzina: 'Rodina', alerty: 'Upozornenia', oferty: 'Ponuky', pogoda: 'Počasie', recepcja: 'Recepcia', info: 'Info' },
+  sv: { sezon: 'Säsong', camping: 'Camping', domki: 'Bungalower', dojazd: 'Väg', atrakcje: 'Sevärdheter', wydarzenia: 'Evenemang', koncerty: 'Konserter', rodzina: 'Familj', alerty: 'Meddelanden', oferty: 'Erbjudanden', pogoda: 'Väder', recepcja: 'Reception', info: 'Info' },
+};
+const localizedLanguage = languageCode === 'pl' ? undefined : languageCode;
 const localizedDirectionsHref = getLocalizedPath(localizedLanguage, 'dojazd');
 const localizedBookingHref = getBookingLocalizedPath(languageCode);
 const resolveHref = (href?: string) => {
@@ -27,18 +46,20 @@ const resolveHref = (href?: string) => {
   return href ?? localizedDirectionsHref;
 };
 const categoryLabel = (category: string) =>
-  siteNoticeCategories.find((item) => item.id === category)?.label ?? category;
+  categoryLabelsByLanguage[languageCode as keyof typeof categoryLabelsByLanguage]?.[
+    category as keyof typeof categoryLabelsByLanguage.en
+  ] ?? siteNoticeCategories.find((item) => item.id === category)?.label ?? category;
 ---
 
 {notices.length > 0 && (
   <section class="site-section site-notices reveal-section" id="start-content" data-after-hero aria-labelledby="siteNoticesTitle">
     <div class="container site-notices__inner">
       <div class="site-notices__head">
-        <span class="section-kicker">{isPl ? 'Aktualności' : 'Updates'}</span>
-        <h2 class="section-title" id="siteNoticesTitle">{heading}</h2>
-        <p class="section-copy">{lead}</p>
+        <span class="section-kicker">{noticesCopy.kicker}</span>
+        <h2 class="section-title" id="siteNoticesTitle">{noticesCopy.heading}</h2>
+        <p class="section-copy">{noticesCopy.lead}</p>
         <a class="site-notices__all" href="/aktualnosci">
-          <span>{isPl ? 'Zobacz wszystkie aktualności' : 'See all updates'}</span>
+          <span>{noticesCopy.all}</span>
           <Icon name="ArrowUpRight" size={17} strokeWidth={2.2} />
         </a>
       </div>
@@ -67,7 +88,7 @@ const categoryLabel = (category: string) =>
                 <h3>{copy.title}</h3>
                 <p>{copy.shortDescription ?? copy.description}</p>
                 <a href={resolveHref(notice.ctaHref)}>
-                  <span>{copy.ctaLabel ?? fallbackCta}</span>
+                  <span>{copy.ctaLabel ?? noticesCopy.details}</span>
                   <Icon name="ArrowUpRight" size={17} strokeWidth={2.2} />
                 </a>
               </div>

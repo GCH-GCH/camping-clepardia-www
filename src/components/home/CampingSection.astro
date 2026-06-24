@@ -1,7 +1,7 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
 import { siteAssets } from '@/data/assets';
-import { getTranslations, resolveContentLanguage } from '@/i18n/config';
+import { getTranslations } from '@/i18n/config';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
-const contentLanguage = resolveContentLanguage(languageCode ?? pathContext.languageCode);
+const contentLanguage = languageCode ?? pathContext.languageCode;
 const t = getTranslations(languageCode ?? pathContext.languageCode);
 const page = t.pages.camping;
 const campingCards = page.highlights.map((item, index) => ({
@@ -21,7 +21,7 @@ const campingCards = page.highlights.map((item, index) => ({
 }));
 const pricingHref = getLocalizedPath(explicitLanguage, 'cennik');
 const contactHref = getLocalizedPath(explicitLanguage, 'kontakt');
-const mediaLabels = {
+const mediaLabelsByLanguage = {
   pl: {
     aria: 'Zdjęcia sekcji camping',
     mainAlt: 'Strefa dla kamperów i vanów Camping Clepardia',
@@ -66,7 +66,74 @@ const mediaLabels = {
     electricityAlt: 'Allacci elettrici nel camping',
     electricity: 'Elettricità e servizi',
   },
-}[contentLanguage];
+  fr: {
+    aria: 'Photos de la section camping',
+    mainAlt: 'Zone camping-cars et vans à Camping Clepardia',
+    main: 'Camping-cars et vans',
+    pitchesAlt: 'Emplacements de camping à Camping Clepardia',
+    pitches: 'Emplacements camping',
+    tentsAlt: 'Zone tentes Camping Clepardia',
+    tents: 'Tentes',
+    electricityAlt: 'Branchements électriques au camping',
+    electricity: 'Électricité et services',
+  },
+  es: {
+    aria: 'Fotos de la sección camping',
+    mainAlt: 'Zona de autocaravanas y vans en Camping Clepardia',
+    main: 'Autocaravanas y vans',
+    pitchesAlt: 'Parcelas de Camping Clepardia',
+    pitches: 'Parcelas camping',
+    tentsAlt: 'Zona de tiendas Camping Clepardia',
+    tents: 'Tiendas',
+    electricityAlt: 'Conexiones eléctricas del camping',
+    electricity: 'Electricidad y servicios',
+  },
+  nl: {
+    aria: 'Foto’s van de campingsectie',
+    mainAlt: 'Camper- en vangedeelte bij Camping Clepardia',
+    main: 'Campers en vans',
+    pitchesAlt: 'Kampeerplaatsen bij Camping Clepardia',
+    pitches: 'Kampeerplaatsen',
+    tentsAlt: 'Tentzone Camping Clepardia',
+    tents: 'Tenten',
+    electricityAlt: 'Stroomaansluitingen op de camping',
+    electricity: 'Stroom en voorzieningen',
+  },
+  cs: {
+    aria: 'Fotografie campingové sekce',
+    mainAlt: 'Zóna obytných vozů a dodávek Camping Clepardia',
+    main: 'Obytné vozy a dodávky',
+    pitchesAlt: 'Místa v Camping Clepardia',
+    pitches: 'Campingová místa',
+    tentsAlt: 'Stanová zóna Camping Clepardia',
+    tents: 'Stany',
+    electricityAlt: 'Elektrické přípojky v kempu',
+    electricity: 'Elektřina a zázemí',
+  },
+  sk: {
+    aria: 'Fotografie campingovej sekcie',
+    mainAlt: 'Zóna obytných áut a dodávok Camping Clepardia',
+    main: 'Obytné autá a dodávky',
+    pitchesAlt: 'Miesta v Camping Clepardia',
+    pitches: 'Campingové miesta',
+    tentsAlt: 'Stanová zóna Camping Clepardia',
+    tents: 'Stany',
+    electricityAlt: 'Elektrické prípojky v kempe',
+    electricity: 'Elektrina a zázemie',
+  },
+  sv: {
+    aria: 'Bilder från campingsektionen',
+    mainAlt: 'Husbils- och vanområde på Camping Clepardia',
+    main: 'Husbilar och vans',
+    pitchesAlt: 'Campingplatser på Camping Clepardia',
+    pitches: 'Campingplatser',
+    tentsAlt: 'Tältområde Camping Clepardia',
+    tents: 'Tält',
+    electricityAlt: 'Elanslutningar på campingen',
+    electricity: 'El och faciliteter',
+  },
+};
+const mediaLabels = mediaLabelsByLanguage[contentLanguage as keyof typeof mediaLabelsByLanguage] ?? mediaLabelsByLanguage.en;
 ---
 
 <section class="site-section camping-section reveal-section" id="camping">

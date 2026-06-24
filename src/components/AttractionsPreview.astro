@@ -16,82 +16,202 @@ const activeLanguage = languageCode ?? pathContext.languageCode;
 const t = getTranslations(activeLanguage);
 const page = t.pages.atrakcje;
 
-const ctaLabel = activeLanguage === 'de'
-  ? 'Attraktionen ansehen'
-  : activeLanguage === 'it'
-    ? 'Vedi attrazioni'
-    : activeLanguage === 'pl'
-      ? 'Zobacz atrakcje'
-      : 'See attractions';
+const attractionCopyByLanguage = {
+  pl: {
+    cta: 'Zobacz atrakcje',
+    closest: 'Najbliżej Krakowa',
+    tramWalk: 'Tram + spacer',
+    dayTrip: 'Wycieczka poza miasto',
+    carBus: 'Samochód / bus',
+    cityMuseum: 'Miasto + muzeum',
+    fullDay: 'Cały dzień',
+    nature: 'Natura / góry',
+    items: {
+      oldTown: ['Stare Miasto', 'Klasyczna trasa po Krakowie: Rynek, Sukiennice, kościół Mariacki i spacer w stronę Wawelu.', 'Stare Miasto w Krakowie'],
+      wieliczka: ['Wieliczka', 'Kopalnia soli i jedna z najbardziej rozpoznawalnych wycieczek z Krakowa.', 'Kopalnia Soli Wieliczka'],
+      auschwitz: ['Auschwitz-Birkenau', 'Ważne miejsce pamięci, które warto zaplanować z wyprzedzeniem.', 'Muzeum Auschwitz-Birkenau'],
+      schindler: ['Fabryka Schindlera', 'Muzeum historii Krakowa i okupacji, blisko Kazimierza i Podgórza.', 'Fabryka Schindlera w Krakowie'],
+      energylandia: ['Energylandia', 'Całodniowa wycieczka dla rodzin i osób szukających mocniejszych wrażeń.', 'Energylandia'],
+      nature: ['Ojców / Zakopane', 'Dobre kierunki na jednodniową wycieczkę poza miasto.', 'Ojców, Zakopane i okolice Krakowa'],
+    },
+  },
+  en: {
+    cta: 'See attractions',
+    closest: 'Closest to Kraków',
+    tramWalk: 'Tram + walk',
+    dayTrip: 'Day trip',
+    carBus: 'Car / tour bus',
+    cityMuseum: 'City + museum',
+    fullDay: 'Full-day trip',
+    nature: 'Nature / mountains',
+    items: {
+      oldTown: ['Old Town', 'The classic Kraków route: Main Square, Cloth Hall, St. Mary’s Basilica and a walk toward Wawel.', 'Kraków Old Town'],
+      wieliczka: ['Wieliczka', 'Salt mine and one of the most recognisable trips from Kraków.', 'Wieliczka Salt Mine'],
+      auschwitz: ['Auschwitz-Birkenau', 'An important memorial site worth planning in advance.', 'Auschwitz-Birkenau Museum'],
+      schindler: ['Schindler’s Factory', 'A museum about Kraków’s wartime history, close to Kazimierz and Podgórze.', 'Schindler’s Factory in Kraków'],
+      energylandia: ['Energylandia', 'A full-day trip for families and guests looking for stronger thrills.', 'Energylandia'],
+      nature: ['Ojców / Zakopane', 'Good options for a day trip outside the city.', 'Ojców, Zakopane and the Kraków area'],
+    },
+  },
+  de: {
+    cta: 'Attraktionen ansehen',
+    closest: 'Am nächsten zu Krakau',
+    tramWalk: 'Tram + Spaziergang',
+    dayTrip: 'Ausflug',
+    carBus: 'Auto / Bus',
+    cityMuseum: 'Stadt + Museum',
+    fullDay: 'Ganztägig',
+    nature: 'Natur / Berge',
+    items: {
+      oldTown: ['Altstadt', 'Klassische Route durch Krakau: Markt, Tuchhallen, Marienkirche und Spaziergang Richtung Wawel.', 'Altstadt von Krakau'],
+      wieliczka: ['Wieliczka', 'Salzbergwerk und einer der bekanntesten Ausflüge ab Krakau.', 'Salzbergwerk Wieliczka'],
+      auschwitz: ['Auschwitz-Birkenau', 'Eine wichtige Gedenkstätte, die man im Voraus planen sollte.', 'Museum Auschwitz-Birkenau'],
+      schindler: ['Schindlers Fabrik', 'Museum zur Geschichte Krakaus und der Besatzungszeit, nahe Kazimierz und Podgórze.', 'Schindlers Fabrik in Krakau'],
+      energylandia: ['Energylandia', 'Ganztägiger Ausflug für Familien und Gäste, die stärkere Eindrücke suchen.', 'Energylandia'],
+      nature: ['Ojców / Zakopane', 'Gute Ziele für einen Tagesausflug außerhalb der Stadt.', 'Ojców, Zakopane und Umgebung'],
+    },
+  },
+  it: {
+    cta: 'Vedi attrazioni',
+    closest: 'Più vicino a Cracovia',
+    tramWalk: 'Tram + passeggiata',
+    dayTrip: 'Gita fuori città',
+    carBus: 'Auto / bus',
+    cityMuseum: 'Città + museo',
+    fullDay: 'Giornata intera',
+    nature: 'Natura / montagne',
+    items: {
+      oldTown: ['Città Vecchia', 'Il percorso classico di Cracovia: piazza del mercato, Sukiennice, chiesa di Santa Maria e passeggiata verso il Wawel.', 'Città Vecchia di Cracovia'],
+      wieliczka: ['Wieliczka', 'Miniera di sale e una delle gite più riconoscibili da Cracovia.', 'Miniera di Sale Wieliczka'],
+      auschwitz: ['Auschwitz-Birkenau', 'Un importante luogo della memoria da pianificare in anticipo.', 'Museo Auschwitz-Birkenau'],
+      schindler: ['Fabbrica di Schindler', 'Museo sulla storia di Cracovia in guerra, vicino a Kazimierz e Podgórze.', 'Fabbrica di Schindler a Cracovia'],
+      energylandia: ['Energylandia', 'Gita di un giorno per famiglie e ospiti in cerca di emozioni forti.', 'Energylandia'],
+      nature: ['Ojców / Zakopane', 'Buone opzioni per una gita fuori città.', 'Ojców, Zakopane e dintorni'],
+    },
+  },
+  fr: {
+    cta: 'Voir les attractions',
+    closest: 'Le plus proche de Cracovie',
+    tramWalk: 'Tramway + marche',
+    dayTrip: 'Excursion',
+    carBus: 'Voiture / bus',
+    cityMuseum: 'Ville + musée',
+    fullDay: 'Journée entière',
+    nature: 'Nature / montagnes',
+    items: {
+      oldTown: ['Vieille Ville', 'Le parcours classique de Cracovie : Rynek, Halle aux Draps, basilique Sainte-Marie et promenade vers Wawel.', 'Vieille Ville de Cracovie'],
+      wieliczka: ['Wieliczka', 'Mine de sel et l’une des excursions les plus connues depuis Cracovie.', 'Mine de sel Wieliczka'],
+      auschwitz: ['Auschwitz-Birkenau', 'Un lieu de mémoire important à planifier à l’avance.', 'Musée Auschwitz-Birkenau'],
+      schindler: ['Usine de Schindler', 'Musée sur l’histoire de Cracovie pendant la guerre, près de Kazimierz et Podgórze.', 'Usine de Schindler à Cracovie'],
+      energylandia: ['Energylandia', 'Excursion d’une journée pour familles et amateurs de sensations.', 'Energylandia'],
+      nature: ['Ojców / Zakopane', 'Bonnes idées d’excursion hors de la ville.', 'Ojców, Zakopane et environs de Cracovie'],
+    },
+  },
+  es: {
+    cta: 'Ver atracciones',
+    closest: 'Lo más cercano a Cracovia',
+    tramWalk: 'Tranvía + paseo',
+    dayTrip: 'Excursión',
+    carBus: 'Coche / bus',
+    cityMuseum: 'Ciudad + museo',
+    fullDay: 'Día completo',
+    nature: 'Naturaleza / montañas',
+    items: {
+      oldTown: ['Casco antiguo', 'La ruta clásica de Cracovia: plaza principal, Sukiennice, Santa María y paseo hacia Wawel.', 'Casco antiguo de Cracovia'],
+      wieliczka: ['Wieliczka', 'Mina de sal y una de las excursiones más conocidas desde Cracovia.', 'Mina de Sal Wieliczka'],
+      auschwitz: ['Auschwitz-Birkenau', 'Un importante lugar de memoria que conviene planificar con antelación.', 'Museo Auschwitz-Birkenau'],
+      schindler: ['Fábrica de Schindler', 'Museo sobre la historia de Cracovia en la guerra, cerca de Kazimierz y Podgórze.', 'Fábrica de Schindler en Cracovia'],
+      energylandia: ['Energylandia', 'Excursión de día completo para familias y amantes de emociones fuertes.', 'Energylandia'],
+      nature: ['Ojców / Zakopane', 'Buenas opciones para una excursión fuera de la ciudad.', 'Ojców, Zakopane y alrededores'],
+    },
+  },
+  nl: {
+    cta: 'Bekijk attracties',
+    closest: 'Dichtst bij Krakau',
+    tramWalk: 'Tram + wandeling',
+    dayTrip: 'Dagtrip',
+    carBus: 'Auto / bus',
+    cityMuseum: 'Stad + museum',
+    fullDay: 'Hele dag',
+    nature: 'Natuur / bergen',
+    items: {
+      oldTown: ['Oude Stad', 'De klassieke route door Krakau: Marktplein, Lakenhal, Mariakerk en wandeling naar Wawel.', 'Oude Stad van Krakau'],
+      wieliczka: ['Wieliczka', 'Zoutmijn en een van de bekendste uitstapjes vanuit Krakau.', 'Zoutmijn Wieliczka'],
+      auschwitz: ['Auschwitz-Birkenau', 'Een belangrijke herdenkingsplek die je vooraf plant.', 'Museum Auschwitz-Birkenau'],
+      schindler: ['Schindlerfabriek', 'Museum over de oorlogsgeschiedenis van Krakau, dicht bij Kazimierz en Podgórze.', 'Schindlerfabriek in Krakau'],
+      energylandia: ['Energylandia', 'Dagtrip voor families en gasten die meer spanning zoeken.', 'Energylandia'],
+      nature: ['Ojców / Zakopane', 'Goede opties voor een dagtrip buiten de stad.', 'Ojców, Zakopane en omgeving'],
+    },
+  },
+  cs: {
+    cta: 'Zobrazit atrakce',
+    closest: 'Nejblíže Krakovu',
+    tramWalk: 'Tramvaj + pěšky',
+    dayTrip: 'Výlet',
+    carBus: 'Auto / bus',
+    cityMuseum: 'Město + muzeum',
+    fullDay: 'Celý den',
+    nature: 'Příroda / hory',
+    items: {
+      oldTown: ['Staré Město', 'Klasická trasa Krakovem: Rynek, Sukiennice, Mariánský kostel a procházka k Wawelu.', 'Staré Město v Krakově'],
+      wieliczka: ['Wieliczka', 'Solný důl a jeden z nejznámějších výletů z Krakova.', 'Solný důl Wieliczka'],
+      auschwitz: ['Auschwitz-Birkenau', 'Důležité pamětní místo, které je vhodné plánovat předem.', 'Muzeum Auschwitz-Birkenau'],
+      schindler: ['Schindlerova továrna', 'Muzeum historie Krakova za války, blízko Kazimierze a Podgórze.', 'Schindlerova továrna v Krakově'],
+      energylandia: ['Energylandia', 'Celodenní výlet pro rodiny a milovníky silnějších zážitků.', 'Energylandia'],
+      nature: ['Ojców / Zakopane', 'Dobré cíle na jednodenní výlet mimo město.', 'Ojców, Zakopane a okolí'],
+    },
+  },
+  sk: {
+    cta: 'Zobraziť atrakcie',
+    closest: 'Najbližšie ku Krakovu',
+    tramWalk: 'Električka + pešo',
+    dayTrip: 'Výlet',
+    carBus: 'Auto / bus',
+    cityMuseum: 'Mesto + múzeum',
+    fullDay: 'Celý deň',
+    nature: 'Príroda / hory',
+    items: {
+      oldTown: ['Staré Mesto', 'Klasická trasa Krakovom: Rynek, Sukiennice, Mariánsky kostol a prechádzka k Wawelu.', 'Staré Mesto v Krakove'],
+      wieliczka: ['Wieliczka', 'Soľná baňa a jeden z najznámejších výletov z Krakova.', 'Soľná baňa Wieliczka'],
+      auschwitz: ['Auschwitz-Birkenau', 'Dôležité pamätné miesto, ktoré je vhodné plánovať vopred.', 'Múzeum Auschwitz-Birkenau'],
+      schindler: ['Schindlerova továreň', 'Múzeum histórie Krakova počas vojny, blízko Kazimierza a Podgórze.', 'Schindlerova továreň v Krakove'],
+      energylandia: ['Energylandia', 'Celodenný výlet pre rodiny a milovníkov silnejších zážitkov.', 'Energylandia'],
+      nature: ['Ojców / Zakopane', 'Dobré ciele na jednodenný výlet mimo mesta.', 'Ojców, Zakopane a okolie'],
+    },
+  },
+  sv: {
+    cta: 'Se sevärdheter',
+    closest: 'Närmst Kraków',
+    tramWalk: 'Spårvagn + promenad',
+    dayTrip: 'Utflykt',
+    carBus: 'Bil / buss',
+    cityMuseum: 'Stad + museum',
+    fullDay: 'Heldag',
+    nature: 'Natur / berg',
+    items: {
+      oldTown: ['Gamla stan', 'Den klassiska rutten i Kraków: torget, Sukiennice, Mariakyrkan och promenad mot Wawel.', 'Gamla stan i Kraków'],
+      wieliczka: ['Wieliczka', 'Saltgruva och en av de mest kända utflykterna från Kraków.', 'Wieliczka saltgruva'],
+      auschwitz: ['Auschwitz-Birkenau', 'En viktig minnesplats som bör planeras i förväg.', 'Auschwitz-Birkenau museum'],
+      schindler: ['Schindlers fabrik', 'Museum om Krakóws krigshistoria, nära Kazimierz och Podgórze.', 'Schindlers fabrik i Kraków'],
+      energylandia: ['Energylandia', 'Heldagsutflykt för familjer och gäster som söker starkare upplevelser.', 'Energylandia'],
+      nature: ['Ojców / Zakopane', 'Bra alternativ för en dagsutflykt utanför staden.', 'Ojców, Zakopane och området'],
+    },
+  },
+};
 
+const attractionCopy = attractionCopyByLanguage[activeLanguage as keyof typeof attractionCopyByLanguage] ?? attractionCopyByLanguage.en;
+const ctaLabel = attractionCopy.cta;
 const attractions = [
-  {
-    name: activeLanguage === 'de' ? 'Altstadt' : activeLanguage === 'it' ? 'Città Vecchia' : activeLanguage === 'pl' ? 'Stare Miasto' : 'Old Town',
-    description: activeLanguage === 'de'
-      ? 'Klassische Route durch Krakau: Markt, Tuchhallen, Marienkirche und Spaziergang Richtung Wawel.'
-      : activeLanguage === 'it'
-        ? 'Il percorso classico di Cracovia: piazza del mercato, Sukiennice, chiesa di Santa Maria e passeggiata verso il Wawel.'
-        : activeLanguage === 'pl'
-          ? 'Klasyczna trasa po Krakowie: Rynek, Sukiennice, kościół Mariacki i spacer w stronę Wawelu.'
-          : 'The classic Kraków route: Main Square, Cloth Hall, St. Mary’s Basilica and a walk toward Wawel.',
-    meta: activeLanguage === 'pl' ? 'Tram + spacer' : activeLanguage === 'de' ? 'Tram + Spaziergang' : activeLanguage === 'it' ? 'Tram + passeggiata' : 'Tram + walk',
-    metaIcon: 'tram',
-    image: attractionImages.mainSquare,
-    alt: activeLanguage === 'de' ? 'Altstadt von Krakau' : activeLanguage === 'it' ? 'Città Vecchia di Cracovia' : activeLanguage === 'pl' ? 'Stare Miasto w Krakowie' : 'Kraków Old Town',
-    icon: 'landmark',
-    variant: 'old-town',
-  },
-  {
-    name: 'Wieliczka',
-    description: activeLanguage === 'pl' ? 'Kopalnia soli i jedna z najbardziej rozpoznawalnych wycieczek z Krakowa.' : 'Salt mine and one of the most recognisable trips from Kraków.',
-    meta: activeLanguage === 'pl' ? 'Wycieczka poza miasto' : 'Day trip',
-    metaIcon: 'route',
-    image: attractionImages.wieliczka,
-    alt: 'Kopalnia Soli Wieliczka',
-    icon: 'map',
-    variant: 'wieliczka',
-  },
-  {
-    name: 'Auschwitz-Birkenau',
-    description: activeLanguage === 'pl' ? 'Ważne miejsce pamięci, które warto zaplanować z wyprzedzeniem.' : 'An important memorial site worth planning in advance.',
-    meta: activeLanguage === 'pl' ? 'Samochód / bus' : 'Car / tour bus',
-    metaIcon: 'bus',
-    image: attractionImages.auschwitz,
-    alt: 'Muzeum Auschwitz-Birkenau',
-    icon: 'shield',
-    variant: 'auschwitz',
-  },
-  {
-    name: activeLanguage === 'pl' ? 'Fabryka Schindlera' : 'Schindler’s Factory',
-    description: activeLanguage === 'pl' ? 'Muzeum historii Krakowa i okupacji, blisko Kazimierza i Podgórza.' : 'A museum about Kraków’s wartime history, close to Kazimierz and Podgórze.',
-    meta: activeLanguage === 'pl' ? 'Miasto + muzeum' : 'City + museum',
-    metaIcon: 'ticket',
-    image: attractionImages.schindler,
-    alt: 'Fabryka Schindlera w Krakowie',
-    icon: 'info',
-    variant: 'schindler',
-  },
-  {
-    name: 'Energylandia',
-    description: activeLanguage === 'pl' ? 'Całodniowa wycieczka dla rodzin i osób szukających mocniejszych wrażeń.' : 'A full-day trip for families and guests looking for stronger thrills.',
-    meta: activeLanguage === 'pl' ? 'Cały dzień' : 'Full-day trip',
-    metaIcon: 'car',
-    image: attractionImages.energylandia,
-    alt: 'Energylandia',
-    icon: 'sparkle',
-    variant: 'energylandia',
-  },
-  {
-    name: activeLanguage === 'pl' ? 'Ojców / Zakopane' : 'Ojców / Zakopane',
-    description: activeLanguage === 'pl' ? 'Dobre kierunki na jednodniową wycieczkę poza miasto.' : 'Good options for a day trip outside the city.',
-    meta: activeLanguage === 'pl' ? 'Natura / góry' : 'Nature / mountains',
-    metaIcon: 'leaf',
-    image: attractionImages.zakopane,
-    alt: 'Ojców, Zakopane i okolice Krakowa',
-    icon: 'leaf',
-    variant: 'nature',
-  },
-];
+  { key: 'oldTown', meta: attractionCopy.tramWalk, metaIcon: 'tram', image: attractionImages.mainSquare, icon: 'landmark', variant: 'old-town' },
+  { key: 'wieliczka', meta: attractionCopy.dayTrip, metaIcon: 'route', image: attractionImages.wieliczka, icon: 'map', variant: 'wieliczka' },
+  { key: 'auschwitz', meta: attractionCopy.carBus, metaIcon: 'bus', image: attractionImages.auschwitz, icon: 'shield', variant: 'auschwitz' },
+  { key: 'schindler', meta: attractionCopy.cityMuseum, metaIcon: 'ticket', image: attractionImages.schindler, icon: 'info', variant: 'schindler' },
+  { key: 'energylandia', meta: attractionCopy.fullDay, metaIcon: 'car', image: attractionImages.energylandia, icon: 'sparkle', variant: 'energylandia' },
+  { key: 'nature', meta: attractionCopy.nature, metaIcon: 'leaf', image: attractionImages.zakopane, icon: 'leaf', variant: 'nature' },
+].map((item) => {
+  const [name, description, alt] = attractionCopy.items[item.key as keyof typeof attractionCopy.items];
+  return { ...item, name, description, alt };
+});
 
 const featured = attractions[0];
 const secondary = attractions.slice(1);
@@ -123,7 +243,7 @@ const secondary = attractions.slice(1);
             <Icon name={featured.metaIcon} size={14} strokeWidth={2} />
             {featured.meta}
           </span>
-          <p>{activeLanguage === 'pl' ? 'Najbliżej Krakowa' : 'Closest to Kraków'}</p>
+          <p>{attractionCopy.closest}</p>
           <h3>{featured.name}</h3>
           <span>{featured.description}</span>
         </div>

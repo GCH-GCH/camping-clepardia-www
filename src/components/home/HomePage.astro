@@ -13,34 +13,25 @@ import QuickInquiryCTA from '@/components/home/QuickInquiryCTA.astro';
 import HomeFinalCTA from '@/components/home/HomeFinalCTA.astro';
 import ArrivalFlowSection from '@/components/home/ArrivalFlowSection.astro';
 import SiteNoticesSection from '@/components/home/SiteNoticesSection.astro';
-import HomeCustomerPath from '@/components/home/HomeCustomerPath.astro';
 
 interface Props {
   languageCode?: string;
 }
 
 const { languageCode } = Astro.props as Props;
-const richHomeLanguages = ['pl', 'en', 'de', 'it'];
-const useRichHomepage = !languageCode || richHomeLanguages.includes(languageCode);
 ---
 
 <Hero languageCode={languageCode} />
-{useRichHomepage ? (
-  <>
-    <SiteNoticesSection languageCode={languageCode} />
-    <HomeStorySection languageCode={languageCode} />
-    <WhyClepardia languageCode={languageCode} />
-    <CampingSection languageCode={languageCode} />
-    <BungalowsSection languageCode={languageCode} />
-    <PricingPreview languageCode={languageCode} />
-    <TramCenterGuide languageCode={languageCode} variant="home" />
-    <ArrivalFlowSection languageCode={languageCode} />
-    <AttractionsPreview languageCode={languageCode} />
-    <ToursSection languageCode={languageCode} />
-    <TrustSection languageCode={languageCode} />
-    <QuickInquiryCTA languageCode={languageCode} />
-    <HomeFinalCTA languageCode={languageCode} />
-  </>
-) : (
-  <HomeCustomerPath languageCode={languageCode} />
-)}
+<SiteNoticesSection languageCode={languageCode} />
+<HomeStorySection languageCode={languageCode} />
+<WhyClepardia languageCode={languageCode} />
+<CampingSection languageCode={languageCode} />
+<BungalowsSection languageCode={languageCode} />
+<PricingPreview languageCode={languageCode} />
+<TramCenterGuide languageCode={languageCode} variant="home" />
+<ArrivalFlowSection languageCode={languageCode} />
+<AttractionsPreview languageCode={languageCode} />
+<ToursSection languageCode={languageCode} />
+<TrustSection languageCode={languageCode} />
+<QuickInquiryCTA languageCode={languageCode} />
+<HomeFinalCTA languageCode={languageCode} />

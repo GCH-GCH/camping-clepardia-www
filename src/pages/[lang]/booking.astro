@@ -11,12 +11,37 @@ export function getStaticPaths() {
 }
 
 const { lang } = Astro.props;
+const seoByLanguage = {
+  fr: {
+    title: 'Demande de réservation — Camping Clepardia Cracovie',
+    description: 'Choisissez camping, bungalow ou séjour combiné et envoyez une demande à la réception de Camping Clepardia.',
+  },
+  es: {
+    title: 'Consulta de reserva — Camping Clepardia Cracovia',
+    description: 'Elige camping, bungalow o estancia combinada y envía una consulta a la recepción de Camping Clepardia.',
+  },
+  nl: {
+    title: 'Boekingsaanvraag — Camping Clepardia Krakau',
+    description: 'Kies camping, bungalow of een gecombineerd verblijf en stuur een aanvraag naar de receptie van Camping Clepardia.',
+  },
+  cs: {
+    title: 'Dotaz k rezervaci — Camping Clepardia Krakov',
+    description: 'Vyberte camping, bungalov nebo kombinovaný pobyt a odešlete dotaz recepci Camping Clepardia.',
+  },
+  sk: {
+    title: 'Dopyt k rezervácii — Camping Clepardia Krakov',
+    description: 'Vyberte camping, bungalov alebo kombinovaný pobyt a odošlite dopyt recepcii Camping Clepardia.',
+  },
+  sv: {
+    title: 'Bokningsförfrågan — Camping Clepardia Kraków',
+    description: 'Välj camping, bungalow eller kombinerad vistelse och skicka en förfrågan till Camping Clepardias reception.',
+  },
+} as const;
+
+const seo = seoByLanguage[lang as keyof typeof seoByLanguage] ?? seoByLanguage.fr;
 ---
 
-<Layout
-  title="Booking enquiry — Camping Clepardia Krakow"
-  description="Choose camping, bungalows or a combined stay and send an enquiry to Camping Clepardia reception."
->
+<Layout title={seo.title} description={seo.description}>
   <ReservationMiniGame languageCode={lang} />
   <ClientGuideTools languageCode={lang} variant="reservation" />
 </Layout>

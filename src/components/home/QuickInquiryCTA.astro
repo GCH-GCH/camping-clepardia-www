@@ -1,6 +1,5 @@
 ---
 import { getBookingLocalizedPath, getPathContext } from '@/utils/localizedLinks';
-import { resolveContentLanguage } from '@/i18n/config';
 import Icon from '@/components/ui/Icon.astro';
 
 interface Props {
@@ -9,11 +8,11 @@ interface Props {
 
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
-const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode);
+const lang = languageCode ?? pathContext.languageCode;
 const bookingLanguage = languageCode ?? pathContext.languageCode;
 const bookingHref = getBookingLocalizedPath(bookingLanguage);
 
-const copy = {
+const copyByLanguage = {
   pl: {
     kicker: 'Szybkie zapytanie',
     title: 'Zapytaj o dostępność pobytu',
@@ -110,7 +109,80 @@ const copy = {
       },
     },
   },
-}[lang];
+  fr: {
+    kicker: 'Demande rapide',
+    title: 'Demandez la disponibilité du séjour',
+    lead: 'Choisissez le type de séjour : le formulaire complet s’ouvre avec le bon contexte.',
+    button: 'Aller au formulaire',
+    cardCta: 'Ouvrir le formulaire',
+    choices: {
+      camping: { title: 'Camping', text: 'Camping-car, caravane, tente, van ou voiture avec tente de toit.', icon: 'camping' },
+      bungalow: { title: 'Bungalows', text: 'Bungalows pour 2, 3 et 4 personnes.', icon: 'bungalow' },
+      combined: { title: 'Combiné', text: 'Bungalow et emplacement camping dans une seule demande.', icon: 'UsersRound' },
+    },
+  },
+  es: {
+    kicker: 'Consulta rápida',
+    title: 'Pregunta por disponibilidad',
+    lead: 'Elige el tipo de estancia y el formulario se abre con el contexto preparado.',
+    button: 'Ir al formulario',
+    cardCta: 'Abrir formulario',
+    choices: {
+      camping: { title: 'Camping', text: 'Autocaravana, caravana, tienda, van o coche con tienda de techo.', icon: 'camping' },
+      bungalow: { title: 'Bungalows', text: 'Bungalows para 2, 3 y 4 personas.', icon: 'bungalow' },
+      combined: { title: 'Combinado', text: 'Bungalow y parcela camping en una consulta.', icon: 'UsersRound' },
+    },
+  },
+  nl: {
+    kicker: 'Snelle aanvraag',
+    title: 'Vraag naar beschikbaarheid',
+    lead: 'Kies je verblijfstype en het volledige formulier opent met context.',
+    button: 'Naar formulier',
+    cardCta: 'Open formulier',
+    choices: {
+      camping: { title: 'Camping', text: 'Camper, caravan, tent, van of auto met daktent.', icon: 'camping' },
+      bungalow: { title: 'Bungalows', text: 'Bungalows voor 2, 3 en 4 personen.', icon: 'bungalow' },
+      combined: { title: 'Gecombineerd', text: 'Bungalow en campingplaats in één aanvraag.', icon: 'UsersRound' },
+    },
+  },
+  cs: {
+    kicker: 'Rychlý dotaz',
+    title: 'Zeptejte se na dostupnost pobytu',
+    lead: 'Vyberte typ pobytu a celý formulář se otevře s připraveným kontextem.',
+    button: 'Přejít na formulář',
+    cardCta: 'Otevřít formulář',
+    choices: {
+      camping: { title: 'Kemp', text: 'Obytný vůz, karavan, stan, dodávka nebo auto se střešním stanem.', icon: 'camping' },
+      bungalow: { title: 'Bungalovy', text: 'Bungalovy pro 2, 3 a 4 osoby.', icon: 'bungalow' },
+      combined: { title: 'Kombinace', text: 'Bungalov a campingové místo v jednom dotazu.', icon: 'UsersRound' },
+    },
+  },
+  sk: {
+    kicker: 'Rýchly dopyt',
+    title: 'Opýtajte sa na dostupnosť pobytu',
+    lead: 'Vyberte typ pobytu a celý formulár sa otvorí s pripraveným kontextom.',
+    button: 'Prejsť na formulár',
+    cardCta: 'Otvoriť formulár',
+    choices: {
+      camping: { title: 'Kemp', text: 'Obytné auto, karavan, stan, dodávka alebo auto so strešným stanom.', icon: 'camping' },
+      bungalow: { title: 'Bungalovy', text: 'Bungalovy pre 2, 3 a 4 osoby.', icon: 'bungalow' },
+      combined: { title: 'Kombinácia', text: 'Bungalov a campingové miesto v jednom dopyte.', icon: 'UsersRound' },
+    },
+  },
+  sv: {
+    kicker: 'Snabb förfrågan',
+    title: 'Fråga om tillgänglighet',
+    lead: 'Välj vistelsetyp så öppnas formuläret med rätt kontext.',
+    button: 'Gå till formuläret',
+    cardCta: 'Öppna formulär',
+    choices: {
+      camping: { title: 'Camping', text: 'Husbil, husvagn, tält, van eller bil med taktält.', icon: 'camping' },
+      bungalow: { title: 'Bungalower', text: 'Bungalower för 2, 3 och 4 personer.', icon: 'bungalow' },
+      combined: { title: 'Kombinerat', text: 'Bungalow och campingplats i en förfrågan.', icon: 'UsersRound' },
+    },
+  },
+};
+const copy = copyByLanguage[lang as keyof typeof copyByLanguage] ?? copyByLanguage.en;
 
 const choices = [
   ['camping', copy.choices.camping],

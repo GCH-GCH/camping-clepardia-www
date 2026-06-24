@@ -1,7 +1,7 @@
 ---
 import ImageFrame from '@/components/ImageFrame.astro';
 import { siteAssets } from '@/data/assets';
-import { getTranslations, resolveContentLanguage } from '@/i18n/config';
+import { getTranslations } from '@/i18n/config';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && languageCode !== 'pl' ? languageCode : undefined);
-const contentLanguage = resolveContentLanguage(languageCode ?? pathContext.languageCode);
+const contentLanguage = languageCode ?? pathContext.languageCode;
 const t = getTranslations(languageCode ?? pathContext.languageCode);
 const page = t.pages.domki;
 const bungalowCards = page.highlights.map((item, index) => ({
@@ -21,7 +21,7 @@ const bungalowCards = page.highlights.map((item, index) => ({
 }));
 const pricingHref = getLocalizedPath(explicitLanguage, 'cennik');
 const contactHref = getLocalizedPath(explicitLanguage, 'kontakt');
-const mediaLabels = {
+const mediaLabelsByLanguage = {
   pl: {
     aria: 'Zdjęcia sekcji domki',
     mainAlt: 'Domki Camping Clepardia w Krakowie',
@@ -58,7 +58,62 @@ const mediaLabels = {
     bungalow4Alt: 'Bungalow 4 persone Camping Clepardia',
     bungalow4: 'Bungalow 4 persone',
   },
-}[contentLanguage];
+  fr: {
+    aria: 'Photos de la section bungalows',
+    mainAlt: 'Bungalows Camping Clepardia à Cracovie',
+    main: 'Bungalows Camping Clepardia',
+    roomAlt: 'Intérieur d’un bungalow Camping Clepardia',
+    room: 'Intérieur du bungalow',
+    bungalow4Alt: 'Bungalow 4 personnes Camping Clepardia',
+    bungalow4: 'Bungalow 4 pers.',
+  },
+  es: {
+    aria: 'Fotos de la sección bungalows',
+    mainAlt: 'Bungalows Camping Clepardia en Cracovia',
+    main: 'Bungalows Camping Clepardia',
+    roomAlt: 'Interior de bungalow Camping Clepardia',
+    room: 'Interior del bungalow',
+    bungalow4Alt: 'Bungalow 4 personas Camping Clepardia',
+    bungalow4: 'Bungalow 4 pers.',
+  },
+  nl: {
+    aria: 'Foto’s van de bungalowsectie',
+    mainAlt: 'Bungalows Camping Clepardia in Krakau',
+    main: 'Bungalows Camping Clepardia',
+    roomAlt: 'Interieur van bungalow Camping Clepardia',
+    room: 'Bungalowinterieur',
+    bungalow4Alt: '4-persoons bungalow Camping Clepardia',
+    bungalow4: '4-persoons bungalow',
+  },
+  cs: {
+    aria: 'Fotografie sekce bungalovů',
+    mainAlt: 'Bungalovy Camping Clepardia v Krakově',
+    main: 'Bungalovy Camping Clepardia',
+    roomAlt: 'Interiér bungalovu Camping Clepardia',
+    room: 'Interiér bungalovu',
+    bungalow4Alt: 'Bungalov pro 4 osoby Camping Clepardia',
+    bungalow4: 'Bungalov 4 os.',
+  },
+  sk: {
+    aria: 'Fotografie sekcie bungalovov',
+    mainAlt: 'Bungalovy Camping Clepardia v Krakove',
+    main: 'Bungalovy Camping Clepardia',
+    roomAlt: 'Interiér bungalovu Camping Clepardia',
+    room: 'Interiér bungalovu',
+    bungalow4Alt: 'Bungalov pre 4 osoby Camping Clepardia',
+    bungalow4: 'Bungalov 4 os.',
+  },
+  sv: {
+    aria: 'Bilder från bungalowsektionen',
+    mainAlt: 'Bungalower Camping Clepardia i Kraków',
+    main: 'Bungalower Camping Clepardia',
+    roomAlt: 'Interiör i bungalow Camping Clepardia',
+    room: 'Bungalowinteriör',
+    bungalow4Alt: '4-personers bungalow Camping Clepardia',
+    bungalow4: '4-personers bungalow',
+  },
+};
+const mediaLabels = mediaLabelsByLanguage[contentLanguage as keyof typeof mediaLabelsByLanguage] ?? mediaLabelsByLanguage.en;
 ---
 
 <section class="site-section bungalows-section reveal-section" id="domki">
