@@ -10,6 +10,12 @@ const title = 'Panel recepcji Camping Clepardia';
     <meta name="robots" content="noindex, nofollow, noarchive" />
     <meta name="referrer" content="no-referrer" />
     <title>{title}</title>
+    <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
+    <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=3" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=3" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3" />
+    <link rel="manifest" href="/site.webmanifest?v=3" />
   </head>
   <body>
     <main class="inbox-shell">
@@ -65,7 +71,7 @@ const title = 'Panel recepcji Camping Clepardia';
         const count = document.querySelector('[data-count]');
         const stats = document.querySelector('[data-stats]');
         const filters = Array.from(document.querySelectorAll('[data-filter]'));
-        const statusLabels = { new:'Nowe', needs_reply:'Do odpowiedzi', replied:'Odpowiedziane', confirmed:'Potwierdzone', rejected:'Odrzucone', spam:'Spam/test', archived:'Archiwum' };
+        const statusLabels = { new:'Nowe', needs_reply:'Do potwierdzenia', replied:'Odpowiedziane', confirmed:'Potwierdzone', rejected:'Odrzucone', spam:'Spam/test', archived:'Archiwum' };
         const categoryLabels = {
           urgent:'Pilne', today:'Przyjazd dzisiaj', next7:'Przyjazd ≤ 7 dni', camping:'Camping', bungalow:'Domki', combined:'Pobyt łączony',
           group:'Grupa', scouts:'Harcerze / skauci', trips:'Wycieczki', feedback:'Opinia o stronie',
@@ -77,8 +83,119 @@ const title = 'Panel recepcji Camping Clepardia';
         const esc = (value) => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
         const raw = (item) => item?.raw_payload_json && typeof item.raw_payload_json === 'object' ? item.raw_payload_json : {};
         const feedback = (item) => raw(item)?.feedback && typeof raw(item).feedback === 'object' ? raw(item).feedback : {};
+        const likedFeedback = (review) => Array.isArray(review?.liked) ? review.liked : [];
         const vehicle = (item) => item?.vehicle_details_json && typeof item.vehicle_details_json === 'object' ? item.vehicle_details_json : {};
-        const services = (item) => Array.isArray(item?.services_json) ? item.services_json : [];
+        const serviceCatalog = {
+          camper: { id:'camper', scope:'camping', label:'Kamper', price:80 },
+          van: { id:'van', scope:'camping', label:'Van', price:75 },
+          caravan: { id:'caravan', scope:'camping', label:'Przyczepa', price:60 },
+          'tent-small': { id:'tent-small', scope:'camping', label:'Namiot 1-2 os.', price:35 },
+          'tent-large': { id:'tent-large', scope:'camping', label:'Namiot 3-4 os.', price:45 },
+          'rooftop-tent': { id:'rooftop-tent', scope:'camping', label:'Auto + namiot dachowy', price:50 },
+          electricity: { id:'electricity', scope:'camping', label:'Prąd 10A', price:30 },
+          dog: { id:'dog', scope:'camping', label:'Pies', price:0 },
+          motorcycle: { id:'motorcycle', scope:'camping', label:'Motocykl', price:25 },
+          'cargo-trailer': { id:'cargo-trailer', scope:'camping', label:'Przyczepa bagażowa', price:25 },
+          bus: { id:'bus', scope:'camping', label:'Bus / ciężarówka', price:160 },
+          parking: { id:'parking', scope:'camping', label:'Samochód', price:35 },
+          'extra-car': { id:'extra-car', scope:'camping', label:'Dodatkowe auto', price:35 },
+          'bungalow-2': { id:'bungalow-2', scope:'bungalow', label:'Domek 2-os.', price:200 },
+          'bungalow-3': { id:'bungalow-3', scope:'bungalow', label:'Domek 3-os.', price:250 },
+          'bungalow-4': { id:'bungalow-4', scope:'bungalow', label:'Domek 4-os.', price:400 },
+          adults: { id:'adults', scope:'people', label:'Osoba dorosła', price:35 },
+          children: { id:'children', scope:'people', label:'Dziecko 4-14', price:20 },
+          toddlers: { id:'toddlers', scope:'people', label:'Dziecko do 4', price:0 },
+        };
+        const normalizeServiceText = (value) => String(value ?? '')
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g,'')
+          .replace(/[×x]\s*\d+/g,' ')
+          .replace(/\d+\s*(pln|zl|zł)(\s*\/\s*noc)?/g,' ')
+          .replace(/legacy|pobyt|usluga|uslugi|service|services/g,' ')
+          .replace(/[^a-z0-9]+/g,' ')
+          .trim();
+        const serviceQuantity = (service = {}) => {
+          const obj = service && typeof service === 'object' ? service : { label: service };
+          const explicit = Math.floor(Number(obj.qty || obj.quantity || obj.count || 0));
+          if (explicit > 0) return explicit;
+          const match = `${obj.label || ''} ${obj.id || ''}`.match(/[×x]\s*(\d+)/i);
+          return match ? Math.max(1, Math.floor(Number(match[1]))) : 1;
+        };
+        const servicePrice = (service = {}, catalog) => {
+          const obj = service && typeof service === 'object' ? service : { label: service };
+          const explicit = Number(obj.price ?? obj.unitPrice ?? obj.pricePln ?? obj.price_pln);
+          if (Number.isFinite(explicit) && explicit >= 0) return explicit;
+          const match = String(obj.label || obj.id || '').match(/(\d+(?:[.,]\d+)?)\s*(?:PLN|zł|zl)/i);
+          if (match) return Math.max(0, Number(match[1].replace(',','.')) || 0);
+          return catalog?.price ?? 0;
+        };
+        const canonicalServiceId = (service = {}) => {
+          const obj = service && typeof service === 'object' ? service : { label: service };
+          const text = normalizeServiceText([obj.scope, obj.id, obj.label, obj.name, obj.title].filter(Boolean).join(' '));
+          if (/electric|prad|power|10a/.test(text)) return 'electricity';
+          if (/cargo.*trailer|bagazow|przyczepa bagaz/.test(text)) return 'cargo-trailer';
+          if (/rooftop|dachow/.test(text)) return 'rooftop-tent';
+          if (/tent.*small|small.*tent|namiot.*1.*2|1.*2.*namiot/.test(text)) return 'tent-small';
+          if (/tent.*large|large.*tent|namiot.*3.*4|3.*4.*namiot/.test(text)) return 'tent-large';
+          if (/bungalow.*2|domek.*2|2.*os/.test(text)) return 'bungalow-2';
+          if (/bungalow.*3|domek.*3|3.*os/.test(text)) return 'bungalow-3';
+          if (/bungalow.*4|domek.*4|4.*os/.test(text)) return 'bungalow-4';
+          if (/camper|kamper/.test(text)) return 'camper';
+          if (/\bvan\b/.test(text)) return 'van';
+          if (/caravan|przyczep|wohnwagen|roulotte/.test(text)) return 'caravan';
+          if (/dog|pies|hund|chien|perro|pes/.test(text)) return 'dog';
+          if (/motorcycle|motocykl/.test(text)) return 'motorcycle';
+          if (/\bbus\b|ciezar|truck|lkw/.test(text)) return 'bus';
+          if (/extra.*car|dodatk.*auto/.test(text)) return 'extra-car';
+          if (/parking|samochod|auto|car\b/.test(text)) return 'parking';
+          if (/adult|dorosl|erwachsene|adulti/.test(text)) return 'adults';
+          if (/child|dziec|kinder|bambin/.test(text) && !/toddl|do 4|under 4/.test(text)) return 'children';
+          if (/toddl|do 4|under 4|infant/.test(text)) return 'toddlers';
+          return normalizeServiceText(obj.id || obj.label || obj.name || obj.title);
+        };
+        const serviceBuckets = (item) => {
+          const payload = raw(item);
+          const toArray = (value) => Array.isArray(value) ? value.filter(Boolean) : [];
+          return [
+            { source:'services_json', rank:50, items:toArray(item?.services_json) },
+            { source:'payload_services', rank:40, items:toArray(payload.services) },
+            { source:'summary_services', rank:30, items:toArray(payload.summary?.services) },
+            { source:'stay_services', rank:30, items:toArray(payload.stay?.services) },
+            { source:'legacy', rank:10, items:toArray(payload.addons).map((addon,index)=>({ id:`legacy-${index + 1}`, scope:'legacy', label:addon })) },
+          ];
+        };
+        const normalizeInquiryServices = (item) => {
+          const normalized = new Map();
+          const addService = (service, source, rank) => {
+            const obj = service && typeof service === 'object' ? service : { label: service };
+            const canonicalId = canonicalServiceId(obj);
+            if (!canonicalId) return;
+            const catalog = serviceCatalog[canonicalId];
+            const qty = serviceQuantity(obj);
+            if (qty <= 0) return;
+            const entry = {
+              id: catalog?.id || String(obj.id || canonicalId).slice(0,80),
+              scope: catalog?.scope || String(obj.scope || (source === 'legacy' ? 'pobyt' : 'pobyt')).slice(0,40),
+              label: catalog?.label || String(obj.label || obj.name || obj.title || obj.id || canonicalId).slice(0,120),
+              qty,
+              price: servicePrice(obj, catalog),
+              rank,
+            };
+            const key = `${entry.scope}:${canonicalId}`;
+            const existing = normalized.get(key);
+            if (!existing || existing.rank < rank) {
+              normalized.set(key, entry);
+              return;
+            }
+            if (existing.rank === rank) {
+              normalized.set(key, { ...existing, qty:Math.max(existing.qty, entry.qty), price:Math.max(existing.price, entry.price) });
+            }
+          };
+          serviceBuckets(item).forEach((bucket)=>bucket.items.forEach((service)=>addService(service,bucket.source,bucket.rank)));
+          return [...normalized.values()].map(({ rank, ...service }) => service).slice(0,40);
+        };
+        const services = normalizeInquiryServices;
         const trips = (item) => Array.isArray(item?.trips_interest_json) ? item.trips_interest_json : [];
         const consents = (item) => item?.consents_json && typeof item.consents_json === 'object' ? item.consents_json : {};
         const yesNo = (value) => value ? 'Tak' : 'Nie';
@@ -159,7 +276,7 @@ const title = 'Panel recepcji Camping Clepardia';
             `Rejestracja: ${item.vehicle_registration || '-'}`, `Pojazd: ${v.summary || [v.model,v.length,v.width,v.height,v.weight].filter(Boolean).join(', ') || '-'}`,
             `Ciężki pojazd: ${yesNo(v.large)}, asfalt: ${yesNo(v.asphaltNeeded)}`,
             `Wycieczki: ${trips(item).join(', ') || '-'}`, `Specjalne potrzeby: ${item.special_needs || '-'}`,
-            `Opinia: ${feedback(item).rating ? `${feedback(item).rating}/5` : '-'}; podobało się: ${(feedback(item).liked || []).join(', ') || '-'}; informacje: ${feedback(item).easyInfo || '-'}; formularz: ${feedback(item).easyForm || '-'}; sugestia: ${feedback(item).improve || '-'}`,
+            `Opinia: ${feedback(item).rating ? `${feedback(item).rating}/5` : '-'}; podobało się: ${likedFeedback(feedback(item)).join(', ') || '-'}; informacje: ${feedback(item).easyInfo || '-'}; formularz: ${feedback(item).easyForm || '-'}; sugestia: ${feedback(item).improve || '-'}`,
             `Zgody: cisza nocna ${c.quiet ? 'OK':'BRAK'}, kontakt ${c.contact ? 'OK':'BRAK'}, prywatność ${c.privacy ? 'OK':'BRAK'}`,
             `Mail: ${item.mail_provider || 'none'} / ${item.mail_delivered ? 'dostarczony':'niedostarczony'}`, `Błąd maila: ${item.mail_error || '-'}`,
             `Wiadomość: ${item.message || '-'}`, `Notatka: ${item.notes || '-'}`,
@@ -212,37 +329,36 @@ const title = 'Panel recepcji Camping Clepardia';
         const serviceCards = (item) => services(item).map((service) => `
           <li><span aria-hidden="true">${serviceIcon(service)}</span><div><strong>${esc(service.label || service.id || 'Usługa')}</strong><small>${esc(service.scope || 'pobyt')}</small></div><b>× ${esc(service.qty || 1)}</b><em>${esc(Number(service.price || 0) * Math.max(1,Number(service.qty || 1)))} PLN / noc</em></li>
         `).join('') || '<li class="empty-line">Brak usług</li>';
-        const card = (item) => {
+        const stars = (rating) => {
+          const score = Math.max(0, Math.min(5, Number(rating) || 0));
+          return Array.from({ length:5 }, (_,index)=>index < score ? '★' : '☆').join('');
+        };
+        const debugText = (item) => JSON.stringify({
+          raw_payload_json:item.raw_payload_json,
+          services_json:item.services_json,
+          normalized_services:services(item),
+          vehicle_details_json:item.vehicle_details_json,
+          consents_json:item.consents_json,
+        }, null, 2);
+        const warningsFor = (item, categories) => [
+          categories.includes('urgent') ? '<p>⏰ Przyjazd dziś lub jutro — sprawdź w pierwszej kolejności.</p>' : '',
+          categories.includes('scouts') ? '<p>⚜️ Wykryto możliwą grupę skautów/harcerzy. Sprawdź zasady przyjmowania grup przed potwierdzeniem.</p>' : '',
+          categories.includes('group') ? `<p>👥 Możliwa grupa — sprawdź liczbę osób (${guestCount(item) || '?'}), pojazdów i zasady pobytu.</p>` : '',
+          categories.includes('mailFailed') ? '<p>✉️ Mail automatyczny nie został dostarczony. Użyj „Kopiuj treść maila” albo „Otwórz mailto”.</p>' : '',
+          categories.includes('feedback') ? '<p>⭐ Klient zostawił opinię o nowej stronie.</p>' : '',
+        ].filter(Boolean).join('');
+        const feedbackSection = (item, categories) => {
+          if (!categories.includes('feedback')) return '';
+          const review = feedback(item);
+          return `<section class="detail-card detail-card--wide feedback-card"><h3>⭐ Opinia o stronie</h3><p class="feedback-stars" aria-label="Ocena ${esc(review.rating || 0)} z 5">${stars(review.rating)}</p><p><strong>${review.rating ? `${esc(review.rating)}/5` : 'Bez oceny liczbowej'}</strong></p><small>Podobało się: ${esc(likedFeedback(review).join(', ') || '-')}</small><small>Łatwo znaleźć informacje: ${esc(review.easyInfo || '-')} · Prostota formularza: ${esc(review.easyForm || '-')}</small><p class="message-copy">${esc(review.improve || 'Brak dodatkowej sugestii.')}</p></section>`;
+        };
+        const detailsBody = (item) => {
           const v = vehicle(item);
           const payload = raw(item);
           const c = consents(item);
-          const review = feedback(item);
           const categories = categoryKeys(item);
-          const categoryBadges = categories.map((key)=>`<span class="category-badge category-${esc(key)}">${esc(categoryLabels[key] || key)}</span>`).join('');
-          const warnings = [
-            categories.includes('urgent') ? '<p>⏰ Przyjazd dziś lub jutro — sprawdź w pierwszej kolejności.</p>' : '',
-            categories.includes('scouts') ? '<p>⚜️ Wykryto możliwą grupę skautów/harcerzy. Sprawdź zasady przyjmowania grup przed potwierdzeniem.</p>' : '',
-            categories.includes('group') ? `<p>👥 Możliwa grupa — sprawdź liczbę osób (${guestCount(item) || '?'}), pojazdów i zasady pobytu.</p>` : '',
-            categories.includes('mailFailed') ? '<p>✉️ Mail automatyczny nie został dostarczony. Użyj „Kopiuj treść maila” albo „Otwórz mailto”.</p>' : '',
-            categories.includes('feedback') ? '<p>⭐ Klient zostawił opinię o nowej stronie.</p>' : '',
-          ].filter(Boolean).join('');
-          const highSeason = Boolean(payload.highSeasonCampingInfo) || (isSummer(item) && /camping|kamper|van|namiot|przyczep|bus/i.test(item.stay_type || ''));
-          return `<article class="inquiry-card" data-id="${esc(item.id)}">
-            <header>
-              <div><div class="card-badges"><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span><span class="mail-badge ${item.mail_delivered ? 'is-ok':'is-failed'}">${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</span>${categoryBadges}${highSeason ? '<span class="season-badge">Lipiec/sierpień — camping bez rezerwacji</span>':''}</div><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.nights || 0)} nocy</p></div>
-              <div class="card-date"><small>Dodano</small><strong>${esc(formatDate(item.created_at,true))}</strong><code>${esc(item.id)}</code></div>
-            </header>
-            <div class="inquiry-card__summary">
-              <span>🏕️ ${esc(item.stay_type || '-')}</span>
-              <span>📅 ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</span>
-              <span>🌍 ${esc(item.country || '-')} / ${esc(item.language || '-')}</span>
-              <span>✉️ ${item.mail_delivered ? 'mail OK':'mail niedostarczony'}</span>
-              ${item.email ? `<a href="mailto:${esc(item.email)}">${esc(item.email)}</a>` : ''}
-              ${item.phone ? `<a href="tel:${esc(item.phone)}">${esc(item.phone)}</a>` : ''}
-            </div>
-            <details class="inquiry-card__details">
-              <summary><span>Rozwiń szczegóły zapytania</span><small>Dane klienta, usługi, wycieczki, feedback, mail i notatki recepcji</small></summary>
-              ${warnings ? `<aside class="crm-warnings">${warnings}</aside>` : ''}
+          const warnings = warningsFor(item, categories);
+          return `${warnings ? `<aside class="crm-warnings">${warnings}</aside>` : ''}
             <div class="details-grid">
               <section class="detail-card"><h3>📇 Kontakt</h3><p>${item.email ? `<a href="mailto:${esc(item.email)}">${esc(item.email)}</a>`:'-'}<br>${item.phone ? `<a href="tel:${esc(item.phone)}">${esc(item.phone)}</a>`:'-'}</p><small>${esc(item.country || '-')} · ${esc(item.language || '-')}</small></section>
               <section class="detail-card"><h3>📅 Pobyt</h3><p><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><br>${esc(item.nights || 0)} nocy</p><small>Przyjazd: ${esc(payload.arrivalTime || 'jeszcze nie wiem')}</small></section>
@@ -253,12 +369,35 @@ const title = 'Panel recepcji Camping Clepardia';
               <section class="detail-card"><h3>♿ Specjalne potrzeby</h3><p>${esc(item.special_needs || 'Brak')}</p></section>
               <section class="detail-card"><h3>✅ Zgody</h3><ul class="consent-list"><li>Cisza nocna: <b>${c.quiet ? 'OK':'BRAK'}</b></li><li>Kontakt: <b>${c.contact ? 'OK':'BRAK'}</b></li><li>Polityka prywatności: <b>${c.privacy ? 'OK':'BRAK'}</b></li></ul></section>
               <section class="detail-card detail-card--wide"><h3>💬 Wiadomość</h3><p class="message-copy">${esc(item.message || 'Brak wiadomości')}</p></section>
-              ${categories.includes('feedback') ? `<section class="detail-card detail-card--wide feedback-card"><h3>⭐ Opinia o stronie</h3><p><strong>${review.rating ? `${esc(review.rating)}/5` : 'Bez oceny liczbowej'}</strong></p><small>Podobało się: ${esc((review.liked || []).join(', ') || '-')}</small><small>Łatwo znaleźć informacje: ${esc(review.easyInfo || '-')} · Prostota formularza: ${esc(review.easyForm || '-')}</small><p class="message-copy">${esc(review.improve || 'Brak dodatkowej sugestii.')}</p></section>` : ''}
+              ${feedbackSection(item, categories)}
               <section class="detail-card detail-card--wide mail-status-card ${item.mail_delivered ? 'is-ok':'is-failed'}"><h3>✉️ Status maila</h3><p><strong>${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</strong> · provider: ${esc(item.mail_provider || 'none')}</p><small>${esc(item.mail_error || (item.mail_delivered ? 'Brak błędu.':'Brak szczegółów błędu.'))}</small>${item.mail_delivered ? '' : '<p>Zapytanie jest zapisane w panelu recepcji. Skopiuj treść maila lub użyj przycisku mailto.</p>'}<div class="inline-actions"><button type="button" data-copy-mail>Kopiuj treść maila</button><a href="mailto:clepardia@gmail.com?subject=${encodeURIComponent(`Zapytanie ${item.id}`)}&body=${encodeURIComponent(mailText(item))}">Otwórz Gmail / mailto</a></div></section>
-              <details class="technical-data"><summary>Dane techniczne</summary><pre>${esc(JSON.stringify({raw_payload_json:item.raw_payload_json,services_json:item.services_json,vehicle_details_json:item.vehicle_details_json,consents_json:item.consents_json},null,2))}</pre></details>
+              <details class="technical-data"><summary>Dane techniczne</summary><pre data-raw-debug>Otwórz panel techniczny, żeby załadować raw JSON.</pre></details>
             </div>
             <div class="edit-row"><label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${item.status === value ? 'selected':''}>${label}</option>`).join('')}</select></label><label class="note"><span>Notatka recepcji</span><textarea data-notes rows="3">${esc(item.notes || '')}</textarea></label><button type="button" data-save>Zapisz status i notatkę</button></div>
-            <div class="card-actions"><button type="button" data-quick-status="needs_reply">Do odpowiedzi</button><button type="button" data-quick-status="confirmed">Potwierdź</button><button type="button" data-quick-status="rejected">Odrzuć</button><button type="button" data-copy-summary>Kopiuj podsumowanie</button><button type="button" data-copy-email ${item.email ? '':'disabled'}>Kopiuj email</button><button type="button" data-copy-phone ${item.phone ? '':'disabled'}>Kopiuj telefon</button><button type="button" data-copy-mail>Kopiuj treść maila</button><button type="button" data-copy-id>Kopiuj link / ID</button>${item.email ? `<a href="mailto:${esc(item.email)}">Otwórz mailto</a>`:''}${item.phone ? `<a href="tel:${esc(item.phone)}">Otwórz tel</a>`:''}<button type="button" data-quick-status="archived">Archiwizuj</button><button type="button" data-quick-status="spam">Spam/test</button></div>
+            <div class="card-actions"><button type="button" data-quick-status="needs_reply">Do potwierdzenia</button><button type="button" data-quick-status="confirmed">Potwierdź</button><button type="button" data-quick-status="rejected">Odrzuć</button><button type="button" data-copy-summary>Kopiuj podsumowanie</button><button type="button" data-copy-email ${item.email ? '':'disabled'}>Kopiuj email</button><button type="button" data-copy-phone ${item.phone ? '':'disabled'}>Kopiuj telefon</button><button type="button" data-copy-mail>Kopiuj treść maila</button><button type="button" data-copy-id>Kopiuj link / ID</button>${item.email ? `<a href="mailto:${esc(item.email)}">Otwórz mailto</a>`:''}${item.phone ? `<a href="tel:${esc(item.phone)}">Otwórz tel</a>`:''}<button type="button" data-quick-status="archived">Archiwizuj</button><button type="button" data-quick-status="spam">Spam/test</button></div>`;
+        };
+        const card = (item) => {
+          const payload = raw(item);
+          const categories = categoryKeys(item);
+          const categoryBadges = categories.map((key)=>`<span class="category-badge category-${esc(key)}">${esc(categoryLabels[key] || key)}</span>`).join('');
+          const highSeason = Boolean(payload.highSeasonCampingInfo) || (isSummer(item) && /camping|kamper|van|namiot|przyczep|bus/i.test(item.stay_type || ''));
+          return `<article class="inquiry-card" data-id="${esc(item.id)}">
+            <header>
+              <div><div class="card-badges"><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span><span class="mail-badge ${item.mail_delivered ? 'is-ok':'is-failed'}">${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</span>${categoryBadges}${highSeason ? '<span class="season-badge">Lipiec/sierpień — camping bez rezerwacji</span>':''}</div><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.nights || 0)} nocy</p></div>
+              <div class="card-date"><small>Dodano</small><strong>${esc(formatDate(item.created_at,true))}</strong><code>${esc(item.id)}</code></div>
+            </header>
+            <div class="inquiry-card__summary">
+              <span>🏕️ ${esc(item.stay_type || '-')}</span>
+              <span>📅 ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</span>
+              <span>🌍 ${esc(item.country || '-')} / ${esc(item.language || '-')}</span>
+              <span>💰 ${esc(item.estimated_total_pln ?? '-')} PLN</span>
+              <span>✉️ ${item.mail_delivered ? 'mail OK':'mail niedostarczony'}</span>
+              ${item.email ? `<a href="mailto:${esc(item.email)}">${esc(item.email)}</a>` : ''}
+              ${item.phone ? `<a href="tel:${esc(item.phone)}">${esc(item.phone)}</a>` : ''}
+            </div>
+            <details class="inquiry-card__details">
+              <summary><span>Rozwiń szczegóły zapytania</span><small>Dane klienta, usługi, wycieczki, feedback, mail i notatki recepcji</small></summary>
+              <div data-details-body hidden></div>
             </details>
           </article>`;
         };
@@ -268,7 +407,7 @@ const title = 'Panel recepcji Camping Clepardia';
           if (stats) {
             const statItems = [
               ['Nowe', inquiries.filter((item)=>item.status === 'new').length],
-              ['Do odpowiedzi', inquiries.filter((item)=>['new','needs_reply'].includes(item.status)).length],
+              ['Do potwierdzenia', inquiries.filter((item)=>['new','needs_reply'].includes(item.status)).length],
               ['Mail niedostarczony', inquiries.filter((item)=>!item.mail_delivered).length],
               ['Wycieczki', inquiries.filter((item)=>categoryKeys(item).includes('trips')).length],
               ['Opinie', inquiries.filter((item)=>categoryKeys(item).includes('feedback')).length],
@@ -328,6 +467,35 @@ const title = 'Panel recepcji Camping Clepardia';
         document.querySelector('[data-refresh]')?.addEventListener('click',load);
         document.querySelector('[data-logout]')?.addEventListener('click',()=>{sessionStorage.removeItem(storageKey);location.reload();});
         filters.forEach((filter)=>filter.addEventListener(filter instanceof HTMLInputElement && filter.type === 'search' ? 'input':'change',render));
+        const findItemForNode = (node) => inquiries.find((entry)=>String(entry.id) === String(node?.dataset?.id));
+        const hydrateDetails = (details) => {
+          if (!(details instanceof HTMLDetailsElement) || !details.classList.contains('inquiry-card__details') || !details.open) return;
+          const node = details.closest('[data-id]');
+          const body = details.querySelector('[data-details-body]');
+          if (!(node instanceof HTMLElement) || !(body instanceof HTMLElement) || body.dataset.rendered === 'true') return;
+          const item = findItemForNode(node);
+          if (!item) return;
+          body.innerHTML = detailsBody(item);
+          body.hidden = false;
+          body.dataset.rendered = 'true';
+        };
+        const hydrateDebug = (details) => {
+          if (!(details instanceof HTMLDetailsElement) || !details.classList.contains('technical-data') || !details.open) return;
+          const node = details.closest('[data-id]');
+          const pre = details.querySelector('[data-raw-debug]');
+          if (!(node instanceof HTMLElement) || !(pre instanceof HTMLPreElement) || pre.dataset.rendered === 'true') return;
+          const item = findItemForNode(node);
+          if (!item) return;
+          pre.textContent = debugText(item);
+          pre.dataset.rendered = 'true';
+        };
+        list?.addEventListener('toggle',(event)=>{
+          const target = event.target;
+          if (target instanceof HTMLDetailsElement) {
+            hydrateDetails(target);
+            hydrateDebug(target);
+          }
+        }, true);
         list?.addEventListener('click',(event)=>{
           const target = event.target;
           if (!(target instanceof Element)) return;
@@ -435,6 +603,21 @@ const title = 'Panel recepcji Camping Clepardia';
   .inquiry-card__details:not([open]) .card-actions,
   .inquiry-card__details:not([open]) .crm-warnings {
     display: none;
+  }
+
+  .feedback-stars {
+    color: #ffe492;
+    font-size: 1.35rem;
+    letter-spacing: .08em;
+  }
+
+  .service-list li.empty-line {
+    display: block;
+    color: rgba(239,251,243,.62);
+  }
+
+  [data-details-body] {
+    min-width: 0;
   }
 
   @media (max-width: 720px) {

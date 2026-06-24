@@ -44,6 +44,7 @@ const resolvedOgDescription = ogDescription ?? description;
 const resolvedOgImage = resolveOgImage(ogImage);
 const absoluteOgImage = withOrigin(resolvedOgImage, siteOrigin);
 const socialImageAlt = 'Camping Clepardia in Krakow';
+const faviconVersion = 'v=3';
 const campgroundJsonLd = getCampgroundJsonLd({
   image: absoluteOgImage,
   pageUrl: seoLanguageMeta.canonicalHref,
@@ -89,12 +90,12 @@ const campgroundJsonLd = getCampgroundJsonLd({
 		<link rel="preload" as="image" href={logoMain} type="image/svg+xml" />
 		{shouldPreloadMobileHero && <link rel="preload" as="image" href={siteAssets.hero.mobile} type="image/webp" fetchpriority="high" media="(max-width: 767px)" />}
 		{shouldPreloadHero && <link rel="preload" as="image" href={siteAssets.hero.desktop} type="image/webp" fetchpriority="high" media="(min-width: 768px)" />}
-		<link rel="icon" href="/favicon.ico" sizes="any" />
-		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-		<link rel="manifest" href="/site.webmanifest" />
+		<link rel="icon" href={`/favicon.ico?${faviconVersion}`} sizes="any" />
+		<link rel="icon" href={`/favicon.svg?${faviconVersion}`} type="image/svg+xml" />
+		<link rel="icon" type="image/png" sizes="32x32" href={`/favicon-32x32.png?${faviconVersion}`} />
+		<link rel="icon" type="image/png" sizes="16x16" href={`/favicon-16x16.png?${faviconVersion}`} />
+		<link rel="apple-touch-icon" sizes="180x180" href={`/apple-touch-icon.png?${faviconVersion}`} />
+		<link rel="manifest" href={`/site.webmanifest?${faviconVersion}`} />
 		
 		<!-- Preconnect -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />

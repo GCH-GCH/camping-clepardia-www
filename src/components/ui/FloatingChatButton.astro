@@ -304,7 +304,356 @@ const finalCampyCopy = {
     },
   },
 };
-const finalCampy = finalCampyCopy[pathContext.languageCode as keyof typeof finalCampyCopy] ?? finalCampyCopy.en;
+const campyCriticalCopy = {
+  pl: {
+    answers: {
+      lateArrival: 'Recepcja jest czynna 9:00–21:00, a brama 8:00–22:00. Przy przyjeździe po 21:00 skontaktuj się wcześniej z recepcją i ustal szczegóły przed podróżą.',
+      summerCamping: 'W lipcu i sierpniu rezerwujemy z wyprzedzeniem tylko domki. Camping dla kamperów, vanów, namiotów i przyczep działa według kolejności przyjazdu — najlepiej być około 12:00.',
+      arrivalTiming: 'Na camping najlepiej przyjechać około 12:00, bo check-out z campingu jest do 12:00 i wtedy zwalniają się miejsca. Domki: check-in od 16:00, check-out do 11:00.',
+      evCharging: 'Prąd 10A na stanowiskach służy do wyposażenia kampera lub przyczepy. Nie wolno ładować aut elektrycznych ani hybryd plug-in — zaplanuj publiczną ładowarkę.',
+      bungalowTowels: 'W domkach zabierz własne ręczniki, kosmetyki i rzeczy osobiste. Dostępne są domki 2-, 3- i 4-osobowe.',
+      heavyVehicle: 'Ciężkie pojazdy muszą stać na utwardzonej lub asfaltowej powierzchni, nie na trawie. Kampery stoją głównie na płytach betonowych — przy dużym busie napisz do recepcji.',
+      greeting: 'Cześć! Pomogę z rezerwacją, cenami, dojazdem tramwajem 18, Google Maps, domkami, zasadami pobytu i wycieczkami. O co chcesz zapytać?',
+    },
+  },
+  en: {
+    answers: {
+      lateArrival: 'Reception is open 09:00–21:00 and the gate is open 08:00–22:00. For arrival after 21:00, contact reception in advance before you travel.',
+      summerCamping: 'In July and August only bungalows can be booked in advance. Camping pitches for campers, vans, tents and caravans are first come, first served — arriving around 12:00 is best.',
+      arrivalTiming: 'For camping, arrive around 12:00 because camping check-out is at 12:00 and pitches start freeing up. Bungalows: check-in from 16:00, check-out by 11:00.',
+      evCharging: 'The 10A camping electricity is for camper/caravan equipment. EVs and plug-in hybrids may not be charged on pitches — please use a public charging station.',
+      bungalowTowels: 'For bungalows, please bring your own towels, cosmetics and personal items. Bungalows are 2-, 3- and 4-person units.',
+      heavyVehicle: 'Heavy vehicles must use hardened or asphalt surfaces, not grass. Camper pitches are mainly concrete slabs — contact reception if your van or bus is large or heavy.',
+      greeting: 'Hi! I can help with booking, prices, tram 18, Google Maps, bungalows, stay rules and trips from Krakow. What would you like to know?',
+    },
+  },
+  de: {
+    actions: {
+      bookStay:'Aufenthalt buchen', siteSearch:'Website durchsuchen', registration:'Was brauche ich zur Anmeldung?', camperPrice:'Preis für Wohnmobil', stayCompare:'Camping oder Bungalows?', combinedStay:'Camping + Bungalow', lateCheckout:'Später Check-out', cityCamping:'Camping in der Stadt',
+      currency:'EUR / USD / GBP', campingPricing:'Campingpreise', powerDog:'Strom und Hund', dog:'Hund erlaubt?', bungalowOptions:'Bungalows 2/3/4 Pers.', centerTransit:'Ins Zentrum fahren', maps:'Google Maps', sctEtoll:'SCT / e-TOLL', tramTickets:'Straßenbahntickets',
+      dayPlan:'Tag in Krakau planen', oneNightPlan:'Plan für 1 Nacht', twoNightPlan:'Plan für 2 Nächte', threeNightPlan:'Plan für 3 Nächte', stayLength:'Wie lange bleiben?', currentNotices:'Aktuelles in Krakau', familyAttractions:'Mit Kindern', waterRelax:'Wasser und Erholung',
+      wawel:'Wawel', wieliczka:'Wieliczka', auschwitz:'Auschwitz', schindler:'Schindler-Fabrik', toursFromKrakow:'Ausflüge ab Krakau', quiet:'Nachtruhe', reception:'Rezeption kontaktieren', receptionHours:'Öffnungszeiten Rezeption',
+    },
+    answers: {
+      registration:'Zur Anmeldung an der Rezeption bitte ein Ausweisdokument bereithalten. Bei Auto, Wohnmobil, Van oder Wohnwagen brauchen wir auch das Kennzeichen; beim Anhänger das Anhängerkennzeichen.',
+      prepareArrival:'Vor der Anreise: Ausweis, Fahrzeug- oder Anhängerkennzeichen, Google Maps, Kabel/Adapter für 10A-Strom und Nachtruhe 22:00–07:00 einplanen.',
+      camperPrice:`Wohnmobil: ${stayPrice('camper')} PLN / Nacht. Erwachsene ${pricingConfig.people.adults.price} PLN, Kinder 4–14 ${pricingConfig.people.children.price} PLN, Strom ${addonPrice('electricity')} PLN, Hund ${addonPrice('dog')} PLN.`,
+      campingPricing:`Campingpreise bestehen aus Fahrzeug/Zelt, Personen und Extras. Beispiel: Wohnmobil ${stayPrice('camper')} PLN / Nacht, Erwachsener ${pricingConfig.people.adults.price} PLN, Strom ${addonPrice('electricity')} PLN, Hund ${addonPrice('dog')} PLN.`,
+      powerDog:'10A-Strom kostet 30 PLN / Nacht. Hund: 0 PLN. Bitte den Hund betreuen, anleinen und sauber machen.',
+      dog:'Ja, Hunde sind willkommen. Der Hund kostet 0 PLN. Bitte an der Leine führen und hinter dem Hund aufräumen.',
+      bungalowOptions:'Bungalows gibt es nur für 2, 3 oder 4 Personen. Für Bungalows bitte eigene Handtücher, Kosmetik und persönliche Sachen mitbringen.',
+      centerTransit:'Die Haltestelle Górnickiego ist ca. 40 m vom Camping entfernt. Straßenbahn 18 fährt in ca. 14 Minuten zum Stary Kleparz; zur Altstadt sind es ca. 5 Minuten zu Fuß. Nutzen Sie Google Maps oder Jakdojade.',
+      maps:'Wir empfehlen Google Maps, weil sich die Zufahrt 2022 geändert hat und ältere Navigationen falsch führen können.',
+      quiet:'Nachtruhe ist 22:00–07:00. Camping Clepardia ist kein Partyplatz, sondern ein ruhiger Stadtcampingplatz; Stadtgeräusche sind möglich.',
+      cityCamping:'Camping Clepardia liegt in Krakau: nah an Straßenbahn, Geschäften und Sehenswürdigkeiten. Es ist kein Waldcamping, sondern ein grüner Stadtcampingplatz.',
+      reception:'Rezeption: +48 795 294 486, E-Mail clepardia@gmail.com. Für Aufenthalt bitte Kontakt oder Buchungsanfrage nutzen.',
+      receptionHours:'Die Rezeption ist 09:00–21:00 geöffnet, das Tor 08:00–22:00. Bei Anreise nach 21:00 bitte vorher die Rezeption kontaktieren.',
+      gateHours:'Rezeption 09:00–21:00, Tor 08:00–22:00. Bei Anreise nach 21:00 bitte vorher Kontakt aufnehmen.',
+      lateArrival:'Bei Anreise nach 21:00 bitte vorher die Rezeption kontaktieren. Rezeption: 09:00–21:00, Tor: 08:00–22:00.',
+      summerCamping:'Im Juli und August können nur Bungalows im Voraus reserviert werden. Campingplätze für Wohnmobile, Vans, Zelte und Wohnwagen sind nach Ankunftsreihenfolge — am besten gegen 12:00 anreisen.',
+      arrivalTiming:'Für Camping am besten gegen 12:00 anreisen, weil Check-out bis 12:00 ist. Bungalows: Check-in ab 16:00, Check-out bis 11:00.',
+      evCharging:'10A-Strom ist für Wohnmobil-/Wohnwagen-Ausstattung. Elektroautos und Plug-in-Hybride dürfen am Stellplatz nicht geladen werden.',
+      bungalowTowels:'In Bungalows bitte eigene Handtücher, Kosmetik und persönliche Sachen mitbringen.',
+      heavyVehicle:'Schwere Fahrzeuge müssen auf befestigtem oder asphaltiertem Untergrund stehen, nicht auf Gras. Wohnmobile stehen meist auf Betonplatten.',
+      wieliczka:'Wieliczka ist ein klassischer Ausflug ab Krakau. Die Rezeption kann Hinweise geben; aktuelle Verfügbarkeit bitte über den Ausflugs-Link prüfen.',
+      auschwitz:'Auschwitz-Birkenau ist ein ernster Tagesausflug. Tickets, Regeln und Transport bitte im Voraus prüfen.',
+      toursFromKrakow:'Sie können nach Ausflügen nach Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców, Energylandia, Park Wodny, Bagry, Kryspinów, Altstadt und Wawel fragen.',
+      waterRelax:'Für Wasser und Erholung: Park Wodny Kraków, Bagry oder Kryspinów — je nach Wetter und Saison.',
+      familyAttractions:'Mit Kindern passen oft Altstadt, Wawel, Wieliczka, Ojców oder Energylandia.',
+      sctEtoll:'Vor der Anreise aktuelle Krakauer SCT- und e-TOLL-Regeln prüfen, besonders bei größeren Fahrzeugen.',
+      greeting:'Hallo! Ich helfe mit Buchung, Preisen, Tram 18, Google Maps, Bungalows, Regeln und Ausflügen. Was möchten Sie wissen?',
+    },
+  },
+  it: {
+    actions: {
+      bookStay:'Prenota il soggiorno', siteSearch:'Cerca nel sito', registration:'Cosa serve al check-in?', camperPrice:'Prezzo camper', stayCompare:'Camping o bungalow?', combinedStay:'Camping + bungalow', lateCheckout:'Check-out più tardi', cityCamping:'Camping in città',
+      currency:'EUR / USD / GBP', campingPricing:'Prezzi camping', powerDog:'Corrente e cane', dog:'Posso portare il cane?', bungalowOptions:'Bungalow 2/3/4 pers.', centerTransit:'Come arrivare in centro', maps:'Google Maps', sctEtoll:'SCT / e-TOLL', tramTickets:'Biglietti tram',
+      dayPlan:'Pianifica un giorno', oneNightPlan:'Piano 1 notte', twoNightPlan:'Piano 2 notti', threeNightPlan:'Piano 3 notti', stayLength:'Quanti giorni?', currentNotices:'Attualità a Cracovia', familyAttractions:'Con bambini', waterRelax:'Acqua e relax',
+      wawel:'Wawel', wieliczka:'Wieliczka', auschwitz:'Auschwitz', schindler:'Fabbrica di Schindler', toursFromKrakow:'Tour da Cracovia', quiet:'Silenzio notturno', reception:'Contatta reception', receptionHours:'Orari reception',
+    },
+    answers: {
+      registration:'Alla reception prepara un documento d’identità. Se arrivi con auto, camper, van o roulotte serve anche il numero di targa; per la roulotte indica la targa della roulotte.',
+      prepareArrival:'Prima dell’arrivo: documento, targa del veicolo o rimorchio, Google Maps, cavo/adattatore per corrente 10A e silenzio notturno 22:00–07:00.',
+      camperPrice:`Camper: ${stayPrice('camper')} PLN / notte. Adulto ${pricingConfig.people.adults.price} PLN, bambino 4–14 ${pricingConfig.people.children.price} PLN, corrente ${addonPrice('electricity')} PLN, cane ${addonPrice('dog')} PLN.`,
+      campingPricing:`Il prezzo camping include veicolo/tenda, persone ed extra. Esempio: camper ${stayPrice('camper')} PLN / notte, adulto ${pricingConfig.people.adults.price} PLN, corrente ${addonPrice('electricity')} PLN, cane ${addonPrice('dog')} PLN.`,
+      powerDog:'Corrente 10A: 30 PLN / notte. Cane: 0 PLN. Chiediamo solo cura, guinzaglio e pulizia.',
+      dog:'Sì, i cani sono benvenuti. Il cane costa 0 PLN. Tienilo sotto controllo e pulisci dopo di lui.',
+      bungalowOptions:'I bungalow sono solo da 2, 3 o 4 persone. Porta asciugamani, cosmetici e oggetti personali.',
+      centerTransit:'La fermata Górnickiego è a circa 40 m. Il tram 18 arriva a Stary Kleparz in circa 14 minuti; da lì 5 minuti a piedi per la Città Vecchia. Usa Google Maps o Jakdojade.',
+      maps:'Consigliamo Google Maps: l’accesso al camping è cambiato nel 2022 e vecchi navigatori possono sbagliare.',
+      quiet:'Silenzio notturno 22:00–07:00. Clepardia non è un camping per feste: è un camping urbano tranquillo.',
+      cityCamping:'Camping Clepardia è a Cracovia, vicino a tram, negozi e attrazioni. Non è un camping nel bosco, ma una base verde in città.',
+      reception:'Reception: +48 795 294 486, email clepardia@gmail.com. Per il soggiorno usa contatto o richiesta di prenotazione.',
+      receptionHours:'Reception 09:00–21:00, cancello 08:00–22:00. Per arrivo dopo le 21:00 contatta prima la reception.',
+      gateHours:'Reception 09:00–21:00 e cancello 08:00–22:00.',
+      lateArrival:'Per arrivo dopo le 21:00 contatta prima la reception. Reception 09:00–21:00, cancello 08:00–22:00.',
+      summerCamping:'In luglio e agosto si prenotano in anticipo solo i bungalow. Le piazzole camping sono in ordine di arrivo; meglio arrivare verso le 12:00.',
+      arrivalTiming:'Per il camping arriva verso le 12:00, perché il check-out camping è alle 12:00. Bungalow: check-in dalle 16:00, check-out alle 11:00.',
+      evCharging:'La corrente 10A serve per attrezzatura di camper/roulotte. Non è consentito caricare auto elettriche o ibride plug-in in piazzola.',
+      bungalowTowels:'Nei bungalow porta asciugamani, cosmetici e cose personali.',
+      heavyVehicle:'I veicoli pesanti devono stare su superficie indurita o asfaltata, non sull’erba. I camper stanno soprattutto su lastre di cemento.',
+      wieliczka:'Wieliczka è un tour classico da Cracovia. Puoi chiedere informazioni e controllare disponibilità dal link tour.',
+      auschwitz:'Auschwitz-Birkenau è una visita seria di una giornata; controlla biglietti, regole e trasporto in anticipo.',
+      toursFromKrakow:'Puoi chiedere tour per Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców, Energylandia, Park Wodny, Bagry, Kryspinów, Città Vecchia e Wawel.',
+      waterRelax:'Per acqua e relax: Park Wodny Kraków, Bagry o Kryspinów secondo stagione e meteo.',
+      familyAttractions:'Con bambini funzionano spesso Città Vecchia, Wawel, Wieliczka, Ojców o Energylandia.',
+      sctEtoll:'Prima di arrivare controlla regole SCT di Cracovia ed e-TOLL, soprattutto con veicoli più grandi.',
+      greeting:'Ciao! Ti aiuto con prenotazione, prezzi, tram 18, Google Maps, bungalow, regole e tour. Cosa vuoi sapere?',
+    },
+  },
+  fr: {
+    actions: {
+      bookStay:'Réserver', siteSearch:'Chercher sur le site', registration:'Documents à préparer', camperPrice:'Prix camping-car', stayCompare:'Camping ou bungalows ?', combinedStay:'Camping + bungalow', lateCheckout:'Départ tardif', cityCamping:'Camping en ville',
+      currency:'EUR / USD / GBP', campingPricing:'Tarifs camping', powerDog:'Électricité et chien', dog:'Chien accepté ?', bungalowOptions:'Bungalows 2/3/4 pers.', centerTransit:'Aller au centre', maps:'Google Maps', sctEtoll:'SCT / e-TOLL', tramTickets:'Tickets de tram',
+      dayPlan:'Planifier une journée', oneNightPlan:'Plan 1 nuit', twoNightPlan:'Plan 2 nuits', threeNightPlan:'Plan 3 nuits', stayLength:'Combien de jours ?', currentNotices:'Actuel à Cracovie', familyAttractions:'Avec enfants', waterRelax:'Eau et détente',
+      wawel:'Wawel', wieliczka:'Wieliczka', auschwitz:'Auschwitz', schindler:'Usine Schindler', toursFromKrakow:'Excursions depuis Cracovie', quiet:'Silence nocturne', reception:'Contacter la réception', receptionHours:'Horaires réception',
+    },
+    answers: {
+      registration:'À la réception, préparez une pièce d’identité. Avec voiture, camping-car, van ou caravane, la réception demandera aussi l’immatriculation; pour une caravane, celle de la caravane.',
+      prepareArrival:'Avant l’arrivée: pièce d’identité, immatriculation du véhicule ou de la remorque, Google Maps, câble/adaptateur 10A et silence 22:00–07:00.',
+      camperPrice:`Camping-car: ${stayPrice('camper')} PLN / nuit. Adulte ${pricingConfig.people.adults.price} PLN, enfant 4–14 ${pricingConfig.people.children.price} PLN, électricité ${addonPrice('electricity')} PLN, chien ${addonPrice('dog')} PLN.`,
+      campingPricing:`Le tarif camping combine véhicule/tente, personnes et options. Exemple: camping-car ${stayPrice('camper')} PLN / nuit, adulte ${pricingConfig.people.adults.price} PLN, électricité ${addonPrice('electricity')} PLN, chien ${addonPrice('dog')} PLN.`,
+      powerDog:'Électricité 10A: 30 PLN / nuit. Chien: 0 PLN. Merci de garder votre chien sous contrôle et de nettoyer.',
+      dog:'Oui, les chiens sont acceptés. Le chien coûte 0 PLN.',
+      bungalowOptions:'Les bungalows sont pour 2, 3 ou 4 personnes. Apportez vos serviettes, produits de toilette et effets personnels.',
+      centerTransit:'L’arrêt Górnickiego est à environ 40 m. Le tram 18 va à Stary Kleparz en environ 14 minutes; la Vieille Ville est à 5 minutes à pied. Vérifiez avec Google Maps ou Jakdojade.',
+      maps:'Nous recommandons Google Maps, car l’accès au camping a changé en 2022 et les anciens GPS peuvent se tromper.',
+      quiet:'Silence nocturne 22:00–07:00. Clepardia n’est pas un camping de fête: c’est un camping urbain calme.',
+      cityCamping:'Camping Clepardia est à Cracovie, près du tram, des magasins et attractions. Ce n’est pas un camping forestier mais une base verte en ville.',
+      reception:'Réception: +48 795 294 486, e-mail clepardia@gmail.com. Utilisez contact ou réservation pour votre séjour.',
+      receptionHours:'Réception 09:00–21:00, portail 08:00–22:00. Pour une arrivée après 21:00, contactez la réception à l’avance.',
+      gateHours:'Réception 09:00–21:00, portail 08:00–22:00.',
+      lateArrival:'Pour une arrivée après 21:00, contactez la réception avant le voyage. Réception 09:00–21:00, portail 08:00–22:00.',
+      summerCamping:'En juillet et août, seuls les bungalows se réservent à l’avance. Le camping fonctionne par ordre d’arrivée; arrivez idéalement vers 12:00.',
+      arrivalTiming:'Pour le camping, arrivez vers 12:00 car le check-out camping est à 12:00. Bungalows: check-in dès 16:00, check-out à 11:00.',
+      evCharging:'L’électricité 10A sert aux équipements du camping-car/de la caravane. Il est interdit de charger les voitures électriques ou hybrides plug-in sur l’emplacement.',
+      bungalowTowels:'Dans les bungalows, apportez vos serviettes, produits de toilette et effets personnels.',
+      heavyVehicle:'Les véhicules lourds doivent rester sur surface durcie ou asphaltée, pas sur l’herbe. Les camping-cars sont surtout sur dalles béton.',
+      wieliczka:'Wieliczka est une excursion classique depuis Cracovie. Vous pouvez demander une information et vérifier les options via le lien excursions.',
+      auschwitz:'Auschwitz-Birkenau est une visite sérieuse d’une journée; vérifiez billets, règles et transport à l’avance.',
+      toursFromKrakow:'Vous pouvez demander Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców, Energylandia, Park Wodny, Bagry, Kryspinów, Vieille Ville et Wawel.',
+      waterRelax:'Pour l’eau et détente: Park Wodny Kraków, Bagry ou Kryspinów selon saison et météo.',
+      familyAttractions:'Avec enfants: Vieille Ville, Wawel, Wieliczka, Ojców ou Energylandia fonctionnent souvent bien.',
+      sctEtoll:'Avant l’arrivée, vérifiez les règles SCT de Cracovie et e-TOLL, surtout avec un grand véhicule.',
+      greeting:'Bonjour ! Je peux aider pour réservation, prix, tram 18, Google Maps, bungalows, règles et excursions. Que souhaitez-vous savoir ?',
+    },
+  },
+  es: {
+    actions: {
+      bookStay:'Reservar estancia', siteSearch:'Buscar en la web', registration:'Documentos para registro', camperPrice:'Precio camper', stayCompare:'Camping o bungalows', combinedStay:'Camping + bungalow', lateCheckout:'Salida más tarde', cityCamping:'Camping urbano',
+      currency:'EUR / USD / GBP', campingPricing:'Precios camping', powerDog:'Electricidad y perro', dog:'¿Perro permitido?', bungalowOptions:'Bungalows 2/3/4 pers.', centerTransit:'Ir al centro', maps:'Google Maps', sctEtoll:'SCT / e-TOLL', tramTickets:'Billetes de tranvía',
+      dayPlan:'Plan de un día', oneNightPlan:'Plan 1 noche', twoNightPlan:'Plan 2 noches', threeNightPlan:'Plan 3 noches', stayLength:'Cuántos días', currentNotices:'Actual en Cracovia', familyAttractions:'Con niños', waterRelax:'Agua y relax',
+      wawel:'Wawel', wieliczka:'Wieliczka', auschwitz:'Auschwitz', schindler:'Fábrica de Schindler', toursFromKrakow:'Tours desde Cracovia', quiet:'Silencio nocturno', reception:'Contactar recepción', receptionHours:'Horario recepción',
+    },
+    answers: {
+      registration:'En recepción prepara un documento de identidad. Si llegas con coche, camper, van o caravana, también se pide la matrícula; para remolque/caravana, la matrícula del remolque.',
+      prepareArrival:'Antes de llegar: documento, matrícula del vehículo o remolque, Google Maps, cable/adaptador para 10A y silencio 22:00–07:00.',
+      camperPrice:`Camper: ${stayPrice('camper')} PLN / noche. Adulto ${pricingConfig.people.adults.price} PLN, niño 4–14 ${pricingConfig.people.children.price} PLN, electricidad ${addonPrice('electricity')} PLN, perro ${addonPrice('dog')} PLN.`,
+      campingPricing:`El precio camping combina vehículo/tienda, personas y extras. Ejemplo: camper ${stayPrice('camper')} PLN / noche, adulto ${pricingConfig.people.adults.price} PLN, electricidad ${addonPrice('electricity')} PLN, perro ${addonPrice('dog')} PLN.`,
+      powerDog:'Electricidad 10A: 30 PLN / noche. Perro: 0 PLN. Por favor, cuida al perro y limpia después.',
+      dog:'Sí, puedes venir con perro. El perro cuesta 0 PLN.',
+      bungalowOptions:'Los bungalows son de 2, 3 o 4 personas. Trae tus propias toallas, cosméticos y objetos personales.',
+      centerTransit:'La parada Górnickiego está a unos 40 m. El tranvía 18 llega a Stary Kleparz en unos 14 minutos; al Casco Antiguo son 5 minutos a pie. Usa Google Maps o Jakdojade.',
+      maps:'Recomendamos Google Maps porque el acceso cambió en 2022 y navegadores antiguos pueden equivocarse.',
+      quiet:'Silencio nocturno 22:00–07:00. Clepardia no es camping de fiesta; es un camping urbano tranquilo.',
+      cityCamping:'Camping Clepardia está en Cracovia, cerca de tranvía, tiendas y atracciones. No es un camping de bosque, sino una base verde urbana.',
+      reception:'Recepción: +48 795 294 486, email clepardia@gmail.com. Para estancia usa contacto o solicitud de reserva.',
+      receptionHours:'Recepción 09:00–21:00, puerta 08:00–22:00. Para llegar después de las 21:00, contacta antes con recepción.',
+      gateHours:'Recepción 09:00–21:00 y puerta 08:00–22:00.',
+      lateArrival:'Para llegar después de las 21:00, contacta antes con recepción. Recepción 09:00–21:00, puerta 08:00–22:00.',
+      summerCamping:'En julio y agosto solo se reservan bungalows con antelación. Las plazas de camping son por orden de llegada; mejor llegar sobre las 12:00.',
+      arrivalTiming:'Para camping, llega sobre las 12:00 porque el check-out camping es a las 12:00. Bungalows: check-in desde 16:00, check-out a las 11:00.',
+      evCharging:'La electricidad 10A es para equipos de camper/caravana. No se permite cargar coches eléctricos ni híbridos plug-in en la parcela.',
+      bungalowTowels:'En bungalows trae toallas, cosméticos y objetos personales.',
+      heavyVehicle:'Los vehículos pesados deben estar sobre superficie firme o asfalto, no sobre césped. Las campers suelen estar sobre placas de hormigón.',
+      wieliczka:'Wieliczka es un tour clásico desde Cracovia. Puedes pedir información y comprobar opciones con el enlace de tours.',
+      auschwitz:'Auschwitz-Birkenau es una visita seria de día completo; revisa entradas, normas y transporte antes.',
+      toursFromKrakow:'Puedes preguntar por Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców, Energylandia, Park Wodny, Bagry, Kryspinów, Casco Antiguo y Wawel.',
+      waterRelax:'Para agua y relax: Park Wodny Kraków, Bagry o Kryspinów según temporada y clima.',
+      familyAttractions:'Con niños suelen funcionar Casco Antiguo, Wawel, Wieliczka, Ojców o Energylandia.',
+      sctEtoll:'Antes de llegar revisa reglas SCT de Cracovia y e-TOLL, especialmente con vehículos grandes.',
+      greeting:'¡Hola! Ayudo con reservas, precios, tranvía 18, Google Maps, bungalows, normas y tours. ¿Qué quieres saber?',
+    },
+  },
+  nl: {
+    actions: {
+      bookStay:'Verblijf boeken', siteSearch:'Zoeken op site', registration:'Wat nodig bij registratie?', camperPrice:'Camperprijs', stayCompare:'Camping of bungalows?', combinedStay:'Camping + bungalow', lateCheckout:'Later uitchecken', cityCamping:'Stadscamping',
+      currency:'EUR / USD / GBP', campingPricing:'Campingprijzen', powerDog:'Stroom en hond', dog:'Hond toegestaan?', bungalowOptions:'Bungalows 2/3/4 pers.', centerTransit:'Naar centrum', maps:'Google Maps', sctEtoll:'SCT / e-TOLL', tramTickets:'Tramtickets',
+      dayPlan:'Dag in Krakau plannen', oneNightPlan:'Plan 1 nacht', twoNightPlan:'Plan 2 nachten', threeNightPlan:'Plan 3 nachten', stayLength:'Hoe lang blijven?', currentNotices:'Actueel in Krakau', familyAttractions:'Met kinderen', waterRelax:'Water en ontspanning',
+      wawel:'Wawel', wieliczka:'Wieliczka', auschwitz:'Auschwitz', schindler:'Schindlerfabriek', toursFromKrakow:'Tours vanuit Krakau', quiet:'Nachtrust', reception:'Receptie contacteren', receptionHours:'Openingstijden receptie',
+    },
+    answers: {
+      registration:'Bij de receptie heb je een identiteitsdocument nodig. Kom je met auto, camper, van of caravan, dan vraagt de receptie ook om het kenteken; bij een caravan het kenteken van de caravan.',
+      prepareArrival:'Voor aankomst: identiteitsdocument, kenteken van voertuig of aanhanger, Google Maps, kabel/adapter voor 10A en nachtrust 22:00–07:00.',
+      camperPrice:`Camper: ${stayPrice('camper')} PLN / nacht. Volwassene ${pricingConfig.people.adults.price} PLN, kind 4–14 ${pricingConfig.people.children.price} PLN, stroom ${addonPrice('electricity')} PLN, hond ${addonPrice('dog')} PLN.`,
+      campingPricing:`Campingprijs bestaat uit voertuig/tent, personen en extra's. Voorbeeld: camper ${stayPrice('camper')} PLN / nacht, volwassene ${pricingConfig.people.adults.price} PLN, stroom ${addonPrice('electricity')} PLN, hond ${addonPrice('dog')} PLN.`,
+      powerDog:'10A stroom kost 30 PLN / nacht. Hond: 0 PLN. Houd de hond onder controle en ruim op.',
+      dog:'Ja, honden zijn welkom. De hond kost 0 PLN.',
+      bungalowOptions:'Bungalows zijn voor 2, 3 of 4 personen. Neem eigen handdoeken, toiletartikelen en persoonlijke spullen mee.',
+      centerTransit:'Halte Górnickiego ligt ongeveer 40 m verder. Tram 18 rijdt in circa 14 minuten naar Stary Kleparz; daarna 5 minuten lopen naar de Oude Stad. Gebruik Google Maps of Jakdojade.',
+      maps:'Wij adviseren Google Maps, omdat de toegang in 2022 is veranderd en oude navigatie fout kan rijden.',
+      quiet:'Nachtrust is 22:00–07:00. Clepardia is geen feestcamping, maar een rustige stadscamping.',
+      cityCamping:'Camping Clepardia ligt in Krakau, dicht bij tram, winkels en attracties. Het is geen boscamping, maar een groene stadscamping.',
+      reception:'Receptie: +48 795 294 486, e-mail clepardia@gmail.com. Gebruik contact of boekingsaanvraag voor je verblijf.',
+      receptionHours:'Receptie 09:00–21:00, poort 08:00–22:00. Voor aankomst na 21:00 vooraf contact opnemen.',
+      gateHours:'Receptie 09:00–21:00 en poort 08:00–22:00.',
+      lateArrival:'Kom je na 21:00, neem vooraf contact op met de receptie. Receptie 09:00–21:00, poort 08:00–22:00.',
+      summerCamping:'In juli en augustus kunnen alleen bungalows vooraf worden geboekt. Campingplaatsen zijn op volgorde van aankomst; kom liefst rond 12:00.',
+      arrivalTiming:'Voor camping kom je het best rond 12:00, omdat check-out camping om 12:00 is. Bungalows: check-in vanaf 16:00, check-out 11:00.',
+      evCharging:'10A stroom is voor camper/caravanapparatuur. Elektrische auto’s en plug-in hybrides mogen niet op de plaats worden opgeladen.',
+      bungalowTowels:'Neem voor bungalows eigen handdoeken, toiletartikelen en persoonlijke spullen mee.',
+      heavyVehicle:'Zware voertuigen moeten op verharde of asfaltgrond staan, niet op gras. Campers staan vooral op betonplaten.',
+      wieliczka:'Wieliczka is een klassieke tour vanuit Krakau. Vraag gerust info en check opties via de tourlink.',
+      auschwitz:'Auschwitz-Birkenau is een serieus dagbezoek; controleer tickets, regels en vervoer vooraf.',
+      toursFromKrakow:'Je kunt vragen naar Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców, Energylandia, Park Wodny, Bagry, Kryspinów, Oude Stad en Wawel.',
+      waterRelax:'Voor water en ontspanning: Park Wodny Kraków, Bagry of Kryspinów afhankelijk van seizoen en weer.',
+      familyAttractions:'Met kinderen werken Oude Stad, Wawel, Wieliczka, Ojców of Energylandia vaak goed.',
+      sctEtoll:'Controleer voor aankomst de Krakau SCT- en e-TOLL-regels, vooral met grotere voertuigen.',
+      greeting:'Hoi! Ik help met boeken, prijzen, tram 18, Google Maps, bungalows, regels en tours. Wat wil je weten?',
+    },
+  },
+  cs: {
+    actions: {
+      bookStay:'Rezervovat pobyt', siteSearch:'Hledat na webu', registration:'Co k registraci?', camperPrice:'Cena obytného vozu', stayCompare:'Kemp nebo chatky?', combinedStay:'Kemp + chatka', lateCheckout:'Pozdější odjezd', cityCamping:'Městský kemp',
+      currency:'EUR / USD / GBP', campingPricing:'Ceny kempu', powerDog:'Elektřina a pes', dog:'Pes povolen?', bungalowOptions:'Chatky 2/3/4 os.', centerTransit:'Do centra', maps:'Google Maps', sctEtoll:'SCT / e-TOLL', tramTickets:'Jízdenky na tramvaj',
+      dayPlan:'Plán dne v Krakově', oneNightPlan:'Plán 1 noc', twoNightPlan:'Plán 2 noci', threeNightPlan:'Plán 3 noci', stayLength:'Kolik dní?', currentNotices:'Aktuálně v Krakově', familyAttractions:'S dětmi', waterRelax:'Voda a relax',
+      wawel:'Wawel', wieliczka:'Wieliczka', auschwitz:'Auschwitz', schindler:'Schindlerova továrna', toursFromKrakow:'Výlety z Krakova', quiet:'Noční klid', reception:'Kontakt recepce', receptionHours:'Otevírací doba recepce',
+    },
+    answers: {
+      registration:'Na recepci si připravte doklad totožnosti. Pokud přijedete autem, obytným vozem, vanem nebo karavanem, recepce požádá také o SPZ; u přívěsu SPZ přívěsu.',
+      prepareArrival:'Před příjezdem: doklad totožnosti, SPZ vozidla nebo přívěsu, Google Maps, kabel/adaptér na 10A a noční klid 22:00–07:00.',
+      camperPrice:`Obytný vůz: ${stayPrice('camper')} PLN / noc. Dospělý ${pricingConfig.people.adults.price} PLN, dítě 4–14 ${pricingConfig.people.children.price} PLN, elektřina ${addonPrice('electricity')} PLN, pes ${addonPrice('dog')} PLN.`,
+      campingPricing:`Cena kempu kombinuje vozidlo/stan, osoby a doplňky. Příklad: obytný vůz ${stayPrice('camper')} PLN / noc, dospělý ${pricingConfig.people.adults.price} PLN, elektřina ${addonPrice('electricity')} PLN, pes ${addonPrice('dog')} PLN.`,
+      powerDog:'Elektřina 10A stojí 30 PLN / noc. Pes: 0 PLN. Prosíme o dohled, vodítko a úklid.',
+      dog:'Ano, psi jsou vítáni. Pes stojí 0 PLN.',
+      bungalowOptions:'Chatky jsou pro 2, 3 nebo 4 osoby. Vezměte si vlastní ručníky, kosmetiku a osobní věci.',
+      centerTransit:'Zastávka Górnickiego je asi 40 m od kempu. Tramvaj 18 jede na Stary Kleparz asi 14 minut; do Starého Města je to 5 minut pěšky. Použijte Google Maps nebo Jakdojade.',
+      maps:'Doporučujeme Google Maps, protože příjezd se v roce 2022 změnil a starší navigace mohou vést špatně.',
+      quiet:'Noční klid je 22:00–07:00. Clepardia není párty kemp, ale klidný městský kemp.',
+      cityCamping:'Camping Clepardia je v Krakově, blízko tramvaje, obchodů a atrakcí. Není to lesní kemp, ale zelená městská základna.',
+      reception:'Recepce: +48 795 294 486, e-mail clepardia@gmail.com. Pro pobyt použijte kontakt nebo rezervační dotaz.',
+      receptionHours:'Recepce 09:00–21:00, brána 08:00–22:00. Pro příjezd po 21:00 kontaktujte recepci předem.',
+      gateHours:'Recepce 09:00–21:00 a brána 08:00–22:00.',
+      lateArrival:'Při příjezdu po 21:00 kontaktujte recepci předem. Recepce 09:00–21:00, brána 08:00–22:00.',
+      summerCamping:'V červenci a srpnu lze předem rezervovat jen chatky. Místa v kempu jsou podle pořadí příjezdu; nejlepší je přijet kolem 12:00.',
+      arrivalTiming:'Do kempu je nejlepší přijet kolem 12:00, protože check-out kempu je ve 12:00. Chatky: check-in od 16:00, check-out do 11:00.',
+      evCharging:'Elektřina 10A je pro vybavení obytného vozu/karavanu. Elektromobily a plug-in hybridy se na místě nesmí nabíjet.',
+      bungalowTowels:'Do chatek si vezměte vlastní ručníky, kosmetiku a osobní věci.',
+      heavyVehicle:'Těžká vozidla musí stát na zpevněném nebo asfaltovém povrchu, ne na trávě. Obytné vozy stojí hlavně na betonových deskách.',
+      wieliczka:'Wieliczka je klasický výlet z Krakova. Můžete se zeptat na informace a ověřit možnosti přes odkaz výletů.',
+      auschwitz:'Auschwitz-Birkenau je vážná celodenní návštěva; ověřte vstupenky, pravidla a dopravu předem.',
+      toursFromKrakow:'Můžete se ptát na Wieliczku, Auschwitz-Birkenau, Zakopané, Ojców, Energylandii, Park Wodny, Bagry, Kryspinów, Staré Město a Wawel.',
+      waterRelax:'Pro vodu a relax: Park Wodny Kraków, Bagry nebo Kryspinów podle sezóny a počasí.',
+      familyAttractions:'S dětmi se často hodí Staré Město, Wawel, Wieliczka, Ojców nebo Energylandia.',
+      sctEtoll:'Před příjezdem ověřte pravidla krakovské SCT a e-TOLL, hlavně u větších vozidel.',
+      greeting:'Dobrý den! Pomohu s rezervací, cenami, tramvají 18, Google Maps, chatkami, pravidly a výlety. Na co se chcete zeptat?',
+    },
+  },
+  sk: {
+    actions: {
+      bookStay:'Rezervovať pobyt', siteSearch:'Hľadať na webe', registration:'Čo k registrácii?', camperPrice:'Cena obytného auta', stayCompare:'Kemp alebo chatky?', combinedStay:'Kemp + chatka', lateCheckout:'Neskorší odchod', cityCamping:'Mestský kemp',
+      currency:'EUR / USD / GBP', campingPricing:'Ceny kempu', powerDog:'Elektrina a pes', dog:'Pes povolený?', bungalowOptions:'Chatky 2/3/4 os.', centerTransit:'Do centra', maps:'Google Maps', sctEtoll:'SCT / e-TOLL', tramTickets:'Lístky na električku',
+      dayPlan:'Plán dňa v Krakove', oneNightPlan:'Plán 1 noc', twoNightPlan:'Plán 2 noci', threeNightPlan:'Plán 3 noci', stayLength:'Koľko dní?', currentNotices:'Aktuálne v Krakove', familyAttractions:'S deťmi', waterRelax:'Voda a relax',
+      wawel:'Wawel', wieliczka:'Wieliczka', auschwitz:'Auschwitz', schindler:'Schindlerova továreň', toursFromKrakow:'Výlety z Krakova', quiet:'Nočný pokoj', reception:'Kontakt recepcie', receptionHours:'Otváracie hodiny recepcie',
+    },
+    answers: {
+      registration:'Na recepcii si pripravte doklad totožnosti. Ak prídete autom, obytným autom, vanom alebo karavanom, recepcia požiada aj o EČV; pri prívese EČV prívesu.',
+      prepareArrival:'Pred príchodom: doklad totožnosti, EČV vozidla alebo prívesu, Google Maps, kábel/adaptér na 10A a nočný pokoj 22:00–07:00.',
+      camperPrice:`Obytné auto: ${stayPrice('camper')} PLN / noc. Dospelý ${pricingConfig.people.adults.price} PLN, dieťa 4–14 ${pricingConfig.people.children.price} PLN, elektrina ${addonPrice('electricity')} PLN, pes ${addonPrice('dog')} PLN.`,
+      campingPricing:`Cena kempu kombinuje vozidlo/stan, osoby a doplnky. Príklad: obytné auto ${stayPrice('camper')} PLN / noc, dospelý ${pricingConfig.people.adults.price} PLN, elektrina ${addonPrice('electricity')} PLN, pes ${addonPrice('dog')} PLN.`,
+      powerDog:'Elektrina 10A stojí 30 PLN / noc. Pes: 0 PLN. Prosíme dohľad, vôdzku a upratanie.',
+      dog:'Áno, psy sú vítané. Pes stojí 0 PLN.',
+      bungalowOptions:'Chatky sú pre 2, 3 alebo 4 osoby. Prineste si vlastné uteráky, kozmetiku a osobné veci.',
+      centerTransit:'Zastávka Górnickiego je asi 40 m od kempu. Električka 18 ide na Stary Kleparz asi 14 minút; do Starého Mesta je to 5 minút pešo. Použite Google Maps alebo Jakdojade.',
+      maps:'Odporúčame Google Maps, pretože príjazd sa v roku 2022 zmenil a staršie navigácie môžu viesť nesprávne.',
+      quiet:'Nočný pokoj je 22:00–07:00. Clepardia nie je párty kemp, ale pokojný mestský kemp.',
+      cityCamping:'Camping Clepardia je v Krakove, blízko električky, obchodov a atrakcií. Nie je to lesný kemp, ale zelená mestská základňa.',
+      reception:'Recepcia: +48 795 294 486, e-mail clepardia@gmail.com. Pre pobyt použite kontakt alebo rezervačný dopyt.',
+      receptionHours:'Recepcia 09:00–21:00, brána 08:00–22:00. Pri príchode po 21:00 kontaktujte recepciu vopred.',
+      gateHours:'Recepcia 09:00–21:00 a brána 08:00–22:00.',
+      lateArrival:'Pri príchode po 21:00 kontaktujte recepciu vopred. Recepcia 09:00–21:00, brána 08:00–22:00.',
+      summerCamping:'V júli a auguste sa vopred rezervujú iba chatky. Kempové miesta sú podľa poradia príchodu; najlepšie prísť okolo 12:00.',
+      arrivalTiming:'Do kempu je najlepšie prísť okolo 12:00, pretože check-out kempu je o 12:00. Chatky: check-in od 16:00, check-out do 11:00.',
+      evCharging:'Elektrina 10A je pre vybavenie obytného auta/karavanu. Elektromobily a plug-in hybridy sa na mieste nesmú nabíjať.',
+      bungalowTowels:'Do chatiek si prineste vlastné uteráky, kozmetiku a osobné veci.',
+      heavyVehicle:'Ťažké vozidlá musia stáť na spevnenom alebo asfaltovom povrchu, nie na tráve. Obytné autá stoja hlavne na betónových platniach.',
+      wieliczka:'Wieliczka je klasický výlet z Krakova. Môžete sa opýtať na informácie a overiť možnosti cez odkaz výletov.',
+      auschwitz:'Auschwitz-Birkenau je vážna celodenná návšteva; overte lístky, pravidlá a dopravu vopred.',
+      toursFromKrakow:'Môžete sa pýtať na Wieliczku, Auschwitz-Birkenau, Zakopané, Ojców, Energylandiu, Park Wodny, Bagry, Kryspinów, Staré Mesto a Wawel.',
+      waterRelax:'Na vodu a relax: Park Wodny Kraków, Bagry alebo Kryspinów podľa sezóny a počasia.',
+      familyAttractions:'S deťmi sa často hodí Staré Mesto, Wawel, Wieliczka, Ojców alebo Energylandia.',
+      sctEtoll:'Pred príchodom overte pravidlá krakovskej SCT a e-TOLL, hlavne pri väčších vozidlách.',
+      greeting:'Dobrý deň! Pomôžem s rezerváciou, cenami, električkou 18, Google Maps, chatkami, pravidlami a výletmi. Na čo sa chcete opýtať?',
+    },
+  },
+  sv: {
+    actions: {
+      bookStay:'Boka vistelse', siteSearch:'Sök på sidan', registration:'Vad behövs vid registrering?', camperPrice:'Husbilspris', stayCompare:'Camping eller stugor?', combinedStay:'Camping + stuga', lateCheckout:'Senare utcheckning', cityCamping:'Stadscamping',
+      currency:'EUR / USD / GBP', campingPricing:'Campingpriser', powerDog:'El och hund', dog:'Hund tillåten?', bungalowOptions:'Stugor 2/3/4 pers.', centerTransit:'Till centrum', maps:'Google Maps', sctEtoll:'SCT / e-TOLL', tramTickets:'Spårvagnsbiljetter',
+      dayPlan:'Planera en dag', oneNightPlan:'Plan 1 natt', twoNightPlan:'Plan 2 nätter', threeNightPlan:'Plan 3 nätter', stayLength:'Hur länge stanna?', currentNotices:'Aktuellt i Kraków', familyAttractions:'Med barn', waterRelax:'Vatten och avkoppling',
+      wawel:'Wawel', wieliczka:'Wieliczka', auschwitz:'Auschwitz', schindler:'Schindlers fabrik', toursFromKrakow:'Turer från Kraków', quiet:'Nattro', reception:'Kontakta receptionen', receptionHours:'Receptionens öppettider',
+    },
+    answers: {
+      registration:'Vid receptionen behövs en id-handling. Kommer du med bil, husbil, van eller husvagn behövs även registreringsnummer; för släp/husvagn anges släpets nummer.',
+      prepareArrival:'Före ankomst: id-handling, registreringsnummer för fordon/släp, Google Maps, kabel/adapter för 10A och nattro 22:00–07:00.',
+      camperPrice:`Husbil: ${stayPrice('camper')} PLN / natt. Vuxen ${pricingConfig.people.adults.price} PLN, barn 4–14 ${pricingConfig.people.children.price} PLN, el ${addonPrice('electricity')} PLN, hund ${addonPrice('dog')} PLN.`,
+      campingPricing:`Campingpris består av fordon/tält, personer och tillval. Exempel: husbil ${stayPrice('camper')} PLN / natt, vuxen ${pricingConfig.people.adults.price} PLN, el ${addonPrice('electricity')} PLN, hund ${addonPrice('dog')} PLN.`,
+      powerDog:'10A el kostar 30 PLN / natt. Hund: 0 PLN. Håll hunden under uppsikt och städa efter den.',
+      dog:'Ja, hundar är välkomna. Hund kostar 0 PLN.',
+      bungalowOptions:'Stugor finns för 2, 3 eller 4 personer. Ta med egna handdukar, hygienartiklar och personliga saker.',
+      centerTransit:'Hållplatsen Górnickiego ligger ca 40 m bort. Spårvagn 18 går till Stary Kleparz på ca 14 minuter; Gamla stan ligger ca 5 minuters promenad därifrån. Använd Google Maps eller Jakdojade.',
+      maps:'Vi rekommenderar Google Maps eftersom infarten ändrades 2022 och äldre navigatorer kan visa fel.',
+      quiet:'Nattro gäller 22:00–07:00. Clepardia är ingen partycamping utan en lugn stadscamping.',
+      cityCamping:'Camping Clepardia ligger i Kraków, nära spårvagn, butiker och sevärdheter. Det är inte skogscamping utan en grön bas i staden.',
+      reception:'Reception: +48 795 294 486, e-post clepardia@gmail.com. Använd kontakt eller bokningsförfrågan för vistelsen.',
+      receptionHours:'Receptionen är öppen 09:00–21:00, porten 08:00–22:00. Vid ankomst efter 21:00, kontakta receptionen i förväg.',
+      gateHours:'Reception 09:00–21:00 och port 08:00–22:00.',
+      lateArrival:'Vid ankomst efter 21:00, kontakta receptionen i förväg. Reception 09:00–21:00, port 08:00–22:00.',
+      summerCamping:'I juli och augusti kan endast stugor bokas i förväg. Campingplatser gäller enligt ankomstordning; kom helst runt 12:00.',
+      arrivalTiming:'För camping är det bäst att komma runt 12:00 eftersom camping check-out är 12:00. Stugor: check-in från 16:00, check-out 11:00.',
+      evCharging:'10A el är för utrustning i husbil/husvagn. Elbilar och plug-in-hybrider får inte laddas på platsen.',
+      bungalowTowels:'I stugorna tar du med egna handdukar, hygienartiklar och personliga saker.',
+      heavyVehicle:'Tunga fordon måste stå på hårdgjord eller asfalterad yta, inte på gräs. Husbilar står främst på betongplattor.',
+      wieliczka:'Wieliczka är en klassisk tur från Kraków. Fråga gärna om information och kontrollera alternativ via tur-länken.',
+      auschwitz:'Auschwitz-Birkenau är ett seriöst heldagsbesök; kontrollera biljetter, regler och transport i förväg.',
+      toursFromKrakow:'Du kan fråga om Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców, Energylandia, Park Wodny, Bagry, Kryspinów, Gamla stan och Wawel.',
+      waterRelax:'För vatten och avkoppling: Park Wodny Kraków, Bagry eller Kryspinów beroende på säsong och väder.',
+      familyAttractions:'Med barn passar ofta Gamla stan, Wawel, Wieliczka, Ojców eller Energylandia.',
+      sctEtoll:'Kontrollera Krakóws SCT- och e-TOLL-regler före ankomst, särskilt med större fordon.',
+      greeting:'Hej! Jag hjälper med bokning, priser, spårvagn 18, Google Maps, stugor, regler och turer. Vad vill du veta?',
+    },
+  },
+};
+type CampyCopyPatch = {
+  actions?: Record<string, string>;
+  answers?: Record<string, string>;
+  quick?: {
+    toggle?: string;
+    aria?: string;
+    groups?: Record<string, string>;
+  };
+};
+const finalCampyBase = finalCampyCopy[pathContext.languageCode as keyof typeof finalCampyCopy] ?? finalCampyCopy.en;
+const finalCampyCritical = (campyCriticalCopy[pathContext.languageCode as keyof typeof campyCriticalCopy] ?? {}) as CampyCopyPatch;
+const finalCampy = {
+  ...finalCampyBase,
+  actions: {
+    ...(finalCampyBase.actions ?? {}),
+    ...(finalCampyCritical.actions ?? {}),
+  },
+  answers: {
+    ...(finalCampyBase.answers ?? {}),
+    ...(finalCampyCritical.answers ?? {}),
+  },
+  quick: {
+    ...(finalCampyBase.quick ?? {}),
+    ...(finalCampyCritical.quick ?? {}),
+    groups: {
+      ...(finalCampyBase.quick?.groups ?? {}),
+      ...(finalCampyCritical.quick?.groups ?? {}),
+    },
+  },
+};
 const campyQuick = {
   ...(finalCampy.quick ?? finalCampyCopy.en.quick),
   toggle: coreCopy.quick[0],
@@ -751,16 +1100,16 @@ const quickActionGroups = preferredQuickKeys
       const answers = chatTexts.answers || {};
       const links = chatTexts.links || {};
       const actionLabels = {
-        booking: 'Przejdź do rezerwacji',
-        prices: 'Zobacz cennik',
-        attractions: 'Zobacz atrakcje',
-        maps: 'Otwórz Google Maps',
-        jakdojade: 'Otwórz Jakdojade',
-        directions: 'Zobacz dojazd',
-        contact: 'Kontakt',
+        booking: chatTexts.actions?.bookStay || 'Rezerwacja',
+        prices: chatTexts.actions?.campingPricing || chatTexts.actions?.pricing || 'Cennik',
+        attractions: chatTexts.actions?.attractions || 'Atrakcje',
+        maps: chatTexts.actions?.maps || 'Google Maps',
+        jakdojade: 'Jakdojade',
+        directions: chatTexts.actions?.directions || chatTexts.actions?.centerTransit || 'Dojazd',
+        contact: chatTexts.actions?.reception || 'Kontakt',
         camping: 'Camping',
-        bungalow: 'Domki',
-        combined: 'Razem',
+        bungalow: chatTexts.actions?.bungalowOptions || 'Domki',
+        combined: chatTexts.actions?.combinedStay || 'Razem',
         sct: 'SCT Kraków',
         etoll: 'e-TOLL',
         tours: chatTexts.tourLabels?.[0] || 'Sprawdź wycieczki',
@@ -832,31 +1181,31 @@ const quickActionGroups = preferredQuickKeys
       const prompt = rawPrompt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       const hasAny = (...parts) => parts.some((part) => prompt.includes(part));
 
-      if (hasAny('godziny recepcji', 'otwarta recepcja', 'czynna recepcja', 'reception hours', 'offnungszeiten rezeption', 'orari reception')) {
+      if (hasAny('godziny recepcji', 'otwarta recepcja', 'czynna recepcja', 'reception hours', 'offnungszeiten rezeption', 'offnungszeiten', 'oeffnungszeiten rezeption', 'rezeption oeffnungszeiten', 'rezeption offnungszeiten', 'orari reception', 'horaires reception', 'horario recepcion', 'openingstijden receptie', 'oteviraci doba recepce', 'hodiny recepce', 'otvaracie hodiny recepcie', 'hodiny recepcie', 'recepcia hodiny', 'receptionens oppettider', 'reception oppettider', 'oppettider')) {
         return {
           text: chatTexts.answers.receptionHours,
-          actions: [{ label: 'Kontakt z recepcją', href: chatTexts.links?.contact }],
+          actions: [{ label: chatTexts.actions?.reception || 'Kontakt', href: chatTexts.links?.contact }],
         };
       }
 
-      if (hasAny('do ktorej brama', 'do ktorej jest brama', 'godziny bramy', 'brama otwarta', 'gate hours', 'gate open')) {
+      if (hasAny('do ktorej brama', 'do ktorej jest brama', 'godziny bramy', 'brama otwarta', 'gate hours', 'gate open', 'tor offen', 'cancello', 'portail', 'puerta', 'poort', 'brana', 'porten')) {
         return {
-          text: chatTexts.answers.gateHours || 'Recepcja jest czynna 9:00–21:00, a brama 8:00–22:00.',
-          actions: [{ label: 'Kontakt z recepcją', href: chatTexts.links?.contact }],
+          text: chatTexts.answers.gateHours || chatTexts.answers.receptionHours,
+          actions: [{ label: chatTexts.actions?.reception || 'Kontakt', href: chatTexts.links?.contact }],
         };
       }
 
-      if (hasAny('wycieczk', 'tour', 'excursion') && hasAny('wielicz', 'auschwitz', 'zakop', 'ojcow', 'ojców', 'energy', 'zarezerw', 'sprawdz', 'check', 'book')) {
+      if (hasAny('wycieczk', 'tour', 'excursion', 'ausflug', 'gita', 'visita', 'excursion', 'vylet', 'vilet', 'tur') && hasAny('wielicz', 'auschwitz', 'zakop', 'ojcow', 'ojców', 'energy', 'wawel', 'bagry', 'kryspin', 'zarezerw', 'sprawdz', 'check', 'book', 'reserv', 'prenot', 'buchen')) {
         return {
-          text: 'Recepcja może pomóc w informacji o wycieczkach do Wieliczki, Auschwitz-Birkenau, Zakopanego, Ojcowa i Energylandii. Aktualne warianty oraz dostępność sprawdzisz przez bezpieczne CTA.',
+          text: chatTexts.answers.toursFromKrakow ?? chatTexts.answers.wieliczka ?? chatTexts.answers.attractions,
           actions: [{ label: chatTexts.tourLabels?.[0] || 'Sprawdź wycieczki', href: chatTexts.links?.tours, external: true }, { label: chatTexts.tourLabels?.[2] || 'Zapytaj recepcję', href: chatTexts.links?.contact }],
         };
       }
 
-      if (hasAny('najlepiej przyjechac', 'o ktorej przyjechac', 'pora przyjazdu') && hasAny('sezon', 'lipiec', 'sierpien', 'kamper', 'camping')) {
+      if (hasAny('najlepiej przyjechac', 'o ktorej przyjechac', 'pora przyjazdu', 'best arrival', 'wann anreisen', 'quando arrivare', 'quand arriver', 'cuando llegar', 'wanneer aankomen', 'kdy prijet', 'kedy prist', 'nar anlanda') && hasAny('sezon', 'lipiec', 'sierpien', 'kamper', 'camping', 'july', 'august', 'juli', 'agosto', 'juillet', 'julio', 'srpen', 'jul', 'augusti')) {
         return {
-          text: 'W wysokim sezonie najlepiej przyjechać na camping około 12:00, ponieważ check-out z campingu jest do 12:00 i wtedy zwalniają się miejsca. W lipcu i sierpniu miejsca campingowe działają według kolejności przyjazdu.',
-          actions: [{ label: 'Kontakt z recepcją', href: chatTexts.links?.contact }, { label: 'Sprawdź dojazd', href: chatTexts.links?.directions }],
+          text: chatTexts.answers.arrivalTiming ?? chatTexts.answers.summerCamping,
+          actions: [{ label: chatTexts.actions?.reception || 'Kontakt', href: chatTexts.links?.contact }, { label: chatTexts.actions?.centerTransit || 'Dojazd', href: chatTexts.links?.directions }],
         };
       }
 
@@ -864,59 +1213,59 @@ const quickActionGroups = preferredQuickKeys
         return actionResponse('twoNightPlan') ?? chatTexts.answers.twoNightPlan;
       }
 
-      if (hasAny('auto elektryczne', 'samochod elektryczny', 'ladowac auto', 'ladowanie auta', 'charge an electric', 'electric vehicle', 'ev charging')) {
+      if (hasAny('auto elektryczne', 'samochod elektryczny', 'ladowac auto', 'ladowanie auta', 'charge an electric', 'electric vehicle', 'ev charging', 'elektroauto', 'e auto', 'auto elettrica', 'voiture electrique', 'coche electrico', 'elektrische auto', 'elektromobil', 'elbil', 'plug in', 'hybrid', 'charger', 'recharger', 'caricare', 'cargar', 'nabij', 'ladda', 'electri')) {
         return {
-          text: 'Prąd 10A na stanowiskach campingowych służy do wyposażenia kampera lub przyczepy i nie jest przeznaczony do ładowania samochodów elektrycznych. Zaplanuj ładowanie auta w publicznej stacji ładowania.',
-          actions: [{ label: 'Sprawdź dojazd', href: chatTexts.links?.directions }, { label: 'Kontakt z recepcją', href: chatTexts.links?.contact }],
+          text: chatTexts.answers.evCharging ?? chatTexts.answers.powerDog,
+          actions: [{ label: chatTexts.actions?.centerTransit || 'Dojazd', href: chatTexts.links?.directions }, { label: chatTexts.actions?.reception || 'Kontakt', href: chatTexts.links?.contact }],
         };
       }
 
-      if (hasAny('ciezki pojazd', 'ciezkim pojazdem', 'ciezarow', 'autobus', 'heavy vehicle', 'heavy motorhome', 'na trawie', 'on grass')) {
+      if (hasAny('ciezki pojazd', 'ciezkim pojazdem', 'ciezarow', 'autobus', 'heavy vehicle', 'heavy motorhome', 'na trawie', 'on grass', 'schweres fahrzeug', 'lkw', 'poids lourd', 'vehiculo pesado', 'veicolo pesante', 'zwaar voertuig', 'tezke vozidlo', 'tazke vozidlo', 'tungt fordon', 'grass', 'erba', 'herbe', 'cesped', 'gras', 'trava')) {
         return {
-          text: 'Ciężkie pojazdy muszą stanąć na utwardzonej lub asfaltowej powierzchni — nie na trawie. Miejsca dla kamperów są głównie na płytach betonowych. Jeśli pojazd jest wyjątkowo duży lub ciężki, skontaktuj się z recepcją przed przyjazdem.',
-          actions: [{ label: 'Kontakt z recepcją', href: chatTexts.links?.contact }, { label: 'Sprawdź dojazd', href: chatTexts.links?.directions }],
+          text: chatTexts.answers.heavyVehicle,
+          actions: [{ label: chatTexts.actions?.reception || 'Kontakt', href: chatTexts.links?.contact }, { label: chatTexts.actions?.centerTransit || 'Dojazd', href: chatTexts.links?.directions }],
         };
       }
 
-      if (hasAny('lipiec', 'lipcu', 'sierpien', 'sierpniu', 'july', 'august')
-        && hasAny('kamper', 'camper', 'motorhome', 'van', 'namiot', 'tent', 'przyczep', 'caravan', 'camping')) {
+      if (hasAny('lipiec', 'lipcu', 'sierpien', 'sierpniu', 'july', 'august', 'juli', 'luglio', 'agosto', 'juillet', 'julio', 'srpen', 'cerven', 'cervenci', 'jul', 'augusti')
+        && hasAny('kamper', 'camper', 'motorhome', 'wohnmobil', 'camping car', 'camping-car', 'obytne auto', 'obytny vuz', 'obytny voz', 'obytny automobil', 'obytny', 'husbil', 'van', 'namiot', 'tent', 'przyczep', 'caravan', 'camping')) {
         return {
-          text: 'W lipcu i sierpniu nie przyjmujemy rezerwacji miejsc campingowych. Dotyczy to kamperów, vanów, namiotów i przyczep. Camping działa według kolejności przyjazdu — najlepiej przyjechać około 12:00, ponieważ check-out z campingu jest do 12:00. W lipcu i sierpniu można rezerwować z wyprzedzeniem tylko domki.',
-          actions: [{ label: 'Zobacz domki', href: chatTexts.links?.bookingBungalow }, { label: 'Kontakt z recepcją', href: chatTexts.links?.contact }],
+          text: chatTexts.answers.summerCamping,
+          actions: [{ label: chatTexts.actions?.bungalowOptions || 'Domki', href: chatTexts.links?.bookingBungalow }, { label: chatTexts.actions?.reception || 'Kontakt', href: chatTexts.links?.contact }],
         };
       }
 
-      if (hasAny('recznik', 'reczniki', 'towel', 'kosmetyk') && hasAny('domk', 'bungalow', 'cabin')) {
+      if (hasAny('recznik', 'reczniki', 'towel', 'towels', 'kosmetyk', 'handtuch', 'asciugaman', 'serviette', 'toalla', 'handdoek', 'rucnik', 'uterak', 'handduk') && hasAny('domk', 'bungalow', 'cabin', 'chatk', 'stug')) {
         return {
-          text: 'Przy pobycie w domkach prosimy zabrać własne rzeczy osobiste, w tym ręczniki i kosmetyki. Dostępne są wyłącznie domki 2-, 3- i 4-osobowe — nie używamy kategorii „domek rodzinny”.',
-          actions: [{ label: 'Zobacz domki', href: chatTexts.links?.bookingBungalow }, { label: 'Wyślij zapytanie', href: chatTexts.links?.booking }],
+          text: chatTexts.answers.bungalowTowels ?? chatTexts.answers.bungalowOptions,
+          actions: [{ label: chatTexts.actions?.bungalowOptions || 'Domki', href: chatTexts.links?.bookingBungalow }, { label: chatTexts.actions?.bookStay || 'Rezerwacja', href: chatTexts.links?.booking }],
         };
       }
 
-      if (hasAny('po 21', 'po21', '21:00', '21.00', 'pozny przyjazd', 'pozno przyjech', 'late arrival')) {
+      if (hasAny('po 21', 'po21', '21:00', '21.00', 'pozny przyjazd', 'pozno przyjech', 'late arrival', 'after 21', 'nach 21', 'dopo le 21', 'apres 21', 'despues de las 21', 'na 21', 'po 21:00', 'efter 21')) {
         return {
-          text: 'Recepcja jest czynna 9:00–21:00, a brama 8:00–22:00. Przy przyjeździe po 21:00 trzeba wcześniej skontaktować się z recepcją i ustalić szczegóły przed podróżą.',
-          actions: [{ label: 'Kontakt z recepcją', href: chatTexts.links?.contact }, { label: 'Wyślij zapytanie', href: chatTexts.links?.booking }],
+          text: chatTexts.answers.lateArrival ?? chatTexts.answers.receptionHours,
+          actions: [{ label: chatTexts.actions?.reception || 'Kontakt', href: chatTexts.links?.contact }, { label: chatTexts.actions?.bookStay || 'Rezerwacja', href: chatTexts.links?.booking }],
         };
       }
 
-      if (hasAny('camping w miescie', 'camping miejski', 'w krakowie', 'city campsite', 'city camping')) {
+      if (hasAny('camping w miescie', 'camping miejski', 'w krakowie', 'city campsite', 'city camping', 'campsite in the city', 'in the city', 'camping in der stadt', 'camping in citta', 'camping en ville', 'camping urbano', 'en la ciudad', 'stadscamping', 'mestsky kemp', 've meste', 'v meste', 'in de stad', 'i staden')) {
         return actionResponse('cityCamping') ?? chatTexts.answers.cityCamping;
       }
 
-      if (hasAny('cichy', 'cisza', 'spokojny', 'imprez', 'quiet', 'party')) {
+      if (hasAny('cichy', 'cisza', 'spokojny', 'imprez', 'quiet', 'party', 'ruhe', 'silenzio', 'calme', 'silencio', 'nachtrust', 'nocni klid', 'nocny pokoj', 'nattro')) {
         return actionResponse('quiet') ?? chatTexts.answers.quiet;
       }
 
-      if (hasAny('dokument', 'document', 'dowod', 'paszport', 'rejestracj', 'tablic')) {
+      if (hasAny('dokument', 'document', 'dowod', 'paszport', 'rejestracj', 'tablic', 'ausweis', 'kennzeichen', 'documento', 'targa', 'piece d identite', 'immatriculation', 'matricula', 'kenteken', 'doklad', 'spz', 'ecv', 'registreringsnummer')) {
         return actionResponse('registration') ?? chatTexts.answers.registration;
       }
 
-      if (hasAny('pies', 'psa', 'platny pies', 'dog', 'hund', 'cane')) {
+      if (hasAny('pies', 'psa', 'platny pies', 'dog', 'hund', 'cane', 'chien', 'perro', 'hond', 'pes', 'hund')) {
         return actionResponse('dog') ?? chatTexts.answers.dog;
       }
 
-      if (hasAny('jak dojechac tramwajem', 'tramwajem', 'tram 18', 'gornickiego', 'stary kleparz')) {
+      if (hasAny('jak dojechac tramwajem', 'tramwajem', 'tram 18', 'gornickiego', 'stary kleparz', 'tram', 'strassenbahn', 'tramway', 'tranvia', 'elektricka', 'spårvagn')) {
         return actionResponse('centerTransit') ?? chatTexts.answers.centerTransit;
       }
 
@@ -927,10 +1276,10 @@ const quickActionGroups = preferredQuickKeys
         };
       }
 
-      if (/^(czesc|hej|hejka|dzien dobry|witam|hello|hi)[!,. ]*$/.test(prompt.trim())) {
+      if (/^(czesc|hej|hejka|dzien dobry|witam|hello|hi|hallo|ciao|bonjour|hola|ahoj|dobry den|hej)[!,. ]*$/.test(prompt.trim())) {
         return {
-          text: 'Cześć! Pomogę Ci z rezerwacją, cennikiem, dojazdem tramwajem, domkami, zasadami pobytu i atrakcjami Krakowa. O co chcesz zapytać?',
-          actions: [{ label: 'Rezerwacja', href: chatTexts.links?.booking }, { label: 'Atrakcje', href: chatTexts.links?.attractions }],
+          text: chatTexts.answers.greeting ?? chatTexts.intro,
+          actions: [{ label: chatTexts.actions?.bookStay || 'Rezerwacja', href: chatTexts.links?.booking }, { label: chatTexts.actions?.attractions || 'Atrakcje', href: chatTexts.links?.attractions }],
         };
       }
 

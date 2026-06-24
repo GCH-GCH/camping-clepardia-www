@@ -111,31 +111,113 @@ const displayDate = (date) => {
   return `${String(date.getUTCDate()).padStart(2, '0')}.${String(date.getUTCMonth() + 1).padStart(2, '0')}.${date.getUTCFullYear()}`;
 };
 
+const serviceCatalog = {
+  camper: { id: 'camper', scope: 'camping', label: 'Kamper', price: 80 },
+  van: { id: 'van', scope: 'camping', label: 'Van', price: 75 },
+  caravan: { id: 'caravan', scope: 'camping', label: 'Przyczepa', price: 60 },
+  'tent-small': { id: 'tent-small', scope: 'camping', label: 'Namiot 1-2 os.', price: 35 },
+  'tent-large': { id: 'tent-large', scope: 'camping', label: 'Namiot 3-4 os.', price: 45 },
+  'rooftop-tent': { id: 'rooftop-tent', scope: 'camping', label: 'Auto + namiot dachowy', price: 50 },
+  electricity: { id: 'electricity', scope: 'camping', label: 'Prąd 10A', price: 30 },
+  dog: { id: 'dog', scope: 'camping', label: 'Pies', price: 0 },
+  motorcycle: { id: 'motorcycle', scope: 'camping', label: 'Motocykl', price: 25 },
+  'cargo-trailer': { id: 'cargo-trailer', scope: 'camping', label: 'Przyczepa bagażowa', price: 25 },
+  bus: { id: 'bus', scope: 'camping', label: 'Bus / ciężarówka', price: 160 },
+  parking: { id: 'parking', scope: 'camping', label: 'Samochód', price: 35 },
+  'extra-car': { id: 'extra-car', scope: 'camping', label: 'Dodatkowe auto', price: 35 },
+  'bungalow-2': { id: 'bungalow-2', scope: 'bungalow', label: 'Domek 2-os.', price: 200 },
+  'bungalow-3': { id: 'bungalow-3', scope: 'bungalow', label: 'Domek 3-os.', price: 250 },
+  'bungalow-4': { id: 'bungalow-4', scope: 'bungalow', label: 'Domek 4-os.', price: 400 },
+  adults: { id: 'adults', scope: 'people', label: 'Osoba dorosła', price: 35 },
+  children: { id: 'children', scope: 'people', label: 'Dziecko 4-14', price: 20 },
+  toddlers: { id: 'toddlers', scope: 'people', label: 'Dziecko do 4', price: 0 },
+};
+
+const normalizeServiceText = (value) =>
+  oneLine(value, 200)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[×x]\s*\d+/g, ' ')
+    .replace(/\d+\s*(pln|zl|zł)(\s*\/\s*noc)?/g, ' ')
+    .replace(/legacy|pobyt|usluga|uslugi/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+const canonicalServiceId = (service = {}) => {
+  const id = normalizeServiceText(service.id);
+  const label = normalizeServiceText(service.label);
+  const scope = normalizeServiceText(service.scope);
+  const text = `${scope} ${id} ${label}`;
+
+  if (/electric|prad|power|10a/.test(text)) return 'electricity';
+  if (/cargo.*trailer|bagazow|przyczepa bagaz/.test(text)) return 'cargo-trailer';
+  if (/rooftop|dachow/.test(text)) return 'rooftop-tent';
+  if (/tent.*small|small.*tent|namiot.*1.*2|1.*2.*namiot/.test(text)) return 'tent-small';
+  if (/tent.*large|large.*tent|namiot.*3.*4|3.*4.*namiot/.test(text)) return 'tent-large';
+  if (/bungalow.*2|domek.*2|2.*os/.test(text)) return 'bungalow-2';
+  if (/bungalow.*3|domek.*3|3.*os/.test(text)) return 'bungalow-3';
+  if (/bungalow.*4|domek.*4|4.*os/.test(text)) return 'bungalow-4';
+  if (/camper|kamper/.test(text)) return 'camper';
+  if (/\bvan\b/.test(text)) return 'van';
+  if (/caravan|przyczep|wohnwagen|roulotte/.test(text)) return 'caravan';
+  if (/dog|pies|hund|chien|perro|pes/.test(text)) return 'dog';
+  if (/motorcycle|motocykl/.test(text)) return 'motorcycle';
+  if (/\bbus\b|ciezar|truck|lkw/.test(text)) return 'bus';
+  if (/extra.*car|dodatk.*auto/.test(text)) return 'extra-car';
+  if (/parking|samochod|auto|car\b/.test(text)) return 'parking';
+  if (/adult|dorosl|erwachsene|adulti/.test(text)) return 'adults';
+  if (/child|dziec|kinder|bambin/.test(text) && !/toddl|do 4|under 4/.test(text)) return 'children';
+  if (/toddl|do 4|under 4|infant/.test(text)) return 'toddlers';
+
+  return id || label;
+};
+
+const serviceQuantity = (service = {}) => {
+  const explicit = Math.floor(Number(service.qty || service.quantity || 0));
+  if (explicit > 0) return explicit;
+  const match = `${service.label || ''} ${service.id || ''}`.match(/[×x]\s*(\d+)/i);
+  return match ? Math.max(1, Math.floor(Number(match[1]))) : 1;
+};
+
 const normalizeServices = (payload) => {
   const services = Array.isArray(payload.services) ? payload.services : [];
   const addons = Array.isArray(payload.addons) ? payload.addons : [];
+  const normalized = new Map();
 
-  return services
-    .map((service) => ({
-      id: oneLine(service?.id, 80),
-      scope: oneLine(service?.scope, 40),
-      label: oneLine(service?.label, 120),
-      qty: Math.max(0, Math.floor(Number(service?.qty || 0))),
-      price: Math.max(0, Number(service?.price || 0)),
-    }))
-    .filter((service) => service.id && service.label && service.qty > 0)
-    .concat(
-      addons
-        .filter(Boolean)
-        .slice(0, 12)
-        .map((addon, index) => ({
-          id: `addon-${index + 1}`,
-          scope: 'legacy',
-          label: oneLine(addon, 120),
-          qty: 1,
-          price: 0,
-        })),
-    )
+  const addService = (service, source = 'services') => {
+    const canonicalId = canonicalServiceId(service);
+    const catalog = serviceCatalog[canonicalId];
+    const qty = serviceQuantity(service);
+    if (!canonicalId || qty <= 0) return;
+
+    const entry = {
+      id: catalog?.id || oneLine(service?.id || canonicalId, 80),
+      scope: catalog?.scope || oneLine(service?.scope || (source === 'legacy' ? 'legacy' : 'pobyt'), 40),
+      label: catalog?.label || oneLine(service?.label || service?.id || canonicalId, 120),
+      qty,
+      price: Math.max(0, Number(service?.price ?? catalog?.price ?? 0)),
+      source,
+    };
+    const key = `${entry.scope}:${canonicalId}`;
+    const existing = normalized.get(key);
+    if (!existing || (existing.source === 'legacy' && source !== 'legacy')) {
+      normalized.set(key, entry);
+      return;
+    }
+    if (existing.source === source) {
+      normalized.set(key, { ...existing, qty: Math.max(existing.qty, entry.qty), price: Math.max(existing.price, entry.price) });
+    }
+  };
+
+  services.forEach((service) => addService(service, 'services'));
+  addons
+    .filter(Boolean)
+    .slice(0, 12)
+    .forEach((addon, index) => addService({ id: `legacy-${index + 1}`, scope: 'legacy', label: oneLine(addon, 120), qty: serviceQuantity({ label: addon }) }, 'legacy'));
+
+  return [...normalized.values()]
+    .map(({ source, ...service }) => service)
     .slice(0, 40);
 };
 
