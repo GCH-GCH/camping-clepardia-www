@@ -37,6 +37,9 @@ const escapeHtml = (value) =>
 
 const configured = (...values) => values.find((value) => String(value || '').trim()) || '';
 
+const envValue = (name) =>
+  configured(globalThis.process?.env?.[name], import.meta.env?.[name]);
+
 const mailProvider = () => {
   const provider = String(process.env.MAIL_PROVIDER || 'auto').trim().toLowerCase();
   return ['auto', 'web3forms', 'resend', 'formsubmit'].includes(provider) ? provider : 'auto';
@@ -49,7 +52,7 @@ const inboxUrl = () => `${siteUrl()}/cc-gate-a8f3k9r2p6`;
 
 const reservationUrl = () => `${siteUrl()}/rezerwacja`;
 
-const web3FormsAccessKey = () => String(process.env.WEB3FORMS_ACCESS_KEY || '').trim();
+const web3FormsAccessKey = () => String(envValue('WEB3FORMS_ACCESS_KEY') || '').trim();
 
 const reservationToEmail = () =>
   configured(process.env.RESERVATION_TO_EMAIL, process.env.MAIL_TO, 'clepardia@gmail.com');
@@ -783,13 +786,42 @@ const buildFormSubmitPayload = (message, inquiry) => ({
   podsumowanie: message.text,
 });
 
-const normalizeWeb3FormsError = (body, status) => {
-  const rawMessage = oneLine(body?.message || body?.error || body?.reason || `Web3Forms returned ${status}.`, 800);
+const parseProviderBody = (text) => {
+  try {
+    return text ? JSON.parse(text) : {};
+  } catch {
+    return {};
+  }
+};
+
+const sanitizeProviderBody = (value) => {
+  const raw = typeof value === 'string' ? value : JSON.stringify(value || {});
+  return oneLine(raw.replace(/"access_key"\s*:\s*"[^"]+"/gi, '"access_key":"[redacted]"'), 1000);
+};
+
+const web3FormsAdminDiagnostic = (accessKey, response, responseBody, responseText, contentType) => ({
+  keyPresent: Boolean(String(accessKey || '').trim()),
+  keyLength: String(accessKey || '').trim().length,
+  status: response?.status ?? null,
+  responseSuccess: typeof responseBody?.success === 'boolean' ? responseBody.success : null,
+  responseBody: sanitizeProviderBody(Object.keys(responseBody || {}).length ? responseBody : responseText),
+  contentType,
+});
+
+const normalizeWeb3FormsError = (body, status, responseText = '') => {
+  const rawMessage = oneLine(body?.message || body?.error || body?.reason || responseText || `Web3Forms returned ${status}.`, 800);
   const normalized = rawMessage.toLowerCase();
   if (status === 401 || normalized.includes('access_key') || normalized.includes('access key') || normalized.includes('invalid key')) {
     return {
       errorCode: 'web3forms_invalid_access_key',
       message: 'Web3Forms access key is missing or invalid.',
+      reason: rawMessage,
+    };
+  }
+  if (normalized.includes('this method is not allowed') || normalized.includes('server ip address') || normalized.includes('pro plan')) {
+    return {
+      errorCode: 'WEB3FORMS_SERVER_SIDE_BLOCKED',
+      message: 'Web3Forms blokuje wysyłkę server-side z tej funkcji. Wymagana wysyłka client-side albo dopuszczenie IP/plan Pro po stronie Web3Forms.',
       reason: rawMessage,
     };
   }
@@ -803,76 +835,70 @@ const normalizeWeb3FormsError = (body, status) => {
 const buildWeb3FormsPayload = (message, inquiry) => ({
   access_key: web3FormsAccessKey(),
   subject: message.subject,
-  from_name: 'Camping Clepardia WWW',
+  from_name: 'Camping Clepardia — formularz strony',
   name: inquiry.fullName || 'Gość strony',
-  email: inquiry.email || reservationToEmail(),
-  replyto: inquiry.email || '',
-  phone: inquiry.phone || '',
-  to_email: reservationToEmail(),
+  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inquiry.email || '') ? inquiry.email : reservationToEmail(),
   message: message.text,
-  inquiry_id: inquiry.inquiryId,
-  cc_inbox: inboxUrl(),
-  typ_pobytu: inquiry.stayType,
-  imie_i_nazwisko: inquiry.fullName || '',
-  telefon: inquiry.phone || '',
-  email_klienta: inquiry.email || '',
-  kraj: inquiry.country || '',
-  jezyk: inquiry.contactLanguage || '',
-  termin: `${inquiry.arrival} - ${inquiry.departure}`,
-  data_przyjazdu: inquiry.arrival,
-  data_wyjazdu: inquiry.departure,
-  liczba_nocy: String(inquiry.nights || 0),
-  godzina_przyjazdu: inquiry.arrivalTime || '',
-  uslugi: inquiry.services.map((service) => `${service.label} x ${service.qty} - ${service.price} PLN / noc`).join('\n') || 'brak',
-  cena: inquiry.estimatedTotal || '',
-  wycieczki: inquiry.tours.join(', ') || '',
-  wydarzenie: inquiry.eventInterest || '',
-  pojazd: inquiry.vehicleType || inquiry.vehicleDetails?.summary || '',
-  numer_rejestracyjny: inquiry.vehiclePlate || '',
-  numer_przyczepy: inquiry.trailerPlate || '',
-  specjalne_potrzeby: inquiry.specialNeeds || '',
-  feedback_ocena: inquiry.feedback?.rating ? `${inquiry.feedback.rating}/5` : '',
-  feedback_podobalo_sie: inquiry.feedback?.liked?.join(', ') || '',
-  feedback_latwo_info: inquiry.feedback?.easyInfo || '',
-  feedback_latwy_formularz: inquiry.feedback?.easyForm || '',
-  feedback_sugestia: inquiry.feedback?.improve || '',
-  zapis_do_panelu: 'Zapytanie zapisane w Panelu Recepcji CC.',
 });
+
+const toUrlEncoded = (payload) => {
+  const params = new URLSearchParams();
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    params.append(key, String(value));
+  });
+  return params;
+};
 
 const sendWithWeb3Forms = async (message, inquiry) => {
   const accessKey = web3FormsAccessKey();
+  const keyLength = accessKey.length;
   if (!accessKey) {
     return {
       provider: 'web3forms',
       delivered: false,
-      errorCode: 'WEB3FORMS_ACCESS_KEY_MISSING',
-      reason: 'WEB3FORMS_ACCESS_KEY is not configured - Web3Forms was skipped.',
-      message: 'WEB3FORMS_ACCESS_KEY is not configured - Web3Forms was skipped.',
+      errorCode: 'WEB3FORMS_KEY_MISSING',
+      reason: 'WEB3FORMS_KEY_MISSING',
+      message: 'WEB3FORMS_KEY_MISSING',
+      keyPresent: false,
+      keyLength,
+      contentType: 'application/x-www-form-urlencoded',
     };
   }
 
   try {
+    const contentType = 'application/x-www-form-urlencoded';
+    const payload = buildWeb3FormsPayload(message, inquiry);
+    const formBody = toUrlEncoded(payload);
     const response = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       headers: {
         accept: 'application/json',
-        'content-type': 'application/json',
+        'content-type': `${contentType}; charset=UTF-8`,
+        'user-agent': 'curl/8.5.0',
       },
-      body: JSON.stringify(buildWeb3FormsPayload(message, inquiry)),
+      body: formBody.toString(),
     });
-    const body = await response.json().catch(() => ({}));
+    const responseText = await response.text().catch(() => '');
+    const body = parseProviderBody(responseText);
+    const diagnostic = web3FormsAdminDiagnostic(accessKey, response, body, responseText, contentType);
 
     if (!response.ok || body?.success === false) {
-      const normalizedError = normalizeWeb3FormsError(body, response.status);
+      const normalizedError = normalizeWeb3FormsError(body, response.status, responseText);
       console.error('[reservation-api] web3forms-provider-error', {
         status: response.status,
         errorCode: normalizedError.errorCode,
         reason: normalizedError.reason,
+        keyPresent: diagnostic.keyPresent,
+        keyLength: diagnostic.keyLength,
+        responseBody: diagnostic.responseBody,
+        contentType,
       });
       return {
         provider: 'web3forms',
         delivered: false,
         status: response.status,
+        ...diagnostic,
         ...normalizedError,
       };
     }
@@ -882,6 +908,11 @@ const sendWithWeb3Forms = async (message, inquiry) => {
       delivered: true,
       messageId: oneLine(body?.data?.id || body?.message || body?.submission_id || '', 180),
       message: oneLine(body?.message || 'Sent through Web3Forms.', 240),
+      status: response.status,
+      keyPresent: diagnostic.keyPresent,
+      keyLength: diagnostic.keyLength,
+      responseSuccess: diagnostic.responseSuccess,
+      contentType,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Web3Forms request failed.';
@@ -891,6 +922,9 @@ const sendWithWeb3Forms = async (message, inquiry) => {
       errorCode: 'WEB3FORMS_REQUEST_FAILED',
       message,
       reason: message,
+      keyPresent: true,
+      keyLength,
+      contentType: 'application/x-www-form-urlencoded',
     };
   }
 };
@@ -1035,6 +1069,11 @@ const sendReceptionMail = async (message, inquiry) => {
         errorCode: web3forms.errorCode || 'WEB3FORMS_ERROR',
         message: web3forms.message || web3forms.reason || 'Web3Forms delivery failed.',
         reason: web3forms.reason || '',
+        keyPresent: web3forms.keyPresent,
+        keyLength: web3forms.keyLength,
+        responseBody: web3forms.responseBody || '',
+        responseSuccess: web3forms.responseSuccess ?? null,
+        contentType: web3forms.contentType || '',
       },
     };
   }
@@ -1053,6 +1092,19 @@ const sendCustomerConfirmation = async (message) => {
     };
   }
   return sendWithResend(message);
+};
+
+const providerFailureSummary = (result, label = '') => {
+  if (!result) return '';
+  const prefix = label || result.provider || 'provider';
+  return oneLine([
+    `${prefix}: ${result.errorCode || result.message || result.reason || 'MAIL_ERROR'}`,
+    result.status ? `status ${result.status}` : '',
+    typeof result.keyPresent === 'boolean' ? `keyPresent ${result.keyPresent}` : '',
+    Number.isFinite(Number(result.keyLength)) ? `keyLength ${Number(result.keyLength)}` : '',
+    result.responseBody ? `body ${result.responseBody}` : '',
+    result.reason || result.message || '',
+  ].filter(Boolean).join(' | '), 900);
 };
 
 export default async function handler(req, res) {
@@ -1142,7 +1194,10 @@ export default async function handler(req, res) {
     const reception = await sendReceptionMail(buildReceptionMail(inquiry), inquiry);
     const mailError = reception.delivered
       ? null
-      : oneLine(reception.message || reception.reason || reception.errorCode || 'Mail delivery failed.', 1200);
+      : oneLine([
+          providerFailureSummary(reception.fallbackFrom, 'web3forms'),
+          providerFailureSummary(reception, reception.provider || 'provider'),
+        ].filter(Boolean).join(' | '), 1200);
     let inboxUpdateError = '';
     try {
       await updateReservationMailStatus(inquiry.inquiryId, {
