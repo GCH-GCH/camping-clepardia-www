@@ -1,4 +1,5 @@
 import {
+  authorizeInboxRequest,
   logInboxError,
   saveReservationInquiry,
   serializeInboxError,
@@ -41,7 +42,7 @@ const envValue = (name) =>
   configured(globalThis.process?.env?.[name], import.meta.env?.[name]);
 
 const mailProvider = () => {
-  const provider = String(process.env.MAIL_PROVIDER || 'auto').trim().toLowerCase();
+  const provider = String(envValue('MAIL_PROVIDER') || 'auto').trim().toLowerCase();
   return ['auto', 'web3forms', 'resend', 'formsubmit'].includes(provider) ? provider : 'auto';
 };
 
@@ -55,14 +56,19 @@ const reservationUrl = () => `${siteUrl()}/rezerwacja`;
 const web3FormsAccessKey = () => String(envValue('WEB3FORMS_ACCESS_KEY') || '').trim();
 
 const reservationToEmail = () =>
-  configured(process.env.RESERVATION_TO_EMAIL, process.env.MAIL_TO, 'clepardia@gmail.com');
+  configured(envValue('RESERVATION_TO_EMAIL'), envValue('MAIL_TO'), 'clepardia@gmail.com');
 
 const formSubmitEmail = () =>
-  configured(process.env.FORMSUBMIT_TO_EMAIL, process.env.RESERVATION_TO_EMAIL, process.env.MAIL_TO, 'clepardia@gmail.com');
+  configured(envValue('FORMSUBMIT_TO_EMAIL'), envValue('RESERVATION_TO_EMAIL'), envValue('MAIL_TO'), 'clepardia@gmail.com');
+
+const resendApiKey = () => String(envValue('RESEND_API_KEY') || '').trim();
+
+const reservationFromEmail = () =>
+  configured(envValue('RESERVATION_FROM_EMAIL'), envValue('MAIL_FROM'));
 
 const mailEnvSnapshot = () => {
-  const apiKey = String(process.env.RESEND_API_KEY || '').trim();
-  const from = configured(process.env.RESERVATION_FROM_EMAIL, process.env.MAIL_FROM, 'Camping Clepardia WWW <no-reply@clepardia.com.pl>');
+  const apiKey = resendApiKey();
+  const from = reservationFromEmail();
   const to = reservationToEmail();
   const fromDomain = String(from).match(/@([^>\s]+)/)?.[1] || '';
 
@@ -72,8 +78,8 @@ const mailEnvSnapshot = () => {
     resendKeyPresent: Boolean(apiKey),
     resendKeyStartsWithRe: apiKey.startsWith('re_'),
     resendKeyLength: apiKey.length,
-    reservationFromPresent: Boolean(String(process.env.RESERVATION_FROM_EMAIL || '').trim()),
-    reservationToPresent: Boolean(String(process.env.RESERVATION_TO_EMAIL || '').trim()),
+    reservationFromPresent: Boolean(reservationFromEmail()),
+    reservationToPresent: Boolean(reservationToEmail()),
     formSubmitToPresent: Boolean(formSubmitEmail()),
     fromDomain,
     toPresent: Boolean(to),
@@ -307,6 +313,44 @@ const normalizeVehicleDetails = (payload = {}) => {
   return Object.values(vehicle).some(Boolean) ? vehicle : null;
 };
 
+const detectTestSubmission = (payload = {}) => {
+  const values = [
+    payload.fullName,
+    payload.name,
+    payload.email,
+    payload.phone,
+    payload.country,
+    payload.message,
+    payload.originalMessage,
+    payload.source,
+    payload.debug,
+    payload.test,
+    payload.inquiryName,
+  ].map((value) => oneLine(value, 400).toLowerCase());
+  const haystack = values.join(' ');
+  const reasons = [];
+  if (/\b(test|tester|demo|dummy|aaa|asd|qwe)\b/.test(String(payload.fullName || payload.name || '').toLowerCase())) {
+    reasons.push('name');
+  }
+  if (/(test|example|demo|fake)/i.test(String(payload.email || ''))) {
+    reasons.push('email');
+  }
+  if (/(test web3forms|test resend|testowy|task12|codex|live test|diagnostic test)/i.test(String(payload.message || payload.originalMessage || ''))) {
+    reasons.push('message');
+  }
+  if (/test\s*(web3forms|resend|cc)/i.test(String(payload.inquiryName || payload.fullName || ''))) {
+    reasons.push('inquiryName');
+  }
+  const phoneDigits = String(payload.phone || '').replace(/\D+/g, '');
+  if (/^(0+|1{6,}|123456789|123123123|987654321)$/.test(phoneDigits)) {
+    reasons.push('phone');
+  }
+  if (/\b(test|demo|dummy|fake|debug|codex|task12\w*)\b/i.test(haystack) || payload.test === true || payload.isTest === true) {
+    reasons.push('source');
+  }
+  return { isTest: reasons.length > 0, reasons: [...new Set(reasons)] };
+};
+
 const createInquiry = (payload, normalized) => {
   const nights = normalized.arrival && normalized.departure
     ? Math.max(1, Math.round((normalized.departure.getTime() - normalized.arrival.getTime()) / DAY))
@@ -314,9 +358,13 @@ const createInquiry = (payload, normalized) => {
 
   const vehicleDetails = normalizeVehicleDetails(payload);
 
+  const testDiagnostic = detectTestSubmission(payload);
+
   return {
     inquiryId: `WEB-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 10).toUpperCase()}`,
     submittedAt: new Date().toISOString(),
+    isTest: testDiagnostic.isTest,
+    testReasons: testDiagnostic.reasons,
     fullName: oneLine(payload.fullName, 140),
     email: normalized.email,
     phone: normalized.phone,
@@ -374,7 +422,7 @@ const hasBungalow = (inquiry) =>
   /bungalow|domek|domki|combined|razem/i.test(`${inquiry.selectedStayMode} ${inquiry.stayCategory} ${inquiry.stayType}`);
 
 const customerConfirmationEnabled = () =>
-  /^true$/i.test(String(process.env.SEND_CUSTOMER_CONFIRMATION || '').trim());
+  /^true$/i.test(String(envValue('SEND_CUSTOMER_CONFIRMATION') || '').trim());
 
 const createCcSystemDraft = (inquiry) => ({
   source: 'website',
@@ -425,8 +473,16 @@ const numericTotal = (value) => {
   return match ? Number(match[0]) : null;
 };
 
+const stayKindLabel = (inquiry) => {
+  const text = `${inquiry.selectedStayMode} ${inquiry.stayCategory} ${inquiry.stayType}`.toLowerCase();
+  if (inquiry.isTest) return 'Test';
+  if (/combined|razem|łącz|lacz/.test(text)) return 'Razem';
+  if (/bungalow|domek|domki/.test(text)) return 'Domki';
+  return 'Camping';
+};
+
 const createSupabaseRecord = (inquiry, payload) => ({
-  status: inquiry.website ? 'spam' : 'new',
+  status: inquiry.website ? 'spam' : inquiry.isTest ? 'test' : 'new',
   source: oneLine(payload.source || 'website', 80),
   stay_type: inquiry.stayType,
   language: inquiry.contactLanguage,
@@ -457,10 +513,23 @@ const createSupabaseRecord = (inquiry, payload) => ({
   mail_provider: 'none',
   mail_delivered: false,
   mail_error: null,
-  raw_payload_json: payload,
+  raw_payload_json: {
+    ...payload,
+    ccDiagnostics: {
+      isTest: Boolean(inquiry.isTest),
+      testReasons: inquiry.testReasons || [],
+    },
+  },
 });
 
 const buildReceptionMail = (inquiry) => {
+  const stayKind = stayKindLabel(inquiry);
+  const statusRows = [
+    ['Typ zgłoszenia', inquiry.isTest ? `TEST (${(inquiry.testReasons || []).join(', ') || 'heurystyka'})` : 'Klient'],
+    ['Provider maila', 'Resend jako główny provider'],
+    ['Inquiry ID', inquiry.inquiryId],
+    ['Data wpływu', inquiry.submittedAt],
+  ];
   const depositNote = hasBungalow(inquiry)
     ? 'W przypadku domkow moze byc wymagana zaliczka. Dane do zaliczki nalezy wyslac klientowi w odpowiedzi mailowej po potwierdzeniu dostepnosci.'
     : '';
@@ -490,6 +559,7 @@ const buildReceptionMail = (inquiry) => {
     inquiry.people.toddlers ? `Dzieci do 4: ${inquiry.people.toddlers}` : '',
   ].filter(Boolean).join(', ') || 'brak';
   const rows = [
+    ...statusRows,
     ['ID', inquiry.inquiryId],
     ['Zapis do panelu', 'zapisano w reservation_inquiries'],
     ['Panel recepcji', inboxUrl()],
@@ -499,6 +569,7 @@ const buildReceptionMail = (inquiry) => {
     ['Orientacyjna godzina przyjazdu', inquiry.arrivalTime || 'jeszcze nie wiem'],
     ['Noce', inquiry.nights],
     ['Goscie', guests],
+    ['Razem osób', Number(inquiry.people.adults || 0) + Number(inquiry.people.children || 0) + Number(inquiry.people.toddlers || 0)],
     ['Cena orientacyjna', inquiry.estimatedTotal || 'brak'],
     ['Waluty orientacyjnie', inquiry.currencyEstimate || 'brak'],
     ['Imie i nazwisko', inquiry.fullName],
@@ -521,6 +592,8 @@ const buildReceptionMail = (inquiry) => {
     ['Sugestia ulepszenia', inquiry.feedback?.improve || 'brak'],
     ['Lipiec/sierpień — camping bez rezerwacji', inquiry.highSeasonCampingInfo ? 'TAK — przekazano informację o kolejności przyjazdu' : 'nie dotyczy'],
     ['Domki — własne ręczniki i rzeczy osobiste', inquiry.bungalowPersonalItemsNotice ? 'przekazano klientowi' : 'nie dotyczy'],
+    ['Google Maps / wjazd 2022', 'przypomnij klientowi, żeby używać Google Maps'],
+    ['Camping w mieście', 'cisza nocna 22:00-07:00, brama standardowo 8:00-22:00'],
     ['Cisza nocna', inquiry.quietConsent ? 'zaakceptowana' : 'brak'],
     ['Zgoda kontaktowa', inquiry.consent ? 'zaakceptowana' : 'brak'],
     ['Zgoda RODO', inquiry.privacyConsent ? 'zaakceptowana' : 'brak'],
@@ -613,10 +686,10 @@ const buildReceptionMail = (inquiry) => {
   ].filter(Boolean).join('\n');
 
   return {
-    from: configured(process.env.RESERVATION_FROM_EMAIL, process.env.MAIL_FROM, 'Camping Clepardia WWW <no-reply@clepardia.com.pl>'),
+    from: reservationFromEmail(),
     to: reservationToEmail(),
     replyTo: inquiry.email || undefined,
-    subject: `Nowe zapytanie Camping Clepardia - ${inquiry.stayType} - ${inquiry.arrival}`,
+    subject: `Nowe zapytanie Camping Clepardia — ${stayKind} — ${inquiry.arrival}`,
     html: bodyHtml,
     text: bodyText,
   };
@@ -686,7 +759,7 @@ const buildCustomerMail = (inquiry) => {
   ].filter(Boolean).join('\n');
 
   return {
-    from: configured(process.env.RESERVATION_FROM_EMAIL, process.env.MAIL_FROM, 'Camping Clepardia WWW <no-reply@clepardia.com.pl>'),
+    from: reservationFromEmail(),
     to: inquiry.email,
     replyTo: reservationToEmail(),
     subject: 'Otrzymalismy Twoje zapytanie - Camping Clepardia',
@@ -930,12 +1003,20 @@ const sendWithWeb3Forms = async (message, inquiry) => {
 };
 
 const sendWithResend = async (message) => {
-  const apiKey = String(process.env.RESEND_API_KEY || '').trim();
-  if (!apiKey) {
+  const apiKey = resendApiKey();
+  const missing = [
+    !apiKey ? 'RESEND_API_KEY' : '',
+    !String(message.from || '').trim() ? 'RESERVATION_FROM_EMAIL' : '',
+    !String(message.to || '').trim() ? 'RESERVATION_TO_EMAIL' : '',
+  ].filter(Boolean);
+  if (missing.length) {
     return {
-      provider: 'mock',
+      provider: 'resend',
       delivered: false,
-      reason: 'RESEND_API_KEY is not configured - mail body prepared but not sent.',
+      errorCode: 'RESEND_ENV_MISSING',
+      reason: `Brak wymaganych ENV dla Resend: ${missing.join(', ')}.`,
+      message: `Brak wymaganych ENV dla Resend: ${missing.join(', ')}.`,
+      missing,
     };
   }
 
@@ -976,6 +1057,7 @@ const sendWithResend = async (message) => {
       provider: 'resend',
       delivered: true,
       messageId: body?.id || '',
+      status: response.status,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Resend request failed.';
@@ -1050,10 +1132,8 @@ const sendWithFormSubmit = async (message, inquiry) => {
 };
 
 const sendReceptionMail = async (message, inquiry) => {
-  const provider = mailProvider();
-  if (provider === 'web3forms') return sendWithWeb3Forms(message, inquiry);
-  if (provider === 'resend') return sendWithResend(message);
-  if (provider === 'formsubmit') return sendWithFormSubmit(message, inquiry);
+  const resend = await sendWithResend(message);
+  if (resend.delivered) return resend;
 
   if (web3FormsAccessKey()) {
     const web3forms = await sendWithWeb3Forms(message, inquiry);
@@ -1063,27 +1143,47 @@ const sendReceptionMail = async (message, inquiry) => {
     return {
       ...formsubmit,
       fallbackFrom: {
-        provider: 'web3forms',
+        provider: 'resend',
         delivered: false,
-        status: web3forms.status || null,
-        errorCode: web3forms.errorCode || 'WEB3FORMS_ERROR',
-        message: web3forms.message || web3forms.reason || 'Web3Forms delivery failed.',
-        reason: web3forms.reason || '',
-        keyPresent: web3forms.keyPresent,
-        keyLength: web3forms.keyLength,
-        responseBody: web3forms.responseBody || '',
-        responseSuccess: web3forms.responseSuccess ?? null,
-        contentType: web3forms.contentType || '',
+        status: resend.status || null,
+        errorCode: resend.errorCode || 'RESEND_ERROR',
+        message: resend.message || resend.reason || 'Resend delivery failed.',
+        reason: resend.reason || '',
+        missing: resend.missing || undefined,
+        nextFallback: {
+          provider: 'web3forms',
+          delivered: false,
+          status: web3forms.status || null,
+          errorCode: web3forms.errorCode || 'WEB3FORMS_ERROR',
+          message: web3forms.message || web3forms.reason || 'Web3Forms delivery failed.',
+          reason: web3forms.reason || '',
+          keyPresent: web3forms.keyPresent,
+          keyLength: web3forms.keyLength,
+          responseBody: web3forms.responseBody || '',
+          responseSuccess: web3forms.responseSuccess ?? null,
+          contentType: web3forms.contentType || '',
+        },
       },
     };
   }
 
   const formsubmit = await sendWithFormSubmit(message, inquiry);
-  return formsubmit;
+  return {
+    ...formsubmit,
+    fallbackFrom: {
+      provider: 'resend',
+      delivered: false,
+      status: resend.status || null,
+      errorCode: resend.errorCode || 'RESEND_ERROR',
+      message: resend.message || resend.reason || 'Resend delivery failed.',
+      reason: resend.reason || '',
+      missing: resend.missing || undefined,
+    },
+  };
 };
 
 const sendCustomerConfirmation = async (message) => {
-  const apiKey = String(process.env.RESEND_API_KEY || '').trim();
+  const apiKey = resendApiKey();
   if (!apiKey) {
     return {
       provider: 'mock',
@@ -1103,8 +1203,31 @@ const providerFailureSummary = (result, label = '') => {
     typeof result.keyPresent === 'boolean' ? `keyPresent ${result.keyPresent}` : '',
     Number.isFinite(Number(result.keyLength)) ? `keyLength ${Number(result.keyLength)}` : '',
     result.responseBody ? `body ${result.responseBody}` : '',
+    result.missing ? `missing ${[].concat(result.missing).join(',')}` : '',
     result.reason || result.message || '',
   ].filter(Boolean).join(' | '), 900);
+};
+
+const acceptedReservationResponse = (req, inquiry, reception = {}, mail = {}, inboxUpdateError = '') => {
+  const publicPayload = {
+    ok: true,
+    inquirySaved: true,
+    inquiryId: inquiry.inquiryId,
+    mode: 'accepted',
+    message: 'Dziękujemy. Zapytanie zostało przyjęte przez recepcję Camping Clepardia.',
+  };
+  if (!authorizeInboxRequest(req)) return publicPayload;
+  return {
+    ...publicPayload,
+    provider: reception.fallbackFrom ? 'fallback' : (reception.provider || 'none'),
+    delivered: Boolean(reception.delivered),
+    error: reception.delivered ? null : (reception.errorCode || 'MAIL_NOT_DELIVERED'),
+    reason: reception.delivered
+      ? (inboxUpdateError || null)
+      : [reception.reason || reception.message || 'Mail body prepared but not sent.', inboxUpdateError].filter(Boolean).join(' | '),
+    mail,
+    ccSystemDraft: createCcSystemDraft(inquiry),
+  };
 };
 
 export default async function handler(req, res) {
@@ -1181,12 +1304,9 @@ export default async function handler(req, res) {
       return sendJson(res, 200, {
         ok: true,
         inquirySaved: true,
-        provider: 'none',
-        delivered: false,
-        error: null,
-        reason: 'Spam-filtered submission.',
         inquiryId: inquiry.inquiryId,
-        mode: 'spam-filtered',
+        mode: 'accepted',
+        message: 'Dziękujemy. Zapytanie zostało przyjęte przez recepcję Camping Clepardia.',
       });
     }
 
@@ -1195,7 +1315,8 @@ export default async function handler(req, res) {
     const mailError = reception.delivered
       ? null
       : oneLine([
-          providerFailureSummary(reception.fallbackFrom, 'web3forms'),
+          providerFailureSummary(reception.fallbackFrom, reception.fallbackFrom?.provider || 'fallback'),
+          providerFailureSummary(reception.fallbackFrom?.nextFallback, reception.fallbackFrom?.nextFallback?.provider || 'fallback2'),
           providerFailureSummary(reception, reception.provider || 'provider'),
         ].filter(Boolean).join(' | '), 1200);
     let inboxUpdateError = '';
@@ -1222,19 +1343,7 @@ export default async function handler(req, res) {
     };
 
     if (!reception.delivered && reception.provider === 'formsubmit' && reception.activationNotice) {
-      return sendJson(res, 200, {
-        ok: true,
-        inquirySaved: true,
-        provider: reception.fallbackFrom ? 'fallback' : 'formsubmit',
-        delivered: false,
-        error: reception.errorCode || 'formsubmit_activation_required',
-        reason: [reception.reason || reception.message, inboxUpdateError].filter(Boolean).join(' | '),
-        mode: 'formsubmit',
-        inquiryId: inquiry.inquiryId,
-        message: reception.message,
-        mail,
-        ccSystemDraft: createCcSystemDraft(inquiry),
-      });
+      return sendJson(res, 200, acceptedReservationResponse(req, inquiry, reception, mail, inboxUpdateError));
     }
 
     if (!reception.delivered && reception.provider !== 'mock') {
@@ -1245,20 +1354,7 @@ export default async function handler(req, res) {
         errorCode: reception.errorCode || 'MAIL_ERROR',
         message: reception.message || reception.reason || 'Mail delivery failed.',
       });
-      return sendJson(res, 200, {
-        ok: true,
-        inquirySaved: true,
-        mode: 'mail-error',
-        provider: reception.fallbackFrom ? 'fallback' : (reception.provider || 'none'),
-        delivered: false,
-        error: reception.errorCode || 'MAIL_ERROR',
-        reason: [reception.reason || reception.message || 'Mail delivery failed.', inboxUpdateError].filter(Boolean).join(' | '),
-        errorCode: reception.errorCode || 'MAIL_ERROR',
-        message: reception.message || reception.reason || 'Mail delivery failed.',
-        inquiryId: inquiry.inquiryId,
-        mail,
-        ccSystemDraft: createCcSystemDraft(inquiry),
-      });
+      return sendJson(res, 200, acceptedReservationResponse(req, inquiry, reception, mail, inboxUpdateError));
     }
 
     if (reception.delivered && inquiry.email && customerConfirmationEnabled()) {
@@ -1281,20 +1377,7 @@ export default async function handler(req, res) {
       };
     }
 
-    return sendJson(res, 200, {
-      ok: true,
-      inquirySaved: true,
-      provider: reception.fallbackFrom ? 'fallback' : (reception.provider || 'none'),
-      delivered: Boolean(reception.delivered),
-      error: reception.delivered ? null : (reception.errorCode || 'MAIL_NOT_DELIVERED'),
-      reason: reception.delivered
-        ? (inboxUpdateError || null)
-        : [reception.reason || 'Mail body prepared but not sent.', inboxUpdateError].filter(Boolean).join(' | '),
-      mode: reception.delivered ? reception.provider : 'mock',
-      inquiryId: inquiry.inquiryId,
-      mail,
-      ccSystemDraft: createCcSystemDraft(inquiry),
-    });
+    return sendJson(res, 200, acceptedReservationResponse(req, inquiry, reception, mail, inboxUpdateError));
   } catch (error) {
     console.error('[reservation-api-unhandled]', {
       code: error?.code || 'RESERVATION_ENDPOINT_FAILED',

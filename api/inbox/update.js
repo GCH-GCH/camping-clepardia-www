@@ -5,7 +5,19 @@ import {
   updateReservationInquiry,
 } from '../_lib/inbox.js';
 
-const ALLOWED_STATUSES = new Set(['new', 'needs_reply', 'replied', 'confirmed', 'rejected', 'spam', 'archived']);
+const ALLOWED_STATUSES = new Set([
+  'new',
+  'needs_reply',
+  'replied',
+  'needs_confirmation',
+  'confirmed',
+  'unavailable',
+  'rejected',
+  'cancelled',
+  'archived',
+  'test',
+  'spam',
+]);
 
 const sendJson = (res, status, payload) => {
   res.status(status);

@@ -51,9 +51,27 @@ const title = 'CC Inbox — Panel Recepcji';
           </div>
         </header>
 
+        <nav class="view-tabs" aria-label="Widoki CC Inbox">
+          <button type="button" data-view="inbox" aria-pressed="true">Inbox</button>
+          <button type="button" data-view="tests" aria-pressed="false">Testy</button>
+          <button type="button" data-view="stats" aria-pressed="false">Statystyki</button>
+          <button type="button" data-view="templates" aria-pressed="false">Schematy</button>
+          <button type="button" data-view="settings" aria-pressed="false">Ustawienia</button>
+          <button type="button" data-view="archive" aria-pressed="false">Archiwum</button>
+        </nav>
+
+        <section class="system-strip" data-system-strip aria-label="Status systemu"></section>
+
         <section class="stats-grid" data-stats aria-label="Statystyki inboxu"></section>
 
         <section class="filters" aria-label="Filtry zapytań">
+          <div class="filter-shortcuts">
+            <button type="button" data-view-shortcut="inbox">Wszystko</button>
+            <button type="button" data-clear-filters>Wyczyść filtry</button>
+            <button type="button" data-view-shortcut="tests">Testy</button>
+            <button type="button" data-view-shortcut="archive">Archiwum</button>
+            <span data-active-filter-count>Aktywne filtry: 0</span>
+          </div>
           <label class="search"><span>Szukaj</span><input type="search" data-filter="search" placeholder="Imię, email, telefon, rejestracja, kraj, wiadomość…" /></label>
           <label><span>Status</span><select data-filter="status"><option value="">Wszystkie</option></select></label>
           <label><span>Kategoria</span><select data-filter="category"><option value="">Wszystkie</option></select></label>
@@ -69,6 +87,12 @@ const title = 'CC Inbox — Panel Recepcji';
           <label class="check"><input type="checkbox" data-filter="heavy" /><span>Ciężki pojazd</span></label>
           <label class="check"><input type="checkbox" data-filter="ev" /><span>Prąd / EV</span></label>
           <label class="check"><input type="checkbox" data-filter="summer" /><span>Lipiec / sierpień</span></label>
+          <label class="check"><input type="checkbox" data-filter="mailSent" /><span>Mail wysłany</span></label>
+          <label class="check"><input type="checkbox" data-filter="group" /><span>Grupy</span></label>
+          <label class="check"><input type="checkbox" data-filter="scouts" /><span>Skauci</span></label>
+          <label class="check"><input type="checkbox" data-filter="missing" /><span>Brakuje danych</span></label>
+          <label class="check"><input type="checkbox" data-filter="today" /><span>Dzisiaj</span></label>
+          <label class="check"><input type="checkbox" data-filter="next7" /><span>7 dni</span></label>
         </section>
 
         <p class="app-status" data-app-status aria-live="polite"></p>
@@ -89,16 +113,21 @@ const title = 'CC Inbox — Panel Recepcji';
         const stats = document.querySelector('[data-stats]');
         const connectionStatus = document.querySelector('[data-connection-status]');
         const lastRefresh = document.querySelector('[data-last-refresh]');
+        const systemStrip = document.querySelector('[data-system-strip]');
+        const activeFilterCount = document.querySelector('[data-active-filter-count]');
+        const viewButtons = Array.from(document.querySelectorAll('[data-view]'));
         const filters = Array.from(document.querySelectorAll('[data-filter]'));
-        const statusLabels = { new:'Nowe', needs_reply:'Do odpowiedzi', replied:'Odpowiedziane', needs_confirmation:'Do potwierdzenia', confirmed:'Potwierdzone', unavailable:'Brak miejsc', rejected:'Odrzucone', cancelled:'Anulowane', spam:'Spam/test', archived:'Archiwum' };
+        const statusLabels = { new:'Nowe', needs_reply:'Do odpowiedzi', replied:'Odpowiedziane', needs_confirmation:'Do potwierdzenia', confirmed:'Potwierdzone', unavailable:'Brak miejsc', rejected:'Odrzucone', cancelled:'Anulowane', archived:'Archiwum', test:'Test', spam:'Spam/test' };
         const categoryLabels = {
           urgent:'Pilne', today:'Przyjazd dzisiaj', next7:'Przyjazd ≤ 7 dni', camping:'Camping', bungalow:'Domki', combined:'Pobyt łączony',
           group:'Grupa', scouts:'Harcerze / skauci', trips:'Wycieczki', feedback:'Opinia o stronie',
           event:'Wydarzenie', mailFailed:'Mail niedostarczony', late:'Późny przyjazd', special:'Specjalne potrzeby',
-          heavy:'Ciężki pojazd', ev:'Prąd / EV warning',
+          heavy:'Ciężki pojazd', ev:'Prąd / EV warning', missing:'Brakuje danych', mailSent:'Mail wysłany', test:'Test', archived:'Archiwum',
         };
         let accessCode = '';
         let inquiries = [];
+        let health = null;
+        let activeView = 'inbox';
 
         const esc = (value) => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
         const raw = (item) => item?.raw_payload_json && typeof item.raw_payload_json === 'object' ? item.raw_payload_json : {};
@@ -106,6 +135,23 @@ const title = 'CC Inbox — Panel Recepcji';
         const likedFeedback = (review) => Array.isArray(review?.liked) ? review.liked : [];
         const vehicle = (item) => item?.vehicle_details_json && typeof item.vehicle_details_json === 'object' ? item.vehicle_details_json : {};
         const normalizeText = (value) => String(value ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+        const testReasons = (item) => {
+          const payload = raw(item);
+          const reasons = new Set(Array.isArray(payload?.ccDiagnostics?.testReasons) ? payload.ccDiagnostics.testReasons : []);
+          const name = normalizeText(item.full_name || payload.fullName || payload.name);
+          const email = normalizeText(item.email || payload.email);
+          const phoneDigits = String(item.phone || payload.phone || '').replace(/\D+/g,'');
+          const message = normalizeText([item.message,payload.message,payload.originalMessage,payload.source,payload.debug,payload.test].join(' '));
+          if (payload?.ccDiagnostics?.isTest || item.status === 'test' || item.status === 'spam') reasons.add('status');
+          if (/\b(test|tester|demo|dummy|aaa|asd|qwe|codex)\b/.test(name)) reasons.add('name');
+          if (/(test|example|demo|fake)/.test(email)) reasons.add('email');
+          if (/(test web3forms|test resend|testowy|task12|codex|live test|diagnostic test)/.test(message)) reasons.add('message');
+          if (/^(0+|1{6,}|123456789|123123123|987654321)$/.test(phoneDigits)) reasons.add('phone');
+          if (/\b(debug|test|codex|task12\w*)\b/.test(message)) reasons.add('source');
+          return [...reasons];
+        };
+        const isTestInquiry = (item) => testReasons(item).length > 0;
+        const isArchivedInquiry = (item) => item.status === 'archived';
         const flagEmoji = (code) => /^[A-Z]{2}$/.test(code)
           ? [...code].map((char)=>String.fromCodePoint(127397 + char.charCodeAt(0))).join('')
           : '🌍';
@@ -232,8 +278,15 @@ const title = 'CC Inbox — Panel Recepcji';
         const serviceBuckets = (item) => {
           const payload = raw(item);
           const toArray = (value) => Array.isArray(value) ? value.filter(Boolean) : [];
+          const people = payload.people && typeof payload.people === 'object' ? payload.people : {};
+          const peopleItems = [
+            Number(people.adults || 0) > 0 ? { id:'adults', scope:'people', label:'Osoba dorosła', qty:Number(people.adults || 0) } : null,
+            Number(people.children || 0) > 0 ? { id:'children', scope:'people', label:'Dziecko 4-14', qty:Number(people.children || 0) } : null,
+            Number(people.toddlers || 0) > 0 ? { id:'toddlers', scope:'people', label:'Dziecko do 4', qty:Number(people.toddlers || 0) } : null,
+          ].filter(Boolean);
           return [
             { source:'services_json', rank:50, items:toArray(item?.services_json) },
+            { source:'people', rank:45, items:peopleItems },
             { source:'payload_services', rank:40, items:toArray(payload.services) },
             { source:'summary_services', rank:30, items:toArray(payload.summary?.services) },
             { source:'stay_services', rank:30, items:toArray(payload.stay?.services) },
@@ -288,9 +341,45 @@ const title = 'CC Inbox — Panel Recepcji';
           now.setHours(12,0,0,0);
           return Math.ceil((arrival.getTime() - now.getTime()) / 86400000);
         };
-        const guestCount = (item) => {
+        const normalizeInquiryGuests = (item) => {
           const people = raw(item).people || {};
-          return ['adults','children','toddlers'].reduce((sum,key)=>sum + Math.max(0,Number(people[key] || 0)),0);
+          const adults = Math.max(0,Number(people.adults || 0));
+          const children = Math.max(0,Number(people.children || 0));
+          const toddlers = Math.max(0,Number(people.toddlers || 0));
+          const bungalowGuests = Math.max(0,Number(raw(item).guests?.bungalowGuests || raw(item).bungalowGuests || 0));
+          const campingGuests = Math.max(0,Number(raw(item).guests?.campingGuests || raw(item).campingGuests || 0));
+          return {
+            adults,
+            children,
+            toddlers,
+            total: adults + children + toddlers || bungalowGuests + campingGuests,
+            bungalowGuests,
+            campingGuests,
+            label: [
+              adults ? `${adults} dor.` : '',
+              children ? `${children} dz. 4-14` : '',
+              toddlers ? `${toddlers} dz. 0-4` : '',
+            ].filter(Boolean).join(' + ') || (bungalowGuests || campingGuests ? `${bungalowGuests} domek + ${campingGuests} camping` : 'brak danych'),
+          };
+        };
+        const guestCount = (item) => normalizeInquiryGuests(item).total;
+        const normalizeInquiryStay = (item) => ({
+          type:item.stay_type || '-',
+          arrival:item.arrival_date || '-',
+          departure:item.departure_date || '-',
+          nights:Number(item.nights || 0),
+          arrivalTime:raw(item).arrivalTime || 'jeszcze nie wiem',
+          mode:String(raw(item).stayMode || raw(item).stayTypeId || item.stay_type || '').toLowerCase(),
+        });
+        const normalizeInquiryVehicle = (item) => {
+          const v = vehicle(item);
+          return {
+            type:v.type || v.model || raw(item).vehicleType || '',
+            registration:item.vehicle_registration || raw(item).vehiclePlate || '',
+            trailer:v.trailerPlate || raw(item).trailerPlate || '',
+            summary:v.summary || [v.model,v.length,v.width,v.height,v.weight].filter(Boolean).join(', '),
+            heavy:Boolean(v.large || v.asphaltNeeded),
+          };
         };
         const categoryKeys = (item) => {
           const text = [
@@ -313,10 +402,14 @@ const title = 'CC Inbox — Panel Recepcji';
           if (String(eventInterest(item)).trim()) result.push('event');
           if (Object.keys(feedback(item)).some((key)=>feedback(item)[key] && (!Array.isArray(feedback(item)[key]) || feedback(item)[key].length))) result.push('feedback');
           if (!item.mail_delivered) result.push('mailFailed');
+          if (item.mail_delivered) result.push('mailSent');
           if (/po 21|after 21|nach 21|après 21|después de las 21|na 21|21:|późn|late arrival/.test(`${text} ${raw(item).arrivalTime || ''}`.toLowerCase())) result.push('late');
           if (String(item.special_needs || '').trim()) result.push('special');
+          if (!item.email || !item.phone || !item.arrival_date || !item.departure_date || !guestCount(item)) result.push('missing');
           if (vehicle(item).large || vehicle(item).asphaltNeeded || /ciezar|heavy|truck|lkw|bus/.test(text)) result.push('heavy');
           if (/electric|prad|prąd|10a|ev|plug/.test(text)) result.push('ev');
+          if (isTestInquiry(item)) result.push('test');
+          if (isArchivedInquiry(item)) result.push('archived');
           return [...new Set(result)];
         };
         const serviceIcon = (service) => {
@@ -379,12 +472,30 @@ const title = 'CC Inbox — Panel Recepcji';
           select.innerHTML = '<option value="">Wszystkie</option>' + [...new Set(values.filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'pl')).map((value)=>`<option value="${esc(value)}">${esc(labeler(value))}</option>`).join('');
           select.value = current;
         };
+        const clearFilters = () => {
+          filters.forEach((field) => {
+            if (field instanceof HTMLInputElement && field.type === 'checkbox') field.checked = false;
+            else if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) field.value = field.dataset.filter === 'sort' ? 'newest' : '';
+          });
+        };
+        const activeFilterTotal = () => filters.filter((field) => {
+          if (field instanceof HTMLInputElement && field.type === 'checkbox') return field.checked;
+          if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) return field.dataset.filter !== 'sort' && Boolean(field.value.trim());
+          return false;
+        }).length;
+        const itemBelongsToView = (item) => {
+          if (activeView === 'tests') return isTestInquiry(item);
+          if (activeView === 'archive') return isArchivedInquiry(item);
+          if (activeView === 'stats' || activeView === 'templates' || activeView === 'settings') return false;
+          return !isTestInquiry(item) && !isArchivedInquiry(item);
+        };
         const visibleItems = () => {
           const search = filterValue('search').toLowerCase();
           const filtered = inquiries.filter((item) => {
             const v = vehicle(item);
             const haystack = [item.full_name,item.email,item.phone,item.vehicle_registration,item.country,item.message,item.stay_type].join(' ').toLowerCase();
-            return (!search || haystack.includes(search))
+            return itemBelongsToView(item)
+              && (!search || haystack.includes(search))
               && (!filterValue('status') || item.status === filterValue('status'))
               && (!filterValue('category') || categoryKeys(item).includes(filterValue('category')))
               && (!filterValue('stay') || item.stay_type === filterValue('stay'))
@@ -397,7 +508,13 @@ const title = 'CC Inbox — Panel Recepcji';
               && (!filterValue('special') || Boolean(String(item.special_needs || '').trim()))
               && (!filterValue('heavy') || categoryKeys(item).includes('heavy'))
               && (!filterValue('ev') || categoryKeys(item).includes('ev'))
-              && (!filterValue('summer') || isSummer(item));
+              && (!filterValue('summer') || isSummer(item))
+              && (!filterValue('mailSent') || item.mail_delivered)
+              && (!filterValue('group') || categoryKeys(item).includes('group'))
+              && (!filterValue('scouts') || categoryKeys(item).includes('scouts'))
+              && (!filterValue('missing') || categoryKeys(item).includes('missing'))
+              && (!filterValue('today') || categoryKeys(item).includes('today'))
+              && (!filterValue('next7') || categoryKeys(item).includes('next7'));
           });
           const sort = filterValue('sort');
           return filtered.sort((a,b) => sort === 'oldest'
@@ -457,10 +574,23 @@ const title = 'CC Inbox — Panel Recepcji';
           sk:{ hello:'Dobrý deň', received:'ďakujeme za správu. Dostali sme vašu požiadavku na pobyt v Camping Clepardia v termíne {dates}. Recepcia skontroluje detaily a odpovie čo najskôr.', missing:'ďakujeme za požiadavku. Prosíme o doplnenie údajov: EČV vozidla/prívesu, približný čas príchodu a počet osôb, ak nebol uvedený.', positive:'dostali sme vašu požiadavku na {stay} v termíne {dates}. Vybrané služby: {services}. Konečnú dostupnosť a podmienky potvrdí recepcia.', unavailable:'ďakujeme za správu. Vo vybranom termíne môže byť dostupnosť obmedzená. Recepcia overí alternatívy a odpovie.', summer:'v júli a auguste neprijímame rezervácie kempových miest vopred. Miesta pre obytné autá, karavany, vany a stany sú podľa poradia príchodu. Check-out z kempu je do 12:00, najlepšie je prísť okolo poludnia.', bungalow:'ďakujeme za otázku na chatku v termíne {dates}. Dostupnosť potvrdzuje recepcia. Check-in od 16:00, check-out do 11:00. Prineste si vlastné uteráky, kozmetiku a osobné veci.', late:'ak plánujete príchod po 21:00, kontaktujte recepciu vopred. Recepcia 09:00–21:00, brána zvyčajne 08:00–22:00.', trips:'recepcia pomôže s informáciami o výletoch z Krakova: {trips}. Detaily možno dohodnúť s recepciou.', heavy:'pri ťažkom vozidle, autobuse alebo kamióne nás informujte vopred. Takéto vozidlá smerujeme na pevnejšie/asfaltové plochy, nie na mäkkú trávu.', ev:'elektrina 10A je dostupná pre vybavenie obytného auta/karavanu. Elektromobily ani plug-in hybridy nie je možné nabíjať na mieste.', regards:'S pozdravom\nRecepcia Camping Clepardia' },
           sv:{ hello:'Hej', received:'tack för ditt meddelande. Vi har fått din förfrågan till Camping Clepardia för {dates}. Receptionen kontrollerar detaljerna och svarar så snart som möjligt.', missing:'tack för din förfrågan. Skicka gärna saknade uppgifter: registreringsnummer för fordon/släp, ungefärlig ankomsttid och antal gäster om det saknas.', positive:'vi har fått din förfrågan för {stay} under {dates}. Valda tjänster: {services}. Slutlig tillgänglighet och villkor bekräftas av receptionen.', unavailable:'tack för ditt meddelande. Tillgängligheten kan vara begränsad för valda datum. Receptionen kontrollerar alternativ och återkommer.', summer:'i juli och augusti tar vi inte emot förhandsbokningar för campingplatser. Platser för husbilar, husvagnar, vans och tält gäller enligt ankomstordning. Check-out från campingen är till 12:00, så ankomst runt lunch är bäst.', bungalow:'tack för din bungalowförfrågan för {dates}. Tillgänglighet bekräftas av receptionen. Check-in från 16:00, check-out till 11:00. Ta med egna handdukar, hygienartiklar och personliga saker.', late:'om du planerar ankomst efter 21:00, kontakta receptionen i förväg. Reception 09:00–21:00, porten normalt 08:00–22:00.', trips:'receptionen kan hjälpa med information om populära turer från Kraków: {trips}. Detaljer kan avtalas med receptionen.', heavy:'för tungt fordon, buss eller lastbil, meddela oss i förväg. Sådana fordon placeras på fastare/asfalterade ytor, inte på mjukt gräs.', ev:'10A el finns för utrustning i husbil/husvagn. Elbilar och plug-in-hybrider kan inte laddas på platsen.', regards:'Vänliga hälsningar\nReception Camping Clepardia' },
         };
+        const replyExtras = {
+          pl:{ group:'Przy grupach i skautach prosimy o dodatkowe informacje: liczba osób, opiekunowie, pojazdy i plan pobytu. Recepcja potwierdza takie zgłoszenia indywidualnie.', general:'Camping Clepardia jest miejską bazą blisko tramwaju i centrum Krakowa. Chętnie pomożemy dobrać najlepszą opcję pobytu.', phone:'Jeśli wygodniej, prosimy o telefon do recepcji: +48 795 294 486. To najszybsza droga przy pilnych terminach.', feedback:'Dziękujemy za opinię o stronie. Przekazujemy ją dalej i jednocześnie odpowiadamy na zapytanie pobytowe.' },
+          en:{ group:'For groups and scouts, please send the number of guests, leaders, vehicles and planned stay details. Reception confirms such enquiries individually.', general:'Camping Clepardia is a city campsite close to tram connections and Krakow centre. We will gladly help choose the best stay option.', phone:'If easier, please call reception: +48 795 294 486. This is the fastest option for urgent dates.', feedback:'Thank you for your website feedback. We will pass it on and also answer your stay enquiry.' },
+          de:{ group:'Für Gruppen und Scouts senden Sie bitte Personenzahl, Betreuer, Fahrzeuge und Aufenthaltsplan. Die Rezeption bestätigt solche Anfragen individuell.', general:'Camping Clepardia ist ein Stadtcampingplatz nahe Straßenbahn und Zentrum von Krakau. Wir helfen gern bei der passenden Aufenthaltsoption.', phone:'Wenn es einfacher ist, rufen Sie bitte die Rezeption an: +48 795 294 486. Das ist bei dringenden Terminen am schnellsten.', feedback:'Vielen Dank für Ihr Feedback zur Website. Wir leiten es weiter und beantworten zugleich Ihre Aufenthaltsanfrage.' },
+          it:{ group:'Per gruppi e scout chiediamo numero di persone, accompagnatori, veicoli e programma del soggiorno. La reception conferma queste richieste individualmente.', general:'Camping Clepardia è un campeggio urbano vicino al tram e al centro di Cracovia. Aiutiamo volentieri a scegliere l’opzione migliore.', phone:'Se è più comodo, chiamate la reception: +48 795 294 486. È la via più rapida per date urgenti.', feedback:'Grazie per il feedback sul sito. Lo inoltriamo e rispondiamo anche alla richiesta di soggiorno.' },
+          fr:{ group:'Pour les groupes et scouts, merci d’envoyer le nombre de personnes, encadrants, véhicules et détails du séjour. La réception confirme ces demandes individuellement.', general:'Camping Clepardia est un camping urbain proche du tram et du centre de Cracovie. Nous vous aiderons volontiers à choisir la meilleure option.', phone:'Si c’est plus simple, appelez la réception : +48 795 294 486. C’est le plus rapide pour les dates urgentes.', feedback:'Merci pour votre avis sur le site. Nous le transmettons et répondons aussi à votre demande de séjour.' },
+          es:{ group:'Para grupos y scouts, envíen número de personas, responsables, vehículos y plan de estancia. Recepción confirma estas consultas individualmente.', general:'Camping Clepardia es un camping urbano cerca del tranvía y del centro de Cracovia. Les ayudaremos a elegir la mejor opción.', phone:'Si es más cómodo, llamen a recepción: +48 795 294 486. Es la vía más rápida para fechas urgentes.', feedback:'Gracias por la opinión sobre la web. La trasladaremos y también responderemos a la consulta de estancia.' },
+          nl:{ group:'Voor groepen en scouts ontvangen wij graag aantal personen, begeleiders, voertuigen en verblijfsplan. De receptie bevestigt zulke aanvragen individueel.', general:'Camping Clepardia is een stadscamping dichtbij tram en centrum van Krakau. We helpen graag met de beste verblijfsoptie.', phone:'Als bellen makkelijker is: +48 795 294 486. Dit is het snelst bij urgente data.', feedback:'Bedankt voor de feedback over de website. We geven die door en beantwoorden ook uw verblijfsaanvraag.' },
+          cs:{ group:'U skupin a skautů prosíme o počet osob, vedoucí, vozidla a plán pobytu. Recepce tyto dotazy potvrzuje individuálně.', general:'Camping Clepardia je městský kemp blízko tramvaje a centra Krakova. Rádi pomůžeme vybrat nejlepší možnost pobytu.', phone:'Pokud je to jednodušší, zavolejte recepci: +48 795 294 486. U urgentních termínů je to nejrychlejší.', feedback:'Děkujeme za zpětnou vazbu k webu. Předáme ji dál a zároveň odpovíme na dotaz k pobytu.' },
+          sk:{ group:'Pri skupinách a skautoch prosíme o počet osôb, vedúcich, vozidlá a plán pobytu. Recepcia takéto dopyty potvrdzuje individuálne.', general:'Camping Clepardia je mestský kemp blízko električky a centra Krakova. Radi pomôžeme vybrať najlepšiu možnosť pobytu.', phone:'Ak je to jednoduchšie, zavolajte recepciu: +48 795 294 486. Pri urgentných termínoch je to najrýchlejšie.', feedback:'Ďakujeme za spätnú väzbu k webu. Posunieme ju ďalej a zároveň odpovieme na dopyt k pobytu.' },
+          sv:{ group:'För grupper och scouter, skicka antal personer, ledare, fordon och vistelseplan. Receptionen bekräftar sådana förfrågningar individuellt.', general:'Camping Clepardia är en stadscamping nära spårvagn och Krakóws centrum. Vi hjälper gärna till att välja bästa boendealternativ.', phone:'Om det är enklare, ring receptionen: +48 795 294 486. Det är snabbast vid brådskande datum.', feedback:'Tack för feedback om webbplatsen. Vi vidarebefordrar den och svarar samtidigt på din vistelseförfrågan.' },
+        };
         const fillReply = (text, data) => String(text || '').replace(/\{(\w+)\}/g, (_, key) => data[key] ?? '');
         const generateReplyTemplates = (item) => {
           const lang = languageCode(item);
           const copySet = replyCopy[lang] || replyCopy.en;
+          const extraSet = replyExtras[lang] || replyExtras.en;
           const categories = categoryKeys(item);
           const firstName = String(item.full_name || '').trim().split(/\s+/)[0] || '';
           const greeting = `${copySet.hello}${firstName ? ` ${firstName}` : ''},`;
@@ -474,6 +604,10 @@ const title = 'CC Inbox — Panel Recepcji';
             id, title, category, language: lang.toUpperCase(), priority, suggested,
             body: `${greeting}\n\n${fillReply(copySet[key], data)}\n\n${copySet.regards}`,
           });
+          const makeExtra = (id, title, category, key, priority, suggested = true) => ({
+            id, title, category, language: lang.toUpperCase(), priority, suggested,
+            body: `${greeting}\n\n${fillReply(extraSet[key], data)}\n\n${copySet.regards}`,
+          });
           const templates = [
             make('received','Potwierdzenie otrzymania','neutral','received',90,true),
             make('missing','Prośba o dodatkowe dane','missing','missing',80,!item.email || !item.phone || !item.vehicle_registration),
@@ -485,6 +619,10 @@ const title = 'CC Inbox — Panel Recepcji';
             make('trips','Wycieczki','trips','trips',82,trips(item).length > 0),
             make('heavy','Ciężki pojazd','vehicle','heavy',86,categories.includes('heavy')),
             make('ev','Prąd / EV','power','ev',84,categories.includes('ev')),
+            makeExtra('group','Grupa/scouci','group','group',83,categories.includes('group') || categories.includes('scouts')),
+            makeExtra('general','Odpowiedź ogólna z ofertą','offer','general',60,true),
+            makeExtra('phone','Prośba o telefon','phone','phone',79,categories.includes('urgent') || categories.includes('missing')),
+            makeExtra('feedback','Odpowiedź po feedbacku','feedback','feedback',76,categories.includes('feedback')),
           ];
           return templates.sort((a,b)=>Number(b.suggested)-Number(a.suggested) || b.priority-a.priority);
         };
@@ -492,19 +630,116 @@ const title = 'CC Inbox — Panel Recepcji';
           const templates = generateReplyTemplates(item);
           return `<section class="detail-card detail-card--wide reply-templates"><h3>Gotowe odpowiedzi</h3><p>Szablony są personalizowane po języku, kraju, terminie, usługach i kategoriach zapytania. Nie wysyłają się automatycznie.</p><div class="reply-template-grid">${templates.map((template)=>`<article class="reply-template ${template.suggested ? 'is-suggested':''}"><header><span>${esc(template.language)}</span><strong>${esc(template.title)}</strong><em>${esc(template.category)}</em></header><p>${esc(template.body)}</p><div class="inline-actions"><button type="button" data-copy-reply="${encodeURIComponent(template.body)}">Kopiuj odpowiedź</button>${item.email ? `<a href="mailto:${esc(item.email)}?subject=${encodeURIComponent('Camping Clepardia — odpowiedź na zapytanie')}&body=${encodeURIComponent(template.body)}">Otwórz mailto</a>` : '<span class="missing-email">Brak emaila klienta</span>'}</div></article>`).join('')}</div></section>`;
         };
+        const bestReply = (item) => generateReplyTemplates(item).find((template)=>template.suggested)?.body || generateReplyTemplates(item)[0]?.body || summaryText(item);
+        const suggestBestReplies = (item) => {
+          const categories = categoryKeys(item);
+          const result = [];
+          if (categories.includes('camping') && isSummer(item)) result.push(['Camping lipiec/sierpień — bez rezerwacji miejsc','Nie potwierdzaj miejsca campingowego z wyprzedzeniem.']);
+          if (categories.includes('bungalow')) result.push(['Domek — sprawdzenie dostępności','Check-in 16:00, check-out 11:00, ręczniki/kosmetyki własne.']);
+          if (categories.includes('late')) result.push(['Późny przyjazd — kontakt z recepcją','Recepcja 9:00–21:00, brama 8:00–22:00.']);
+          if (categories.includes('ev')) result.push(['EV/prąd','Brak ładowania EV/hybryd plug-in, prąd 10A dla kamperów/przyczep.']);
+          if (categories.includes('heavy')) result.push(['Ciężki pojazd — asfalt','Nie kierować na miękką trawę.']);
+          if (categories.includes('trips')) result.push(['Wycieczki','Wieliczka, Auschwitz, Zakopane, Ojców, Energylandia.']);
+          if (categories.includes('group') || categories.includes('scouts')) result.push(['Grupa/scouci — sprawdzić zasady','Nie potwierdzać automatycznie bez oceny recepcji.']);
+          if (categories.includes('missing')) result.push(['Poproś o brakujące dane','Brakuje kontaktu, osób, dat albo danych pojazdu.']);
+          if (categories.includes('mailFailed')) result.push(['Użyj mailto / kopiuj odpowiedź','Automatyczny mail nie został dostarczony.']);
+          return result.length ? result : [['Normalne','Standardowa obsługa zapytania.']];
+        };
+        const realItems = () => inquiries.filter((item)=>!isTestInquiry(item) && !isArchivedInquiry(item));
+        const testItems = () => inquiries.filter(isTestInquiry);
+        const archivedItems = () => inquiries.filter(isArchivedInquiry);
+        const renderSystemStrip = () => {
+          if (!systemStrip) return;
+          const env = health?.env || {};
+          const real = realItems();
+          const mailOk = inquiries.some((item)=>item.mail_provider === 'resend' && item.mail_delivered);
+          const mailFallback = inquiries.some((item)=>item.mail_provider === 'fallback');
+          const mailFailed = inquiries.some((item)=>!item.mail_delivered);
+          const resendStatus = env.resendKeyPresent && env.reservationFromPresent && env.reservationToPresent
+            ? (mailOk ? 'Resend OK' : mailFallback || mailFailed ? 'Resend gotowy / sprawdź nowe wysyłki' : 'Resend ENV OK')
+            : 'Resend ENV niepełny';
+          systemStrip.innerHTML = [
+            ['Nowe realne', real.filter((item)=>item.status === 'new').length],
+            ['Testy', testItems().length],
+            ['Archiwum', archivedItems().length],
+            ['Mail delivery', resendStatus],
+            ['Supabase', health?.tableCheck?.ok ? 'OK' : health ? 'błąd' : 'sprawdzanie'],
+            ['Fallback', `Web3Forms ${env.web3FormsKeyPresent ? 'ENV' : 'brak'} · FormSubmit ${env.formSubmitToPresent ? 'ENV' : 'brak'}`],
+          ].map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('');
+        };
+        const renderStatsView = () => {
+          const real = realItems();
+          const tests = testItems();
+          const avgRatings = inquiries.map((item)=>Number(feedback(item).rating || 0)).filter(Boolean);
+          const avg = avgRatings.length ? (avgRatings.reduce((sum,value)=>sum+value,0) / avgRatings.length).toFixed(1) : '-';
+          const rows = [
+            ['Nowe zgłoszenia', real.filter((item)=>item.status === 'new').length],
+            ['Do odpowiedzi', real.filter((item)=>['new','needs_reply'].includes(item.status)).length],
+            ['Odpowiedziane', real.filter((item)=>item.status === 'replied').length],
+            ['Potwierdzone', real.filter((item)=>item.status === 'confirmed').length],
+            ['Brak miejsc', real.filter((item)=>item.status === 'unavailable').length],
+            ['Mail wysłany', real.filter((item)=>item.mail_delivered).length],
+            ['Mail niedostarczony', real.filter((item)=>!item.mail_delivered).length],
+            ['Realni klienci', real.length],
+            ['Testy', tests.length],
+            ['Camping', real.filter((item)=>categoryKeys(item).includes('camping')).length],
+            ['Domki', real.filter((item)=>categoryKeys(item).includes('bungalow')).length],
+            ['Razem', real.filter((item)=>categoryKeys(item).includes('combined')).length],
+            ['Kraje', new Set(real.map((item)=>countryInfo(item).code || item.country).filter(Boolean)).size],
+            ['Języki', new Set(real.map((item)=>languageCode(item))).size],
+            ['Lipiec/sierpień', real.filter(isSummer).length],
+            ['Wycieczki', real.filter((item)=>categoryKeys(item).includes('trips')).length],
+            ['Feedback', real.filter((item)=>categoryKeys(item).includes('feedback')).length],
+            ['Grupy/scouci', real.filter((item)=>categoryKeys(item).includes('group') || categoryKeys(item).includes('scouts')).length],
+            ['Średnia ocena strony', avg],
+          ];
+          return `<section class="dashboard-panel"><h2>Statystyki</h2><p>Liczniki oddzielają realnych klientów od testów.</p><div class="stats-grid stats-grid--wide">${rows.map(([label,value])=>`<article><strong>${esc(value)}</strong><span>${esc(label)}</span></article>`).join('')}</div></section>`;
+        };
+        const renderTemplatesView = () => {
+          const languages = ['PL','EN','DE','IT','FR','ES','NL','CS','SK','SV'];
+          const types = ['Potwierdzenie otrzymania','Wstępne potwierdzenie','Poproś o brakujące dane','Brak miejsc','Camping lipiec/sierpień','Domek','Późny przyjazd','Wycieczki','EV/prąd','Ciężki pojazd','Grupa/scouci','Odpowiedź ogólna','Prośba o telefon','Odpowiedź po feedbacku'];
+          const sample = inquiries.find((item)=>!isTestInquiry(item)) || inquiries[0] || null;
+          return `<section class="dashboard-panel"><h2>Schematy odpowiedzi</h2><p>Gotowe odpowiedzi są personalizowane zmiennymi: [IMIĘ], [DATA_PRZYJAZDU], [DATA_WYJAZDU], [NOCE], [TYP_POBYTU], [OSOBY], [USŁUGI], [CENA], [WARUNKI_DYNAMICZNE].</p><div class="schema-grid">${types.map((type)=>`<article><strong>${esc(type)}</strong><small>Języki: ${languages.join(', ')}</small><p>Preview generuje się w rozwiniętej karcie klienta i nie wysyła automatycznie.</p>${sample ? `<button type="button" data-copy-reply="${encodeURIComponent(bestReply(sample))}">Kopiuj przykład</button>` : ''}</article>`).join('')}</div></section>`;
+        };
+        const renderSettingsView = () => {
+          const env = health?.env || {};
+          const rows = [
+            ['Email recepcji','clepardia@gmail.com'],
+            ['Nadawca Resend', env.reservationFromPresent ? 'skonfigurowany w Vercel' : 'brak ENV'],
+            ['RESEND_API_KEY', env.resendKeyPresent ? `obecny, długość ${env.resendKeyLength}` : 'brak'],
+            ['Supabase', env.supabaseUrlPresent && env.serviceRolePresent ? `ENV OK · ${env.supabaseHost || ''}` : 'ENV niepełny'],
+            ['Link wycieczek','https://qr.codes/vksKBT'],
+            ['Telefon','+48 795 294 486'],
+            ['Recepcja','9:00–21:00'],
+            ['Brama','8:00–22:00'],
+            ['Cisza nocna','22:00–07:00'],
+            ['Google Maps','Używać Google Maps — wjazd zmienił się w 2022 roku'],
+            ['Web3Forms/FormSubmit','fallback diagnostyczny'],
+          ];
+          return `<section class="dashboard-panel"><h2>Ustawienia</h2><p>Na tym etapie widok jest read-only; edycja ustawień to kolejny moduł CC SYSTEM ONLINE.</p><div class="settings-grid">${rows.map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('')}</div></section>`;
+        };
         const detailsBody = (item) => {
           const v = vehicle(item);
           const payload = raw(item);
           const c = consents(item);
           const categories = categoryKeys(item);
           const country = countryInfo(item);
+          const guests = normalizeInquiryGuests(item);
           const warnings = warningsFor(item, categories);
+          const suggestions = suggestBestReplies(item).map(([title,copy])=>`<li><strong>${esc(title)}</strong><small>${esc(copy)}</small></li>`).join('');
+          const timeline = [
+            ['Wpłynęło', formatDate(item.created_at,true)],
+            ['Zapis Supabase', 'OK — rekord w reservation_inquiries'],
+            ['Mail', `${item.mail_provider || 'none'} / ${item.mail_delivered ? 'dostarczony' : 'niedostarczony'}`],
+            ['Status', statusLabels[item.status] || item.status],
+          ].map(([label,value])=>`<li><span>${esc(label)}</span><strong>${esc(value)}</strong></li>`).join('');
           return `${warnings ? `<aside class="crm-warnings">${warnings}</aside>` : ''}
             <div class="details-grid">
               <section class="detail-card"><h3>📇 Kontakt</h3><p>${item.email ? `<a href="mailto:${esc(item.email)}">${esc(item.email)}</a>`:'-'}<br>${item.phone ? `<a href="tel:${esc(item.phone)}">${esc(item.phone)}</a>`:'-'}</p><small>${esc(country.flag)} ${esc(country.label)} ${country.code ? `(${esc(country.code)})` : ''} · język formularza: ${esc(country.language)}</small></section>
               <section class="detail-card"><h3>🌍 Kraj i język</h3><p><strong>${esc(country.flag)} ${esc(country.label)}</strong><br>Kod kraju: ${esc(country.code || '-')}<br>Język: ${esc(country.language)}</p><small>${esc(country.risk || 'Brak widocznego ryzyka tłumaczeniowego.')}</small></section>
               <section class="detail-card"><h3>📅 Pobyt</h3><p><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><br>${esc(item.nights || 0)} nocy</p><small>Przyjazd: ${esc(payload.arrivalTime || 'jeszcze nie wiem')}</small></section>
               <section class="detail-card"><h3>💰 Cena</h3><p><strong>${esc(item.estimated_total_pln ?? '-')} PLN</strong></p><small>Kwota orientacyjna</small></section>
+              <section class="detail-card"><h3>👥 Osoby</h3><dl class="plain-list"><div><dt>Dorośli</dt><dd>${esc(guests.adults)}</dd></div><div><dt>Dzieci 4–14</dt><dd>${esc(guests.children)}</dd></div><div><dt>Dzieci 0–4</dt><dd>${esc(guests.toddlers)}</dd></div><div><dt>Razem</dt><dd>${esc(guests.total || '-')}</dd></div><div><dt>Domek</dt><dd>${esc(guests.bungalowGuests || '-')}</dd></div><div><dt>Camping</dt><dd>${esc(guests.campingGuests || '-')}</dd></div></dl></section>
               <section class="detail-card"><h3>🗺️ Wycieczki</h3><p>${esc(trips(item).join(', ') || 'Brak')}</p></section>
               <section class="detail-card"><h3>🎟️ Wydarzenie</h3><p>${esc(eventInterest(item) || 'Brak')}</p></section>
               <section class="detail-card detail-card--wide"><h3>🧾 Usługi</h3><ul class="service-list">${serviceCards(item)}</ul></section>
@@ -513,8 +748,10 @@ const title = 'CC Inbox — Panel Recepcji';
               <section class="detail-card"><h3>✅ Zgody</h3><ul class="consent-list"><li>Cisza nocna: <b>${c.quiet ? 'OK':'BRAK'}</b></li><li>Kontakt: <b>${c.contact ? 'OK':'BRAK'}</b></li><li>Polityka prywatności: <b>${c.privacy ? 'OK':'BRAK'}</b></li></ul></section>
               <section class="detail-card detail-card--wide"><h3>💬 Wiadomość</h3><p class="message-copy">${esc(item.message || 'Brak wiadomości')}</p></section>
               ${feedbackSection(item, categories)}
+              <section class="detail-card detail-card--wide"><h3>✨ Najlepsze podpowiedzi</h3><ul class="suggestion-list">${suggestions}</ul></section>
               ${replyTemplatesSection(item)}
               <section class="detail-card detail-card--wide mail-status-card ${item.mail_delivered ? 'is-ok':'is-failed'}"><h3>✉️ Status maila</h3><p><strong>${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</strong> · provider: ${esc(item.mail_provider || 'none')}</p><small>${esc(item.mail_error || (item.mail_delivered ? 'Brak błędu.':'Brak szczegółów błędu.'))}</small>${item.mail_delivered ? '' : '<p>Zapytanie jest zapisane w panelu recepcji. Skopiuj treść maila lub użyj przycisku mailto.</p>'}<div class="inline-actions"><button type="button" data-copy-mail>Kopiuj treść maila</button><a href="mailto:clepardia@gmail.com?subject=${encodeURIComponent(`Zapytanie ${item.id}`)}&body=${encodeURIComponent(mailText(item))}">Otwórz Gmail / mailto</a></div></section>
+              <section class="detail-card detail-card--wide"><h3>🕒 Timeline</h3><ul class="timeline-list">${timeline}</ul></section>
               <details class="technical-data"><summary>Dane techniczne</summary><pre data-raw-debug>Otwórz panel techniczny, żeby załadować raw JSON.</pre></details>
             </div>
             <div class="edit-row"><label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${item.status === value ? 'selected':''}>${label}</option>`).join('')}</select></label><label class="note"><span>Notatka recepcji</span><textarea data-notes rows="3">${esc(item.notes || '')}</textarea></label><button type="button" data-save>Zapisz status i notatkę</button></div>
@@ -527,6 +764,10 @@ const title = 'CC Inbox — Panel Recepcji';
           const categoryBadges = categories.map((key)=>`<span class="category-badge category-${esc(key)}">${esc(categoryLabels[key] || key)}</span>`).join('');
           const highSeason = Boolean(payload.highSeasonCampingInfo) || (isSummer(item) && /camping|kamper|van|namiot|przyczep|bus/i.test(item.stay_type || ''));
           const countrySummary = `${country.flag} ${country.label}${country.code ? ` (${country.code})` : ''} · ${country.language}`;
+          const guests = normalizeInquiryGuests(item);
+          const mainServices = services(item).slice(0,4).map((service)=>`${service.label} × ${service.qty}`).join(' + ') || 'brak usług';
+          const priority = categories.includes('urgent') || categories.includes('mailFailed') || categories.includes('group') ? 'Pilne' : 'Normalne';
+          const best = bestReply(item);
           return `<article class="inquiry-card" data-id="${esc(item.id)}">
             <header>
               <div><div class="card-badges"><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span><span class="mail-badge ${item.mail_delivered ? 'is-ok':'is-failed'}">${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</span>${categoryBadges}${highSeason ? '<span class="season-badge">Lipiec/sierpień — camping bez rezerwacji</span>':''}</div><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.nights || 0)} nocy</p></div>
@@ -536,10 +777,22 @@ const title = 'CC Inbox — Panel Recepcji';
               <span>🏕️ ${esc(item.stay_type || '-')}</span>
               <span>📅 ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</span>
               <span class="country-pill">${esc(countrySummary)}</span>
+              <span>👥 ${esc(guests.label)} · razem ${esc(guests.total || '-')}</span>
+              <span>🧾 ${esc(mainServices)}</span>
               <span>💰 ${esc(item.estimated_total_pln ?? '-')} PLN</span>
+              <span>⚑ ${esc(priority)}</span>
               <span>✉️ ${item.mail_delivered ? 'mail OK':'mail niedostarczony'}</span>
               ${item.email ? `<a href="mailto:${esc(item.email)}">${esc(item.email)}</a>` : ''}
               ${item.phone ? `<a href="tel:${esc(item.phone)}">${esc(item.phone)}</a>` : ''}
+            </div>
+            <div class="quick-actions">
+              <button type="button" data-quick-status="confirmed">Zatwierdź</button>
+              <button type="button" data-quick-status="needs_reply">Poproś o dane</button>
+              <button type="button" data-quick-status="unavailable">Brak miejsc</button>
+              <button type="button" data-copy-template="summer">Camping lipiec/sierpień</button>
+              <button type="button" data-copy-reply="${encodeURIComponent(best)}">Kopiuj odpowiedź</button>
+              ${item.email ? `<a href="mailto:${esc(item.email)}?subject=${encodeURIComponent('Camping Clepardia — odpowiedź na zapytanie')}&body=${encodeURIComponent(best)}">Mailto</a>` : ''}
+              <button type="button" data-open-details>Rozwiń</button>
             </div>
             <details class="inquiry-card__details">
               <summary><span>Rozwiń szczegóły zapytania</span><small>Dane klienta, usługi, wycieczki, feedback, mail i notatki recepcji</small></summary>
@@ -548,30 +801,43 @@ const title = 'CC Inbox — Panel Recepcji';
           </article>`;
         };
         const render = () => {
+          viewButtons.forEach((button) => button.setAttribute('aria-pressed', button.dataset.view === activeView ? 'true' : 'false'));
+          if (activeFilterCount) activeFilterCount.textContent = `Aktywne filtry: ${activeFilterTotal()}`;
+          renderSystemStrip();
           const items = visibleItems();
-          if (count) count.textContent = `${items.length} z ${inquiries.length} zapytań`;
+          if (count) count.textContent = `${items.length} w widoku · realni: ${realItems().length} · testy: ${testItems().length}`;
           if (stats) {
-            const statItems = [
-              ['Nowe', inquiries.filter((item)=>item.status === 'new').length],
-              ['Do odpowiedzi', inquiries.filter((item)=>['new','needs_reply'].includes(item.status)).length],
-              ['Do potwierdzenia', inquiries.filter((item)=>item.status === 'needs_confirmation').length],
-              ['Mail niedostarczony', inquiries.filter((item)=>!item.mail_delivered).length],
-              ['Wycieczki', inquiries.filter((item)=>categoryKeys(item).includes('trips')).length],
-              ['Wydarzenia', inquiries.filter((item)=>categoryKeys(item).includes('event')).length],
-              ['Prąd / EV', inquiries.filter((item)=>categoryKeys(item).includes('ev')).length],
-              ['Ciężkie pojazdy', inquiries.filter((item)=>categoryKeys(item).includes('heavy')).length],
-              ['Najbliższe 7 dni', inquiries.filter((item)=>categoryKeys(item).includes('next7')).length],
-            ];
+            const statItems = activeView === 'stats'
+              ? []
+              : [
+                ['Nowe', realItems().filter((item)=>item.status === 'new').length],
+                ['Do odpowiedzi', realItems().filter((item)=>['new','needs_reply'].includes(item.status)).length],
+                ['Resend OK', realItems().filter((item)=>item.mail_provider === 'resend' && item.mail_delivered).length],
+                ['Mail niedostarczony', realItems().filter((item)=>!item.mail_delivered).length],
+                ['Testy', testItems().length],
+                ['Wycieczki', realItems().filter((item)=>categoryKeys(item).includes('trips')).length],
+                ['Feedback', realItems().filter((item)=>categoryKeys(item).includes('feedback')).length],
+                ['Najbliższe 7 dni', realItems().filter((item)=>categoryKeys(item).includes('next7')).length],
+              ];
             stats.innerHTML = statItems.map(([label,value])=>`<article><strong>${esc(value)}</strong><span>${esc(label)}</span></article>`).join('');
           }
-          if (list) list.innerHTML = items.length ? items.map(card).join('') : '<div class="empty">Brak zapytań dla wybranych filtrów.</div>';
+          if (list) {
+            if (activeView === 'stats') list.innerHTML = renderStatsView();
+            else if (activeView === 'templates') list.innerHTML = renderTemplatesView();
+            else if (activeView === 'settings') list.innerHTML = renderSettingsView();
+            else list.innerHTML = items.length ? items.map(card).join('') : '<div class="empty">Brak zapytań dla wybranych filtrów.</div>';
+          }
         };
         const load = async () => {
           if (appStatus) appStatus.textContent = 'Ładowanie…';
           if (connectionStatus) connectionStatus.textContent = 'API: łączenie…';
           try {
-            const result = await request('/api/inbox/list');
+            const [result, healthResult] = await Promise.all([
+              request('/api/inbox/list'),
+              request('/api/inbox/health').catch((error)=>({ ok:false, env:{}, tableCheck:{ ok:false, error:error.message } })),
+            ]);
             inquiries = result.inquiries || [];
+            health = healthResult;
             setOptions('status',Object.keys(statusLabels),(value)=>statusLabels[value] || value);
             setOptions('category',Object.keys(categoryLabels),(value)=>categoryLabels[value] || value);
             setOptions('stay',inquiries.map((item)=>item.stay_type));
@@ -617,6 +883,20 @@ const title = 'CC Inbox — Panel Recepcji';
         });
         document.querySelector('[data-refresh]')?.addEventListener('click',load);
         document.querySelector('[data-logout]')?.addEventListener('click',()=>{sessionStorage.removeItem(storageKey);location.reload();});
+        viewButtons.forEach((button)=>button.addEventListener('click',()=>{
+          activeView = button.dataset.view || 'inbox';
+          render();
+        }));
+        document.querySelectorAll('[data-view-shortcut]').forEach((button)=>button.addEventListener('click',()=>{
+          activeView = button.dataset.viewShortcut || 'inbox';
+          clearFilters();
+          render();
+        }));
+        document.querySelector('[data-clear-filters]')?.addEventListener('click',()=>{
+          activeView = 'inbox';
+          clearFilters();
+          render();
+        });
         filters.forEach((filter)=>filter.addEventListener(filter instanceof HTMLInputElement && filter.type === 'search' ? 'input':'change',render));
         const findItemForNode = (node) => inquiries.find((entry)=>String(entry.id) === String(node?.dataset?.id));
         const hydrateDetails = (details) => {
@@ -650,6 +930,12 @@ const title = 'CC Inbox — Panel Recepcji';
         list?.addEventListener('click',(event)=>{
           const target = event.target;
           if (!(target instanceof Element)) return;
+          const looseReplyButton = target.closest('[data-copy-reply]');
+          if (looseReplyButton instanceof HTMLButtonElement && !target.closest('[data-id]')) {
+            const replyText = decodeURIComponent(looseReplyButton.dataset.copyReply || '');
+            if (replyText) void copy(replyText, looseReplyButton);
+            return;
+          }
           const node = target.closest('[data-id]');
           if (!(node instanceof HTMLElement)) return;
           const item = inquiries.find((entry)=>String(entry.id) === String(node.dataset.id));
@@ -657,6 +943,21 @@ const title = 'CC Inbox — Panel Recepcji';
           if (target.closest('[data-save]')) void save(node);
           const quick = target.closest('[data-quick-status]');
           if (quick instanceof HTMLElement) void save(node,quick.dataset.quickStatus);
+          if (target.closest('[data-open-details]')) {
+            const details = node.querySelector('.inquiry-card__details');
+            if (details instanceof HTMLDetailsElement) {
+              details.open = true;
+              hydrateDetails(details);
+              details.scrollIntoView({ behavior:'smooth', block:'nearest' });
+            }
+          }
+          const templateButton = target.closest('[data-copy-template]');
+          if (templateButton instanceof HTMLButtonElement) {
+            const templates = generateReplyTemplates(item);
+            const wanted = templateButton.dataset.copyTemplate || '';
+            const chosen = templates.find((template)=>template.id === wanted) || templates[0];
+            if (chosen?.body) void copy(chosen.body, templateButton);
+          }
           const replyButton = target.closest('[data-copy-reply]');
           if (replyButton instanceof HTMLButtonElement) {
             const replyText = decodeURIComponent(replyButton.dataset.copyReply || '');
@@ -839,6 +1140,11 @@ const title = 'CC Inbox — Panel Recepcji';
     background: #6b7280;
   }
 
+  .status-test {
+    color: #101d35;
+    background: #a9c8ff;
+  }
+
   .category-event {
     color: #2a1545;
     background: #d8c2ff;
@@ -929,6 +1235,148 @@ const title = 'CC Inbox — Panel Recepcji';
     font-weight: 900;
   }
 
+  .view-tabs,
+  .filter-shortcuts,
+  .quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .view-tabs {
+    position: sticky;
+    top: 8px;
+    z-index: 10;
+    margin: 0 0 14px;
+    padding: 10px;
+    border: 1px solid rgba(143,224,180,.16);
+    border-radius: 22px;
+    background: rgba(7,20,15,.86);
+    backdrop-filter: blur(16px);
+  }
+
+  .view-tabs button[aria-pressed="true"],
+  .filter-shortcuts button:hover,
+  .quick-actions button:hover,
+  .quick-actions a:hover {
+    background: linear-gradient(135deg, #a8f0c7, #7be3a8);
+    color: #07140f;
+  }
+
+  .system-strip {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0 0 14px;
+  }
+
+  .system-strip article,
+  .settings-grid article,
+  .schema-grid article {
+    padding: 14px;
+    border: 1px solid rgba(143,224,180,.14);
+    border-radius: 18px;
+    background: rgba(255,255,255,.055);
+  }
+
+  .system-strip span,
+  .settings-grid span,
+  .schema-grid small {
+    display: block;
+    color: rgba(239,251,243,.58);
+    font-size: .72rem;
+    font-weight: 850;
+  }
+
+  .system-strip strong,
+  .settings-grid strong,
+  .schema-grid strong {
+    display: block;
+    margin-top: 4px;
+    color: #effbf3;
+  }
+
+  .filter-shortcuts {
+    grid-column: 1 / -1;
+    align-items: center;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+
+  .filter-shortcuts span {
+    color: #9ee8bd;
+    font-size: .82rem;
+    font-weight: 950;
+  }
+
+  .quick-actions {
+    margin-top: 16px;
+  }
+
+  .quick-actions a {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 15px;
+    border: 1px solid rgba(143,224,180,.18);
+    border-radius: 13px;
+    color: #e7fff0;
+    background: rgba(255,255,255,.07);
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .dashboard-panel {
+    padding: clamp(18px,3vw,28px);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 28px;
+    background: linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.045));
+  }
+
+  .dashboard-panel h2 {
+    margin: 0 0 8px;
+    font-size: clamp(1.7rem,4vw,3rem);
+  }
+
+  .stats-grid--wide,
+  .schema-grid,
+  .settings-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .schema-grid article {
+    display: grid;
+    gap: 10px;
+  }
+
+  .suggestion-list,
+  .timeline-list {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .suggestion-list li,
+  .timeline-list li {
+    display: grid;
+    gap: 4px;
+    padding: 11px 12px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.055);
+  }
+
+  .suggestion-list small,
+  .timeline-list span {
+    color: rgba(239,251,243,.62);
+    font-weight: 800;
+  }
+
   @media (max-width: 720px) {
     .app-header__brand {
       align-items: flex-start;
@@ -956,6 +1404,19 @@ const title = 'CC Inbox — Panel Recepcji';
     }
 
     .reply-template-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .view-tabs,
+    .quick-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    .system-strip,
+    .stats-grid--wide,
+    .schema-grid,
+    .settings-grid {
       grid-template-columns: 1fr;
     }
   }

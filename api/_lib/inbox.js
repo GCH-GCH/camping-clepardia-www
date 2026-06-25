@@ -34,6 +34,12 @@ export const getInboxEnvHealth = () => {
     serviceRolePresent: Boolean(key),
     inboxCodePresent: Boolean(inboxCode),
     supabaseHost: parsedUrl?.hostname || '',
+    resendKeyPresent: Boolean(envValue('RESEND_API_KEY')),
+    resendKeyLength: envValue('RESEND_API_KEY').length,
+    reservationFromPresent: Boolean(envValue('RESERVATION_FROM_EMAIL') || envValue('MAIL_FROM')),
+    reservationToPresent: Boolean(envValue('RESERVATION_TO_EMAIL') || envValue('MAIL_TO')),
+    web3FormsKeyPresent: Boolean(envValue('WEB3FORMS_ACCESS_KEY')),
+    formSubmitToPresent: Boolean(envValue('FORMSUBMIT_TO_EMAIL') || envValue('RESERVATION_TO_EMAIL') || envValue('MAIL_TO')),
   };
 };
 
