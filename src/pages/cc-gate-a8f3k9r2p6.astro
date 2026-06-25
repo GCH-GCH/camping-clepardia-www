@@ -1,5 +1,5 @@
 ---
-const title = 'CC Inbox — Panel Recepcji';
+const title = 'CC SYSTEM';
 ---
 
 <!doctype html>
@@ -9,7 +9,7 @@ const title = 'CC Inbox — Panel Recepcji';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow, noarchive" />
     <meta name="referrer" content="no-referrer" />
-    <title>{title}</title>
+    <title>{title} — Recepcja online</title>
     <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
     <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=3" />
@@ -20,7 +20,7 @@ const title = 'CC Inbox — Panel Recepcji';
   <body>
     <main class="inbox-shell">
       <section class="login-card" data-login>
-        <span class="eyebrow">Prywatny mini CRM</span>
+        <span class="eyebrow">Panel recepcji Camping Clepardia</span>
         <h1>{title}</h1>
         <p>Wpisz kod dostępu skonfigurowany dla recepcji.</p>
         <form data-login-form>
@@ -36,22 +36,27 @@ const title = 'CC Inbox — Panel Recepcji';
             <img class="app-header__logo" src="/brand/logo/clepardia-logo-main.svg" alt="Camping Clepardia" width="74" height="74" loading="eager" decoding="async" />
             <div>
               <span class="eyebrow">Camping Clepardia</span>
-              <h1>{title}</h1>
-              <p>Zapytania, rezerwacje, feedback i wiadomości ze strony</p>
+              <h1>{title} <span class="online-badge">ONLINE</span></h1>
+              <p>Recepcja online · zapytania · klienci · odpowiedzi · rezerwacje</p>
+              <small>Panel recepcji Camping Clepardia.</small>
               <small data-count>Ładowanie zapytań…</small>
             </div>
           </div>
           <div class="header-actions">
             <span class="connection-pill" data-connection-status>API: oczekiwanie</span>
+            <span class="connection-pill" data-resend-status>Resend: —</span>
+            <span class="connection-pill" data-supabase-status>Supabase: —</span>
             <span class="connection-pill" data-last-refresh>Ostatnie odświeżenie: —</span>
-            <a href="/" target="_blank" rel="noopener">Strona główna</a>
-            <a href="/rezerwacja/" target="_blank" rel="noopener">Rezerwacja</a>
-            <button type="button" data-refresh>Odśwież</button>
+            <span class="connection-pill" data-auto-refresh-status>Auto-refresh aktywny</span>
+            <a href="/" target="_blank" rel="noopener">Otwórz stronę</a>
+            <a href="/rezerwacja/" target="_blank" rel="noopener">Formularz rezerwacji</a>
+            <button type="button" data-refresh>Odśwież teraz</button>
+            <button type="button" data-auto-refresh-toggle>Pauza auto-refresh</button>
             <button type="button" class="ghost" data-logout>Wyloguj</button>
           </div>
         </header>
 
-        <nav class="view-tabs" aria-label="Widoki CC Inbox">
+        <nav class="view-tabs" aria-label="Widoki CC SYSTEM">
           <button type="button" data-view="inbox" aria-pressed="true">Inbox</button>
           <button type="button" data-view="tests" aria-pressed="false">Testy</button>
           <button type="button" data-view="stats" aria-pressed="false">Statystyki</button>
@@ -99,6 +104,7 @@ const title = 'CC Inbox — Panel Recepcji';
         <section class="inquiry-list" data-list></section>
       </section>
     </main>
+    <div class="panel-toast" data-panel-toast role="status" aria-live="polite" hidden></div>
 
     <script>
       (() => {
@@ -113,6 +119,11 @@ const title = 'CC Inbox — Panel Recepcji';
         const stats = document.querySelector('[data-stats]');
         const connectionStatus = document.querySelector('[data-connection-status]');
         const lastRefresh = document.querySelector('[data-last-refresh]');
+        const resendStatus = document.querySelector('[data-resend-status]');
+        const supabaseStatus = document.querySelector('[data-supabase-status]');
+        const autoRefreshStatus = document.querySelector('[data-auto-refresh-status]');
+        const autoRefreshToggle = document.querySelector('[data-auto-refresh-toggle]');
+        const panelToast = document.querySelector('[data-panel-toast]');
         const systemStrip = document.querySelector('[data-system-strip]');
         const activeFilterCount = document.querySelector('[data-active-filter-count]');
         const viewButtons = Array.from(document.querySelectorAll('[data-view]'));
@@ -128,8 +139,45 @@ const title = 'CC Inbox — Panel Recepcji';
         let inquiries = [];
         let health = null;
         let activeView = 'inbox';
+        let autoRefreshTimer = 0;
+        let autoRefreshPaused = false;
+        let isLoading = false;
+        const autoRefreshMs = 25000;
+        const expandedIds = new Set();
+        const localTimeline = new Map();
 
         const esc = (value) => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+        const showToast = (message, type = 'info') => {
+          if (!(panelToast instanceof HTMLElement)) return;
+          panelToast.textContent = message;
+          panelToast.dataset.type = type;
+          panelToast.hidden = false;
+          window.clearTimeout(Number(panelToast.dataset.timer || 0));
+          const timer = window.setTimeout(() => { panelToast.hidden = true; }, 4500);
+          panelToast.dataset.timer = String(timer);
+        };
+        const rememberExpandedCards = () => {
+          document.querySelectorAll('.inquiry-card[data-id] .inquiry-card__details[open]').forEach((details) => {
+            const node = details.closest('[data-id]');
+            if (node instanceof HTMLElement) expandedIds.add(String(node.dataset.id || ''));
+          });
+        };
+        const restoreExpandedCards = () => {
+          expandedIds.forEach((id) => {
+            const details = document.querySelector(`.inquiry-card[data-id="${CSS.escape(id)}"] .inquiry-card__details`);
+            if (details instanceof HTMLDetailsElement) {
+              details.open = true;
+              hydrateDetails(details);
+            }
+          });
+        };
+        const trackLocalAction = (id, label) => {
+          const key = String(id || '');
+          if (!key) return;
+          const items = localTimeline.get(key) || [];
+          items.unshift({ label, value: new Intl.DateTimeFormat('pl-PL', { timeStyle:'short' }).format(new Date()) });
+          localTimeline.set(key, items.slice(0, 8));
+        };
         const raw = (item) => item?.raw_payload_json && typeof item.raw_payload_json === 'object' ? item.raw_payload_json : {};
         const feedback = (item) => raw(item)?.feedback && typeof raw(item).feedback === 'object' ? raw(item).feedback : {};
         const likedFeedback = (review) => Array.isArray(review?.liked) ? review.liked : [];
@@ -458,7 +506,36 @@ const title = 'CC Inbox — Panel Recepcji';
           await navigator.clipboard.writeText(text);
           const old = button.textContent;
           button.textContent = 'Skopiowano';
+          showToast('Skopiowano odpowiedź do schowka.', 'success');
           window.setTimeout(() => { button.textContent = old; }, 1200);
+        };
+        const refreshHeaderStatus = () => {
+          const env = health?.env || {};
+          if (resendStatus) {
+            const ok = Boolean(env.resendKeyPresent && env.reservationFromPresent && env.reservationToPresent);
+            resendStatus.textContent = `Resend: ${ok ? 'OK' : 'sprawdź ENV'}`;
+            resendStatus.classList.toggle('is-ok', ok);
+            resendStatus.classList.toggle('is-warn', !ok);
+          }
+          if (supabaseStatus) {
+            const ok = Boolean(health?.tableCheck?.ok);
+            supabaseStatus.textContent = `Supabase: ${ok ? 'OK' : health ? 'błąd' : '—'}`;
+            supabaseStatus.classList.toggle('is-ok', ok);
+            supabaseStatus.classList.toggle('is-warn', !ok && Boolean(health));
+          }
+          if (autoRefreshStatus) autoRefreshStatus.textContent = autoRefreshPaused ? 'Auto-refresh w pauzie' : 'Auto-refresh aktywny';
+          if (autoRefreshToggle instanceof HTMLButtonElement) autoRefreshToggle.textContent = autoRefreshPaused ? 'Wznów auto-refresh' : 'Pauza auto-refresh';
+        };
+        const startAutoRefresh = () => {
+          window.clearInterval(autoRefreshTimer);
+          if (autoRefreshPaused || !accessCode) {
+            refreshHeaderStatus();
+            return;
+          }
+          autoRefreshTimer = window.setInterval(() => {
+            if (!autoRefreshPaused && accessCode) void load({ silent:true, reason:'auto' });
+          }, autoRefreshMs);
+          refreshHeaderStatus();
         };
         const filterValue = (name) => {
           const field = document.querySelector(`[data-filter="${name}"]`);
@@ -587,50 +664,181 @@ const title = 'CC Inbox — Panel Recepcji';
           sv:{ group:'För grupper och scouter, skicka antal personer, ledare, fordon och vistelseplan. Receptionen bekräftar sådana förfrågningar individuellt.', general:'Camping Clepardia är en stadscamping nära spårvagn och Krakóws centrum. Vi hjälper gärna till att välja bästa boendealternativ.', phone:'Om det är enklare, ring receptionen: +48 795 294 486. Det är snabbast vid brådskande datum.', feedback:'Tack för feedback om webbplatsen. Vi vidarebefordrar den och svarar samtidigt på din vistelseförfrågan.' },
         };
         const fillReply = (text, data) => String(text || '').replace(/\{(\w+)\}/g, (_, key) => data[key] ?? '');
+        const replySubjects = {
+          pl:'Camping Clepardia — odpowiedź na zapytanie',
+          en:'Camping Clepardia — reply to your inquiry',
+          de:'Camping Clepardia — Antwort auf Ihre Anfrage',
+          it:'Camping Clepardia — risposta alla Sua richiesta',
+          fr:'Camping Clepardia — réponse à votre demande',
+          es:'Camping Clepardia — respuesta a su consulta',
+          nl:'Camping Clepardia — antwoord op uw aanvraag',
+          cs:'Camping Clepardia — odpověď na váš dotaz',
+          sk:'Camping Clepardia — odpoveď na vašu požiadavku',
+          sv:'Camping Clepardia — svar på din förfrågan',
+        };
+        const replyLabels = {
+          pl:{ title:'🏕️ Witamy w Camping Clepardia — Kraków!', intro:'dziękujemy za wiadomość i zainteresowanie pobytem w Camping Clepardia 😊 Poniżej przesyłamy najważniejsze informacje dotyczące Państwa zapytania.', details:'📅 SZCZEGÓŁY POBYTU', term:'Termin', nights:'Liczba nocy', stay:'Typ pobytu', guests:'Goście', services:'Usługi', price:'Cena orientacyjna', info:'ℹ️ WAŻNE INFORMACJE', location:'📍 LOKALIZACJA', locationText:'Camping znajduje się blisko przystanku tramwajowego. Dojazd do centrum Krakowa zajmuje około 20 minut. Ważne: prosimy korzystać z Google Maps, ponieważ wjazd na camping zmienił się w 2022 roku i starsze nawigacje mogą prowadzić nieprawidłowo.', attractions:'🗺️ CO ZOBACZYĆ W KRAKOWIE', tours:'🎟️ Wycieczki szybko się wyprzedają — warto sprawdzić dostępność wcześniej: https://qr.codes/vksKBT', help:'❓ POTRZEBUJESZ POMOCY?', helpText:'Jesteśmy do dyspozycji — wystarczy odpowiedzieć na tego maila.', bye:'Do zobaczenia! 🚐🌿' },
+          en:{ title:'🏕️ Welcome to Camping Clepardia — Krakow!', intro:'thank you for your message and interest in staying at Camping Clepardia 😊 Below you will find the key information about your enquiry.', details:'📅 STAY DETAILS', term:'Dates', nights:'Nights', stay:'Stay type', guests:'Guests', services:'Services', price:'Estimated price', info:'ℹ️ IMPORTANT INFORMATION', location:'📍 LOCATION', locationText:'The campsite is close to a tram stop. Krakow city centre is around 20 minutes away. Please use Google Maps, as the campsite entrance changed in 2022 and older navigation may lead incorrectly.', attractions:'🗺️ WHAT TO SEE IN KRAKOW', tours:'🎟️ Tours sell out quickly — it is worth checking availability early: https://qr.codes/vksKBT', help:'❓ NEED HELP?', helpText:'We are here to help — simply reply to this email.', bye:'See you soon! 🚐🌿' },
+          de:{ title:'🏕️ Willkommen bei Camping Clepardia — Krakau!', intro:'vielen Dank für Ihre Nachricht und Ihr Interesse an Camping Clepardia 😊 Unten finden Sie die wichtigsten Informationen zu Ihrer Anfrage.', details:'📅 AUFENTHALTSDETAILS', term:'Zeitraum', nights:'Nächte', stay:'Aufenthaltstyp', guests:'Gäste', services:'Leistungen', price:'Orientierungspreis', info:'ℹ️ WICHTIGE INFORMATIONEN', location:'📍 LAGE', locationText:'Der Campingplatz liegt in der Nähe einer Straßenbahnhaltestelle. Das Zentrum von Krakau ist in ca. 20 Minuten erreichbar. Bitte Google Maps verwenden, da sich die Einfahrt 2022 geändert hat.', attractions:'🗺️ SEHENSWERTES IN KRAKAU', tours:'🎟️ Ausflüge sind schnell ausgebucht — prüfen Sie die Verfügbarkeit frühzeitig: https://qr.codes/vksKBT', help:'❓ BRAUCHEN SIE HILFE?', helpText:'Wir helfen gern — antworten Sie einfach auf diese E-Mail.', bye:'Bis bald! 🚐🌿' },
+          it:{ title:'🏕️ Benvenuti a Camping Clepardia — Cracovia!', intro:'grazie per il messaggio e per l’interesse verso Camping Clepardia 😊 Qui sotto trovate le informazioni principali sulla vostra richiesta.', details:'📅 DETTAGLI DEL SOGGIORNO', term:'Periodo', nights:'Notti', stay:'Tipo di soggiorno', guests:'Ospiti', services:'Servizi', price:'Prezzo indicativo', info:'ℹ️ INFORMAZIONI IMPORTANTI', location:'📍 POSIZIONE', locationText:'Il camping è vicino alla fermata del tram. Il centro di Cracovia è a circa 20 minuti. Consigliamo Google Maps: l’ingresso è cambiato nel 2022.', attractions:'🗺️ COSA VEDERE A CRACOVIA', tours:'🎟️ Le escursioni si esauriscono rapidamente — meglio controllare prima: https://qr.codes/vksKBT', help:'❓ SERVE AIUTO?', helpText:'Siamo a disposizione — basta rispondere a questa email.', bye:'A presto! 🚐🌿' },
+          fr:{ title:'🏕️ Bienvenue au Camping Clepardia — Cracovie !', intro:'merci pour votre message et votre intérêt pour Camping Clepardia 😊 Vous trouverez ci-dessous les informations principales concernant votre demande.', details:'📅 DÉTAILS DU SÉJOUR', term:'Dates', nights:'Nuits', stay:'Type de séjour', guests:'Personnes', services:'Services', price:'Prix indicatif', info:'ℹ️ INFORMATIONS IMPORTANTES', location:'📍 LOCALISATION', locationText:'Le camping est proche d’un arrêt de tram. Le centre de Cracovie est à environ 20 minutes. Merci d’utiliser Google Maps, car l’entrée a changé en 2022.', attractions:'🗺️ À VOIR À CRACOVIE', tours:'🎟️ Les excursions se vendent vite — vérifiez la disponibilité à l’avance : https://qr.codes/vksKBT', help:'❓ BESOIN D’AIDE ?', helpText:'Nous sommes à votre disposition — répondez simplement à cet email.', bye:'À bientôt ! 🚐🌿' },
+          es:{ title:'🏕️ Bienvenidos a Camping Clepardia — Cracovia!', intro:'gracias por su mensaje e interés en Camping Clepardia 😊 Abajo encontrará la información principal sobre su consulta.', details:'📅 DETALLES DE LA ESTANCIA', term:'Fechas', nights:'Noches', stay:'Tipo de estancia', guests:'Personas', services:'Servicios', price:'Precio orientativo', info:'ℹ️ INFORMACIÓN IMPORTANTE', location:'📍 UBICACIÓN', locationText:'El camping está cerca de una parada de tranvía. El centro de Cracovia está a unos 20 minutos. Use Google Maps: la entrada cambió en 2022.', attractions:'🗺️ QUÉ VER EN CRACOVIA', tours:'🎟️ Las excursiones se agotan rápido — conviene comprobar disponibilidad antes: https://qr.codes/vksKBT', help:'❓ ¿NECESITA AYUDA?', helpText:'Estamos a su disposición — responda a este email.', bye:'¡Hasta pronto! 🚐🌿' },
+          nl:{ title:'🏕️ Welkom bij Camping Clepardia — Krakau!', intro:'bedankt voor uw bericht en interesse in Camping Clepardia 😊 Hieronder vindt u de belangrijkste informatie over uw aanvraag.', details:'📅 VERBLIJFSGEGEVENS', term:'Data', nights:'Nachten', stay:'Type verblijf', guests:'Gasten', services:'Diensten', price:'Indicatieve prijs', info:'ℹ️ BELANGRIJKE INFORMATIE', location:'📍 LOCATIE', locationText:'De camping ligt dicht bij een tramhalte. Het centrum van Krakau is ongeveer 20 minuten weg. Gebruik Google Maps, omdat de ingang in 2022 is gewijzigd.', attractions:'🗺️ WAT TE ZIEN IN KRAKAU', tours:'🎟️ Tours zijn snel uitverkocht — controleer de beschikbaarheid vroeg: https://qr.codes/vksKBT', help:'❓ HULP NODIG?', helpText:'Wij helpen graag — beantwoord deze e-mail gerust.', bye:'Tot ziens! 🚐🌿' },
+          cs:{ title:'🏕️ Vítejte v Camping Clepardia — Krakov!', intro:'děkujeme za zprávu a zájem o pobyt v Camping Clepardia 😊 Níže najdete nejdůležitější informace k vašemu dotazu.', details:'📅 DETAILY POBYTU', term:'Termín', nights:'Noci', stay:'Typ pobytu', guests:'Hosté', services:'Služby', price:'Orientační cena', info:'ℹ️ DŮLEŽITÉ INFORMACE', location:'📍 POLOHA', locationText:'Kemp je blízko tramvajové zastávky. Do centra Krakova je to asi 20 minut. Použijte prosím Google Maps, vjezd se v roce 2022 změnil.', attractions:'🗺️ CO VIDĚT V KRAKOVĚ', tours:'🎟️ Výlety se rychle vyprodávají — dostupnost ověřte předem: https://qr.codes/vksKBT', help:'❓ POTŘEBUJETE POMOC?', helpText:'Jsme k dispozici — stačí odpovědět na tento e-mail.', bye:'Těšíme se na vás! 🚐🌿' },
+          sk:{ title:'🏕️ Vitajte v Camping Clepardia — Krakov!', intro:'ďakujeme za správu a záujem o pobyt v Camping Clepardia 😊 Nižšie nájdete najdôležitejšie informácie k vašej požiadavke.', details:'📅 DETAILY POBYTU', term:'Termín', nights:'Noci', stay:'Typ pobytu', guests:'Hostia', services:'Služby', price:'Orientačná cena', info:'ℹ️ DÔLEŽITÉ INFORMÁCIE', location:'📍 POLOHA', locationText:'Kemp je blízko električkovej zastávky. Do centra Krakova je to asi 20 minút. Použite prosím Google Maps, vjazd sa v roku 2022 zmenil.', attractions:'🗺️ ČO VIDIEŤ V KRAKOVE', tours:'🎟️ Výlety sa rýchlo vypredávajú — dostupnosť si overte vopred: https://qr.codes/vksKBT', help:'❓ POTREBUJETE POMOC?', helpText:'Sme k dispozícii — stačí odpovedať na tento e-mail.', bye:'Tešíme sa na vás! 🚐🌿' },
+          sv:{ title:'🏕️ Välkommen till Camping Clepardia — Kraków!', intro:'tack för ditt meddelande och intresse för Camping Clepardia 😊 Nedan finns den viktigaste informationen om din förfrågan.', details:'📅 VISTELSEDETALJER', term:'Datum', nights:'Nätter', stay:'Typ av vistelse', guests:'Gäster', services:'Tjänster', price:'Ungefärligt pris', info:'ℹ️ VIKTIG INFORMATION', location:'📍 PLATS', locationText:'Campingen ligger nära en spårvagnshållplats. Krakóws centrum ligger cirka 20 minuter bort. Använd Google Maps, eftersom infarten ändrades 2022.', attractions:'🗺️ ATT SE I KRAKÓW', tours:'🎟️ Turer blir snabbt slutsålda — kontrollera tillgänglighet i god tid: https://qr.codes/vksKBT', help:'❓ BEHÖVER DU HJÄLP?', helpText:'Vi hjälper gärna — svara bara på detta mejl.', bye:'Vi ses snart! 🚐🌿' },
+        };
+        const separator = '━━━━━━━━━━━━━━━━━━━━━━━';
+        const templateDefs = [
+          { id:'confirm', icon:'✅', title:'Potwierdzenie pobytu', category:'confirm', key:'positive', priority:90, recommendedWhen:'Gdy recepcja może odpowiedzieć pozytywnie.' },
+          { id:'infoCampingSummer', icon:'🏕️', title:'Camping w lipcu/sierpniu', category:'season', key:'summer', priority:120, recommendedWhen:'Camping w lipcu lub sierpniu — informacja bez gwarancji miejsca.' },
+          { id:'askMissingData', icon:'📻', title:'Prośba o brakujące dane', category:'missing', key:'missing', priority:96, recommendedWhen:'Brakuje telefonu, e-maila, osób, dat albo danych pojazdu.' },
+          { id:'noAvailability', icon:'❌', title:'Brak dostępności', category:'availability', key:'unavailable', priority:80, recommendedWhen:'Gdy recepcja chce odpisać, że nie ma miejsc.' },
+          { id:'bungalow', icon:'🏡', title:'Domek — dostępność i zasady', category:'bungalow', key:'bungalow', priority:88, recommendedWhen:'Zapytania o domki lub pobyt łączony.' },
+          { id:'lateArrival', icon:'🌙', title:'Późny przyjazd', category:'arrival', key:'late', priority:86, recommendedWhen:'Przyjazd po 21:00 albo niejasna godzina przyjazdu.' },
+          { id:'tours', icon:'🎟️', title:'Wycieczki z Krakowa', category:'tours', key:'trips', priority:84, recommendedWhen:'Klient pyta o wycieczki lub atrakcje.' },
+          { id:'electricityEv', icon:'⚡', title:'Prąd 10A / EV', category:'power', key:'ev', priority:82, recommendedWhen:'Prąd, EV, hybryda plug-in albo pytanie o ładowanie.' },
+          { id:'heavyVehicle', icon:'🚫', title:'Ciężki pojazd', category:'vehicle', key:'heavy', priority:81, recommendedWhen:'Bus, ciężarówka, ciężki kamper lub potrzeba asfaltu.' },
+          { id:'groupScout', icon:'👥', title:'Grupa / skauci', category:'group', key:'group', extra:true, priority:83, recommendedWhen:'Grupy, skauci, harcerze lub większa liczba osób.' },
+          { id:'generalOffer', icon:'🌿', title:'Ogólna oferta', category:'offer', key:'general', extra:true, priority:70, recommendedWhen:'Uniwersalna, miła odpowiedź ofertowa.' },
+          { id:'phoneContact', icon:'☎️', title:'Prośba o kontakt telefoniczny', category:'phone', key:'phone', extra:true, priority:79, recommendedWhen:'Pilne terminy lub sprawa wymagająca szybkiego ustalenia.' },
+        ];
+        const dynamicConditions = (item, copySet, data) => {
+          const categories = categoryKeys(item);
+          return [
+            isSummer(item) && categories.includes('camping') ? fillReply(copySet.summer, data) : '',
+            categories.includes('bungalow') || categories.includes('combined') ? fillReply(copySet.bungalow, data) : '',
+            categories.includes('ev') ? fillReply(copySet.ev, data) : '',
+            categories.includes('heavy') ? fillReply(copySet.heavy, data) : '',
+            categories.includes('late') ? fillReply(copySet.late, data) : '',
+            /dog|pies/i.test(services(item).map((service)=>`${service.id} ${service.label}`).join(' ')) ? 'Pobyt psa jest bezpłatny. Prosimy o sprzątanie po pupilu.' : '',
+            'Na campingu obowiązuje cisza nocna od 22:00 do 7:00. Camping Clepardia nie jest miejscem imprezowym.',
+          ].filter(Boolean);
+        };
+        const premiumReplyBody = (item, def, copySet, extraSet, data) => {
+          const lang = languageCode(item);
+          const labels = replyLabels[lang] || replyLabels.en;
+          const firstName = String(item.full_name || '').trim().split(/\s+/)[0] || '';
+          const greeting = `${copySet.hello}${firstName ? ` ${firstName}` : ''},`;
+          const mainCopy = fillReply(def.extra ? extraSet[def.key] : copySet[def.key], data);
+          const conditions = dynamicConditions(item, copySet, data);
+          const attractions = ['Stare Miasto','Wawel','Kazimierz','Kopalnia Soli Wieliczka','Auschwitz-Birkenau','Fabryka Schindlera','Energylandia','Ojców / Zakopane'];
+          return [
+            labels.title,
+            '',
+            greeting,
+            '',
+            labels.intro,
+            '',
+            mainCopy,
+            '',
+            separator,
+            labels.details,
+            '',
+            `${labels.term}: ${data.arrival} — ${data.departure}`,
+            `${labels.nights}: ${data.nights}`,
+            `${labels.stay}: ${data.stay}`,
+            `${labels.guests}: ${data.people}`,
+            `${labels.services}: ${data.services}`,
+            `${labels.price}: ${data.price}`,
+            '',
+            separator,
+            labels.info,
+            '',
+            ...(conditions.length ? conditions : [data.dynamic]),
+            '',
+            separator,
+            labels.location,
+            '',
+            labels.locationText,
+            '',
+            separator,
+            labels.attractions,
+            '',
+            ...attractions.map((name)=>`• ${name}`),
+            '',
+            labels.tours,
+            '',
+            separator,
+            labels.help,
+            '',
+            labels.helpText,
+            '',
+            labels.bye,
+            copySet.regards,
+            'www.clepardia.com.pl',
+            '+48 795 294 486',
+          ].filter(Boolean).join('\n');
+        };
         const generateReplyTemplates = (item) => {
           const lang = languageCode(item);
           const copySet = replyCopy[lang] || replyCopy.en;
           const extraSet = replyExtras[lang] || replyExtras.en;
           const categories = categoryKeys(item);
-          const firstName = String(item.full_name || '').trim().split(/\s+/)[0] || '';
-          const greeting = `${copySet.hello}${firstName ? ` ${firstName}` : ''},`;
+          const guests = normalizeInquiryGuests(item);
+          const templateSubject = replySubjects[lang] || replySubjects.en;
           const data = {
+            arrival: item.arrival_date || '-',
+            departure: item.departure_date || '-',
             dates: `${item.arrival_date || '-'} — ${item.departure_date || '-'}`,
+            nights: `${item.nights || 0}`,
             stay: item.stay_type || 'pobytu',
-            services: services(item).map((service)=>`${service.label} x ${service.qty}`).join(', ') || '-',
+            people: guests.label,
+            services: services(item).map((service)=>`${service.label} × ${service.qty}`).join(', ') || '-',
+            price: item.estimated_total_pln ? `${item.estimated_total_pln} PLN` : 'do potwierdzenia',
             trips: trips(item).join(', ') || 'Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców, Energylandia',
+            dynamic: 'Finalne warunki i dostępność potwierdza recepcja Camping Clepardia.',
           };
-          const make = (id, title, category, key, priority, suggested = true) => ({
-            id, title, category, language: lang.toUpperCase(), priority, suggested,
-            body: `${greeting}\n\n${fillReply(copySet[key], data)}\n\n${copySet.regards}`,
+          const templates = templateDefs.map((def) => {
+            const suggested = (
+              def.id === 'confirm'
+              || (def.id === 'infoCampingSummer' && isSummer(item) && categories.includes('camping'))
+              || (def.id === 'askMissingData' && categories.includes('missing'))
+              || (def.id === 'bungalow' && (categories.includes('bungalow') || categories.includes('combined')))
+              || (def.id === 'lateArrival' && categories.includes('late'))
+              || (def.id === 'tours' && trips(item).length > 0)
+              || (def.id === 'electricityEv' && categories.includes('ev'))
+              || (def.id === 'heavyVehicle' && categories.includes('heavy'))
+              || (def.id === 'groupScout' && (categories.includes('group') || categories.includes('scouts')))
+              || (def.id === 'phoneContact' && (categories.includes('urgent') || categories.includes('missing')))
+            );
+            return {
+              ...def,
+              language: lang.toUpperCase(),
+              subject: templateSubject,
+              body: premiumReplyBody(item, def, copySet, extraSet, data),
+              suggested,
+            };
           });
-          const makeExtra = (id, title, category, key, priority, suggested = true) => ({
-            id, title, category, language: lang.toUpperCase(), priority, suggested,
-            body: `${greeting}\n\n${fillReply(extraSet[key], data)}\n\n${copySet.regards}`,
-          });
-          const templates = [
-            make('received','Potwierdzenie otrzymania','neutral','received',90,true),
-            make('missing','Prośba o dodatkowe dane','missing','missing',80,!item.email || !item.phone || !item.vehicle_registration),
-            make('positive','Wstępne potwierdzenie','positive','positive',70,true),
-            make('unavailable','Brak dostępności','negative','unavailable',50,true),
-            make('summer','Lipiec/sierpień — camping','season','summer',95,isSummer(item) && categories.includes('camping')),
-            make('bungalow','Domki','bungalow','bungalow',75,categories.includes('bungalow') || categories.includes('combined')),
-            make('late','Późny przyjazd','arrival','late',88,categories.includes('late')),
-            make('trips','Wycieczki','trips','trips',82,trips(item).length > 0),
-            make('heavy','Ciężki pojazd','vehicle','heavy',86,categories.includes('heavy')),
-            make('ev','Prąd / EV','power','ev',84,categories.includes('ev')),
-            makeExtra('group','Grupa/scouci','group','group',83,categories.includes('group') || categories.includes('scouts')),
-            makeExtra('general','Odpowiedź ogólna z ofertą','offer','general',60,true),
-            makeExtra('phone','Prośba o telefon','phone','phone',79,categories.includes('urgent') || categories.includes('missing')),
-            makeExtra('feedback','Odpowiedź po feedbacku','feedback','feedback',76,categories.includes('feedback')),
-          ];
           return templates.sort((a,b)=>Number(b.suggested)-Number(a.suggested) || b.priority-a.priority);
         };
         const replyTemplatesSection = (item) => {
           const templates = generateReplyTemplates(item);
-          return `<section class="detail-card detail-card--wide reply-templates"><h3>Gotowe odpowiedzi</h3><p>Szablony są personalizowane po języku, kraju, terminie, usługach i kategoriach zapytania. Nie wysyłają się automatycznie.</p><div class="reply-template-grid">${templates.map((template)=>`<article class="reply-template ${template.suggested ? 'is-suggested':''}"><header><span>${esc(template.language)}</span><strong>${esc(template.title)}</strong><em>${esc(template.category)}</em></header><p>${esc(template.body)}</p><div class="inline-actions"><button type="button" data-copy-reply="${encodeURIComponent(template.body)}">Kopiuj odpowiedź</button>${item.email ? `<a href="mailto:${esc(item.email)}?subject=${encodeURIComponent('Camping Clepardia — odpowiedź na zapytanie')}&body=${encodeURIComponent(template.body)}">Otwórz mailto</a>` : '<span class="missing-email">Brak emaila klienta</span>'}</div></article>`).join('')}</div></section>`;
+          return `<section class="detail-card detail-card--wide reply-templates"><h3>Gotowe odpowiedzi premium</h3><p>Szablony mają tytuł, ikonę, temat, sekcje, zmienne i personalizację po języku klienta. Nie wysyłają się automatycznie.</p><div class="reply-template-grid">${templates.map((template)=>`<article class="reply-template ${template.suggested ? 'is-suggested':''}"><header><span>${esc(template.language)}</span><b>${esc(template.icon)}</b><strong>${esc(template.title)}</strong><em>${esc(template.category)}</em></header><small>Kiedy używać: ${esc(template.recommendedWhen)}</small><small>Temat: ${esc(template.subject)}</small><p>${esc(template.body)}</p><div class="inline-actions"><button type="button" data-copy-reply="${encodeURIComponent(template.body)}">Kopiuj odpowiedź</button><button type="button" data-reply-template="${esc(template.id)}">Otwórz mailto</button></div></article>`).join('')}</div></section>`;
         };
-        const bestReply = (item) => generateReplyTemplates(item).find((template)=>template.suggested)?.body || generateReplyTemplates(item)[0]?.body || summaryText(item);
+        const bestTemplate = (item) => {
+          const templates = generateReplyTemplates(item);
+          return templates.find((template)=>template.suggested) || templates[0];
+        };
+        const bestReply = (item) => bestTemplate(item)?.body || summaryText(item);
+        const replyTemplateById = (item, id) => {
+          const templates = generateReplyTemplates(item);
+          return templates.find((template)=>template.id === id) || bestTemplate(item) || templates[0];
+        };
+        const openReplyMail = (item, template, node = null) => {
+          if (!template?.body) return false;
+          if (!item.email) {
+            showToast('Brak emaila klienta. Odpowiedź została przygotowana do skopiowania.', 'error');
+            const fallbackButton = node?.querySelector?.('[data-copy-reply]');
+            if (fallbackButton instanceof HTMLButtonElement) void copy(template.body, fallbackButton);
+            return false;
+          }
+          const url = `mailto:${encodeURIComponent(item.email)}?subject=${encodeURIComponent(template.subject)}&body=${encodeURIComponent(template.body)}`;
+          window.location.href = url;
+          trackLocalAction(item.id, `Otworzono mailto: ${template.title}`);
+          showToast(`Otwieram mailto: ${template.title}`, 'success');
+          return true;
+        };
         const suggestBestReplies = (item) => {
           const categories = categoryKeys(item);
           const result = [];
@@ -697,9 +905,9 @@ const title = 'CC Inbox — Panel Recepcji';
         };
         const renderTemplatesView = () => {
           const languages = ['PL','EN','DE','IT','FR','ES','NL','CS','SK','SV'];
-          const types = ['Potwierdzenie otrzymania','Wstępne potwierdzenie','Poproś o brakujące dane','Brak miejsc','Camping lipiec/sierpień','Domek','Późny przyjazd','Wycieczki','EV/prąd','Ciężki pojazd','Grupa/scouci','Odpowiedź ogólna','Prośba o telefon','Odpowiedź po feedbacku'];
           const sample = inquiries.find((item)=>!isTestInquiry(item)) || inquiries[0] || null;
-          return `<section class="dashboard-panel"><h2>Schematy odpowiedzi</h2><p>Gotowe odpowiedzi są personalizowane zmiennymi: [IMIĘ], [DATA_PRZYJAZDU], [DATA_WYJAZDU], [NOCE], [TYP_POBYTU], [OSOBY], [USŁUGI], [CENA], [WARUNKI_DYNAMICZNE].</p><div class="schema-grid">${types.map((type)=>`<article><strong>${esc(type)}</strong><small>Języki: ${languages.join(', ')}</small><p>Preview generuje się w rozwiniętej karcie klienta i nie wysyła automatycznie.</p>${sample ? `<button type="button" data-copy-reply="${encodeURIComponent(bestReply(sample))}">Kopiuj przykład</button>` : ''}</article>`).join('')}</div></section>`;
+          const exampleTemplates = sample ? generateReplyTemplates(sample) : [];
+          return `<section class="dashboard-panel"><h2>Schematy odpowiedzi</h2><p>Zmienne: [IMIĘ], [DATA_PRZYJAZDU], [DATA_WYJAZDU], [NOCE], [TYP_POBYTU], [OSOBY], [USŁUGI], [CENA], [WARUNKI_DYNAMICZNE]. Obsługiwane języki: ${languages.join(', ')}.</p><div class="schema-grid">${templateDefs.map((def)=>{const example = exampleTemplates.find((template)=>template.id === def.id); return `<article><strong>${esc(def.icon)} ${esc(def.title)}</strong><small>ID: ${esc(def.id)} · kategoria: ${esc(def.category)} · priorytet: ${esc(def.priority)}</small><p><b>Kiedy używać:</b> ${esc(def.recommendedWhen)}</p><p><b>Preview:</b> ${esc(example ? example.body.slice(0, 360) : 'Preview generuje się po pobraniu zapytań klienta.')}…</p>${example ? `<button type="button" data-copy-reply="${encodeURIComponent(example.body)}">Kopiuj przykład</button>` : ''}</article>`;}).join('')}</div></section>`;
         };
         const renderSettingsView = () => {
           const env = health?.env || {};
@@ -732,6 +940,7 @@ const title = 'CC Inbox — Panel Recepcji';
             ['Zapis Supabase', 'OK — rekord w reservation_inquiries'],
             ['Mail', `${item.mail_provider || 'none'} / ${item.mail_delivered ? 'dostarczony' : 'niedostarczony'}`],
             ['Status', statusLabels[item.status] || item.status],
+            ...(localTimeline.get(String(item.id)) || []).map((entry)=>[entry.label, entry.value]),
           ].map(([label,value])=>`<li><span>${esc(label)}</span><strong>${esc(value)}</strong></li>`).join('');
           return `${warnings ? `<aside class="crm-warnings">${warnings}</aside>` : ''}
             <div class="details-grid">
@@ -755,7 +964,7 @@ const title = 'CC Inbox — Panel Recepcji';
               <details class="technical-data"><summary>Dane techniczne</summary><pre data-raw-debug>Otwórz panel techniczny, żeby załadować raw JSON.</pre></details>
             </div>
             <div class="edit-row"><label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${item.status === value ? 'selected':''}>${label}</option>`).join('')}</select></label><label class="note"><span>Notatka recepcji</span><textarea data-notes rows="3">${esc(item.notes || '')}</textarea></label><button type="button" data-save>Zapisz status i notatkę</button></div>
-            <div class="card-actions"><button type="button" data-quick-status="needs_reply">Do odpowiedzi</button><button type="button" data-quick-status="replied">Odpowiedziane</button><button type="button" data-quick-status="needs_confirmation">Do potwierdzenia</button><button type="button" data-quick-status="confirmed">Potwierdź</button><button type="button" data-quick-status="unavailable">Brak miejsc</button><button type="button" data-quick-status="rejected">Odrzuć</button><button type="button" data-copy-summary>Kopiuj podsumowanie</button><button type="button" data-copy-email ${item.email ? '':'disabled'}>Kopiuj email</button><button type="button" data-copy-phone ${item.phone ? '':'disabled'}>Kopiuj telefon</button><button type="button" data-copy-mail>Kopiuj treść maila</button><button type="button" data-copy-id>Kopiuj link / ID</button>${item.email ? `<a href="mailto:${esc(item.email)}">Otwórz mailto</a>`:''}${item.phone ? `<a href="tel:${esc(item.phone)}">Otwórz tel</a>`:''}<button type="button" data-quick-status="cancelled">Anulowane</button><button type="button" data-quick-status="archived">Archiwizuj</button><button type="button" data-quick-status="spam">Spam/test</button></div>`;
+            <div class="card-actions"><button type="button" data-reply-action="confirm" data-target-status="needs_confirmation">✅ Potwierdź</button><button type="button" data-reply-action="askMissingData" data-target-status="needs_reply">📻 Poproś o dane</button><button type="button" data-reply-action="noAvailability" data-target-status="unavailable">❌ Brak miejsc</button><button type="button" data-quick-status="replied">Odpowiedziane</button><button type="button" data-quick-status="rejected">Odrzuć</button><button type="button" data-copy-summary>Kopiuj podsumowanie</button><button type="button" data-copy-email ${item.email ? '':'disabled'}>Kopiuj email</button><button type="button" data-copy-phone ${item.phone ? '':'disabled'}>Kopiuj telefon</button><button type="button" data-copy-mail>Kopiuj treść maila</button><button type="button" data-copy-id>Kopiuj link / ID</button>${item.phone ? `<a href="tel:${esc(item.phone)}">Otwórz tel</a>`:''}<button type="button" data-quick-status="cancelled">Anulowane</button><button type="button" data-quick-status="archived">Archiwizuj</button><button type="button" data-quick-status="spam">Spam/test</button></div>`;
         };
         const card = (item) => {
           const payload = raw(item);
@@ -767,7 +976,7 @@ const title = 'CC Inbox — Panel Recepcji';
           const guests = normalizeInquiryGuests(item);
           const mainServices = services(item).slice(0,4).map((service)=>`${service.label} × ${service.qty}`).join(' + ') || 'brak usług';
           const priority = categories.includes('urgent') || categories.includes('mailFailed') || categories.includes('group') ? 'Pilne' : 'Normalne';
-          const best = bestReply(item);
+          const best = bestTemplate(item);
           return `<article class="inquiry-card" data-id="${esc(item.id)}">
             <header>
               <div><div class="card-badges"><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span><span class="mail-badge ${item.mail_delivered ? 'is-ok':'is-failed'}">${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</span>${categoryBadges}${highSeason ? '<span class="season-badge">Lipiec/sierpień — camping bez rezerwacji</span>':''}</div><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.nights || 0)} nocy</p></div>
@@ -786,12 +995,15 @@ const title = 'CC Inbox — Panel Recepcji';
               ${item.phone ? `<a href="tel:${esc(item.phone)}">${esc(item.phone)}</a>` : ''}
             </div>
             <div class="quick-actions">
-              <button type="button" data-quick-status="confirmed">Zatwierdź</button>
-              <button type="button" data-quick-status="needs_reply">Poproś o dane</button>
-              <button type="button" data-quick-status="unavailable">Brak miejsc</button>
-              <button type="button" data-copy-template="summer">Camping lipiec/sierpień</button>
-              <button type="button" data-copy-reply="${encodeURIComponent(best)}">Kopiuj odpowiedź</button>
-              ${item.email ? `<a href="mailto:${esc(item.email)}?subject=${encodeURIComponent('Camping Clepardia — odpowiedź na zapytanie')}&body=${encodeURIComponent(best)}">Mailto</a>` : ''}
+              <button type="button" data-reply-action="confirm" data-target-status="needs_confirmation">✅ Potwierdź</button>
+              <button type="button" data-reply-action="askMissingData" data-target-status="needs_reply">📻 Poproś o dane</button>
+              <button type="button" data-reply-action="noAvailability" data-target-status="unavailable">❌ Brak miejsc</button>
+              <button type="button" data-reply-action="infoCampingSummer" data-target-status="replied">🏕️ Camping lipiec/sierpień</button>
+              <button type="button" data-reply-action="bungalow" data-target-status="needs_confirmation">🏡 Domek</button>
+              <button type="button" data-reply-action="electricityEv" data-target-status="replied">⚡ Prąd / EV</button>
+              <button type="button" data-reply-action="tours" data-target-status="replied">🎟️ Wycieczki</button>
+              <button type="button" data-copy-reply="${encodeURIComponent(best?.body || summaryText(item))}">📋 Kopiuj</button>
+              <button type="button" data-reply-template="${esc(best?.id || 'confirm')}">✉️ Mailto</button>
               <button type="button" data-open-details>Rozwiń</button>
             </div>
             <details class="inquiry-card__details">
@@ -803,6 +1015,7 @@ const title = 'CC Inbox — Panel Recepcji';
         const render = () => {
           viewButtons.forEach((button) => button.setAttribute('aria-pressed', button.dataset.view === activeView ? 'true' : 'false'));
           if (activeFilterCount) activeFilterCount.textContent = `Aktywne filtry: ${activeFilterTotal()}`;
+          refreshHeaderStatus();
           renderSystemStrip();
           const items = visibleItems();
           if (count) count.textContent = `${items.length} w widoku · realni: ${realItems().length} · testy: ${testItems().length}`;
@@ -828,15 +1041,23 @@ const title = 'CC Inbox — Panel Recepcji';
             else list.innerHTML = items.length ? items.map(card).join('') : '<div class="empty">Brak zapytań dla wybranych filtrów.</div>';
           }
         };
-        const load = async () => {
-          if (appStatus) appStatus.textContent = 'Ładowanie…';
-          if (connectionStatus) connectionStatus.textContent = 'API: łączenie…';
+        const load = async ({ silent = false, reason = 'manual' } = {}) => {
+          if (isLoading && silent) return;
+          rememberExpandedCards();
+          const previousIds = new Set(inquiries.map((item)=>String(item.id)));
+          isLoading = true;
+          if (!silent && appStatus) appStatus.textContent = 'Ładowanie…';
+          if (connectionStatus) connectionStatus.textContent = silent ? 'API: odświeżanie w tle…' : 'API: łączenie…';
           try {
             const [result, healthResult] = await Promise.all([
               request('/api/inbox/list'),
               request('/api/inbox/health').catch((error)=>({ ok:false, env:{}, tableCheck:{ ok:false, error:error.message } })),
             ]);
-            inquiries = result.inquiries || [];
+            const nextInquiries = result.inquiries || [];
+            const newItems = previousIds.size
+              ? nextInquiries.filter((item)=>!previousIds.has(String(item.id)))
+              : [];
+            inquiries = nextInquiries;
             health = healthResult;
             setOptions('status',Object.keys(statusLabels),(value)=>statusLabels[value] || value);
             setOptions('category',Object.keys(categoryLabels),(value)=>categoryLabels[value] || value);
@@ -845,16 +1066,36 @@ const title = 'CC Inbox — Panel Recepcji';
             setOptions('language',inquiries.map((item)=>item.language));
             if (appStatus) appStatus.textContent = '';
             if (connectionStatus) connectionStatus.textContent = 'API: połączono';
-            if (lastRefresh) lastRefresh.textContent = `Ostatnie odświeżenie: ${formatDate(new Date().toISOString(), true)}`;
+            if (lastRefresh) lastRefresh.textContent = `Ostatnie odświeżenie: ${new Intl.DateTimeFormat('pl-PL', { timeStyle:'short' }).format(new Date())}`;
             render();
+            restoreExpandedCards();
+            if (newItems.length && reason === 'auto') {
+              const visibleNew = newItems.filter((item)=>itemBelongsToView(item));
+              const noticeItem = visibleNew[0] || newItems[0];
+              const country = countryInfo(noticeItem);
+              const where = visibleNew.length ? '' : isTestInquiry(noticeItem) ? ' — w zakładce Testy' : ' — w Inbox';
+              showToast(`Nowe zapytanie od ${noticeItem.full_name || country.label || 'klienta'}${where}`, 'success');
+            }
+            startAutoRefresh();
           } catch (error) {
-            if (error.status === 401) { sessionStorage.removeItem(storageKey); accessCode=''; if (app instanceof HTMLElement) app.hidden=true; if (login instanceof HTMLElement) login.hidden=false; }
+            if (error.status === 401) {
+              window.clearInterval(autoRefreshTimer);
+              sessionStorage.removeItem(storageKey);
+              accessCode='';
+              showToast('Kod dostępu wygasł albo jest nieprawidłowy. Zaloguj się ponownie.', 'error');
+              if (app instanceof HTMLElement) app.hidden=true;
+              if (login instanceof HTMLElement) login.hidden=false;
+            }
             if (appStatus) appStatus.textContent = error.message;
             if (loginStatus) loginStatus.textContent = error.message;
             if (connectionStatus) connectionStatus.textContent = 'API: błąd';
+            refreshHeaderStatus();
+          } finally {
+            isLoading = false;
           }
         };
         const save = async (cardNode, statusOverride = '') => {
+          rememberExpandedCards();
           const id = cardNode.dataset.id;
           const status = statusOverride || cardNode.querySelector('[data-status]')?.value;
           const notes = cardNode.querySelector('[data-notes]')?.value || '';
@@ -864,8 +1105,10 @@ const title = 'CC Inbox — Panel Recepcji';
             const result = await request('/api/inbox/update',{method:'PATCH',body:JSON.stringify({id,status,notes})});
             const index = inquiries.findIndex((item)=>String(item.id) === String(id));
             if (index >= 0) inquiries[index] = result.inquiry;
+            trackLocalAction(id, `Zmieniono status: ${statusLabels[status] || status}`);
             render();
-          } catch (error) { if (appStatus) appStatus.textContent = error.message; }
+            restoreExpandedCards();
+          } catch (error) { if (appStatus) appStatus.textContent = error.message; showToast(error.message, 'error'); }
           finally { if (button) button.disabled = false; }
         };
 
@@ -879,10 +1122,22 @@ const title = 'CC Inbox — Panel Recepcji';
           sessionStorage.setItem(storageKey,accessCode);
           if (login instanceof HTMLElement) login.hidden=true;
           if (app instanceof HTMLElement) app.hidden=false;
+          startAutoRefresh();
           if (loginStatus) loginStatus.textContent='';
         });
-        document.querySelector('[data-refresh]')?.addEventListener('click',load);
-        document.querySelector('[data-logout]')?.addEventListener('click',()=>{sessionStorage.removeItem(storageKey);location.reload();});
+        document.querySelector('[data-refresh]')?.addEventListener('click',()=>void load({ silent:false, reason:'manual' }));
+        autoRefreshToggle?.addEventListener('click',()=>{
+          autoRefreshPaused = !autoRefreshPaused;
+          if (!autoRefreshPaused) {
+            void load({ silent:true, reason:'manual' });
+          } else {
+            window.clearInterval(autoRefreshTimer);
+            showToast('Auto-refresh zatrzymany. Widok i filtry zostają bez zmian.', 'info');
+          }
+          startAutoRefresh();
+          refreshHeaderStatus();
+        });
+        document.querySelector('[data-logout]')?.addEventListener('click',()=>{window.clearInterval(autoRefreshTimer);sessionStorage.removeItem(storageKey);location.reload();});
         viewButtons.forEach((button)=>button.addEventListener('click',()=>{
           activeView = button.dataset.view || 'inbox';
           render();
@@ -923,6 +1178,12 @@ const title = 'CC Inbox — Panel Recepcji';
         list?.addEventListener('toggle',(event)=>{
           const target = event.target;
           if (target instanceof HTMLDetailsElement) {
+            const node = target.closest('[data-id]');
+            const id = node instanceof HTMLElement ? String(node.dataset.id || '') : '';
+            if (id && target.classList.contains('inquiry-card__details')) {
+              if (target.open) expandedIds.add(id);
+              else expandedIds.delete(id);
+            }
             hydrateDetails(target);
             hydrateDebug(target);
           }
@@ -940,6 +1201,20 @@ const title = 'CC Inbox — Panel Recepcji';
           if (!(node instanceof HTMLElement)) return;
           const item = inquiries.find((entry)=>String(entry.id) === String(node.dataset.id));
           if (!item) return;
+          const replyAction = target.closest('[data-reply-action]');
+          if (replyAction instanceof HTMLElement) {
+            const template = replyTemplateById(item, replyAction.dataset.replyAction || 'confirm');
+            const opened = openReplyMail(item, template, node);
+            const statusAfter = replyAction.dataset.targetStatus || '';
+            if (opened && statusAfter) void save(node, statusAfter);
+            return;
+          }
+          const replyTemplateButton = target.closest('[data-reply-template]');
+          if (replyTemplateButton instanceof HTMLElement) {
+            const template = replyTemplateById(item, replyTemplateButton.dataset.replyTemplate || '');
+            openReplyMail(item, template, node);
+            return;
+          }
           if (target.closest('[data-save]')) void save(node);
           const quick = target.closest('[data-quick-status]');
           if (quick instanceof HTMLElement) void save(node,quick.dataset.quickStatus);
@@ -961,7 +1236,10 @@ const title = 'CC Inbox — Panel Recepcji';
           const replyButton = target.closest('[data-copy-reply]');
           if (replyButton instanceof HTMLButtonElement) {
             const replyText = decodeURIComponent(replyButton.dataset.copyReply || '');
-            if (replyText) void copy(replyText, replyButton);
+            if (replyText) {
+              trackLocalAction(item.id, 'Skopiowano odpowiedź');
+              void copy(replyText, replyButton);
+            }
           }
           const actions = [
             ['[data-copy-summary]',summaryText(item)],['[data-copy-email]',item.email],['[data-copy-phone]',item.phone],
@@ -969,8 +1247,9 @@ const title = 'CC Inbox — Panel Recepcji';
           ];
           actions.forEach(([selector,text])=>{const button=target.closest(selector);if(button instanceof HTMLButtonElement && text) void copy(text,button);});
         });
+        window.addEventListener('beforeunload',()=>window.clearInterval(autoRefreshTimer));
         accessCode = sessionStorage.getItem(storageKey) || '';
-        if (accessCode) { if (login instanceof HTMLElement) login.hidden=true; if (app instanceof HTMLElement) app.hidden=false; void load(); }
+        if (accessCode) { if (login instanceof HTMLElement) login.hidden=true; if (app instanceof HTMLElement) app.hidden=false; void load(); startAutoRefresh(); }
       })();
     </script>
   </body>
@@ -995,13 +1274,13 @@ const title = 'CC Inbox — Panel Recepcji';
     display: inline-flex;
     max-width: 100%;
     align-items: center;
-    min-height: 34px;
-    padding: 0 11px;
+    min-height: 38px;
+    padding: 0 13px;
     border: 1px solid rgba(143,224,180,.14);
     border-radius: 999px;
     color: rgba(239,251,243,.82);
     background: rgba(255,255,255,.055);
-    font-size: .78rem;
+    font-size: .84rem;
     font-weight: 850;
     text-decoration: none;
     overflow-wrap: anywhere;
@@ -1093,6 +1372,28 @@ const title = 'CC Inbox — Panel Recepcji';
     box-shadow: 0 18px 38px rgba(0,0,0,.22);
   }
 
+  .app-header__brand small {
+    display: block;
+    margin-top: 4px;
+    color: rgba(239,251,243,.62);
+    font-weight: 800;
+  }
+
+  .online-badge {
+    display: inline-flex;
+    vertical-align: middle;
+    min-height: 28px;
+    align-items: center;
+    margin-left: 8px;
+    padding: 0 10px;
+    border-radius: 999px;
+    color: #07140f;
+    background: linear-gradient(135deg, #a8f0c7, #7be3a8);
+    font-size: .72rem;
+    font-weight: 950;
+    letter-spacing: .08em;
+  }
+
   .header-actions {
     align-items: center;
     flex-wrap: wrap;
@@ -1118,6 +1419,42 @@ const title = 'CC Inbox — Panel Recepcji';
   .connection-pill {
     color: #9ee8bd;
     background: rgba(143,224,180,.08);
+  }
+
+  .connection-pill.is-ok {
+    color: #07140f;
+    background: #8fe0b4;
+  }
+
+  .connection-pill.is-warn {
+    color: #3d2600;
+    background: #ffd08a;
+  }
+
+  .panel-toast {
+    position: fixed;
+    right: clamp(12px, 3vw, 28px);
+    bottom: clamp(12px, 3vw, 28px);
+    z-index: 999;
+    width: min(420px, calc(100% - 24px));
+    padding: 14px 16px;
+    border: 1px solid rgba(143,224,180,.25);
+    border-radius: 18px;
+    color: #07140f;
+    background: #8fe0b4;
+    box-shadow: 0 22px 60px rgba(0,0,0,.32);
+    font-weight: 950;
+  }
+
+  .panel-toast[data-type="error"] {
+    color: #3d1300;
+    border-color: rgba(255,166,121,.35);
+    background: #ffb08a;
+  }
+
+  .panel-toast[data-type="info"] {
+    color: #07140f;
+    background: #dff5e8;
   }
 
   .country-pill {
@@ -1195,7 +1532,8 @@ const title = 'CC Inbox — Panel Recepcji';
   }
 
   .reply-template header span,
-  .reply-template header em {
+  .reply-template header em,
+  .reply-template header b {
     display: inline-flex;
     align-items: center;
     min-height: 24px;
@@ -1212,6 +1550,12 @@ const title = 'CC Inbox — Panel Recepcji';
   .reply-template header em {
     color: #e7fff0;
     background: rgba(255,255,255,.09);
+  }
+
+  .reply-template header b {
+    color: #07140f;
+    background: #ffe492;
+    font-size: .92rem;
   }
 
   .reply-template strong {
@@ -1311,6 +1655,12 @@ const title = 'CC Inbox — Panel Recepcji';
 
   .quick-actions {
     margin-top: 16px;
+  }
+
+  .quick-actions button[data-reply-action],
+  .quick-actions button[data-reply-template] {
+    color: #07140f;
+    background: linear-gradient(135deg, #a8f0c7, #7be3a8);
   }
 
   .quick-actions a {
