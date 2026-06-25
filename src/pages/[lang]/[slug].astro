@@ -1,12 +1,11 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import ContentPage from '@/components/pages/ContentPage.astro';
-import CoreLocalizedPage from '@/components/pages/CoreLocalizedPage.astro';
 import StayPlannerPage from '@/components/pages/StayPlannerPage.astro';
 import { languages } from '@/data/languages';
 import { pageSlugs } from '@/data/sitePages';
 import { getSitePage } from '@/i18n/config';
-import { coreCustomerSlugs, getCorePage } from '@/i18n/corePages';
+import { getCorePage } from '@/i18n/corePages';
 import { plannerSlugByLanguage } from '@/utils/localizedLinks';
 
 export function getStaticPaths() {
@@ -77,7 +76,6 @@ const plannerSeo = {
   description: 'Camping Clepardia mini stay planner.',
 };
 const compactPage = !isPlanner && page ? getCorePage(language.code, page.slug) : undefined;
-const useCompactPage = !isPlanner && page && language.translation === 'core-ui' && coreCustomerSlugs.includes(page.slug);
 const seoTitle = compactPage?.title ?? page?.seoTitle ?? plannerSeo.title;
 const seoDescription = compactPage?.lead ?? page?.seoDescription ?? plannerSeo.description;
 ---
@@ -98,8 +96,6 @@ const seoDescription = compactPage?.lead ?? page?.seoDescription ?? plannerSeo.d
     ogTitle={seoTitle}
     ogDescription={seoDescription}
   >
-    {useCompactPage
-      ? <CoreLocalizedPage languageCode={language.code} slug={page.slug} />
-      : <ContentPage page={page} languageCode={language.code} languageName={language.name} />}
+    <ContentPage page={page} languageCode={language.code} languageName={language.name} />
   </Layout>
 )}

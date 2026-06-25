@@ -350,7 +350,7 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   </div>
 </section>
 
-{(page.slug === 'kontakt' || page.slug === 'dojazd') && <ArrivalFlowSection languageCode={contentLanguage} />}
+{(page.slug === 'kontakt' || page.slug === 'dojazd') && <ArrivalFlowSection languageCode={resolvedContentLanguage} />}
 
 {page.slug !== 'cennik' && page.slug !== 'kontakt' && page.slug !== 'dojazd' && page.slug !== 'atrakcje' && page.slug !== 'faq' && page.slug !== 'galeria' && page.slug !== 'dla-kamperow' && page.slug !== 'dla-rodzin' && page.slug !== 'regulamin' && page.slug !== 'polityka-prywatnosci' && (
 <section class="site-section page-detail reveal-section">
@@ -551,21 +551,21 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   </section>
 )}
 
-{page.slug === 'cennik' && <PremiumPricingApp languageCode={contentLanguage} />}
+{page.slug === 'cennik' && <PremiumPricingApp languageCode={resolvedContentLanguage} />}
 
-{page.slug === 'dojazd' && <TransportDirections languageCode={contentLanguage} />}
+{page.slug === 'dojazd' && <TransportDirections languageCode={resolvedContentLanguage} />}
 
-{page.slug === 'atrakcje' && <AttractionsPage languageCode={contentLanguage} />}
+{page.slug === 'atrakcje' && <AttractionsPage languageCode={resolvedContentLanguage} />}
 
-{page.slug === 'faq' && <FaqPage languageCode={contentLanguage} />}
+{page.slug === 'faq' && <FaqPage languageCode={resolvedContentLanguage} />}
 
-{page.slug === 'galeria' && <GalleryPage languageCode={contentLanguage} />}
+{page.slug === 'galeria' && <GalleryPage languageCode={resolvedContentLanguage} />}
 
-{page.slug === 'dla-kamperow' && <CampersPage languageCode={contentLanguage} />}
+{page.slug === 'dla-kamperow' && <CampersPage languageCode={resolvedContentLanguage} />}
 
-{page.slug === 'dla-rodzin' && <FamiliesPage languageCode={contentLanguage} />}
+{page.slug === 'dla-rodzin' && <FamiliesPage languageCode={resolvedContentLanguage} />}
 
-{(page.slug === 'regulamin' || page.slug === 'polityka-prywatnosci') && <LegalPage pageSlug={page.slug} languageCode={contentLanguage} />}
+{(page.slug === 'regulamin' || page.slug === 'polityka-prywatnosci') && <LegalPage pageSlug={page.slug} languageCode={resolvedContentLanguage} />}
 
 {false && page.slug === 'cennik' && (
   <section class="site-section page-detail pricing-guidance reveal-section">

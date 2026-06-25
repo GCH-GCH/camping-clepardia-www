@@ -1,5 +1,5 @@
 ---
-const title = 'Panel recepcji Camping Clepardia';
+const title = 'CC Inbox — Panel Recepcji';
 ---
 
 <!doctype html>
@@ -32,8 +32,23 @@ const title = 'Panel recepcji Camping Clepardia';
 
       <section class="inbox-app" data-app hidden>
         <header class="app-header">
-          <div><span class="eyebrow">Camping Clepardia</span><h1>Inbox recepcji</h1><p data-count>Ładowanie zapytań…</p></div>
-          <div class="header-actions"><button type="button" data-refresh>Odśwież</button><button type="button" class="ghost" data-logout>Wyloguj</button></div>
+          <div class="app-header__brand">
+            <img class="app-header__logo" src="/brand/logo/clepardia-logo-main.svg" alt="Camping Clepardia" width="74" height="74" loading="eager" decoding="async" />
+            <div>
+              <span class="eyebrow">Camping Clepardia</span>
+              <h1>{title}</h1>
+              <p>Zapytania, rezerwacje, feedback i wiadomości ze strony</p>
+              <small data-count>Ładowanie zapytań…</small>
+            </div>
+          </div>
+          <div class="header-actions">
+            <span class="connection-pill" data-connection-status>API: oczekiwanie</span>
+            <span class="connection-pill" data-last-refresh>Ostatnie odświeżenie: —</span>
+            <a href="/" target="_blank" rel="noopener">Strona główna</a>
+            <a href="/rezerwacja/" target="_blank" rel="noopener">Rezerwacja</a>
+            <button type="button" data-refresh>Odśwież</button>
+            <button type="button" class="ghost" data-logout>Wyloguj</button>
+          </div>
         </header>
 
         <section class="stats-grid" data-stats aria-label="Statystyki inboxu"></section>
@@ -49,8 +64,10 @@ const title = 'Panel recepcji Camping Clepardia';
           <label><span>Sortowanie</span><select data-filter="sort"><option value="newest">Najnowsze</option><option value="oldest">Najstarsze</option><option value="arrival">Przyjazd najbliżej</option></select></label>
           <label class="check"><input type="checkbox" data-filter="mailFailed" /><span>Mail niedostarczony</span></label>
           <label class="check"><input type="checkbox" data-filter="trips" /><span>Wycieczki</span></label>
+          <label class="check"><input type="checkbox" data-filter="event" /><span>Wydarzenia</span></label>
           <label class="check"><input type="checkbox" data-filter="special" /><span>Specjalne potrzeby</span></label>
           <label class="check"><input type="checkbox" data-filter="heavy" /><span>Ciężki pojazd</span></label>
+          <label class="check"><input type="checkbox" data-filter="ev" /><span>Prąd / EV</span></label>
           <label class="check"><input type="checkbox" data-filter="summer" /><span>Lipiec / sierpień</span></label>
         </section>
 
@@ -70,12 +87,15 @@ const title = 'Panel recepcji Camping Clepardia';
         const list = document.querySelector('[data-list]');
         const count = document.querySelector('[data-count]');
         const stats = document.querySelector('[data-stats]');
+        const connectionStatus = document.querySelector('[data-connection-status]');
+        const lastRefresh = document.querySelector('[data-last-refresh]');
         const filters = Array.from(document.querySelectorAll('[data-filter]'));
-        const statusLabels = { new:'Nowe', needs_reply:'Do potwierdzenia', replied:'Odpowiedziane', confirmed:'Potwierdzone', rejected:'Odrzucone', spam:'Spam/test', archived:'Archiwum' };
+        const statusLabels = { new:'Nowe', needs_reply:'Do odpowiedzi', replied:'Odpowiedziane', needs_confirmation:'Do potwierdzenia', confirmed:'Potwierdzone', unavailable:'Brak miejsc', rejected:'Odrzucone', cancelled:'Anulowane', spam:'Spam/test', archived:'Archiwum' };
         const categoryLabels = {
           urgent:'Pilne', today:'Przyjazd dzisiaj', next7:'Przyjazd ≤ 7 dni', camping:'Camping', bungalow:'Domki', combined:'Pobyt łączony',
           group:'Grupa', scouts:'Harcerze / skauci', trips:'Wycieczki', feedback:'Opinia o stronie',
-          mailFailed:'Mail niedostarczony', late:'Późny przyjazd', special:'Specjalne potrzeby',
+          event:'Wydarzenie', mailFailed:'Mail niedostarczony', late:'Późny przyjazd', special:'Specjalne potrzeby',
+          heavy:'Ciężki pojazd', ev:'Prąd / EV warning',
         };
         let accessCode = '';
         let inquiries = [];
@@ -85,6 +105,61 @@ const title = 'Panel recepcji Camping Clepardia';
         const feedback = (item) => raw(item)?.feedback && typeof raw(item).feedback === 'object' ? raw(item).feedback : {};
         const likedFeedback = (review) => Array.isArray(review?.liked) ? review.liked : [];
         const vehicle = (item) => item?.vehicle_details_json && typeof item.vehicle_details_json === 'object' ? item.vehicle_details_json : {};
+        const normalizeText = (value) => String(value ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+        const flagEmoji = (code) => /^[A-Z]{2}$/.test(code)
+          ? [...code].map((char)=>String.fromCodePoint(127397 + char.charCodeAt(0))).join('')
+          : '🌍';
+        const countryAliases = [
+          ['PL',['pl','polska','poland','polen','pologne','polonia']],
+          ['DE',['de','niemcy','germany','deutschland','alemania','germania','duitsland']],
+          ['CZ',['cz','cs','czechy','czech republic','czechia','cesko','ceska republika','tsjechie']],
+          ['SK',['sk','slowacja','slovakia','slovensko','slovaquie','slovacchia','eslovaquia']],
+          ['KZ',['kz','kazachstan','kazakhstan']],
+          ['UA',['ua','ukraina','ukraine']],
+          ['HU',['hu','wegry','hungary','ungarn','hongrie','ungheria']],
+          ['NL',['nl','holandia','netherlands','nederland','holland','paesi bassi']],
+          ['FR',['fr','francja','france','frankreich','francia']],
+          ['IT',['it','wlochy','italy','italia','italie']],
+          ['ES',['es','hiszpania','spain','espana','espagne','spanien']],
+          ['SE',['se','sv','szwecja','sweden','sverige','suecia','svezia']],
+          ['LT',['lt','litwa','lithuania','lietuva']],
+          ['LV',['lv','lotwa','latvia','latvija']],
+          ['EE',['ee','estonia','eesti']],
+          ['US',['us','usa','united states','stany zjednoczone']],
+          ['GB',['gb','uk','united kingdom','great britain','wielka brytania','anglia']],
+          ['CA',['ca','kanada','canada']],
+          ['AU',['au','australia']],
+          ['MX',['mx','meksyk','mexico','mexique']],
+          ['AT',['at','austria','osterreich']],
+          ['CH',['ch','switzerland','szwajcaria','schweiz','suisse']],
+          ['BE',['be','belgia','belgium','belgique']],
+          ['DK',['dk','dania','denmark','danmark']],
+          ['NO',['no','norwegia','norway','norge']],
+          ['FI',['fi','finlandia','finland']],
+          ['IE',['ie','irlandia','ireland']],
+          ['PT',['pt','portugalia','portugal']],
+          ['RO',['ro','rumunia','romania']],
+          ['BG',['bg','bulgaria','bulgaria']],
+          ['HR',['hr','chorwacja','croatia','hrvatska']],
+          ['SI',['si','slowenia','slovenia','slovenija']],
+          ['RS',['rs','serbia']],
+        ];
+        const countryInfo = (item) => {
+          const value = String(item?.country || '').trim();
+          const text = normalizeText(value);
+          const bracketCode = String(value.match(/\(([A-Za-z]{2})\)/)?.[1] || '').toUpperCase();
+          const found = countryAliases.find(([code, aliases]) => aliases.some((alias)=>text === alias || text.includes(` ${alias} `) || text.startsWith(`${alias} `) || text.endsWith(` ${alias}`)));
+          const code = found?.[0] || (/^[A-Z]{2}$/.test(bracketCode) ? bracketCode : '');
+          return {
+            raw:value || 'Nieznany kraj',
+            code,
+            flag: flagEmoji(code),
+            label: value || 'Nieznany kraj',
+            language: String(item?.language || raw(item).contactLanguage || raw(item).locale || '-').toUpperCase(),
+            risk: code ? '' : 'Nie rozpoznano kraju — sprawdź język odpowiedzi przed wysłaniem.',
+          };
+        };
+        const eventInterest = (item) => raw(item).eventInterest || raw(item).event || raw(item).eventName || raw(item).krakowEvent || '';
         const serviceCatalog = {
           camper: { id:'camper', scope:'camping', label:'Kamper', price:80 },
           van: { id:'van', scope:'camping', label:'Van', price:75 },
@@ -235,10 +310,13 @@ const title = 'Panel recepcji Camping Clepardia';
           if (/harcer|skaut|scout|pfadfinder|scoutisme|scouting/.test(text)) result.push('scouts');
           if (/grup|group|gruppe|groupe|gruppo|groep|skupin/.test(text) || guestCount(item) >= 8) result.push('group');
           if (trips(item).length) result.push('trips');
+          if (String(eventInterest(item)).trim()) result.push('event');
           if (Object.keys(feedback(item)).some((key)=>feedback(item)[key] && (!Array.isArray(feedback(item)[key]) || feedback(item)[key].length))) result.push('feedback');
           if (!item.mail_delivered) result.push('mailFailed');
           if (/po 21|after 21|nach 21|après 21|después de las 21|na 21|21:|późn|late arrival/.test(`${text} ${raw(item).arrivalTime || ''}`.toLowerCase())) result.push('late');
           if (String(item.special_needs || '').trim()) result.push('special');
+          if (vehicle(item).large || vehicle(item).asphaltNeeded || /ciezar|heavy|truck|lkw|bus/.test(text)) result.push('heavy');
+          if (/electric|prad|prąd|10a|ev|plug/.test(text)) result.push('ev');
           return [...new Set(result)];
         };
         const serviceIcon = (service) => {
@@ -315,8 +393,10 @@ const title = 'Panel recepcji Camping Clepardia';
               && (!filterValue('arrival') || String(item.arrival_date || '') >= filterValue('arrival'))
               && (!filterValue('mailFailed') || !item.mail_delivered)
               && (!filterValue('trips') || trips(item).length)
+              && (!filterValue('event') || categoryKeys(item).includes('event'))
               && (!filterValue('special') || Boolean(String(item.special_needs || '').trim()))
-              && (!filterValue('heavy') || Boolean(v.large))
+              && (!filterValue('heavy') || categoryKeys(item).includes('heavy'))
+              && (!filterValue('ev') || categoryKeys(item).includes('ev'))
               && (!filterValue('summer') || isSummer(item));
           });
           const sort = filterValue('sort');
@@ -352,35 +432,101 @@ const title = 'Panel recepcji Camping Clepardia';
           const review = feedback(item);
           return `<section class="detail-card detail-card--wide feedback-card"><h3>⭐ Opinia o stronie</h3><p class="feedback-stars" aria-label="Ocena ${esc(review.rating || 0)} z 5">${stars(review.rating)}</p><p><strong>${review.rating ? `${esc(review.rating)}/5` : 'Bez oceny liczbowej'}</strong></p><small>Podobało się: ${esc(likedFeedback(review).join(', ') || '-')}</small><small>Łatwo znaleźć informacje: ${esc(review.easyInfo || '-')} · Prostota formularza: ${esc(review.easyForm || '-')}</small><p class="message-copy">${esc(review.improve || 'Brak dodatkowej sugestii.')}</p></section>`;
         };
+        const languageCode = (item) => {
+          const value = String(item?.language || raw(item).contactLanguage || raw(item).locale || 'en').toLowerCase();
+          if (value.startsWith('pl')) return 'pl';
+          if (value.startsWith('de')) return 'de';
+          if (value.startsWith('it')) return 'it';
+          if (value.startsWith('fr')) return 'fr';
+          if (value.startsWith('es')) return 'es';
+          if (value.startsWith('nl')) return 'nl';
+          if (value.startsWith('cs') || value.startsWith('cz')) return 'cs';
+          if (value.startsWith('sk')) return 'sk';
+          if (value.startsWith('sv') || value.startsWith('se')) return 'sv';
+          return value.startsWith('en') ? 'en' : 'en';
+        };
+        const replyCopy = {
+          pl:{ hello:'Dzień dobry', received:'dziękujemy za wiadomość. Otrzymaliśmy zapytanie dotyczące pobytu w Camping Clepardia w terminie {dates}. Recepcja sprawdzi szczegóły i odpowie możliwie szybko.', missing:'dziękujemy za zapytanie. Prosimy o dosłanie brakujących danych: numer rejestracyjny pojazdu/przyczepy, orientacyjna godzina przyjazdu oraz liczba osób, jeśli nie została podana.', positive:'wstępnie przyjęliśmy zapytanie dotyczące pobytu {stay} w terminie {dates}. Wybrane usługi: {services}. Finalne potwierdzenie dostępności i warunków wyśle recepcja.', unavailable:'dziękujemy za wiadomość. W wybranym terminie dostępność może być ograniczona. Recepcja sprawdzi alternatywne opcje i wróci z odpowiedzią.', summer:'w lipcu i sierpniu nie prowadzimy rezerwacji miejsc campingowych z wyprzedzeniem. Miejsca dla kamperów, przyczep, vanów i namiotów są według kolejności przyjazdu. Check-out z campingu jest do 12:00, dlatego najlepiej przyjechać około południa.', bungalow:'dziękujemy za zapytanie o domek w terminie {dates}. Dostępność domków potwierdza recepcja. Check-in do domków jest od 16:00, check-out do 11:00. Prosimy zabrać własne ręczniki, kosmetyki i rzeczy osobiste.', late:'jeśli planują Państwo przyjazd po godzinie 21:00, prosimy o wcześniejszy kontakt z recepcją. Recepcja pracuje 9:00–21:00, a brama standardowo 8:00–22:00.', trips:'recepcja może pomóc w informacjach o popularnych wycieczkach z Krakowa: {trips}. Szczegóły można ustalić przy kontakcie z recepcją.', heavy:'przy ciężkim pojeździe, autobusie lub busie prosimy o wcześniejszą informację. Takie pojazdy kierujemy na stabilniejsze/asfaltowe miejsca, nie na miękką trawę.', ev:'na campingu dostępny jest prąd 10A dla kamperów i przyczep. Nie ma możliwości ładowania samochodów elektrycznych ani hybryd plug-in na stanowisku.', regards:'Pozdrawiamy,\nRecepcja Camping Clepardia' },
+          en:{ hello:'Hello', received:'thank you for your message. We have received your enquiry for Camping Clepardia for {dates}. Reception will check the details and reply as soon as possible.', missing:'thank you for your enquiry. Please send the missing details: vehicle/trailer registration plate, approximate arrival time and number of guests if not provided.', positive:'we have received your enquiry for {stay} on {dates}. Selected services: {services}. Final availability and conditions will be confirmed by reception.', unavailable:'thank you for your message. Availability may be limited for the selected dates. Reception will check alternatives and reply to you.', summer:'in July and August we do not take advance reservations for camping pitches. Camper, caravan, van and tent pitches are first come, first served. Camping check-out is until 12:00, so arriving around noon is best.', bungalow:'thank you for your bungalow enquiry for {dates}. Bungalow availability is confirmed by reception. Check-in is from 16:00 and check-out until 11:00. Please bring your own towels, toiletries and personal items.', late:'if you plan to arrive after 21:00, please contact reception in advance. Reception is open 09:00–21:00 and the gate usually operates 08:00–22:00.', trips:'reception can help with information about popular trips from Krakow: {trips}. Details can be agreed directly with reception.', heavy:'for a heavy vehicle, bus or truck, please inform us in advance. Such vehicles are directed to firmer/asphalt areas, not soft grass.', ev:'10A electricity is available for camper/caravan equipment. Electric cars and plug-in hybrids cannot be charged on the pitch.', regards:'Kind regards,\nCamping Clepardia Reception' },
+          de:{ hello:'Guten Tag', received:'vielen Dank für Ihre Nachricht. Wir haben Ihre Anfrage für Camping Clepardia im Zeitraum {dates} erhalten. Die Rezeption prüft die Details und antwortet schnellstmöglich.', missing:'vielen Dank für Ihre Anfrage. Bitte senden Sie fehlende Angaben: Kennzeichen von Fahrzeug/Anhänger, ungefähre Ankunftszeit und Personenzahl, falls noch nicht angegeben.', positive:'wir haben Ihre Anfrage für {stay} im Zeitraum {dates} erhalten. Gewählte Leistungen: {services}. Die endgültige Verfügbarkeit und Bedingungen bestätigt die Rezeption.', unavailable:'vielen Dank für Ihre Nachricht. Im gewählten Zeitraum kann die Verfügbarkeit begrenzt sein. Die Rezeption prüft Alternativen und meldet sich.', summer:'im Juli und August nehmen wir keine Vorausreservierungen für Campingplätze an. Plätze für Wohnmobile, Wohnwagen, Vans und Zelte gelten nach Ankunftsreihenfolge. Check-out vom Camping ist bis 12:00, daher ist Anreise gegen Mittag am besten.', bungalow:'vielen Dank für Ihre Bungalow-Anfrage für {dates}. Die Verfügbarkeit bestätigt die Rezeption. Check-in ist ab 16:00, Check-out bis 11:00. Bitte eigene Handtücher, Kosmetik und persönliche Dinge mitbringen.', late:'bei Anreise nach 21:00 kontaktieren Sie bitte vorher die Rezeption. Die Rezeption ist 09:00–21:00 geöffnet, das Tor normalerweise 08:00–22:00.', trips:'die Rezeption kann Informationen zu beliebten Ausflügen ab Krakau geben: {trips}. Details können direkt mit der Rezeption abgestimmt werden.', heavy:'bei schwerem Fahrzeug, Bus oder LKW bitte vorher informieren. Solche Fahrzeuge werden auf festere/asphaltierte Bereiche geleitet, nicht auf weiches Gras.', ev:'10A-Strom ist für Wohnmobil-/Wohnwagen-Ausstattung verfügbar. Elektroautos und Plug-in-Hybride können am Stellplatz nicht geladen werden.', regards:'Mit freundlichen Grüßen\nRezeption Camping Clepardia' },
+          it:{ hello:'Buongiorno', received:'grazie per il messaggio. Abbiamo ricevuto la richiesta per Camping Clepardia nel periodo {dates}. La reception controllerà i dettagli e risponderà appena possibile.', missing:'grazie per la richiesta. Chiediamo di inviare i dati mancanti: targa del veicolo/rimorchio, orario indicativo di arrivo e numero di ospiti se non indicato.', positive:'abbiamo ricevuto la richiesta per {stay} nel periodo {dates}. Servizi scelti: {services}. Disponibilità e condizioni finali saranno confermate dalla reception.', unavailable:'grazie per il messaggio. Nel periodo scelto la disponibilità può essere limitata. La reception controllerà alternative e risponderà.', summer:'in luglio e agosto non prendiamo prenotazioni anticipate per piazzole camping. Camper, roulotte, van e tende sono in ordine di arrivo. Check-out camping entro le 12:00, quindi è meglio arrivare verso mezzogiorno.', bungalow:'grazie per la richiesta bungalow per {dates}. La disponibilità è confermata dalla reception. Check-in dalle 16:00, check-out entro le 11:00. Portare asciugamani, cosmetici e oggetti personali.', late:'se prevedete arrivo dopo le 21:00, contattate prima la reception. Reception 09:00–21:00, cancello normalmente 08:00–22:00.', trips:'la reception può aiutare con informazioni sulle escursioni da Cracovia: {trips}. I dettagli si concordano con la reception.', heavy:'per veicolo pesante, bus o camion vi chiediamo di avvisare in anticipo. Questi veicoli vanno su aree più stabili/asfaltate, non su erba morbida.', ev:'è disponibile corrente 10A per attrezzatura camper/roulotte. Non è possibile caricare auto elettriche o ibride plug-in in piazzola.', regards:'Cordiali saluti\nReception Camping Clepardia' },
+          fr:{ hello:'Bonjour', received:'merci pour votre message. Nous avons reçu votre demande pour Camping Clepardia pour {dates}. La réception vérifiera les détails et répondra dès que possible.', missing:'merci pour votre demande. Merci d’envoyer les informations manquantes : immatriculation du véhicule/remorque, heure approximative d’arrivée et nombre de personnes si non indiqué.', positive:'nous avons reçu votre demande pour {stay} aux dates {dates}. Services choisis : {services}. La disponibilité finale et les conditions seront confirmées par la réception.', unavailable:'merci pour votre message. La disponibilité peut être limitée aux dates choisies. La réception vérifiera les alternatives et vous répondra.', summer:'en juillet et août, nous ne réservons pas les emplacements camping à l’avance. Les places pour camping-cars, caravanes, vans et tentes sont selon l’ordre d’arrivée. Le check-out camping est jusqu’à 12:00, il est donc préférable d’arriver vers midi.', bungalow:'merci pour votre demande de bungalow pour {dates}. La disponibilité est confirmée par la réception. Check-in à partir de 16:00, check-out jusqu’à 11:00. Merci d’apporter serviettes, cosmétiques et effets personnels.', late:'si vous prévoyez d’arriver après 21:00, contactez la réception à l’avance. Réception 09:00–21:00, portail normalement 08:00–22:00.', trips:'la réception peut aider avec les informations sur les excursions depuis Cracovie : {trips}. Les détails peuvent être convenus avec la réception.', heavy:'pour un véhicule lourd, bus ou camion, merci de nous informer à l’avance. Ces véhicules sont dirigés vers des zones plus stables/asphaltées, pas sur l’herbe molle.', ev:'l’électricité 10A est disponible pour l’équipement du camping-car/de la caravane. Les voitures électriques et hybrides plug-in ne peuvent pas être chargées sur l’emplacement.', regards:'Cordialement\nRéception Camping Clepardia' },
+          es:{ hello:'Buenos días', received:'gracias por su mensaje. Hemos recibido su consulta para Camping Clepardia para {dates}. Recepción revisará los detalles y responderá lo antes posible.', missing:'gracias por su consulta. Por favor envíe los datos que faltan: matrícula del vehículo/remolque, hora aproximada de llegada y número de personas si no se indicó.', positive:'hemos recibido su consulta para {stay} en las fechas {dates}. Servicios elegidos: {services}. La disponibilidad final y condiciones serán confirmadas por recepción.', unavailable:'gracias por su mensaje. La disponibilidad puede ser limitada en las fechas elegidas. Recepción revisará alternativas y responderá.', summer:'en julio y agosto no reservamos parcelas de camping con antelación. Las plazas para autocaravanas, caravanas, vans y tiendas son por orden de llegada. El check-out de camping es hasta las 12:00, por eso es mejor llegar sobre mediodía.', bungalow:'gracias por su consulta sobre bungalow para {dates}. La disponibilidad la confirma recepción. Check-in desde las 16:00, check-out hasta las 11:00. Por favor traigan toallas, cosméticos y objetos personales.', late:'si planean llegar después de las 21:00, contacten antes con recepción. Recepción 09:00–21:00, puerta normalmente 08:00–22:00.', trips:'recepción puede ayudar con información sobre excursiones desde Cracovia: {trips}. Los detalles se acuerdan con recepción.', heavy:'para vehículo pesado, bus o camión, avisen con antelación. Estos vehículos se dirigen a zonas más firmes/asfaltadas, no a césped blando.', ev:'hay electricidad 10A para equipos de camper/caravana. No se pueden cargar coches eléctricos ni híbridos plug-in en la parcela.', regards:'Saludos cordiales\nRecepción Camping Clepardia' },
+          nl:{ hello:'Goedendag', received:'bedankt voor uw bericht. We hebben uw aanvraag voor Camping Clepardia voor {dates} ontvangen. De receptie controleert de details en antwoordt zo snel mogelijk.', missing:'bedankt voor uw aanvraag. Stuur alstublieft de ontbrekende gegevens: kenteken van voertuig/aanhanger, geschatte aankomsttijd en aantal gasten als dat ontbreekt.', positive:'we hebben uw aanvraag voor {stay} op {dates} ontvangen. Gekozen diensten: {services}. Definitieve beschikbaarheid en voorwaarden worden door de receptie bevestigd.', unavailable:'bedankt voor uw bericht. Beschikbaarheid kan beperkt zijn voor de gekozen data. De receptie controleert alternatieven en antwoordt u.', summer:'in juli en augustus reserveren wij campingplaatsen niet vooraf. Plaatsen voor campers, caravans, vans en tenten zijn op volgorde van aankomst. Check-out camping is tot 12:00, dus aankomst rond de middag is het beste.', bungalow:'bedankt voor uw bungalowaanvraag voor {dates}. Beschikbaarheid wordt door de receptie bevestigd. Check-in vanaf 16:00, check-out tot 11:00. Neem eigen handdoeken, toiletartikelen en persoonlijke spullen mee.', late:'als u na 21:00 aankomt, neem vooraf contact op met de receptie. Receptie 09:00–21:00, poort normaal 08:00–22:00.', trips:'de receptie kan helpen met informatie over populaire uitstappen vanuit Krakau: {trips}. Details kunnen met de receptie worden afgesproken.', heavy:'voor een zwaar voertuig, bus of truck graag vooraf informeren. Zulke voertuigen gaan naar stevigere/asfaltplaatsen, niet op zacht gras.', ev:'10A stroom is beschikbaar voor camper/caravanapparatuur. Elektrische auto’s en plug-in hybrides kunnen niet op de plaats worden opgeladen.', regards:'Met vriendelijke groet\nReceptie Camping Clepardia' },
+          cs:{ hello:'Dobrý den', received:'děkujeme za zprávu. Obdrželi jsme váš dotaz na pobyt v Camping Clepardia v termínu {dates}. Recepce zkontroluje detaily a odpoví co nejdříve.', missing:'děkujeme za dotaz. Prosíme o zaslání chybějících údajů: SPZ vozidla/přívěsu, přibližný čas příjezdu a počet osob, pokud nebyl uveden.', positive:'obdrželi jsme váš dotaz na {stay} v termínu {dates}. Vybrané služby: {services}. Konečnou dostupnost a podmínky potvrdí recepce.', unavailable:'děkujeme za zprávu. Ve vybraném termínu může být dostupnost omezená. Recepce ověří alternativy a odpoví.', summer:'v červenci a srpnu nepřijímáme rezervace kempových míst předem. Místa pro obytné vozy, karavany, vany a stany jsou podle pořadí příjezdu. Check-out z kempu je do 12:00, nejlepší je přijet kolem poledne.', bungalow:'děkujeme za dotaz na chatku v termínu {dates}. Dostupnost potvrzuje recepce. Check-in od 16:00, check-out do 11:00. Vezměte si vlastní ručníky, kosmetiku a osobní věci.', late:'pokud plánujete příjezd po 21:00, kontaktujte recepci předem. Recepce 09:00–21:00, brána obvykle 08:00–22:00.', trips:'recepce pomůže s informacemi o výletech z Krakova: {trips}. Detaily lze dohodnout s recepcí.', heavy:'u těžkého vozidla, autobusu nebo nákladního auta nás prosím informujte předem. Taková vozidla směřujeme na pevnější/asfaltové plochy, ne na měkkou trávu.', ev:'elektřina 10A je dostupná pro vybavení obytného vozu/karavanu. Elektromobily ani plug-in hybridy nelze nabíjet na místě.', regards:'S pozdravem\nRecepce Camping Clepardia' },
+          sk:{ hello:'Dobrý deň', received:'ďakujeme za správu. Dostali sme vašu požiadavku na pobyt v Camping Clepardia v termíne {dates}. Recepcia skontroluje detaily a odpovie čo najskôr.', missing:'ďakujeme za požiadavku. Prosíme o doplnenie údajov: EČV vozidla/prívesu, približný čas príchodu a počet osôb, ak nebol uvedený.', positive:'dostali sme vašu požiadavku na {stay} v termíne {dates}. Vybrané služby: {services}. Konečnú dostupnosť a podmienky potvrdí recepcia.', unavailable:'ďakujeme za správu. Vo vybranom termíne môže byť dostupnosť obmedzená. Recepcia overí alternatívy a odpovie.', summer:'v júli a auguste neprijímame rezervácie kempových miest vopred. Miesta pre obytné autá, karavany, vany a stany sú podľa poradia príchodu. Check-out z kempu je do 12:00, najlepšie je prísť okolo poludnia.', bungalow:'ďakujeme za otázku na chatku v termíne {dates}. Dostupnosť potvrdzuje recepcia. Check-in od 16:00, check-out do 11:00. Prineste si vlastné uteráky, kozmetiku a osobné veci.', late:'ak plánujete príchod po 21:00, kontaktujte recepciu vopred. Recepcia 09:00–21:00, brána zvyčajne 08:00–22:00.', trips:'recepcia pomôže s informáciami o výletoch z Krakova: {trips}. Detaily možno dohodnúť s recepciou.', heavy:'pri ťažkom vozidle, autobuse alebo kamióne nás informujte vopred. Takéto vozidlá smerujeme na pevnejšie/asfaltové plochy, nie na mäkkú trávu.', ev:'elektrina 10A je dostupná pre vybavenie obytného auta/karavanu. Elektromobily ani plug-in hybridy nie je možné nabíjať na mieste.', regards:'S pozdravom\nRecepcia Camping Clepardia' },
+          sv:{ hello:'Hej', received:'tack för ditt meddelande. Vi har fått din förfrågan till Camping Clepardia för {dates}. Receptionen kontrollerar detaljerna och svarar så snart som möjligt.', missing:'tack för din förfrågan. Skicka gärna saknade uppgifter: registreringsnummer för fordon/släp, ungefärlig ankomsttid och antal gäster om det saknas.', positive:'vi har fått din förfrågan för {stay} under {dates}. Valda tjänster: {services}. Slutlig tillgänglighet och villkor bekräftas av receptionen.', unavailable:'tack för ditt meddelande. Tillgängligheten kan vara begränsad för valda datum. Receptionen kontrollerar alternativ och återkommer.', summer:'i juli och augusti tar vi inte emot förhandsbokningar för campingplatser. Platser för husbilar, husvagnar, vans och tält gäller enligt ankomstordning. Check-out från campingen är till 12:00, så ankomst runt lunch är bäst.', bungalow:'tack för din bungalowförfrågan för {dates}. Tillgänglighet bekräftas av receptionen. Check-in från 16:00, check-out till 11:00. Ta med egna handdukar, hygienartiklar och personliga saker.', late:'om du planerar ankomst efter 21:00, kontakta receptionen i förväg. Reception 09:00–21:00, porten normalt 08:00–22:00.', trips:'receptionen kan hjälpa med information om populära turer från Kraków: {trips}. Detaljer kan avtalas med receptionen.', heavy:'för tungt fordon, buss eller lastbil, meddela oss i förväg. Sådana fordon placeras på fastare/asfalterade ytor, inte på mjukt gräs.', ev:'10A el finns för utrustning i husbil/husvagn. Elbilar och plug-in-hybrider kan inte laddas på platsen.', regards:'Vänliga hälsningar\nReception Camping Clepardia' },
+        };
+        const fillReply = (text, data) => String(text || '').replace(/\{(\w+)\}/g, (_, key) => data[key] ?? '');
+        const generateReplyTemplates = (item) => {
+          const lang = languageCode(item);
+          const copySet = replyCopy[lang] || replyCopy.en;
+          const categories = categoryKeys(item);
+          const firstName = String(item.full_name || '').trim().split(/\s+/)[0] || '';
+          const greeting = `${copySet.hello}${firstName ? ` ${firstName}` : ''},`;
+          const data = {
+            dates: `${item.arrival_date || '-'} — ${item.departure_date || '-'}`,
+            stay: item.stay_type || 'pobytu',
+            services: services(item).map((service)=>`${service.label} x ${service.qty}`).join(', ') || '-',
+            trips: trips(item).join(', ') || 'Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców, Energylandia',
+          };
+          const make = (id, title, category, key, priority, suggested = true) => ({
+            id, title, category, language: lang.toUpperCase(), priority, suggested,
+            body: `${greeting}\n\n${fillReply(copySet[key], data)}\n\n${copySet.regards}`,
+          });
+          const templates = [
+            make('received','Potwierdzenie otrzymania','neutral','received',90,true),
+            make('missing','Prośba o dodatkowe dane','missing','missing',80,!item.email || !item.phone || !item.vehicle_registration),
+            make('positive','Wstępne potwierdzenie','positive','positive',70,true),
+            make('unavailable','Brak dostępności','negative','unavailable',50,true),
+            make('summer','Lipiec/sierpień — camping','season','summer',95,isSummer(item) && categories.includes('camping')),
+            make('bungalow','Domki','bungalow','bungalow',75,categories.includes('bungalow') || categories.includes('combined')),
+            make('late','Późny przyjazd','arrival','late',88,categories.includes('late')),
+            make('trips','Wycieczki','trips','trips',82,trips(item).length > 0),
+            make('heavy','Ciężki pojazd','vehicle','heavy',86,categories.includes('heavy')),
+            make('ev','Prąd / EV','power','ev',84,categories.includes('ev')),
+          ];
+          return templates.sort((a,b)=>Number(b.suggested)-Number(a.suggested) || b.priority-a.priority);
+        };
+        const replyTemplatesSection = (item) => {
+          const templates = generateReplyTemplates(item);
+          return `<section class="detail-card detail-card--wide reply-templates"><h3>Gotowe odpowiedzi</h3><p>Szablony są personalizowane po języku, kraju, terminie, usługach i kategoriach zapytania. Nie wysyłają się automatycznie.</p><div class="reply-template-grid">${templates.map((template)=>`<article class="reply-template ${template.suggested ? 'is-suggested':''}"><header><span>${esc(template.language)}</span><strong>${esc(template.title)}</strong><em>${esc(template.category)}</em></header><p>${esc(template.body)}</p><div class="inline-actions"><button type="button" data-copy-reply="${encodeURIComponent(template.body)}">Kopiuj odpowiedź</button>${item.email ? `<a href="mailto:${esc(item.email)}?subject=${encodeURIComponent('Camping Clepardia — odpowiedź na zapytanie')}&body=${encodeURIComponent(template.body)}">Otwórz mailto</a>` : '<span class="missing-email">Brak emaila klienta</span>'}</div></article>`).join('')}</div></section>`;
+        };
         const detailsBody = (item) => {
           const v = vehicle(item);
           const payload = raw(item);
           const c = consents(item);
           const categories = categoryKeys(item);
+          const country = countryInfo(item);
           const warnings = warningsFor(item, categories);
           return `${warnings ? `<aside class="crm-warnings">${warnings}</aside>` : ''}
             <div class="details-grid">
-              <section class="detail-card"><h3>📇 Kontakt</h3><p>${item.email ? `<a href="mailto:${esc(item.email)}">${esc(item.email)}</a>`:'-'}<br>${item.phone ? `<a href="tel:${esc(item.phone)}">${esc(item.phone)}</a>`:'-'}</p><small>${esc(item.country || '-')} · ${esc(item.language || '-')}</small></section>
+              <section class="detail-card"><h3>📇 Kontakt</h3><p>${item.email ? `<a href="mailto:${esc(item.email)}">${esc(item.email)}</a>`:'-'}<br>${item.phone ? `<a href="tel:${esc(item.phone)}">${esc(item.phone)}</a>`:'-'}</p><small>${esc(country.flag)} ${esc(country.label)} ${country.code ? `(${esc(country.code)})` : ''} · język formularza: ${esc(country.language)}</small></section>
+              <section class="detail-card"><h3>🌍 Kraj i język</h3><p><strong>${esc(country.flag)} ${esc(country.label)}</strong><br>Kod kraju: ${esc(country.code || '-')}<br>Język: ${esc(country.language)}</p><small>${esc(country.risk || 'Brak widocznego ryzyka tłumaczeniowego.')}</small></section>
               <section class="detail-card"><h3>📅 Pobyt</h3><p><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><br>${esc(item.nights || 0)} nocy</p><small>Przyjazd: ${esc(payload.arrivalTime || 'jeszcze nie wiem')}</small></section>
               <section class="detail-card"><h3>💰 Cena</h3><p><strong>${esc(item.estimated_total_pln ?? '-')} PLN</strong></p><small>Kwota orientacyjna</small></section>
               <section class="detail-card"><h3>🗺️ Wycieczki</h3><p>${esc(trips(item).join(', ') || 'Brak')}</p></section>
+              <section class="detail-card"><h3>🎟️ Wydarzenie</h3><p>${esc(eventInterest(item) || 'Brak')}</p></section>
               <section class="detail-card detail-card--wide"><h3>🧾 Usługi</h3><ul class="service-list">${serviceCards(item)}</ul></section>
-              <section class="detail-card"><h3>🚐 Pojazd</h3><dl class="plain-list"><div><dt>Rejestracja</dt><dd>${esc(item.vehicle_registration || '-')}</dd></div><div><dt>Typ / model</dt><dd>${esc(v.model || '-')}</dd></div><div><dt>Wymiary</dt><dd>${esc([v.length,v.width,v.height].filter(Boolean).join(' × ') || '-')}</dd></div><div><dt>Masa</dt><dd>${esc(v.weight || '-')}</dd></div><div><dt>Ciężki pojazd</dt><dd>${yesNo(v.large)}</dd></div><div><dt>Potrzeba asfaltu</dt><dd>${yesNo(v.asphaltNeeded)}</dd></div><div><dt>Uwagi</dt><dd>${esc(v.notes || '-')}</dd></div></dl></section>
+              <section class="detail-card"><h3>🚐 Pojazd</h3><dl class="plain-list"><div><dt>Rejestracja</dt><dd>${esc(item.vehicle_registration || '-')}</dd></div><div><dt>Przyczepa</dt><dd>${esc(v.trailerPlate || payload.trailerPlate || '-')}</dd></div><div><dt>Typ / model</dt><dd>${esc(v.type || v.model || '-')}</dd></div><div><dt>Wymiary</dt><dd>${esc([v.length,v.width,v.height].filter(Boolean).join(' × ') || '-')}</dd></div><div><dt>Masa</dt><dd>${esc(v.weight || '-')}</dd></div><div><dt>Ciężki pojazd</dt><dd>${yesNo(v.large)}</dd></div><div><dt>Potrzeba asfaltu</dt><dd>${yesNo(v.asphaltNeeded)}</dd></div><div><dt>Uwagi</dt><dd>${esc(v.notes || v.summary || '-')}</dd></div></dl></section>
               <section class="detail-card"><h3>♿ Specjalne potrzeby</h3><p>${esc(item.special_needs || 'Brak')}</p></section>
               <section class="detail-card"><h3>✅ Zgody</h3><ul class="consent-list"><li>Cisza nocna: <b>${c.quiet ? 'OK':'BRAK'}</b></li><li>Kontakt: <b>${c.contact ? 'OK':'BRAK'}</b></li><li>Polityka prywatności: <b>${c.privacy ? 'OK':'BRAK'}</b></li></ul></section>
               <section class="detail-card detail-card--wide"><h3>💬 Wiadomość</h3><p class="message-copy">${esc(item.message || 'Brak wiadomości')}</p></section>
               ${feedbackSection(item, categories)}
+              ${replyTemplatesSection(item)}
               <section class="detail-card detail-card--wide mail-status-card ${item.mail_delivered ? 'is-ok':'is-failed'}"><h3>✉️ Status maila</h3><p><strong>${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</strong> · provider: ${esc(item.mail_provider || 'none')}</p><small>${esc(item.mail_error || (item.mail_delivered ? 'Brak błędu.':'Brak szczegółów błędu.'))}</small>${item.mail_delivered ? '' : '<p>Zapytanie jest zapisane w panelu recepcji. Skopiuj treść maila lub użyj przycisku mailto.</p>'}<div class="inline-actions"><button type="button" data-copy-mail>Kopiuj treść maila</button><a href="mailto:clepardia@gmail.com?subject=${encodeURIComponent(`Zapytanie ${item.id}`)}&body=${encodeURIComponent(mailText(item))}">Otwórz Gmail / mailto</a></div></section>
               <details class="technical-data"><summary>Dane techniczne</summary><pre data-raw-debug>Otwórz panel techniczny, żeby załadować raw JSON.</pre></details>
             </div>
             <div class="edit-row"><label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${item.status === value ? 'selected':''}>${label}</option>`).join('')}</select></label><label class="note"><span>Notatka recepcji</span><textarea data-notes rows="3">${esc(item.notes || '')}</textarea></label><button type="button" data-save>Zapisz status i notatkę</button></div>
-            <div class="card-actions"><button type="button" data-quick-status="needs_reply">Do potwierdzenia</button><button type="button" data-quick-status="confirmed">Potwierdź</button><button type="button" data-quick-status="rejected">Odrzuć</button><button type="button" data-copy-summary>Kopiuj podsumowanie</button><button type="button" data-copy-email ${item.email ? '':'disabled'}>Kopiuj email</button><button type="button" data-copy-phone ${item.phone ? '':'disabled'}>Kopiuj telefon</button><button type="button" data-copy-mail>Kopiuj treść maila</button><button type="button" data-copy-id>Kopiuj link / ID</button>${item.email ? `<a href="mailto:${esc(item.email)}">Otwórz mailto</a>`:''}${item.phone ? `<a href="tel:${esc(item.phone)}">Otwórz tel</a>`:''}<button type="button" data-quick-status="archived">Archiwizuj</button><button type="button" data-quick-status="spam">Spam/test</button></div>`;
+            <div class="card-actions"><button type="button" data-quick-status="needs_reply">Do odpowiedzi</button><button type="button" data-quick-status="replied">Odpowiedziane</button><button type="button" data-quick-status="needs_confirmation">Do potwierdzenia</button><button type="button" data-quick-status="confirmed">Potwierdź</button><button type="button" data-quick-status="unavailable">Brak miejsc</button><button type="button" data-quick-status="rejected">Odrzuć</button><button type="button" data-copy-summary>Kopiuj podsumowanie</button><button type="button" data-copy-email ${item.email ? '':'disabled'}>Kopiuj email</button><button type="button" data-copy-phone ${item.phone ? '':'disabled'}>Kopiuj telefon</button><button type="button" data-copy-mail>Kopiuj treść maila</button><button type="button" data-copy-id>Kopiuj link / ID</button>${item.email ? `<a href="mailto:${esc(item.email)}">Otwórz mailto</a>`:''}${item.phone ? `<a href="tel:${esc(item.phone)}">Otwórz tel</a>`:''}<button type="button" data-quick-status="cancelled">Anulowane</button><button type="button" data-quick-status="archived">Archiwizuj</button><button type="button" data-quick-status="spam">Spam/test</button></div>`;
         };
         const card = (item) => {
           const payload = raw(item);
           const categories = categoryKeys(item);
+          const country = countryInfo(item);
           const categoryBadges = categories.map((key)=>`<span class="category-badge category-${esc(key)}">${esc(categoryLabels[key] || key)}</span>`).join('');
           const highSeason = Boolean(payload.highSeasonCampingInfo) || (isSummer(item) && /camping|kamper|van|namiot|przyczep|bus/i.test(item.stay_type || ''));
+          const countrySummary = `${country.flag} ${country.label}${country.code ? ` (${country.code})` : ''} · ${country.language}`;
           return `<article class="inquiry-card" data-id="${esc(item.id)}">
             <header>
               <div><div class="card-badges"><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span><span class="mail-badge ${item.mail_delivered ? 'is-ok':'is-failed'}">${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</span>${categoryBadges}${highSeason ? '<span class="season-badge">Lipiec/sierpień — camping bez rezerwacji</span>':''}</div><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.nights || 0)} nocy</p></div>
@@ -389,7 +535,7 @@ const title = 'Panel recepcji Camping Clepardia';
             <div class="inquiry-card__summary">
               <span>🏕️ ${esc(item.stay_type || '-')}</span>
               <span>📅 ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</span>
-              <span>🌍 ${esc(item.country || '-')} / ${esc(item.language || '-')}</span>
+              <span class="country-pill">${esc(countrySummary)}</span>
               <span>💰 ${esc(item.estimated_total_pln ?? '-')} PLN</span>
               <span>✉️ ${item.mail_delivered ? 'mail OK':'mail niedostarczony'}</span>
               ${item.email ? `<a href="mailto:${esc(item.email)}">${esc(item.email)}</a>` : ''}
@@ -407,12 +553,13 @@ const title = 'Panel recepcji Camping Clepardia';
           if (stats) {
             const statItems = [
               ['Nowe', inquiries.filter((item)=>item.status === 'new').length],
-              ['Do potwierdzenia', inquiries.filter((item)=>['new','needs_reply'].includes(item.status)).length],
+              ['Do odpowiedzi', inquiries.filter((item)=>['new','needs_reply'].includes(item.status)).length],
+              ['Do potwierdzenia', inquiries.filter((item)=>item.status === 'needs_confirmation').length],
               ['Mail niedostarczony', inquiries.filter((item)=>!item.mail_delivered).length],
               ['Wycieczki', inquiries.filter((item)=>categoryKeys(item).includes('trips')).length],
-              ['Opinie', inquiries.filter((item)=>categoryKeys(item).includes('feedback')).length],
-              ['Grupy / skauci', inquiries.filter((item)=>categoryKeys(item).some((key)=>['group','scouts'].includes(key))).length],
-              ['Dzisiaj', inquiries.filter((item)=>categoryKeys(item).includes('today')).length],
+              ['Wydarzenia', inquiries.filter((item)=>categoryKeys(item).includes('event')).length],
+              ['Prąd / EV', inquiries.filter((item)=>categoryKeys(item).includes('ev')).length],
+              ['Ciężkie pojazdy', inquiries.filter((item)=>categoryKeys(item).includes('heavy')).length],
               ['Najbliższe 7 dni', inquiries.filter((item)=>categoryKeys(item).includes('next7')).length],
             ];
             stats.innerHTML = statItems.map(([label,value])=>`<article><strong>${esc(value)}</strong><span>${esc(label)}</span></article>`).join('');
@@ -421,6 +568,7 @@ const title = 'Panel recepcji Camping Clepardia';
         };
         const load = async () => {
           if (appStatus) appStatus.textContent = 'Ładowanie…';
+          if (connectionStatus) connectionStatus.textContent = 'API: łączenie…';
           try {
             const result = await request('/api/inbox/list');
             inquiries = result.inquiries || [];
@@ -430,11 +578,14 @@ const title = 'Panel recepcji Camping Clepardia';
             setOptions('country',inquiries.map((item)=>item.country));
             setOptions('language',inquiries.map((item)=>item.language));
             if (appStatus) appStatus.textContent = '';
+            if (connectionStatus) connectionStatus.textContent = 'API: połączono';
+            if (lastRefresh) lastRefresh.textContent = `Ostatnie odświeżenie: ${formatDate(new Date().toISOString(), true)}`;
             render();
           } catch (error) {
             if (error.status === 401) { sessionStorage.removeItem(storageKey); accessCode=''; if (app instanceof HTMLElement) app.hidden=true; if (login instanceof HTMLElement) login.hidden=false; }
             if (appStatus) appStatus.textContent = error.message;
             if (loginStatus) loginStatus.textContent = error.message;
+            if (connectionStatus) connectionStatus.textContent = 'API: błąd';
           }
         };
         const save = async (cardNode, statusOverride = '') => {
@@ -506,6 +657,11 @@ const title = 'Panel recepcji Camping Clepardia';
           if (target.closest('[data-save]')) void save(node);
           const quick = target.closest('[data-quick-status]');
           if (quick instanceof HTMLElement) void save(node,quick.dataset.quickStatus);
+          const replyButton = target.closest('[data-copy-reply]');
+          if (replyButton instanceof HTMLButtonElement) {
+            const replyText = decodeURIComponent(replyButton.dataset.copyReply || '');
+            if (replyText) void copy(replyText, replyButton);
+          }
           const actions = [
             ['[data-copy-summary]',summaryText(item)],['[data-copy-email]',item.email],['[data-copy-phone]',item.phone],
             ['[data-copy-mail]',mailText(item)],['[data-copy-id]',`${location.origin}/cc-gate-a8f3k9r2p6#${item.id}\nID: ${item.id}`],
@@ -620,7 +776,169 @@ const title = 'Panel recepcji Camping Clepardia';
     min-width: 0;
   }
 
+  .app-header__brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .app-header__logo {
+    width: 58px;
+    height: 58px;
+    object-fit: contain;
+    padding: 8px;
+    border-radius: 18px;
+    background: rgba(255,255,255,.94);
+    box-shadow: 0 18px 38px rgba(0,0,0,.22);
+  }
+
+  .header-actions {
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .header-actions a,
+  .connection-pill {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    border: 1px solid rgba(143,224,180,.16);
+    border-radius: 999px;
+    color: #e7fff0;
+    background: rgba(255,255,255,.07);
+    font-size: .78rem;
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .connection-pill {
+    color: #9ee8bd;
+    background: rgba(143,224,180,.08);
+  }
+
+  .country-pill {
+    letter-spacing: .01em;
+  }
+
+  .status-needs_confirmation,
+  .status-unavailable {
+    color: #3d2600;
+    background: #ffd08a;
+  }
+
+  .status-replied,
+  .status-confirmed {
+    background: #7be3a8;
+  }
+
+  .status-cancelled {
+    color: #effbf3;
+    background: #6b7280;
+  }
+
+  .category-event {
+    color: #2a1545;
+    background: #d8c2ff;
+  }
+
+  .category-heavy,
+  .category-ev {
+    color: #3d2600;
+    background: #ffd08a;
+  }
+
+  .reply-templates {
+    grid-column: 1 / -1;
+    border-color: rgba(143,224,180,.2);
+    background: linear-gradient(145deg, rgba(143,224,180,.09), rgba(255,255,255,.045));
+  }
+
+  .reply-templates > p {
+    margin-bottom: 14px;
+    color: rgba(239,251,243,.7);
+  }
+
+  .reply-template-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .reply-template {
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 16px;
+    background: rgba(7,20,15,.42);
+  }
+
+  .reply-template.is-suggested {
+    border-color: rgba(143,224,180,.35);
+    box-shadow: inset 0 0 0 1px rgba(143,224,180,.14);
+  }
+
+  .reply-template header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .reply-template header span,
+  .reply-template header em {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 8px;
+    border-radius: 999px;
+    color: #07140f;
+    background: #8fe0b4;
+    font-size: .68rem;
+    font-style: normal;
+    font-weight: 950;
+    text-transform: uppercase;
+  }
+
+  .reply-template header em {
+    color: #e7fff0;
+    background: rgba(255,255,255,.09);
+  }
+
+  .reply-template strong {
+    color: #effbf3;
+  }
+
+  .reply-template p {
+    white-space: pre-wrap;
+    color: rgba(239,251,243,.86);
+  }
+
+  .missing-email {
+    display: inline-flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 0 12px;
+    border-radius: 13px;
+    color: #ffe4b8;
+    background: rgba(255,208,138,.08);
+    font-size: .82rem;
+    font-weight: 900;
+  }
+
   @media (max-width: 720px) {
+    .app-header__brand {
+      align-items: flex-start;
+    }
+
+    .header-actions a,
+    .connection-pill {
+      width: 100%;
+    }
+
     .inquiry-card__summary {
       display: grid;
       grid-template-columns: 1fr;
@@ -635,6 +953,10 @@ const title = 'Panel recepcji Camping Clepardia';
 
     .inquiry-card__details > summary {
       padding-right: 46px;
+    }
+
+    .reply-template-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>

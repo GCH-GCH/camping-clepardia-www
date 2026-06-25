@@ -1390,7 +1390,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         summaryStatusReady: 'Gotowe do wysłania',
         copySummary: 'Skopiuj całe podsumowanie',
         copied: 'Podsumowanie skopiowane 🌿',
-        copyFallback: 'Zaznaczono tekst podsumowania. Skopiuj go skrótem Ctrl+C.',
+        copyHelper: 'Zaznaczono tekst podsumowania. Skopiuj go skrótem Ctrl+C.',
         statusConfirmedByReception: 'Do potwierdzenia przez recepcję',
         privacyLink: 'Polityka prywatności',
         consentSectionTitle: 'Wymagane zgody',
@@ -1458,7 +1458,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         summaryStatusReady: 'Ready to send',
         copySummary: 'Copy full summary',
         copied: 'Summary copied 🌿',
-        copyFallback: 'The summary text is selected. Copy it with Ctrl+C.',
+        copyHelper: 'The summary text is selected. Copy it with Ctrl+C.',
         statusConfirmedByReception: 'To be confirmed by reception',
         privacyLink: 'Privacy policy',
         consentSectionTitle: 'Required consents',
@@ -6190,24 +6190,16 @@ html.reservation-modal-open body {
   letter-spacing: .04em;
 }
 
-.reservation-success-modal[data-submit-mode="resend-error"] .reservation-success-modal__badge,
-.reservation-success-modal[data-submit-mode="error"] .reservation-success-modal__badge,
-.reservation-success-modal[data-submit-mode="formsubmit-activation"] .reservation-success-modal__badge {
+.reservation-success-modal[data-submit-mode="error"] .reservation-success-modal__badge {
   border-color: rgba(242,192,120,.34);
   color: #ffe6bb;
   background: rgba(242,192,120,.12);
 }
 
-.reservation-success-modal[data-submit-mode="formsubmit"] .reservation-success-modal__badge {
+.reservation-success-modal[data-submit-mode="success"] .reservation-success-modal__badge {
   border-color: rgba(143,224,180,.34);
   color: #dffff0;
   background: rgba(60,179,113,.15);
-}
-
-.reservation-success-modal[data-submit-mode="mock"] .reservation-success-modal__badge {
-  border-color: rgba(255,255,255,.20);
-  color: rgba(245,255,248,.82);
-  background: rgba(255,255,255,.08);
 }
 
 .reservation-success-modal__card p {
@@ -6332,7 +6324,7 @@ html.reservation-modal-open body {
   font-weight: 850;
 }
 
-.reservation-copy-fallback {
+.reservation-copy-helper {
   width: 100%;
   margin-top: 10px;
   border: 1px solid rgba(143,224,180,.24);
@@ -6731,7 +6723,7 @@ html[data-theme="light"] .reservation-feedback__answers button,
 html[data-theme="light"] .reservation-country__list,
 html[data-theme="light"] .reservation-summary-row,
 html[data-theme="light"] .reservation-success-row,
-html[data-theme="light"] .reservation-copy-fallback {
+html[data-theme="light"] .reservation-copy-helper {
   color: #122319;
   border-color: rgba(22,56,36,.14);
   background: rgba(255,255,255,.72);

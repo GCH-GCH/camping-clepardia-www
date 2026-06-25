@@ -39,8 +39,20 @@ const configured = (...values) => values.find((value) => String(value || '').tri
 
 const mailProvider = () => {
   const provider = String(process.env.MAIL_PROVIDER || 'auto').trim().toLowerCase();
-  return ['auto', 'resend', 'formsubmit'].includes(provider) ? provider : 'auto';
+  return ['auto', 'web3forms', 'resend', 'formsubmit'].includes(provider) ? provider : 'auto';
 };
+
+const siteUrl = () =>
+  configured(process.env.PUBLIC_SITE_URL, process.env.SITE_URL, 'https://www.clepardia.com.pl').replace(/\/+$/, '');
+
+const inboxUrl = () => `${siteUrl()}/cc-gate-a8f3k9r2p6`;
+
+const reservationUrl = () => `${siteUrl()}/rezerwacja`;
+
+const web3FormsAccessKey = () => String(process.env.WEB3FORMS_ACCESS_KEY || '').trim();
+
+const reservationToEmail = () =>
+  configured(process.env.RESERVATION_TO_EMAIL, process.env.MAIL_TO, 'clepardia@gmail.com');
 
 const formSubmitEmail = () =>
   configured(process.env.FORMSUBMIT_TO_EMAIL, process.env.RESERVATION_TO_EMAIL, process.env.MAIL_TO, 'clepardia@gmail.com');
@@ -48,11 +60,12 @@ const formSubmitEmail = () =>
 const mailEnvSnapshot = () => {
   const apiKey = String(process.env.RESEND_API_KEY || '').trim();
   const from = configured(process.env.RESERVATION_FROM_EMAIL, process.env.MAIL_FROM, 'Camping Clepardia WWW <no-reply@clepardia.com.pl>');
-  const to = configured(process.env.RESERVATION_TO_EMAIL, process.env.MAIL_TO, 'clepardia@gmail.com');
+  const to = reservationToEmail();
   const fromDomain = String(from).match(/@([^>\s]+)/)?.[1] || '';
 
   return {
     mailProvider: mailProvider(),
+    web3FormsKeyPresent: Boolean(web3FormsAccessKey()),
     resendKeyPresent: Boolean(apiKey),
     resendKeyStartsWithRe: apiKey.startsWith('re_'),
     resendKeyLength: apiKey.length,
@@ -259,10 +272,44 @@ const normalizeFeedback = (value) => {
   return { rating, liked, improve, easyInfo, easyForm };
 };
 
+const normalizeVehicleDetails = (payload = {}) => {
+  const source = payload.vehicleDetails && typeof payload.vehicleDetails === 'object'
+    ? payload.vehicleDetails
+    : payload.vehicle && typeof payload.vehicle === 'object'
+      ? payload.vehicle
+      : {};
+  const vehicle = {
+    type: oneLine(payload.vehicleType || source.type || source.kind || source.category, 120),
+    model: oneLine(source.model || source.name, 120),
+    length: oneLine(source.length, 40),
+    width: oneLine(source.width, 40),
+    height: oneLine(source.height, 40),
+    weight: oneLine(source.weight, 40),
+    large: Boolean(source.large || source.heavy || payload.heavyVehicle),
+    asphaltNeeded: Boolean(source.asphaltNeeded || source.asphalt || payload.asphaltNeeded),
+    trailerPlate: oneLine(payload.trailerPlate || source.trailerPlate || source.trailerRegistration, 80),
+    notes: longText(source.notes || source.comment, 500),
+    summary: oneLine(source.summary || payload.vehicleSummary, 240),
+  };
+  if (!vehicle.summary) {
+    vehicle.summary = [
+      vehicle.type,
+      vehicle.model,
+      vehicle.length ? `dł. ${vehicle.length}` : '',
+      vehicle.width ? `szer. ${vehicle.width}` : '',
+      vehicle.height ? `wys. ${vehicle.height}` : '',
+      vehicle.weight ? `masa ${vehicle.weight}` : '',
+    ].filter(Boolean).join(', ');
+  }
+  return Object.values(vehicle).some(Boolean) ? vehicle : null;
+};
+
 const createInquiry = (payload, normalized) => {
   const nights = normalized.arrival && normalized.departure
     ? Math.max(1, Math.round((normalized.departure.getTime() - normalized.arrival.getTime()) / DAY))
     : Math.max(0, Number(payload.nights || 0));
+
+  const vehicleDetails = normalizeVehicleDetails(payload);
 
   return {
     inquiryId: `WEB-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 10).toUpperCase()}`,
@@ -305,8 +352,12 @@ const createInquiry = (payload, normalized) => {
     ),
     calculatorSummary: payload.calculatorSummary || null,
     vehiclePlate: oneLine(payload.vehiclePlate, 80),
+    vehicleDetails,
+    vehicleType: oneLine(payload.vehicleType || vehicleDetails?.type || vehicleDetails?.model || vehicleDetails?.summary, 160),
+    trailerPlate: oneLine(payload.trailerPlate || vehicleDetails?.trailerPlate, 80),
     specialNeeds: longText(payload.specialNeeds, 1200),
     lateCheckout: oneLine(payload.lateCheckout, 160),
+    eventInterest: oneLine(payload.eventInterest || payload.event || payload.eventName || payload.krakowEvent, 180),
     message: longText(payload.message || payload.originalMessage, 2400),
     quietConsent: Boolean(payload.quietConsent),
     consent: Boolean(payload.consent),
@@ -351,8 +402,12 @@ const createCcSystemDraft = (inquiry) => ({
     currencyEstimate: inquiry.currencyEstimate,
     currencyDisclaimer: inquiry.currencyDisclaimer,
     vehiclePlate: inquiry.vehiclePlate,
+    vehicleType: inquiry.vehicleType,
+    trailerPlate: inquiry.trailerPlate,
+    vehicleDetails: inquiry.vehicleDetails,
     specialNeeds: inquiry.specialNeeds,
     lateCheckout: inquiry.lateCheckout,
+    eventInterest: inquiry.eventInterest,
     summerNotice: inquiry.summerNotice,
     quietConsent: inquiry.quietConsent,
     consent: inquiry.consent,
@@ -386,7 +441,7 @@ const createSupabaseRecord = (inquiry, payload) => ({
     disclaimer: inquiry.currencyDisclaimer,
   },
   vehicle_registration: inquiry.vehiclePlate || null,
-  vehicle_details_json: payload.vehicleDetails || null,
+  vehicle_details_json: inquiry.vehicleDetails || normalizeVehicleDetails(payload),
   special_needs: inquiry.specialNeeds || null,
   trips_interest_json: inquiry.tours,
   consents_json: {
@@ -407,6 +462,19 @@ const buildReceptionMail = (inquiry) => {
     ? 'W przypadku domkow moze byc wymagana zaliczka. Dane do zaliczki nalezy wyslac klientowi w odpowiedzi mailowej po potwierdzeniu dostepnosci.'
     : '';
   const services = inquiry.services.map((service) => `${service.label} x ${service.qty} (${service.price} PLN / noc)`);
+  const hasElectricity = inquiry.services.some((service) => /electric|prąd|prad|10a/i.test(`${service.id} ${service.label}`));
+  const hasDog = inquiry.services.some((service) => /dog|pies/i.test(`${service.id} ${service.label}`));
+  const isLateArrival = /2[1-3]:|21|22|23|po 21|after 21|late/i.test(inquiry.arrivalTime || '');
+  const importantNotes = [
+    isLateArrival ? 'Późny przyjazd: poprosić klienta o kontakt z recepcją. Recepcja 9:00-21:00, brama 8:00-22:00.' : '',
+    inquiry.highSeasonCampingInfo ? 'Lipiec/sierpień: camping według kolejności przyjazdu, najlepiej około 12:00.' : '',
+    inquiry.vehicleDetails?.large || inquiry.vehicleDetails?.asphaltNeeded ? 'Ciężki pojazd / asfalt: nie kierować na miękką trawę.' : '',
+    hasDog ? 'Pies: wybrany w usługach, 0 PLN.' : '',
+    hasElectricity ? 'Prąd 10A: dla wyposażenia kampera/przyczepy; nie służy do ładowania EV ani hybryd plug-in.' : '',
+    inquiry.tours.length ? `Wycieczki: ${inquiry.tours.join(', ')}.` : '',
+    inquiry.eventInterest ? `Wydarzenie: ${inquiry.eventInterest}.` : '',
+    inquiry.specialNeeds ? `Specjalne potrzeby: ${inquiry.specialNeeds}.` : '',
+  ].filter(Boolean);
   const serviceGroups = inquiry.services.reduce((groups, service) => {
     const scope = /bungalow/i.test(service.scope) ? 'Domki' : /camping/i.test(service.scope) ? 'Camping' : 'Pozostale';
     groups[scope] = groups[scope] || [];
@@ -421,7 +489,7 @@ const buildReceptionMail = (inquiry) => {
   const rows = [
     ['ID', inquiry.inquiryId],
     ['Zapis do panelu', 'zapisano w reservation_inquiries'],
-    ['Panel recepcji', 'https://camping-clepardia-www.vercel.app/cc-gate-a8f3k9r2p6'],
+    ['Panel recepcji', inboxUrl()],
     ['Status', 'Do potwierdzenia przez recepcje'],
     ['Typ pobytu', inquiry.stayType],
     ['Termin', `${inquiry.arrival} - ${inquiry.departure}`],
@@ -435,9 +503,13 @@ const buildReceptionMail = (inquiry) => {
     ['Telefon', inquiry.phone],
     ['Kraj', inquiry.country],
     ['Jezyk kontaktu', inquiry.contactLanguage],
+    ['Typ pojazdu', inquiry.vehicleType || 'brak'],
     ['Numer rejestracyjny', inquiry.vehiclePlate || 'brak'],
+    ['Numer rejestracyjny przyczepy', inquiry.trailerPlate || 'brak'],
+    ['Opis pojazdu', inquiry.vehicleDetails?.summary || 'brak'],
     ['Specjalne potrzeby', inquiry.specialNeeds || 'brak'],
     ['Pozniejszy wyjazd', inquiry.lateCheckout || 'brak'],
+    ['Wydarzenie', inquiry.eventInterest || 'brak'],
     ['Wycieczki (bez doliczania ceny)', inquiry.tours.join(', ') || 'brak'],
     ['Ocena strony', inquiry.feedback?.rating ? `${inquiry.feedback.rating}/5` : 'brak'],
     ['Co sie podobalo', inquiry.feedback?.liked?.join(', ') || 'brak'],
@@ -459,6 +531,12 @@ const buildReceptionMail = (inquiry) => {
   const serviceHtml = services.map((service) => `
     <li style="padding:9px 0;border-top:1px solid #e6f1ea;color:#102319;font-weight:800;">${escapeHtml(service)}</li>
   `).join('');
+  const importantHtml = importantNotes.length
+    ? `<section style="margin:18px 0;padding:18px 20px;border:1px solid #f0d7a6;border-radius:18px;background:#fff8ea;color:#4c3b13;">
+          <h2 style="margin:0 0 12px;font-size:17px;">Ważne dla recepcji</h2>
+          <ul style="margin:0;padding-left:18px;line-height:1.7;">${importantNotes.map((note) => `<li>${escapeHtml(note)}</li>`).join('')}</ul>
+        </section>`
+    : '';
   const groupedServiceText = Object.keys(serviceGroups).length
     ? Object.entries(serviceGroups).map(([group, items]) => [
         `${group}:`,
@@ -492,6 +570,7 @@ const buildReceptionMail = (inquiry) => {
           <ul style="list-style:none;margin:0;padding:0;">${serviceHtml}</ul>
           ${groupedServiceHtml}
         </section>
+        ${importantHtml}
         <section style="margin:18px 0;padding:16px 18px;border-radius:18px;background:#eef8f1;border:1px solid #dceee4;color:#102319;">
           <h2 style="margin:0 0 8px;font-size:16px;">Waluty orientacyjne</h2>
           <p style="margin:0 0 8px;line-height:1.55;font-weight:800;">${escapeHtml(inquiry.currencyEstimate || 'brak')}</p>
@@ -514,6 +593,9 @@ const buildReceptionMail = (inquiry) => {
     'USLUGI I CENY',
     ...(services.length ? services.map((service) => `- ${service}`) : ['- brak']),
     '',
+    'WAZNE DLA RECEPCJI',
+    ...(importantNotes.length ? importantNotes.map((note) => `- ${note}`) : ['- brak']),
+    '',
     `Waluty orientacyjnie: ${inquiry.currencyEstimate || 'brak'}`,
     inquiry.currencyDisclaimer,
     '',
@@ -529,9 +611,9 @@ const buildReceptionMail = (inquiry) => {
 
   return {
     from: configured(process.env.RESERVATION_FROM_EMAIL, process.env.MAIL_FROM, 'Camping Clepardia WWW <no-reply@clepardia.com.pl>'),
-    to: configured(process.env.RESERVATION_TO_EMAIL, process.env.MAIL_TO, 'clepardia@gmail.com'),
+    to: reservationToEmail(),
     replyTo: inquiry.email || undefined,
-    subject: `Nowe zapytanie rezerwacyjne - Camping Clepardia - ${inquiry.stayType} - ${inquiry.arrival} - ${inquiry.departure}`,
+    subject: `Nowe zapytanie Camping Clepardia - ${inquiry.stayType} - ${inquiry.arrival}`,
     html: bodyHtml,
     text: bodyText,
   };
@@ -603,7 +685,7 @@ const buildCustomerMail = (inquiry) => {
   return {
     from: configured(process.env.RESERVATION_FROM_EMAIL, process.env.MAIL_FROM, 'Camping Clepardia WWW <no-reply@clepardia.com.pl>'),
     to: inquiry.email,
-    replyTo: configured(process.env.RESERVATION_TO_EMAIL, process.env.MAIL_TO, 'clepardia@gmail.com'),
+    replyTo: reservationToEmail(),
     subject: 'Otrzymalismy Twoje zapytanie - Camping Clepardia',
     html: bodyHtml,
     text: bodyText,
@@ -637,10 +719,6 @@ const normalizeResendError = (body, status) => {
     reason: rawMessage,
   };
 };
-
-const isResendFallbackError = (result) =>
-  ['invalid_api_key', 'sender_rejected'].includes(String(result?.errorCode || '').toLowerCase())
-  || [401, 403].includes(Number(result?.status || 0));
 
 const normalizeFormSubmitError = (body, status) => {
   const rawMessage = oneLine(body?.message || body?.error || body?.reason || `FormSubmit returned ${status}.`, 800);
@@ -704,6 +782,118 @@ const buildFormSubmitPayload = (message, inquiry) => ({
   informacja: 'Dostepnosc i finalne warunki potwierdza recepcja.',
   podsumowanie: message.text,
 });
+
+const normalizeWeb3FormsError = (body, status) => {
+  const rawMessage = oneLine(body?.message || body?.error || body?.reason || `Web3Forms returned ${status}.`, 800);
+  const normalized = rawMessage.toLowerCase();
+  if (status === 401 || normalized.includes('access_key') || normalized.includes('access key') || normalized.includes('invalid key')) {
+    return {
+      errorCode: 'web3forms_invalid_access_key',
+      message: 'Web3Forms access key is missing or invalid.',
+      reason: rawMessage,
+    };
+  }
+  return {
+    errorCode: oneLine(body?.code || body?.error || `WEB3FORMS_${status}`, 120),
+    message: rawMessage,
+    reason: rawMessage,
+  };
+};
+
+const buildWeb3FormsPayload = (message, inquiry) => ({
+  access_key: web3FormsAccessKey(),
+  subject: message.subject,
+  from_name: 'Camping Clepardia WWW',
+  name: inquiry.fullName || 'Gość strony',
+  email: inquiry.email || reservationToEmail(),
+  replyto: inquiry.email || '',
+  phone: inquiry.phone || '',
+  to_email: reservationToEmail(),
+  message: message.text,
+  inquiry_id: inquiry.inquiryId,
+  cc_inbox: inboxUrl(),
+  typ_pobytu: inquiry.stayType,
+  imie_i_nazwisko: inquiry.fullName || '',
+  telefon: inquiry.phone || '',
+  email_klienta: inquiry.email || '',
+  kraj: inquiry.country || '',
+  jezyk: inquiry.contactLanguage || '',
+  termin: `${inquiry.arrival} - ${inquiry.departure}`,
+  data_przyjazdu: inquiry.arrival,
+  data_wyjazdu: inquiry.departure,
+  liczba_nocy: String(inquiry.nights || 0),
+  godzina_przyjazdu: inquiry.arrivalTime || '',
+  uslugi: inquiry.services.map((service) => `${service.label} x ${service.qty} - ${service.price} PLN / noc`).join('\n') || 'brak',
+  cena: inquiry.estimatedTotal || '',
+  wycieczki: inquiry.tours.join(', ') || '',
+  wydarzenie: inquiry.eventInterest || '',
+  pojazd: inquiry.vehicleType || inquiry.vehicleDetails?.summary || '',
+  numer_rejestracyjny: inquiry.vehiclePlate || '',
+  numer_przyczepy: inquiry.trailerPlate || '',
+  specjalne_potrzeby: inquiry.specialNeeds || '',
+  feedback_ocena: inquiry.feedback?.rating ? `${inquiry.feedback.rating}/5` : '',
+  feedback_podobalo_sie: inquiry.feedback?.liked?.join(', ') || '',
+  feedback_latwo_info: inquiry.feedback?.easyInfo || '',
+  feedback_latwy_formularz: inquiry.feedback?.easyForm || '',
+  feedback_sugestia: inquiry.feedback?.improve || '',
+  zapis_do_panelu: 'Zapytanie zapisane w Panelu Recepcji CC.',
+});
+
+const sendWithWeb3Forms = async (message, inquiry) => {
+  const accessKey = web3FormsAccessKey();
+  if (!accessKey) {
+    return {
+      provider: 'web3forms',
+      delivered: false,
+      errorCode: 'WEB3FORMS_ACCESS_KEY_MISSING',
+      reason: 'WEB3FORMS_ACCESS_KEY is not configured - Web3Forms was skipped.',
+      message: 'WEB3FORMS_ACCESS_KEY is not configured - Web3Forms was skipped.',
+    };
+  }
+
+  try {
+    const response = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(buildWeb3FormsPayload(message, inquiry)),
+    });
+    const body = await response.json().catch(() => ({}));
+
+    if (!response.ok || body?.success === false) {
+      const normalizedError = normalizeWeb3FormsError(body, response.status);
+      console.error('[reservation-api] web3forms-provider-error', {
+        status: response.status,
+        errorCode: normalizedError.errorCode,
+        reason: normalizedError.reason,
+      });
+      return {
+        provider: 'web3forms',
+        delivered: false,
+        status: response.status,
+        ...normalizedError,
+      };
+    }
+
+    return {
+      provider: 'web3forms',
+      delivered: true,
+      messageId: oneLine(body?.data?.id || body?.message || body?.submission_id || '', 180),
+      message: oneLine(body?.message || 'Sent through Web3Forms.', 240),
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Web3Forms request failed.';
+    return {
+      provider: 'web3forms',
+      delivered: false,
+      errorCode: 'WEB3FORMS_REQUEST_FAILED',
+      message,
+      reason: message,
+    };
+  }
+};
 
 const sendWithResend = async (message) => {
   const apiKey = String(process.env.RESEND_API_KEY || '').trim();
@@ -781,8 +971,8 @@ const sendWithFormSubmit = async (message, inquiry) => {
       headers: {
         accept: 'application/json',
         'content-type': 'application/json',
-        origin: 'https://camping-clepardia-www.vercel.app',
-        referer: 'https://camping-clepardia-www.vercel.app/rezerwacja',
+        origin: siteUrl(),
+        referer: reservationUrl(),
         'user-agent': 'Camping Clepardia reservation API',
       },
       body: JSON.stringify(buildFormSubmitPayload(message, inquiry)),
@@ -827,28 +1017,30 @@ const sendWithFormSubmit = async (message, inquiry) => {
 
 const sendReceptionMail = async (message, inquiry) => {
   const provider = mailProvider();
+  if (provider === 'web3forms') return sendWithWeb3Forms(message, inquiry);
   if (provider === 'resend') return sendWithResend(message);
   if (provider === 'formsubmit') return sendWithFormSubmit(message, inquiry);
 
-  const apiKey = String(process.env.RESEND_API_KEY || '').trim();
-  if (!apiKey) return sendWithFormSubmit(message, inquiry);
+  if (web3FormsAccessKey()) {
+    const web3forms = await sendWithWeb3Forms(message, inquiry);
+    if (web3forms.delivered) return web3forms;
 
-  const resend = await sendWithResend(message);
-  if (resend.delivered) return resend;
-  if (!isResendFallbackError(resend)) return resend;
+    const formsubmit = await sendWithFormSubmit(message, inquiry);
+    return {
+      ...formsubmit,
+      fallbackFrom: {
+        provider: 'web3forms',
+        delivered: false,
+        status: web3forms.status || null,
+        errorCode: web3forms.errorCode || 'WEB3FORMS_ERROR',
+        message: web3forms.message || web3forms.reason || 'Web3Forms delivery failed.',
+        reason: web3forms.reason || '',
+      },
+    };
+  }
 
   const formsubmit = await sendWithFormSubmit(message, inquiry);
-  return {
-    ...formsubmit,
-    fallbackFrom: {
-      provider: 'resend',
-      delivered: false,
-      status: resend.status || null,
-      errorCode: resend.errorCode || 'RESEND_ERROR',
-      message: resend.message || resend.reason || 'Resend delivery failed.',
-      reason: resend.reason || '',
-    },
-  };
+  return formsubmit;
 };
 
 const sendCustomerConfirmation = async (message) => {
