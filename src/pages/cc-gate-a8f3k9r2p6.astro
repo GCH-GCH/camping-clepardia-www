@@ -58,12 +58,24 @@ const title = 'CC SYSTEM';
 
         <nav class="view-tabs" aria-label="Widoki CC SYSTEM">
           <button type="button" data-view="inbox" aria-pressed="true">Inbox</button>
+          <button type="button" data-view="mail" aria-pressed="false">Wiadomości</button>
           <button type="button" data-view="tests" aria-pressed="false">Testy</button>
           <button type="button" data-view="stats" aria-pressed="false">Statystyki</button>
           <button type="button" data-view="templates" aria-pressed="false">Schematy</button>
           <button type="button" data-view="settings" aria-pressed="false">Ustawienia</button>
           <button type="button" data-view="archive" aria-pressed="false">Archiwum</button>
         </nav>
+
+        <section class="mail-center-nav" aria-label="Mail Center">
+          <button type="button" data-mail-status="">Inbox / Wiadomości</button>
+          <button type="button" data-mail-status="needs_reply">Do odpowiedzi</button>
+          <button type="button" data-mail-status="replied">Odpowiedziane</button>
+          <button type="button" data-mail-status="needs_confirmation">Do potwierdzenia</button>
+          <button type="button" data-mail-status="confirmed">Potwierdzone</button>
+          <button type="button" data-mail-status="unavailable">Brak miejsc</button>
+          <button type="button" data-view-shortcut="tests">Testy</button>
+          <button type="button" data-view-shortcut="archive">Archiwum</button>
+        </section>
 
         <section class="system-strip" data-system-strip aria-label="Status systemu"></section>
 
@@ -105,6 +117,28 @@ const title = 'CC SYSTEM';
       </section>
     </main>
     <div class="panel-toast" data-panel-toast role="status" aria-live="polite" hidden></div>
+    <div class="reply-modal" data-reply-modal hidden>
+      <div class="reply-modal__backdrop" data-reply-close></div>
+      <section class="reply-modal__card" role="dialog" aria-modal="true" aria-labelledby="reply-modal-title">
+        <button class="reply-modal__close" type="button" data-reply-close aria-label="Zamknij">×</button>
+        <header>
+          <span class="eyebrow">CC SYSTEM Mail Center</span>
+          <h2 id="reply-modal-title" data-reply-title>Odpowiedź do klienta</h2>
+          <p data-reply-meta>Podgląd odpowiedzi</p>
+        </header>
+        <div class="reply-modal__preview" data-reply-preview></div>
+        <details class="reply-modal__text">
+          <summary>Tekstowa wersja mailto</summary>
+          <pre data-reply-mailto-text></pre>
+        </details>
+        <div class="reply-modal__actions">
+          <button type="button" data-reply-copy>Kopiuj treść</button>
+          <button type="button" data-reply-mailto>Otwórz mailto</button>
+          <button type="button" data-reply-mark>Oznacz jako odpowiedziane</button>
+          <button type="button" class="ghost" data-reply-close>Zamknij</button>
+        </div>
+      </section>
+    </div>
 
     <script>
       (() => {
@@ -124,6 +158,11 @@ const title = 'CC SYSTEM';
         const autoRefreshStatus = document.querySelector('[data-auto-refresh-status]');
         const autoRefreshToggle = document.querySelector('[data-auto-refresh-toggle]');
         const panelToast = document.querySelector('[data-panel-toast]');
+        const replyModal = document.querySelector('[data-reply-modal]');
+        const replyTitle = document.querySelector('[data-reply-title]');
+        const replyMeta = document.querySelector('[data-reply-meta]');
+        const replyPreview = document.querySelector('[data-reply-preview]');
+        const replyMailtoText = document.querySelector('[data-reply-mailto-text]');
         const systemStrip = document.querySelector('[data-system-strip]');
         const activeFilterCount = document.querySelector('[data-active-filter-count]');
         const viewButtons = Array.from(document.querySelectorAll('[data-view]'));
@@ -145,6 +184,7 @@ const title = 'CC SYSTEM';
         const autoRefreshMs = 25000;
         const expandedIds = new Set();
         const localTimeline = new Map();
+        let activeReplyDraft = null;
 
         const esc = (value) => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
         const showToast = (message, type = 'info') => {
@@ -501,6 +541,18 @@ const title = 'CC SYSTEM';
             `Wiadomość: ${item.message || '-'}`, `Notatka: ${item.notes || '-'}`,
           ].join('\n');
         };
+        const clientSafeSummaryText = (item) => [
+          `Klient: ${item.full_name || '-'}`,
+          `Email: ${item.email || '-'}`,
+          `Telefon: ${item.phone || '-'}`,
+          `Kraj / język: ${item.country || '-'} / ${item.language || '-'}`,
+          `Pobyt: ${item.stay_type || '-'}`,
+          `Termin: ${item.arrival_date || '-'} — ${item.departure_date || '-'} (${item.nights || 0} n.)`,
+          `Osoby: ${normalizeInquiryGuests(item).label}`,
+          `Usługi: ${services(item).map((service)=>`${service.label} × ${service.qty}`).join(', ') || '-'}`,
+          `Cena orientacyjna: ${item.estimated_total_pln ?? '-'} PLN`,
+          `Wiadomość: ${item.message || '-'}`,
+        ].join('\n');
         const mailText = (item) => `Nowe zapytanie rezerwacyjne — Camping Clepardia\n\n${summaryText(item)}\n\nSprawdź w panelu recepcji:\n${location.origin}/cc-gate-a8f3k9r2p6`;
         const copy = async (text, button) => {
           await navigator.clipboard.writeText(text);
@@ -564,6 +616,7 @@ const title = 'CC SYSTEM';
           if (activeView === 'tests') return isTestInquiry(item);
           if (activeView === 'archive') return isArchivedInquiry(item);
           if (activeView === 'stats' || activeView === 'templates' || activeView === 'settings') return false;
+          if (activeView === 'mail') return !isTestInquiry(item) && !isArchivedInquiry(item);
           return !isTestInquiry(item) && !isArchivedInquiry(item);
         };
         const visibleItems = () => {
@@ -703,6 +756,35 @@ const title = 'CC SYSTEM';
           { id:'generalOffer', icon:'🌿', title:'Ogólna oferta', category:'offer', key:'general', extra:true, priority:70, recommendedWhen:'Uniwersalna, miła odpowiedź ofertowa.' },
           { id:'phoneContact', icon:'☎️', title:'Prośba o kontakt telefoniczny', category:'phone', key:'phone', extra:true, priority:79, recommendedWhen:'Pilne terminy lub sprawa wymagająca szybkiego ustalenia.' },
         ];
+        const isSuggestedTemplate = (item, def) => {
+          const categories = categoryKeys(item);
+          return (
+            def.id === 'confirm'
+            || (def.id === 'infoCampingSummer' && isSummer(item) && categories.includes('camping'))
+            || (def.id === 'askMissingData' && categories.includes('missing'))
+            || (def.id === 'bungalow' && (categories.includes('bungalow') || categories.includes('combined')))
+            || (def.id === 'lateArrival' && categories.includes('late'))
+            || (def.id === 'tours' && trips(item).length > 0)
+            || (def.id === 'electricityEv' && categories.includes('ev'))
+            || (def.id === 'heavyVehicle' && categories.includes('heavy'))
+            || (def.id === 'groupScout' && (categories.includes('group') || categories.includes('scouts')))
+            || (def.id === 'phoneContact' && (categories.includes('urgent') || categories.includes('missing')))
+          );
+        };
+        const recommendedTemplateId = (item, requested = '') => {
+          const categories = categoryKeys(item);
+          if (requested === 'confirm' && isSummer(item) && categories.includes('camping')) return 'infoCampingSummer';
+          if (requested) return requested;
+          if (isSummer(item) && categories.includes('camping')) return 'infoCampingSummer';
+          if (categories.includes('missing')) return 'askMissingData';
+          if (categories.includes('bungalow') || categories.includes('combined')) return 'bungalow';
+          if (categories.includes('late')) return 'lateArrival';
+          if (trips(item).length) return 'tours';
+          if (categories.includes('ev')) return 'electricityEv';
+          if (categories.includes('heavy')) return 'heavyVehicle';
+          if (categories.includes('group') || categories.includes('scouts')) return 'groupScout';
+          return 'confirm';
+        };
         const dynamicConditions = (item, copySet, data) => {
           const categories = categoryKeys(item);
           return [
@@ -770,6 +852,23 @@ const title = 'CC SYSTEM';
             '+48 795 294 486',
           ].filter(Boolean).join('\n');
         };
+        const replyVisualPreviewHtml = (item, template, data) => {
+          const conditions = dynamicConditions(item, replyCopy[languageCode(item)] || replyCopy.en, data);
+          const cardRows = [
+            ['📅','Termin',`${data.arrival} — ${data.departure}`,`${data.nights} nocy`],
+            ['👥','Goście',data.people,''],
+            ['🏕️','Pobyt',data.stay,''],
+            ['💰','Cena',data.price,'orientacyjnie'],
+          ];
+          return `<article class="reply-preview-card">
+            <header><span>${esc(template.icon)}</span><div><strong>Camping Clepardia</strong><h3>${esc(template.title)}</h3><p>${esc(template.subject)}</p></div></header>
+            <div class="reply-preview-grid">${cardRows.map(([icon,label,value,hint])=>`<section><b>${esc(icon)}</b><small>${esc(label)}</small><strong>${esc(value)}</strong>${hint ? `<em>${esc(hint)}</em>` : ''}</section>`).join('')}</div>
+            <section><h4>ℹ️ Ważne informacje</h4><ul>${conditions.map((condition)=>`<li>${esc(condition)}</li>`).join('')}</ul></section>
+            <section><h4>📍 Dojazd</h4><p>Camping znajduje się blisko tramwaju i centrum Krakowa. Prosimy korzystać z Google Maps, bo wjazd zmienił się w 2022 roku.</p></section>
+            <section><h4>🗺️ Atrakcje i wycieczki</h4><p>Stare Miasto, Wawel, Kazimierz, Wieliczka, Auschwitz-Birkenau, Ojców, Zakopane, Energylandia.</p><p><a href="https://qr.codes/vksKBT" target="_blank" rel="noopener">Wycieczki z Krakowa</a></p></section>
+            <footer>www.clepardia.com.pl · +48 795 294 486</footer>
+          </article>`;
+        };
         const generateReplyTemplates = (item) => {
           const lang = languageCode(item);
           const copySet = replyCopy[lang] || replyCopy.en;
@@ -790,54 +889,70 @@ const title = 'CC SYSTEM';
             dynamic: 'Finalne warunki i dostępność potwierdza recepcja Camping Clepardia.',
           };
           const templates = templateDefs.map((def) => {
-            const suggested = (
-              def.id === 'confirm'
-              || (def.id === 'infoCampingSummer' && isSummer(item) && categories.includes('camping'))
-              || (def.id === 'askMissingData' && categories.includes('missing'))
-              || (def.id === 'bungalow' && (categories.includes('bungalow') || categories.includes('combined')))
-              || (def.id === 'lateArrival' && categories.includes('late'))
-              || (def.id === 'tours' && trips(item).length > 0)
-              || (def.id === 'electricityEv' && categories.includes('ev'))
-              || (def.id === 'heavyVehicle' && categories.includes('heavy'))
-              || (def.id === 'groupScout' && (categories.includes('group') || categories.includes('scouts')))
-              || (def.id === 'phoneContact' && (categories.includes('urgent') || categories.includes('missing')))
-            );
+            const mailtoBodyText = premiumReplyBody(item, def, copySet, extraSet, data);
+            const suggested = isSuggestedTemplate(item, def);
             return {
               ...def,
               language: lang.toUpperCase(),
               subject: templateSubject,
-              body: premiumReplyBody(item, def, copySet, extraSet, data),
+              mailtoBodyText,
+              body: mailtoBodyText,
+              visualPreviewHtml: replyVisualPreviewHtml(item, def, data),
               suggested,
             };
           });
           return templates.sort((a,b)=>Number(b.suggested)-Number(a.suggested) || b.priority-a.priority);
         };
         const replyTemplatesSection = (item) => {
-          const templates = generateReplyTemplates(item);
-          return `<section class="detail-card detail-card--wide reply-templates"><h3>Gotowe odpowiedzi premium</h3><p>Szablony mają tytuł, ikonę, temat, sekcje, zmienne i personalizację po języku klienta. Nie wysyłają się automatycznie.</p><div class="reply-template-grid">${templates.map((template)=>`<article class="reply-template ${template.suggested ? 'is-suggested':''}"><header><span>${esc(template.language)}</span><b>${esc(template.icon)}</b><strong>${esc(template.title)}</strong><em>${esc(template.category)}</em></header><small>Kiedy używać: ${esc(template.recommendedWhen)}</small><small>Temat: ${esc(template.subject)}</small><p>${esc(template.body)}</p><div class="inline-actions"><button type="button" data-copy-reply="${encodeURIComponent(template.body)}">Kopiuj odpowiedź</button><button type="button" data-reply-template="${esc(template.id)}">Otwórz mailto</button></div></article>`).join('')}</div></section>`;
+          const lang = languageCode(item).toUpperCase();
+          const recommendedId = recommendedTemplateId(item);
+          const compactTemplates = templateDefs
+            .map((template)=>({ ...template, suggested: template.id === recommendedId || isSuggestedTemplate(item, template) }))
+            .sort((a,b)=>Number(b.id === recommendedId)-Number(a.id === recommendedId) || Number(b.suggested)-Number(a.suggested) || b.priority-a.priority);
+          return `<section class="detail-card detail-card--wide reply-templates"><h3>Gotowe odpowiedzi premium</h3><p>Karta pokazuje tylko skróty. Pełna odpowiedź, podgląd mini-maila i tekst mailto otwierają się w modalu.</p><div class="reply-template-grid">${compactTemplates.map((template)=>`<article class="reply-template reply-template--compact ${template.id === recommendedId ? 'is-best':''} ${template.suggested ? 'is-suggested':''}"><header><span>${esc(lang)}</span><b>${esc(template.icon)}</b><strong>${esc(template.title)}</strong><em>${esc(template.category)}</em></header><small>${template.id === recommendedId ? 'Rekomendowane dla tego zgłoszenia. ' : ''}${esc(template.recommendedWhen)}</small><div class="inline-actions"><button type="button" data-reply-template="${esc(template.id)}">Otwórz</button></div></article>`).join('')}</div></section>`;
         };
         const bestTemplate = (item) => {
-          const templates = generateReplyTemplates(item);
-          return templates.find((template)=>template.suggested) || templates[0];
+          return replyTemplateById(item, recommendedTemplateId(item));
         };
         const bestReply = (item) => bestTemplate(item)?.body || summaryText(item);
         const replyTemplateById = (item, id) => {
           const templates = generateReplyTemplates(item);
-          return templates.find((template)=>template.id === id) || bestTemplate(item) || templates[0];
+          return templates.find((template)=>template.id === recommendedTemplateId(item, id)) || templates.find((template)=>template.id === recommendedTemplateId(item)) || templates[0];
         };
-        const openReplyMail = (item, template, node = null) => {
-          if (!template?.body) return false;
-          if (!item.email) {
-            showToast('Brak emaila klienta. Odpowiedź została przygotowana do skopiowania.', 'error');
-            const fallbackButton = node?.querySelector?.('[data-copy-reply]');
-            if (fallbackButton instanceof HTMLButtonElement) void copy(template.body, fallbackButton);
-            return false;
+        const closeReplyModal = () => {
+          if (replyModal instanceof HTMLElement) replyModal.hidden = true;
+          document.body.style.overflow = '';
+        };
+        const openReplyModal = (item, template, node = null, targetStatus = '') => {
+          if (!template?.mailtoBodyText) return false;
+          activeReplyDraft = { itemId: item.id, template, node, targetStatus };
+          if (replyTitle) replyTitle.textContent = `${template.icon} ${template.title}`;
+          if (replyMeta) replyMeta.textContent = `${template.language} · ${template.subject} · ${item.full_name || 'klient'}${item.email ? ` · ${item.email}` : ''}`;
+          if (replyPreview) replyPreview.innerHTML = template.visualPreviewHtml || '';
+          if (replyMailtoText) replyMailtoText.textContent = template.mailtoBodyText;
+          if (replyModal instanceof HTMLElement) replyModal.hidden = false;
+          document.body.style.overflow = 'hidden';
+          trackLocalAction(item.id, `Otworzono modal odpowiedzi: ${template.title}`);
+          return true;
+        };
+        const launchReplyMailto = () => {
+          if (!activeReplyDraft) return;
+          const item = inquiries.find((entry)=>String(entry.id) === String(activeReplyDraft.itemId));
+          const template = activeReplyDraft.template;
+          if (!item?.email) {
+            showToast('Brak emaila klienta. Skopiuj odpowiedź z modala.', 'error');
+            return;
           }
-          const url = `mailto:${encodeURIComponent(item.email)}?subject=${encodeURIComponent(template.subject)}&body=${encodeURIComponent(template.body)}`;
-          window.location.href = url;
+          window.location.href = `mailto:${encodeURIComponent(item.email)}?subject=${encodeURIComponent(template.subject)}&body=${encodeURIComponent(template.mailtoBodyText)}`;
           trackLocalAction(item.id, `Otworzono mailto: ${template.title}`);
           showToast(`Otwieram mailto: ${template.title}`, 'success');
-          return true;
+        };
+        const markReplyHandled = () => {
+          if (!activeReplyDraft) return;
+          const currentNode = document.querySelector(`.inquiry-card[data-id="${CSS.escape(String(activeReplyDraft.itemId))}"]`);
+          const node = currentNode instanceof HTMLElement ? currentNode : activeReplyDraft.node;
+          if (node instanceof HTMLElement) void save(node, activeReplyDraft.targetStatus || 'replied');
+          showToast('Status rozmowy zaktualizowany.', 'success');
         };
         const suggestBestReplies = (item) => {
           const categories = categoryKeys(item);
@@ -935,6 +1050,8 @@ const title = 'CC SYSTEM';
           const guests = normalizeInquiryGuests(item);
           const warnings = warningsFor(item, categories);
           const suggestions = suggestBestReplies(item).map(([title,copy])=>`<li><strong>${esc(title)}</strong><small>${esc(copy)}</small></li>`).join('');
+          const threadKey = `${String(item.email || item.phone || 'no-contact').toLowerCase()}::${item.arrival_date || '-'}|${item.departure_date || '-'}`;
+          const conversationTitle = [item.full_name || 'Klient', item.stay_type, `${item.arrival_date || '-'} — ${item.departure_date || '-'}`].filter(Boolean).join(' · ');
           const timeline = [
             ['Wpłynęło', formatDate(item.created_at,true)],
             ['Zapis Supabase', 'OK — rekord w reservation_inquiries'],
@@ -944,6 +1061,7 @@ const title = 'CC SYSTEM';
           ].map(([label,value])=>`<li><span>${esc(label)}</span><strong>${esc(value)}</strong></li>`).join('');
           return `${warnings ? `<aside class="crm-warnings">${warnings}</aside>` : ''}
             <div class="details-grid">
+              <section class="detail-card detail-card--wide conversation-card"><h3>💬 Wątek / rozmowa</h3><p><strong>${esc(conversationTitle)}</strong></p><small>Temat odpowiedzi: Camping Clepardia — odpowiedź na zapytanie</small><small>Thread key roboczy: ${esc(threadKey)}</small><div class="inline-actions"><button type="button" data-reply-template="${esc(recommendedTemplateId(item))}">Otwórz odpowiedź</button><button type="button" data-copy-client-safe>Kopiuj safe summary</button></div></section>
               <section class="detail-card"><h3>📇 Kontakt</h3><p>${item.email ? `<a href="mailto:${esc(item.email)}">${esc(item.email)}</a>`:'-'}<br>${item.phone ? `<a href="tel:${esc(item.phone)}">${esc(item.phone)}</a>`:'-'}</p><small>${esc(country.flag)} ${esc(country.label)} ${country.code ? `(${esc(country.code)})` : ''} · język formularza: ${esc(country.language)}</small></section>
               <section class="detail-card"><h3>🌍 Kraj i język</h3><p><strong>${esc(country.flag)} ${esc(country.label)}</strong><br>Kod kraju: ${esc(country.code || '-')}<br>Język: ${esc(country.language)}</p><small>${esc(country.risk || 'Brak widocznego ryzyka tłumaczeniowego.')}</small></section>
               <section class="detail-card"><h3>📅 Pobyt</h3><p><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><br>${esc(item.nights || 0)} nocy</p><small>Przyjazd: ${esc(payload.arrivalTime || 'jeszcze nie wiem')}</small></section>
@@ -960,11 +1078,11 @@ const title = 'CC SYSTEM';
               <section class="detail-card detail-card--wide"><h3>✨ Najlepsze podpowiedzi</h3><ul class="suggestion-list">${suggestions}</ul></section>
               ${replyTemplatesSection(item)}
               <section class="detail-card detail-card--wide mail-status-card ${item.mail_delivered ? 'is-ok':'is-failed'}"><h3>✉️ Status maila</h3><p><strong>${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</strong> · provider: ${esc(item.mail_provider || 'none')}</p><small>${esc(item.mail_error || (item.mail_delivered ? 'Brak błędu.':'Brak szczegółów błędu.'))}</small>${item.mail_delivered ? '' : '<p>Zapytanie jest zapisane w panelu recepcji. Skopiuj treść maila lub użyj przycisku mailto.</p>'}<div class="inline-actions"><button type="button" data-copy-mail>Kopiuj treść maila</button><a href="mailto:clepardia@gmail.com?subject=${encodeURIComponent(`Zapytanie ${item.id}`)}&body=${encodeURIComponent(mailText(item))}">Otwórz Gmail / mailto</a></div></section>
-              <section class="detail-card detail-card--wide"><h3>🕒 Timeline</h3><ul class="timeline-list">${timeline}</ul></section>
+              <section class="detail-card detail-card--wide"><h3>🕒 Historia rozmowy</h3><ul class="timeline-list">${timeline}</ul><small>TODO: docelowo zapisywać wiadomości i akcje w tabelach mail_threads, mail_messages i mail_actions.</small></section>
               <details class="technical-data"><summary>Dane techniczne</summary><pre data-raw-debug>Otwórz panel techniczny, żeby załadować raw JSON.</pre></details>
             </div>
             <div class="edit-row"><label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${item.status === value ? 'selected':''}>${label}</option>`).join('')}</select></label><label class="note"><span>Notatka recepcji</span><textarea data-notes rows="3">${esc(item.notes || '')}</textarea></label><button type="button" data-save>Zapisz status i notatkę</button></div>
-            <div class="card-actions"><button type="button" data-reply-action="confirm" data-target-status="needs_confirmation">✅ Potwierdź</button><button type="button" data-reply-action="askMissingData" data-target-status="needs_reply">📻 Poproś o dane</button><button type="button" data-reply-action="noAvailability" data-target-status="unavailable">❌ Brak miejsc</button><button type="button" data-quick-status="replied">Odpowiedziane</button><button type="button" data-quick-status="rejected">Odrzuć</button><button type="button" data-copy-summary>Kopiuj podsumowanie</button><button type="button" data-copy-email ${item.email ? '':'disabled'}>Kopiuj email</button><button type="button" data-copy-phone ${item.phone ? '':'disabled'}>Kopiuj telefon</button><button type="button" data-copy-mail>Kopiuj treść maila</button><button type="button" data-copy-id>Kopiuj link / ID</button>${item.phone ? `<a href="tel:${esc(item.phone)}">Otwórz tel</a>`:''}<button type="button" data-quick-status="cancelled">Anulowane</button><button type="button" data-quick-status="archived">Archiwizuj</button><button type="button" data-quick-status="spam">Spam/test</button></div>`;
+            <div class="card-actions"><button type="button" data-reply-action="confirm" data-target-status="needs_confirmation">✅ Potwierdź</button><button type="button" data-reply-action="askMissingData" data-target-status="needs_reply">📝 Poproś o dane</button><button type="button" data-reply-action="noAvailability" data-target-status="unavailable">❌ Brak miejsc</button><button type="button" data-quick-status="replied">Odpowiedziane</button><button type="button" data-quick-status="rejected">Odrzuć</button><button type="button" data-copy-summary>Kopiuj podsumowanie</button><button type="button" data-copy-email ${item.email ? '':'disabled'}>Kopiuj email</button><button type="button" data-copy-phone ${item.phone ? '':'disabled'}>Kopiuj telefon</button><button type="button" data-copy-mail>Kopiuj treść maila</button><button type="button" data-copy-id>Kopiuj link / ID</button>${item.phone ? `<a href="tel:${esc(item.phone)}">Otwórz tel</a>`:''}<button type="button" data-quick-status="cancelled">Anulowane</button><button type="button" data-quick-status="archived">Archiwizuj</button><button type="button" data-quick-status="spam">Spam/test</button></div>`;
         };
         const card = (item) => {
           const payload = raw(item);
@@ -976,7 +1094,7 @@ const title = 'CC SYSTEM';
           const guests = normalizeInquiryGuests(item);
           const mainServices = services(item).slice(0,4).map((service)=>`${service.label} × ${service.qty}`).join(' + ') || 'brak usług';
           const priority = categories.includes('urgent') || categories.includes('mailFailed') || categories.includes('group') ? 'Pilne' : 'Normalne';
-          const best = bestTemplate(item);
+          const recommendedId = recommendedTemplateId(item);
           return `<article class="inquiry-card" data-id="${esc(item.id)}">
             <header>
               <div><div class="card-badges"><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span><span class="mail-badge ${item.mail_delivered ? 'is-ok':'is-failed'}">${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</span>${categoryBadges}${highSeason ? '<span class="season-badge">Lipiec/sierpień — camping bez rezerwacji</span>':''}</div><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.nights || 0)} nocy</p></div>
@@ -996,15 +1114,15 @@ const title = 'CC SYSTEM';
             </div>
             <div class="quick-actions">
               <button type="button" data-reply-action="confirm" data-target-status="needs_confirmation">✅ Potwierdź</button>
-              <button type="button" data-reply-action="askMissingData" data-target-status="needs_reply">📻 Poproś o dane</button>
+              <button type="button" data-reply-action="askMissingData" data-target-status="needs_reply">📝 Poproś o dane</button>
               <button type="button" data-reply-action="noAvailability" data-target-status="unavailable">❌ Brak miejsc</button>
               <button type="button" data-reply-action="infoCampingSummer" data-target-status="replied">🏕️ Camping lipiec/sierpień</button>
               <button type="button" data-reply-action="bungalow" data-target-status="needs_confirmation">🏡 Domek</button>
               <button type="button" data-reply-action="electricityEv" data-target-status="replied">⚡ Prąd / EV</button>
-              <button type="button" data-reply-action="tours" data-target-status="replied">🎟️ Wycieczki</button>
-              <button type="button" data-copy-reply="${encodeURIComponent(best?.body || summaryText(item))}">📋 Kopiuj</button>
-              <button type="button" data-reply-template="${esc(best?.id || 'confirm')}">✉️ Mailto</button>
-              <button type="button" data-open-details>Rozwiń</button>
+              <button type="button" data-reply-action="tours" data-target-status="replied">🚌 Wycieczki</button>
+              <button type="button" data-reply-template="${esc(recommendedId)}">📋 Kopiuj / podgląd</button>
+              <button type="button" data-reply-template="${esc(recommendedId)}">✉️ Mailto</button>
+              <button type="button" data-open-details>💬 Otwórz rozmowę</button>
             </div>
             <details class="inquiry-card__details">
               <summary><span>Rozwiń szczegóły zapytania</span><small>Dane klienta, usługi, wycieczki, feedback, mail i notatki recepcji</small></summary>
@@ -1126,6 +1244,17 @@ const title = 'CC SYSTEM';
           if (loginStatus) loginStatus.textContent='';
         });
         document.querySelector('[data-refresh]')?.addEventListener('click',()=>void load({ silent:false, reason:'manual' }));
+        document.querySelectorAll('[data-reply-close]').forEach((button)=>button.addEventListener('click',closeReplyModal));
+        document.querySelector('[data-reply-copy]')?.addEventListener('click',(event)=>{
+          if (!activeReplyDraft?.template?.mailtoBodyText || !(event.currentTarget instanceof HTMLButtonElement)) return;
+          trackLocalAction(activeReplyDraft.itemId, 'Skopiowano odpowiedź z modala');
+          void copy(activeReplyDraft.template.mailtoBodyText, event.currentTarget);
+        });
+        document.querySelector('[data-reply-mailto]')?.addEventListener('click',launchReplyMailto);
+        document.querySelector('[data-reply-mark]')?.addEventListener('click',markReplyHandled);
+        window.addEventListener('keydown',(event)=>{
+          if (event.key === 'Escape') closeReplyModal();
+        });
         autoRefreshToggle?.addEventListener('click',()=>{
           autoRefreshPaused = !autoRefreshPaused;
           if (!autoRefreshPaused) {
@@ -1145,6 +1274,13 @@ const title = 'CC SYSTEM';
         document.querySelectorAll('[data-view-shortcut]').forEach((button)=>button.addEventListener('click',()=>{
           activeView = button.dataset.viewShortcut || 'inbox';
           clearFilters();
+          render();
+        }));
+        document.querySelectorAll('[data-mail-status]').forEach((button)=>button.addEventListener('click',()=>{
+          activeView = 'mail';
+          clearFilters();
+          const statusSelect = document.querySelector('[data-filter="status"]');
+          if (statusSelect instanceof HTMLSelectElement) statusSelect.value = button.dataset.mailStatus || '';
           render();
         }));
         document.querySelector('[data-clear-filters]')?.addEventListener('click',()=>{
@@ -1204,15 +1340,14 @@ const title = 'CC SYSTEM';
           const replyAction = target.closest('[data-reply-action]');
           if (replyAction instanceof HTMLElement) {
             const template = replyTemplateById(item, replyAction.dataset.replyAction || 'confirm');
-            const opened = openReplyMail(item, template, node);
             const statusAfter = replyAction.dataset.targetStatus || '';
-            if (opened && statusAfter) void save(node, statusAfter);
+            openReplyModal(item, template, node, statusAfter);
             return;
           }
           const replyTemplateButton = target.closest('[data-reply-template]');
           if (replyTemplateButton instanceof HTMLElement) {
             const template = replyTemplateById(item, replyTemplateButton.dataset.replyTemplate || '');
-            openReplyMail(item, template, node);
+            openReplyModal(item, template, node, 'replied');
             return;
           }
           if (target.closest('[data-save]')) void save(node);
@@ -1243,7 +1378,7 @@ const title = 'CC SYSTEM';
           }
           const actions = [
             ['[data-copy-summary]',summaryText(item)],['[data-copy-email]',item.email],['[data-copy-phone]',item.phone],
-            ['[data-copy-mail]',mailText(item)],['[data-copy-id]',`${location.origin}/cc-gate-a8f3k9r2p6#${item.id}\nID: ${item.id}`],
+            ['[data-copy-client-safe]',clientSafeSummaryText(item)],['[data-copy-mail]',mailText(item)],['[data-copy-id]',`${location.origin}/cc-gate-a8f3k9r2p6#${item.id}\nID: ${item.id}`],
           ];
           actions.forEach(([selector,text])=>{const button=target.closest(selector);if(button instanceof HTMLButtonElement && text) void copy(text,button);});
         });
@@ -1523,6 +1658,11 @@ const title = 'CC SYSTEM';
     box-shadow: inset 0 0 0 1px rgba(143,224,180,.14);
   }
 
+  .reply-template.is-best {
+    border-color: rgba(255,228,146,.45);
+    background: linear-gradient(145deg, rgba(255,228,146,.12), rgba(143,224,180,.07));
+  }
+
   .reply-template header {
     display: flex;
     flex-wrap: wrap;
@@ -1567,6 +1707,15 @@ const title = 'CC SYSTEM';
     color: rgba(239,251,243,.86);
   }
 
+  .reply-template--compact p {
+    display: none;
+  }
+
+  .conversation-card {
+    border-color: rgba(143,224,180,.24);
+    background: linear-gradient(145deg, rgba(143,224,180,.1), rgba(255,255,255,.05));
+  }
+
   .missing-email {
     display: inline-flex;
     align-items: center;
@@ -1580,6 +1729,7 @@ const title = 'CC SYSTEM';
   }
 
   .view-tabs,
+  .mail-center-nav,
   .filter-shortcuts,
   .quick-actions {
     display: flex;
@@ -1600,11 +1750,20 @@ const title = 'CC SYSTEM';
   }
 
   .view-tabs button[aria-pressed="true"],
+  .mail-center-nav button:hover,
   .filter-shortcuts button:hover,
   .quick-actions button:hover,
   .quick-actions a:hover {
     background: linear-gradient(135deg, #a8f0c7, #7be3a8);
     color: #07140f;
+  }
+
+  .mail-center-nav {
+    margin: 0 0 14px;
+    padding: 10px;
+    border: 1px solid rgba(143,224,180,.12);
+    border-radius: 20px;
+    background: rgba(255,255,255,.045);
   }
 
   .system-strip {
@@ -1727,6 +1886,164 @@ const title = 'CC SYSTEM';
     font-weight: 800;
   }
 
+  .reply-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: clamp(10px, 3vw, 28px);
+  }
+
+  .reply-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 10, 7, .74);
+    backdrop-filter: blur(14px);
+  }
+
+  .reply-modal__card {
+    position: relative;
+    z-index: 1;
+    width: min(980px, 100%);
+    max-height: min(88vh, 920px);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    gap: 14px;
+    padding: clamp(18px, 3vw, 28px);
+    border: 1px solid rgba(143,224,180,.24);
+    border-radius: 28px;
+    color: #effbf3;
+    background: radial-gradient(circle at 10% 0%, rgba(143,224,180,.18), transparent 32%), linear-gradient(145deg, #07140f, #102b1d);
+    box-shadow: 0 34px 90px rgba(0,0,0,.48);
+    overflow: hidden;
+  }
+
+  .reply-modal__card header h2 {
+    margin: 8px 0 6px;
+    font-size: clamp(1.55rem, 4vw, 2.6rem);
+  }
+
+  .reply-modal__close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 42px;
+    min-height: 42px;
+    padding: 0;
+    border-radius: 50%;
+  }
+
+  .reply-modal__preview {
+    min-height: 0;
+    overflow: auto;
+    padding-right: 4px;
+  }
+
+  .reply-modal__text {
+    border: 1px solid rgba(143,224,180,.16);
+    border-radius: 16px;
+    padding: 12px 14px;
+    background: rgba(255,255,255,.055);
+  }
+
+  .reply-modal__text summary {
+    cursor: pointer;
+    color: #9ee8bd;
+    font-weight: 950;
+  }
+
+  .reply-modal__text pre {
+    max-height: 220px;
+    margin: 12px 0 0;
+    overflow: auto;
+    white-space: pre-wrap;
+    color: #dffff0;
+  }
+
+  .reply-modal__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+
+  .reply-preview-card {
+    display: grid;
+    gap: 14px;
+    color: #102319;
+  }
+
+  .reply-preview-card header,
+  .reply-preview-card section,
+  .reply-preview-card footer {
+    padding: 16px;
+    border-radius: 18px;
+    background: #fff;
+  }
+
+  .reply-preview-card header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    color: #fff;
+    background: linear-gradient(135deg, #07140f, #1e7b4d);
+  }
+
+  .reply-preview-card header > span {
+    display: grid;
+    width: 54px;
+    height: 54px;
+    place-items: center;
+    border-radius: 16px;
+    background: rgba(255,255,255,.13);
+    font-size: 1.7rem;
+  }
+
+  .reply-preview-card h3,
+  .reply-preview-card h4,
+  .reply-preview-card p,
+  .reply-preview-card ul {
+    margin: 0;
+  }
+
+  .reply-preview-card header p {
+    color: rgba(239,251,243,.72);
+  }
+
+  .reply-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .reply-preview-grid section {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    background: #f4fbf6;
+  }
+
+  .reply-preview-grid b {
+    font-size: 1.4rem;
+  }
+
+  .reply-preview-grid small,
+  .reply-preview-grid em {
+    color: #61736a;
+    font-style: normal;
+    font-weight: 800;
+  }
+
+  .reply-preview-card section {
+    display: grid;
+    gap: 10px;
+  }
+
+  .reply-preview-card a {
+    color: #0f6b43;
+    font-weight: 950;
+  }
+
   @media (max-width: 720px) {
     .app-header__brand {
       align-items: flex-start;
@@ -1758,8 +2075,27 @@ const title = 'CC SYSTEM';
     }
 
     .view-tabs,
+    .mail-center-nav,
     .quick-actions {
       display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    .reply-modal {
+      align-items: stretch;
+      padding: 8px;
+    }
+
+    .reply-modal__card {
+      max-height: calc(100vh - 16px);
+      border-radius: 22px;
+    }
+
+    .reply-modal__actions {
+      display: grid;
+    }
+
+    .reply-preview-grid {
       grid-template-columns: 1fr;
     }
 

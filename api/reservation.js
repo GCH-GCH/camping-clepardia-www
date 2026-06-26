@@ -468,6 +468,42 @@ const createCcSystemDraft = (inquiry) => ({
   createdAt: inquiry.submittedAt,
 });
 
+const buildThreadMetadata = (inquiry) => {
+  const dates = [inquiry.arrivalIso || inquiry.arrival, inquiry.departureIso || inquiry.departure].filter(Boolean).join('|');
+  const email = String(inquiry.email || '').trim().toLowerCase();
+  const stay = [inquiry.stayType, inquiry.arrival || inquiry.arrivalIso, inquiry.departure || inquiry.departureIso].filter(Boolean).join(' · ');
+  return {
+    originalInquirySubject: `Camping Clepardia — nowe zapytanie o pobyt`,
+    customerReplySubject: 'Camping Clepardia — odpowiedź na zapytanie',
+    conversationTitle: [inquiry.fullName || 'Klient', stay].filter(Boolean).join(' · '),
+    threadKey: [email || inquiry.phone || 'no-contact', dates || inquiry.inquiryId].join('::'),
+    clientSafeSummary: [
+      inquiry.fullName,
+      inquiry.country,
+      inquiry.stayType,
+      inquiry.arrival && inquiry.departure ? `${inquiry.arrival} — ${inquiry.departure}` : '',
+    ].filter(Boolean).join(' · '),
+  };
+};
+
+const buildAdminDiagnostics = (inquiry, reception = {}) => ({
+  inquiryId: inquiry.inquiryId,
+  isTest: Boolean(inquiry.isTest),
+  testReasons: inquiry.testReasons || [],
+  mailProvider: reception.provider || 'none',
+  delivered: Boolean(reception.delivered),
+  fallbackFrom: reception.fallbackFrom || null,
+  errorCode: reception.errorCode || null,
+  reason: reception.reason || reception.message || null,
+  feedback: inquiry.feedback || null,
+  consents: {
+    quiet: inquiry.quietConsent,
+    contact: inquiry.consent,
+    privacy: inquiry.privacyConsent,
+  },
+  thread: buildThreadMetadata(inquiry),
+});
+
 const numericTotal = (value) => {
   const match = String(value || '').replace(',', '.').match(/\d+(?:\.\d+)?/);
   return match ? Number(match[0]) : null;
@@ -522,7 +558,7 @@ const createSupabaseRecord = (inquiry, payload) => ({
   },
 });
 
-const buildReceptionMail = (inquiry) => {
+const buildReceptionSafeEmail = (inquiry) => {
   const stayKind = stayKindLabel(inquiry);
   const services = Array.isArray(inquiry.services) ? inquiry.services : [];
   const totalPeople = Number(inquiry.people.adults || 0) + Number(inquiry.people.children || 0) + Number(inquiry.people.toddlers || 0);
@@ -530,13 +566,14 @@ const buildReceptionMail = (inquiry) => {
     inquiry.people.adults ? `Dorośli: ${inquiry.people.adults}` : '',
     inquiry.people.children ? `Dzieci 4–14: ${inquiry.people.children}` : '',
     inquiry.people.toddlers ? `Dzieci 0–4: ${inquiry.people.toddlers}` : '',
-  ].filter(Boolean).join(', ') || 'brak danych';
-  const vehicleSummary = [
+  ].filter(Boolean).join(', ') || 'do ustalenia';
+  const vehicleParts = [
     inquiry.vehicleType,
     inquiry.vehiclePlate ? `rej. ${inquiry.vehiclePlate}` : '',
     inquiry.trailerPlate ? `przyczepa ${inquiry.trailerPlate}` : '',
     inquiry.vehicleDetails?.summary,
-  ].filter(Boolean).join(' · ') || 'brak danych';
+  ].filter(Boolean);
+  const vehicleSummary = vehicleParts.join(' · ');
   const serviceSearch = services.map((service) => `${service.id} ${service.label} ${service.scope}`).join(' ');
   const freeTextSearch = [
     serviceSearch,
@@ -549,35 +586,23 @@ const buildReceptionMail = (inquiry) => {
   const hasEv = /ev|electric car|samoch[oó]d elektry|hybryd|plug[-\s]?in/i.test(freeTextSearch);
   const hasDog = /dog|pies/i.test(freeTextSearch);
   const isLateArrival = /2[1-3]:|21|22|23|po 21|after 21|late|p[oó][źz]n/i.test(inquiry.arrivalTime || '');
-  const hasMissingData = [
-    !inquiry.email ? 'brak e-maila' : '',
-    !inquiry.phone ? 'brak telefonu' : '',
-    !inquiry.arrival ? 'brak przyjazdu' : '',
-    !inquiry.departure ? 'brak wyjazdu' : '',
-    !totalPeople ? 'brak liczby osób' : '',
-  ].filter(Boolean);
   const warningItems = [
-    inquiry.highSeasonCampingInfo ? 'Lipiec/sierpień + camping: nie gwarantować miejsca z wyprzedzeniem; miejsca według kolejności przyjazdu, najlepiej około 12:00.' : '',
-    isLateArrival ? 'Późny przyjazd: poprosić klienta o kontakt z recepcją. Recepcja 9:00–21:00, brama standardowo 8:00–22:00.' : '',
+    inquiry.highSeasonCampingInfo ? 'Lipiec/sierpień + camping: miejsca według kolejności przyjazdu, najlepiej około 12:00.' : '',
+    hasBungalow(inquiry) ? 'Domek: check-in od 16:00, check-out do 11:00. Klient powinien zabrać własne ręczniki, kosmetyki i rzeczy osobiste.' : '',
+    isLateArrival ? 'Późny przyjazd: warto wcześniej ustalić szczegóły z recepcją. Recepcja 9:00–21:00, brama standardowo 8:00–22:00.' : '',
     hasElectricity ? 'Prąd 10A: dostępny dla wyposażenia kampera/przyczepy.' : '',
     hasEv ? 'EV / plug-in: nie ma możliwości ładowania samochodów elektrycznych ani hybryd plug-in na stanowisku.' : '',
-    inquiry.vehicleDetails?.large || inquiry.vehicleDetails?.asphaltNeeded ? 'Ciężki pojazd / asfalt: kierować na stabilne/asfaltowe miejsce, nie na miękką trawę.' : '',
-    /grup|group|skaut|scout|harcer/i.test(freeTextSearch) || totalPeople >= 8 ? 'Grupa / skauci: potwierdzić indywidualnie zasady pobytu i liczbę opiekunów.' : '',
-    hasMissingData.length ? `Brak danych: ${hasMissingData.join(', ')}.` : '',
-    inquiry.tours.length ? `Wycieczki: klient pyta o ${inquiry.tours.join(', ')}.` : '',
-    inquiry.eventInterest ? `Wydarzenie: ${inquiry.eventInterest}.` : '',
-    inquiry.specialNeeds ? `Specjalne potrzeby: ${inquiry.specialNeeds}.` : '',
-    hasDog ? 'Pies: wybrany w usługach, pobyt psa bezpłatny; przypomnieć o sprzątaniu po pupilu.' : '',
+    inquiry.vehicleDetails?.large || inquiry.vehicleDetails?.asphaltNeeded ? 'Ciężki pojazd: najlepiej ustawić na stabilnym/asfaltowym miejscu.' : '',
+    hasDog ? 'Pies: pobyt psa jest bezpłatny; prosimy o sprzątanie po pupilu.' : '',
+    'Dojazd: rekomendowane Google Maps, ponieważ wjazd na camping zmienił się w 2022 roku.',
   ].filter(Boolean);
-  const badge = inquiry.isTest ? 'TEST' : warningItems.length ? 'PILNE / SPRAWDŹ' : 'NOWE ZAPYTANIE';
-  const depositNote = hasBungalow(inquiry)
-    ? 'W przypadku domków może być wymagana zaliczka. Dane do zaliczki należy wysłać klientowi dopiero po potwierdzeniu dostępności.'
-    : '';
+  const badge = warningItems.length ? 'SPRAWDŹ SZCZEGÓŁY' : 'NOWE ZAPYTANIE';
   const sectionTitle = (icon, title) => `<h2 style="margin:0 0 14px;font-size:18px;line-height:1.25;color:#0f2c1d;">${icon} ${escapeHtml(title)}</h2>`;
-  const fieldRows = (rows) => rows.map(([label, value]) => `
+  const safeRows = (rows) => rows.filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '');
+  const fieldRows = (rows) => safeRows(rows).map(([label, value]) => `
     <tr>
       <td style="padding:10px 0;color:#61736a;border-top:1px solid #e6f1ea;font-size:13px;">${escapeHtml(label)}</td>
-      <td style="padding:10px 0;color:#102319;font-weight:800;text-align:right;border-top:1px solid #e6f1ea;font-size:13px;">${escapeHtml(value || 'brak')}</td>
+      <td style="padding:10px 0;color:#102319;font-weight:800;text-align:right;border-top:1px solid #e6f1ea;font-size:13px;">${escapeHtml(value)}</td>
     </tr>
   `).join('');
   const card = ([icon, label, value, hint]) => `
@@ -585,7 +610,7 @@ const buildReceptionMail = (inquiry) => {
       <div style="min-height:112px;padding:16px;border:1px solid #dceee4;border-radius:18px;background:linear-gradient(145deg,#ffffff,#f4fbf6);">
         <div style="font-size:24px;line-height:1;">${icon}</div>
         <p style="margin:9px 0 4px;color:#60736a;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;">${escapeHtml(label)}</p>
-        <strong style="display:block;color:#102319;font-size:18px;line-height:1.25;">${escapeHtml(value || 'brak')}</strong>
+        <strong style="display:block;color:#102319;font-size:18px;line-height:1.25;">${escapeHtml(value || 'do ustalenia')}</strong>
         ${hint ? `<small style="display:block;margin-top:6px;color:#61736a;line-height:1.35;">${escapeHtml(hint)}</small>` : ''}
       </div>
     </td>
@@ -603,14 +628,12 @@ const buildReceptionMail = (inquiry) => {
       </tr>
     `;
   }).join('');
-  const servicesText = services.length
-    ? services.map((service) => {
-        const qty = Math.max(1, Number(service.qty || 1));
-        const price = Math.max(0, Number(service.price || 0));
-        const sum = price * qty * Math.max(1, Number(inquiry.nights || 1));
-        return `- ${service.label || service.id || 'Usługa'} x ${qty}: ${price} PLN / noc, orientacyjnie ${sum} PLN`;
-      })
-    : ['- brak usług'];
+  const servicesText = services.map((service) => {
+    const qty = Math.max(1, Number(service.qty || 1));
+    const price = Math.max(0, Number(service.price || 0));
+    const sum = price * qty * Math.max(1, Number(inquiry.nights || 1));
+    return `- ${service.label || service.id || 'Usługa'} x ${qty}: ${price} PLN / noc, orientacyjnie ${sum} PLN`;
+  });
   const clientRows = [
     ['Imię i nazwisko', inquiry.fullName],
     ['Email', inquiry.email],
@@ -624,32 +647,23 @@ const buildReceptionMail = (inquiry) => {
     ['Noce', inquiry.nights],
     ['Godzina przyjazdu', inquiry.arrivalTime || 'jeszcze nie wiem'],
     ['Typ pobytu', inquiry.stayType],
-    ['Status', 'Do obsługi przez recepcję'],
     ['Pojazd', vehicleSummary],
-    ['Specjalne potrzeby', inquiry.specialNeeds || 'brak'],
-    ['Wydarzenie', inquiry.eventInterest || 'brak'],
-    ['Wycieczki', inquiry.tours.join(', ') || 'brak'],
+    ['Uwagi / potrzeby klienta', inquiry.specialNeeds],
+    ['Wydarzenie', inquiry.eventInterest],
+    ['Wycieczki', inquiry.tours.join(', ')],
   ];
   const peopleRows = [
     ['Dorośli', inquiry.people.adults || 0],
     ['Dzieci 4–14', inquiry.people.children || 0],
     ['Dzieci 0–4', inquiry.people.toddlers || 0],
-    ['Razem osób', totalPeople || 'brak danych'],
-  ];
-  const feedbackRows = [
-    ['Ocena strony', inquiry.feedback?.rating ? `${inquiry.feedback.rating}/5` : 'brak'],
-    ['Co się podobało', inquiry.feedback?.liked?.join(', ') || 'brak'],
-    ['Co poprawić', inquiry.feedback?.improve || 'brak'],
-    ['Łatwo znaleźć informacje', inquiry.feedback?.easyInfo || 'brak'],
-    ['Formularz był prosty', inquiry.feedback?.easyForm || 'brak'],
+    ['Razem osób', totalPeople || 'do ustalenia'],
   ];
   const topCards = [
     ['📅', 'Termin', `${inquiry.arrival || '-'} — ${inquiry.departure || '-'}`, `${inquiry.nights || 0} nocy`],
-    ['👥', 'Goście', totalPeople ? `${totalPeople} osób` : 'brak danych', guests],
-    ['🚐', 'Typ pobytu / pojazd', inquiry.stayType || '-', vehicleSummary],
-    ['💰', 'Cena orientacyjna', inquiry.estimatedTotal || 'do potwierdzenia', inquiry.currencyEstimate || 'waluty obce tylko orientacyjnie'],
-    ['🌍', 'Kraj / język', inquiry.country || '-', inquiry.contactLanguage || '-'],
-    ['📩', 'Status maila', 'Resend → recepcja', 'zapytanie zapisane w CC SYSTEM'],
+    ['👥', 'Goście', totalPeople ? `${totalPeople} osób` : 'do ustalenia', guests],
+    ['🚐', 'Typ pobytu / pojazd', inquiry.stayType || 'do ustalenia', vehicleSummary],
+    ['💰', 'Cena orientacyjna', inquiry.estimatedTotal || 'do potwierdzenia', inquiry.currencyEstimate],
+    ['🌍', 'Kraj / język', inquiry.country || 'do ustalenia', inquiry.contactLanguage],
   ];
   const warningHtml = warningItems.length
     ? `<section style="margin:18px 0;padding:20px;border:1px solid #f0d7a6;border-radius:20px;background:#fff8ea;color:#4c3b13;">
@@ -662,7 +676,7 @@ const buildReceptionMail = (inquiry) => {
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nowe zapytanie Camping Clepardia</title>
+    <title>Nowe zapytanie o pobyt — Camping Clepardia</title>
   </head>
   <body style="margin:0;background:#eef7f1;color:#102319;font-family:Arial,Helvetica,sans-serif;">
     <div style="padding:28px;background:#eef7f1;">
@@ -670,14 +684,14 @@ const buildReceptionMail = (inquiry) => {
         <header style="padding:28px;border-radius:28px;background:linear-gradient(135deg,#07140f,#12472d 58%,#1e7b4d);color:#fff;box-shadow:0 24px 70px rgba(7,20,15,.24);">
           <p style="display:inline-block;margin:0 0 14px;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.14);color:#c8ffdc;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;">${escapeHtml(badge)}</p>
           <h1 style="margin:0;font-size:30px;line-height:1.1;">Camping Clepardia</h1>
-          <h2 style="margin:8px 0 0;font-size:22px;line-height:1.2;">Nowe zapytanie Camping Clepardia</h2>
-          <p style="margin:14px 0 0;color:#d7efe0;font-size:15px;line-height:1.55;">${escapeHtml(stayKind)} · ${escapeHtml(inquiry.arrival || '-')} — ${escapeHtml(inquiry.departure || '-')} · ${escapeHtml(inquiry.fullName || 'Klient')} / ${escapeHtml(inquiry.country || 'kraj niepodany')}</p>
+          <h2 style="margin:8px 0 0;font-size:22px;line-height:1.2;">Nowe zapytanie o pobyt</h2>
+          <p style="margin:14px 0 0;color:#d7efe0;font-size:15px;line-height:1.55;">${escapeHtml(stayKind)} · ${escapeHtml(inquiry.arrival || '-')} — ${escapeHtml(inquiry.departure || '-')} · ${escapeHtml([inquiry.fullName, inquiry.country].filter(Boolean).join(' / ') || 'klient')}</p>
         </header>
 
         <table role="presentation" style="width:100%;border-collapse:separate;border-spacing:0;margin:18px -7px 4px;">
           <tr>${topCards.slice(0, 2).map(card).join('')}</tr>
           <tr>${topCards.slice(2, 4).map(card).join('')}</tr>
-          <tr>${topCards.slice(4, 6).map(card).join('')}</tr>
+          <tr>${topCards.slice(4, 5).map(card).join('')}</tr>
         </table>
 
         ${warningHtml}
@@ -707,84 +721,54 @@ const buildReceptionMail = (inquiry) => {
               <th align="right" style="padding:0 0 9px;color:#61736a;font-size:12px;text-transform:uppercase;">Suma</th>
             </tr>
             ${serviceRows}
-          </table>` : '<p style="margin:0;color:#61736a;">Brak usług w payloadzie.</p>'}
+          </table>` : ''}
           <p style="margin:14px 0 0;color:#61736a;font-size:13px;line-height:1.55;">Cena jest orientacyjna; finalne warunki potwierdza recepcja.</p>
         </section>
 
-        <section style="margin:18px 0;padding:20px;border:1px solid #dceee4;border-radius:20px;background:#fff;">
+        ${inquiry.message ? `<section style="margin:18px 0;padding:20px;border:1px solid #dceee4;border-radius:20px;background:#fff;">
           ${sectionTitle('💬', 'Wiadomość klienta')}
-          <p style="white-space:pre-wrap;line-height:1.7;margin:0;color:#102319;">${escapeHtml(inquiry.message || 'brak wiadomości')}</p>
-        </section>
-
-        <section style="margin:18px 0;padding:20px;border:1px solid #dceee4;border-radius:20px;background:#fff;">
-          ${sectionTitle('⭐', 'Feedback ze strony')}
-          <table role="presentation" style="width:100%;border-collapse:collapse;">${fieldRows(feedbackRows)}</table>
-        </section>
-
-        ${depositNote ? `<section style="margin:18px 0;padding:20px;border-radius:20px;background:#fff8ea;border:1px solid #f0d7a6;color:#4c3b13;"><strong>🏡 Zaliczka / domki</strong><p style="margin:8px 0 0;line-height:1.6;">${escapeHtml(depositNote)}</p></section>` : ''}
-
-        <section style="margin:18px 0;padding:20px;border:1px solid #dceee4;border-radius:20px;background:#f8fcf9;">
-          ${sectionTitle('🔗', 'Szybkie akcje')}
-          <p style="margin:0 0 14px;color:#61736a;line-height:1.55;">Zapytanie zapisane w CC SYSTEM. Ten mail jest kopią dla recepcji.</p>
-          <p style="margin:0;">
-            <a href="${escapeHtml(inboxUrl())}" style="display:inline-block;margin:0 8px 8px 0;padding:12px 16px;border-radius:999px;background:#0f6b43;color:#fff;text-decoration:none;font-weight:900;">Otwórz CC SYSTEM</a>
-            <a href="${escapeHtml(reservationUrl())}" style="display:inline-block;margin:0 8px 8px 0;padding:12px 16px;border-radius:999px;background:#dff5e8;color:#0f2c1d;text-decoration:none;font-weight:900;">Otwórz formularz rezerwacji</a>
-            <a href="${escapeHtml(siteUrl())}" style="display:inline-block;margin:0 8px 8px 0;padding:12px 16px;border-radius:999px;background:#dff5e8;color:#0f2c1d;text-decoration:none;font-weight:900;">Otwórz stronę</a>
-          </p>
-        </section>
+          <p style="white-space:pre-wrap;line-height:1.7;margin:0;color:#102319;">${escapeHtml(inquiry.message)}</p>
+        </section>` : ''}
 
         <footer style="padding:18px 6px;color:#54675d;font-size:12px;line-height:1.7;">
           <strong>Camping Clepardia</strong><br>
-          www.clepardia.com.pl · +48 795 294 486<br>
-          Zapytanie zapisane w CC SYSTEM. Ten mail jest kopią dla recepcji.<br>
-          ID: ${escapeHtml(inquiry.inquiryId)} · Wpłynęło: ${escapeHtml(inquiry.submittedAt)}
+          www.clepardia.com.pl · +48 795 294 486
         </footer>
       </div>
     </div>
   </body>
 </html>`;
   const bodyText = [
-    'Nowe zapytanie Camping Clepardia',
+    'Nowe zapytanie o pobyt — Camping Clepardia',
     '',
-    `Typ zgłoszenia: ${inquiry.isTest ? `TEST (${(inquiry.testReasons || []).join(', ') || 'heurystyka'})` : 'Klient'}`,
-    `ID: ${inquiry.inquiryId}`,
-    `Wpłynęło: ${inquiry.submittedAt}`,
-    `Summary: ${stayKind} · ${inquiry.arrival || '-'} — ${inquiry.departure || '-'} · ${inquiry.fullName || 'Klient'} / ${inquiry.country || '-'}`,
+    [stayKind, `${inquiry.arrival || '-'} — ${inquiry.departure || '-'}`, [inquiry.fullName, inquiry.country].filter(Boolean).join(' / ')].filter(Boolean).join(' · '),
     '',
     'NAJWAŻNIEJSZE',
     `Termin: ${inquiry.arrival || '-'} — ${inquiry.departure || '-'} (${inquiry.nights || 0} nocy)`,
-    `Goście: ${guests}; razem: ${totalPeople || 'brak danych'}`,
-    `Typ pobytu / pojazd: ${inquiry.stayType || '-'}; ${vehicleSummary}`,
+    `Goście: ${guests}; razem: ${totalPeople || 'do ustalenia'}`,
+    `Typ pobytu / pojazd: ${[inquiry.stayType, vehicleSummary].filter(Boolean).join('; ') || 'do ustalenia'}`,
     `Cena orientacyjna: ${inquiry.estimatedTotal || 'do potwierdzenia'}`,
-    `Kraj / język: ${inquiry.country || '-'} / ${inquiry.contactLanguage || '-'}`,
-    `Status maila: Resend → recepcja, zapisane w CC SYSTEM`,
+    `Kraj / język: ${[inquiry.country, inquiry.contactLanguage].filter(Boolean).join(' / ') || 'do ustalenia'}`,
     '',
     'KLIENT',
-    ...clientRows.map(([label, value]) => `${label}: ${value || 'brak'}`),
+    ...safeRows(clientRows).map(([label, value]) => `${label}: ${value}`),
     '',
     'POBYT',
-    ...stayRows.map(([label, value]) => `${label}: ${value || 'brak'}`),
+    ...safeRows(stayRows).map(([label, value]) => `${label}: ${value}`),
     '',
     'OSOBY',
-    ...peopleRows.map(([label, value]) => `${label}: ${value || 'brak'}`),
+    ...safeRows(peopleRows).map(([label, value]) => `${label}: ${value}`),
     '',
-    'USŁUGI',
+    servicesText.length ? 'USŁUGI' : '',
     ...servicesText,
     '',
     'WARNINGI DLA RECEPCJI',
-    ...(warningItems.length ? warningItems.map((note) => `- ${note}`) : ['- brak']),
+    ...warningItems.map((note) => `- ${note}`),
     '',
-    'WIADOMOŚĆ KLIENTA',
-    inquiry.message || 'brak',
+    inquiry.message ? 'WIADOMOŚĆ KLIENTA' : '',
+    inquiry.message || '',
     '',
-    'FEEDBACK',
-    ...feedbackRows.map(([label, value]) => `${label}: ${value || 'brak'}`),
-    '',
-    depositNote,
-    '',
-    `CC SYSTEM: ${inboxUrl()}`,
-    `Formularz: ${reservationUrl()}`,
-    `Strona: ${siteUrl()}`,
+    `Strona: www.clepardia.com.pl`,
     'Camping Clepardia · www.clepardia.com.pl · +48 795 294 486',
   ].filter(Boolean).join('\n');
 
@@ -792,11 +776,31 @@ const buildReceptionMail = (inquiry) => {
     from: reservationFromEmail(),
     to: reservationToEmail(),
     replyTo: inquiry.email || undefined,
-    subject: `Nowe zapytanie Camping Clepardia — ${stayKind} — ${inquiry.arrival}`,
+    subject: `Camping Clepardia — nowe zapytanie o pobyt — ${stayKind} — ${inquiry.arrival}`,
     html: bodyHtml,
     text: bodyText,
   };
 };
+
+const buildClientReplyTemplate = (inquiry) => ({
+  subject: buildThreadMetadata(inquiry).customerReplySubject,
+  text: [
+    `Dzień dobry${inquiry.fullName ? ` ${inquiry.fullName.split(/\s+/)[0]}` : ''},`,
+    '',
+    'dziękujemy za wiadomość i zainteresowanie pobytem w Camping Clepardia.',
+    inquiry.arrival && inquiry.departure ? `Termin: ${inquiry.arrival} — ${inquiry.departure}` : '',
+    inquiry.nights ? `Liczba nocy: ${inquiry.nights}` : '',
+    inquiry.stayType ? `Typ pobytu: ${inquiry.stayType}` : '',
+    inquiry.estimatedTotal ? `Cena orientacyjna: ${inquiry.estimatedTotal}` : '',
+    '',
+    'Finalną dostępność i warunki potwierdza recepcja.',
+    '',
+    'Pozdrawiamy,',
+    'Recepcja Camping Clepardia',
+    'www.clepardia.com.pl',
+    '+48 795 294 486',
+  ].filter(Boolean).join('\n'),
+});
 
 const buildCustomerMail = (inquiry) => {
   const depositNote = hasBungalow(inquiry)
@@ -1330,6 +1334,8 @@ const acceptedReservationResponse = (req, inquiry, reception = {}, mail = {}, in
       : [reception.reason || reception.message || 'Mail body prepared but not sent.', inboxUpdateError].filter(Boolean).join(' | '),
     mail,
     ccSystemDraft: createCcSystemDraft(inquiry),
+    adminDiagnostics: buildAdminDiagnostics(inquiry, reception),
+    clientReplyTemplate: buildClientReplyTemplate(inquiry),
   };
 };
 
@@ -1414,7 +1420,7 @@ export default async function handler(req, res) {
     }
 
     logMailEnv(inquiry.inquiryId);
-    const reception = await sendReceptionMail(buildReceptionMail(inquiry), inquiry);
+    const reception = await sendReceptionMail(buildReceptionSafeEmail(inquiry), inquiry);
     const mailError = reception.delivered
       ? null
       : oneLine([
