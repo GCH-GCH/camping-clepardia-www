@@ -267,6 +267,58 @@ const validate = (payload) => {
   return { errors, arrival, departure, services, email, phone };
 };
 
+const SUMMER_CAMPING_BLOCK_MESSAGE = 'W lipcu i sierpniu nie prowadzimy rezerwacji miejsc campingowych z wyprzedzeniem. Miejsca dla kamperów, przyczep, vanów i namiotów są dostępne według kolejności przyjazdu. W tym terminie można wysłać zapytanie tylko o domek.';
+
+const dateRangeTouchesSummer = (arrival, departure) => {
+  if (!arrival || !departure) return false;
+  const start = new Date(Math.min(arrival.getTime(), departure.getTime()));
+  const end = new Date(Math.max(arrival.getTime(), departure.getTime()));
+  const cursor = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()));
+  const last = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate()));
+  while (cursor <= last) {
+    const month = cursor.getUTCMonth() + 1;
+    if (month === 7 || month === 8) return true;
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return false;
+};
+
+const isCampingStayPayload = (payload = {}, services = []) => {
+  const text = stripAccents([
+    payload.stayTypeId,
+    payload.stayType,
+    payload.stayCategory,
+    payload.selectedStayMode,
+    payload.stayMode,
+    payload.mode,
+  ].filter(Boolean).join(' '));
+  const hasCampingMode = /\b(camping|camp|combined|razem|kamper|camper|van|przyczep|caravan|namiot|tent|rooftop|dachow|pole|pitch)\b/.test(text);
+  if (hasCampingMode) return true;
+  const hasBungalowMode = /\b(bungalow|bungalowem|domek|domki|bungalowowy)\b/.test(text);
+  if (hasBungalowMode) return false;
+
+  const campingStayIds = new Set(['camper', 'van', 'caravan', 'tent-small', 'tent-large', 'rooftop-tent', 'cargo-trailer', 'bus']);
+  return (Array.isArray(services) ? services : []).some((service) => {
+    const id = stripAccents(service?.id);
+    const label = stripAccents(service?.label);
+    const scope = stripAccents(service?.scope);
+    if (scope === 'bungalow') return false;
+    return campingStayIds.has(id) || /\b(kamper|camper|van|przyczep|caravan|namiot|tent|rooftop|dachow|pole|pitch)\b/.test(`${id} ${label}`);
+  });
+};
+
+const summerCampingBlock = (payload, normalized) => {
+  const touchesSummer = dateRangeTouchesSummer(normalized.arrival, normalized.departure);
+  const camping = isCampingStayPayload(payload, normalized.services);
+  return {
+    blocked: Boolean(touchesSummer && camping),
+    touchesSummer,
+    camping,
+    reason: 'SUMMER_CAMPING_BLOCKED',
+    message: SUMMER_CAMPING_BLOCK_MESSAGE,
+  };
+};
+
 const normalizeFeedback = (value) => {
   if (!value || typeof value !== 'object') return null;
   const rating = Math.min(5, Math.max(0, Math.floor(Number(value.rating || 0))));
@@ -1574,6 +1626,28 @@ export default async function handler(req, res) {
         reason: 'Reservation payload validation failed.',
         inquiryId: null,
         errors: normalized.errors,
+      });
+    }
+
+    const blockedSummerCamping = summerCampingBlock(payload, normalized);
+    if (blockedSummerCamping.blocked || payload.summerCampingBlocked === true) {
+      console.info('[reservation-api] summer-camping-blocked', {
+        arrivalIso: oneLine(payload.arrivalIso || payload.arrival, 20),
+        departureIso: oneLine(payload.departureIso || payload.departure, 20),
+        stayTypeId: oneLine(payload.stayTypeId || payload.selectedStayMode || payload.stayType, 80),
+        touchesSummer: blockedSummerCamping.touchesSummer,
+        camping: blockedSummerCamping.camping,
+      });
+      return sendJson(res, 409, {
+        ok: false,
+        inquirySaved: false,
+        inquiryId: null,
+        provider: 'none',
+        delivered: false,
+        code: 'SUMMER_CAMPING_BLOCKED',
+        error: 'SUMMER_CAMPING_BLOCKED',
+        reason: blockedSummerCamping.message,
+        message: blockedSummerCamping.message,
       });
     }
 

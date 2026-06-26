@@ -10,7 +10,7 @@ interface Props {
   languageCode?: string;
 }
 
-type SupportedLang = 'pl' | 'en' | 'de' | 'it';
+type SupportedLang = 'pl' | 'en' | 'de' | 'it' | 'fr' | 'es' | 'nl' | 'cs' | 'sk' | 'sv';
 
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
@@ -428,7 +428,7 @@ const reservationCoreCopy: Record<string, any> = {
     hints: { chooseService: 'Välj minst en tjänst.', required: 'Fyll i obligatoriska samtycken.' },
   },
 };
-const coreReservation = reservationCoreCopy[uiLang];
+const coreReservation = reservationCoreCopy[uiLang as keyof typeof reservationCoreCopy];
 const baseCopy = copy[lang] ?? copy.en;
 const t = coreReservation ? {
   ...baseCopy,
@@ -553,7 +553,7 @@ const beforeArrivalCopy = {
     ],
   },
 } as const;
-const beforeArrival = beforeArrivalCopy[lang] ?? beforeArrivalCopy.en;
+const beforeArrival = beforeArrivalCopy[lang as keyof typeof beforeArrivalCopy] ?? beforeArrivalCopy.en;
 
 const clientSuccessCopy = {
   pl: {
@@ -665,6 +665,139 @@ const clientSuccessCopy = {
     directions: 'Se vägbeskrivning',
     campy: 'Fråga CAMPY',
     attractions: 'Se sevärdheter',
+  },
+} as const;
+
+const summerCampingBlockCopy = {
+  pl: {
+    title: 'Camping w lipcu i sierpniu',
+    badge: 'Tylko przyjazd bez rezerwacji',
+    message: 'W lipcu i sierpniu nie prowadzimy rezerwacji miejsc campingowych z wyprzedzeniem. Miejsca dla kamperów, przyczep, vanów i namiotów są dostępne według kolejności przyjazdu. W tym terminie można wysłać zapytanie tylko o domek.',
+    short: 'W lipcu i sierpniu można wysłać zapytanie tylko o domek. Camping działa według kolejności przyjazdu.',
+    toast: 'W lipcu i sierpniu nie przyjmujemy zapytań rezerwacyjnych na camping. Zmień pobyt na domek albo przyjedź według kolejności przyjazdu.',
+    switchToBungalow: 'Zmień na domek',
+    rules: 'Sprawdź zasady przyjazdu',
+    askCampy: 'Zapytaj CAMPY',
+    switched: 'Zmieniono typ pobytu na domek. Wybierz domek i możesz wysłać zapytanie.',
+    campyPrompt: 'Wyjaśnij zasady przyjazdu na camping w lipcu i sierpniu oraz zaproponuj domek jako rezerwowaną opcję.',
+    summaryLabel: 'Lipiec/sierpień + camping',
+  },
+  en: {
+    title: 'Camping in July and August',
+    badge: 'Arrival order only',
+    message: 'In July and August we do not accept advance reservations for camping pitches. Places for campers, caravans, vans and tents are available in arrival order. For this period you can only send an enquiry for a bungalow.',
+    short: 'In July and August only bungalow enquiries can be sent. Camping works by arrival order.',
+    toast: 'In July and August we do not accept camping reservation enquiries. Please switch to a bungalow or arrive in arrival order.',
+    switchToBungalow: 'Switch to bungalow',
+    rules: 'Check arrival rules',
+    askCampy: 'Ask CAMPY',
+    switched: 'Stay type changed to bungalow. Choose a bungalow and you can send the enquiry.',
+    campyPrompt: 'Explain the July and August camping arrival-order rule and suggest a bungalow as the reservable option.',
+    summaryLabel: 'July/August + camping',
+  },
+  de: {
+    title: 'Camping im Juli und August',
+    badge: 'Nur nach Ankunftsreihenfolge',
+    message: 'Im Juli und August nehmen wir keine Vorausreservierungen für Campingplätze an. Plätze für Camper, Wohnwagen, Vans und Zelte sind nach Ankunftsreihenfolge verfügbar. Für diesen Zeitraum können Sie nur eine Anfrage für einen Bungalow senden.',
+    short: 'Im Juli und August können nur Bungalow-Anfragen gesendet werden. Camping funktioniert nach Ankunftsreihenfolge.',
+    toast: 'Im Juli und August nehmen wir keine Camping-Reservierungsanfragen an. Bitte wechseln Sie zu einem Bungalow oder reisen Sie nach Ankunftsreihenfolge an.',
+    switchToBungalow: 'Zum Bungalow wechseln',
+    rules: 'Anreiseregeln prüfen',
+    askCampy: 'CAMPY fragen',
+    switched: 'Der Aufenthaltstyp wurde auf Bungalow geändert. Wählen Sie einen Bungalow und senden Sie die Anfrage.',
+    campyPrompt: 'Erkläre die Camping-Regel im Juli und August nach Ankunftsreihenfolge und schlage einen Bungalow als reservierbare Option vor.',
+    summaryLabel: 'Juli/August + Camping',
+  },
+  it: {
+    title: 'Camping a luglio e agosto',
+    badge: 'Solo in ordine di arrivo',
+    message: 'A luglio e agosto non accettiamo prenotazioni anticipate per piazzole camping. I posti per camper, roulotte, van e tende sono disponibili in ordine di arrivo. In questo periodo puoi inviare una richiesta solo per un bungalow.',
+    short: 'A luglio e agosto puoi inviare richieste solo per bungalow. Il camping funziona in ordine di arrivo.',
+    toast: 'A luglio e agosto non accettiamo richieste di prenotazione per il camping. Passa a un bungalow oppure arriva in ordine di arrivo.',
+    switchToBungalow: 'Passa al bungalow',
+    rules: 'Controlla le regole di arrivo',
+    askCampy: 'Chiedi a CAMPY',
+    switched: 'Tipo di soggiorno cambiato in bungalow. Scegli un bungalow e puoi inviare la richiesta.',
+    campyPrompt: 'Spiega la regola del camping a luglio e agosto in ordine di arrivo e suggerisci il bungalow come opzione prenotabile.',
+    summaryLabel: 'Luglio/agosto + camping',
+  },
+  fr: {
+    title: 'Camping en juillet et août',
+    badge: 'Ordre d’arrivée uniquement',
+    message: 'En juillet et août, nous ne prenons pas de réservations à l’avance pour les emplacements de camping. Les places pour camping-cars, caravanes, vans et tentes sont disponibles par ordre d’arrivée. Pour cette période, vous pouvez envoyer une demande uniquement pour un bungalow.',
+    short: 'En juillet et août, seules les demandes pour bungalow peuvent être envoyées. Le camping fonctionne par ordre d’arrivée.',
+    toast: 'En juillet et août, nous ne prenons pas de demandes de réservation pour le camping. Passez à un bungalow ou arrivez par ordre d’arrivée.',
+    switchToBungalow: 'Passer au bungalow',
+    rules: 'Voir les règles d’arrivée',
+    askCampy: 'Demander à CAMPY',
+    switched: 'Type de séjour changé en bungalow. Choisissez un bungalow et vous pourrez envoyer la demande.',
+    campyPrompt: 'Explique la règle camping de juillet et août par ordre d’arrivée et propose le bungalow comme option réservable.',
+    summaryLabel: 'Juillet/août + camping',
+  },
+  es: {
+    title: 'Camping en julio y agosto',
+    badge: 'Solo por orden de llegada',
+    message: 'En julio y agosto no aceptamos reservas anticipadas para parcelas de camping. Las plazas para autocaravanas, caravanas, furgonetas y tiendas están disponibles por orden de llegada. En este periodo solo puedes enviar una consulta para bungalow.',
+    short: 'En julio y agosto solo se pueden enviar consultas para bungalow. El camping funciona por orden de llegada.',
+    toast: 'En julio y agosto no aceptamos consultas de reserva para camping. Cambia a bungalow o llega por orden de llegada.',
+    switchToBungalow: 'Cambiar a bungalow',
+    rules: 'Ver reglas de llegada',
+    askCampy: 'Preguntar a CAMPY',
+    switched: 'Tipo de estancia cambiado a bungalow. Elige un bungalow y podrás enviar la consulta.',
+    campyPrompt: 'Explica la regla de camping en julio y agosto por orden de llegada y sugiere bungalow como opción reservable.',
+    summaryLabel: 'Julio/agosto + camping',
+  },
+  nl: {
+    title: 'Camping in juli en augustus',
+    badge: 'Alleen op volgorde van aankomst',
+    message: 'In juli en augustus nemen wij geen reserveringen vooraf aan voor campingplaatsen. Plaatsen voor campers, caravans, vans en tenten zijn beschikbaar op volgorde van aankomst. Voor deze periode kun je alleen een aanvraag voor een bungalow sturen.',
+    short: 'In juli en augustus kun je alleen bungalowaanvragen sturen. Camping werkt op volgorde van aankomst.',
+    toast: 'In juli en augustus nemen wij geen campingreserveringsaanvragen aan. Kies een bungalow of arriveer op volgorde van aankomst.',
+    switchToBungalow: 'Wijzig naar bungalow',
+    rules: 'Bekijk aankomstregels',
+    askCampy: 'Vraag CAMPY',
+    switched: 'Verblijfstype gewijzigd naar bungalow. Kies een bungalow en verstuur de aanvraag.',
+    campyPrompt: 'Leg de campingregel voor juli en augustus uit op volgorde van aankomst en stel een bungalow voor als reserveerbare optie.',
+    summaryLabel: 'Juli/augustus + camping',
+  },
+  cs: {
+    title: 'Kempování v červenci a srpnu',
+    badge: 'Pouze podle pořadí příjezdu',
+    message: 'V červenci a srpnu nepřijímáme rezervace kempovacích míst předem. Místa pro obytné vozy, karavany, dodávky a stany jsou dostupná podle pořadí příjezdu. V tomto termínu můžete poslat dotaz pouze na bungalov.',
+    short: 'V červenci a srpnu lze poslat dotaz pouze na bungalov. Kemp funguje podle pořadí příjezdu.',
+    toast: 'V červenci a srpnu nepřijímáme rezervační dotazy na camping. Změňte pobyt na bungalov nebo přijeďte podle pořadí příjezdu.',
+    switchToBungalow: 'Změnit na bungalov',
+    rules: 'Zkontrolovat pravidla příjezdu',
+    askCampy: 'Zeptat se CAMPY',
+    switched: 'Typ pobytu změněn na bungalov. Vyberte bungalov a můžete dotaz odeslat.',
+    campyPrompt: 'Vysvětli pravidlo kempu v červenci a srpnu podle pořadí příjezdu a navrhni bungalov jako rezervovatelnou možnost.',
+    summaryLabel: 'Červenec/srpen + camping',
+  },
+  sk: {
+    title: 'Kempovanie v júli a auguste',
+    badge: 'Iba podľa poradia príchodu',
+    message: 'V júli a auguste neprijímame rezervácie kempovacích miest vopred. Miesta pre obytné autá, karavany, vany a stany sú dostupné podľa poradia príchodu. V tomto termíne môžete poslať dopyt iba na bungalov.',
+    short: 'V júli a auguste je možné poslať dopyt iba na bungalov. Camping funguje podľa poradia príchodu.',
+    toast: 'V júli a auguste neprijímame rezervačné dopyty na camping. Zmeňte pobyt na bungalov alebo príďte podľa poradia príchodu.',
+    switchToBungalow: 'Zmeniť na bungalov',
+    rules: 'Skontrolovať pravidlá príchodu',
+    askCampy: 'Opýtať sa CAMPY',
+    switched: 'Typ pobytu bol zmenený na bungalov. Vyberte bungalov a môžete dopyt odoslať.',
+    campyPrompt: 'Vysvetli pravidlo campingu v júli a auguste podľa poradia príchodu a navrhni bungalov ako rezervovateľnú možnosť.',
+    summaryLabel: 'Júl/august + camping',
+  },
+  sv: {
+    title: 'Camping i juli och augusti',
+    badge: 'Endast ankomstordning',
+    message: 'I juli och augusti tar vi inte emot förhandsbokningar för campingplatser. Platser för husbilar, husvagnar, vans och tält finns enligt ankomstordning. Under denna period kan du endast skicka en förfrågan om bungalow.',
+    short: 'I juli och augusti kan endast bungalowförfrågningar skickas. Camping fungerar enligt ankomstordning.',
+    toast: 'I juli och augusti tar vi inte emot bokningsförfrågningar för camping. Byt till bungalow eller kom enligt ankomstordning.',
+    switchToBungalow: 'Byt till bungalow',
+    rules: 'Kontrollera ankomstregler',
+    askCampy: 'Fråga CAMPY',
+    switched: 'Vistelsen ändrades till bungalow. Välj en bungalow så kan du skicka förfrågan.',
+    campyPrompt: 'Förklara campingregeln i juli och augusti enligt ankomstordning och föreslå bungalow som bokningsbart alternativ.',
+    summaryLabel: 'Juli/augusti + camping',
   },
 } as const;
 
@@ -1052,7 +1185,7 @@ const uxCopy = {
   de: null,
   it: null,
 } as const;
-const ux = uxCopy[lang] ?? uxCopy.en;
+const ux = uxCopy[lang as keyof typeof uxCopy] ?? uxCopy.en;
 
 const stayPrice = (id: string) => pricingConfig.stayTypes.find((item) => item.id === id) as any;
 const addonPrice = (id: string) => pricingConfig.addons.find((item) => item.id === id) as any;
@@ -1103,6 +1236,7 @@ const config = {
     icon: renderLucideIcon('CheckCircle2'),
   },
   clientSuccess: clientSuccessCopy[uiLang as keyof typeof clientSuccessCopy] ?? clientSuccessCopy.en,
+  summerBlock: summerCampingBlockCopy[uiLang as keyof typeof summerCampingBlockCopy] ?? summerCampingBlockCopy.en,
   feedback: feedbackCopy[uiLang as keyof typeof feedbackCopy] ?? feedbackCopy.en,
   ux,
   icons: iconHtml,
@@ -1710,6 +1844,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     };
 
     const highSeasonCampingInfo = () => touchesSummer() && (state.mode === 'camping' || state.mode === 'combined');
+    const summerCampingBlocked = () => highSeasonCampingInfo();
     const bungalowPersonalItemsNotice = () => state.mode === 'bungalow' || state.mode === 'combined';
     const arrivalTimeLabel = () => state.details.arrivalTime || (config.lang === 'pl' ? 'jeszcze nie wiem' : 'not sure yet');
     const cityCampingNotice = () => config.lang === 'pl'
@@ -1718,9 +1853,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const bungalowItemsNotice = () => config.lang === 'pl'
       ? 'Przy pobycie w domkach prosimy zabrać własne rzeczy osobiste, w tym ręczniki i kosmetyki.'
       : 'For a bungalow stay, please bring personal items, including towels and toiletries.';
-    const highSeasonCampingNotice = () => config.lang === 'pl'
-      ? 'W lipcu i sierpniu nie prowadzimy rezerwacji miejsc campingowych. Camping działa według kolejności przyjazdu. Najlepiej przyjechać w okolicach godziny 12:00, ponieważ check-out z campingu jest do 12:00. Rezerwacje w tym okresie przyjmujemy tylko na domki.'
-      : 'In July and August camping pitches are not reserved in advance and operate in arrival order. It is best to arrive around 12:00. Advance bookings in this period are available only for bungalows.';
+    const highSeasonCampingNotice = () => config.summerBlock?.message || (config.lang === 'pl'
+      ? 'W lipcu i sierpniu nie prowadzimy rezerwacji miejsc campingowych z wyprzedzeniem. Miejsca dla kamperów, przyczep, vanów i namiotów są dostępne według kolejności przyjazdu. W tym terminie można wysłać zapytanie tylko o domek.'
+      : 'In July and August we do not accept advance reservations for camping pitches. Places for campers, caravans, vans and tents are available in arrival order. For this period you can only send an enquiry for a bungalow.');
 
     const servicePrice = (item) => {
       if (item.seasonalPrices) return highSeason() ? item.seasonalPrices.high : item.seasonalPrices.low;
@@ -1871,8 +2006,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if ((has('camping', 'dog') || has('bungalow', 'dog')) && text.dogFree) {
         suggestions.push({ icon: 'dog', text: text.dogFree });
       }
-      if (hasCamping && touchesSummer() && text.summerCamping) {
-        suggestions.push({ icon: 'warning', text: text.summerCamping });
+      if (hasCamping && touchesSummer() && (config.summerBlock?.short || text.summerCamping)) {
+        suggestions.push({ icon: 'warning', text: config.summerBlock?.short || text.summerCamping });
       }
       return suggestions.slice(0, 4);
     };
@@ -2086,6 +2221,26 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const guestIcon = (key) => iconFromConfig('guests', key);
     const detailIcon = (key) => iconFromConfig('details', key);
 
+    const summerBlockTemplate = (compact = false) => {
+      if (!summerCampingBlocked()) return '';
+      const copy = config.summerBlock || {};
+      return `
+        <aside class="reservation-summer-block ${compact ? 'reservation-summer-block--compact' : ''}" data-summer-camping-block>
+          <i aria-hidden="true">${detailIcon('warning')}</i>
+          <div>
+            <span>${esc(copy.badge || 'Arrival order only')}</span>
+            <strong>${esc(copy.title || 'Camping in July and August')}</strong>
+            <p>${esc(copy.message || highSeasonCampingNotice())}</p>
+            <div class="reservation-summer-block__actions">
+              <button type="button" class="reservation-btn reservation-btn--primary" data-switch-to-bungalow>${esc(copy.switchToBungalow || 'Switch to bungalow')}</button>
+              <a class="reservation-btn reservation-btn--ghost" href="${esc(config.links?.directions || '/dojazd')}">${esc(copy.rules || 'Check arrival rules')}</a>
+              <button type="button" class="reservation-btn reservation-btn--ghost" data-summer-campy>${esc(copy.askCampy || 'Ask CAMPY')}</button>
+            </div>
+          </div>
+        </aside>
+      `;
+    };
+
     const startTemplate = () => `
       <div class="reservation-mini__start">
         <p class="reservation-mini__kicker">${esc(t.kicker)}</p>
@@ -2275,6 +2430,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         </div>
         ${calendarTemplate()}
         ${dateStaySummary()}
+        ${summerBlockTemplate()}
         <div class="reservation-date-helper">
           <i aria-hidden="true">${detailIcon('info')}</i>
           <span>
@@ -2286,7 +2442,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           ${(state.mode === 'camping' || state.mode === 'combined') ? `<p>${esc(t.info.campingHours)}</p>` : ''}
           ${(state.mode === 'bungalow' || state.mode === 'combined') ? `<p>${esc(t.info.bungalowHours)}</p>` : ''}
           ${state.mode === 'combined' ? `<p>${esc(t.info.combined)}</p>` : ''}
-          ${seasonalHint() ? `<p class="is-warm">${esc(seasonalHint())}</p>` : ''}
+          ${seasonalHint() && !summerCampingBlocked() ? `<p class="is-warm">${esc(seasonalHint())}</p>` : ''}
         </div>
       </section>
     `;
@@ -2769,6 +2925,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           </div>
           <h2>${esc(t.summary.title)}</h2>
           <b class="reservation-summary__badge">${esc(ui.summary.badge)}</b>
+          ${summerBlockTemplate(true)}
           <p>${esc(t.summary.empty)}</p>
           <dl>
             ${summaryRow('stay', t.summary.stay, modeTitle())}
@@ -2803,6 +2960,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         </div>
         <h2>${esc(t.summary.title)}</h2>
         <b class="reservation-summary__badge">${esc(ui.summary.badge)}</b>
+        ${summerBlockTemplate(true)}
         <dl>
           ${summaryRow('stay', t.summary.stay, modeTitle())}
           ${summaryRow('calendar', t.summary.dates, dateText)}
@@ -2866,7 +3024,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <button class="reservation-btn reservation-btn--ghost" type="button" data-back ${state.step <= 1 ? 'disabled' : ''}>${esc(t.actions.back)}</button>
         ${state.step < 5
           ? `<button class="reservation-btn reservation-btn--primary" type="button" data-next>${esc(t.actions.next)}</button>`
-          : `<button class="reservation-btn reservation-btn--primary" type="button" data-submit ${state.submitting ? 'disabled' : ''}>${esc(state.submitting ? (ui.sending || 'Sending...') : t.actions.send)}</button>`
+          : `<button class="reservation-btn reservation-btn--primary" type="button" data-submit ${state.submitting || summerCampingBlocked() ? 'disabled' : ''} title="${esc(summerCampingBlocked() ? (config.summerBlock?.short || highSeasonCampingNotice()) : '')}">${esc(state.submitting ? (ui.sending || 'Sending...') : t.actions.send)}</button>`
         }
       </div>
     `;
@@ -3011,6 +3169,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         ].filter(Boolean).join('\n\n'),
         summerNotice: touchesSummer(),
         highSeasonCampingInfo: highSeasonCampingInfo(),
+        summerCampingBlocked: summerCampingBlocked(),
         bungalowPersonalItemsNotice: bungalowPersonalItemsNotice(),
         quietConsent: state.details.quiet,
         consent: state.details.consent,
@@ -3313,6 +3472,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.calendarDragStart = '';
       state.calendarHover = '';
       render({ motion: 'soft' });
+      if (summerCampingBlocked()) showViewportToast(config.summerBlock?.short || highSeasonCampingNotice(), 'warning');
       pulseSummary();
     };
 
@@ -3388,6 +3548,11 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         state.step = 3;
         return false;
       }
+      if (summerCampingBlocked()) {
+        state.hint = config.summerBlock?.toast || highSeasonCampingNotice();
+        state.step = 1;
+        return false;
+      }
       if (!state.details.name.trim()) {
         state.hint = formText.validation.name;
         state.step = 4;
@@ -3412,7 +3577,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     };
 
     const scrollFirstIssue = () => {
-      const issue = mount.querySelector('.reservation-field.is-invalid, .reservation-option-row.is-invalid, .reservation-missing-card');
+      const issue = mount.querySelector('.reservation-summer-block, .reservation-field.is-invalid, .reservation-option-row.is-invalid, .reservation-missing-card');
       if (issue instanceof HTMLElement) {
         scrollToReservationSection(issue, { center: true });
         const field = issue.querySelector('input, select, textarea, button');
@@ -3455,10 +3620,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             showViewportToast(config.clientSuccess.badge, 'success');
             return;
           }
-          state.submitError = errors || config.clientSuccess.errorText;
+          state.submitError = result?.reason || result?.message || errors || config.clientSuccess.errorText;
           state.hint = state.submitError;
-          showViewportToast(config.clientSuccess.errorText, 'error');
-          state.step = 4;
+          showViewportToast(state.submitError, 'error');
+          state.step = result?.code === 'SUMMER_CAMPING_BLOCKED' ? 1 : 4;
           state.submitting = false;
           render();
           return;
@@ -3521,6 +3686,31 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (target.closest('[data-change-mode]')) {
         event.preventDefault();
         resetFlow();
+        return;
+      }
+
+      if (target.closest('[data-switch-to-bungalow]')) {
+        event.preventDefault();
+        clearVisibleServices();
+        state.mode = 'bungalow';
+        state.step = Math.max(1, Math.min(state.step || 1, 3));
+        state.hint = '';
+        state.toast = config.summerBlock?.switched || '';
+        renderStepDom({ motion: 'step' });
+        showViewportToast(state.toast, 'success');
+        scheduleScrollToTop();
+        return;
+      }
+
+      if (target.closest('[data-summer-campy]')) {
+        event.preventDefault();
+        window.dispatchEvent(new CustomEvent('campy:prompt', {
+          detail: {
+            prompt: config.summerBlock?.campyPrompt || highSeasonCampingNotice(),
+            actionKey: 'summerCampingRule',
+          },
+        }));
+        showViewportToast(config.summerBlock?.short || highSeasonCampingNotice(), 'warning');
         return;
       }
 
@@ -3813,7 +4003,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         if (target.dataset.field.startsWith('dates.')) {
           normalizeDateRange();
           render();
-          if (highSeasonCampingInfo()) showViewportToast(highSeasonCampingNotice(), 'warning');
+          if (summerCampingBlocked()) showViewportToast(config.summerBlock?.short || highSeasonCampingNotice(), 'warning');
         }
         else if (target.dataset.field === 'details.arrivalTime') {
           render();
@@ -4522,6 +4712,86 @@ html.reservation-modal-open body {
   color: #ffe0ad !important;
   background: rgba(242,169,74,.12);
   font-weight: 850;
+}
+
+.reservation-summer-block {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid rgba(255, 196, 96, .36);
+  border-radius: 22px;
+  color: #fff4dc;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 217, 145, .18), transparent 34%),
+    linear-gradient(135deg, rgba(128, 72, 4, .36), rgba(74, 40, 0, .20));
+  box-shadow: 0 18px 46px rgba(92, 50, 0, .18);
+}
+
+.reservation-summer-block > i {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 217, 145, .36);
+  border-radius: 18px;
+  color: #ffd68f;
+  background: rgba(255, 217, 145, .14);
+}
+
+.reservation-summer-block span,
+.reservation-summer-block strong,
+.reservation-summer-block p {
+  display: block;
+}
+
+.reservation-summer-block span {
+  width: fit-content;
+  margin-bottom: 6px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  color: #341d00;
+  background: #ffd990;
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.reservation-summer-block strong {
+  color: #fff8e8;
+  font-size: 1.05rem;
+}
+
+.reservation-summer-block p {
+  margin: 7px 0 0;
+  color: rgba(255, 248, 232, .84);
+  font-weight: 760;
+}
+
+.reservation-summer-block__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 13px;
+}
+
+.reservation-summer-block--compact {
+  grid-template-columns: 42px minmax(0, 1fr);
+  padding: 13px;
+}
+
+.reservation-summer-block--compact > i {
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+}
+
+.reservation-summary .reservation-summer-block__actions {
+  display: grid;
+  grid-template-columns: 1fr;
 }
 
 .reservation-viewport-toast.is-visible {
@@ -6506,6 +6776,15 @@ html.reservation-modal-open body {
     grid-template-columns: 1fr;
   }
 
+  .reservation-summer-block {
+    grid-template-columns: 1fr;
+  }
+
+  .reservation-summer-block__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
   .reservation-help__panel {
     width: 100%;
     min-height: auto;
@@ -6851,6 +7130,29 @@ html[data-theme="light"] .reservation-smart-suggestions button {
   color: #1b5b3a;
   border-color: rgba(60,179,113,.25);
   background: rgba(60,179,113,.10);
+}
+
+html[data-theme="light"] .reservation-summer-block {
+  color: #3a2500;
+  border-color: rgba(169,101,0,.24);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255,198,94,.30), transparent 36%),
+    #fff8e6;
+  box-shadow: 0 18px 50px rgba(127,84,14,.14);
+}
+
+html[data-theme="light"] .reservation-summer-block > i {
+  color: #8a5b00;
+  border-color: rgba(169,101,0,.22);
+  background: rgba(255,198,94,.22);
+}
+
+html[data-theme="light"] .reservation-summer-block strong {
+  color: #2d1c00;
+}
+
+html[data-theme="light"] .reservation-summer-block p {
+  color: rgba(45,28,0,.74);
 }
 
 html[data-theme="light"] .reservation-country__list p,

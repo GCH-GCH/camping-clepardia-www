@@ -53,7 +53,7 @@ export const campyKnowledge = {
     bungalowCheckIn: 'od 16:00',
     bungalowCheckOut: 'do 11:00',
     campingCheckOut: 'do 12:00',
-    highSeason: 'W lipcu i sierpniu rezerwacje z wyprzedzeniem dotyczą tylko domków. Camping działa według kolejności przyjazdu; najlepiej przyjechać około 12:00.',
+    highSeason: 'W lipcu i sierpniu rezerwacje z wyprzedzeniem dotyczą tylko domków/bungalowów. Nie przyjmujemy zapytań rezerwacyjnych na miejsca campingowe w tym okresie. Camping dla kamperów, vanów, przyczep i namiotów działa według kolejności przyjazdu; najlepiej przyjechać około 12:00.',
     camperPitches: 'Miejsca dla kamperów są głównie na płytach betonowych.',
     heavyVehicles: 'Busy, trucki, autobusy i ciężkie pojazdy ustawiamy na asfalcie, aby uniknąć zakopania się pojazdu.',
   },
@@ -92,6 +92,7 @@ Knowledge:
 - Reception: ${campyKnowledge.rules.receptionHours}. Gate: ${campyKnowledge.rules.gateHours}. Arrival after 21:00 requires prior contact.
 - Bookings: ${campyKnowledge.rules.bookings}
 - High season: ${campyKnowledge.stay.highSeason}
+- If a guest asks about reserving camping in July/August, do not encourage sending a camping reservation enquiry. Explain arrival order and suggest a bungalow if they need an advance reservation.
 - Bungalows: ${campyKnowledge.stay.bungalows}
 - Bungalow personal items: ${campyKnowledge.stay.bungalowItems}
 - Stay hours: camping check-out ${campyKnowledge.stay.campingCheckOut}; bungalow check-in ${campyKnowledge.stay.bungalowCheckIn}; bungalow check-out ${campyKnowledge.stay.bungalowCheckOut}.
@@ -115,6 +116,9 @@ export const getCampyFallbackResponse = (language: CampyLanguage = 'pl', message
     if (normalized.includes('plan')) {
       return 'Jasne, zaplanujmy dzień. Ile macie czasu, czy jedziecie z dziećmi, wolicie spokojny czy intensywny plan i tramwaj czy auto?';
     }
+    if ((normalized.includes('lip') || normalized.includes('sier') || normalized.includes('july') || normalized.includes('august')) && (normalized.includes('camp') || normalized.includes('kamper') || normalized.includes('namiot') || normalized.includes('przyczep') || normalized.includes('van'))) {
+      return 'W lipcu i sierpniu nie przyjmujemy rezerwacji miejsc campingowych z wyprzedzeniem. Camping działa według kolejności przyjazdu, najlepiej przyjechać około 12:00. W tym terminie zapytanie z wyprzedzeniem można wysłać tylko o domek.';
+    }
     if (normalized.includes('kamper') || normalized.includes('cena') || normalized.includes('koszt')) {
       return 'Kamper kosztuje 80 PLN za noc. Dorosły: 35 PLN, dziecko 4-14 lat: 20 PLN, prąd: 30 PLN, pies: 0 PLN. Przykład: 2 osoby + kamper + prąd = 180 PLN za noc. Dostępność potwierdza recepcja.';
     }
@@ -129,6 +133,9 @@ export const getCampyFallbackResponse = (language: CampyLanguage = 'pl', message
 
   if (normalized.includes('plan')) {
     return 'Sure, let us sketch a day. How much time do you have, are you with children, calm or intensive plan, tram or car?';
+  }
+  if ((normalized.includes('july') || normalized.includes('august') || normalized.includes('lip') || normalized.includes('sier')) && (normalized.includes('camp') || normalized.includes('camper') || normalized.includes('tent') || normalized.includes('caravan') || normalized.includes('van'))) {
+    return 'In July and August we do not take advance reservations for camping pitches. Camping works by arrival order, best around 12:00. For that period, an advance enquiry can be sent only for a bungalow.';
   }
   if (normalized.includes('camper') || normalized.includes('price') || normalized.includes('cost')) {
     return 'A motorhome costs 80 PLN per night. Adult: 35 PLN, child 4-14: 20 PLN, electricity: 30 PLN, dog: 0 PLN. Example: 2 adults + camper + electricity = 180 PLN per night. Reception confirms availability.';

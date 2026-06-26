@@ -30,51 +30,70 @@ const title = 'CC SYSTEM';
         </form>
       </section>
 
-      <section class="inbox-app" data-app hidden>
-        <header class="app-header">
-          <div class="app-header__brand">
-            <img class="app-header__logo" src="/brand/logo/clepardia-logo-main.svg" alt="Camping Clepardia" width="74" height="74" loading="eager" decoding="async" />
-            <div>
-              <span class="eyebrow">Camping Clepardia</span>
-              <h1>{title} <span class="online-badge">ONLINE</span></h1>
-              <p>Recepcja online · klienci · rezerwacje · kalendarz · odpowiedzi</p>
-              <small>Panel recepcji Camping Clepardia.</small>
-              <small data-count>Ładowanie zapytań…</small>
-            </div>
+      <section class="inbox-app cc-system-app" data-app data-sidebar-state="expanded" hidden>
+        <button class="cc-sidebar-scrim" type="button" data-sidebar-close aria-label="Zamknij menu"></button>
+        <aside class="cc-sidebar" data-sidebar>
+          <div class="cc-sidebar__brand">
+            <img src="/brand/logo/clepardia-logo-main.svg" alt="Camping Clepardia" width="46" height="46" loading="eager" decoding="async" />
+            <span>
+              <strong>{title}</strong>
+              <small>ONLINE</small>
+            </span>
           </div>
-          <div class="header-actions">
-            <span class="connection-pill" data-connection-status>API: oczekiwanie</span>
-            <span class="connection-pill" data-resend-status>Resend: —</span>
-            <span class="connection-pill" data-supabase-status>Supabase: —</span>
-            <span class="connection-pill" data-last-refresh>Ostatnie odświeżenie: —</span>
-            <span class="connection-pill" data-auto-refresh-status>Auto-refresh aktywny</span>
-            <a href="/" target="_blank" rel="noopener">Otwórz stronę</a>
-            <a href="/rezerwacja/" target="_blank" rel="noopener">Formularz rezerwacji</a>
-            <button type="button" data-refresh>Odśwież teraz</button>
-            <button type="button" data-auto-refresh-toggle>Pauza auto-refresh</button>
-            <button type="button" class="ghost" data-logout>Wyloguj</button>
-          </div>
-        </header>
+          <button class="cc-sidebar__toggle" type="button" data-sidebar-toggle aria-label="Zwiń lub rozwiń sidebar">☰</button>
+          <nav class="view-tabs cc-sidebar__nav" aria-label="Moduły CC SYSTEM">
+            <button type="button" data-view="dashboard" aria-pressed="true"><span aria-hidden="true">🏕️</span><em>Recepcja</em></button>
+            <button type="button" data-view="mail" aria-pressed="false"><span aria-hidden="true">✉️</span><em>Mail Center</em><b data-sidebar-badge="inbox">0</b></button>
+            <button type="button" data-view="customers" aria-pressed="false"><span aria-hidden="true">👤</span><em>Klienci</em></button>
+            <button type="button" data-view="reservations" aria-pressed="false"><span aria-hidden="true">📋</span><em>Rezerwacje</em></button>
+            <button type="button" data-view="calendar" aria-pressed="false"><span aria-hidden="true">📅</span><em>Kalendarz</em></button>
+            <button type="button" data-view="bungalows" aria-pressed="false"><span aria-hidden="true">🏠</span><em>Domki</em></button>
+            <button type="button" data-view="camping" aria-pressed="false"><span aria-hidden="true">⛺</span><em>Camping</em></button>
+            <button type="button" data-view="extend" aria-pressed="false"><span aria-hidden="true">➕</span><em>Przedłuż pobyt</em></button>
+            <button type="button" data-view="print" aria-pressed="false"><span aria-hidden="true">🖨️</span><em>Drukowanie</em></button>
+            <button type="button" data-view="reports" aria-pressed="false"><span aria-hidden="true">📊</span><em>GUS / Raporty</em></button>
+            <button type="button" data-view="staff" aria-pressed="false"><span aria-hidden="true">👥</span><em>Pracownicy</em></button>
+            <button type="button" data-view="tasks" aria-pressed="false"><span aria-hidden="true">✅</span><em>Zadania</em><b data-sidebar-badge="tasks">0</b></button>
+            <button type="button" data-view="stats" aria-pressed="false"><span aria-hidden="true">📈</span><em>Statystyki</em></button>
+            <button type="button" data-view="templates" aria-pressed="false"><span aria-hidden="true">💬</span><em>Schematy odpowiedzi</em><b data-sidebar-badge="reply">0</b></button>
+            <button type="button" data-view="settings" aria-pressed="false"><span aria-hidden="true">⚙️</span><em>Ustawienia</em></button>
+            <button type="button" data-view="tests" aria-pressed="false"><span aria-hidden="true">🧪</span><em>Testy</em><b data-sidebar-badge="tests">0</b></button>
+            <button type="button" data-view="archive" aria-pressed="false"><span aria-hidden="true">🗄️</span><em>Archiwum</em></button>
+            <button type="button" data-view-shortcut="mail" class="cc-sidebar__mail-failed"><span aria-hidden="true">⚠️</span><em>Mail niedostarczony</em><b data-sidebar-badge="mailFailed">0</b></button>
+          </nav>
+        </aside>
 
-        <nav class="view-tabs" aria-label="Widoki CC SYSTEM">
-          <button type="button" data-view="dashboard" aria-pressed="true">Recepcja / Dashboard</button>
-          <button type="button" data-view="mail" aria-pressed="false">Mail Center / Inbox</button>
-          <button type="button" data-view="customers" aria-pressed="false">Klienci</button>
-          <button type="button" data-view="reservations" aria-pressed="false">Rezerwacje</button>
-          <button type="button" data-view="calendar" aria-pressed="false">Kalendarz</button>
-          <button type="button" data-view="bungalows" aria-pressed="false">Domki</button>
-          <button type="button" data-view="camping" aria-pressed="false">Camping</button>
-          <button type="button" data-view="extend" aria-pressed="false">Przedłuż pobyt</button>
-          <button type="button" data-view="print" aria-pressed="false">Drukowanie</button>
-          <button type="button" data-view="reports" aria-pressed="false">GUS / Raporty</button>
-          <button type="button" data-view="staff" aria-pressed="false">Pracownicy</button>
-          <button type="button" data-view="tasks" aria-pressed="false">Zadania</button>
-          <button type="button" data-view="stats" aria-pressed="false">Statystyki</button>
-          <button type="button" data-view="templates" aria-pressed="false">Schematy odpowiedzi</button>
-          <button type="button" data-view="settings" aria-pressed="false">Ustawienia</button>
-          <button type="button" data-view="tests" aria-pressed="false">Testy</button>
-          <button type="button" data-view="archive" aria-pressed="false">Archiwum</button>
-        </nav>
+        <div class="cc-system-main">
+          <header class="app-header">
+            <button class="cc-mobile-menu" type="button" data-sidebar-mobile-toggle aria-label="Otwórz menu">☰</button>
+            <div class="app-header__brand">
+              <img class="app-header__logo" src="/brand/logo/clepardia-logo-main.svg" alt="Camping Clepardia" width="64" height="64" loading="eager" decoding="async" />
+              <div>
+                <span class="eyebrow">Camping Clepardia</span>
+                <h1>{title} <span class="online-badge">ONLINE</span></h1>
+                <p>Recepcja online · klienci · rezerwacje · kalendarz · odpowiedzi</p>
+                <small data-count>Ładowanie zapytań…</small>
+              </div>
+            </div>
+            <label class="global-search" aria-label="Globalna wyszukiwarka">
+              <span>🔎</span>
+              <input type="search" data-global-search placeholder="Szukaj po imieniu, emailu, kraju, terminie…" />
+            </label>
+            <div class="header-actions">
+              <span class="connection-pill weather-pill">☀️ 23°C</span>
+              <span class="connection-pill" data-resend-status>Resend: —</span>
+              <span class="connection-pill" data-supabase-status>Supabase: —</span>
+              <span class="connection-pill" data-last-refresh>Ostatnie odświeżenie: —</span>
+              <span class="connection-pill" data-auto-refresh-status>Auto-refresh aktywny</span>
+              <span class="connection-pill" data-connection-status>API: oczekiwanie</span>
+              <a href="/rezerwacja/" target="_blank" rel="noopener">Dodaj rezerwację</a>
+              <a href="/" target="_blank" rel="noopener">Strona</a>
+              <button type="button" data-refresh>Odśwież</button>
+              <button type="button" data-auto-refresh-toggle>Pauza auto-refresh</button>
+              <span class="profile-pill">Recepcja</span>
+              <button type="button" class="ghost" data-logout>Wyloguj</button>
+            </div>
+          </header>
 
         <section class="mail-center-nav" aria-label="Mail Center">
           <button type="button" data-mail-status="">Inbox / Wiadomości</button>
@@ -124,6 +143,7 @@ const title = 'CC SYSTEM';
 
         <p class="app-status" data-app-status aria-live="polite"></p>
         <section class="inquiry-list" data-list></section>
+        </div>
       </section>
     </main>
     <div class="panel-toast" data-panel-toast role="status" aria-live="polite" hidden></div>
@@ -177,6 +197,11 @@ const title = 'CC SYSTEM';
         const activeFilterCount = document.querySelector('[data-active-filter-count]');
         const viewButtons = Array.from(document.querySelectorAll('[data-view]'));
         const filters = Array.from(document.querySelectorAll('[data-filter]'));
+        const globalSearch = document.querySelector('[data-global-search]');
+        const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
+        const sidebarMobileToggle = document.querySelector('[data-sidebar-mobile-toggle]');
+        const sidebarCloseButtons = Array.from(document.querySelectorAll('[data-sidebar-close]'));
+        const sidebarBadges = Array.from(document.querySelectorAll('[data-sidebar-badge]'));
         const statusLabels = { new:'Nowe', needs_reply:'Do odpowiedzi', replied:'Odpowiedziane', needs_confirmation:'Do potwierdzenia', confirmed:'Potwierdzone', unavailable:'Brak miejsc', rejected:'Odrzucone', cancelled:'Anulowane', archived:'Archiwum', test:'Test', spam:'Spam/test' };
         const categoryLabels = {
           urgent:'Pilne', today:'Przyjazd dzisiaj', next7:'Przyjazd ≤ 7 dni', camping:'Camping', bungalow:'Domki', combined:'Pobyt łączony',
@@ -195,6 +220,25 @@ const title = 'CC SYSTEM';
         const expandedIds = new Set();
         const localTimeline = new Map();
         let activeReplyDraft = null;
+        const sidebarStateKey = 'cc-system-sidebar-state';
+        const setSidebarState = (state) => {
+          const next = state === 'collapsed' ? 'collapsed' : 'expanded';
+          if (app instanceof HTMLElement) app.dataset.sidebarState = next;
+          try { localStorage.setItem(sidebarStateKey, next); } catch {}
+        };
+        const closeMobileSidebar = () => {
+          if (app instanceof HTMLElement) app.classList.remove('is-sidebar-open');
+        };
+        const toggleSidebar = () => {
+          if (!(app instanceof HTMLElement)) return;
+          const isMobile = window.matchMedia('(max-width: 880px)').matches;
+          if (isMobile) {
+            app.classList.toggle('is-sidebar-open');
+            return;
+          }
+          setSidebarState(app.dataset.sidebarState === 'collapsed' ? 'expanded' : 'collapsed');
+        };
+        try { setSidebarState(localStorage.getItem(sidebarStateKey) || 'expanded'); } catch { setSidebarState('expanded'); }
 
         const esc = (value) => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
         const showToast = (message, type = 'info') => {
@@ -1002,6 +1046,23 @@ const title = 'CC SYSTEM';
         const realItems = () => inquiries.filter((item)=>!isTestInquiry(item) && !isArchivedInquiry(item));
         const testItems = () => inquiries.filter(isTestInquiry);
         const archivedItems = () => inquiries.filter(isArchivedInquiry);
+        const updateSidebarBadges = () => {
+          const real = realItems();
+          const values = {
+            inbox: real.length,
+            reply: real.filter((item)=>['new','needs_reply'].includes(item.status)).length,
+            tests: testItems().length,
+            tasks: real.filter((item)=>categoryKeys(item).includes('urgent') || categoryKeys(item).includes('missing') || categoryKeys(item).includes('today')).length,
+            mailFailed: real.filter((item)=>!item.mail_delivered).length,
+          };
+          sidebarBadges.forEach((badge) => {
+            if (!(badge instanceof HTMLElement)) return;
+            const key = badge.dataset.sidebarBadge || '';
+            const value = Number(values[key] || 0);
+            badge.textContent = String(value);
+            badge.hidden = value <= 0;
+          });
+        };
         const moduleOnlyViews = new Set(['dashboard','customers','reservations','calendar','bungalows','camping','extend','print','reports','staff','tasks','stats','templates','settings']);
         const moneyLabel = (item) => item.estimated_total_pln !== null && item.estimated_total_pln !== undefined ? `${item.estimated_total_pln} PLN` : '-';
         const serviceSummaryShort = (item) => services(item).map((service)=>`${service.label} × ${service.qty}`).join(', ') || '-';
@@ -1296,6 +1357,7 @@ const title = 'CC SYSTEM';
         };
         const render = () => {
           viewButtons.forEach((button) => button.setAttribute('aria-pressed', button.dataset.view === activeView ? 'true' : 'false'));
+          updateSidebarBadges();
           if (activeFilterCount) activeFilterCount.textContent = `Aktywne filtry: ${activeFilterTotal()}`;
           refreshHeaderStatus();
           renderSystemStrip();
@@ -1420,6 +1482,9 @@ const title = 'CC SYSTEM';
           if (loginStatus) loginStatus.textContent='';
         });
         document.querySelector('[data-refresh]')?.addEventListener('click',()=>void load({ silent:false, reason:'manual' }));
+        sidebarToggle?.addEventListener('click',toggleSidebar);
+        sidebarMobileToggle?.addEventListener('click',toggleSidebar);
+        sidebarCloseButtons.forEach((button)=>button.addEventListener('click',closeMobileSidebar));
         document.querySelectorAll('[data-reply-close]').forEach((button)=>button.addEventListener('click',closeReplyModal));
         document.querySelector('[data-reply-copy]')?.addEventListener('click',(event)=>{
           if (!activeReplyDraft?.template?.mailtoBodyText || !(event.currentTarget instanceof HTMLButtonElement)) return;
@@ -1429,7 +1494,10 @@ const title = 'CC SYSTEM';
         document.querySelector('[data-reply-mailto]')?.addEventListener('click',launchReplyMailto);
         document.querySelector('[data-reply-mark]')?.addEventListener('click',markReplyHandled);
         window.addEventListener('keydown',(event)=>{
-          if (event.key === 'Escape') closeReplyModal();
+          if (event.key === 'Escape') {
+            closeReplyModal();
+            closeMobileSidebar();
+          }
         });
         autoRefreshToggle?.addEventListener('click',()=>{
           autoRefreshPaused = !autoRefreshPaused;
@@ -1445,11 +1513,17 @@ const title = 'CC SYSTEM';
         document.querySelector('[data-logout]')?.addEventListener('click',()=>{window.clearInterval(autoRefreshTimer);sessionStorage.removeItem(storageKey);location.reload();});
         viewButtons.forEach((button)=>button.addEventListener('click',()=>{
           activeView = button.dataset.view || 'inbox';
+          closeMobileSidebar();
           render();
         }));
         document.querySelectorAll('[data-view-shortcut]').forEach((button)=>button.addEventListener('click',()=>{
           activeView = button.dataset.viewShortcut || 'inbox';
           clearFilters();
+          if (button.classList.contains('cc-sidebar__mail-failed')) {
+            const mailFailed = document.querySelector('[data-filter="mailFailed"]');
+            if (mailFailed instanceof HTMLInputElement) mailFailed.checked = true;
+          }
+          closeMobileSidebar();
           render();
         }));
         document.querySelectorAll('[data-mail-status]').forEach((button)=>button.addEventListener('click',()=>{
@@ -1464,7 +1538,20 @@ const title = 'CC SYSTEM';
           clearFilters();
           render();
         });
-        filters.forEach((filter)=>filter.addEventListener(filter instanceof HTMLInputElement && filter.type === 'search' ? 'input':'change',render));
+        globalSearch?.addEventListener('input',()=>{
+          const search = document.querySelector('[data-filter="search"]');
+          if (search instanceof HTMLInputElement && globalSearch instanceof HTMLInputElement) {
+            search.value = globalSearch.value;
+            activeView = 'mail';
+            render();
+          }
+        });
+        filters.forEach((filter)=>filter.addEventListener(filter instanceof HTMLInputElement && filter.type === 'search' ? 'input':'change',()=>{
+          if (filter instanceof HTMLInputElement && filter.matches('[data-filter="search"]') && globalSearch instanceof HTMLInputElement) {
+            globalSearch.value = filter.value;
+          }
+          render();
+        }));
         const findItemForNode = (node) => inquiries.find((entry)=>String(entry.id) === String(node?.dataset?.id));
         const hydrateDetails = (details) => {
           if (!(details instanceof HTMLDetailsElement) || !details.classList.contains('inquiry-card__details') || !details.open) return;
@@ -1573,6 +1660,362 @@ const title = 'CC SYSTEM';
 </style>
 
 <style is:global>
+  .inbox-shell {
+    width: min(1840px, calc(100% - 28px));
+  }
+
+  .cc-system-app {
+    --sidebar-expanded: 284px;
+    --sidebar-collapsed: 84px;
+    display: grid;
+    grid-template-columns: var(--sidebar-expanded) minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+  }
+
+  .cc-system-app[data-sidebar-state="collapsed"] {
+    grid-template-columns: var(--sidebar-collapsed) minmax(0, 1fr);
+  }
+
+  .cc-system-main {
+    min-width: 0;
+  }
+
+  .cc-sidebar {
+    position: sticky;
+    top: 18px;
+    z-index: 20;
+    width: var(--sidebar-expanded);
+    max-height: calc(100vh - 36px);
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 12px;
+    overflow: hidden;
+    padding: 14px;
+    border: 1px solid rgba(143,224,180,.16);
+    border-radius: 28px;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(60,179,113,.24), transparent 34%),
+      linear-gradient(180deg, rgba(7,30,18,.96), rgba(4,18,12,.94));
+    box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    transition: width .24s cubic-bezier(.22,1,.36,1), transform .24s cubic-bezier(.22,1,.36,1), border-color .2s ease;
+  }
+
+  .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar {
+    width: var(--sidebar-collapsed);
+  }
+
+  .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:hover,
+  .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:focus-within {
+    width: var(--sidebar-expanded);
+    z-index: 30;
+    border-color: rgba(143,224,180,.32);
+  }
+
+  .cc-sidebar__brand {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    min-height: 54px;
+  }
+
+  .cc-sidebar__brand img {
+    width: 46px;
+    height: 46px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.08);
+  }
+
+  .cc-sidebar__brand strong,
+  .cc-sidebar__brand small {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .cc-sidebar__brand strong {
+    color: #f2fff6;
+    font-size: 1.02rem;
+    line-height: 1.05;
+  }
+
+  .cc-sidebar__brand small {
+    width: fit-content;
+    margin-top: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    color: #07140f;
+    background: #8fe0b4;
+    font-size: .66rem;
+    font-weight: 950;
+  }
+
+  .cc-sidebar__toggle,
+  .cc-mobile-menu {
+    min-width: 42px;
+    min-height: 42px;
+    padding: 0 12px;
+    color: #eafff1;
+    border: 1px solid rgba(143,224,180,.18);
+    background: rgba(255,255,255,.07);
+  }
+
+  .cc-sidebar__toggle {
+    justify-self: start;
+    width: 100%;
+  }
+
+  .cc-sidebar .view-tabs {
+    display: grid;
+    grid-auto-rows: minmax(46px, auto);
+    gap: 7px;
+    overflow: auto;
+    padding: 2px 2px 8px;
+    margin: 0;
+    scrollbar-width: thin;
+  }
+
+  .cc-sidebar .view-tabs button {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    justify-content: start;
+    padding: 5px 10px;
+    color: rgba(239,251,243,.82);
+    border: 1px solid rgba(143,224,180,.13);
+    border-radius: 16px;
+    background: rgba(255,255,255,.045);
+    text-align: left;
+  }
+
+  .cc-sidebar .view-tabs button > span {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: rgba(60,179,113,.16);
+    font-size: 1rem;
+  }
+
+  .cc-sidebar .view-tabs button em {
+    min-width: 0;
+    overflow: hidden;
+    color: inherit;
+    font-style: normal;
+    font-weight: 900;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .cc-sidebar .view-tabs button b {
+    min-width: 22px;
+    height: 22px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0 6px;
+    border-radius: 999px;
+    color: #07140f;
+    background: #8fe0b4;
+    font-size: .68rem;
+    font-weight: 950;
+  }
+
+  .cc-sidebar .view-tabs button[aria-pressed="true"] {
+    color: #07140f;
+    border-color: rgba(143,224,180,.62);
+    background: linear-gradient(135deg, #a8f0c7, #3CB371);
+    box-shadow: 0 14px 34px rgba(60,179,113,.24);
+  }
+
+  .cc-sidebar .view-tabs button[aria-pressed="true"] > span {
+    background: rgba(7,20,15,.10);
+  }
+
+  .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__brand span,
+  .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button em,
+  .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button b {
+    width: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button,
+  .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__brand {
+    grid-template-columns: 38px;
+    justify-content: center;
+  }
+
+  .app-header {
+    align-items: center;
+    padding: 14px;
+    border: 1px solid rgba(143,224,180,.14);
+    border-radius: 28px;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(60,179,113,.18), transparent 32%),
+      rgba(8,28,18,.78);
+  }
+
+  .app-header__brand {
+    min-width: 250px;
+  }
+
+  .global-search {
+    width: min(440px, 100%);
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    align-items: center;
+    min-height: 46px;
+    padding: 0 12px;
+    border: 1px solid rgba(143,224,180,.18);
+    border-radius: 16px;
+    color: rgba(239,251,243,.72);
+    background: rgba(255,255,255,.06);
+  }
+
+  .global-search input {
+    min-height: 40px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .profile-pill {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 13px;
+    border: 1px solid rgba(143,224,180,.16);
+    border-radius: 999px;
+    color: #f4fff8;
+    background: rgba(255,255,255,.06);
+    font-weight: 900;
+  }
+
+  .cc-mobile-menu,
+  .cc-sidebar-scrim {
+    display: none;
+  }
+
+  @media (max-width: 1180px) {
+    .cc-system-app {
+      grid-template-columns: var(--sidebar-collapsed) minmax(0, 1fr);
+    }
+
+    .cc-sidebar {
+      width: var(--sidebar-collapsed);
+    }
+
+    .cc-sidebar:hover,
+    .cc-sidebar:focus-within {
+      width: var(--sidebar-expanded);
+    }
+
+    .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__brand span,
+    .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button em,
+    .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button b {
+      width: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button,
+    .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__brand {
+      grid-template-columns: 38px;
+      justify-content: center;
+    }
+
+    .app-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 880px) {
+    .inbox-shell {
+      width: min(100% - 16px, 1840px);
+      padding-top: 14px;
+    }
+
+    .cc-system-app,
+    .cc-system-app[data-sidebar-state="collapsed"] {
+      display: block;
+    }
+
+    .cc-sidebar {
+      position: fixed;
+      inset: 10px auto 10px 10px;
+      z-index: 80;
+      width: min(330px, calc(100vw - 28px));
+      max-height: calc(100dvh - 20px);
+      transform: translateX(calc(-100% - 18px));
+    }
+
+    .cc-sidebar:hover,
+    .cc-sidebar:focus-within,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:hover,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:focus-within {
+      width: min(330px, calc(100vw - 28px));
+    }
+
+    .cc-system-app.is-sidebar-open .cc-sidebar {
+      transform: translateX(0);
+    }
+
+    .cc-system-app.is-sidebar-open .cc-sidebar-scrim {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      min-height: 100dvh;
+      border-radius: 0;
+      background: rgba(0,0,0,.54);
+    }
+
+    .cc-sidebar .cc-sidebar__brand,
+    .cc-sidebar .view-tabs button,
+    .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__brand,
+    .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button {
+      grid-template-columns: 38px minmax(0, 1fr) auto;
+    }
+
+    .cc-sidebar .cc-sidebar__brand span,
+    .cc-sidebar .view-tabs button em,
+    .cc-sidebar .view-tabs button b,
+    .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__brand span,
+    .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button em,
+    .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button b {
+      width: auto;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .cc-mobile-menu {
+      display: inline-flex;
+      justify-self: start;
+    }
+
+    .app-header {
+      gap: 12px;
+    }
+
+    .header-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      width: 100%;
+    }
+
+    .global-search {
+      width: 100%;
+    }
+  }
+
   .inquiry-card__summary {
     display: flex;
     flex-wrap: wrap;
@@ -1945,6 +2388,18 @@ const title = 'CC SYSTEM';
     border: 1px solid rgba(143,224,180,.12);
     border-radius: 20px;
     background: rgba(255,255,255,.045);
+  }
+
+  .cc-sidebar .view-tabs {
+    position: static;
+    top: auto;
+    z-index: auto;
+    margin: 0;
+    padding: 2px 2px 8px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    backdrop-filter: none;
   }
 
   .system-strip {
