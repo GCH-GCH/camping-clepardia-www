@@ -30,7 +30,7 @@ const title = 'CC SYSTEM';
         </form>
       </section>
 
-      <section class="inbox-app cc-system-app" data-app data-sidebar-state="expanded" hidden>
+      <section class="inbox-app cc-system-app" data-app data-sidebar-state="collapsed" data-active-view="dashboard" hidden>
         <button class="cc-sidebar-scrim" type="button" data-sidebar-close aria-label="Zamknij menu"></button>
         <aside class="cc-sidebar" data-sidebar>
           <div class="cc-sidebar__brand">
@@ -40,26 +40,44 @@ const title = 'CC SYSTEM';
               <small>ONLINE</small>
             </span>
           </div>
-          <button class="cc-sidebar__toggle" type="button" data-sidebar-toggle aria-label="Zwiń lub rozwiń sidebar">☰</button>
+          <button class="cc-sidebar__toggle" type="button" data-sidebar-toggle aria-label="Przypnij lub zwiń sidebar"><span>📌</span><em>Przypnij menu</em></button>
           <nav class="view-tabs cc-sidebar__nav" aria-label="Moduły CC SYSTEM">
-            <button type="button" data-view="dashboard" aria-pressed="true"><span aria-hidden="true">🏕️</span><em>Recepcja</em></button>
-            <button type="button" data-view="mail" aria-pressed="false"><span aria-hidden="true">✉️</span><em>Mail Center</em><b data-sidebar-badge="inbox">0</b></button>
-            <button type="button" data-view="customers" aria-pressed="false"><span aria-hidden="true">👤</span><em>Klienci</em></button>
-            <button type="button" data-view="reservations" aria-pressed="false"><span aria-hidden="true">📋</span><em>Rezerwacje</em></button>
-            <button type="button" data-view="calendar" aria-pressed="false"><span aria-hidden="true">📅</span><em>Kalendarz</em></button>
-            <button type="button" data-view="bungalows" aria-pressed="false"><span aria-hidden="true">🏠</span><em>Domki</em></button>
-            <button type="button" data-view="camping" aria-pressed="false"><span aria-hidden="true">⛺</span><em>Camping</em></button>
-            <button type="button" data-view="extend" aria-pressed="false"><span aria-hidden="true">➕</span><em>Przedłuż pobyt</em></button>
-            <button type="button" data-view="print" aria-pressed="false"><span aria-hidden="true">🖨️</span><em>Drukowanie</em></button>
-            <button type="button" data-view="reports" aria-pressed="false"><span aria-hidden="true">📊</span><em>GUS / Raporty</em></button>
-            <button type="button" data-view="staff" aria-pressed="false"><span aria-hidden="true">👥</span><em>Pracownicy</em></button>
-            <button type="button" data-view="tasks" aria-pressed="false"><span aria-hidden="true">✅</span><em>Zadania</em><b data-sidebar-badge="tasks">0</b></button>
-            <button type="button" data-view="stats" aria-pressed="false"><span aria-hidden="true">📈</span><em>Statystyki</em></button>
-            <button type="button" data-view="templates" aria-pressed="false"><span aria-hidden="true">💬</span><em>Schematy odpowiedzi</em><b data-sidebar-badge="reply">0</b></button>
-            <button type="button" data-view="settings" aria-pressed="false"><span aria-hidden="true">⚙️</span><em>Ustawienia</em></button>
-            <button type="button" data-view="tests" aria-pressed="false"><span aria-hidden="true">🧪</span><em>Testy</em><b data-sidebar-badge="tests">0</b></button>
-            <button type="button" data-view="archive" aria-pressed="false"><span aria-hidden="true">🗄️</span><em>Archiwum</em></button>
-            <button type="button" data-view-shortcut="mail" class="cc-sidebar__mail-failed"><span aria-hidden="true">⚠️</span><em>Mail niedostarczony</em><b data-sidebar-badge="mailFailed">0</b></button>
+            <div class="cc-sidebar__group">
+              <span class="cc-sidebar__group-label">Recepcja</span>
+              <button type="button" data-view="dashboard" aria-pressed="true"><span aria-hidden="true">🏕️</span><em>Recepcja</em></button>
+              <button type="button" data-view="reservations" aria-pressed="false"><span aria-hidden="true">📋</span><em>Rezerwacje</em></button>
+              <button type="button" data-view="calendar" aria-pressed="false"><span aria-hidden="true">📅</span><em>Kalendarz</em></button>
+            </div>
+            <div class="cc-sidebar__group">
+              <span class="cc-sidebar__group-label">Komunikacja</span>
+              <button type="button" data-view="mail" aria-pressed="false"><span aria-hidden="true">✉️</span><em>Mail Center</em><b data-sidebar-badge="inbox">0</b></button>
+              <button type="button" data-view="templates" aria-pressed="false"><span aria-hidden="true">💬</span><em>Schematy odpowiedzi</em><b data-sidebar-badge="reply">0</b></button>
+              <button type="button" data-view-shortcut="mail" class="cc-sidebar__mail-failed"><span aria-hidden="true">⚠️</span><em>Mail niedostarczony</em><b data-sidebar-badge="mailFailed">0</b></button>
+            </div>
+            <div class="cc-sidebar__group">
+              <span class="cc-sidebar__group-label">Operacje</span>
+              <button type="button" data-view="customers" aria-pressed="false"><span aria-hidden="true">👤</span><em>Klienci</em></button>
+              <button type="button" data-view="bungalows" aria-pressed="false"><span aria-hidden="true">🏠</span><em>Domki</em></button>
+              <button type="button" data-view="camping" aria-pressed="false"><span aria-hidden="true">⛺</span><em>Camping</em></button>
+              <button type="button" data-view="extend" aria-pressed="false"><span aria-hidden="true">➕</span><em>Przedłuż pobyt</em></button>
+              <button type="button" data-view="print" aria-pressed="false"><span aria-hidden="true">🖨️</span><em>Drukowanie</em></button>
+            </div>
+            <div class="cc-sidebar__group">
+              <span class="cc-sidebar__group-label">Raporty</span>
+              <button type="button" data-view="reports" aria-pressed="false"><span aria-hidden="true">📊</span><em>GUS / Raporty</em></button>
+              <button type="button" data-view="stats" aria-pressed="false"><span aria-hidden="true">📈</span><em>Statystyki</em></button>
+            </div>
+            <div class="cc-sidebar__group">
+              <span class="cc-sidebar__group-label">Zespół</span>
+              <button type="button" data-view="staff" aria-pressed="false"><span aria-hidden="true">👥</span><em>Pracownicy</em></button>
+              <button type="button" data-view="tasks" aria-pressed="false"><span aria-hidden="true">✅</span><em>Zadania</em><b data-sidebar-badge="tasks">0</b></button>
+            </div>
+            <div class="cc-sidebar__group">
+              <span class="cc-sidebar__group-label">Ustawienia</span>
+              <button type="button" data-view="settings" aria-pressed="false"><span aria-hidden="true">⚙️</span><em>Ustawienia</em></button>
+              <button type="button" data-view="tests" aria-pressed="false"><span aria-hidden="true">🧪</span><em>Testy</em><b data-sidebar-badge="tests">0</b></button>
+              <button type="button" data-view="archive" aria-pressed="false"><span aria-hidden="true">🗄️</span><em>Archiwum</em></button>
+            </div>
           </nav>
         </aside>
 
@@ -172,6 +190,7 @@ const title = 'CC SYSTEM';
 
     <script>
       (() => {
+        const demoMode = false;
         const storageKey = 'cc-inbox-access-code';
         const login = document.querySelector('[data-login]');
         const app = document.querySelector('[data-app]');
@@ -213,6 +232,7 @@ const title = 'CC SYSTEM';
         let inquiries = [];
         let health = null;
         let activeView = 'dashboard';
+        let selectedInquiryId = '';
         let autoRefreshTimer = 0;
         let autoRefreshPaused = false;
         let isLoading = false;
@@ -238,7 +258,7 @@ const title = 'CC SYSTEM';
           }
           setSidebarState(app.dataset.sidebarState === 'collapsed' ? 'expanded' : 'collapsed');
         };
-        try { setSidebarState(localStorage.getItem(sidebarStateKey) || 'expanded'); } catch { setSidebarState('expanded'); }
+        try { setSidebarState(localStorage.getItem(sidebarStateKey) || 'collapsed'); } catch { setSidebarState('collapsed'); }
 
         const esc = (value) => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
         const showToast = (message, type = 'info') => {
@@ -609,7 +629,22 @@ const title = 'CC SYSTEM';
         ].join('\n');
         const mailText = (item) => `Nowe zapytanie rezerwacyjne — Camping Clepardia\n\n${summaryText(item)}\n\nSprawdź w panelu recepcji:\n${location.origin}/cc-gate-a8f3k9r2p6`;
         const copy = async (text, button) => {
-          await navigator.clipboard.writeText(text);
+          try {
+            if (!navigator.clipboard?.writeText) throw new Error('CLIPBOARD_API_UNAVAILABLE');
+            await navigator.clipboard.writeText(text);
+          } catch {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', 'readonly');
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            textarea.style.top = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            document.execCommand('copy');
+            textarea.remove();
+          }
           const old = button.textContent;
           button.textContent = 'Skopiowano';
           showToast('Skopiowano odpowiedź do schowka.', 'success');
@@ -1127,6 +1162,117 @@ const title = 'CC SYSTEM';
           <header class="module-head"><span class="eyebrow">Mail Center / Inbox</span><h2>Własny Gmail recepcji</h2><p>Wątki rozumieją daty, osoby, usługi, kraj, język, status dostarczenia maila i najlepszą odpowiedź premium.</p></header>
           <div class="module-status-row">${moduleStatus('Inbox', items.length)}${moduleStatus('Do odpowiedzi', realItems().filter((item)=>['new','needs_reply'].includes(item.status)).length)}${moduleStatus('Mail niedostarczony', realItems().filter((item)=>!item.mail_delivered).length, realItems().some((item)=>!item.mail_delivered) ? 'warn' : 'ok')}${moduleStatus('Auto-refresh', autoRefreshPaused ? 'pauza' : '25 s', autoRefreshPaused ? 'warn' : 'ok')}</div>
         </section>${items.length ? items.map(card).join('') : '<div class="empty">Brak zapytań dla wybranych filtrów.</div>'}`;
+        const renderPremiumDashboardView = () => {
+          const real = realItems();
+          const mailOk = real.some((item)=>item.mail_provider === 'resend' && item.mail_delivered);
+          const campingItems = real.filter((item)=>categoryKeys(item).includes('camping'));
+          const bungalowItems = real.filter((item)=>categoryKeys(item).includes('bungalow') || categoryKeys(item).includes('combined'));
+          const urgent = urgentItems();
+          const latest = real.slice(0,5);
+          const tasks = [
+            ['✉️', 'Mail niedostarczony', real.filter((item)=>!item.mail_delivered).length, 'Otwórz Mail Center i wyślij ręcznie.'],
+            ['🏕️', 'Camping L/S', real.filter((item)=>isSummer(item) && categoryKeys(item).includes('camping')).length, 'Bez rezerwacji miejsc campingowych.'],
+            ['🧩', 'Brakuje danych', real.filter((item)=>categoryKeys(item).includes('missing')).length, 'Poproś klienta o uzupełnienie.'],
+            ['👥', 'Grupy / skauci', real.filter((item)=>categoryKeys(item).includes('group') || categoryKeys(item).includes('scouts')).length, 'Wymagana ręczna decyzja recepcji.'],
+            ['⚡', 'EV / prąd', real.filter((item)=>categoryKeys(item).includes('ev')).length, 'Prąd 10A nie służy do ładowania EV.'],
+          ];
+          const kpis = [
+            ['🟢','Nowe zapytania', real.filter((item)=>item.status === 'new').length, demoMode ? 'demo inbox' : 'realni klienci'],
+            ['✉️','Do odpowiedzi', real.filter((item)=>['new','needs_reply'].includes(item.status)).length, 'kolejka recepcji'],
+            ['📥','Przyjazdy dziś', arrivalTodayItems().length, 'check-in'],
+            ['📤','Wyjazdy dziś', departureTodayItems().length, 'check-out'],
+            ['🏕️','Obłożenie camping', campingItems.length, 'z zapytań'],
+            ['🏡','Obłożenie domki', bungalowItems.length, 'z zapytań'],
+            ['🚀','Mail delivery', demoMode ? 'demo OFF' : (mailOk ? 'Resend OK' : 'sprawdź'), demoMode ? 'bez wysyłki' : 'status recepcji'],
+            ['📅','Najbliższe 7 dni', next7Items().length, 'operacje'],
+          ];
+          return `<section class="premium-dashboard">
+            <header class="dashboard-hero">
+              <div>
+                <span class="eyebrow">Recepcja online</span>
+                <h2>Centrum dowodzenia Camping Clepardia</h2>
+                <p>${demoMode ? 'Publiczny widok demo do oceny UI/UX — bez Supabase, bez wysyłki i bez realnych danych.' : 'Operacyjny widok zapytań, maili, klientów i zadań recepcji w jednym miejscu.'}</p>
+              </div>
+              <aside class="dashboard-weather-card">
+                <span>☀️ Kraków</span>
+                <strong>23°C</strong>
+                <small>Placeholder pogody · integracja API później</small>
+              </aside>
+            </header>
+            <div class="premium-kpi-grid">${kpis.map(([icon,label,value,hint])=>`<article class="premium-kpi-card"><span>${esc(icon)}</span><small>${esc(label)}</small><strong>${esc(value)}</strong><em>${esc(hint)}</em></article>`).join('')}</div>
+            <div class="dashboard-command-grid">
+              <section class="command-card command-card--urgent"><header><span>🔥</span><div><h3>Pilne teraz</h3><p>Sprawy, których recepcja nie powinna przegapić.</p></div></header>${moduleThreadList(urgent.slice(0,6), 'Brak pilnych spraw. System oddycha spokojnie.')}</section>
+              <section class="command-card"><header><span>✉️</span><div><h3>Mini Mail Center</h3><p>5 najnowszych wątków z inboxa.</p></div></header>${moduleThreadList(latest, 'Brak zapytań.')}<div class="inline-actions"><button type="button" data-view-shortcut="mail">Otwórz Mail Center</button></div></section>
+              <section class="command-card"><header><span>✅</span><div><h3>Zadania recepcji</h3><p>Automatyczne TODO z zapytań.</p></div></header><ul class="module-task-list">${tasks.map(([icon,label,count,hint])=>`<li><strong>${esc(icon)} ${esc(count)}</strong><span>${esc(label)}</span><small>${esc(hint)}</small></li>`).join('')}</ul></section>
+              <section class="command-card"><header><span>⚡</span><div><h3>Szybkie akcje</h3><p>Najczęstsze operacje bez szukania.</p></div></header><div class="quick-action-grid"><a href="/rezerwacja/" target="_blank" rel="noopener">Dodaj rezerwację</a><button type="button" data-view-shortcut="mail">Mail Center</button><button type="button" data-view-shortcut="print">Drukuj kartę</button><button type="button" data-view-shortcut="extend">Przedłuż pobyt</button></div></section>
+            </div>
+          </section>`;
+        };
+        const mailFolderDefs = () => {
+          const real = realItems();
+          return [
+            ['inbox','📥','Inbox',real.filter((item)=>!['archived','spam','test'].includes(item.status)).length],
+            ['needs_reply','🟠','Do odpowiedzi',real.filter((item)=>['new','needs_reply'].includes(item.status)).length],
+            ['replied','✅','Odpowiedziane',real.filter((item)=>item.status === 'replied').length],
+            ['confirmed','🟢','Potwierdzone',real.filter((item)=>['confirmed','needs_confirmation'].includes(item.status)).length],
+            ['unavailable','⛔','Brak miejsc',real.filter((item)=>item.status === 'unavailable').length],
+            ['mailFailed','⚠️','Mail niedostarczony',real.filter((item)=>!item.mail_delivered).length],
+            ['urgent','🔥','Pilne',urgentItems().length],
+            ['tests','🧪','Testy',testItems().length],
+            ['archive','🗄️','Archiwum',archivedItems().length],
+            ['all','🌍','Wszystkie realne',real.length],
+          ];
+        };
+        const activeMailFolder = () => {
+          if (activeView === 'tests') return 'tests';
+          if (activeView === 'archive') return 'archive';
+          const status = document.querySelector('[data-filter="status"]');
+          const mailFailed = document.querySelector('[data-filter="mailFailed"]');
+          if (mailFailed instanceof HTMLInputElement && mailFailed.checked) return 'mailFailed';
+          if (status instanceof HTMLSelectElement && status.value) return status.value;
+          return 'inbox';
+        };
+        const renderThreadCard = (item, selectedId) => {
+          const country = countryInfo(item);
+          const guests = normalizeInquiryGuests(item);
+          const cats = categoryKeys(item);
+          const badgeKeys = cats.filter((key)=>['camping','bungalow','combined','mailFailed','urgent','group','scouts','missing','ev','trips','feedback'].includes(key)).slice(0,4);
+          return `<button type="button" class="mail-thread ${String(item.id) === String(selectedId) ? 'is-selected' : ''}" data-id="${esc(item.id)}" data-thread-select="${esc(item.id)}">
+            <span class="mail-thread__flag">${esc(country.flag)}</span>
+            <span class="mail-thread__body"><strong>${esc(item.full_name || 'Bez nazwy')}</strong><small>${esc(country.label)} · ${esc(languageCode(item).toUpperCase())} · ${esc(formatDate(item.created_at,true))}</small><em>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.stay_type || '-')}</em><span>${badgeKeys.map((key)=>`<b>${esc(categoryLabels[key] || key)}</b>`).join('')}</span></span>
+            <span class="mail-thread__meta"><strong>${esc(moneyLabel(item))}</strong><small>${esc(guests.label)}</small><i class="${item.mail_delivered ? 'is-ok':'is-warn'}">${item.mail_delivered ? 'Mail OK':'Mail fail'}</i></span>
+          </button>`;
+        };
+        const renderCasePanel = (item) => {
+          if (!item) return `<section class="mail-case-panel is-empty"><h3>Wybierz wątek</h3><p>Lista po lewej działa jak inbox. Kliknij zgłoszenie, żeby zobaczyć CRM, pobyt, usługi i odpowiedzi.</p></section>`;
+          const country = countryInfo(item);
+          const guests = normalizeInquiryGuests(item);
+          const cats = categoryKeys(item);
+          const best = suggestBestReply(item);
+          const warnings = warningsFor(item, cats) || '<p>Brak pilnych ostrzeżeń operacyjnych.</p>';
+          const timeline = [
+            ['Wpłynęło', formatDate(item.created_at,true)],
+            [demoMode ? 'Zapis demo' : 'Zapis Supabase', demoMode ? 'lokalna tablica demo' : 'OK — reservation_inquiries'],
+            ['Mail', demoMode ? 'status demo — bez wysyłki' : `${item.mail_provider || 'none'} / ${item.mail_delivered ? 'dostarczony' : 'niedostarczony'}`],
+            ['Status', statusLabels[item.status] || item.status],
+          ].map(([label,value])=>`<li><span>${esc(label)}</span><strong>${esc(value)}</strong></li>`).join('');
+          return `<section class="mail-case-panel" data-id="${esc(item.id)}">
+            <button type="button" class="mail-back" data-mail-back>← Lista wątków</button>
+            <header class="case-hero"><div><span class="eyebrow">Sprawa klienta</span><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(country.flag)} ${esc(country.label)} · ${esc(languageCode(item).toUpperCase())} · ${esc(item.email || item.phone || 'brak kontaktu')}</p></div><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span></header>
+            <div class="case-kpis"><article><span>📅</span><small>Termin</small><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><em>${esc(item.nights || 0)} nocy</em></article><article><span>👥</span><small>Osoby</small><strong>${esc(guests.label)}</strong><em>razem ${esc(guests.total || '-')}</em></article><article><span>🏕️</span><small>Pobyt</small><strong>${esc(item.stay_type || '-')}</strong><em>${esc(cats.includes('camping') ? 'Camping' : cats.includes('bungalow') ? 'Domki' : 'Pobyt')}</em></article><article><span>💰</span><small>Cena</small><strong>${esc(moneyLabel(item))}</strong><em>orientacyjnie</em></article></div>
+            <div class="case-grid"><section class="case-card case-card--wide"><h3>🧾 Usługi i cena</h3><ul class="service-list">${serviceCards(item)}</ul></section><section class="case-card"><h3>💬 Wiadomość klienta</h3><p class="message-copy">${esc(item.message || 'Brak wiadomości')}</p></section><section class="case-card"><h3>ℹ️ Ważne informacje</h3><aside class="crm-warnings">${warnings}</aside></section><section class="case-card case-card--wide best-reply-card"><h3>✨ Najlepsza odpowiedź</h3><p><strong>${esc(best.icon)} ${esc(best.title)}</strong></p><small>Powód: ${esc(best.reason)}</small><div class="inline-actions"><button type="button" data-reply-template="${esc(best.id)}">Utwórz odpowiedź</button><button type="button" data-copy-client-safe>Kopiuj safe summary</button>${item.email ? `<a href="mailto:${esc(item.email)}">Mailto klienta</a>` : ''}</div></section><section class="case-card"><h3>⚡ Szybkie akcje</h3><div class="quick-action-grid"><button type="button" data-reply-action="confirm" data-target-status="needs_confirmation">Potwierdź</button><button type="button" data-reply-action="askMissingData" data-target-status="needs_reply">Poproś o dane</button><button type="button" data-reply-action="noAvailability" data-target-status="unavailable">Brak miejsc</button><button type="button" data-reply-action="infoCampingSummer" data-target-status="replied">Camping L/S</button><button type="button" data-reply-action="electricityEv" data-target-status="replied">Prąd / EV</button><button type="button" data-reply-action="tours" data-target-status="replied">Wycieczki</button></div></section><section class="case-card"><h3>📝 Notatki i status</h3><label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${item.status === value ? 'selected':''}>${label}</option>`).join('')}</select></label><label><span>Notatka recepcji</span><textarea data-notes rows="4">${esc(item.notes || '')}</textarea></label><button type="button" data-save>Zapisz status</button></section><section class="case-card case-card--wide"><h3>🕒 Historia rozmowy</h3><ul class="timeline-list">${timeline}</ul></section></div>
+          </section>`;
+        };
+        const renderMailCenterWorkspace = (items) => {
+          const selected = items.find((item)=>String(item.id) === String(selectedInquiryId)) || items[0] || realItems()[0] || null;
+          if (selected) selectedInquiryId = String(selected.id);
+          const folder = activeMailFolder();
+          return `<section class="mail-center-workspace">
+            <aside class="mail-folders"><header><span class="eyebrow">Mail Center</span><h2>Inbox recepcji</h2><p>${demoMode ? 'Dane demo, bez wysyłki.' : 'Własny Gmail + CRM + akcje.'}</p></header>${mailFolderDefs().map(([key,icon,label,count])=>`<button type="button" data-mail-folder="${esc(key)}" class="${folder === key ? 'is-active' : ''}"><span>${esc(icon)} ${esc(label)}</span><strong>${esc(count)}</strong></button>`).join('')}</aside>
+            <section class="mail-thread-list"><header><div><span class="eyebrow">Wątki</span><h3>${esc(items.length)} w widoku</h3></div><small>${esc(autoRefreshPaused ? 'Auto-refresh pauza' : 'Auto-refresh 25 s')}</small></header><div class="mail-thread-scroll">${items.length ? items.map((item)=>renderThreadCard(item, selected?.id)).join('') : '<div class="empty">Brak wątków dla wybranych filtrów.</div>'}</div></section>
+            ${renderCasePanel(selected)}
+          </section>`;
+        };
         const customersFromInquiries = () => {
           const map = new Map();
           realItems().forEach((item) => {
@@ -1357,12 +1503,15 @@ const title = 'CC SYSTEM';
         };
         const render = () => {
           viewButtons.forEach((button) => button.setAttribute('aria-pressed', button.dataset.view === activeView ? 'true' : 'false'));
+          if (app instanceof HTMLElement) app.dataset.activeView = activeView;
           updateSidebarBadges();
           if (activeFilterCount) activeFilterCount.textContent = `Aktywne filtry: ${activeFilterTotal()}`;
           refreshHeaderStatus();
           renderSystemStrip();
           const items = visibleItems();
-          if (count) count.textContent = `${items.length} w widoku · realni: ${realItems().length} · testy: ${testItems().length}`;
+          if (count) count.textContent = activeView === 'dashboard'
+            ? `realni: ${realItems().length} · testy: ${testItems().length}`
+            : `${items.length} w widoku · realni: ${realItems().length} · testy: ${testItems().length}`;
           if (stats) {
             const statItems = activeView === 'stats'
               ? []
@@ -1379,8 +1528,8 @@ const title = 'CC SYSTEM';
             stats.innerHTML = statItems.map(([label,value])=>`<article><strong>${esc(value)}</strong><span>${esc(label)}</span></article>`).join('');
           }
           if (list) {
-            if (activeView === 'dashboard') list.innerHTML = renderDashboardView();
-            else if (activeView === 'mail') list.innerHTML = renderMailCenterView(items);
+            if (activeView === 'dashboard') list.innerHTML = renderPremiumDashboardView();
+            else if (activeView === 'mail') list.innerHTML = renderMailCenterWorkspace(items);
             else if (activeView === 'customers') list.innerHTML = renderCustomersView();
             else if (activeView === 'reservations') list.innerHTML = renderReservationsView();
             else if (activeView === 'calendar') list.innerHTML = renderCalendarView();
@@ -1590,6 +1739,44 @@ const title = 'CC SYSTEM';
         list?.addEventListener('click',(event)=>{
           const target = event.target;
           if (!(target instanceof Element)) return;
+          const dynamicShortcut = target.closest('[data-view-shortcut]');
+          if (dynamicShortcut instanceof HTMLElement && !dynamicShortcut.closest('[data-id]')) {
+            activeView = dynamicShortcut.dataset.viewShortcut || 'mail';
+            clearFilters();
+            closeMobileSidebar();
+            render();
+            return;
+          }
+          const folderButton = target.closest('[data-mail-folder]');
+          if (folderButton instanceof HTMLElement) {
+            const folder = folderButton.dataset.mailFolder || 'inbox';
+            clearFilters();
+            selectedInquiryId = '';
+            activeView = 'mail';
+            const statusSelect = document.querySelector('[data-filter="status"]');
+            const categorySelect = document.querySelector('[data-filter="category"]');
+            const mailFailed = document.querySelector('[data-filter="mailFailed"]');
+            if (folder === 'tests') activeView = 'tests';
+            else if (folder === 'archive') activeView = 'archive';
+            else if (folder === 'mailFailed' && mailFailed instanceof HTMLInputElement) mailFailed.checked = true;
+            else if (folder === 'urgent' && categorySelect instanceof HTMLSelectElement) categorySelect.value = 'urgent';
+            else if (['needs_reply','replied','unavailable'].includes(folder) && statusSelect instanceof HTMLSelectElement) statusSelect.value = folder;
+            else if (folder === 'confirmed' && statusSelect instanceof HTMLSelectElement) statusSelect.value = 'confirmed';
+            render();
+            return;
+          }
+          const backButton = target.closest('[data-mail-back]');
+          if (backButton instanceof HTMLElement) {
+            if (app instanceof HTMLElement) app.classList.remove('is-mail-detail');
+            return;
+          }
+          const threadButton = target.closest('[data-thread-select]');
+          if (threadButton instanceof HTMLElement) {
+            selectedInquiryId = threadButton.dataset.threadSelect || threadButton.dataset.id || '';
+            if (app instanceof HTMLElement && window.matchMedia('(max-width: 900px)').matches) app.classList.add('is-mail-detail');
+            render();
+            return;
+          }
           const looseReplyButton = target.closest('[data-copy-reply]');
           if (looseReplyButton instanceof HTMLButtonElement && !target.closest('[data-id]')) {
             const replyText = decodeURIComponent(looseReplyButton.dataset.copyReply || '');
@@ -1657,6 +1844,775 @@ const title = 'CC SYSTEM';
   :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#07140f;color:#effbf3}*{box-sizing:border-box}body{margin:0;min-width:320px;min-height:100vh;background:radial-gradient(circle at 15% 0%,rgba(60,179,113,.22),transparent 30%),linear-gradient(145deg,#07140f,#102b1d)}button,input,select,textarea{font:inherit}button,.card-actions a,.inline-actions a{border:0;cursor:pointer}[hidden]{display:none!important}.inbox-shell{width:min(1500px,calc(100% - 28px));margin:auto;padding:clamp(28px,5vw,64px) 0}.login-card{width:min(540px,100%);margin:8vh auto 0;padding:clamp(24px,5vw,42px);border:1px solid rgba(143,224,180,.2);border-radius:30px;background:rgba(15,42,28,.88);box-shadow:0 30px 100px rgba(0,0,0,.32)}.eyebrow{color:#8fe0b4;font-size:.76rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}h1{margin:10px 0;font-size:clamp(2rem,5vw,4rem);line-height:1}p{color:rgba(239,251,243,.72);line-height:1.55}label{display:grid;gap:7px;color:rgba(239,251,243,.76);font-size:.82rem;font-weight:800}input,select,textarea{width:100%;border:1px solid rgba(255,255,255,.13);border-radius:14px;color:#effbf3;background:rgba(255,255,255,.07);outline:0}input,select{min-height:46px;padding:0 12px}textarea{padding:12px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:rgba(143,224,180,.55);box-shadow:0 0 0 4px rgba(60,179,113,.12)}button,.card-actions a,.inline-actions a{min-height:42px;display:inline-flex;align-items:center;justify-content:center;padding:0 15px;border-radius:13px;color:#07140f;background:#8fe0b4;font-weight:900;text-decoration:none}button.ghost,.card-actions button,.card-actions a,.inline-actions button,.inline-actions a{color:#e7fff0;border:1px solid rgba(143,224,180,.18);background:rgba(255,255,255,.07)}button:disabled{opacity:.45;cursor:not-allowed}.login-card form{display:grid;gap:14px;margin-top:24px}.status,.app-status{min-height:22px;margin:0;color:#ffcf91;font-weight:800}.app-header{display:flex;gap:20px;align-items:end;justify-content:space-between;margin-bottom:24px}.app-header p{margin:0}.header-actions{display:flex;gap:9px}.stats-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:0 0 14px}.stats-grid article{display:grid;gap:4px;padding:16px;border:1px solid rgba(143,224,180,.15);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.035))}.stats-grid strong{color:#8fe0b4;font-size:1.75rem}.stats-grid span{color:rgba(239,251,243,.66);font-size:.76rem;font-weight:850}.filters{display:grid;grid-template-columns:2fr repeat(7,minmax(130px,1fr));gap:10px;padding:16px;border:1px solid rgba(143,224,180,.17);border-radius:24px;background:rgba(8,28,18,.72)}.filters .check{display:flex;align-items:center;gap:8px;min-height:42px;padding:8px 10px;border-radius:13px;background:rgba(255,255,255,.05)}.filters .check input{width:18px;min-height:18px;accent-color:#3CB371}.inquiry-list{display:grid;gap:20px;margin-top:16px}.inquiry-card{padding:clamp(18px,3vw,28px);border:1px solid rgba(255,255,255,.12);border-radius:28px;background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.045));box-shadow:0 20px 60px rgba(0,0,0,.18)}.inquiry-card>header{display:flex;justify-content:space-between;gap:20px;align-items:start}.inquiry-card h2{margin:12px 0 5px;font-size:clamp(1.45rem,3vw,2.1rem)}.inquiry-card header p{margin:0}.card-badges{display:flex;flex-wrap:wrap;gap:7px}.status-badge,.mail-badge,.season-badge,.category-badge{display:inline-flex;min-height:28px;align-items:center;padding:0 10px;border-radius:999px;color:#07140f;background:#8fe0b4;font-size:.7rem;font-weight:950;text-transform:uppercase}.category-badge{color:#dffff0;border:1px solid rgba(143,224,180,.2);background:rgba(255,255,255,.08)}.category-urgent,.category-mailFailed{color:#3d2600;background:#ffd08a}.category-group,.category-scouts{color:#101d35;background:#a9c8ff}.category-feedback{color:#372b00;background:#ffe492}.status-spam,.status-rejected,.mail-badge.is-failed{background:#f2c078}.status-archived{color:#effbf3;background:#53665b}.mail-badge.is-ok{background:#7be3a8}.season-badge{color:#4a2b00;background:#ffd696}.crm-warnings{display:grid;gap:7px;margin-top:16px}.crm-warnings p{margin:0;padding:10px 13px;border:1px solid rgba(255,208,138,.22);border-radius:13px;color:#ffe4b8;background:rgba(255,208,138,.08);font-weight:800}.card-date{display:grid;gap:5px;min-width:190px;text-align:right}.card-date small{color:rgba(239,251,243,.52)}.card-date code{color:#8fe0b4;font-size:.72rem}.details-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:20px 0}.detail-card{min-width:0;padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.055)}.detail-card--wide{grid-column:span 2}.detail-card h3{margin:0 0 12px;color:#9ee8bd;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase}.detail-card p{margin:0;color:#effbf3;overflow-wrap:anywhere}.detail-card a{color:#dffff0}.detail-card small{display:block;margin-top:8px;color:rgba(239,251,243,.58);line-height:1.5}.feedback-card{border-color:rgba(255,228,146,.2);background:rgba(255,228,146,.06)}.service-list,.consent-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}.service-list li{display:grid;grid-template-columns:38px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px;border-radius:14px;background:rgba(255,255,255,.055)}.service-list li>span{display:grid;width:38px;height:38px;place-items:center;border-radius:12px;background:rgba(60,179,113,.13);font-size:1.2rem}.service-list strong,.service-list small{display:block;margin:0}.service-list small{color:rgba(239,251,243,.5)}.service-list b{color:#8fe0b4}.service-list em{color:#fff;font-style:normal;font-weight:850}.plain-list{display:grid;gap:6px;margin:0}.plain-list div{display:grid;grid-template-columns:1fr 1.2fr;gap:8px}.plain-list dt{color:rgba(239,251,243,.5);font-size:.72rem}.plain-list dd{margin:0;text-align:right;overflow-wrap:anywhere}.consent-list b{color:#8fe0b4}.message-copy{white-space:pre-wrap}.mail-status-card.is-failed{border-color:rgba(242,192,120,.28);background:rgba(242,192,120,.08)}.mail-status-card.is-ok{border-color:rgba(123,227,168,.24)}.inline-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.technical-data{grid-column:1/-1;padding:12px 15px;border:1px dashed rgba(143,224,180,.2);border-radius:16px}.technical-data summary{cursor:pointer;color:rgba(239,251,243,.65);font-weight:850}.technical-data pre{max-height:320px;overflow:auto;white-space:pre-wrap;color:#bde8cd}.edit-row{display:grid;grid-template-columns:190px minmax(260px,1fr) auto;gap:10px;align-items:end;padding-top:16px;border-top:1px solid rgba(255,255,255,.09)}.card-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.empty{padding:40px;border:1px dashed rgba(143,224,180,.22);border-radius:22px;text-align:center;color:rgba(239,251,243,.65)}
   @media(max-width:1180px){.stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.filters{grid-template-columns:repeat(3,minmax(0,1fr))}.filters .search{grid-column:1/-1}.details-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:720px){.inbox-shell{width:min(100% - 16px,1500px);padding-top:18px}.app-header,.inquiry-card>header{align-items:stretch;flex-direction:column}.header-actions,.header-actions button{width:100%}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.filters,.details-grid,.edit-row{grid-template-columns:1fr}.filters .search,.detail-card--wide{grid-column:auto}.card-date{text-align:left}.card-actions>*{width:100%}.service-list li{grid-template-columns:38px 1fr}.service-list b,.service-list em{grid-column:2}.inline-actions{display:grid}.inline-actions>*{width:100%}}
+</style>
+
+<style is:global>
+  :root {
+    --cc-bg: #04110b;
+    --cc-panel: rgba(8, 31, 20, .76);
+    --cc-panel-strong: rgba(11, 46, 29, .9);
+    --cc-line: rgba(143, 224, 180, .16);
+    --cc-line-strong: rgba(60, 179, 113, .42);
+    --cc-text: #f4fff8;
+    --cc-muted: rgba(244, 255, 248, .64);
+    --cc-green: #3CB371;
+    --cc-green-soft: #8fe0b4;
+    --cc-yellow: #ffd36e;
+    --cc-red: #ff8d8d;
+  }
+
+  body {
+    overflow-x: hidden;
+    background:
+      radial-gradient(circle at 13% 0%, rgba(60,179,113,.22), transparent 32rem),
+      radial-gradient(circle at 84% 12%, rgba(143,224,180,.13), transparent 30rem),
+      linear-gradient(135deg, #04110b 0%, #071c12 52%, #03100a 100%);
+  }
+
+  .inbox-shell {
+    width: 100%;
+    max-width: none;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .login-card {
+    margin-top: 8vh;
+  }
+
+  .cc-system-app {
+    --sidebar-expanded: 286px;
+    --sidebar-collapsed: 86px;
+    width: 100%;
+    min-height: 100vh;
+    gap: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .cc-system-main {
+    min-width: 0;
+    padding: 18px clamp(14px, 2vw, 26px) 30px;
+  }
+
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    align-items: center;
+    gap: 16px;
+    margin: 0 0 16px;
+    padding: 14px;
+    border: 1px solid var(--cc-line);
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(4,17,11,.92), rgba(10,44,29,.78));
+    backdrop-filter: blur(22px);
+    box-shadow: 0 24px 70px rgba(0,0,0,.26);
+  }
+
+  .app-header__brand h1 {
+    margin: 3px 0;
+    font-size: clamp(1.35rem, 2vw, 2.1rem);
+    letter-spacing: -.04em;
+  }
+
+  .app-header__brand p,
+  .app-header__brand small {
+    color: var(--cc-muted);
+  }
+
+  .global-search {
+    flex: 1 1 360px;
+    max-width: 560px;
+    grid-template-columns: 28px minmax(0, 1fr);
+    align-items: center;
+    min-height: 50px;
+    padding: 0 14px;
+    border: 1px solid rgba(255,255,255,.11);
+    border-radius: 17px;
+    background: rgba(255,255,255,.065);
+  }
+
+  .global-search input {
+    min-height: 46px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 620px;
+  }
+
+  .header-actions a,
+  .header-actions button,
+  .connection-pill,
+  .profile-pill {
+    min-height: 36px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .cc-sidebar {
+    border-right: 1px solid rgba(143,224,180,.16);
+    background:
+      linear-gradient(180deg, rgba(4,17,11,.98), rgba(5,29,17,.96)),
+      radial-gradient(circle at 40% 0%, rgba(60,179,113,.18), transparent 16rem);
+    box-shadow: 20px 0 60px rgba(0,0,0,.22);
+  }
+
+  .cc-sidebar__toggle {
+    gap: 10px;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 42px;
+    margin: 10px 0 12px;
+    color: var(--cc-text);
+    border: 1px solid rgba(143,224,180,.16);
+    background: rgba(255,255,255,.055);
+  }
+
+  .cc-sidebar__toggle em {
+    font-style: normal;
+  }
+
+  .cc-sidebar__group {
+    display: grid;
+    gap: 5px;
+    padding: 10px 0;
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+
+  .cc-sidebar__group-label {
+    padding: 0 11px 4px;
+    color: rgba(244,255,248,.42);
+    font-size: .66rem;
+    font-weight: 950;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .cc-sidebar .view-tabs {
+    gap: 0;
+    padding-right: 4px;
+  }
+
+  .cc-sidebar .view-tabs button {
+    position: relative;
+    min-height: 46px;
+    border-radius: 15px;
+    transition: transform .18s ease, background .18s ease, border-color .18s ease;
+  }
+
+  .cc-sidebar .view-tabs button:hover {
+    transform: translateX(3px);
+    background: rgba(60,179,113,.12);
+  }
+
+  .cc-sidebar .view-tabs button[aria-pressed="true"] {
+    border-color: rgba(143,224,180,.42);
+    background: linear-gradient(135deg, rgba(60,179,113,.95), rgba(143,224,180,.72));
+    color: #031009;
+    box-shadow: 0 14px 32px rgba(60,179,113,.24);
+  }
+
+  .cc-sidebar .view-tabs button[aria-pressed="true"] em,
+  .cc-sidebar .view-tabs button[aria-pressed="true"] b {
+    color: #031009;
+  }
+
+  .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__group-label,
+  .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__toggle em {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .mail-center-nav,
+  .cc-system-app[data-active-view="dashboard"] .filters,
+  .cc-system-app[data-active-view="dashboard"] .stats-grid[data-stats],
+  .cc-system-app[data-active-view="mail"] .filters,
+  .cc-system-app[data-active-view="mail"] .stats-grid[data-stats],
+  .cc-system-app[data-active-view="mail"] .system-strip {
+    display: none;
+  }
+
+  .inquiry-list {
+    margin-top: 0;
+  }
+
+  .premium-dashboard {
+    display: grid;
+    gap: 16px;
+  }
+
+  .dashboard-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+    gap: 16px;
+    align-items: stretch;
+    padding: clamp(22px, 3vw, 34px);
+    border: 1px solid var(--cc-line);
+    border-radius: 30px;
+    background:
+      radial-gradient(circle at 8% 8%, rgba(60,179,113,.26), transparent 24rem),
+      linear-gradient(135deg, rgba(12,54,34,.88), rgba(7,26,17,.92));
+    box-shadow: 0 28px 80px rgba(0,0,0,.24);
+  }
+
+  .dashboard-hero h2 {
+    margin: 8px 0;
+    color: var(--cc-text);
+    font-size: clamp(2rem, 4vw, 4rem);
+    line-height: .98;
+    letter-spacing: -.06em;
+  }
+
+  .dashboard-weather-card,
+  .command-card,
+  .premium-kpi-grid article,
+  .mail-folders,
+  .mail-thread-list,
+  .mail-case-panel,
+  .case-card {
+    border: 1px solid var(--cc-line);
+    background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.038));
+    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    backdrop-filter: blur(18px);
+  }
+
+  .dashboard-weather-card {
+    display: grid;
+    align-content: center;
+    gap: 4px;
+    padding: 22px;
+    border-radius: 24px;
+  }
+
+  .dashboard-weather-card strong {
+    color: var(--cc-green-soft);
+    font-size: 3.2rem;
+    letter-spacing: -.07em;
+  }
+
+  .dashboard-weather-card small,
+  .premium-kpi-grid em,
+  .mail-thread small,
+  .mail-thread em,
+  .case-kpis em,
+  .case-card small {
+    color: var(--cc-muted);
+    font-style: normal;
+  }
+
+  .premium-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .premium-kpi-grid article {
+    display: grid;
+    gap: 5px;
+    min-height: 132px;
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  .premium-kpi-grid article > span {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 14px;
+    background: rgba(60,179,113,.16);
+  }
+
+  .premium-kpi-grid small {
+    color: var(--cc-muted);
+    font-weight: 850;
+  }
+
+  .premium-kpi-grid strong {
+    color: var(--cc-text);
+    font-size: clamp(1.5rem, 2vw, 2.25rem);
+    letter-spacing: -.06em;
+  }
+
+  .dashboard-command-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 14px;
+  }
+
+  .command-card {
+    min-width: 0;
+    padding: 18px;
+    border-radius: 26px;
+  }
+
+  .command-card > header {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .command-card > header > span {
+    display: grid;
+    flex: 0 0 44px;
+    height: 44px;
+    place-items: center;
+    border-radius: 16px;
+    background: rgba(60,179,113,.16);
+    font-size: 1.25rem;
+  }
+
+  .command-card h3,
+  .mail-folders h2,
+  .mail-thread-list h3,
+  .case-hero h2 {
+    margin: 0;
+    color: var(--cc-text);
+    letter-spacing: -.04em;
+  }
+
+  .quick-action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .quick-action-grid a,
+  .quick-action-grid button {
+    min-height: 42px;
+    border-radius: 14px;
+  }
+
+  .mail-center-workspace {
+    display: grid;
+    grid-template-columns: minmax(210px, 240px) minmax(330px, 420px) minmax(0, 1fr);
+    gap: 14px;
+    height: calc(100vh - 148px);
+    min-height: 640px;
+  }
+
+  .mail-folders,
+  .mail-thread-list,
+  .mail-case-panel {
+    min-width: 0;
+    min-height: 0;
+    border-radius: 26px;
+  }
+
+  .mail-folders {
+    display: grid;
+    align-content: start;
+    gap: 7px;
+    padding: 14px;
+  }
+
+  .mail-folders header {
+    padding: 8px 6px 12px;
+  }
+
+  .mail-folders button {
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 12px;
+    color: var(--cc-text);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 15px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .mail-folders button.is-active {
+    color: #031009;
+    background: linear-gradient(135deg, var(--cc-green), var(--cc-green-soft));
+  }
+
+  .mail-thread-list {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: hidden;
+  }
+
+  .mail-thread-list > header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+
+  .mail-thread-scroll {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    overflow: auto;
+    padding: 10px;
+  }
+
+  .mail-thread {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: start;
+    width: 100%;
+    min-height: 112px;
+    padding: 12px;
+    color: var(--cc-text);
+    text-align: left;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .mail-thread:hover,
+  .mail-thread.is-selected {
+    border-color: var(--cc-line-strong);
+    background: rgba(60,179,113,.12);
+    transform: translateY(-1px);
+  }
+
+  .mail-thread__flag {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border-radius: 15px;
+    background: rgba(255,255,255,.08);
+    font-size: 1.35rem;
+  }
+
+  .mail-thread__body,
+  .mail-thread__meta {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+  }
+
+  .mail-thread__body strong,
+  .mail-thread__body em,
+  .mail-thread__body small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mail-thread__body span {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .mail-thread__body b,
+  .mail-thread__meta i {
+    width: max-content;
+    max-width: 100%;
+    padding: 4px 7px;
+    border-radius: 999px;
+    color: var(--cc-green-soft);
+    background: rgba(60,179,113,.12);
+    font-size: .64rem;
+    font-style: normal;
+    text-transform: uppercase;
+  }
+
+  .mail-thread__meta {
+    justify-items: end;
+    text-align: right;
+  }
+
+  .mail-thread__meta .is-warn {
+    color: var(--cc-yellow);
+    background: rgba(255,211,110,.12);
+  }
+
+  .mail-case-panel {
+    overflow: auto;
+    padding: 16px;
+  }
+
+  .mail-back {
+    display: none;
+    margin-bottom: 12px;
+  }
+
+  .case-hero {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+
+  .case-hero h2 {
+    margin-top: 5px;
+    font-size: clamp(1.7rem, 3vw, 2.7rem);
+  }
+
+  .case-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px;
+    margin: 14px 0;
+  }
+
+  .case-kpis article {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 16px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .case-kpis strong {
+    color: var(--cc-text);
+    overflow-wrap: anywhere;
+  }
+
+  .case-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .case-card {
+    min-width: 0;
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .case-card--wide {
+    grid-column: 1 / -1;
+  }
+
+  .case-card h3 {
+    margin: 0 0 10px;
+    color: var(--cc-green-soft);
+    font-size: .82rem;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+
+  .case-card label + label,
+  .case-card label + button {
+    margin-top: 10px;
+  }
+
+  .case-card .crm-warnings {
+    margin-top: 0;
+  }
+
+  .case-card .crm-warnings p {
+    padding: 9px 10px;
+  }
+
+  .module-thread {
+    border-radius: 17px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .inquiry-card {
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .inquiry-card__summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin: 16px 0 10px;
+  }
+
+  .inquiry-card__summary > * {
+    min-width: 0;
+    padding: 9px 10px;
+    border-radius: 14px;
+    color: var(--cc-text);
+    background: rgba(255,255,255,.055);
+    overflow-wrap: anywhere;
+  }
+
+  .quick-actions {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .quick-actions button {
+    flex: 0 0 auto;
+  }
+
+  .reply-modal {
+    backdrop-filter: blur(18px);
+  }
+
+  .reply-modal__card {
+    border-color: rgba(143,224,180,.22);
+    background: linear-gradient(145deg, rgba(8,31,20,.98), rgba(4,17,11,.96));
+  }
+
+  .reply-preview-card {
+    background: #f9fff9;
+  }
+
+  .panel-toast {
+    z-index: 10000;
+  }
+
+  @media (max-width: 1380px) {
+    .premium-kpi-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .mail-center-workspace {
+      grid-template-columns: 210px minmax(300px, 360px) minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 1120px) {
+    .app-header {
+      align-items: stretch;
+      flex-wrap: wrap;
+    }
+
+    .global-search {
+      order: 3;
+      max-width: none;
+      flex-basis: 100%;
+    }
+
+    .dashboard-command-grid,
+    .dashboard-hero {
+      grid-template-columns: 1fr;
+    }
+
+    .mail-center-workspace {
+      grid-template-columns: 190px minmax(280px, 340px) minmax(0, 1fr);
+    }
+
+    .case-kpis {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 900px) {
+    .cc-system-main {
+      padding: 12px 10px 24px;
+    }
+
+    .app-header {
+      position: relative;
+      border-radius: 20px;
+    }
+
+    .header-actions {
+      max-width: none;
+      justify-content: flex-start;
+    }
+
+    .premium-kpi-grid,
+    .dashboard-command-grid,
+    .inquiry-card__summary {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mail-center-workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      height: auto;
+      min-height: 0;
+    }
+
+    .mail-folders {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      border-radius: 20px;
+    }
+
+    .mail-folders header {
+      min-width: 180px;
+    }
+
+    .mail-folders button {
+      flex: 0 0 auto;
+      min-width: 170px;
+    }
+
+    .mail-thread-list {
+      min-height: 520px;
+    }
+
+    .mail-case-panel {
+      display: none;
+      min-height: 70vh;
+    }
+
+    .cc-system-app.is-mail-detail .mail-thread-list,
+    .cc-system-app.is-mail-detail .mail-folders {
+      display: none;
+    }
+
+    .cc-system-app.is-mail-detail .mail-case-panel {
+      display: block;
+    }
+
+    .mail-back {
+      display: inline-flex;
+    }
+
+    .case-grid,
+    .case-kpis {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .premium-kpi-grid,
+    .dashboard-command-grid,
+    .inquiry-card__summary,
+    .quick-action-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .app-header__brand {
+      align-items: flex-start;
+    }
+
+    .app-header__logo {
+      width: 44px;
+      height: 44px;
+    }
+
+    .mail-thread {
+      grid-template-columns: 38px minmax(0, 1fr);
+    }
+
+    .mail-thread__meta {
+      grid-column: 2;
+      justify-items: start;
+      text-align: left;
+    }
+
+    .case-hero {
+      display: grid;
+    }
+  }
 </style>
 
 <style is:global>
@@ -2975,6 +3931,34 @@ const title = 'CC SYSTEM';
 
     .module-head button {
       width: 100%;
+    }
+  }
+</style>
+
+<style is:global>
+  .cc-system-app[data-active-view="dashboard"] .mail-center-nav,
+  .cc-system-app[data-active-view="mail"] .mail-center-nav,
+  .cc-system-app[data-active-view="dashboard"] .system-strip,
+  .cc-system-app[data-active-view="mail"] .system-strip,
+  .cc-system-app[data-active-view="dashboard"] .stats-grid[data-stats],
+  .cc-system-app[data-active-view="mail"] .stats-grid[data-stats],
+  .cc-system-app[data-active-view="dashboard"] .filters,
+  .cc-system-app[data-active-view="mail"] .filters {
+    display: none !important;
+  }
+
+  @media (min-width: 901px) {
+    .cc-system-app .mail-center-workspace {
+      grid-template-columns: minmax(190px, 220px) minmax(280px, .95fr) minmax(430px, 1.35fr) !important;
+    }
+
+    .cc-system-app .case-kpis {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .cc-system-app .case-kpis strong {
+      overflow-wrap: normal !important;
+      word-break: normal !important;
     }
   }
 </style>
