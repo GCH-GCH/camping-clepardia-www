@@ -1,0 +1,1690 @@
+---
+import { ccSystemDemoData } from '../data/ccSystemDemoData.js';
+
+const buildStamp = new Intl.DateTimeFormat('pl-PL', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+  timeZone: 'Europe/Warsaw',
+}).format(new Date());
+
+const items = ccSystemDemoData;
+const activeItems = items.filter((item) => !['test', 'archived', 'spam'].includes(item.status));
+
+const statusLabels = {
+  new: 'Nowe',
+  needs_reply: 'Do odpowiedzi',
+  replied: 'Odpowiedziane',
+  needs_confirmation: 'Do potwierdzenia',
+  confirmed: 'Potwierdzone',
+  unavailable: 'Brak miejsc',
+  rejected: 'Odrzucone',
+  cancelled: 'Anulowane',
+  archived: 'Archiwum',
+  test: 'Test',
+  spam: 'Spam/test',
+};
+
+const flagMap = {
+  PL: '🇵🇱', NL: '🇳🇱', DE: '🇩🇪', FR: '🇫🇷', CH: '🇨🇭', EN: '🇬🇧',
+  IT: '🇮🇹', CZ: '🇨🇿', ES: '🇪🇸', SE: '🇸🇪', GB: '🇬🇧', SK: '🇸🇰',
+  NO: '🇳🇴', BE: '🇧🇪',
+};
+
+const flag = (item) => {
+  const raw = `${item?.country || ''} ${item?.language || ''}`;
+  const code = raw.match(/\(([A-Z]{2})\)/)?.[1] || raw.match(/\b([A-Z]{2})\b/)?.[1] || '';
+  return flagMap[code] || '🌍';
+};
+
+const money = (item) => Number.isFinite(Number(item?.estimated_total_pln))
+  ? `${Number(item.estimated_total_pln).toLocaleString('pl-PL')} PLN`
+  : '—';
+
+const peopleLabel = (item) => {
+  const people = item?.raw_payload_json?.people || {};
+  const parts = [];
+  if (people.adults) parts.push(`${people.adults} dor.`);
+  if (people.children) parts.push(`${people.children} dzieci`);
+  if (people.toddlers) parts.push(`${people.toddlers} maluchy`);
+  return parts.join(' + ') || '—';
+};
+
+const services = (item) => Array.isArray(item?.services_json) ? item.services_json : [];
+const serviceText = (item) => services(item).map((service) => `${service.label} × ${service.qty}`).join(' · ') || 'Brak usług';
+const tripsText = (item) => Array.isArray(item?.trips_interest_json) && item.trips_interest_json.length
+  ? item.trips_interest_json.join(', ')
+  : 'Brak wycieczek';
+
+const findItem = (predicate, fallback = items[0]) => items.find(predicate) || fallback;
+const dashboardLead = findItem((item) => item.id === 'DEMO-2026-0001');
+const bungalowLead = findItem((item) => /Domek/i.test(item.stay_type));
+const groupLead = findItem((item) => /Grupa|Scout/i.test(`${item.stay_type} ${item.message}`));
+const evLead = findItem((item) => /EV|ciężki|asfalt|heavy/i.test(`${item.message} ${item.notes} ${JSON.stringify(item.vehicle_details_json || {})}`));
+const unavailableLead = findItem((item) => item.status === 'unavailable');
+const missingLead = findItem((item) => item.full_name === 'Missing Data Demo');
+const toursLead = findItem((item) => Array.isArray(item.trips_interest_json) && item.trips_interest_json.length >= 2);
+
+const stats = {
+  all: items.length,
+  active: activeItems.length,
+  countries: new Set(items.map((item) => item.country).filter(Boolean)).size,
+  languages: new Set(items.map((item) => String(item.language || '').toUpperCase()).filter(Boolean)).size,
+  camping: items.filter((item) => /camping|kamper|van|namiot|przyczep|bus/i.test(item.stay_type)).length,
+  bungalows: items.filter((item) => /domek/i.test(item.stay_type)).length,
+  delivered: items.filter((item) => item.mail_delivered).length,
+  failed: items.filter((item) => !item.mail_delivered).length,
+};
+
+const navGroups = [
+  ['Recepcja', [
+    ['🏠', 'Dashboard', '12'],
+    ['✉️', 'Mail Center', '8'],
+    ['👤', 'Klienci', '16'],
+    ['📋', 'Rezerwacje', '24'],
+    ['📅', 'Kalendarz', ''],
+    ['🏡', 'Domki', ''],
+    ['⛺', 'Camping', ''],
+  ]],
+  ['Raporty', [
+    ['📊', 'GUS / Raporty', ''],
+    ['📈', 'Statystyki', ''],
+    ['💬', 'Schematy odpowiedzi', ''],
+  ]],
+  ['Zespół', [
+    ['👥', 'Pracownicy', ''],
+    ['✅', 'Zadania', '5'],
+    ['⚙️', 'Ustawienia', ''],
+  ]],
+];
+
+const templates = [
+  ['✅', 'Potwierdź', 'Rezerwacja możliwa, prośba o potwierdzenie danych.'],
+  ['📝', 'Poproś o dane', 'Brak daty, telefonu, kraju albo liczby osób.'],
+  ['⛔', 'Brak miejsc', 'Grzeczna odmowa z alternatywą i prośbą o inny termin.'],
+  ['⛺', 'Camping L/S', 'Lipiec/sierpień: brak rezerwacji miejsc campingowych.'],
+  ['🏡', 'Domek', 'Zasady domków, check-in/out, wyposażenie.'],
+  ['⚡', 'Prąd / EV', 'Prąd 10A dla kampera, brak ładowania EV na stanowisku.'],
+  ['🚌', 'Wycieczki', 'Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców i inne.'],
+  ['👥', 'Grupa / skauci', 'Obsługa większej grupy, zasady i dane do doprecyzowania.'],
+];
+
+const sections = [
+  ['audit-header', 'Header audytu'],
+  ['sidebar-expanded', 'Sidebar expanded'],
+  ['sidebar-collapsed', 'Sidebar collapsed'],
+  ['dashboard', 'Dashboard / Recepcja'],
+  ['mail-center', 'Mail Center'],
+  ['clients', 'Klienci / CRM'],
+  ['reservations', 'Rezerwacje'],
+  ['calendar', 'Kalendarz'],
+  ['bungalows', 'Domki'],
+  ['camping', 'Camping'],
+  ['reply-templates', 'Schematy odpowiedzi'],
+  ['reply-modal', 'Modal odpowiedzi'],
+  ['settings', 'Ustawienia'],
+  ['statistics', 'Statystyki'],
+  ['mobile', 'Mobile 390'],
+  ['todo', 'Known Issues / TODO'],
+];
+
+const calendarResources = ['Domek 2-os.', 'Domek 3-os.', 'Domek 4-os.', 'Domek Blue', 'Domek Family', 'Pole A', 'Pole B', 'Pole C'];
+const calendarItems = activeItems.slice(0, 10);
+const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow,noarchive" />
+    <title>CC SYSTEM — Audit Preview</title>
+    <meta name="description" content="Statyczny podgląd UI/UX CC SYSTEM na danych demo, bez API i bez prawdziwych danych." />
+  </head>
+  <body>
+    <main class="audit-shell">
+      <header class="audit-hero" id="audit-header">
+        <div>
+          <p class="eyebrow">Camping Clepardia · CC SYSTEM ONLINE</p>
+          <h1>CC SYSTEM — Audit Preview</h1>
+          <p class="hero-copy">Statyczny podgląd UI/UX na danych demo, bez prawdziwych danych i bez requestów API.</p>
+        </div>
+        <aside class="audit-meta">
+          <span>DEMO</span>
+          <span>NOINDEX</span>
+          <span>NO API</span>
+          <span>SAFE FOR REVIEW</span>
+          <small>Build/test: {buildStamp}</small>
+        </aside>
+      </header>
+
+      <nav class="toc" aria-label="Spis sekcji audytu">
+        {sections.map(([id, label]) => <a href={`#${id}`}>{label}</a>)}
+      </nav>
+
+      <section class="audit-section" id="sidebar-expanded">
+        <header>
+          <span class="section-number">01</span>
+          <div>
+            <h2>Sidebar expanded</h2>
+            <p>Co sprawdzać: czy moduły są pogrupowane, czy nazwy są czytelne i czy panel wygląda jak narzędzie recepcji, nie jak lista przypadkowych przycisków.</p>
+          </div>
+        </header>
+        <div class="sidebar-stage">
+          <aside class="sidebar-demo sidebar-demo--expanded">
+            <div class="brand-pill"><span>▲</span><strong>Camping Clepardia<br /><small>CC SYSTEM ONLINE</small></strong></div>
+            {navGroups.map(([group, links]) => (
+              <div class="sidebar-group">
+                <p>{group}</p>
+                {links.map(([icon, label, count]) => (
+                  <article class={label === 'Mail Center' ? 'is-active' : ''}>
+                    <span>{icon}</span><b>{label}</b>{count && <em>{count}</em>}
+                  </article>
+                ))}
+              </div>
+            ))}
+            <button>← Zwiń menu</button>
+          </aside>
+          <div class="audit-note-card">
+            <h3>Założenie UX</h3>
+            <p>Domyślnie desktop ma szeroki sidebar z pełnymi nazwami. Zwijanie jest ręczne i przewidywalne — bez rozrostu na hover.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="audit-section" id="sidebar-collapsed">
+        <header>
+          <span class="section-number">02</span>
+          <div>
+            <h2>Sidebar collapsed</h2>
+            <p>Co sprawdzać: czy po zwinięciu nadal wiadomo, gdzie są najważniejsze moduły, a ikony nie zabierają miejsca głównej pracy recepcji.</p>
+          </div>
+        </header>
+        <div class="collapsed-stage">
+          <aside class="sidebar-demo sidebar-demo--collapsed">
+            <div class="brand-icon">▲</div>
+            {navGroups.flatMap(([, links]) => links).map(([icon, label, count]) => (
+              <article title={label}>
+                <span>{icon}</span>{count && <em>{count}</em>}
+              </article>
+            ))}
+            <button title="Rozwiń menu">→</button>
+          </aside>
+          <div class="legend-list">
+            {navGroups.flatMap(([, links]) => links).slice(0, 9).map(([icon, label]) => <span><b>{icon}</b>{label}</span>)}
+          </div>
+        </div>
+      </section>
+
+      <section class="audit-section" id="dashboard">
+        <header>
+          <span class="section-number">03</span>
+          <div>
+            <h2>Dashboard / Recepcja</h2>
+            <p>Co sprawdzać: szybkie KPI, pilne sprawy, mały Mail Center, zadania i status operacyjny bez udawania pełnej tabeli rezerwacji.</p>
+          </div>
+        </header>
+        <div class="dashboard-grid">
+          <section class="hero-panel">
+            <p class="eyebrow">Dzisiaj w recepcji</p>
+            <h3>12 nowych zapytań · 5 pilnych · 100% demo safe</h3>
+            <div class="kpi-grid">
+              <article><span>🟢</span><b>{stats.active}</b><small>aktywnych demo</small></article>
+              <article><span>🏕️</span><b>{stats.camping}</b><small>camping</small></article>
+              <article><span>🏡</span><b>{stats.bungalows}</b><small>domki</small></article>
+              <article><span>✉️</span><b>{stats.delivered}/{stats.all}</b><small>mail delivery</small></article>
+            </div>
+          </section>
+          <section class="work-card urgent-card">
+            <h3>🔥 Pilne teraz</h3>
+            {[dashboardLead, evLead, missingLead].map((item) => (
+              <article class="mini-thread">
+                <strong>{flag(item)} {item.full_name}</strong>
+                <span>{statusLabels[item.status]} · {item.stay_type}</span>
+                <small>{item.arrival_date || 'brak daty'} — {item.departure_date || 'brak wyjazdu'}</small>
+              </article>
+            ))}
+          </section>
+          <section class="work-card">
+            <h3>Mini Mail Center</h3>
+            {activeItems.slice(0, 4).map((item) => (
+              <article class="mail-line">
+                <b>{item.full_name}</b>
+                <span>{item.message}</span>
+                <em>{money(item)}</em>
+              </article>
+            ))}
+          </section>
+          <section class="work-card">
+            <h3>Zadania</h3>
+            <ul class="clean-list">
+              <li>Odpowiedzieć na camping L/S — bez potwierdzania miejsca.</li>
+              <li>Poprosić o brakującą datę wyjazdu.</li>
+              <li>Oznaczyć ciężki pojazd i asfalt.</li>
+              <li>Przygotować odpowiedź dla grupy skautów.</li>
+            </ul>
+          </section>
+        </div>
+      </section>
+
+      <section class="audit-section" id="mail-center">
+        <header>
+          <span class="section-number">04</span>
+          <div>
+            <h2>Mail Center — widok docelowy</h2>
+            <p>Co sprawdzać: czy przypomina Gmail/CRM, czy lista wątków jest kompaktowa, czy panel sprawy jest czytelny i czy odpowiedzi są przygotowane jako akcje.</p>
+          </div>
+        </header>
+        <div class="mail-center-preview">
+          <aside class="mail-folders-preview">
+            <h3>Inbox</h3>
+            {[
+              ['Wszystkie', stats.all],
+              ['Nowe', items.filter((item) => item.status === 'new').length],
+              ['Do odpowiedzi', items.filter((item) => item.status === 'needs_reply').length],
+              ['Potwierdzone', items.filter((item) => item.status === 'confirmed').length],
+              ['Brak miejsc', items.filter((item) => item.status === 'unavailable').length],
+              ['Archiwum', items.filter((item) => item.status === 'archived').length],
+            ].map(([label, value]) => <button><span>{label}</span><b>{value}</b></button>)}
+          </aside>
+          <section class="thread-list-preview">
+            {activeItems.slice(0, 7).map((item, index) => (
+              <article class={index === 0 ? 'is-selected' : ''}>
+                <strong>{flag(item)} {item.full_name}</strong>
+                <span>{item.arrival_date || 'brak daty'} — {item.departure_date || 'brak daty'}</span>
+                <small>{peopleLabel(item)} · {item.stay_type}</small>
+                <b>{money(item)}</b>
+              </article>
+            ))}
+          </section>
+          <section class="case-preview">
+            <div class="case-header">
+              <span class="avatar">AK</span>
+              <div>
+                <h3>{dashboardLead.full_name}</h3>
+                <p>{flag(dashboardLead)} {dashboardLead.country} · język {dashboardLead.language}</p>
+              </div>
+              <em>{statusLabels[dashboardLead.status]}</em>
+            </div>
+            <div class="case-kpis">
+              <article><small>Termin</small><b>{dashboardLead.arrival_date} — {dashboardLead.departure_date}</b></article>
+              <article><small>Osoby</small><b>{peopleLabel(dashboardLead)}</b></article>
+              <article><small>Pobyt</small><b>{dashboardLead.stay_type}</b></article>
+              <article><small>Cena</small><b>{money(dashboardLead)}</b></article>
+            </div>
+            <section class="warning-box">
+              <h4>Ważne informacje</h4>
+              <ul>
+                <li>Lipiec/sierpień + camping: miejsca według kolejności przyjazdu.</li>
+                <li>Prąd 10A: dostępny dla kampera/przyczepy.</li>
+                <li>Nie potwierdzać konkretnego miejsca campingowego.</li>
+              </ul>
+            </section>
+            <div class="reply-actions">
+              <button>Otwórz odpowiedź</button>
+              <button>Kopiuj summary</button>
+              <button>Oznacz jako odpowiedziane</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="audit-section" id="clients">
+        <header>
+          <span class="section-number">05</span>
+          <div>
+            <h2>Klienci — CRM profile</h2>
+            <p>Co sprawdzać: czy widok klienta łączy dane kontaktowe, pobyty, notatki, preferencje i szybkie akcje bez mieszania z inboxem.</p>
+          </div>
+        </header>
+        <div class="crm-preview">
+          <section class="crm-hero-card">
+            <span class="avatar avatar-lg">AK</span>
+            <div>
+              <h3>{dashboardLead.full_name} {flag(dashboardLead)}</h3>
+              <p>{dashboardLead.email} · {dashboardLead.phone} · {dashboardLead.country}</p>
+              <div class="tag-row"><span>Klient</span><span>Camping L/S</span><span>⭐ 5/5 demo</span></div>
+            </div>
+            <dl>
+              <div><dt>Pierwszy kontakt</dt><dd>26.06.2026</dd></div>
+              <div><dt>Liczba pobytów</dt><dd>3</dd></div>
+              <div><dt>Łączny obrót</dt><dd>1 320 PLN</dd></div>
+              <div><dt>Język</dt><dd>{dashboardLead.language}</dd></div>
+            </dl>
+          </section>
+          <section class="work-card">
+            <h3>Następny pobyt</h3>
+            <article class="stay-card">
+              <b>{dashboardLead.stay_type}</b>
+              <span>{dashboardLead.arrival_date} — {dashboardLead.departure_date}</span>
+              <em>{money(dashboardLead)}</em>
+            </article>
+          </section>
+          <section class="work-card">
+            <h3>Historia</h3>
+            {[dashboardLead, bungalowLead, toursLead].map((item) => (
+              <article class="history-line"><span>{statusLabels[item.status]}</span><b>{item.arrival_date} — {item.departure_date || '—'}</b><em>{money(item)}</em></article>
+            ))}
+          </section>
+          <section class="work-card">
+            <h3>Notatki i preferencje</h3>
+            <p>Preferuje spokojne miejsca, jasne zasady i szybki kontakt mailowy. Przy L/S pamiętać o komunikacie „bez rezerwacji miejsc campingowych”.</p>
+            <div class="tag-row"><span>Blisko sanitariatów</span><span>Cisza</span><span>Miejsce z prądem</span><span>Pies mile widziany</span></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="audit-section" id="reservations">
+        <header>
+          <span class="section-number">06</span>
+          <div>
+            <h2>Rezerwacje — system operacyjny</h2>
+            <p>Co sprawdzać: tabela/lista, statusy, panel szczegółów, cena i mini kalendarz pobytu jako osobny moduł, nie kopia Mail Center.</p>
+          </div>
+        </header>
+        <div class="reservations-preview">
+          <div class="reservation-kpis">
+            <article><span>📋</span><b>{stats.all}</b><small>wszystkie</small></article>
+            <article><span>✅</span><b>{items.filter((item) => item.status === 'confirmed').length}</b><small>potwierdzone</small></article>
+            <article><span>⏳</span><b>{items.filter((item) => item.status === 'needs_confirmation').length}</b><small>do potwierdzenia</small></article>
+            <article><span>⛔</span><b>{items.filter((item) => item.status === 'unavailable').length}</b><small>brak miejsc</small></article>
+          </div>
+          <section class="reservation-table-preview">
+            <header><span>Klient</span><span>Termin</span><span>Typ</span><span>Cena</span><span>Status</span></header>
+            {activeItems.slice(0, 8).map((item) => (
+              <article>
+                <strong>{flag(item)} {item.full_name}</strong>
+                <span>{item.arrival_date || '—'} — {item.departure_date || '—'}</span>
+                <span>{item.stay_type}</span>
+                <span>{money(item)}</span>
+                <em>{statusLabels[item.status]}</em>
+              </article>
+            ))}
+          </section>
+          <aside class="reservation-detail-preview">
+            <h3>{unavailableLead.full_name}</h3>
+            <p>{unavailableLead.message}</p>
+            <div class="case-kpis">
+              <article><small>Termin</small><b>{unavailableLead.arrival_date} — {unavailableLead.departure_date}</b></article>
+              <article><small>Pobyt</small><b>{unavailableLead.stay_type}</b></article>
+              <article><small>Status</small><b>{statusLabels[unavailableLead.status]}</b></article>
+              <article><small>Cena</small><b>{money(unavailableLead)}</b></article>
+            </div>
+            <div class="mini-month">
+              {monthDays.slice(0, 31).map((day) => <span class={day >= 1 && day <= 4 ? 'is-stay' : ''}>{day}</span>)}
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="audit-section" id="calendar">
+        <header>
+          <span class="section-number">07</span>
+          <div>
+            <h2>Kalendarz — miesiąc, domki i camping</h2>
+            <p>Co sprawdzać: zasoby w wierszach, rezerwacje jako paski, ostrzeżenie L/S i boczny panel szczegółów.</p>
+          </div>
+        </header>
+        <div class="calendar-preview">
+          <main class="calendar-board-preview">
+            <div class="calendar-head"><strong>Lipiec 2026</strong>{monthDays.map((day) => <span>{day}</span>)}</div>
+            {calendarResources.map((resource, rowIndex) => (
+              <div class="calendar-row-preview">
+                <b>{resource}</b>
+                {monthDays.map(() => <span></span>)}
+                {calendarItems.filter((_, index) => index % calendarResources.length === rowIndex).slice(0, 2).map((item) => {
+                  const start = Math.max(1, Math.min(28, Number(String(item.arrival_date || '').slice(8, 10)) || rowIndex + 2));
+                  const span = Math.max(1, Math.min(6, Number(item.nights || 2)));
+                  const cabin = /domek/i.test(item.stay_type);
+                  const summer = /2026-07|2026-08/.test(`${item.arrival_date} ${item.departure_date}`) && /camping|kamper|namiot|van|bus/i.test(item.stay_type);
+                  return <article class:list={[cabin ? 'is-cabin' : 'is-camp', summer && 'is-summer']} style={`grid-column:${start + 1} / span ${span};`}><strong>{flag(item)} {item.full_name}</strong><small>{item.arrival_date} — {item.departure_date || '—'}</small></article>;
+                })}
+              </div>
+            ))}
+            <div class="summer-note">LIPIEC / SIERPIEŃ — CAMPING BEZ REZERWACJI · miejsca według kolejności przyjazdu</div>
+          </main>
+          <aside class="calendar-side">
+            <h3>{groupLead.full_name}</h3>
+            <p>{groupLead.stay_type} · {peopleLabel(groupLead)}</p>
+            <div class="tag-row"><span>Camping L/S</span><span>Grupa</span><span>Wymaga odpowiedzi</span></div>
+            <ul class="clean-list">
+              <li>Nie potwierdzać miejsca campingowego w lipcu.</li>
+              <li>Poprosić o dokładną liczbę namiotów i aut.</li>
+              <li>Zaproponować przyjazd ok. 12:00.</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+      <section class="audit-section" id="bungalows">
+        <header>
+          <span class="section-number">08</span>
+          <div>
+            <h2>Domki</h2>
+            <p>Co sprawdzać: czy zasady domków są oddzielone od campingu i czy recepcja widzi check-in/out, ceny demo oraz zapytania o domki.</p>
+          </div>
+        </header>
+        <div class="rules-grid">
+          <article><span>🏡</span><b>Domek 2-os.</b><small>demo 220 PLN/noc</small></article>
+          <article><span>🏠</span><b>Domek 3-os.</b><small>demo 270–300 PLN/noc</small></article>
+          <article><span>🏘️</span><b>Domek 4-os.</b><small>demo 400 PLN/noc</small></article>
+          <article><span>🕓</span><b>Check-in</b><small>od 16:00</small></article>
+          <article><span>🕚</span><b>Check-out</b><small>do 11:00</small></article>
+          <article><span>🧴</span><b>Ręczniki/kosmetyki</b><small>we własnym zakresie</small></article>
+        </div>
+        <div class="module-thread-list">
+          {[bungalowLead, unavailableLead, findItem((item) => item.full_name === 'Sophie Lambert')].map((item) => (
+            <article><strong>{flag(item)} {item.full_name}</strong><span>{item.stay_type} · {item.arrival_date} — {item.departure_date}</span><em>{money(item)}</em></article>
+          ))}
+        </div>
+      </section>
+
+      <section class="audit-section" id="camping">
+        <header>
+          <span class="section-number">09</span>
+          <div>
+            <h2>Camping</h2>
+            <p>Co sprawdzać: czy najważniejsze zasady operacyjne są natychmiast widoczne, szczególnie lipiec/sierpień i prąd/EV.</p>
+          </div>
+        </header>
+        <div class="rules-grid rules-grid--accent">
+          {[
+            ['⛺', 'Lipiec/sierpień', 'bez rezerwacji miejsc campingowych'],
+            ['🕛', 'Check-out', 'camping do 12:00'],
+            ['⚡', 'Prąd', '10A dla kampera/przyczepy'],
+            ['🔌', 'EV', 'brak ładowania na stanowisku'],
+            ['🚐', 'Ciężkie pojazdy', 'kierować na asfalt/stabilne miejsca'],
+            ['🐕', 'Pies', '0 PLN, sprzątanie po pupilu'],
+          ].map(([icon, title, copy]) => <article><span>{icon}</span><b>{title}</b><small>{copy}</small></article>)}
+        </div>
+        <div class="module-thread-list">
+          {[dashboardLead, evLead, groupLead, toursLead].map((item) => (
+            <article><strong>{flag(item)} {item.full_name}</strong><span>{serviceText(item)}</span><em>{money(item)}</em></article>
+          ))}
+        </div>
+      </section>
+
+      <section class="audit-section" id="reply-templates">
+        <header>
+          <span class="section-number">10</span>
+          <div>
+            <h2>Schematy odpowiedzi</h2>
+            <p>Co sprawdzać: czy biblioteka odpowiedzi pokrywa najczęstsze przypadki recepcji i nie wymaga szukania tekstu po całym panelu.</p>
+          </div>
+        </header>
+        <div class="template-grid">
+          {templates.map(([icon, title, copy]) => <article><span>{icon}</span><h3>{title}</h3><p>{copy}</p></article>)}
+        </div>
+      </section>
+
+      <section class="audit-section" id="reply-modal">
+        <header>
+          <span class="section-number">11</span>
+          <div>
+            <h2>Modal odpowiedzi premium</h2>
+            <p>Co sprawdzać: statyczny stan otwartego modala — temat, język, treść odpowiedzi i akcje kopiowania/mailto.</p>
+          </div>
+        </header>
+        <div class="modal-preview">
+          <section class="modal-card">
+            <header><span>✨</span><div><h3>Camping lipiec/sierpień — bez rezerwacji</h3><p>Język: PL · Klient: {dashboardLead.full_name}</p></div></header>
+            <article class="email-preview">
+              <h4>Camping Clepardia — odpowiedź na zapytanie</h4>
+              <p>Dzień dobry Pani Anno,</p>
+              <p>Dziękujemy za zapytanie dotyczące pobytu na naszym campingu. W lipcu i sierpniu nie prowadzimy rezerwacji konkretnych miejsc campingowych — miejsca są wybierane według kolejności przyjazdu.</p>
+              <p>Prąd 10A jest dostępny dla kamperów i przyczep. Najlepiej przyjechać około godziny 12:00.</p>
+              <p>Pozdrawiamy,<br />Camping Clepardia</p>
+            </article>
+            <footer><button>Kopiuj treść</button><button>Otwórz mailto</button><button>Zamknij</button></footer>
+          </section>
+        </div>
+      </section>
+
+      <section class="audit-section" id="settings">
+        <header>
+          <span class="section-number">12</span>
+          <div>
+            <h2>Ustawienia</h2>
+            <p>Co sprawdzać: czy konfiguracja wygląda jak bezpieczny panel administracyjny i nie ujawnia sekretów.</p>
+          </div>
+        </header>
+        <div class="settings-grid-preview">
+          {[
+            ['Resend', 'demo status: OK / bez wysyłki'],
+            ['Supabase', 'demo status: OK / bez pobierania danych'],
+            ['Godziny recepcji', '8:00–22:00'],
+            ['Godziny bramy', '6:00–23:00'],
+            ['Cennik', 'demo snapshot'],
+            ['Link wycieczek', 'lista opcji demo'],
+            ['Języki', 'PL, EN, DE, IT, FR, ES, NL, CS, SK, SV'],
+            ['Sekrety', 'niewidoczne w raporcie'],
+          ].map(([label, value]) => <article><span>{label}</span><strong>{value}</strong></article>)}
+        </div>
+      </section>
+
+      <section class="audit-section" id="statistics">
+        <header>
+          <span class="section-number">13</span>
+          <div>
+            <h2>Statystyki</h2>
+            <p>Co sprawdzać: przykładowe metryki z danych demo — zapytania, kraje, języki, camping/domki, mail delivery i feedback.</p>
+          </div>
+        </header>
+        <div class="stats-preview">
+          {[
+            ['Zapytania demo', stats.all],
+            ['Aktywne sprawy', stats.active],
+            ['Kraje', stats.countries],
+            ['Języki', stats.languages],
+            ['Camping', stats.camping],
+            ['Domki', stats.bungalows],
+            ['Mail OK', stats.delivered],
+            ['Mail fallback', stats.failed],
+          ].map(([label, value]) => <article><strong>{value}</strong><span>{label}</span><i style={`width:${Math.max(16, Math.min(100, Number(value) * 7))}%`}></i></article>)}
+        </div>
+      </section>
+
+      <section class="audit-section" id="mobile">
+        <header>
+          <span class="section-number">14</span>
+          <div>
+            <h2>Mobile preview 390px</h2>
+            <p>Co sprawdzać: drawer sidebara, kompaktowa lista Mail Center, szczegóły wątku i statyczny modal odpowiedzi w telefonicznym kontenerze.</p>
+          </div>
+        </header>
+        <div class="phone-stage">
+          <section class="phone-frame">
+            <header><button>☰</button><strong>CC SYSTEM</strong><span>●</span></header>
+            <aside class="mobile-drawer">
+              <div class="brand-pill"><span>▲</span><strong>Camping Clepardia<br /><small>ONLINE</small></strong></div>
+              {navGroups[0][1].slice(0, 6).map(([icon, label, count]) => <article><span>{icon}</span><b>{label}</b>{count && <em>{count}</em>}</article>)}
+            </aside>
+            <main>
+              <h3>Mail Center</h3>
+              {[dashboardLead, evLead, missingLead].map((item) => <article class="phone-thread"><strong>{flag(item)} {item.full_name}</strong><span>{item.stay_type}</span><small>{item.message}</small></article>)}
+              <section class="phone-detail">
+                <h4>{dashboardLead.full_name}</h4>
+                <p>{dashboardLead.arrival_date} — {dashboardLead.departure_date} · {money(dashboardLead)}</p>
+                <button>Otwórz odpowiedź</button>
+              </section>
+              <section class="phone-modal">
+                <h4>Odpowiedź premium</h4>
+                <p>Camping lipiec/sierpień — miejsca według kolejności przyjazdu.</p>
+                <div><button>Kopiuj</button><button>Zamknij</button></div>
+              </section>
+            </main>
+          </section>
+        </div>
+      </section>
+
+      <section class="audit-section" id="todo">
+        <header>
+          <span class="section-number">15</span>
+          <div>
+            <h2>Known Issues / TODO</h2>
+            <p>Co sprawdzać: granica między działającym UI demo a rzeczami, które wymagają osobnych tabel lub dalszego wdrożenia.</p>
+          </div>
+        </header>
+        <div class="todo-grid">
+          <article><h3>Makiety świadome</h3><p>Widoki kalendarza zasobów, CRM 360, pracownicy, zadania i GUS są statycznym kierunkiem UI — bez zapisu do docelowych tabel.</p></article>
+          <article><h3>Wymaga tabel</h3><p>Docelowe clients, reservations, mail_threads, mail_messages, tasks, staff i assets powinny być osobnym etapem backendowym.</p></article>
+          <article><h3>Do UI polish</h3><p>Dalsze dopracowanie proporcji tabel, dostępności keyboard, microcopy statusów i eksportu potwierdzeń.</p></article>
+          <article><h3>Bezpieczeństwo</h3><p>Ta strona używa wyłącznie danych demo, ma noindex/nofollow/noarchive i nie wykonuje requestów API.</p></article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
+
+<style>
+  :root {
+    --bg: #020907;
+    --panel: rgba(7, 27, 20, .86);
+    --panel-2: rgba(10, 39, 28, .78);
+    --line: rgba(143, 224, 180, .16);
+    --line-strong: rgba(143, 224, 180, .34);
+    --text: #f3fff7;
+    --muted: rgba(239, 251, 243, .68);
+    --dim: rgba(239, 251, 243, .48);
+    --green: #3CB371;
+    --green-soft: #9EE8BD;
+    --amber: #ffd18b;
+    --red: #ff7676;
+    color-scheme: dark;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; background: var(--bg); }
+  body {
+    margin: 0;
+    min-width: 320px;
+    color: var(--text);
+    background:
+      radial-gradient(circle at 8% 0%, rgba(60,179,113,.22), transparent 32rem),
+      radial-gradient(circle at 92% 12%, rgba(45,117,255,.12), transparent 28rem),
+      linear-gradient(180deg, #03110d 0%, #020907 44%, #010604 100%);
+  }
+
+  button, input { font: inherit; }
+  a { color: inherit; text-decoration: none; }
+  h1, h2, h3, h4, p, dl, dd { margin: 0; }
+  small, span, em, p, li { overflow-wrap: anywhere; }
+
+  .audit-shell {
+    width: min(1600px, calc(100% - 28px));
+    margin: 0 auto;
+    padding: 28px 0 72px;
+  }
+
+  .audit-hero,
+  .audit-section {
+    border: 1px solid var(--line);
+    background:
+      radial-gradient(circle at 10% 0%, rgba(60,179,113,.18), transparent 24rem),
+      linear-gradient(135deg, rgba(8,31,23,.92), rgba(2,13,11,.92));
+    box-shadow: 0 30px 90px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.04);
+    backdrop-filter: blur(18px);
+  }
+
+  .audit-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 22px;
+    align-items: end;
+    padding: clamp(24px, 4vw, 46px);
+    border-radius: 34px;
+  }
+
+  .eyebrow {
+    color: var(--green-soft);
+    font-size: .76rem;
+    font-weight: 950;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin-top: 8px;
+    font-size: clamp(2.8rem, 7vw, 6.4rem);
+    line-height: .88;
+    letter-spacing: -.075em;
+  }
+
+  .hero-copy {
+    max-width: 760px;
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    font-weight: 800;
+  }
+
+  .audit-meta,
+  .tag-row,
+  .reply-actions,
+  .modal-card footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .audit-meta {
+    width: min(360px, 100%);
+    justify-content: flex-end;
+  }
+
+  .audit-meta span,
+  .tag-row span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0 11px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: #07140f;
+    background: linear-gradient(135deg, #a8f0c7, var(--green));
+    font-size: .72rem;
+    font-weight: 950;
+  }
+
+  .audit-meta small {
+    flex-basis: 100%;
+    color: var(--dim);
+    text-align: right;
+    font-weight: 800;
+  }
+
+  .toc {
+    position: sticky;
+    top: 10px;
+    z-index: 20;
+    display: flex;
+    gap: 8px;
+    margin: 16px 0;
+    overflow-x: auto;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: rgba(3,14,11,.84);
+    backdrop-filter: blur(14px);
+  }
+
+  .toc a {
+    flex: 0 0 auto;
+    padding: 10px 12px;
+    border: 1px solid rgba(143,224,180,.12);
+    border-radius: 999px;
+    color: var(--muted);
+    background: rgba(255,255,255,.04);
+    font-size: .82rem;
+    font-weight: 900;
+  }
+
+  .audit-section {
+    display: grid;
+    gap: 18px;
+    margin-top: 18px;
+    padding: clamp(18px, 3vw, 30px);
+    border-radius: 30px;
+    scroll-margin-top: 92px;
+  }
+
+  .audit-section > header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  .section-number {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border-radius: 16px;
+    color: #07140f;
+    background: linear-gradient(135deg, #a8f0c7, var(--green));
+    font-weight: 950;
+  }
+
+  h2 {
+    font-size: clamp(1.8rem, 3vw, 3rem);
+    line-height: .95;
+    letter-spacing: -.05em;
+  }
+
+  .audit-section > header p {
+    max-width: 920px;
+    margin-top: 8px;
+    color: var(--muted);
+    font-weight: 800;
+  }
+
+  .sidebar-stage,
+  .collapsed-stage,
+  .dashboard-grid,
+  .crm-preview,
+  .reservations-preview,
+  .calendar-preview,
+  .phone-stage {
+    display: grid;
+    gap: 16px;
+  }
+
+  .sidebar-stage {
+    grid-template-columns: 300px minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .sidebar-demo {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+    min-height: 560px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 26px;
+    background: linear-gradient(180deg, rgba(5,29,20,.98), rgba(2,16,12,.98));
+  }
+
+  .brand-pill,
+  .case-header,
+  .modal-card header,
+  .phone-frame > header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .brand-pill span,
+  .brand-icon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border-radius: 50%;
+    color: #07140f;
+    background: linear-gradient(135deg, #d8ffe5, var(--green));
+    font-weight: 950;
+  }
+
+  .brand-pill small {
+    color: var(--green-soft);
+    font-size: .68rem;
+  }
+
+  .sidebar-group {
+    display: grid;
+    gap: 7px;
+  }
+
+  .sidebar-group p {
+    margin: 10px 8px 3px;
+    color: var(--dim);
+    font-size: .72rem;
+    font-weight: 950;
+    text-transform: uppercase;
+  }
+
+  .sidebar-demo article,
+  .mail-folders-preview button,
+  .phone-frame article {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    gap: 9px;
+    align-items: center;
+    min-height: 44px;
+    padding: 7px 9px;
+    border: 1px solid rgba(143,224,180,.12);
+    border-radius: 15px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .sidebar-demo article.is-active,
+  .mail-folders-preview button:first-of-type,
+  .thread-list-preview .is-selected {
+    border-color: rgba(143,224,180,.36);
+    background: linear-gradient(135deg, rgba(60,179,113,.42), rgba(60,179,113,.16));
+  }
+
+  .sidebar-demo article span {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border-radius: 12px;
+    background: rgba(60,179,113,.14);
+  }
+
+  .sidebar-demo article b,
+  .mail-folders-preview button span {
+    font-size: .9rem;
+  }
+
+  .sidebar-demo article em,
+  .mail-folders-preview b {
+    display: grid;
+    min-width: 22px;
+    height: 22px;
+    place-items: center;
+    border-radius: 999px;
+    color: #07140f;
+    background: var(--green-soft);
+    font-size: .68rem;
+    font-style: normal;
+    font-weight: 950;
+  }
+
+  .sidebar-demo button,
+  .case-preview button,
+  .modal-card button,
+  .phone-detail button,
+  .phone-modal button {
+    min-height: 42px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    color: var(--text);
+    background: rgba(255,255,255,.06);
+    font-weight: 950;
+  }
+
+  .audit-note-card,
+  .work-card,
+  .case-preview,
+  .reservation-detail-preview,
+  .calendar-side,
+  .modal-card,
+  .todo-grid article {
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: var(--panel);
+    padding: 18px;
+  }
+
+  .audit-note-card {
+    display: grid;
+    align-content: center;
+    min-height: 300px;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(60,179,113,.2), transparent 18rem),
+      var(--panel);
+  }
+
+  .audit-note-card p,
+  .work-card p,
+  .todo-grid p {
+    margin-top: 8px;
+    color: var(--muted);
+    font-weight: 800;
+  }
+
+  .collapsed-stage {
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+
+  .sidebar-demo--collapsed {
+    min-height: 520px;
+    padding: 12px;
+    justify-items: center;
+  }
+
+  .sidebar-demo--collapsed article,
+  .sidebar-demo--collapsed button {
+    width: 58px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    position: relative;
+  }
+
+  .sidebar-demo--collapsed article em {
+    position: absolute;
+    right: -4px;
+    top: -4px;
+  }
+
+  .legend-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    align-content: start;
+  }
+
+  .legend-list span {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    min-height: 58px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: rgba(255,255,255,.045);
+    font-weight: 900;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr);
+  }
+
+  .hero-panel {
+    grid-column: 1 / -1;
+    padding: 24px;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(60,179,113,.28), transparent 20rem),
+      rgba(5,29,20,.85);
+  }
+
+  .hero-panel h3 {
+    margin-top: 8px;
+    font-size: clamp(1.8rem, 3vw, 3.2rem);
+    line-height: .95;
+  }
+
+  .kpi-grid,
+  .rules-grid,
+  .template-grid,
+  .settings-grid-preview,
+  .stats-preview,
+  .todo-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .kpi-grid {
+    margin-top: 18px;
+  }
+
+  .kpi-grid article,
+  .rules-grid article,
+  .template-grid article,
+  .settings-grid-preview article,
+  .stats-preview article,
+  .reservation-kpis article {
+    position: relative;
+    display: grid;
+    gap: 6px;
+    min-height: 112px;
+    padding: 16px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .kpi-grid b,
+  .reservation-kpis b,
+  .stats-preview strong {
+    font-size: 2rem;
+  }
+
+  .kpi-grid small,
+  .rules-grid small,
+  .settings-grid-preview span,
+  .stats-preview span,
+  .reservation-kpis small,
+  .thread-list-preview small,
+  .case-kpis small {
+    color: var(--dim);
+    font-weight: 850;
+  }
+
+  .mini-thread,
+  .mail-line,
+  .history-line,
+  .stay-card,
+  .module-thread-list article {
+    display: grid;
+    gap: 4px;
+    padding: 12px;
+    border: 1px solid rgba(143,224,180,.11);
+    border-radius: 15px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .mini-thread span,
+  .mini-thread small,
+  .mail-line span,
+  .mail-line em,
+  .history-line span,
+  .history-line em,
+  .module-thread-list span,
+  .module-thread-list em {
+    color: var(--muted);
+    font-style: normal;
+    font-weight: 800;
+  }
+
+  .work-card {
+    display: grid;
+    gap: 10px;
+  }
+
+  .clean-list {
+    display: grid;
+    gap: 9px;
+    margin: 0;
+    padding-left: 20px;
+    color: var(--muted);
+    font-weight: 800;
+  }
+
+  .mail-center-preview {
+    display: grid;
+    grid-template-columns: 230px minmax(280px, .9fr) minmax(420px, 1.2fr);
+    gap: 14px;
+  }
+
+  .mail-folders-preview,
+  .thread-list-preview,
+  .case-preview {
+    min-width: 0;
+  }
+
+  .mail-folders-preview,
+  .thread-list-preview {
+    display: grid;
+    gap: 9px;
+    align-content: start;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: var(--panel);
+  }
+
+  .mail-folders-preview button {
+    width: 100%;
+    color: var(--text);
+    text-align: left;
+  }
+
+  .thread-list-preview article {
+    display: grid;
+    gap: 5px;
+    padding: 13px;
+    border: 1px solid rgba(143,224,180,.11);
+    border-radius: 16px;
+    background: rgba(255,255,255,.04);
+  }
+
+  .thread-list-preview b {
+    justify-self: end;
+    color: var(--green-soft);
+  }
+
+  .case-preview {
+    display: grid;
+    gap: 14px;
+  }
+
+  .avatar {
+    display: grid;
+    width: 54px;
+    height: 54px;
+    place-items: center;
+    border-radius: 50%;
+    color: #07140f;
+    background: linear-gradient(135deg, #c8ffd9, var(--green));
+    font-weight: 950;
+  }
+
+  .avatar-lg {
+    width: 74px;
+    height: 74px;
+    font-size: 1.35rem;
+  }
+
+  .case-header {
+    justify-content: space-between;
+  }
+
+  .case-header p,
+  .case-header em {
+    color: var(--muted);
+    font-style: normal;
+    font-weight: 850;
+  }
+
+  .case-kpis {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .case-kpis article {
+    padding: 12px;
+    border: 1px solid rgba(143,224,180,.10);
+    border-radius: 15px;
+    background: rgba(255,255,255,.04);
+  }
+
+  .warning-box {
+    padding: 14px;
+    border: 1px solid rgba(255,209,139,.24);
+    border-radius: 18px;
+    color: #fff1d6;
+    background: rgba(255,209,139,.08);
+  }
+
+  .warning-box ul {
+    margin-bottom: 0;
+  }
+
+  .reply-actions button:first-child,
+  .modal-card footer button:first-child,
+  .phone-detail button {
+    color: #07140f;
+    background: linear-gradient(135deg, #a8f0c7, var(--green));
+  }
+
+  .crm-preview {
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr);
+  }
+
+  .crm-hero-card {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(300px, .65fr);
+    gap: 18px;
+    align-items: center;
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    background: var(--panel);
+  }
+
+  .crm-hero-card p {
+    margin-top: 5px;
+    color: var(--muted);
+    font-weight: 800;
+  }
+
+  .crm-hero-card dl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .crm-hero-card dt {
+    color: var(--dim);
+    font-size: .72rem;
+    font-weight: 950;
+    text-transform: uppercase;
+  }
+
+  .crm-hero-card dd {
+    margin-top: 4px;
+    font-weight: 950;
+  }
+
+  .tag-row span {
+    color: var(--green-soft);
+    background: rgba(60,179,113,.12);
+  }
+
+  .reservations-preview {
+    grid-template-columns: minmax(0, 1.2fr) minmax(300px, .55fr);
+  }
+
+  .reservation-kpis {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .reservation-table-preview {
+    display: grid;
+    padding: 14px;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: var(--panel);
+  }
+
+  .reservation-table-preview header,
+  .reservation-table-preview article {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.2fr) minmax(150px, .9fr) minmax(110px, .7fr) minmax(90px, .5fr) minmax(120px, .6fr);
+    gap: 12px;
+    min-width: 800px;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+
+  .reservation-table-preview header {
+    color: var(--dim);
+    font-size: .72rem;
+    font-weight: 950;
+    text-transform: uppercase;
+  }
+
+  .reservation-table-preview em,
+  .reservation-detail-preview em {
+    color: var(--green-soft);
+    font-style: normal;
+    font-weight: 950;
+  }
+
+  .reservation-detail-preview {
+    display: grid;
+    gap: 14px;
+  }
+
+  .reservation-detail-preview p {
+    color: var(--muted);
+    font-weight: 800;
+  }
+
+  .mini-month {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .mini-month span {
+    display: grid;
+    min-height: 30px;
+    place-items: center;
+    border-radius: 8px;
+    color: var(--muted);
+    background: rgba(255,255,255,.035);
+    font-size: .78rem;
+    font-weight: 850;
+  }
+
+  .mini-month .is-stay {
+    color: #07140f;
+    background: var(--green-soft);
+  }
+
+  .calendar-preview {
+    grid-template-columns: minmax(0, 1fr) 310px;
+  }
+
+  .calendar-board-preview {
+    overflow-x: auto;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: var(--panel);
+  }
+
+  .calendar-head,
+  .calendar-row-preview {
+    display: grid;
+    grid-template-columns: 140px repeat(31, minmax(28px, 1fr));
+    min-width: 1050px;
+  }
+
+  .calendar-head {
+    padding-bottom: 10px;
+    color: var(--dim);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+
+  .calendar-head span {
+    text-align: center;
+    font-size: .72rem;
+    font-weight: 900;
+  }
+
+  .calendar-row-preview {
+    position: relative;
+    min-height: 58px;
+    border-bottom: 1px solid rgba(255,255,255,.055);
+  }
+
+  .calendar-row-preview > b {
+    z-index: 2;
+    align-self: center;
+  }
+
+  .calendar-row-preview > span {
+    min-height: 58px;
+    border-left: 1px solid rgba(255,255,255,.045);
+  }
+
+  .calendar-row-preview article {
+    z-index: 4;
+    align-self: center;
+    display: grid;
+    gap: 2px;
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1px solid rgba(143,224,180,.22);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(49,163,96,.88), rgba(12,82,54,.88));
+  }
+
+  .calendar-row-preview article.is-cabin {
+    border-color: rgba(111,178,255,.25);
+    background: linear-gradient(135deg, rgba(36,101,176,.88), rgba(12,46,91,.88));
+  }
+
+  .calendar-row-preview article.is-summer {
+    border-color: rgba(255,190,90,.28);
+    background: linear-gradient(135deg, rgba(142,82,14,.92), rgba(73,50,13,.90));
+  }
+
+  .calendar-row-preview article small {
+    color: rgba(255,255,255,.72);
+  }
+
+  .summer-note {
+    min-width: 1050px;
+    margin-top: 12px;
+    padding: 16px;
+    border: 1px dashed rgba(255,211,139,.28);
+    border-radius: 16px;
+    color: rgba(255,246,225,.86);
+    background: repeating-linear-gradient(135deg, rgba(255,211,139,.08), rgba(255,211,139,.08) 8px, transparent 8px, transparent 18px);
+    text-align: center;
+    font-weight: 950;
+  }
+
+  .calendar-side {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+  }
+
+  .calendar-side p {
+    color: var(--muted);
+    font-weight: 850;
+  }
+
+  .rules-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .rules-grid article span,
+  .template-grid article span {
+    font-size: 1.6rem;
+  }
+
+  .rules-grid--accent article {
+    background: linear-gradient(135deg, rgba(60,179,113,.14), rgba(255,255,255,.04));
+  }
+
+  .module-thread-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .template-grid article h3 {
+    margin: 0;
+  }
+
+  .template-grid article p {
+    color: var(--muted);
+    font-weight: 800;
+  }
+
+  .modal-preview {
+    display: grid;
+    place-items: center;
+  }
+
+  .modal-card {
+    width: min(760px, 100%);
+    padding: 0;
+    overflow: hidden;
+    border-color: rgba(143,224,180,.28);
+    box-shadow: 0 40px 100px rgba(0,0,0,.36);
+  }
+
+  .modal-card header {
+    padding: 18px;
+    background: linear-gradient(135deg, rgba(60,179,113,.28), rgba(255,255,255,.05));
+  }
+
+  .modal-card header span {
+    display: grid;
+    width: 54px;
+    height: 54px;
+    place-items: center;
+    border-radius: 16px;
+    background: rgba(255,255,255,.09);
+    font-size: 1.6rem;
+  }
+
+  .email-preview {
+    display: grid;
+    gap: 12px;
+    margin: 16px;
+    padding: 18px;
+    border-radius: 18px;
+    color: #132218;
+    background: #f6fff8;
+  }
+
+  .email-preview p {
+    color: #31483a;
+    line-height: 1.55;
+  }
+
+  .modal-card footer {
+    padding: 16px;
+    border-top: 1px solid rgba(255,255,255,.08);
+  }
+
+  .settings-grid-preview strong {
+    color: var(--text);
+  }
+
+  .stats-preview article i {
+    position: absolute;
+    left: 16px;
+    bottom: 12px;
+    height: 5px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--green), var(--green-soft));
+  }
+
+  .phone-stage {
+    place-items: center;
+  }
+
+  .phone-frame {
+    width: min(390px, 100%);
+    min-height: 780px;
+    padding: 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 34px;
+    background: #06130f;
+    box-shadow: 0 40px 100px rgba(0,0,0,.38);
+  }
+
+  .phone-frame > header {
+    justify-content: space-between;
+    min-height: 48px;
+  }
+
+  .phone-frame > header button {
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    color: var(--text);
+    background: rgba(255,255,255,.05);
+  }
+
+  .mobile-drawer {
+    display: grid;
+    gap: 7px;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: rgba(9,35,24,.96);
+  }
+
+  .phone-frame main {
+    display: grid;
+    gap: 10px;
+  }
+
+  .phone-thread {
+    grid-template-columns: 1fr;
+  }
+
+  .phone-thread span,
+  .phone-thread small,
+  .phone-detail p,
+  .phone-modal p {
+    color: var(--muted);
+    font-weight: 800;
+  }
+
+  .phone-detail,
+  .phone-modal {
+    display: grid;
+    gap: 8px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .phone-modal {
+    border-color: rgba(255,211,139,.24);
+    background: rgba(255,211,139,.08);
+  }
+
+  .todo-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  @media (max-width: 1180px) {
+    .audit-hero,
+    .sidebar-stage,
+    .mail-center-preview,
+    .crm-preview,
+    .reservations-preview,
+    .calendar-preview {
+      grid-template-columns: 1fr;
+    }
+
+    .rules-grid,
+    .kpi-grid,
+    .template-grid,
+    .settings-grid-preview,
+    .stats-preview,
+    .todo-grid,
+    .reservation-kpis {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .audit-meta {
+      justify-content: flex-start;
+    }
+
+    .audit-meta small {
+      text-align: left;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .audit-shell {
+      width: min(100% - 16px, 1600px);
+      padding-top: 12px;
+    }
+
+    .audit-section,
+    .audit-hero {
+      border-radius: 22px;
+    }
+
+    .audit-section > header,
+    .crm-hero-card,
+    .case-header {
+      grid-template-columns: 1fr;
+    }
+
+    .collapsed-stage,
+    .dashboard-grid,
+    .rules-grid,
+    .kpi-grid,
+    .template-grid,
+    .settings-grid-preview,
+    .stats-preview,
+    .todo-grid,
+    .reservation-kpis,
+    .case-kpis,
+    .legend-list {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar-demo {
+      min-height: auto;
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 18vw, 4rem);
+    }
+  }
+</style>
