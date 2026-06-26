@@ -282,7 +282,11 @@ export default defineConfig({
         try {
           pathname = new URL(page).pathname;
         } catch {}
-        return !pathname.includes('/cc-gate-a8f3k9r2p6') && !/^\/pl(?:\/|$)/.test(pathname);
+        const hiddenRoutes = [
+          '/cc-gate-a8f3k9r2p6',
+          '/cc-system-qa-preview-a7k9x2',
+        ];
+        return !hiddenRoutes.some((route) => pathname.includes(route)) && !/^\/pl(?:\/|$)/.test(pathname);
       },
       i18n: {
         defaultLocale: 'pl',
