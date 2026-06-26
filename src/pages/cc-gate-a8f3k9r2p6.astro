@@ -37,7 +37,7 @@ const title = 'CC SYSTEM';
             <div>
               <span class="eyebrow">Camping Clepardia</span>
               <h1>{title} <span class="online-badge">ONLINE</span></h1>
-              <p>Recepcja online · zapytania · klienci · odpowiedzi · rezerwacje</p>
+              <p>Recepcja online · klienci · rezerwacje · kalendarz · odpowiedzi</p>
               <small>Panel recepcji Camping Clepardia.</small>
               <small data-count>Ładowanie zapytań…</small>
             </div>
@@ -57,12 +57,22 @@ const title = 'CC SYSTEM';
         </header>
 
         <nav class="view-tabs" aria-label="Widoki CC SYSTEM">
-          <button type="button" data-view="inbox" aria-pressed="true">Inbox</button>
-          <button type="button" data-view="mail" aria-pressed="false">Wiadomości</button>
-          <button type="button" data-view="tests" aria-pressed="false">Testy</button>
+          <button type="button" data-view="dashboard" aria-pressed="true">Recepcja / Dashboard</button>
+          <button type="button" data-view="mail" aria-pressed="false">Mail Center / Inbox</button>
+          <button type="button" data-view="customers" aria-pressed="false">Klienci</button>
+          <button type="button" data-view="reservations" aria-pressed="false">Rezerwacje</button>
+          <button type="button" data-view="calendar" aria-pressed="false">Kalendarz</button>
+          <button type="button" data-view="bungalows" aria-pressed="false">Domki</button>
+          <button type="button" data-view="camping" aria-pressed="false">Camping</button>
+          <button type="button" data-view="extend" aria-pressed="false">Przedłuż pobyt</button>
+          <button type="button" data-view="print" aria-pressed="false">Drukowanie</button>
+          <button type="button" data-view="reports" aria-pressed="false">GUS / Raporty</button>
+          <button type="button" data-view="staff" aria-pressed="false">Pracownicy</button>
+          <button type="button" data-view="tasks" aria-pressed="false">Zadania</button>
           <button type="button" data-view="stats" aria-pressed="false">Statystyki</button>
-          <button type="button" data-view="templates" aria-pressed="false">Schematy</button>
+          <button type="button" data-view="templates" aria-pressed="false">Schematy odpowiedzi</button>
           <button type="button" data-view="settings" aria-pressed="false">Ustawienia</button>
+          <button type="button" data-view="tests" aria-pressed="false">Testy</button>
           <button type="button" data-view="archive" aria-pressed="false">Archiwum</button>
         </nav>
 
@@ -83,7 +93,7 @@ const title = 'CC SYSTEM';
 
         <section class="filters" aria-label="Filtry zapytań">
           <div class="filter-shortcuts">
-            <button type="button" data-view-shortcut="inbox">Wszystko</button>
+            <button type="button" data-view-shortcut="mail">Wszystko</button>
             <button type="button" data-clear-filters>Wyczyść filtry</button>
             <button type="button" data-view-shortcut="tests">Testy</button>
             <button type="button" data-view-shortcut="archive">Archiwum</button>
@@ -177,7 +187,7 @@ const title = 'CC SYSTEM';
         let accessCode = '';
         let inquiries = [];
         let health = null;
-        let activeView = 'inbox';
+        let activeView = 'dashboard';
         let autoRefreshTimer = 0;
         let autoRefreshPaused = false;
         let isLoading = false;
@@ -615,7 +625,7 @@ const title = 'CC SYSTEM';
         const itemBelongsToView = (item) => {
           if (activeView === 'tests') return isTestInquiry(item);
           if (activeView === 'archive') return isArchivedInquiry(item);
-          if (activeView === 'stats' || activeView === 'templates' || activeView === 'settings') return false;
+          if (moduleOnlyViews.has(activeView)) return false;
           if (activeView === 'mail') return !isTestInquiry(item) && !isArchivedInquiry(item);
           return !isTestInquiry(item) && !isArchivedInquiry(item);
         };
@@ -968,9 +978,154 @@ const title = 'CC SYSTEM';
           if (categories.includes('mailFailed')) result.push(['Użyj mailto / kopiuj odpowiedź','Automatyczny mail nie został dostarczony.']);
           return result.length ? result : [['Normalne','Standardowa obsługa zapytania.']];
         };
+        const suggestBestReply = (item) => {
+          const categories = categoryKeys(item);
+          const templateId = recommendedTemplateId(item);
+          const template = replyTemplateById(item, templateId);
+          const reasons = [];
+          if (categories.includes('camping') && isSummer(item)) reasons.push('lipiec/sierpień + camping');
+          if (categories.includes('bungalow') || categories.includes('combined')) reasons.push('zapytanie o domek / pobyt łączony');
+          if (categories.includes('missing')) reasons.push('brakuje danych klienta lub pobytu');
+          if (categories.includes('group') || categories.includes('scouts')) reasons.push('wykryto grupę / skautów');
+          if (categories.includes('ev')) reasons.push('prąd 10A / EV');
+          if (categories.includes('late')) reasons.push('późny przyjazd');
+          if (categories.includes('heavy')) reasons.push('ciężki pojazd / asfalt');
+          if (trips(item).length) reasons.push('klient pyta o wycieczki');
+          return {
+            id: templateId,
+            icon: template?.icon || '✨',
+            title: template?.title || 'Standardowa odpowiedź',
+            reason: reasons.join(' + ') || 'standardowa obsługa zapytania',
+            when: template?.recommendedWhen || 'Użyj, gdy recepcja chce odpowiedzieć klientowi z kompletem informacji.',
+          };
+        };
         const realItems = () => inquiries.filter((item)=>!isTestInquiry(item) && !isArchivedInquiry(item));
         const testItems = () => inquiries.filter(isTestInquiry);
         const archivedItems = () => inquiries.filter(isArchivedInquiry);
+        const moduleOnlyViews = new Set(['dashboard','customers','reservations','calendar','bungalows','camping','extend','print','reports','staff','tasks','stats','templates','settings']);
+        const moneyLabel = (item) => item.estimated_total_pln !== null && item.estimated_total_pln !== undefined ? `${item.estimated_total_pln} PLN` : '-';
+        const serviceSummaryShort = (item) => services(item).map((service)=>`${service.label} × ${service.qty}`).join(', ') || '-';
+        const arrivalTodayItems = () => realItems().filter((item)=>categoryKeys(item).includes('today'));
+        const departureTodayItems = () => {
+          const today = new Date();
+          const stamp = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+          return realItems().filter((item)=>String(item.departure_date || '') === stamp);
+        };
+        const next7Items = () => realItems().filter((item)=>categoryKeys(item).includes('next7')).sort((a,b)=>String(a.arrival_date || '').localeCompare(String(b.arrival_date || '')));
+        const urgentItems = () => realItems().filter((item) => {
+          const keys = categoryKeys(item);
+          return keys.includes('urgent') || keys.includes('mailFailed') || keys.includes('missing') || keys.includes('group') || keys.includes('scouts') || keys.includes('heavy') || (keys.includes('camping') && isSummer(item)) || keys.includes('late');
+        }).slice(0, 12);
+        const moduleMetric = (icon, label, value, hint = '') => `<article class="module-metric"><span>${esc(icon)}</span><strong>${esc(value)}</strong><small>${esc(label)}</small>${hint ? `<em>${esc(hint)}</em>` : ''}</article>`;
+        const moduleStatus = (label, value, tone = '') => `<span class="module-status ${tone ? `is-${esc(tone)}` : ''}">${esc(label)}: <strong>${esc(value)}</strong></span>`;
+        const miniThread = (item) => {
+          const country = countryInfo(item);
+          const best = suggestBestReply(item);
+          return `<article class="module-thread">
+            <header><strong>${esc(item.full_name || 'Bez nazwy')}</strong><span>${esc(country.flag)} ${esc(country.label)} · ${esc(languageCode(item).toUpperCase())}</span></header>
+            <p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(normalizeInquiryGuests(item).label)}</p>
+            <small>${esc(best.icon)} ${esc(best.title)} · powód: ${esc(best.reason)}</small>
+          </article>`;
+        };
+        const moduleThreadList = (items, empty = 'Brak aktualnych zapytań.') =>
+          items.length ? `<div class="module-thread-list">${items.map(miniThread).join('')}</div>` : `<p class="module-empty">${esc(empty)}</p>`;
+        const renderDashboardView = () => {
+          const real = realItems();
+          const env = health?.env || {};
+          const mailOk = real.some((item)=>item.mail_provider === 'resend' && item.mail_delivered);
+          const campingItems = real.filter((item)=>categoryKeys(item).includes('camping'));
+          const bungalowItems = real.filter((item)=>categoryKeys(item).includes('bungalow') || categoryKeys(item).includes('combined'));
+          const urgent = urgentItems();
+          const taskRows = [
+            ['Mail niedostarczony', real.filter((item)=>!item.mail_delivered).length, 'Sprawdź w Mail Center i użyj mailto/kopiuj.'],
+            ['Brak danych', real.filter((item)=>categoryKeys(item).includes('missing')).length, 'Wyślij prośbę o brakujące dane.'],
+            ['Grupy/skauci', real.filter((item)=>categoryKeys(item).includes('group') || categoryKeys(item).includes('scouts')).length, 'Wymaga ręcznej weryfikacji recepcji.'],
+            ['Ciężkie pojazdy', real.filter((item)=>categoryKeys(item).includes('heavy')).length, 'Kierować na stabilne/asfaltowe miejsca.'],
+          ];
+          return `<section class="dashboard-panel module-view">
+            <header class="module-head"><span class="eyebrow">Recepcja / Dashboard</span><h2>Centrum dowodzenia recepcji</h2><p>Najważniejsze sprawy z zapytań, maili i pobytów — realne dane z inboxu, bez mieszania testów.</p></header>
+            <div class="module-metrics">
+              ${moduleMetric('🟢','Nowe zapytania', real.filter((item)=>item.status === 'new').length, 'realni klienci')}
+              ${moduleMetric('✉️','Do odpowiedzi', real.filter((item)=>['new','needs_reply'].includes(item.status)).length)}
+              ${moduleMetric('📥','Przyjazdy dziś', arrivalTodayItems().length)}
+              ${moduleMetric('📤','Wyjazdy dziś', departureTodayItems().length)}
+              ${moduleMetric('📅','Najbliższe 7 dni', next7Items().length)}
+              ${moduleMetric('🏕️','Obłożenie camping', campingItems.length, 'z zapytań')}
+              ${moduleMetric('🏡','Obłożenie domki', bungalowItems.length, 'z zapytań')}
+              ${moduleMetric('🚀','Mail delivery', mailOk ? 'Resend OK' : env.resendKeyPresent ? 'Resend ENV OK' : 'sprawdź ENV')}
+              ${moduleMetric('☁️','Pogoda', 'placeholder', 'TODO: integracja pogodowa')}
+              ${moduleMetric('✅','Zadania', taskRows.reduce((sum,row)=>sum + Number(row[1] || 0), 0), 'pilne teraz')}
+            </div>
+            <div class="module-grid module-grid--two">
+              <section class="module-card"><h3>🔥 Pilne teraz</h3>${moduleThreadList(urgent, 'Brak pilnych spraw. Miło, gdy system oddycha.')}<div class="module-status-row">${moduleStatus('Mail', mailOk ? 'OK' : 'sprawdź', mailOk ? 'ok' : 'warn')}${moduleStatus('Supabase', health?.tableCheck?.ok ? 'OK' : health ? 'błąd' : 'czekam', health?.tableCheck?.ok ? 'ok' : 'warn')}</div></section>
+              <section class="module-card"><h3>🧭 Zadania recepcji</h3><ul class="module-task-list">${taskRows.map(([label,count,hint])=>`<li><strong>${esc(count)}</strong><span>${esc(label)}</span><small>${esc(hint)}</small></li>`).join('')}</ul></section>
+            </div>
+          </section>`;
+        };
+        const renderMailCenterView = (items) => `<section class="dashboard-panel module-view">
+          <header class="module-head"><span class="eyebrow">Mail Center / Inbox</span><h2>Własny Gmail recepcji</h2><p>Wątki rozumieją daty, osoby, usługi, kraj, język, status dostarczenia maila i najlepszą odpowiedź premium.</p></header>
+          <div class="module-status-row">${moduleStatus('Inbox', items.length)}${moduleStatus('Do odpowiedzi', realItems().filter((item)=>['new','needs_reply'].includes(item.status)).length)}${moduleStatus('Mail niedostarczony', realItems().filter((item)=>!item.mail_delivered).length, realItems().some((item)=>!item.mail_delivered) ? 'warn' : 'ok')}${moduleStatus('Auto-refresh', autoRefreshPaused ? 'pauza' : '25 s', autoRefreshPaused ? 'warn' : 'ok')}</div>
+        </section>${items.length ? items.map(card).join('') : '<div class="empty">Brak zapytań dla wybranych filtrów.</div>'}`;
+        const customersFromInquiries = () => {
+          const map = new Map();
+          realItems().forEach((item) => {
+            const key = String(item.email || item.phone || item.full_name || item.id).trim().toLowerCase();
+            const current = map.get(key) || { name:item.full_name || 'Bez nazwy', email:item.email || '', phone:item.phone || '', country:item.country || '', language:languageCode(item).toUpperCase(), items:[] };
+            current.items.push(item);
+            current.name = current.name || item.full_name;
+            current.email = current.email || item.email;
+            current.phone = current.phone || item.phone;
+            current.country = current.country || item.country;
+            map.set(key, current);
+          });
+          return [...map.values()].sort((a,b)=>String(b.items[0]?.created_at || '').localeCompare(String(a.items[0]?.created_at || '')));
+        };
+        const renderCustomersView = () => {
+          const customers = customersFromInquiries();
+          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Klienci</span><h2>CRM klientów z zapytań</h2><p>Agregacja po emailu/telefonie/nazwie z reservation_inquiries. TODO: osobna tabela clients, notatki trwałe i preferencje.</p></header>
+            <div class="module-table">${customers.map((client)=>{
+              const country = countryInfo({ country:client.country, language:client.language });
+              const last = client.items[0];
+              return `<details class="module-row"><summary><strong>${esc(client.name)}</strong><span>${esc(client.email || client.phone || '-')}</span><span>${esc(country.flag)} ${esc(country.label)}</span><span>${esc(client.items.length)} zapytań</span><span>${esc(last?.arrival_date || '-')}</span></summary>${moduleThreadList(client.items)}</details>`;
+            }).join('') || '<p class="module-empty">Brak realnych klientów.</p>'}</div></section>`;
+        };
+        const renderReservationsView = () => {
+          const items = realItems();
+          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Rezerwacje</span><h2>Zapytania jako fundament rezerwacji</h2><p>Lista działa read-only na reservation_inquiries. Przycisk tworzenia jest przygotowany, ale zapis docelowej rezerwacji wymaga tabeli reservations.</p><button type="button" disabled>Utwórz rezerwację — TODO baza</button></header>
+            <div class="module-table">${items.map((item)=>`<article class="module-row module-row--plain"><strong>${esc(item.full_name || '-')}</strong><span>${esc(statusLabels[item.status] || item.status)}</span><span>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</span><span>${esc(item.stay_type || '-')}</span><span>${esc(normalizeInquiryGuests(item).label)}</span><span>${esc(moneyLabel(item))}</span><span>${esc(countryInfo(item).flag)} ${esc(item.country || '-')}</span></article>`).join('') || '<p class="module-empty">Brak rezerwacji/zapytań.</p>'}</div></section>`;
+        };
+        const renderCalendarView = () => {
+          const upcoming = next7Items();
+          const today = new Date();
+          const days = Array.from({ length:7 }, (_, index) => {
+            const date = new Date(today);
+            date.setDate(today.getDate() + index);
+            const stamp = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+            const dayItems = realItems().filter((item)=>item.arrival_date === stamp || item.departure_date === stamp);
+            return `<article><strong>${esc(new Intl.DateTimeFormat('pl-PL',{ weekday:'short', day:'2-digit', month:'2-digit' }).format(date))}</strong><span>${esc(dayItems.length)} zdarzeń</span>${dayItems.slice(0,3).map((item)=>`<small>${esc(item.full_name || '-')} · ${esc(item.arrival_date === stamp ? 'przyjazd' : 'wyjazd')}</small>`).join('')}</article>`;
+          }).join('');
+          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Kalendarz</span><h2>Fundament kalendarza pobytów</h2><p>Widok tygodniowy z realnych zapytań. TODO: miesiąc, drag/drop, zasoby domków i potwierdzone rezerwacje.</p></header><div class="mini-calendar">${days}</div><div class="module-grid module-grid--two"><section class="module-card"><h3>Najbliższe przyjazdy</h3>${moduleThreadList(upcoming)}</section><section class="module-card"><h3>Potencjalne konflikty</h3><p class="module-empty">Na tym etapie system pokazuje fundament. Konflikty wymagają docelowej tabeli zasobów i potwierdzonych rezerwacji.</p></section></div></section>`;
+        };
+        const renderBungalowsView = () => {
+          const items = realItems().filter((item)=>categoryKeys(item).includes('bungalow') || categoryKeys(item).includes('combined'));
+          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Domki</span><h2>Domki 2-os., 3-os. i 4-os.</h2><p>Zasady: check-in 16:00, check-out 11:00, ręczniki/kosmetyki/rzeczy osobiste własne.</p></header><div class="module-metrics">${moduleMetric('🏡','Domek 2-os.','200 PLN/noc')}${moduleMetric('🏡','Domek 3-os.','250 PLN/noc')}${moduleMetric('🏡','Domek 4-os.','400 PLN/noc')}${moduleMetric('📬','Zapytania o domki',items.length)}</div>${moduleThreadList(items, 'Brak aktualnych zapytań o domki.')}</section>`;
+        };
+        const renderCampingView = () => {
+          const items = realItems().filter((item)=>categoryKeys(item).includes('camping'));
+          const rules = ['Lipiec/sierpień: brak rezerwacji miejsc campingowych z wyprzedzeniem.', 'Check-out camping do 12:00, przyjazd najlepiej około 12:00.', 'Prąd 10A dla kamperów/przyczep; EV i plug-in nie ładujemy na stanowisku.', 'Ciężkie pojazdy kierować na asfalt/stabilne miejsca.', 'Psy 0 PLN, prosimy o sprzątanie po pupilu.', 'Płyty betonowe dla kamperów tam, gdzie dostępne.'];
+          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Camping</span><h2>Zasady i zapytania campingowe</h2><p>Moduł operacyjny dla kamperów, vanów, przyczep i namiotów.</p></header><div class="module-grid module-grid--two"><section class="module-card"><h3>Reguły recepcji</h3><ul class="module-rule-list">${rules.map((rule)=>`<li>${esc(rule)}</li>`).join('')}</ul></section><section class="module-card"><h3>Aktualne zapytania campingowe</h3>${moduleThreadList(items, 'Brak aktualnych zapytań campingowych.')}</section></div></section>`;
+        };
+        const renderExtendStayView = () => `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Przedłuż pobyt</span><h2>Fundament przedłużania pobytu</h2><p>Status: w przygotowaniu. Widok pokazuje bezpieczny proces bez zapisu, bo brakuje docelowej tabeli aktywnych pobytów.</p></header><div class="module-grid"><section class="module-card"><h3>Proces docelowy</h3><ol><li>Wybierz klienta/pobyt.</li><li>Dodaj noc lub zmień datę wyjazdu.</li><li>Przelicz osoby i usługi.</li><li>Wyślij potwierdzenie premium.</li></ol></section><section class="module-card"><h3>Kandydaci z najbliższych 7 dni</h3>${moduleThreadList(next7Items())}</section></div></section>`;
+        const renderPrintView = () => `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Drukowanie</span><h2>Centrum dokumentów recepcji</h2><p>Placeholder premium: gotowy układ pod dokumenty, bez ruszania istniejących PDF.</p></header><div class="module-metrics">${['Karta pobytu','Potwierdzenie','Regulamin','Przewodnik','GUS','Lista sprzątania','Etykiety'].map((name)=>moduleMetric('🖨️', name, 'TODO')).join('')}</div></section>`;
+        const renderReportsView = () => {
+          const real = realItems();
+          const personNights = real.reduce((sum,item)=>sum + Number(guestCount(item) || 0) * Number(item.nights || 0), 0);
+          const countries = new Set(real.map((item)=>countryInfo(item).code || item.country).filter(Boolean)).size;
+          const vehicles = real.filter((item)=>item.vehicle_registration || services(item).some((service)=>/camper|van|przyczep|bus|auto|samoch/.test(`${service.id} ${service.label}`.toLowerCase()))).length;
+          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">GUS / Raporty</span><h2>Raporty z danych zapytań</h2><p>Liczniki orientacyjne z inquiries. TODO: eksport i raporty z potwierdzonych pobytów.</p></header><div class="module-metrics">${moduleMetric('🌍','Kraje',countries)}${moduleMetric('👥','Osobonoce',personNights)}${moduleMetric('🏕️','Camping',real.filter((item)=>categoryKeys(item).includes('camping')).length)}${moduleMetric('🏡','Domki',real.filter((item)=>categoryKeys(item).includes('bungalow')).length)}${moduleMetric('🚐','Pojazdy',vehicles)}${moduleMetric('📆','Miesiące',new Set(real.map((item)=>String(item.arrival_date || '').slice(0,7)).filter(Boolean)).size)}</div></section>`;
+        };
+        const renderStaffView = () => `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Pracownicy</span><h2>Role, dyżury i uprawnienia</h2><p>Status: w przygotowaniu. Docelowo konta pracowników, role, grafiki, notatki i uprawnienia do modułów.</p></header><div class="module-grid"><section class="module-card"><h3>Role docelowe</h3><ul class="module-rule-list"><li>Recepcja</li><li>Manager</li><li>Sprzątanie</li><li>Administrator systemu</li></ul></section><section class="module-card"><h3>Powiązanie z zadaniami</h3><p>Na razie zadania są generowane z pilnych zapytań.</p></section></div></section>`;
+        const renderTasksView = () => `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Zadania</span><h2>Lista zadań recepcji</h2><p>Zadania generowane z realnych zapytań: brak danych, mail niedostarczony, grupy, skauci, ciężkie pojazdy, późny przyjazd.</p></header><div class="module-thread-list">${urgentItems().map((item)=>{const best=suggestBestReply(item); return `<article class="module-thread"><header><strong>${esc(best.icon)} ${esc(best.title)}</strong><span>${esc(item.full_name || '-')}</span></header><p>${esc(best.reason)} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</p><small>${esc(best.when)}</small></article>`;}).join('') || '<p class="module-empty">Brak pilnych zadań.</p>'}</div></section>`;
         const renderSystemStrip = () => {
           if (!systemStrip) return;
           const env = health?.env || {};
@@ -1037,6 +1192,9 @@ const title = 'CC SYSTEM';
             ['Brama','8:00–22:00'],
             ['Cisza nocna','22:00–07:00'],
             ['Google Maps','Używać Google Maps — wjazd zmienił się w 2022 roku'],
+            ['Języki odpowiedzi','PL, EN, DE, IT, FR, ES, NL, CS, SK, SV'],
+            ['Cennik camping','Dorośli 35 PLN, dzieci 20 PLN, kamper 80 PLN, prąd 30 PLN'],
+            ['Cennik domki','2-os. 200 PLN, 3-os. 250 PLN, 4-os. 400 PLN'],
             ['Web3Forms/FormSubmit','fallback diagnostyczny'],
           ];
           return `<section class="dashboard-panel"><h2>Ustawienia</h2><p>Na tym etapie widok jest read-only; edycja ustawień to kolejny moduł CC SYSTEM ONLINE.</p><div class="settings-grid">${rows.map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('')}</div></section>`;
@@ -1050,6 +1208,7 @@ const title = 'CC SYSTEM';
           const guests = normalizeInquiryGuests(item);
           const warnings = warningsFor(item, categories);
           const suggestions = suggestBestReplies(item).map(([title,copy])=>`<li><strong>${esc(title)}</strong><small>${esc(copy)}</small></li>`).join('');
+          const bestSuggestion = suggestBestReply(item);
           const threadKey = `${String(item.email || item.phone || 'no-contact').toLowerCase()}::${item.arrival_date || '-'}|${item.departure_date || '-'}`;
           const conversationTitle = [item.full_name || 'Klient', item.stay_type, `${item.arrival_date || '-'} — ${item.departure_date || '-'}`].filter(Boolean).join(' · ');
           const timeline = [
@@ -1075,14 +1234,15 @@ const title = 'CC SYSTEM';
               <section class="detail-card"><h3>✅ Zgody</h3><ul class="consent-list"><li>Cisza nocna: <b>${c.quiet ? 'OK':'BRAK'}</b></li><li>Kontakt: <b>${c.contact ? 'OK':'BRAK'}</b></li><li>Polityka prywatności: <b>${c.privacy ? 'OK':'BRAK'}</b></li></ul></section>
               <section class="detail-card detail-card--wide"><h3>💬 Wiadomość</h3><p class="message-copy">${esc(item.message || 'Brak wiadomości')}</p></section>
               ${feedbackSection(item, categories)}
-              <section class="detail-card detail-card--wide"><h3>✨ Najlepsze podpowiedzi</h3><ul class="suggestion-list">${suggestions}</ul></section>
+              <section class="detail-card detail-card--wide best-reply-card"><h3>✨ Najlepsza odpowiedź</h3><p><strong>${esc(bestSuggestion.icon)} ${esc(bestSuggestion.title)}</strong></p><small>Kiedy używać: ${esc(bestSuggestion.when)}</small><small>Powód: ${esc(bestSuggestion.reason)}</small><div class="inline-actions"><button type="button" data-reply-template="${esc(bestSuggestion.id)}">Otwórz najlepszą odpowiedź</button></div></section>
+              <section class="detail-card detail-card--wide"><h3>✨ Dodatkowe podpowiedzi</h3><ul class="suggestion-list">${suggestions}</ul></section>
               ${replyTemplatesSection(item)}
               <section class="detail-card detail-card--wide mail-status-card ${item.mail_delivered ? 'is-ok':'is-failed'}"><h3>✉️ Status maila</h3><p><strong>${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</strong> · provider: ${esc(item.mail_provider || 'none')}</p><small>${esc(item.mail_error || (item.mail_delivered ? 'Brak błędu.':'Brak szczegółów błędu.'))}</small>${item.mail_delivered ? '' : '<p>Zapytanie jest zapisane w panelu recepcji. Skopiuj treść maila lub użyj przycisku mailto.</p>'}<div class="inline-actions"><button type="button" data-copy-mail>Kopiuj treść maila</button><a href="mailto:clepardia@gmail.com?subject=${encodeURIComponent(`Zapytanie ${item.id}`)}&body=${encodeURIComponent(mailText(item))}">Otwórz Gmail / mailto</a></div></section>
               <section class="detail-card detail-card--wide"><h3>🕒 Historia rozmowy</h3><ul class="timeline-list">${timeline}</ul><small>TODO: docelowo zapisywać wiadomości i akcje w tabelach mail_threads, mail_messages i mail_actions.</small></section>
               <details class="technical-data"><summary>Dane techniczne</summary><pre data-raw-debug>Otwórz panel techniczny, żeby załadować raw JSON.</pre></details>
             </div>
             <div class="edit-row"><label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${item.status === value ? 'selected':''}>${label}</option>`).join('')}</select></label><label class="note"><span>Notatka recepcji</span><textarea data-notes rows="3">${esc(item.notes || '')}</textarea></label><button type="button" data-save>Zapisz status i notatkę</button></div>
-            <div class="card-actions"><button type="button" data-reply-action="confirm" data-target-status="needs_confirmation">✅ Potwierdź</button><button type="button" data-reply-action="askMissingData" data-target-status="needs_reply">📝 Poproś o dane</button><button type="button" data-reply-action="noAvailability" data-target-status="unavailable">❌ Brak miejsc</button><button type="button" data-quick-status="replied">Odpowiedziane</button><button type="button" data-quick-status="rejected">Odrzuć</button><button type="button" data-copy-summary>Kopiuj podsumowanie</button><button type="button" data-copy-email ${item.email ? '':'disabled'}>Kopiuj email</button><button type="button" data-copy-phone ${item.phone ? '':'disabled'}>Kopiuj telefon</button><button type="button" data-copy-mail>Kopiuj treść maila</button><button type="button" data-copy-id>Kopiuj link / ID</button>${item.phone ? `<a href="tel:${esc(item.phone)}">Otwórz tel</a>`:''}<button type="button" data-quick-status="cancelled">Anulowane</button><button type="button" data-quick-status="archived">Archiwizuj</button><button type="button" data-quick-status="spam">Spam/test</button></div>`;
+            <div class="card-actions"><button type="button" data-reply-action="confirm" data-target-status="needs_confirmation">✅ Potwierdź</button><button type="button" data-reply-action="askMissingData" data-target-status="needs_reply">📝 Poproś o dane</button><button type="button" data-reply-action="noAvailability" data-target-status="unavailable">❌ Brak miejsc</button><button type="button" data-reply-action="heavyVehicle" data-target-status="replied">🚫 Ciężki pojazd</button><button type="button" data-reply-action="groupScout" data-target-status="needs_reply">👥 Grupa / skauci</button><button type="button" data-quick-status="replied">Odpowiedziane</button><button type="button" data-quick-status="rejected">Odrzuć</button><button type="button" data-copy-summary>Kopiuj podsumowanie</button><button type="button" data-copy-email ${item.email ? '':'disabled'}>Kopiuj email</button><button type="button" data-copy-phone ${item.phone ? '':'disabled'}>Kopiuj telefon</button><button type="button" data-copy-mail>Kopiuj treść maila</button><button type="button" data-copy-id>Kopiuj link / ID</button>${item.phone ? `<a href="tel:${esc(item.phone)}">Otwórz tel</a>`:''}<button type="button" data-quick-status="cancelled">Anulowane</button><button type="button" data-quick-status="archived">Archiwizuj</button><button type="button" data-quick-status="spam">Spam/test</button></div>`;
         };
         const card = (item) => {
           const payload = raw(item);
@@ -1095,6 +1255,7 @@ const title = 'CC SYSTEM';
           const mainServices = services(item).slice(0,4).map((service)=>`${service.label} × ${service.qty}`).join(' + ') || 'brak usług';
           const priority = categories.includes('urgent') || categories.includes('mailFailed') || categories.includes('group') ? 'Pilne' : 'Normalne';
           const recommendedId = recommendedTemplateId(item);
+          const bestSuggestion = suggestBestReply(item);
           return `<article class="inquiry-card" data-id="${esc(item.id)}">
             <header>
               <div><div class="card-badges"><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span><span class="mail-badge ${item.mail_delivered ? 'is-ok':'is-failed'}">${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</span>${categoryBadges}${highSeason ? '<span class="season-badge">Lipiec/sierpień — camping bez rezerwacji</span>':''}</div><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.nights || 0)} nocy</p></div>
@@ -1108,6 +1269,7 @@ const title = 'CC SYSTEM';
               <span>🧾 ${esc(mainServices)}</span>
               <span>💰 ${esc(item.estimated_total_pln ?? '-')} PLN</span>
               <span>⚑ ${esc(priority)}</span>
+              <span>✨ ${esc(bestSuggestion.title)} · ${esc(bestSuggestion.reason)}</span>
               <span>✉️ ${item.mail_delivered ? 'mail OK':'mail niedostarczony'}</span>
               ${item.email ? `<a href="mailto:${esc(item.email)}">${esc(item.email)}</a>` : ''}
               ${item.phone ? `<a href="tel:${esc(item.phone)}">${esc(item.phone)}</a>` : ''}
@@ -1120,6 +1282,8 @@ const title = 'CC SYSTEM';
               <button type="button" data-reply-action="bungalow" data-target-status="needs_confirmation">🏡 Domek</button>
               <button type="button" data-reply-action="electricityEv" data-target-status="replied">⚡ Prąd / EV</button>
               <button type="button" data-reply-action="tours" data-target-status="replied">🚌 Wycieczki</button>
+              <button type="button" data-reply-action="heavyVehicle" data-target-status="replied">🚫 Ciężki pojazd</button>
+              <button type="button" data-reply-action="groupScout" data-target-status="needs_reply">👥 Grupa / skauci</button>
               <button type="button" data-reply-template="${esc(recommendedId)}">📋 Kopiuj / podgląd</button>
               <button type="button" data-reply-template="${esc(recommendedId)}">✉️ Mailto</button>
               <button type="button" data-open-details>💬 Otwórz rozmowę</button>
@@ -1153,7 +1317,19 @@ const title = 'CC SYSTEM';
             stats.innerHTML = statItems.map(([label,value])=>`<article><strong>${esc(value)}</strong><span>${esc(label)}</span></article>`).join('');
           }
           if (list) {
-            if (activeView === 'stats') list.innerHTML = renderStatsView();
+            if (activeView === 'dashboard') list.innerHTML = renderDashboardView();
+            else if (activeView === 'mail') list.innerHTML = renderMailCenterView(items);
+            else if (activeView === 'customers') list.innerHTML = renderCustomersView();
+            else if (activeView === 'reservations') list.innerHTML = renderReservationsView();
+            else if (activeView === 'calendar') list.innerHTML = renderCalendarView();
+            else if (activeView === 'bungalows') list.innerHTML = renderBungalowsView();
+            else if (activeView === 'camping') list.innerHTML = renderCampingView();
+            else if (activeView === 'extend') list.innerHTML = renderExtendStayView();
+            else if (activeView === 'print') list.innerHTML = renderPrintView();
+            else if (activeView === 'reports') list.innerHTML = renderReportsView();
+            else if (activeView === 'staff') list.innerHTML = renderStaffView();
+            else if (activeView === 'tasks') list.innerHTML = renderTasksView();
+            else if (activeView === 'stats') list.innerHTML = renderStatsView();
             else if (activeView === 'templates') list.innerHTML = renderTemplatesView();
             else if (activeView === 'settings') list.innerHTML = renderSettingsView();
             else list.innerHTML = items.length ? items.map(card).join('') : '<div class="empty">Brak zapytań dla wybranych filtrów.</div>';
@@ -1284,7 +1460,7 @@ const title = 'CC SYSTEM';
           render();
         }));
         document.querySelector('[data-clear-filters]')?.addEventListener('click',()=>{
-          activeView = 'inbox';
+          activeView = 'mail';
           clearFilters();
           render();
         });
@@ -1716,6 +1892,11 @@ const title = 'CC SYSTEM';
     background: linear-gradient(145deg, rgba(143,224,180,.1), rgba(255,255,255,.05));
   }
 
+  .best-reply-card {
+    border-color: rgba(255,228,146,.34);
+    background: linear-gradient(145deg, rgba(255,228,146,.12), rgba(143,224,180,.07));
+  }
+
   .missing-email {
     display: inline-flex;
     align-items: center;
@@ -1846,6 +2027,228 @@ const title = 'CC SYSTEM';
   .dashboard-panel h2 {
     margin: 0 0 8px;
     font-size: clamp(1.7rem,4vw,3rem);
+  }
+
+  .module-view {
+    display: grid;
+    gap: 18px;
+  }
+
+  .module-head {
+    display: grid;
+    gap: 8px;
+  }
+
+  .module-head p {
+    max-width: 920px;
+    margin: 0;
+  }
+
+  .module-head button {
+    width: max-content;
+  }
+
+  .module-metrics {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .module-metric,
+  .module-card,
+  .module-thread,
+  .module-row,
+  .mini-calendar article {
+    min-width: 0;
+    border: 1px solid rgba(143,224,180,.14);
+    border-radius: 20px;
+    background: rgba(255,255,255,.055);
+  }
+
+  .module-metric {
+    display: grid;
+    gap: 5px;
+    padding: 16px;
+  }
+
+  .module-metric span {
+    font-size: 1.35rem;
+  }
+
+  .module-metric strong {
+    color: #8fe0b4;
+    font-size: clamp(1.35rem, 3vw, 2.05rem);
+  }
+
+  .module-metric small,
+  .module-metric em,
+  .module-thread small,
+  .module-thread span,
+  .module-empty {
+    color: rgba(239,251,243,.62);
+    font-size: .82rem;
+    font-style: normal;
+    font-weight: 820;
+  }
+
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .module-grid--two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .module-card {
+    display: grid;
+    gap: 14px;
+    padding: 18px;
+  }
+
+  .module-card h3,
+  .module-thread p,
+  .module-empty {
+    margin: 0;
+  }
+
+  .module-thread-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .module-thread {
+    display: grid;
+    gap: 7px;
+    padding: 14px;
+  }
+
+  .module-thread header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .module-thread strong {
+    color: #effbf3;
+  }
+
+  .module-status-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .module-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 11px;
+    border: 1px solid rgba(143,224,180,.16);
+    border-radius: 999px;
+    color: #dffff0;
+    background: rgba(255,255,255,.06);
+    font-size: .78rem;
+    font-weight: 900;
+  }
+
+  .module-status.is-ok {
+    color: #07140f;
+    background: #8fe0b4;
+  }
+
+  .module-status.is-warn {
+    color: #3d2600;
+    background: #ffd08a;
+  }
+
+  .module-task-list,
+  .module-rule-list {
+    display: grid;
+    gap: 9px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .module-task-list li,
+  .module-rule-list li {
+    display: grid;
+    gap: 4px;
+    padding: 12px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.055);
+  }
+
+  .module-task-list strong {
+    color: #8fe0b4;
+    font-size: 1.3rem;
+  }
+
+  .module-table {
+    display: grid;
+    gap: 9px;
+  }
+
+  .module-row {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .module-row summary,
+  .module-row--plain {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 1fr .7fr .9fr .8fr .9fr;
+    gap: 10px;
+    align-items: center;
+    padding: 14px;
+  }
+
+  .module-row summary {
+    cursor: pointer;
+  }
+
+  .module-row summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .module-row > .module-thread-list {
+    padding: 0 14px 14px;
+  }
+
+  .module-row span,
+  .module-row small {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: rgba(239,251,243,.66);
+    font-size: .82rem;
+    font-weight: 820;
+  }
+
+  .mini-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .mini-calendar article {
+    display: grid;
+    gap: 7px;
+    min-height: 132px;
+    padding: 14px;
+  }
+
+  .mini-calendar strong {
+    color: #8fe0b4;
+  }
+
+  .mini-calendar span,
+  .mini-calendar small {
+    color: rgba(239,251,243,.66);
+    font-size: .78rem;
+    font-weight: 850;
   }
 
   .stats-grid--wide,
@@ -2100,10 +2503,23 @@ const title = 'CC SYSTEM';
     }
 
     .system-strip,
+    .module-metrics,
+    .module-grid,
+    .module-grid--two,
+    .mini-calendar,
     .stats-grid--wide,
     .schema-grid,
     .settings-grid {
       grid-template-columns: 1fr;
+    }
+
+    .module-row summary,
+    .module-row--plain {
+      grid-template-columns: 1fr;
+    }
+
+    .module-head button {
+      width: 100%;
     }
   }
 </style>
