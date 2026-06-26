@@ -108,6 +108,38 @@ const templates = [
   ['👥', 'Grupa / skauci', 'Obsługa większej grupy, zasady i dane do doprecyzowania.'],
 ];
 
+const uiTokenMap = {
+  Dashboard: 'HO',
+  'Mail Center': 'ML',
+  Klienci: 'KL',
+  Rezerwacje: 'RZ',
+  Kalendarz: 'KA',
+  Domki: 'DM',
+  Camping: 'CP',
+  'GUS / Raporty': 'GR',
+  Statystyki: 'ST',
+  'Schematy odpowiedzi': 'SO',
+  Pracownicy: 'PR',
+  Zadania: 'ZD',
+  Ustawienia: 'US',
+  Potwierdź: 'PT',
+  'Poproś o dane': 'PD',
+  'Brak miejsc': 'BM',
+  'Camping L/S': 'LS',
+  Domek: 'DM',
+  'Prąd / EV': 'EV',
+  Wycieczki: 'WY',
+  'Grupa / skauci': 'GS',
+};
+
+const uiToken = (label = '') => uiTokenMap[label] || String(label)
+  .split(/[\s/–-]+/)
+  .filter(Boolean)
+  .map((part) => part[0])
+  .join('')
+  .slice(0, 2)
+  .toUpperCase() || 'CC';
+
 const sections = [
   ['audit-header', 'Header audytu'],
   ['sidebar-expanded', 'Sidebar expanded'],
@@ -178,7 +210,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
                 <p>{group}</p>
                 {links.map(([icon, label, count]) => (
                   <article class={label === 'Mail Center' ? 'is-active' : ''}>
-                    <span>{icon}</span><b>{label}</b>{count && <em>{count}</em>}
+                    <span>{uiToken(label)}</span><b>{label}</b>{count && <em>{count}</em>}
                   </article>
                 ))}
               </div>
@@ -205,13 +237,13 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
             <div class="brand-icon">▲</div>
             {navGroups.flatMap(([, links]) => links).map(([icon, label, count]) => (
               <article title={label}>
-                <span>{icon}</span>{count && <em>{count}</em>}
+                <span>{uiToken(label)}</span>{count && <em>{count}</em>}
               </article>
             ))}
             <button title="Rozwiń menu">→</button>
           </aside>
           <div class="legend-list">
-            {navGroups.flatMap(([, links]) => links).slice(0, 9).map(([icon, label]) => <span><b>{icon}</b>{label}</span>)}
+            {navGroups.flatMap(([, links]) => links).slice(0, 9).map(([icon, label]) => <span><b>{uiToken(label)}</b>{label}</span>)}
           </div>
         </div>
       </section>
@@ -513,7 +545,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
           </div>
         </header>
         <div class="template-grid">
-          {templates.map(([icon, title, copy]) => <article><span>{icon}</span><h3>{title}</h3><p>{copy}</p></article>)}
+          {templates.map(([icon, title, copy]) => <article><span>{uiToken(title)}</span><h3>{title}</h3><p>{copy}</p></article>)}
         </div>
       </section>
 
@@ -597,7 +629,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
             <header><button>☰</button><strong>CC SYSTEM</strong><span>●</span></header>
             <aside class="mobile-drawer">
               <div class="brand-pill"><span>▲</span><strong>Camping Clepardia<br /><small>ONLINE</small></strong></div>
-              {navGroups[0][1].slice(0, 6).map(([icon, label, count]) => <article><span>{icon}</span><b>{label}</b>{count && <em>{count}</em>}</article>)}
+              {navGroups[0][1].slice(0, 6).map(([icon, label, count]) => <article><span>{uiToken(label)}</span><b>{label}</b>{count && <em>{count}</em>}</article>)}
             </aside>
             <main>
               <h3>Mail Center</h3>
@@ -1685,6 +1717,266 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
 
     h1 {
       font-size: clamp(2.5rem, 18vw, 4rem);
+    }
+  }
+</style>
+<style is:global>
+  /* TASK 131 audit polish: static proof of final CC SYSTEM visual direction */
+  :root {
+    --audit-green: #3cb371;
+    --audit-green-strong: #22c56e;
+    --audit-mint: #bdf5d6;
+    --audit-text: #f4fff8;
+    --audit-muted: #9fb8ad;
+    --audit-line: rgba(180, 236, 205, .11);
+    --audit-card: rgba(7, 25, 21, .78);
+  }
+
+  body {
+    color: var(--audit-text);
+    background:
+      radial-gradient(circle at 16% -10%, rgba(60, 179, 113, .18), transparent 32rem),
+      radial-gradient(circle at 88% 4%, rgba(61, 120, 92, .14), transparent 34rem),
+      linear-gradient(135deg, #03100d, #071915 46%, #030d0b) !important;
+  }
+
+  .audit-shell {
+    max-width: 1660px;
+  }
+
+  .audit-hero,
+  .audit-section {
+    border: 1px solid var(--audit-line);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .022)),
+      var(--audit-card);
+    box-shadow: 0 28px 100px rgba(0, 0, 0, .34);
+  }
+
+  .audit-hero {
+    background:
+      radial-gradient(circle at 12% 0, rgba(60, 179, 113, .22), transparent 28rem),
+      linear-gradient(135deg, rgba(14, 62, 44, .88), rgba(5, 18, 16, .86));
+  }
+
+  .audit-hero h1,
+  .audit-section h2 {
+    letter-spacing: -.045em;
+  }
+
+  .eyebrow,
+  .section-number {
+    color: var(--audit-green-strong);
+    letter-spacing: .14em;
+  }
+
+  .toc {
+    border: 1px solid var(--audit-line);
+    border-radius: 24px;
+    background: rgba(5, 18, 16, .78);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 18px 54px rgba(0, 0, 0, .26);
+  }
+
+  .toc a {
+    border-color: rgba(180, 236, 205, .1);
+    background: rgba(255, 255, 255, .035);
+    color: var(--audit-muted);
+  }
+
+  .toc a:hover {
+    border-color: rgba(60, 179, 113, .42);
+    background: rgba(60, 179, 113, .12);
+    color: #fff;
+  }
+
+  .sidebar-demo {
+    border-color: rgba(180, 236, 205, .11);
+    background:
+      linear-gradient(180deg, rgba(5, 20, 17, .98), rgba(3, 13, 11, .96)),
+      radial-gradient(circle at 42% -10%, rgba(60, 179, 113, .15), transparent 18rem);
+    box-shadow: 16px 0 60px rgba(0, 0, 0, .26);
+  }
+
+  .brand-pill,
+  .brand-icon {
+    border-color: rgba(180, 236, 205, .13);
+    background: linear-gradient(135deg, rgba(60, 179, 113, .16), rgba(255, 255, 255, .035));
+  }
+
+  .brand-pill span,
+  .brand-icon,
+  .sidebar-demo article span,
+  .collapsed-stage > aside + div span b,
+  .template-grid article span {
+    display: inline-grid;
+    place-items: center;
+    border-radius: 14px;
+    background: rgba(60, 179, 113, .13);
+    color: var(--audit-mint);
+    font-size: .78rem;
+    font-weight: 950;
+    letter-spacing: -.02em;
+  }
+
+  .sidebar-demo article {
+    min-height: 50px;
+    border-color: transparent;
+    border-radius: 16px;
+    background: transparent;
+    color: rgba(232, 255, 242, .85);
+  }
+
+  .sidebar-demo article:hover {
+    border-color: rgba(180, 236, 205, .13);
+    background: rgba(255, 255, 255, .04);
+  }
+
+  .sidebar-demo article.is-active {
+    border-color: rgba(60, 179, 113, .42);
+    background: linear-gradient(135deg, rgba(60, 179, 113, .95), rgba(16, 113, 67, .9));
+    color: #fff;
+    box-shadow: 0 14px 34px rgba(60, 179, 113, .22);
+  }
+
+  .sidebar-demo article.is-active span {
+    background: rgba(255, 255, 255, .16);
+    color: #fff;
+  }
+
+  .sidebar-demo .sidebar-group p {
+    color: rgba(189, 245, 214, .68);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .sidebar-demo button,
+  .reply-actions button,
+  .quick-actions-preview button {
+    border-color: rgba(180, 236, 205, .12);
+    background: rgba(255, 255, 255, .04);
+    color: var(--audit-text);
+  }
+
+  .mail-center-preview,
+  .crm-preview,
+  .reservations-preview,
+  .calendar-preview,
+  .dashboard-grid,
+  .settings-grid-preview,
+  .stats-preview,
+  .todo-grid {
+    gap: 14px;
+  }
+
+  .mail-folders-preview,
+  .thread-list-preview,
+  .case-preview,
+  .work-card,
+  .crm-hero-card,
+  .reservation-table-preview,
+  .reservation-detail-preview,
+  .calendar-board-preview,
+  .calendar-side-preview,
+  .template-grid article,
+  .settings-grid-preview article,
+  .stats-preview article,
+  .todo-grid article {
+    border: 1px solid var(--audit-line);
+    border-radius: 24px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, .052), rgba(255, 255, 255, .022)),
+      rgba(7, 25, 21, .76);
+    box-shadow: 0 18px 58px rgba(0, 0, 0, .24);
+  }
+
+  .thread-list-preview article,
+  .mail-folders-preview button,
+  .reservation-table-preview article,
+  .case-kpis article,
+  .kpi-grid article,
+  .mobile-drawer,
+  .phone-thread,
+  .phone-detail,
+  .phone-modal {
+    border-color: rgba(180, 236, 205, .1);
+    background: rgba(255, 255, 255, .04);
+  }
+
+  .thread-list-preview article.is-selected,
+  .mail-folders-preview button:first-of-type {
+    border-color: rgba(60, 179, 113, .38);
+    background: linear-gradient(135deg, rgba(60, 179, 113, .17), rgba(255, 255, 255, .05));
+    box-shadow: inset 4px 0 0 var(--audit-green);
+  }
+
+  .reply-actions button:first-child,
+  .quick-actions-preview button:first-child {
+    border-color: rgba(60, 179, 113, .42);
+    background: linear-gradient(135deg, rgba(60, 179, 113, .95), rgba(21, 132, 78, .92));
+    color: #fff;
+    box-shadow: 0 14px 34px rgba(60, 179, 113, .18);
+  }
+
+  .warning-box,
+  .reply-preview-card,
+  .best-reply-preview {
+    border-color: rgba(244, 178, 79, .22);
+    background: linear-gradient(135deg, rgba(244, 178, 79, .12), rgba(255, 255, 255, .04));
+  }
+
+  .template-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+
+  .template-grid article {
+    min-height: 210px;
+    align-content: start;
+  }
+
+  .template-grid article span {
+    width: 46px;
+    height: 46px;
+  }
+
+  .template-grid article p {
+    color: var(--audit-muted);
+    font-weight: 760;
+    line-height: 1.55;
+  }
+
+  .status-pill,
+  .tag-row span,
+  .legend-list span,
+  .audit-meta span {
+    border-color: rgba(180, 236, 205, .13);
+    background: rgba(255, 255, 255, .055);
+    color: #dfffee;
+  }
+
+  .phone-frame {
+    border-color: rgba(180, 236, 205, .16);
+    background:
+      linear-gradient(180deg, rgba(7, 25, 21, .96), rgba(3, 12, 10, .98)),
+      #030d0b;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, .38);
+  }
+
+  @media (max-width: 720px) {
+    .audit-shell {
+      width: min(100% - 14px, 1600px);
+    }
+
+    .audit-hero,
+    .audit-section {
+      border-radius: 22px;
+    }
+
+    .sidebar-demo article,
+    .mail-folders-preview button,
+    .reply-actions button,
+    .quick-actions-preview button {
+      min-height: 48px;
     }
   }
 </style>
