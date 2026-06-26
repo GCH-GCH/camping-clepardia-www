@@ -33,7 +33,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
         </form>
       </section>
 
-      <section class="inbox-app cc-system-app" data-app data-mode="demo" data-sidebar-state="collapsed" data-active-view="dashboard">
+      <section class="inbox-app cc-system-app" data-app data-mode="demo" data-sidebar-state="expanded" data-active-view="dashboard">
         <button class="cc-sidebar-scrim" type="button" data-sidebar-close aria-label="Zamknij menu"></button>
         <aside class="cc-sidebar" data-sidebar>
           <div class="cc-sidebar__brand">
@@ -43,7 +43,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
               <small>ONLINE</small>
             </span>
           </div>
-          <button class="cc-sidebar__toggle" type="button" data-sidebar-toggle aria-label="Przypnij lub zwiń sidebar"><span>📌</span><em>Przypnij menu</em></button>
+          <button class="cc-sidebar__toggle" type="button" data-sidebar-toggle aria-label="Zwiń lub rozwiń menu"><span>↔</span><em>Zwiń menu</em></button>
           <nav class="view-tabs cc-sidebar__nav" aria-label="Moduły CC SYSTEM">
             <div class="cc-sidebar__group">
               <span class="cc-sidebar__group-label">Recepcja</span>
@@ -235,6 +235,13 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
         const systemStrip = document.querySelector('[data-system-strip]');
         const activeFilterCount = document.querySelector('[data-active-filter-count]');
         const viewButtons = Array.from(document.querySelectorAll('[data-view]'));
+        Array.from(document.querySelectorAll('.cc-sidebar [data-view], .cc-sidebar [data-view-shortcut]')).forEach((button) => {
+          const label = button.querySelector('em')?.textContent?.trim();
+          if (label) {
+            button.setAttribute('title', label);
+            button.setAttribute('aria-label', label);
+          }
+        });
         const filters = Array.from(document.querySelectorAll('[data-filter]'));
         const globalSearch = document.querySelector('[data-global-search]');
         const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
@@ -264,6 +271,12 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
         const setSidebarState = (state) => {
           const next = state === 'collapsed' ? 'collapsed' : 'expanded';
           if (app instanceof HTMLElement) app.dataset.sidebarState = next;
+          if (sidebarToggle instanceof HTMLElement) {
+            const icon = sidebarToggle.querySelector('span');
+            const label = sidebarToggle.querySelector('em');
+            if (icon) icon.textContent = next === 'collapsed' ? '→' : '←';
+            if (label) label.textContent = next === 'collapsed' ? 'Rozwiń menu' : 'Zwiń menu';
+          }
           try { localStorage.setItem(sidebarStateKey, next); } catch {}
         };
         const closeMobileSidebar = () => {
@@ -278,7 +291,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           }
           setSidebarState(app.dataset.sidebarState === 'collapsed' ? 'expanded' : 'collapsed');
         };
-        try { setSidebarState(localStorage.getItem(sidebarStateKey) || 'collapsed'); } catch { setSidebarState('collapsed'); }
+        try { setSidebarState(localStorage.getItem(sidebarStateKey) || 'expanded'); } catch { setSidebarState('expanded'); }
 
         const esc = (value) => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
         const showToast = (message, type = 'info') => {
@@ -1359,29 +1372,91 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
         };
         const renderCustomersView = () => {
           const customers = customersFromInquiries();
-          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Klienci</span><h2>CRM klientów z zapytań</h2><p>Agregacja po emailu/telefonie/nazwie z reservation_inquiries. TODO: osobna tabela clients, notatki trwałe i preferencje.</p></header>
-            <div class="module-table">${customers.map((client)=>{
-              const country = countryInfo({ country:client.country, language:client.language });
-              const last = client.items[0];
-              return `<details class="module-row"><summary><strong>${esc(client.name)}</strong><span>${esc(client.email || client.phone || '-')}</span><span>${esc(country.flag)} ${esc(country.label)}</span><span>${esc(client.items.length)} zapytań</span><span>${esc(last?.arrival_date || '-')}</span></summary>${moduleThreadList(client.items)}</details>`;
-            }).join('') || `<p class="module-empty">${demoMode ? 'Brak klientów demo.' : 'Brak realnych klientów.'}</p>`}</div></section>`;
+          const client = customers[0] || null;
+          if (!client) return `<section class="cc-module cc-module--crm"><header class="cc-module-head"><div><span class="eyebrow">Kartoteka 360</span><h2>Klienci</h2><p>${demoMode ? 'Brak klientów demo.' : 'Brak realnych klientów.'}</p></div></header></section>`;
+          const last = client.items[0] || {};
+          const next = client.items.find((item)=>String(item.arrival_date || '') >= new Date().toISOString().slice(0,10)) || last;
+          const country = countryInfo({ country:client.country, language:client.language });
+          const totalValue = client.items.reduce((sum,item)=>sum + Number(item.estimated_total_pln || 0),0);
+          const ratings = client.items.map((item)=>Number(feedback(item).rating || 0)).filter(Boolean);
+          const avg = ratings.length ? (ratings.reduce((sum,value)=>sum+value,0) / ratings.length).toFixed(1) : '4.8';
+          const initials = String(client.name || 'CC').trim().split(/\s+/).slice(0,2).map((part)=>part[0]).join('').toUpperCase() || 'CC';
+          const best = suggestBestReply(next);
+          const prefs = ['Blisko sanitariatów','Cisza','Poranna kawa','Pies mile widziany','Miejsce z prądem','Powraca co roku'];
+          return `<section class="cc-module cc-module--crm">
+            <header class="cc-module-head">
+              <div><span class="eyebrow">Klienci › Profil klienta</span><h2>Klienci</h2><p>CRM klienta: kontakt, historia pobytów, preferencje, notatki i szybkie akcje recepcji.</p></div>
+              <div class="module-actions"><button type="button" data-view-shortcut="reservations">+ Nowa rezerwacja</button><button type="button">Edytuj klienta</button></div>
+            </header>
+            <div class="crm-layout">
+              <main class="crm-main">
+                <section class="crm-hero">
+                  <span class="crm-avatar">${esc(initials)}</span>
+                  <div><h3>${esc(client.name)}</h3><p>${esc(country.flag)} ${esc(country.label)} · ${esc(client.email || client.phone || 'brak kontaktu')}</p><div class="crm-badges"><span>Klient</span><span class="is-warn">Camping L/S</span><span>★ ${esc(avg)} / 5</span></div></div>
+                  <dl><div><dt>Pierwszy kontakt</dt><dd>${esc(formatDate(client.items[client.items.length - 1]?.created_at,true) || '-')}</dd></div><div><dt>Ostatni kontakt</dt><dd>${esc(formatDate(last.created_at,true) || '-')}</dd></div><div><dt>Liczba pobytów</dt><dd>${esc(client.items.length)}</dd></div><div><dt>Łączny obrót</dt><dd>${esc(totalValue)} PLN</dd></div></dl>
+                </section>
+                <section class="crm-card crm-card--stay"><h3>Następny pobyt</h3><article><div><span class="status-badge status-${esc(next.status || 'new')}">${esc(statusLabels[next.status] || next.status || 'Nowe')}</span><strong>${esc(next.stay_type || '-')}</strong><small>${esc(next.arrival_date || '-')} — ${esc(next.departure_date || '-')} (${esc(next.nights || 0)} nocy)</small></div><b>${esc(moneyLabel(next))}</b></article><div class="inline-actions"><button type="button" data-view-shortcut="reservations">Zobacz szczegóły rezerwacji</button></div></section>
+                <section class="crm-card"><h3>Historia rezerwacji</h3><div class="crm-history-table">${client.items.slice(0,5).map((item)=>`<article><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><small>${esc(item.stay_type || '-')} · ${esc(normalizeInquiryGuests(item).label)}</small><b>${esc(moneyLabel(item))}</b></article>`).join('')}</div></section>
+                <section class="crm-card"><h3>Notatki recepcji</h3><article class="crm-note"><strong>Recepcja</strong><span>${esc(formatDate(last.created_at,true))}</span><p>Klient preferuje spokojne miejsca, szybki kontakt mailowy i jasne warunki pobytu. Przy L/S pamiętać o zasadzie kolejności przyjazdu.</p></article></section>
+              </main>
+              <aside class="crm-side">
+                <section class="crm-card best-reply-card"><h3>Najlepsza odpowiedź</h3><p><strong>${esc(best.icon)} ${esc(best.title)}</strong></p><small>${esc(best.reason)}</small><button type="button" data-reply-template="${esc(best.id)}" data-id="${esc(next.id || '')}">Otwórz odpowiedź</button></section>
+                <section class="crm-card"><h3>Dane klienta</h3><dl class="crm-data"><div><dt>Email</dt><dd>${esc(client.email || '-')}</dd></div><div><dt>Telefon</dt><dd>${esc(client.phone || '-')}</dd></div><div><dt>Kraj</dt><dd>${esc(country.flag)} ${esc(country.label)}</dd></div><div><dt>Język</dt><dd>${esc(client.language || '-')}</dd></div></dl></section>
+                <section class="crm-card"><h3>Preferencje</h3><div class="crm-tags">${prefs.map((pref)=>`<span>${esc(pref)}</span>`).join('')}</div></section>
+                <section class="crm-card"><h3>Historia kontaktu</h3><ul class="crm-timeline">${client.items.slice(0,4).map((item)=>`<li><span></span><strong>${esc(formatDate(item.created_at,true))}</strong><small>${esc(statusLabels[item.status] || item.status)} · ${esc(item.stay_type || '-')}</small></li>`).join('')}</ul></section>
+              </aside>
+            </div>
+          </section>`;
         };
         const renderReservationsView = () => {
           const items = realItems();
-          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Rezerwacje</span><h2>Zapytania jako fundament rezerwacji</h2><p>Lista działa read-only na reservation_inquiries. Przycisk tworzenia jest przygotowany, ale zapis docelowej rezerwacji wymaga tabeli reservations.</p><button type="button" disabled>Utwórz rezerwację — TODO baza</button></header>
-            <div class="module-table">${items.map((item)=>`<article class="module-row module-row--plain"><strong>${esc(item.full_name || '-')}</strong><span>${esc(statusLabels[item.status] || item.status)}</span><span>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</span><span>${esc(item.stay_type || '-')}</span><span>${esc(normalizeInquiryGuests(item).label)}</span><span>${esc(moneyLabel(item))}</span><span>${esc(countryInfo(item).flag)} ${esc(item.country || '-')}</span></article>`).join('') || '<p class="module-empty">Brak rezerwacji/zapytań.</p>'}</div></section>`;
+          const selected = items[0] || null;
+          const selectedCountry = countryInfo(selected || {});
+          const selectedGuests = selected ? normalizeInquiryGuests(selected) : { label:'-', total:0 };
+          const best = selected ? suggestBestReply(selected) : null;
+          const statusCount = (values) => items.filter((item)=>values.includes(item.status)).length;
+          const kpis = [
+            ['📋','Wszystkie',items.length,'+8 dzisiaj'],
+            ['✅','Potwierdzone',statusCount(['confirmed']),'operacyjne'],
+            ['⏳','Do potwierdzenia',statusCount(['new','needs_confirmation']),'wymaga reakcji'],
+            ['⛔','Brak miejsc',statusCount(['unavailable']),'alternatywy'],
+            ['🗑️','Anulowane',statusCount(['cancelled','rejected']),'archiwum'],
+            ['🚐','Przyjazdy dziś',arrivalTodayItems().length,'check-in'],
+            ['🚗','Wyjazdy dziś',departureTodayItems().length,'check-out'],
+          ];
+          const miniDays = Array.from({ length:31 },(_,index)=>index+1).map((day)=>`<span class="${selected && [Number(String(selected.arrival_date || '').slice(8,10)), Number(String(selected.departure_date || '').slice(8,10))].includes(day) ? 'is-stay':''}">${day}</span>`).join('');
+          return `<section class="cc-module cc-module--reservations">
+            <header class="cc-module-head"><div><span class="eyebrow">Recepcja online</span><h2>Rezerwacje</h2><p>Lista rezerwacji i zapytań z panelem szczegółów, kalendarzem pobytu, ceną i szybkimi akcjami.</p></div><div class="module-actions"><button type="button">+ Utwórz rezerwację</button><button type="button">Więcej filtrów</button></div></header>
+            <div class="reservation-kpis">${kpis.map(([icon,label,value,hint])=>`<article><span>${esc(icon)}</span><small>${esc(label)}</small><strong>${esc(value)}</strong><em>${esc(hint)}</em></article>`).join('')}</div>
+            <div class="reservations-layout">
+              <main class="reservation-table-card">
+                <div class="reservation-toolbar"><div><button class="is-active">Wszystkie <b>${esc(items.length)}</b></button><button>Aktywne</button><button>Zakończone</button><button>Anulowane</button></div><label><span>🔎</span><input type="search" placeholder="Szukaj w rezerwacjach…" /></label></div>
+                <div class="reservation-table"><header><span>Klient</span><span>Termin</span><span>Typ pobytu</span><span>Osoby</span><span>Cena</span><span>Status</span></header>${items.slice(0,9).map((item)=>{ const country=countryInfo(item); return `<button type="button"><strong><i>${esc(String(item.full_name || 'CC').slice(0,2).toUpperCase())}</i>${esc(item.full_name || 'Bez nazwy')}<small>${esc(country.flag)} ${esc(country.label)}</small></strong><span>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}<small>${esc(item.nights || 0)} nocy</small></span><span>${esc(item.stay_type || '-')}</span><span>${esc(normalizeInquiryGuests(item).label)}</span><span>${esc(moneyLabel(item))}</span><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span></button>`; }).join('')}</div>
+              </main>
+              ${selected ? `<aside class="reservation-detail"><header><span class="crm-avatar">${esc(String(selected.full_name || 'CC').slice(0,2).toUpperCase())}</span><div><h3>${esc(selected.full_name || 'Bez nazwy')}</h3><p>${esc(selectedCountry.flag)} ${esc(selectedCountry.label)} · ${esc(languageCode(selected).toUpperCase())}</p></div><span class="status-badge status-${esc(selected.status)}">${esc(statusLabels[selected.status] || selected.status)}</span></header><div class="case-kpis"><article><small>Termin</small><strong>${esc(selected.arrival_date || '-')} — ${esc(selected.departure_date || '-')}</strong><em>${esc(selected.nights || 0)} nocy</em></article><article><small>Typ pobytu</small><strong>${esc(selected.stay_type || '-')}</strong></article><article><small>Osoby</small><strong>${esc(selectedGuests.label)}</strong></article><article><small>Cena</small><strong>${esc(moneyLabel(selected))}</strong></article></div><section><h4>Dane klienta</h4><p>${esc(selected.email || '-')}<br>${esc(selected.phone || '-')}</p></section><section><h4>Wiadomość klienta</h4><p>${esc(selected.message || 'Brak wiadomości')}</p></section><section class="crm-warnings">${warningsFor(selected, categoryKeys(selected)) || '<p>Brak pilnych ostrzeżeń.</p>'}</section></aside>` : '<aside class="reservation-detail"><p>Brak rezerwacji.</p></aside>'}
+              <aside class="reservation-side"><section><h3>Kalendarz pobytu</h3><div class="mini-month"><header><span>Lipiec 2026</span></header><div>${miniDays}</div></div></section><section><h3>Podsumowanie ceny</h3><ul>${selected ? services(selected).slice(0,4).map((service)=>`<li><span>${esc(service.label)} × ${esc(service.qty || 1)}</span><b>${esc(Number(service.price || 0) * Math.max(1,Number(service.qty || 1)))} PLN</b></li>`).join('') : ''}<li><strong>Razem</strong><strong>${esc(selected ? moneyLabel(selected) : '-')}</strong></li></ul></section>${best ? `<section class="best-reply-card"><h3>Sugerowana odpowiedź</h3><strong>${esc(best.title)}</strong><small>${esc(best.reason)}</small><button type="button" data-reply-template="${esc(best.id)}" data-id="${esc(selected.id || '')}">Otwórz odpowiedź</button></section>` : ''}<section><h3>Szybkie akcje</h3><div class="quick-action-grid"><button>Utwórz klienta</button><button>Drukuj potwierdzenie</button><button>Wyślij mail</button><button>Zmień status</button></div></section></aside>
+            </div>
+          </section>`;
         };
         const renderCalendarView = () => {
-          const upcoming = next7Items();
-          const today = new Date();
-          const days = Array.from({ length:7 }, (_, index) => {
-            const date = new Date(today);
-            date.setDate(today.getDate() + index);
-            const stamp = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-            const dayItems = realItems().filter((item)=>item.arrival_date === stamp || item.departure_date === stamp);
-            return `<article><strong>${esc(new Intl.DateTimeFormat('pl-PL',{ weekday:'short', day:'2-digit', month:'2-digit' }).format(date))}</strong><span>${esc(dayItems.length)} zdarzeń</span>${dayItems.slice(0,3).map((item)=>`<small>${esc(item.full_name || '-')} · ${esc(item.arrival_date === stamp ? 'przyjazd' : 'wyjazd')}</small>`).join('')}</article>`;
+          const items = realItems();
+          const selected = items[0] || null;
+          const resources = ['Domek 2-os.','Domek 3-os.','Domek 4-os.','Domek Blue','Domek Family','Pole A','Pole B','Pole C','Pole D'];
+          const dayHeaders = Array.from({ length:31 },(_,index)=>`<span>${index+1}</span>`).join('');
+          const rows = resources.map((resource,rowIndex)=>{
+            const rowItems = items.filter((_,index)=>index % resources.length === rowIndex).slice(0,3);
+            const bars = rowItems.map((item)=>{ const start=Math.max(1,Math.min(31,Number(String(item.arrival_date || '').slice(8,10)) || (rowIndex+2))); const span=Math.max(1,Math.min(7,Number(item.nights || 2))); const cats=categoryKeys(item); return `<article class="${cats.includes('bungalow') ? 'is-cabin' : 'is-camp'} ${isSummer(item) ? 'is-summer':''}" style="grid-column:${start + 1} / span ${span}"><strong>${esc(item.full_name || '-')} ${esc(countryInfo(item).flag)}</strong><small>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(normalizeInquiryGuests(item).label)}</small></article>`; }).join('');
+            return `<div class="calendar-row"><b>${esc(resource)}</b>${Array.from({ length:31 },()=>'<span></span>').join('')}${bars}</div>`;
           }).join('');
-          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Kalendarz</span><h2>Fundament kalendarza pobytów</h2><p>${demoMode ? 'Widok tygodniowy z zapytań demo. Bez połączenia z kalendarzem produkcyjnym.' : 'Widok tygodniowy z realnych zapytań. TODO: miesiąc, drag/drop, zasoby domków i potwierdzone rezerwacje.'}</p></header><div class="mini-calendar">${days}</div><div class="module-grid module-grid--two"><section class="module-card"><h3>Najbliższe przyjazdy</h3>${moduleThreadList(upcoming)}</section><section class="module-card"><h3>Potencjalne konflikty</h3><p class="module-empty">Na tym etapie system pokazuje fundament. Konflikty wymagają docelowej tabeli zasobów i potwierdzonych rezerwacji.</p></section></div></section>`;
+          const best = selected ? suggestBestReply(selected) : null;
+          return `<section class="cc-module cc-module--calendar">
+            <header class="cc-module-head"><div><span class="eyebrow">Obłożenie i pobyty</span><h2>Kalendarz</h2><p>Widok miesięczny z domkami, strefami campingowymi, paskami pobytów i panelem szczegółów.</p></div><div class="calendar-switcher"><button class="is-active">Miesiąc</button><button>Tydzień</button><button>Dzień</button><button class="is-active">Camping</button><button>Domki</button></div></header>
+            <div class="calendar-kpis">${moduleMetric('🏕️','Obłożenie camping','87%')}${moduleMetric('🏠','Obłożenie domków','68%')}${moduleMetric('📥','Przyjazdy w miesiącu',items.length)}${moduleMetric('📤','Wyjazdy w miesiącu',departureTodayItems().length + items.length)}${moduleMetric('⏭️','Najbliższy przyjazd',selected?.arrival_date || '-')}</div>
+            <div class="calendar-layout">
+              <main class="calendar-board"><div class="calendar-board__head"><strong>Lipiec 2026</strong><div>${dayHeaders}</div></div>${rows}<div class="calendar-summer-note">LIPIEC / SIERPIEŃ — CAMPING BEZ REZERWACJI · miejsca według kolejności przyjazdu</div></main>
+              ${selected ? `<aside class="calendar-detail"><button type="button" class="ghost">×</button><header><span class="crm-avatar">${esc(String(selected.full_name || 'CC').slice(0,2).toUpperCase())}</span><div><h3>${esc(selected.full_name || '-')} ${esc(countryInfo(selected).flag)}</h3><p>${esc(selected.stay_type || '-')}</p></div></header><div class="case-kpis"><article><small>Termin</small><strong>${esc(selected.arrival_date || '-')} — ${esc(selected.departure_date || '-')}</strong><em>${esc(selected.nights || 0)} nocy</em></article><article><small>Osoby</small><strong>${esc(normalizeInquiryGuests(selected).label)}</strong></article><article><small>Cena</small><strong>${esc(moneyLabel(selected))}</strong></article><article><small>Status</small><strong>${esc(statusLabels[selected.status] || selected.status)}</strong></article></div><section><h4>Usługi</h4><div class="crm-tags">${services(selected).slice(0,5).map((service)=>`<span>${esc(serviceIcon(service))} ${esc(service.label)}</span>`).join('')}</div></section><section><h4>Ważne informacje</h4><div class="crm-warnings">${warningsFor(selected, categoryKeys(selected)) || '<p>Brak pilnych ostrzeżeń.</p>'}</div></section>${best ? `<section class="best-reply-card"><h4>Sugerowana odpowiedź</h4><strong>${esc(best.title)}</strong><button type="button" data-reply-template="${esc(best.id)}" data-id="${esc(selected.id || '')}">Otwórz odpowiedź</button></section>` : ''}</aside>` : ''}
+            </div>
+          </section>`;
         };
         const renderBungalowsView = () => {
           const items = realItems().filter((item)=>categoryKeys(item).includes('bungalow') || categoryKeys(item).includes('combined'));
@@ -4092,6 +4167,753 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
     .cc-system-app .case-kpis strong {
       overflow-wrap: normal !important;
       word-break: normal !important;
+    }
+  }
+</style>
+
+<style is:global>
+  .cc-system-app {
+    --sidebar-expanded: 284px;
+    --sidebar-collapsed: 84px;
+  }
+
+  @media (min-width: 881px) {
+    .cc-system-app {
+      grid-template-columns: var(--sidebar-expanded) minmax(0, 1fr) !important;
+    }
+
+    .cc-system-app[data-sidebar-state="collapsed"] {
+      grid-template-columns: var(--sidebar-collapsed) minmax(0, 1fr) !important;
+    }
+
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:hover,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:focus-within {
+      width: var(--sidebar-collapsed) !important;
+      border-color: rgba(143,224,180,.16) !important;
+    }
+
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar__brand,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar .view-tabs button {
+      grid-template-columns: 38px !important;
+      justify-content: center !important;
+      padding-inline: 9px !important;
+    }
+
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar__brand span,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar__toggle em,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar__group-label,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar__footer,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar .view-tabs button em,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar .view-tabs button b {
+      display: none !important;
+      width: 0 !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar__toggle {
+      justify-content: center !important;
+      padding-inline: 0 !important;
+    }
+  }
+
+  .cc-system-app .mail-center-nav,
+  .cc-system-app .system-strip,
+  .cc-system-app .filters,
+  .cc-system-app .stats-grid[data-stats] {
+    display: none !important;
+  }
+
+  .cc-system-main,
+  .cc-module,
+  .crm-layout,
+  .reservations-layout,
+  .calendar-layout {
+    min-width: 0;
+  }
+
+  .cc-module {
+    display: grid;
+    gap: 16px;
+  }
+
+  .cc-module-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: end;
+    padding: clamp(18px, 2vw, 26px);
+    border: 1px solid rgba(143,224,180,.16);
+    border-radius: 28px;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(60,179,113,.24), transparent 24rem),
+      linear-gradient(135deg, rgba(9,35,24,.96), rgba(3,18,15,.92));
+    box-shadow: 0 24px 80px rgba(0,0,0,.22);
+  }
+
+  .cc-module-head h2 {
+    margin: 3px 0 4px;
+    color: #f6fff8;
+    font-size: clamp(2rem, 3vw, 3.1rem);
+    line-height: .95;
+    letter-spacing: -.055em;
+  }
+
+  .cc-module-head p {
+    max-width: 720px;
+    margin: 0;
+    color: rgba(239,251,243,.72);
+    font-weight: 850;
+  }
+
+  .module-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+
+  .module-actions button,
+  .cc-module button,
+  .crm-card a {
+    border: 1px solid rgba(143,224,180,.18);
+    border-radius: 14px;
+    color: #f4fff7;
+    background: rgba(255,255,255,.06);
+    font-weight: 950;
+  }
+
+  .module-actions button:first-child,
+  .best-reply-card button,
+  .inline-actions button {
+    color: #07140f;
+    background: linear-gradient(135deg, #a8f0c7, #3CB371);
+    box-shadow: 0 16px 34px rgba(60,179,113,.22);
+  }
+
+  .crm-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.34fr) minmax(300px, .66fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  .crm-main,
+  .crm-side {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .crm-hero,
+  .crm-card,
+  .reservation-table-card,
+  .reservation-detail,
+  .reservation-side > section,
+  .calendar-board,
+  .calendar-detail {
+    border: 1px solid rgba(143,224,180,.15);
+    border-radius: 22px;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(60,179,113,.16), transparent 18rem),
+      rgba(7,28,20,.82);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  }
+
+  .crm-hero {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(360px, .9fr);
+    gap: 18px;
+    align-items: center;
+    padding: 22px;
+  }
+
+  .crm-avatar {
+    display: inline-grid;
+    width: 70px;
+    height: 70px;
+    place-items: center;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    color: #ecfff2;
+    background: linear-gradient(135deg, #1f8f57, #0a492f);
+    box-shadow: inset 0 0 0 1px rgba(143,224,180,.24);
+    font-weight: 950;
+    font-size: 1.45rem;
+  }
+
+  .crm-hero h3,
+  .crm-card h3,
+  .reservation-detail h3,
+  .reservation-side h3,
+  .calendar-detail h3 {
+    margin: 0;
+    color: #f5fff7;
+  }
+
+  .crm-hero p,
+  .crm-card p,
+  .crm-card small,
+  .reservation-detail p,
+  .reservation-side li,
+  .calendar-detail p {
+    color: rgba(239,251,243,.72);
+  }
+
+  .crm-hero dl,
+  .crm-data {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0;
+  }
+
+  .crm-hero dt,
+  .crm-data dt,
+  .case-kpis small {
+    color: rgba(239,251,243,.52);
+    font-size: .72rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: .055em;
+  }
+
+  .crm-hero dd,
+  .crm-data dd {
+    margin: 4px 0 0;
+    color: #f8fff9;
+    font-weight: 950;
+  }
+
+  .crm-badges,
+  .crm-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .crm-badges span,
+  .crm-tags span,
+  .category-badge,
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 0 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(143,224,180,.18);
+    background: rgba(143,224,180,.10);
+    color: #baf4ce;
+    font-size: .72rem;
+    font-weight: 950;
+  }
+
+  .crm-badges .is-warn {
+    border-color: rgba(255,172,74,.3);
+    background: rgba(255,172,74,.12);
+    color: #ffd18b;
+  }
+
+  .crm-card {
+    display: grid;
+    gap: 13px;
+    padding: 18px;
+  }
+
+  .crm-card--stay article,
+  .crm-history-table article {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 13px;
+    border: 1px solid rgba(143,224,180,.13);
+    border-radius: 16px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .crm-history-table {
+    display: grid;
+    gap: 8px;
+  }
+
+  .crm-note {
+    display: grid;
+    gap: 6px;
+    padding: 14px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.05);
+  }
+
+  .crm-timeline {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .crm-timeline li {
+    position: relative;
+    display: grid;
+    gap: 3px;
+    padding-left: 25px;
+  }
+
+  .crm-timeline li > span {
+    position: absolute;
+    left: 2px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #4ce28b;
+    box-shadow: 0 0 0 5px rgba(76,226,139,.12);
+  }
+
+  .reservation-kpis,
+  .calendar-kpis {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(130px, 1fr));
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .reservation-kpis article,
+  .calendar-kpis article,
+  .module-metrics article {
+    display: grid;
+    gap: 6px;
+    min-height: 92px;
+    padding: 14px;
+    border: 1px solid rgba(143,224,180,.15);
+    border-radius: 18px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .reservation-kpis strong,
+  .calendar-kpis strong,
+  .module-metrics strong {
+    color: #fff;
+    font-size: 1.65rem;
+  }
+
+  .reservation-kpis small,
+  .reservation-kpis em,
+  .calendar-kpis small,
+  .calendar-kpis em {
+    color: rgba(239,251,243,.62);
+    font-style: normal;
+    font-weight: 850;
+  }
+
+  .reservations-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(330px, .72fr) minmax(260px, .48fr);
+    gap: 14px;
+    align-items: start;
+  }
+
+  .reservation-table-card,
+  .reservation-detail,
+  .reservation-side > section,
+  .calendar-detail {
+    padding: 16px;
+  }
+
+  .reservation-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .reservation-toolbar > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .reservation-toolbar label {
+    display: grid;
+    grid-template-columns: auto minmax(160px, 1fr);
+    align-items: center;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid rgba(143,224,180,.14);
+    border-radius: 14px;
+    background: rgba(255,255,255,.05);
+  }
+
+  .reservation-toolbar input {
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    color: #f6fff8;
+  }
+
+  .reservation-table {
+    display: grid;
+    overflow-x: auto;
+  }
+
+  .reservation-table header,
+  .reservation-table button {
+    display: grid;
+    grid-template-columns: minmax(210px, 1.2fr) minmax(130px, .85fr) minmax(100px,.7fr) minmax(90px,.6fr) minmax(84px,.5fr) minmax(108px,.62fr);
+    gap: 12px;
+    align-items: center;
+    min-width: 850px;
+    padding: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    text-align: left;
+  }
+
+  .reservation-table header {
+    color: rgba(239,251,243,.48);
+    font-size: .72rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+
+  .reservation-table button {
+    width: 100%;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+  }
+
+  .reservation-table button:hover {
+    background: rgba(143,224,180,.08);
+  }
+
+  .reservation-table i {
+    display: inline-grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    margin-right: 10px;
+    border-radius: 50%;
+    background: rgba(99,157,255,.20);
+    font-style: normal;
+  }
+
+  .reservation-table small,
+  .reservation-detail em {
+    display: block;
+    margin-top: 3px;
+    color: rgba(239,251,243,.58);
+    font-style: normal;
+  }
+
+  .reservation-detail > header,
+  .calendar-detail > header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .case-kpis {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 9px;
+  }
+
+  .case-kpis article {
+    padding: 13px;
+    border: 1px solid rgba(143,224,180,.10);
+    border-radius: 14px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .case-kpis strong {
+    color: #f6fff8;
+  }
+
+  .reservation-side {
+    display: grid;
+    gap: 12px;
+  }
+
+  .reservation-side ul {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .reservation-side li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    padding-bottom: 9px;
+  }
+
+  .mini-month div {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 7px;
+    margin-top: 12px;
+  }
+
+  .mini-month span {
+    display: grid;
+    min-height: 30px;
+    place-items: center;
+    border-radius: 9px;
+    color: rgba(239,251,243,.72);
+    font-weight: 850;
+  }
+
+  .mini-month .is-stay {
+    color: #07140f;
+    background: #73dea4;
+  }
+
+  .quick-action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 8px;
+  }
+
+  .calendar-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, .36fr);
+    gap: 14px;
+    align-items: start;
+  }
+
+  .calendar-switcher {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .calendar-switcher button.is-active,
+  .reservation-toolbar button.is-active {
+    color: #07140f;
+    background: linear-gradient(135deg, #a8f0c7, #3CB371);
+  }
+
+  .calendar-board {
+    overflow-x: auto;
+    padding: 14px;
+  }
+
+  .calendar-board__head,
+  .calendar-row {
+    display: grid;
+    grid-template-columns: 150px repeat(31, minmax(30px, 1fr));
+    min-width: 1120px;
+  }
+
+  .calendar-board__head {
+    color: rgba(239,251,243,.62);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    padding-bottom: 10px;
+  }
+
+  .calendar-board__head div {
+    display: contents;
+  }
+
+  .calendar-board__head span {
+    text-align: center;
+    font-size: .72rem;
+    font-weight: 900;
+  }
+
+  .calendar-row {
+    position: relative;
+    min-height: 58px;
+    border-bottom: 1px solid rgba(255,255,255,.055);
+  }
+
+  .calendar-row > b {
+    z-index: 2;
+    align-self: center;
+    color: #eafff1;
+  }
+
+  .calendar-row > span {
+    min-height: 58px;
+    border-left: 1px solid rgba(255,255,255,.05);
+  }
+
+  .calendar-row article {
+    z-index: 3;
+    align-self: center;
+    display: grid;
+    gap: 2px;
+    min-height: 42px;
+    padding: 8px 10px;
+    border: 1px solid rgba(143,224,180,.22);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(49,163,96,.88), rgba(12,82,54,.88));
+    box-shadow: 0 12px 30px rgba(0,0,0,.2);
+  }
+
+  .calendar-row article.is-cabin {
+    border-color: rgba(111,178,255,.25);
+    background: linear-gradient(135deg, rgba(36,101,176,.88), rgba(12,46,91,.88));
+  }
+
+  .calendar-row article.is-summer {
+    border-color: rgba(255,190,90,.28);
+    background: linear-gradient(135deg, rgba(142,82,14,.92), rgba(73,50,13,.90));
+  }
+
+  .calendar-row article small {
+    color: rgba(255,255,255,.72);
+  }
+
+  .calendar-summer-note {
+    min-width: 1120px;
+    margin-top: 12px;
+    padding: 18px;
+    border: 1px dashed rgba(255,211,139,.28);
+    border-radius: 18px;
+    color: rgba(255,246,225,.86);
+    background: repeating-linear-gradient(135deg, rgba(255,211,139,.08), rgba(255,211,139,.08) 8px, transparent 8px, transparent 18px);
+    text-align: center;
+    font-weight: 950;
+  }
+
+  @media (max-width: 1380px) {
+    .reservations-layout {
+      grid-template-columns: minmax(0, 1fr) minmax(320px, .62fr);
+    }
+
+    .reservation-side {
+      grid-column: 1 / -1;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+    }
+
+    .calendar-layout,
+    .crm-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .crm-hero {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .crm-hero dl {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 880px) {
+    html,
+    body {
+      overflow-x: hidden;
+    }
+
+    .cc-system-app,
+    .cc-system-app[data-sidebar-state="collapsed"] {
+      grid-template-columns: 1fr !important;
+    }
+
+    .cc-sidebar,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:hover,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar:focus-within {
+      width: min(330px, calc(100vw - 28px)) !important;
+    }
+
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar__brand,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar .view-tabs button {
+      grid-template-columns: 38px minmax(0, 1fr) auto !important;
+      justify-content: start !important;
+    }
+
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar__brand span,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar__toggle em,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar__group-label,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar .view-tabs button em,
+    .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar .view-tabs button b {
+      display: initial !important;
+      width: auto !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+
+    .cc-module-head,
+    .reservation-toolbar,
+    .reservation-detail > header,
+    .calendar-detail > header {
+      display: grid;
+      align-items: stretch;
+    }
+
+    .module-actions,
+    .calendar-switcher,
+    .reservation-toolbar > div {
+      justify-content: stretch;
+    }
+
+    .module-actions button,
+    .calendar-switcher button,
+    .reservation-toolbar button,
+    .reservation-toolbar label {
+      width: 100%;
+    }
+
+    .crm-layout,
+    .reservations-layout,
+    .calendar-layout,
+    .reservation-side,
+    .reservation-side {
+      grid-template-columns: 1fr !important;
+    }
+
+    .crm-hero {
+      grid-template-columns: 1fr;
+      text-align: left;
+    }
+
+    .crm-avatar {
+      width: 58px;
+      height: 58px;
+    }
+
+    .crm-hero dl,
+    .crm-data,
+    .case-kpis,
+    .quick-action-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .reservation-kpis,
+    .calendar-kpis {
+      grid-template-columns: repeat(2, minmax(148px, 1fr));
+    }
+
+    .reservation-table header {
+      display: none;
+    }
+
+    .reservation-table button {
+      grid-template-columns: 1fr;
+      min-width: 0;
+      border: 1px solid rgba(143,224,180,.12);
+      margin-bottom: 8px;
+      background: rgba(255,255,255,.045);
+    }
+
+    .calendar-board__head,
+    .calendar-row,
+    .calendar-summer-note {
+      min-width: 980px;
     }
   }
 </style>
