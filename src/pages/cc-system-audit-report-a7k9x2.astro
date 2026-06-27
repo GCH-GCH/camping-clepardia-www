@@ -332,8 +332,11 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
               ['Wszystkie', stats.all],
               ['Nowe', items.filter((item) => item.status === 'new').length],
               ['Do odpowiedzi', items.filter((item) => item.status === 'needs_reply').length],
+              ['Do potwierdzenia', items.filter((item) => item.status === 'needs_confirmation').length],
               ['Potwierdzone', items.filter((item) => item.status === 'confirmed').length],
               ['Brak miejsc', items.filter((item) => item.status === 'unavailable').length],
+              ['Mail niedostarczony', items.filter((item) => !item.mail_delivered).length],
+              ['Testy', items.filter((item) => item.status === 'test').length],
               ['Archiwum', items.filter((item) => item.status === 'archived').length],
             ].map(([label, value]) => <button><span>{label}</span><b>{value}</b></button>)}
           </aside>
@@ -370,8 +373,17 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
                 <li>Nie potwierdzać konkretnego miejsca campingowego.</li>
               </ul>
             </section>
+            <section class="warning-box">
+              <h4>Historia wątku</h4>
+              <ul>
+                <li>Inbound: wiadomość z formularza publicznego.</li>
+                <li>Outbound: odpowiedź premium wysłana przez Resend.</li>
+                <li>Internal: notatki i zmiany statusu recepcji.</li>
+              </ul>
+            </section>
             <div class="reply-actions">
-              <button>Otwórz odpowiedź</button>
+              <button>Utwórz odpowiedź premium</button>
+              <button>Wyślij przez Resend</button>
               <button>Kopiuj summary</button>
               <button>Oznacz jako odpowiedziane</button>
             </div>
@@ -652,6 +664,11 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
         <div class="modal-preview">
           <section class="modal-card">
             <header><span>✨</span><div><h3>Camping lipiec/sierpień — bez rezerwacji</h3><p>Język: PL · Klient: {dashboardLead.full_name}</p></div></header>
+            <div class="composer-preview">
+              <span>Do: anna.kowalska@example.com</span>
+              <span>Temat: Camping Clepardia — odpowiedź na zapytanie</span>
+              <span>Szablon: campingSummer · status po wysyłce: Odpowiedziane</span>
+            </div>
             <article class="email-preview">
               <h4>Camping Clepardia — odpowiedź na zapytanie</h4>
               <p>Dzień dobry Pani Anno,</p>
@@ -659,7 +676,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
               <p>Prąd 10A jest dostępny dla kamperów i przyczep. Najlepiej przyjechać około godziny 12:00.</p>
               <p>Pozdrawiamy,<br />Camping Clepardia</p>
             </article>
-            <footer><button>Kopiuj treść</button><button>Otwórz mailto</button><button>Zamknij</button></footer>
+            <footer><button>Wyślij przez Resend</button><button>Zapisz szkic</button><button>Kopiuj treść</button><button>Otwórz mailto</button><button>Zamknij</button></footer>
           </section>
         </div>
       </section>
@@ -1682,6 +1699,18 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
   .email-preview p {
     color: #31483a;
     line-height: 1.55;
+  }
+
+  .composer-preview {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid rgba(143,224,180,.18);
+    border-radius: 16px;
+    background: rgba(255,255,255,.06);
+    color: rgba(239,251,243,.78);
+    font-size: .86rem;
+    font-weight: 800;
   }
 
   .modal-card footer {

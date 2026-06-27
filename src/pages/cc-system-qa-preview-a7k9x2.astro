@@ -193,12 +193,20 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           <h2 id="reply-modal-title" data-reply-title>Odpowiedź do klienta</h2>
           <p data-reply-meta>Podgląd odpowiedzi</p>
         </header>
+        <div class="reply-modal__fields">
+          <label><span>Do</span><input type="email" data-reply-to placeholder="email klienta" /></label>
+          <label><span>Temat</span><input type="text" data-reply-subject placeholder="Camping Clepardia — odpowiedź na zapytanie" /></label>
+          <label><span>Język</span><select data-reply-language><option>PL</option><option>EN</option><option>DE</option><option>IT</option><option>FR</option><option>ES</option><option>NL</option><option>CS</option><option>SK</option><option>SV</option></select></label>
+          <label class="reply-modal__editor"><span>Tekst odpowiedzi / fallback</span><textarea data-reply-editor rows="9" placeholder="Treść odpowiedzi do klienta"></textarea></label>
+        </div>
         <div class="reply-modal__preview" data-reply-preview></div>
         <details class="reply-modal__text">
           <summary>Tekstowa wersja mailto</summary>
           <pre data-reply-mailto-text></pre>
         </details>
         <div class="reply-modal__actions">
+          <button type="button" data-reply-send>Wyślij przez Resend</button>
+          <button type="button" data-reply-draft>Zapisz szkic</button>
           <button type="button" data-reply-copy>Kopiuj treść</button>
           <button type="button" data-reply-mailto>Otwórz mailto</button>
           <button type="button" data-reply-mark>Oznacz jako odpowiedziane</button>
@@ -242,6 +250,12 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
         const replyMeta = document.querySelector('[data-reply-meta]');
         const replyPreview = document.querySelector('[data-reply-preview]');
         const replyMailtoText = document.querySelector('[data-reply-mailto-text]');
+        const replyToInput = document.querySelector('[data-reply-to]');
+        const replySubjectInput = document.querySelector('[data-reply-subject]');
+        const replyLanguageSelect = document.querySelector('[data-reply-language]');
+        const replyEditor = document.querySelector('[data-reply-editor]');
+        const replySendButton = document.querySelector('[data-reply-send]');
+        const replyDraftButton = document.querySelector('[data-reply-draft]');
         const systemStrip = document.querySelector('[data-system-strip]');
         const activeFilterCount = document.querySelector('[data-active-filter-count]');
         const viewButtons = Array.from(document.querySelectorAll('[data-view]'));
@@ -1156,22 +1170,103 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           if (replyMeta) replyMeta.textContent = `${template.language} · ${template.subject} · ${item.full_name || 'klient'}${item.email ? ` · ${item.email}` : ''}`;
           if (replyPreview) replyPreview.innerHTML = template.visualPreviewHtml || '';
           if (replyMailtoText) replyMailtoText.textContent = template.mailtoBodyText;
+          if (replyToInput instanceof HTMLInputElement) replyToInput.value = item.email || '';
+          if (replySubjectInput instanceof HTMLInputElement) replySubjectInput.value = template.subject || 'Camping Clepardia — odpowiedź na zapytanie';
+          if (replyLanguageSelect instanceof HTMLSelectElement) replyLanguageSelect.value = template.language || 'PL';
+          if (replyEditor instanceof HTMLTextAreaElement) replyEditor.value = template.mailtoBodyText || '';
+          if (replySendButton instanceof HTMLButtonElement) {
+            replySendButton.disabled = !item.email;
+            replySendButton.textContent = item.email ? 'Wyślij przez Resend' : 'Brak emaila klienta';
+          }
           if (replyModal instanceof HTMLElement) replyModal.hidden = false;
           document.body.style.overflow = 'hidden';
           trackLocalAction(item.id, `Otworzono modal odpowiedzi: ${template.title}`);
           return true;
         };
-        const launchReplyMailto = () => {
-          if (!activeReplyDraft) return;
+        const activeReplyPayload = () => {
+          if (!activeReplyDraft) return null;
           const item = inquiries.find((entry)=>String(entry.id) === String(activeReplyDraft.itemId));
+          if (!item) return null;
           const template = activeReplyDraft.template;
-          if (!item?.email) {
+          const bodyText = replyEditor instanceof HTMLTextAreaElement ? replyEditor.value.trim() : template.mailtoBodyText;
+          return {
+            item,
+            template,
+            inquiryId:item.id,
+            threadId:`inquiry:${item.id}`,
+            to: replyToInput instanceof HTMLInputElement ? replyToInput.value.trim() : item.email,
+            subject: replySubjectInput instanceof HTMLInputElement ? replySubjectInput.value.trim() : template.subject,
+            bodyText,
+            bodyHtml: replyPreview instanceof HTMLElement ? replyPreview.innerHTML : '',
+            templateId: template.id,
+            language: replyLanguageSelect instanceof HTMLSelectElement ? replyLanguageSelect.value : template.language,
+            statusAfterSend: activeReplyDraft.targetStatus || 'replied',
+          };
+        };
+        const launchReplyMailto = () => {
+          const payload = activeReplyPayload();
+          if (!payload?.item?.email && !payload?.to) {
             showToast('Brak emaila klienta. Skopiuj odpowiedź z modala.', 'error');
             return;
           }
-          window.location.href = `mailto:${encodeURIComponent(item.email)}?subject=${encodeURIComponent(template.subject)}&body=${encodeURIComponent(template.mailtoBodyText)}`;
-          trackLocalAction(item.id, `Otworzono mailto: ${template.title}`);
-          showToast(`Otwieram mailto: ${template.title}`, 'success');
+          window.location.href = `mailto:${encodeURIComponent(payload.to || payload.item.email)}?subject=${encodeURIComponent(payload.subject)}&body=${encodeURIComponent(payload.bodyText)}`;
+          trackLocalAction(payload.item.id, `Otworzono mailto: ${payload.template.title}`);
+          showToast(`Otwieram mailto: ${payload.template.title}`, 'success');
+        };
+        const sendReplyThroughResend = async () => {
+          const payload = activeReplyPayload();
+          if (!payload) return;
+          if (!payload.to) {
+            showToast('Brak emaila klienta. Nie można wysłać przez Resend.', 'error');
+            return;
+          }
+          if (demoMode) {
+            trackLocalAction(payload.item.id, `DEMO: wysyłka przez Resend (${payload.template.title})`);
+            showToast('QA preview: wysyłka przez Resend jest zablokowana, pokazuję tylko demo.', 'success');
+            return;
+          }
+          if (replySendButton instanceof HTMLButtonElement) {
+            replySendButton.disabled = true;
+            replySendButton.textContent = 'Wysyłanie…';
+          }
+          try {
+            const result = await request('/api/mail-center/send-reply',{method:'POST',body:JSON.stringify(payload)});
+            trackLocalAction(payload.item.id, `Wysłano odpowiedź przez Resend: ${payload.template.title}`);
+            showToast(result.delivered ? 'Wysłano odpowiedź do klienta.' : 'Odpowiedź nie została dostarczona — użyj mailto/kopiuj.', result.delivered ? 'success' : 'error');
+            if (result.delivered) {
+              const index = inquiries.findIndex((entry)=>String(entry.id) === String(payload.item.id));
+              if (index >= 0) inquiries[index] = { ...inquiries[index], status: payload.statusAfterSend || 'replied' };
+              closeReplyModal();
+              await load({ silent:true, reason:'reply-sent' });
+            }
+          } catch (error) {
+            showToast(error.message || 'Nie udało się wysłać odpowiedzi przez Resend.', 'error');
+          } finally {
+            if (replySendButton instanceof HTMLButtonElement) {
+              const current = activeReplyPayload();
+              replySendButton.disabled = !current?.to;
+              replySendButton.textContent = current?.to ? 'Wyślij przez Resend' : 'Brak emaila klienta';
+            }
+          }
+        };
+        const saveReplyDraft = async () => {
+          const payload = activeReplyPayload();
+          if (!payload) return;
+          if (demoMode) {
+            trackLocalAction(payload.item.id, `DEMO: zapis szkicu (${payload.template.title})`);
+            showToast('QA preview: szkic zapisany tylko lokalnie w historii demo.', 'success');
+            return;
+          }
+          if (replyDraftButton instanceof HTMLButtonElement) replyDraftButton.disabled = true;
+          try {
+            const result = await request('/api/mail-center/save-draft',{method:'POST',body:JSON.stringify(payload)});
+            trackLocalAction(payload.item.id, result.saved ? `Zapisano szkic: ${payload.template.title}` : `Szkic TODO/fallback: ${payload.template.title}`);
+            showToast(result.saved ? 'Szkic zapisany w historii wątku.' : 'Szkic przygotowany — tabele Mail Center nie są jeszcze utworzone.', result.saved ? 'success' : 'info');
+          } catch (error) {
+            showToast(error.message || 'Nie udało się zapisać szkicu.', 'error');
+          } finally {
+            if (replyDraftButton instanceof HTMLButtonElement) replyDraftButton.disabled = false;
+          }
         };
         const markReplyHandled = () => {
           if (!activeReplyDraft) return;
@@ -1964,9 +2059,12 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
         document.querySelectorAll('[data-reply-close]').forEach((button)=>button.addEventListener('click',closeReplyModal));
         document.querySelector('[data-reply-copy]')?.addEventListener('click',(event)=>{
           if (!activeReplyDraft?.template?.mailtoBodyText || !(event.currentTarget instanceof HTMLButtonElement)) return;
+          const payload = activeReplyPayload();
           trackLocalAction(activeReplyDraft.itemId, 'Skopiowano odpowiedź z modala');
-          void copy(activeReplyDraft.template.mailtoBodyText, event.currentTarget);
+          void copy(payload?.bodyText || activeReplyDraft.template.mailtoBodyText, event.currentTarget);
         });
+        document.querySelector('[data-reply-send]')?.addEventListener('click',()=>void sendReplyThroughResend());
+        document.querySelector('[data-reply-draft]')?.addEventListener('click',()=>void saveReplyDraft());
         document.querySelector('[data-reply-mailto]')?.addEventListener('click',launchReplyMailto);
         document.querySelector('[data-reply-mark]')?.addEventListener('click',markReplyHandled);
         window.addEventListener('keydown',(event)=>{
@@ -5374,7 +5472,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
     width: min(980px, 100%);
     max-height: min(88vh, 920px);
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
     gap: 14px;
     padding: clamp(18px, 3vw, 28px);
     border: 1px solid rgba(143,224,180,.24);
@@ -5398,6 +5496,48 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
     min-height: 42px;
     padding: 0;
     border-radius: 50%;
+  }
+
+  .reply-modal__fields {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) minmax(260px, 1.2fr) minmax(96px, .4fr);
+    gap: 10px;
+    min-height: 0;
+  }
+
+  .reply-modal__fields label {
+    display: grid;
+    gap: 6px;
+    color: rgba(223,247,231,.78);
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  .reply-modal__fields input,
+  .reply-modal__fields select,
+  .reply-modal__fields textarea {
+    width: 100%;
+    border: 1px solid rgba(79,220,139,.25);
+    border-radius: 14px;
+    background: rgba(3,20,13,.72);
+    color: #f4fff8;
+    padding: 11px 12px;
+    font: inherit;
+    text-transform: none;
+    letter-spacing: 0;
+    outline: none;
+  }
+
+  .reply-modal__fields textarea {
+    min-height: 170px;
+    resize: vertical;
+    line-height: 1.55;
+  }
+
+  .reply-modal__editor {
+    grid-column: 1 / -1;
   }
 
   .reply-modal__preview {
@@ -5559,6 +5699,10 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
 
     .reply-modal__actions {
       display: grid;
+    }
+
+    .reply-modal__fields {
+      grid-template-columns: 1fr;
     }
 
     .reply-preview-grid {
