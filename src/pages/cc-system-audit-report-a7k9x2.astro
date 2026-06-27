@@ -78,22 +78,33 @@ const stats = {
 const navGroups = [
   ['Recepcja', [
     ['🏠', 'Dashboard', '12'],
-    ['✉️', 'Mail Center', '8'],
     ['👤', 'Klienci', '16'],
+  ]],
+  ['Komunikacja', [
+    ['✉️', 'Mail Center', '8'],
+    ['💬', 'Schematy odpowiedzi', ''],
+  ]],
+  ['Operacje', [
     ['📋', 'Rezerwacje', '24'],
     ['📅', 'Kalendarz', ''],
+    ['⚡', '/camp / Nowe przyjęcie', ''],
     ['🏡', 'Domki', ''],
     ['⛺', 'Camping', ''],
+    ['➕', 'Przedłuż pobyt', ''],
+    ['🖨️', 'Drukowanie', ''],
   ]],
   ['Raporty', [
     ['📊', 'GUS / Raporty', ''],
     ['📈', 'Statystyki', ''],
-    ['💬', 'Schematy odpowiedzi', ''],
   ]],
   ['Zespół', [
     ['👥', 'Pracownicy', ''],
     ['✅', 'Zadania', '5'],
+  ]],
+  ['Ustawienia', [
     ['⚙️', 'Ustawienia', ''],
+    ['🧪', 'Testy', ''],
+    ['🗄️', 'Archiwum', ''],
   ]],
 ];
 
@@ -114,14 +125,19 @@ const uiTokenMap = {
   Klienci: 'KL',
   Rezerwacje: 'RZ',
   Kalendarz: 'KA',
+  '/camp / Nowe przyjęcie': 'NP',
   Domki: 'DM',
   Camping: 'CP',
+  'Przedłuż pobyt': 'PP',
+  Drukowanie: 'DR',
   'GUS / Raporty': 'GR',
   Statystyki: 'ST',
   'Schematy odpowiedzi': 'SO',
   Pracownicy: 'PR',
   Zadania: 'ZD',
   Ustawienia: 'US',
+  Testy: 'TE',
+  Archiwum: 'AR',
   Potwierdź: 'PT',
   'Poproś o dane': 'PD',
   'Brak miejsc': 'BM',
@@ -146,8 +162,10 @@ const sections = [
   ['sidebar-collapsed', 'Sidebar collapsed'],
   ['dashboard', 'Dashboard / Recepcja'],
   ['mail-center', 'Mail Center'],
+  ['mail-summary', 'Mail summary premium'],
   ['clients', 'Klienci / CRM'],
   ['reservations', 'Rezerwacje'],
+  ['camp-pro', '/camp PRO'],
   ['calendar', 'Kalendarz'],
   ['bungalows', 'Domki'],
   ['camping', 'Camping'],
@@ -219,7 +237,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
           </aside>
           <div class="audit-note-card">
             <h3>Założenie UX</h3>
-            <p>Domyślnie desktop ma szeroki sidebar z pełnymi nazwami. Zwijanie jest ręczne i przewidywalne — bez rozrostu na hover.</p>
+            <p>Domyślnie desktop ma cienki pasek ikon. Po hover wysuwa się glass overlay z pełnymi nazwami i nie przesuwa treści; pin zostawia go szerokim.</p>
           </div>
         </div>
       </section>
@@ -361,6 +379,33 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
         </div>
       </section>
 
+      <section class="audit-section" id="mail-summary">
+        <header>
+          <span class="section-number">04B</span>
+          <div>
+            <h2>Mail do recepcji — najważniejsze kafelki</h2>
+            <p>Co sprawdzać: mail do Gmaila ma być client-safe, bez providerów i diagnostyki, z konkretnym pobytem/pojazdem oraz skrótem na początku i na końcu.</p>
+          </div>
+        </header>
+        <div class="modal-preview">
+          <section class="modal-card">
+            <header><span>⭐</span><div><h3>Najważniejsze informacje</h3><p>{dashboardLead.full_name} · {flag(dashboardLead)} {dashboardLead.country}</p></div></header>
+            <div class="case-kpis">
+              <article><small>Klient</small><b>{dashboardLead.full_name}</b></article>
+              <article><small>Kraj</small><b>{flag(dashboardLead)} {dashboardLead.country}</b></article>
+              <article><small>Termin</small><b>{dashboardLead.arrival_date} — {dashboardLead.departure_date}</b></article>
+              <article><small>Pobyt / pojazd</small><b>Kamper + Prąd 10A</b></article>
+              <article><small>Usługi</small><b>{serviceText(dashboardLead)}</b></article>
+              <article><small>Cena</small><b>{money(dashboardLead)}</b></article>
+            </div>
+            <article class="email-preview">
+              <h4>Najważniejsze informacje — skrót dla recepcji</h4>
+              <p>Klient, kontakt, termin, pobyt/pojazd, usługi i cena są powtórzone na dole maila. Mail nie pokazuje inquiry ID, Supabase, Resend, raw payloadu, feedbacku ani zgód.</p>
+            </article>
+          </section>
+        </div>
+      </section>
+
       <section class="audit-section" id="clients">
         <header>
           <span class="section-number">05</span>
@@ -449,6 +494,52 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
         </div>
       </section>
 
+      <section class="audit-section" id="camp-pro">
+        <header>
+          <span class="section-number">06B</span>
+          <div>
+            <h2>/camp — Nowe przyjęcie PRO</h2>
+            <p>Co sprawdzać: szybki ekran recepcji w stylu offline — dane klienta, pobyt, usługi, płatność, dokumenty i podsumowanie bez udawania zapisu, jeśli nie ma docelowych tabel.</p>
+          </div>
+        </header>
+        <div class="dashboard-grid">
+          <section class="hero-panel">
+            <p class="eyebrow">Express Check-in PRO</p>
+            <h3>Klient w 30–60 sekund: Dane → Usługi → Płatność → Dokumenty → Zakończenie</h3>
+            <div class="kpi-grid">
+              <article><span>🚐</span><b>Kamper</b><small>2 osoby + prąd</small></article>
+              <article><span>🏕️</span><b>Namiot</b><small>2 osoby</small></article>
+              <article><span>🏡</span><b>Domek</b><small>2/3/4-os.</small></article>
+              <article><span>👥</span><b>Grupa</b><small>kilka pojazdów</small></article>
+            </div>
+          </section>
+          <section class="work-card">
+            <h3>Dane klienta i pobyt</h3>
+            <ul class="clean-list">
+              <li>Imię, kraj, język, email, telefon.</li>
+              <li>Rejestracja pojazdu i przyczepy.</li>
+              <li>Przyjazd, liczba nocy, wyjazd automatycznie, godzina przyjazdu.</li>
+            </ul>
+          </section>
+          <section class="work-card">
+            <h3>Usługi i płatność</h3>
+            <ul class="clean-list">
+              <li>Dorośli, dzieci, kamper, przyczepa, namiot, van, bus, prąd 10A, pies, domki.</li>
+              <li>Gotówka, karta, nieopłacone, rabat, wpłacono, pozostało.</li>
+            </ul>
+          </section>
+          <section class="work-card">
+            <h3>Dokumenty i akcje</h3>
+            <div class="reply-actions">
+              <button>Wyczyść</button>
+              <button>Zapisz pobyt — TODO baza</button>
+              <button>Drukuj</button>
+              <button>Otwórz kartę</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
       <section class="audit-section" id="calendar">
         <header>
           <span class="section-number">07</span>
@@ -459,11 +550,12 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
         </header>
         <div class="calendar-preview">
           <main class="calendar-board-preview">
-            <div class="calendar-head"><strong>Lipiec 2026</strong>{monthDays.map((day) => <span>{day}</span>)}</div>
+            <div class="audit-month-strip">{['Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień'].map((month) => <button class={month === 'Lipiec' ? 'is-active' : ''}>{month}</button>)}</div>
+            <div class="calendar-head"><strong>Lipiec 2026</strong>{monthDays.map((day) => <span class={day === 27 ? 'is-today' : ''}>{day}</span>)}</div>
             {calendarResources.map((resource, rowIndex) => (
               <div class="calendar-row-preview">
                 <b>{resource}</b>
-                {monthDays.map(() => <span></span>)}
+                {monthDays.map((day) => <span class={day === 27 ? 'is-today' : ''}></span>)}
                 {calendarItems.filter((_, index) => index % calendarResources.length === rowIndex).slice(0, 2).map((item) => {
                   const start = Math.max(1, Math.min(28, Number(String(item.arrival_date || '').slice(8, 10)) || rowIndex + 2));
                   const span = Math.max(1, Math.min(6, Number(item.nights || 2)));
@@ -1404,6 +1496,28 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
     background: var(--panel);
   }
 
+  .audit-month-strip {
+    display: flex;
+    gap: 8px;
+    min-width: 1050px;
+    margin-bottom: 12px;
+  }
+
+  .audit-month-strip button {
+    border: 1px solid rgba(143,224,180,.16);
+    border-radius: 12px;
+    padding: 8px 12px;
+    color: var(--muted);
+    background: rgba(255,255,255,.04);
+    font-weight: 900;
+  }
+
+  .audit-month-strip .is-active {
+    color: #07140f;
+    border-color: transparent;
+    background: var(--green-soft);
+  }
+
   .calendar-head,
   .calendar-row-preview {
     display: grid;
@@ -1421,6 +1535,17 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
     text-align: center;
     font-size: .72rem;
     font-weight: 900;
+  }
+
+  .calendar-head .is-today,
+  .calendar-row-preview > span.is-today {
+    background: rgba(80,220,140,.16);
+    box-shadow: inset 0 0 0 1px rgba(80,220,140,.32);
+  }
+
+  .calendar-head .is-today {
+    border-radius: 9px;
+    color: var(--green-soft);
   }
 
   .calendar-row-preview {

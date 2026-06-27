@@ -719,6 +719,65 @@ const stayKindLabel = (inquiry) => {
   return 'Camping';
 };
 
+const operationalStatusLabel = (inquiry) => {
+  if (inquiry.highSeasonCampingInfo) return 'blokada L/S · informacyjne';
+  if (hasBungalow(inquiry)) return 'domek · do potwierdzenia';
+  if (inquiry.isTest) return 'test';
+  return 'do potwierdzenia';
+};
+
+const normalizeArrivalVehicleSummary = (inquiry, lineItems = []) => {
+  const services = Array.isArray(lineItems) ? lineItems : [];
+  const text = [
+    inquiry?.stayType,
+    inquiry?.selectedStayMode,
+    inquiry?.stayCategory,
+    inquiry?.vehicleType,
+    inquiry?.vehicleDetails?.type,
+    inquiry?.vehicleDetails?.summary,
+    inquiry?.message,
+    ...services.flatMap((service) => [service.id, service.label, service.scope]),
+  ].filter(Boolean).join(' ').toLowerCase();
+
+  const has = (pattern) => pattern.test(text);
+  const main = (() => {
+    const bungalowMatch = text.match(/domek\s*(2|3|4)[-\s]?os/i) || text.match(/bungalow\s*(2|3|4)/i);
+    if (bungalowMatch) return `Domek ${bungalowMatch[1]}-os.`;
+    if (has(/domek|bungalow|domki/)) return 'Domek';
+    if (has(/kamper|camper|motorhome/)) return 'Kamper';
+    if (has(/przyczep|caravan|trailer/)) return has(/auto|samoch|car|parking/) ? 'Przyczepa + samochód' : 'Przyczepa';
+    if (has(/namiot|tent/)) return 'Namiot';
+    if (has(/\bvan\b|campervan/)) return 'Van';
+    if (has(/autobus|bus|coach/)) return 'Bus / grupa';
+    if (has(/grupa|group|scout|skaut/)) return 'Grupa';
+    if (has(/motocykl|motorcycle/)) return 'Motocykl';
+    if (has(/samoch|auto|car/)) return 'Auto';
+    return 'Do ustalenia';
+  })();
+
+  const extras = [];
+  if (has(/prąd|prad|electric|10a|power/)) extras.push('Prąd 10A');
+  if (has(/pies|dog/)) extras.push('Pies');
+  if (has(/ev|plug[-\s]?in|elektrycz/)) extras.push('EV info');
+  if (inquiry?.vehiclePlate) extras.push(`rej. ${inquiry.vehiclePlate}`);
+  if (inquiry?.trailerPlate && !extras.join(' ').toLowerCase().includes('przyczepa')) extras.push(`przyczepa ${inquiry.trailerPlate}`);
+
+  return [main, ...extras].filter(Boolean).join(' + ');
+};
+
+const compactServiceSummary = (lineItems = []) => {
+  const services = Array.isArray(lineItems) ? lineItems : [];
+  const important = services
+    .filter((service) => {
+      const text = `${service.id || ''} ${service.scope || ''} ${service.label || ''}`.toLowerCase();
+      return !/adult|children|toddler|osoba doros|dzieci/.test(text);
+    })
+    .map((service) => service.label || service.id)
+    .filter(Boolean);
+  const unique = [...new Set(important)];
+  return unique.length ? unique.join(' + ') : 'Do ustalenia';
+};
+
 const createSupabaseRecord = (inquiry, payload) => ({
   status: inquiry.website ? 'spam' : inquiry.isTest ? 'test' : 'new',
   source: oneLine(payload.source || 'website', 80),
@@ -766,6 +825,9 @@ const buildReceptionSafeEmail = (inquiry) => {
   const services = buildStayLineItems(inquiry);
   const priceSummary = receptionPriceSummary(inquiry, services);
   const countryDisplay = countryWithFlag(inquiry.country);
+  const arrivalVehicleSummary = normalizeArrivalVehicleSummary(inquiry, services);
+  const serviceSummary = compactServiceSummary(services);
+  const operationalStatus = operationalStatusLabel(inquiry);
   const totalPeople = Number(inquiry.people.adults || 0) + Number(inquiry.people.children || 0) + Number(inquiry.people.toddlers || 0);
   const guests = [
     inquiry.people.adults ? `Dorośli: ${inquiry.people.adults}` : '',
@@ -779,6 +841,7 @@ const buildReceptionSafeEmail = (inquiry) => {
     inquiry.vehicleDetails?.summary,
   ].filter(Boolean);
   const vehicleSummary = vehicleParts.join(' · ');
+  const vehicleDisplay = arrivalVehicleSummary || vehicleSummary || 'Do ustalenia';
   const serviceSearch = rawServices.map((service) => `${service.id} ${service.label} ${service.scope}`).join(' ');
   const freeTextSearch = [
     serviceSearch,
@@ -855,7 +918,8 @@ const buildReceptionSafeEmail = (inquiry) => {
     ['Noce', inquiry.nights],
     ['Godzina przyjazdu', inquiry.arrivalTime || 'jeszcze nie wiem'],
     ['Typ pobytu', inquiry.stayType],
-    ['Pojazd', vehicleSummary],
+    ['Pobyt / pojazd', vehicleDisplay],
+    ['Dane pojazdu', vehicleSummary],
     ['Uwagi / potrzeby klienta', inquiry.specialNeeds],
     ['Wydarzenie', inquiry.eventInterest],
     ['Wycieczki', inquiry.tours.join(', ')],
@@ -867,11 +931,14 @@ const buildReceptionSafeEmail = (inquiry) => {
     ['Razem osób', totalPeople || 'do ustalenia'],
   ];
   const topCards = [
+    ['👤', 'Klient', inquiry.fullName || 'do ustalenia', [inquiry.email, inquiry.phone].filter(Boolean).join(' · ')],
+    ['🌍', 'Kraj', countryDisplay || 'do ustalenia', inquiry.contactLanguage],
     ['📅', 'Termin', `${inquiry.arrival || '-'} — ${inquiry.departure || '-'}`, `${inquiry.nights || 0} nocy`],
     ['👥', 'Goście', totalPeople ? `${totalPeople} osób` : 'do ustalenia', guests],
-    ['🚐', 'Typ pobytu / pojazd', inquiry.stayType || 'do ustalenia', vehicleSummary],
-    ['💰', 'Cena orientacyjna', priceSummary.label, priceSummary.hint || inquiry.currencyEstimate],
-    ['🌍', 'Kraj / język', countryDisplay || 'do ustalenia', inquiry.contactLanguage],
+    ['🚐', 'Pobyt / pojazd', vehicleDisplay, inquiry.stayType],
+    ['🧾', 'Usługi', serviceSummary, services.length ? `${services.length} pozycji w tabeli` : 'do ustalenia'],
+    ['💰', 'Cena', priceSummary.label, priceSummary.hint || inquiry.currencyEstimate],
+    ['⚡', 'Status operacyjny', operationalStatus, inquiry.highSeasonCampingInfo ? 'camping lipiec/sierpień bez rezerwacji miejsc' : 'recepcja potwierdza dostępność'],
   ];
   const warningHtml = warningItems.length
     ? `<section style="margin:18px 0;padding:20px;border:1px solid #f0d7a6;border-radius:20px;background:#fff8ea;color:#4c3b13;">
@@ -896,11 +963,15 @@ const buildReceptionSafeEmail = (inquiry) => {
           <p style="margin:14px 0 0;color:#d7efe0;font-size:15px;line-height:1.55;">${escapeHtml(stayKind)} · ${escapeHtml(inquiry.arrival || '-')} — ${escapeHtml(inquiry.departure || '-')} · ${escapeHtml([inquiry.fullName, countryDisplay].filter(Boolean).join(' / ') || 'klient')}</p>
         </header>
 
-        <table role="presentation" style="width:100%;border-collapse:separate;border-spacing:0;margin:18px -7px 4px;">
-          <tr>${topCards.slice(0, 2).map(card).join('')}</tr>
-          <tr>${topCards.slice(2, 4).map(card).join('')}</tr>
-          <tr>${topCards.slice(4, 5).map(card).join('')}</tr>
-        </table>
+        <section style="margin:18px 0 6px;padding:20px;border:1px solid #dceee4;border-radius:22px;background:#ffffff;">
+          ${sectionTitle('⭐', 'Najważniejsze informacje')}
+          <table role="presentation" style="width:100%;border-collapse:separate;border-spacing:0;margin:-7px;">
+            <tr>${topCards.slice(0, 2).map(card).join('')}</tr>
+            <tr>${topCards.slice(2, 4).map(card).join('')}</tr>
+            <tr>${topCards.slice(4, 6).map(card).join('')}</tr>
+            <tr>${topCards.slice(6, 8).map(card).join('')}</tr>
+          </table>
+        </section>
 
         ${warningHtml}
 
@@ -942,6 +1013,20 @@ const buildReceptionSafeEmail = (inquiry) => {
           <p style="white-space:pre-wrap;line-height:1.7;margin:0;color:#102319;">${escapeHtml(inquiry.message)}</p>
         </section>` : ''}
 
+        <section style="margin:18px 0;padding:20px;border:1px solid #cfe8d8;border-radius:20px;background:linear-gradient(145deg,#ffffff,#f2fbf5);">
+          ${sectionTitle('✅', 'Najważniejsze informacje — skrót dla recepcji')}
+          <table role="presentation" style="width:100%;border-collapse:collapse;">${fieldRows([
+            ['Klient', inquiry.fullName],
+            ['Kontakt', [inquiry.email, inquiry.phone].filter(Boolean).join(' · ')],
+            ['Kraj', countryDisplay],
+            ['Termin', `${inquiry.arrival || '-'} — ${inquiry.departure || '-'} (${inquiry.nights || 0} nocy)`],
+            ['Pobyt / pojazd', vehicleDisplay],
+            ['Usługi', serviceSummary],
+            ['Cena', priceSummary.label],
+            ['Status operacyjny', operationalStatus],
+          ])}</table>
+        </section>
+
         <footer style="padding:18px 6px;color:#54675d;font-size:12px;line-height:1.7;">
           <strong>Camping Clepardia</strong><br>
           www.clepardia.com.pl · +48 795 294 486
@@ -956,11 +1041,14 @@ const buildReceptionSafeEmail = (inquiry) => {
     [stayKind, `${inquiry.arrival || '-'} — ${inquiry.departure || '-'}`, [inquiry.fullName, countryDisplay].filter(Boolean).join(' / ')].filter(Boolean).join(' · '),
     '',
     'NAJWAŻNIEJSZE',
+    `Klient: ${inquiry.fullName || 'do ustalenia'}`,
+    `Kraj: ${countryDisplay || 'do ustalenia'}`,
     `Termin: ${inquiry.arrival || '-'} — ${inquiry.departure || '-'} (${inquiry.nights || 0} nocy)`,
     `Goście: ${guests}; razem: ${totalPeople || 'do ustalenia'}`,
-    `Typ pobytu / pojazd: ${[inquiry.stayType, vehicleSummary].filter(Boolean).join('; ') || 'do ustalenia'}`,
+    `Pobyt / pojazd: ${vehicleDisplay}`,
+    `Usługi: ${serviceSummary}`,
     `Cena orientacyjna: ${priceSummary.label}${priceSummary.hint ? ` (${priceSummary.hint})` : ''}`,
-    `Kraj / język: ${[countryDisplay, inquiry.contactLanguage].filter(Boolean).join(' / ') || 'do ustalenia'}`,
+    `Status operacyjny: ${operationalStatus}`,
     '',
     'KLIENT',
     ...safeRows(clientRows).map(([label, value]) => `${label}: ${value}`),
@@ -981,6 +1069,14 @@ const buildReceptionSafeEmail = (inquiry) => {
     '',
     inquiry.message ? 'WIADOMOŚĆ KLIENTA' : '',
     inquiry.message || '',
+    '',
+    'SKRÓT DLA RECEPCJI',
+    `Klient: ${inquiry.fullName || 'do ustalenia'}`,
+    `Kontakt: ${[inquiry.email, inquiry.phone].filter(Boolean).join(' / ') || 'do ustalenia'}`,
+    `Termin: ${inquiry.arrival || '-'} — ${inquiry.departure || '-'} (${inquiry.nights || 0} nocy)`,
+    `Pobyt / pojazd: ${vehicleDisplay}`,
+    `Usługi: ${serviceSummary}`,
+    `Cena: ${priceSummary.label}`,
     '',
     `Strona: www.clepardia.com.pl`,
     'Camping Clepardia · www.clepardia.com.pl · +48 795 294 486',
@@ -1164,51 +1260,58 @@ const normalizeFormSubmitError = (body, status) => {
   };
 };
 
-const buildFormSubmitPayload = (message, inquiry) => ({
-  _subject: message.subject,
-  _template: 'table',
-  _captcha: 'false',
-  _replyto: inquiry.email || '',
-  _autoresponse: '',
-  inquiry_id: inquiry.inquiryId,
-  zapis_do_panelu: 'zapisano w reservation_inquiries',
-  status: 'Do potwierdzenia przez recepcje',
-  typ_pobytu: inquiry.stayType,
-  termin: `${inquiry.arrival} - ${inquiry.departure}`,
-  orientacyjna_godzina_przyjazdu: inquiry.arrivalTime || 'jeszcze nie wiem',
-  liczba_nocy: inquiry.nights,
-  goscie: [
-    inquiry.people.adults ? `Dorosli: ${inquiry.people.adults}` : '',
-    inquiry.people.children ? `Dzieci 4-14: ${inquiry.people.children}` : '',
-    inquiry.people.toddlers ? `Dzieci do 4: ${inquiry.people.toddlers}` : '',
-  ].filter(Boolean).join(', ') || 'brak',
-  uslugi: inquiry.services.map((service) => `${service.scope ? `[${service.scope}] ` : ''}${service.label} x ${service.qty} - ${service.price} PLN / noc`).join('\n') || 'brak',
-  cena_orientacyjna: inquiry.estimatedTotal || 'brak',
-  waluty_orientacyjnie: inquiry.currencyEstimate || 'brak',
-  informacja_o_walutach: inquiry.currencyDisclaimer || 'Waluty obce pokazujemy wylacznie orientacyjnie.',
-  kraj: inquiry.country || 'brak',
-  jezyk_kontaktu: inquiry.contactLanguage || 'brak',
-  imie_i_nazwisko: inquiry.fullName || 'brak',
-  email: inquiry.email || 'brak',
-  telefon: inquiry.phone || 'brak',
-  numer_rejestracyjny: inquiry.vehiclePlate || 'brak',
-  specjalne_potrzeby: inquiry.specialNeeds || 'brak',
-  pozniejszy_wyjazd: inquiry.lateCheckout || 'brak',
-  wycieczki_bez_doliczania_ceny: inquiry.tours.join(', ') || 'brak',
-  ocena_strony: inquiry.feedback?.rating ? `${inquiry.feedback.rating}/5` : 'brak',
-  co_sie_podobalo: inquiry.feedback?.liked?.join(', ') || 'brak',
-  latwo_znalezc_informacje: inquiry.feedback?.easyInfo || 'brak',
-  prosty_formularz: inquiry.feedback?.easyForm || 'brak',
-  sugestia_ulepszenia: inquiry.feedback?.improve || 'brak',
-  camping_lipiec_sierpien_bez_rezerwacji: inquiry.highSeasonCampingInfo ? 'TAK — według kolejności przyjazdu' : 'nie dotyczy',
-  domki_wlasne_reczniki_i_rzeczy_osobiste: inquiry.bungalowPersonalItemsNotice ? 'informacja przekazana' : 'nie dotyczy',
-  wiadomosc_klienta: inquiry.message || 'brak',
-  zgoda_cisza_nocna: inquiry.quietConsent ? 'zaakceptowana' : 'brak',
-  zgoda_kontaktowa: inquiry.consent ? 'zaakceptowana' : 'brak',
-  zgoda_prywatnosc: inquiry.privacyConsent ? 'zaakceptowana' : 'brak',
-  informacja: 'Dostepnosc i finalne warunki potwierdza recepcja.',
-  podsumowanie: message.text,
-});
+const buildFormSubmitPayload = (message, inquiry) => {
+  const lineItems = buildStayLineItems(inquiry);
+  const clean = (entries) => Object.fromEntries(entries.filter(([, value]) =>
+    value !== undefined && value !== null && String(value).trim() !== '' && String(value).trim().toLowerCase() !== 'brak'));
+  return clean([
+    ['_subject', message.subject],
+    ['_template', 'table'],
+    ['_captcha', 'false'],
+    ['_replyto', inquiry.email || ''],
+    ['_autoresponse', ''],
+    ['status', 'Do potwierdzenia przez recepcje'],
+    ['pobyt_pojazd', normalizeArrivalVehicleSummary(inquiry, lineItems)],
+    ['typ_pobytu', inquiry.stayType],
+    ['termin', `${inquiry.arrival} - ${inquiry.departure}`],
+    ['orientacyjna_godzina_przyjazdu', inquiry.arrivalTime || 'jeszcze nie wiem'],
+    ['liczba_nocy', inquiry.nights],
+    ['goscie', [
+      inquiry.people.adults ? `Dorosli: ${inquiry.people.adults}` : '',
+      inquiry.people.children ? `Dzieci 4-14: ${inquiry.people.children}` : '',
+      inquiry.people.toddlers ? `Dzieci do 4: ${inquiry.people.toddlers}` : '',
+    ].filter(Boolean).join(', ')],
+    ['uslugi', lineItems.map((service) => {
+      const qty = Math.max(1, Number(service.qty || 1));
+      const price = Math.max(0, Number(service.price || 0));
+      return service.billable === false
+        ? `${service.label} — ${service.note || 'bez doliczania'}`
+        : `${service.label} x ${qty} - ${price} PLN / noc`;
+    }).join('\n')],
+    ['cena_orientacyjna', receptionPriceSummary(inquiry, lineItems).label],
+    ['waluty_orientacyjnie', inquiry.currencyEstimate],
+    ['informacja_o_walutach', inquiry.currencyDisclaimer || 'Waluty obce pokazujemy wylacznie orientacyjnie.'],
+    ['kraj', inquiry.country],
+    ['jezyk_kontaktu', inquiry.contactLanguage],
+    ['imie_i_nazwisko', inquiry.fullName],
+    ['email', inquiry.email],
+    ['telefon', inquiry.phone],
+    ['numer_rejestracyjny', inquiry.vehiclePlate],
+    ['dane_pojazdu', [
+      inquiry.vehicleType,
+      inquiry.vehicleDetails?.summary,
+      inquiry.trailerPlate ? `przyczepa ${inquiry.trailerPlate}` : '',
+    ].filter(Boolean).join(' / ')],
+    ['specjalne_potrzeby', inquiry.specialNeeds],
+    ['pozniejszy_wyjazd', inquiry.lateCheckout],
+    ['wycieczki_bez_doliczania_ceny', inquiry.tours.join(', ')],
+    ['camping_lipiec_sierpien_bez_rezerwacji', inquiry.highSeasonCampingInfo ? 'TAK — według kolejności przyjazdu' : ''],
+    ['domki_wlasne_reczniki_i_rzeczy_osobiste', inquiry.bungalowPersonalItemsNotice ? 'informacja przekazana' : ''],
+    ['wiadomosc_klienta', inquiry.message],
+    ['informacja', 'Dostepnosc i finalne warunki potwierdza recepcja.'],
+    ['podsumowanie', message.text],
+  ]);
+};
 
 const parseProviderBody = (text) => {
   try {

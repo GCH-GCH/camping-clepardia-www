@@ -33,7 +33,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
         </form>
       </section>
 
-      <section class="inbox-app cc-system-app" data-app data-mode="demo" data-sidebar-state="expanded" data-active-view="dashboard">
+      <section class="inbox-app cc-system-app" data-app data-mode="demo" data-sidebar-state="rail" data-active-view="dashboard">
         <button class="cc-sidebar-scrim" type="button" data-sidebar-close aria-label="Zamknij menu"></button>
         <aside class="cc-sidebar" data-sidebar>
           <div class="cc-sidebar__brand">
@@ -43,13 +43,14 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
               <small>ONLINE</small>
             </span>
           </div>
-          <button class="cc-sidebar__toggle" type="button" data-sidebar-toggle aria-label="Zwiń lub rozwiń menu"><span>↔</span><em>Zwiń menu</em></button>
+          <button class="cc-sidebar__toggle" type="button" data-sidebar-toggle aria-label="Przypnij lub odepnij menu"><span>⇥</span><em>Przypnij menu</em></button>
           <nav class="view-tabs cc-sidebar__nav" aria-label="Moduły CC SYSTEM">
             <div class="cc-sidebar__group">
               <span class="cc-sidebar__group-label">Recepcja</span>
               <button type="button" data-view="dashboard" aria-pressed="true"><span aria-hidden="true">🏕️</span><em>Recepcja</em></button>
               <button type="button" data-view="reservations" aria-pressed="false"><span aria-hidden="true">📋</span><em>Rezerwacje</em></button>
               <button type="button" data-view="calendar" aria-pressed="false"><span aria-hidden="true">📅</span><em>Kalendarz</em></button>
+              <button type="button" data-view="camp" aria-pressed="false"><span aria-hidden="true">⚡</span><em>/camp — Nowe przyjęcie</em></button>
             </div>
             <div class="cc-sidebar__group">
               <span class="cc-sidebar__group-label">Komunikacja</span>
@@ -101,18 +102,27 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
               <input type="search" data-global-search placeholder="Szukaj po imieniu, emailu, kraju, terminie…" />
             </label>
             <div class="header-actions">
+              <span class="connection-pill connection-pill--online" data-connection-status>Online</span>
+              <span class="connection-pill connection-pill--mini" data-auto-refresh-status>Auto 25 s</span>
+              <span class="connection-pill connection-pill--mini" data-resend-status>Resend</span>
+              <span class="connection-pill connection-pill--mini" data-supabase-status>Supabase</span>
               <span class="connection-pill weather-pill">☀️ 23°C</span>
-              <span class="connection-pill" data-resend-status>Resend: —</span>
-              <span class="connection-pill" data-supabase-status>Supabase: —</span>
-              <span class="connection-pill" data-last-refresh>Ostatnie odświeżenie: —</span>
-              <span class="connection-pill" data-auto-refresh-status>Auto-refresh aktywny</span>
-              <span class="connection-pill" data-connection-status>API: oczekiwanie</span>
-              <a href="/rezerwacja/" target="_blank" rel="noopener">Dodaj rezerwację</a>
-              <a href="/" target="_blank" rel="noopener">Strona</a>
-              <button type="button" data-refresh>Odśwież</button>
-              <button type="button" data-auto-refresh-toggle>Pauza auto-refresh</button>
+              <span class="notification-pill" aria-label="Powiadomienia">8</span>
+              <button type="button" class="topbar-action" data-view-shortcut="camp">Nowe przyjęcie</button>
+              <a class="topbar-action topbar-action--ghost" href="/rezerwacja/" target="_blank" rel="noopener">Dodaj rezerwację</a>
+              <details class="topbar-more">
+                <summary>Więcej</summary>
+                <div>
+                  <span class="connection-pill" data-last-refresh>Ostatnie odświeżenie: —</span>
+                  <button type="button" data-refresh>Odśwież</button>
+                  <button type="button" data-auto-refresh-toggle>Pauza auto-refresh</button>
+                  <a href="/" target="_blank" rel="noopener">Strona publiczna</a>
+                  <button type="button" data-view-shortcut="settings">Ustawienia</button>
+                  <button type="button" data-view-shortcut="tests">Debug / testy</button>
+                  <button type="button" class="ghost" data-logout>Wyloguj</button>
+                </div>
+              </details>
               <span class="profile-pill">Recepcja</span>
-              <button type="button" class="ghost" data-logout>Wyloguj</button>
             </div>
           </header>
 
@@ -241,6 +251,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           customers: '<circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/>',
           reservations: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6"/><path d="m9 13 2 2 4-5"/>',
           calendar: '<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/>',
+          camp: '<path d="M13 2 5 13h6l-1 9 9-13h-6l1-7Z"/>',
           bungalows: '<path d="M3 11.5 12 4l9 7.5"/><path d="M6 10.5V20h12v-9.5"/>',
           camping: '<path d="M3.5 20 12 4l8.5 16"/><path d="M12 4v16"/><path d="M8.5 20 12 13l3.5 7"/>',
           extend: '<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M12 13v5M9.5 15.5h5"/>',
@@ -261,6 +272,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           customers: 'customers',
           reservations: 'reservations',
           calendar: 'calendar',
+          camp: 'camp',
           bungalows: 'bungalows',
           camping: 'camping',
           extend: 'extend',
@@ -314,15 +326,15 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
         const expandedIds = new Set();
         const localTimeline = new Map();
         let activeReplyDraft = null;
-        const sidebarStateKey = 'cc-system-sidebar-state';
+        const sidebarStateKey = 'cc-system-sidebar-pin-state';
         const setSidebarState = (state) => {
-          const next = state === 'collapsed' ? 'collapsed' : 'expanded';
+          const next = state === 'pinned' || state === 'expanded' ? 'pinned' : 'rail';
           if (app instanceof HTMLElement) app.dataset.sidebarState = next;
           if (sidebarToggle instanceof HTMLElement) {
             const icon = sidebarToggle.querySelector('span');
             const label = sidebarToggle.querySelector('em');
-            if (icon) icon.textContent = next === 'collapsed' ? '→' : '←';
-            if (label) label.textContent = next === 'collapsed' ? 'Rozwiń menu' : 'Zwiń menu';
+            if (icon) icon.textContent = next === 'pinned' ? '⇤' : '⇥';
+            if (label) label.textContent = next === 'pinned' ? 'Odepnij menu' : 'Przypnij menu';
           }
           try { localStorage.setItem(sidebarStateKey, next); } catch {}
         };
@@ -336,9 +348,11 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
             app.classList.toggle('is-sidebar-open');
             return;
           }
-          setSidebarState(app.dataset.sidebarState === 'collapsed' ? 'expanded' : 'collapsed');
+          const nextState = app.dataset.sidebarState === 'pinned' ? 'rail' : 'pinned';
+          setSidebarState(nextState);
+          if (nextState === 'rail' && document.activeElement instanceof HTMLElement) document.activeElement.blur();
         };
-        try { setSidebarState(localStorage.getItem(sidebarStateKey) || 'expanded'); } catch { setSidebarState('expanded'); }
+        try { setSidebarState(localStorage.getItem(sidebarStateKey) || 'rail'); } catch { setSidebarState('rail'); }
 
         const esc = (value) => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
         const showToast = (message, type = 'info') => {
@@ -1221,12 +1235,13 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
             badge.hidden = value <= 0;
           });
         };
-        const moduleOnlyViews = new Set(['dashboard','customers','reservations','calendar','bungalows','camping','extend','print','reports','staff','tasks','stats','templates','settings']);
+        const moduleOnlyViews = new Set(['dashboard','customers','reservations','calendar','camp','bungalows','camping','extend','print','reports','staff','tasks','stats','templates','settings']);
         const uiTokenFor = (text = '') => {
           const value = String(text || '').toLowerCase();
           if (/mail|inbox|odpowiedz/.test(value)) return 'ML';
           if (/przyjaz|check-in|termin|kalendarz|najbli/.test(value)) return 'KA';
           if (/wyjaz|check-out/.test(value)) return 'WY';
+          if (/nowe przyj|check-in|\/camp/.test(value)) return 'NP';
           if (/camping|kamper|pole|namiot/.test(value)) return 'CP';
           if (/domek|domk|bungalow/.test(value)) return 'DM';
           if (/zadani|todo/.test(value)) return 'ZD';
@@ -1377,7 +1392,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
               <section class="command-card command-card--urgent"><header><span>🔥</span><div><h3>Pilne teraz</h3><p>Sprawy, których recepcja nie powinna przegapić.</p></div></header>${moduleThreadList(urgent.slice(0,6), 'Brak pilnych spraw. System oddycha spokojnie.')}</section>
               <section class="command-card"><header><span>✉️</span><div><h3>Mini Mail Center</h3><p>5 najnowszych wątków z inboxa.</p></div></header>${moduleThreadList(latest, 'Brak zapytań.')}<div class="inline-actions"><button type="button" data-view-shortcut="mail">Otwórz Mail Center</button></div></section>
               <section class="command-card"><header><span>✅</span><div><h3>Zadania recepcji</h3><p>Automatyczne TODO z zapytań.</p></div></header><ul class="module-task-list">${tasks.map(([icon,label,count,hint])=>`<li><strong>${esc(icon)} ${esc(count)}</strong><span>${esc(label)}</span><small>${esc(hint)}</small></li>`).join('')}</ul></section>
-              <section class="command-card"><header><span>⚡</span><div><h3>Szybkie akcje</h3><p>Najczęstsze operacje bez szukania.</p></div></header><div class="quick-action-grid"><a href="/rezerwacja/" target="_blank" rel="noopener">Dodaj rezerwację</a><button type="button" data-view-shortcut="mail">Mail Center</button><button type="button" data-view-shortcut="print">Drukuj kartę</button><button type="button" data-view-shortcut="extend">Przedłuż pobyt</button></div></section>
+              <section class="command-card"><header><span>⚡</span><div><h3>Szybkie akcje</h3><p>Najczęstsze operacje bez szukania.</p></div></header><div class="quick-action-grid"><button type="button" data-view-shortcut="camp">Nowe przyjęcie /camp</button><a href="/rezerwacja/" target="_blank" rel="noopener">Dodaj rezerwację</a><button type="button" data-view-shortcut="mail">Mail Center</button><button type="button" data-view-shortcut="calendar">Dodaj do kalendarza</button><button type="button" data-view-shortcut="print">Drukuj kartę</button><button type="button" data-view-shortcut="extend">Przedłuż pobyt</button></div></section>
             </div>
           </section>`;
         };
@@ -1433,7 +1448,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
             <button type="button" class="mail-back" data-mail-back>← Lista wątków</button>
             <header class="case-hero"><div><span class="eyebrow">Sprawa klienta</span><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(country.flag)} ${esc(country.label)} · ${esc(languageCode(item).toUpperCase())} · ${esc(item.email || item.phone || 'brak kontaktu')}</p></div><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span></header>
             <div class="case-kpis"><article><span>📅</span><small>Termin</small><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><em>${esc(item.nights || 0)} nocy</em></article><article><span>👥</span><small>Osoby</small><strong>${esc(guests.label)}</strong><em>razem ${esc(guests.total || '-')}</em></article><article><span>🏕️</span><small>Pobyt</small><strong>${esc(item.stay_type || '-')}</strong><em>${esc(cats.includes('camping') ? 'Camping' : cats.includes('bungalow') ? 'Domki' : 'Pobyt')}</em></article><article><span>💰</span><small>Cena</small><strong>${esc(moneyLabel(item))}</strong><em>orientacyjnie</em></article></div>
-            <div class="case-grid"><section class="case-card case-card--wide"><h3>🧾 Usługi i cena</h3><ul class="service-list">${serviceCards(item)}</ul></section><section class="case-card"><h3>💬 Wiadomość klienta</h3><p class="message-copy">${esc(item.message || 'Brak wiadomości')}</p></section><section class="case-card"><h3>ℹ️ Ważne informacje</h3><aside class="crm-warnings">${warnings}</aside></section><section class="case-card case-card--wide best-reply-card"><h3>✨ Najlepsza odpowiedź</h3><p><strong>${esc(best.icon)} ${esc(best.title)}</strong></p><small>Powód: ${esc(best.reason)}</small><div class="inline-actions"><button type="button" data-reply-template="${esc(best.id)}">Utwórz odpowiedź</button><button type="button" data-copy-client-safe>Kopiuj safe summary</button>${item.email ? `<a href="mailto:${esc(item.email)}">Mailto klienta</a>` : ''}</div></section><section class="case-card"><h3>⚡ Szybkie akcje</h3><div class="quick-action-grid"><button type="button" data-reply-action="confirm" data-target-status="needs_confirmation">Potwierdź</button><button type="button" data-reply-action="askMissingData" data-target-status="needs_reply">Poproś o dane</button><button type="button" data-reply-action="noAvailability" data-target-status="unavailable">Brak miejsc</button><button type="button" data-reply-action="infoCampingSummer" data-target-status="replied">Camping L/S</button><button type="button" data-reply-action="electricityEv" data-target-status="replied">Prąd / EV</button><button type="button" data-reply-action="tours" data-target-status="replied">Wycieczki</button></div></section><section class="case-card"><h3>📝 Notatki i status</h3><label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${item.status === value ? 'selected':''}>${label}</option>`).join('')}</select></label><label><span>Notatka recepcji</span><textarea data-notes rows="4">${esc(item.notes || '')}</textarea></label><button type="button" data-save>Zapisz status</button></section><section class="case-card case-card--wide"><h3>🕒 Historia rozmowy</h3><ul class="timeline-list">${timeline}</ul></section></div>
+            <div class="case-grid"><section class="case-card case-card--wide"><h3>🧾 Usługi i cena</h3><ul class="service-list">${serviceCards(item)}</ul></section><section class="case-card"><h3>💬 Wiadomość klienta</h3><p class="message-copy">${esc(item.message || 'Brak wiadomości')}</p></section><section class="case-card"><h3>ℹ️ Ważne informacje</h3><aside class="crm-warnings">${warnings}</aside></section><section class="case-card case-card--wide best-reply-card"><h3>✨ Najlepsza odpowiedź</h3><p><strong>${esc(best.icon)} ${esc(best.title)}</strong></p><small>Powód: ${esc(best.reason)}</small><div class="inline-actions"><button type="button" data-reply-template="${esc(best.id)}">Utwórz odpowiedź</button><button type="button" data-copy-client-safe>Kopiuj safe summary</button>${item.email ? `<a href="mailto:${esc(item.email)}">Mailto klienta</a>` : ''}</div></section><section class="case-card case-card--wide"><h3>Przepływ recepcji</h3><div class="workflow-rail"><button type="button" data-view-shortcut="customers">Utwórz klienta</button><button type="button" data-view-shortcut="reservations">Utwórz pobyt</button><button type="button" data-view-shortcut="camp">Otwórz w /camp</button><button type="button" data-view-shortcut="calendar">Dodaj do kalendarza</button><button type="button" data-view-shortcut="print">Drukuj kartę</button></div><p class="module-empty">Preview flow: zapis klienta/pobytu wymaga docelowych tabel, więc system nie udaje zapisu.</p></section><section class="case-card"><h3>⚡ Szybkie akcje</h3><div class="quick-action-grid"><button type="button" data-reply-action="confirm" data-target-status="needs_confirmation">Potwierdź</button><button type="button" data-reply-action="askMissingData" data-target-status="needs_reply">Poproś o dane</button><button type="button" data-reply-action="noAvailability" data-target-status="unavailable">Brak miejsc</button><button type="button" data-reply-action="infoCampingSummer" data-target-status="replied">Camping L/S</button><button type="button" data-reply-action="electricityEv" data-target-status="replied">Prąd / EV</button><button type="button" data-reply-action="tours" data-target-status="replied">Wycieczki</button></div></section><section class="case-card"><h3>📝 Notatki i status</h3><label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${item.status === value ? 'selected':''}>${label}</option>`).join('')}</select></label><label><span>Notatka recepcji</span><textarea data-notes rows="4">${esc(item.notes || '')}</textarea></label><button type="button" data-save>Zapisz status</button></section><section class="case-card case-card--wide"><h3>🕒 Historia rozmowy</h3><ul class="timeline-list">${timeline}</ul></section></div>
           </section>`;
         };
         const renderMailCenterWorkspace = (items) => {
@@ -1524,7 +1539,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
                 <div class="reservation-table"><header><span>Klient</span><span>Termin</span><span>Typ pobytu</span><span>Osoby</span><span>Cena</span><span>Status</span></header>${items.slice(0,9).map((item)=>{ const country=countryInfo(item); return `<button type="button"><strong><i>${esc(String(item.full_name || 'CC').slice(0,2).toUpperCase())}</i>${esc(item.full_name || 'Bez nazwy')}<small>${esc(country.flag)} ${esc(country.label)}</small></strong><span>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}<small>${esc(item.nights || 0)} nocy</small></span><span>${esc(item.stay_type || '-')}</span><span>${esc(normalizeInquiryGuests(item).label)}</span><span>${esc(moneyLabel(item))}</span><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span></button>`; }).join('')}</div>
               </main>
               ${selected ? `<aside class="reservation-detail"><header><span class="crm-avatar">${esc(String(selected.full_name || 'CC').slice(0,2).toUpperCase())}</span><div><h3>${esc(selected.full_name || 'Bez nazwy')}</h3><p>${esc(selectedCountry.flag)} ${esc(selectedCountry.label)} · ${esc(languageCode(selected).toUpperCase())}</p></div><span class="status-badge status-${esc(selected.status)}">${esc(statusLabels[selected.status] || selected.status)}</span></header><div class="case-kpis"><article><small>Termin</small><strong>${esc(selected.arrival_date || '-')} — ${esc(selected.departure_date || '-')}</strong><em>${esc(selected.nights || 0)} nocy</em></article><article><small>Typ pobytu</small><strong>${esc(selected.stay_type || '-')}</strong></article><article><small>Osoby</small><strong>${esc(selectedGuests.label)}</strong></article><article><small>Cena</small><strong>${esc(moneyLabel(selected))}</strong></article></div><section><h4>Dane klienta</h4><p>${esc(selected.email || '-')}<br>${esc(selected.phone || '-')}</p></section><section><h4>Wiadomość klienta</h4><p>${esc(selected.message || 'Brak wiadomości')}</p></section><section class="crm-warnings">${warningsFor(selected, categoryKeys(selected)) || '<p>Brak pilnych ostrzeżeń.</p>'}</section></aside>` : '<aside class="reservation-detail"><p>Brak rezerwacji.</p></aside>'}
-              <aside class="reservation-side"><section><h3>Kalendarz pobytu</h3><div class="mini-month"><header><span>Lipiec 2026</span></header><div>${miniDays}</div></div></section><section><h3>Podsumowanie ceny</h3><ul>${selected ? services(selected).slice(0,4).map((service)=>`<li><span>${esc(service.label)} × ${esc(service.qty || 1)}</span><b>${esc(Number(service.price || 0) * Math.max(1,Number(service.qty || 1)))} PLN</b></li>`).join('') : ''}<li><strong>Razem</strong><strong>${esc(selected ? moneyLabel(selected) : '-')}</strong></li></ul></section>${best ? `<section class="best-reply-card"><h3>Sugerowana odpowiedź</h3><strong>${esc(best.title)}</strong><small>${esc(best.reason)}</small><button type="button" data-reply-template="${esc(best.id)}" data-id="${esc(selected.id || '')}">Otwórz odpowiedź</button></section>` : ''}<section><h3>Szybkie akcje</h3><div class="quick-action-grid"><button>Utwórz klienta</button><button>Drukuj potwierdzenie</button><button>Wyślij mail</button><button>Zmień status</button></div></section></aside>
+              <aside class="reservation-side"><section><h3>Kalendarz pobytu</h3><div class="mini-month"><header><span>Lipiec 2026</span></header><div>${miniDays}</div></div></section><section><h3>Podsumowanie ceny</h3><ul>${selected ? services(selected).slice(0,4).map((service)=>`<li><span>${esc(service.label)} × ${esc(service.qty || 1)}</span><b>${esc(Number(service.price || 0) * Math.max(1,Number(service.qty || 1)))} PLN</b></li>`).join('') : ''}<li><strong>Razem</strong><strong>${esc(selected ? moneyLabel(selected) : '-')}</strong></li></ul></section>${best ? `<section class="best-reply-card"><h3>Sugerowana odpowiedź</h3><strong>${esc(best.title)}</strong><small>${esc(best.reason)}</small><button type="button" data-reply-template="${esc(best.id)}" data-id="${esc(selected.id || '')}">Otwórz odpowiedź</button></section>` : ''}<section><h3>Szybkie akcje</h3><div class="quick-action-grid"><button type="button" data-view-shortcut="customers">Utwórz klienta</button><button type="button" data-view-shortcut="reservations">Utwórz pobyt</button><button type="button" data-view-shortcut="camp">Otwórz w /camp</button><button type="button" data-view-shortcut="calendar">Dodaj do kalendarza</button><button type="button" data-view-shortcut="print">Drukuj kartę</button><button>Wyślij mail</button></div></section></aside>
             </div>
           </section>`;
         };
@@ -1532,19 +1547,82 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           const items = realItems();
           const selected = items[0] || null;
           const resources = ['Domek 2-os.','Domek 3-os.','Domek 4-os.','Domek Blue','Domek Family','Pole A','Pole B','Pole C','Pole D'];
-          const dayHeaders = Array.from({ length:31 },(_,index)=>`<span>${index+1}</span>`).join('');
+          const today = new Date();
+          const todayDay = today.getDate();
+          const monthButtons = ['Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień'];
+          const dayHeaders = Array.from({ length:31 },(_,index)=>`<span class="${index + 1 === todayDay ? 'is-today':''}">${index+1}</span>`).join('');
           const rows = resources.map((resource,rowIndex)=>{
             const rowItems = items.filter((_,index)=>index % resources.length === rowIndex).slice(0,3);
-            const bars = rowItems.map((item)=>{ const start=Math.max(1,Math.min(31,Number(String(item.arrival_date || '').slice(8,10)) || (rowIndex+2))); const span=Math.max(1,Math.min(7,Number(item.nights || 2))); const cats=categoryKeys(item); return `<article class="${cats.includes('bungalow') ? 'is-cabin' : 'is-camp'} ${isSummer(item) ? 'is-summer':''}" style="grid-column:${start + 1} / span ${span}"><strong>${esc(item.full_name || '-')} ${esc(countryInfo(item).flag)}</strong><small>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(normalizeInquiryGuests(item).label)}</small></article>`; }).join('');
-            return `<div class="calendar-row"><b>${esc(resource)}</b>${Array.from({ length:31 },()=>'<span></span>').join('')}${bars}</div>`;
+            const bars = rowItems.map((item)=>{ const start=Math.max(1,Math.min(31,Number(String(item.arrival_date || '').slice(8,10)) || (rowIndex+2))); const span=Math.max(1,Math.min(7,Number(item.nights || 2))); const cats=categoryKeys(item); return `<article class="${cats.includes('bungalow') ? 'is-cabin' : 'is-camp'} ${isSummer(item) ? 'is-summer':''} status-${esc(item.status || 'new')}" style="grid-column:${start + 1} / span ${span}"><strong>${esc(item.full_name || '-')} ${esc(countryInfo(item).flag)}</strong><small>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(normalizeInquiryGuests(item).label)}</small></article>`; }).join('');
+            return `<div class="calendar-row"><b>${esc(resource)}</b>${Array.from({ length:31 },(_,dayIndex)=>`<span class="${dayIndex + 1 === todayDay ? 'is-today':''}"></span>`).join('')}${bars}</div>`;
           }).join('');
           const best = selected ? suggestBestReply(selected) : null;
           return `<section class="cc-module cc-module--calendar">
-            <header class="cc-module-head"><div><span class="eyebrow">Obłożenie i pobyty</span><h2>Kalendarz</h2><p>Widok miesięczny z domkami, strefami campingowymi, paskami pobytów i panelem szczegółów.</p></div><div class="calendar-switcher"><button class="is-active">Miesiąc</button><button>Tydzień</button><button>Dzień</button><button class="is-active">Camping</button><button>Domki</button></div></header>
+            <header class="cc-module-head"><div><span class="eyebrow">Obłożenie i pobyty</span><h2>Kalendarz</h2><p>Widok operacyjny: zasoby w wierszach, dni w kolumnach, pobyty jako paski i szczegóły po prawej.</p></div><div class="calendar-switcher"><button>Poprzedni</button><button class="is-active">Dzisiaj</button><button>Następny</button><button class="is-active">Miesiąc</button><button>Camping</button><button>Domki</button></div></header>
+            <div class="calendar-month-strip">${monthButtons.map((month)=>`<button class="${month === 'Lipiec' ? 'is-active':''}">${esc(month)}</button>`).join('')}</div>
             <div class="calendar-kpis">${moduleMetric('🏕️','Obłożenie camping','87%')}${moduleMetric('🏠','Obłożenie domków','68%')}${moduleMetric('📥','Przyjazdy w miesiącu',items.length)}${moduleMetric('📤','Wyjazdy w miesiącu',departureTodayItems().length + items.length)}${moduleMetric('⏭️','Najbliższy przyjazd',selected?.arrival_date || '-')}</div>
             <div class="calendar-layout">
               <main class="calendar-board"><div class="calendar-board__head"><strong>Lipiec 2026</strong><div>${dayHeaders}</div></div>${rows}<div class="calendar-summer-note">LIPIEC / SIERPIEŃ — CAMPING BEZ REZERWACJI · miejsca według kolejności przyjazdu</div></main>
               ${selected ? `<aside class="calendar-detail"><button type="button" class="ghost">×</button><header><span class="crm-avatar">${esc(String(selected.full_name || 'CC').slice(0,2).toUpperCase())}</span><div><h3>${esc(selected.full_name || '-')} ${esc(countryInfo(selected).flag)}</h3><p>${esc(selected.stay_type || '-')}</p></div></header><div class="case-kpis"><article><small>Termin</small><strong>${esc(selected.arrival_date || '-')} — ${esc(selected.departure_date || '-')}</strong><em>${esc(selected.nights || 0)} nocy</em></article><article><small>Osoby</small><strong>${esc(normalizeInquiryGuests(selected).label)}</strong></article><article><small>Cena</small><strong>${esc(moneyLabel(selected))}</strong></article><article><small>Status</small><strong>${esc(statusLabels[selected.status] || selected.status)}</strong></article></div><section><h4>Usługi</h4><div class="crm-tags">${services(selected).slice(0,5).map((service)=>`<span>${esc(serviceIcon(service))} ${esc(service.label)}</span>`).join('')}</div></section><section><h4>Ważne informacje</h4><div class="crm-warnings">${warningsFor(selected, categoryKeys(selected)) || '<p>Brak pilnych ostrzeżeń.</p>'}</div></section>${best ? `<section class="best-reply-card"><h4>Sugerowana odpowiedź</h4><strong>${esc(best.title)}</strong><button type="button" data-reply-template="${esc(best.id)}" data-id="${esc(selected.id || '')}">Otwórz odpowiedź</button></section>` : ''}</aside>` : ''}
+            </div>
+          </section>`;
+        };
+        const renderCampProView = () => {
+          const selected = realItems()[0] || null;
+          const country = countryInfo(selected || {});
+          const guests = selected ? normalizeInquiryGuests(selected) : { adults: 2, children: 0, toddlers: 0, total: 2, label: '2 osoby' };
+          const currentServices = selected ? services(selected) : [];
+          const price = selected ? moneyLabel(selected) : '0 PLN';
+          const steps = ['Dane klienta','Usługi','Płatność','Dokumenty','Zakończenie'];
+          const stayCards = ['Kamper','Przyczepa','Namiot','Rodzina','Domek 2-os.','Domek 3-os.','Domek 4-os.','Grupa'];
+          const serviceCatalogPreview = [
+            ['Osoba dorosła','35 PLN/noc', guests.adults || 2],
+            ['Dziecko 4–14','20 PLN/noc', guests.children || 0],
+            ['Dziecko 0–4','0 PLN/noc', guests.toddlers || 0],
+            ['Kamper','80 PLN/noc', currentServices.some((service)=>/kamper|camper/i.test(service.label)) ? 1 : 0],
+            ['Przyczepa','60 PLN/noc', currentServices.some((service)=>/przyczep|caravan/i.test(service.label)) ? 1 : 0],
+            ['Samochód','35 PLN/noc', currentServices.some((service)=>/samoch|auto|parking/i.test(service.label)) ? 1 : 0],
+            ['Namiot','35–45 PLN/noc', currentServices.some((service)=>/namiot|tent/i.test(service.label)) ? 1 : 0],
+            ['Van','75 PLN/noc', currentServices.some((service)=>/van/i.test(service.label)) ? 1 : 0],
+            ['Prąd 10A','30 PLN/noc', currentServices.some((service)=>/prąd|prad|10a|electric/i.test(service.label)) ? 1 : 0],
+            ['Pies','0 PLN', currentServices.some((service)=>/pies|dog/i.test(service.label)) ? 1 : 0],
+          ];
+          const serviceRows = (currentServices.length ? currentServices : serviceCatalogPreview.map(([label, priceLabel, qty]) => ({ label, qty, price: priceLabel, preview: true }))).map((service) => `
+            <article>
+              <strong>${esc(service.label || '-')}</strong>
+              <span>${esc(service.qty || 0)}</span>
+              <small>${esc(service.preview ? service.price : `${service.price || 0} PLN / noc`)}</small>
+            </article>
+          `).join('');
+          return `<section class="cc-module cc-module--camp-pro">
+            <header class="cc-module-head camp-pro-hero">
+              <div><span class="eyebrow">/camp · Nowe przyjęcie PRO</span><h2>Nowe przyjęcie</h2><p>Express Check-in PRO — klient w 30–60 sekund. Ten ekran działa jako kalkulator i preview pobytu; zapis do bazy pobytów jest oznaczony jako TODO.</p></div>
+              <div class="module-actions"><button type="button" disabled>Zapisz pobyt — TODO baza</button><button type="button">Drukuj kartę</button><button type="button">Otwórz kartę</button></div>
+            </header>
+            <div class="camp-pro-steps">${steps.map((step,index)=>`<span class="${index === 1 ? 'is-active':''}"><b>${index + 1}</b>${esc(step)}</span>`).join('')}</div>
+            <div class="camp-pro-layout">
+              <main class="camp-pro-main">
+                <section class="camp-pro-card"><h3>Kogo przyjmujesz?</h3><div class="camp-pro-type-grid">${stayCards.map((name,index)=>`<button type="button" class="${index === 0 ? 'is-active':''}"><span class="cc-ui-token">${esc(uiTokenFor(name))}</span><strong>${esc(name)}</strong><small>${index < 3 ? 'pole / CAMP' : index < 7 ? 'nocleg w domku' : 'wiele pojazdów'}</small></button>`).join('')}</div></section>
+                <section class="camp-pro-card"><h3>Dane klienta i pobyt</h3><div class="camp-pro-form-grid">
+                  <label><span>Imię i nazwisko *</span><input value="${esc(selected?.full_name || 'Nowy klient')}" /></label>
+                  <label><span>Kraj *</span><input value="${esc(country.label || selected?.country || 'Polska')}" /></label>
+                  <label><span>Język</span><input value="${esc(languageCode(selected || {}).toUpperCase() || 'PL')}" /></label>
+                  <label><span>Email</span><input value="${esc(selected?.email || '')}" /></label>
+                  <label><span>Telefon</span><input value="${esc(selected?.phone || '')}" /></label>
+                  <label><span>Rejestracja pojazdu</span><input value="${esc(selected?.vehicle_registration || '')}" placeholder="np. KR 12345" /></label>
+                  <label><span>Przyjazd *</span><input value="${esc(selected?.arrival_date || new Date().toISOString().slice(0,10))}" /></label>
+                  <label><span>Liczba nocy *</span><input value="${esc(selected?.nights || 1)}" /></label>
+                  <label><span>Wyjazd</span><input value="${esc(selected?.departure_date || '')}" /></label>
+                  <label><span>Godzina przyjazdu</span><input value="ok. 12:00" /></label>
+                </div></section>
+                <section class="camp-pro-card"><h3>Usługi</h3><div class="camp-pro-service-grid">${serviceRows}</div></section>
+                <section class="camp-pro-card camp-pro-card--payment"><h3>Płatność</h3><div class="camp-pro-payment"><button class="is-active">Karta</button><button>Gotówka</button><button>Nieopłacone</button><label><span>Rabat</span><input value="0 PLN" /></label><label><span>Wpłacono</span><input value="${esc(price === '-' ? '0 PLN' : price)}" /></label><label><span>Pozostało</span><input value="0 PLN" /></label></div></section>
+              </main>
+              <aside class="camp-pro-summary">
+                <section class="camp-pro-card"><h3>Podsumowanie pobytu</h3><div class="camp-pro-client"><span class="crm-avatar">${esc(String(selected?.full_name || 'CC').slice(0,2).toUpperCase())}</span><div><strong>${esc(selected?.full_name || 'BRAK IMIENIA')}</strong><small>${esc(country.flag || '🌍')} ${esc(country.label || 'Kraj do ustalenia')}</small></div></div><div class="case-kpis"><article><small>Termin</small><strong>${esc(selected?.arrival_date || '-')} → ${esc(selected?.departure_date || '-')}</strong></article><article><small>Noce</small><strong>${esc(selected?.nights || 1)}</strong></article><article><small>Typ</small><strong>${esc(selected?.stay_type || 'Pole / CAMP')}</strong></article><article><small>Osoby</small><strong>${esc(guests.total || 0)}</strong></article></div><div class="camp-pro-total"><small>Do zapłaty</small><strong>${esc(price)}</strong><span>≈ EUR / USD / GBP informacyjnie</span></div></section>
+                <section class="camp-pro-card"><h3>Dokumenty</h3><div class="quick-action-grid"><button>Podgląd karty</button><button>PDF pobytu</button><button>Drukuj kartę</button><button>Wyślij</button></div></section>
+                <section class="camp-pro-card"><h3>Szybkie akcje</h3><div class="quick-action-grid"><button>Wyczyść</button><button disabled>Zapisz pobyt — TODO</button><button>Drukuj</button><button>Otwórz kartę</button></div><p class="module-empty">Zapis nie jest udawany: dopóki nie ma tabeli aktywnych pobytów, ekran działa jako preview/kalkulator recepcji.</p></section>
+              </aside>
             </div>
           </section>`;
         };
@@ -1778,6 +1856,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
             else if (activeView === 'customers') list.innerHTML = renderCustomersView();
             else if (activeView === 'reservations') list.innerHTML = renderReservationsView();
             else if (activeView === 'calendar') list.innerHTML = renderCalendarView();
+            else if (activeView === 'camp') list.innerHTML = renderCampProView();
             else if (activeView === 'bungalows') list.innerHTML = renderBungalowsView();
             else if (activeView === 'camping') list.innerHTML = renderCampingView();
             else if (activeView === 'extend') list.innerHTML = renderExtendStayView();
@@ -2004,7 +2083,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           const target = event.target;
           if (!(target instanceof Element)) return;
           const dynamicShortcut = target.closest('[data-view-shortcut]');
-          if (dynamicShortcut instanceof HTMLElement && !dynamicShortcut.closest('[data-id]')) {
+          if (dynamicShortcut instanceof HTMLElement) {
             activeView = dynamicShortcut.dataset.viewShortcut || 'mail';
             clearFilters();
             closeMobileSidebar();
@@ -2898,6 +2977,484 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
     .cc-system-app .modal-card {
       max-height: min(86vh, 720px);
       overflow: auto;
+    }
+  }
+</style>
+
+<style is:global>
+  /* TASK 132: offline-like sidebar overlay, compact topbar, /camp PRO and calendar polish */
+  .cc-system-app {
+    --sidebar-expanded: 320px !important;
+    --sidebar-collapsed: 88px !important;
+    grid-template-columns: var(--sidebar-collapsed) minmax(0, 1fr) !important;
+    overflow-x: clip !important;
+  }
+
+  .cc-system-app .cc-sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 80 !important;
+    width: var(--sidebar-collapsed) !important;
+    min-width: var(--sidebar-collapsed) !important;
+    height: 100vh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    backdrop-filter: blur(22px) saturate(135%) !important;
+    transition: width .22s ease, min-width .22s ease, box-shadow .22s ease, background .22s ease !important;
+  }
+
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:hover,
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:focus-within,
+  .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar {
+    width: var(--sidebar-expanded) !important;
+    min-width: var(--sidebar-expanded) !important;
+    background:
+      linear-gradient(180deg, rgba(5,20,17,.96), rgba(3,13,11,.92)),
+      radial-gradient(circle at 42% -10%, rgba(60,179,113,.18), transparent 18rem) !important;
+    box-shadow: 22px 0 70px rgba(0,0,0,.42) !important;
+  }
+
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__brand,
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button {
+    grid-template-columns: 42px !important;
+    justify-content: center !important;
+    padding-inline: 9px !important;
+  }
+
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__brand span,
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__toggle em,
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__group-label,
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__footer,
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button em,
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button b {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .cc-system-app .cc-sidebar .view-tabs button {
+    position: relative !important;
+  }
+
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button::after {
+    content: attr(title);
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    z-index: 120;
+    max-width: 220px;
+    padding: 8px 10px;
+    border: 1px solid rgba(180,236,205,.16);
+    border-radius: 12px;
+    color: #f4fff8;
+    background: rgba(4,16,14,.94);
+    box-shadow: 0 18px 42px rgba(0,0,0,.34);
+    opacity: 0;
+    transform: translateY(-50%) translateX(-4px);
+    pointer-events: none;
+    white-space: nowrap;
+    transition: opacity .16s ease, transform .16s ease;
+  }
+
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+
+  .cc-system-app .cc-sidebar__icon,
+  .cc-system-app .cc-sidebar .view-tabs button > span {
+    color: #c9ffdd !important;
+  }
+
+  .cc-system-app .cc-sidebar .view-tabs button[aria-pressed="true"] > span,
+  .cc-system-app .cc-sidebar .view-tabs button[aria-pressed="true"] .cc-sidebar__icon {
+    color: #fff !important;
+    background: rgba(255,255,255,.18) !important;
+  }
+
+  .cc-system-app .app-header {
+    grid-template-columns: auto minmax(220px, 1fr) minmax(360px, .9fr) auto !important;
+    gap: 14px !important;
+  }
+
+  .cc-system-app .header-actions {
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .cc-system-app .connection-pill,
+  .cc-system-app .profile-pill,
+  .cc-system-app .notification-pill,
+  .cc-system-app .topbar-action,
+  .cc-system-app .topbar-more > summary {
+    min-height: 38px !important;
+    padding: 0 12px !important;
+    border: 1px solid rgba(180,236,205,.13) !important;
+    border-radius: 999px !important;
+    color: #effff4 !important;
+    background: rgba(255,255,255,.055) !important;
+    font-size: .78rem !important;
+    font-weight: 900 !important;
+    white-space: nowrap !important;
+    text-decoration: none !important;
+  }
+
+  .cc-system-app .connection-pill--online::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    margin-right: 7px;
+    display: inline-block;
+    border-radius: 50%;
+    background: #41e079;
+    box-shadow: 0 0 0 4px rgba(65,224,121,.12);
+  }
+
+  .cc-system-app .topbar-action {
+    color: #061410 !important;
+    background: linear-gradient(135deg, #b9f6d2, #38b36f) !important;
+    box-shadow: 0 12px 32px rgba(60,179,113,.2) !important;
+  }
+
+  .cc-system-app .topbar-action--ghost {
+    color: #dfffee !important;
+    background: rgba(255,255,255,.055) !important;
+    box-shadow: none !important;
+  }
+
+  .cc-system-app .notification-pill {
+    width: 38px !important;
+    justify-content: center !important;
+    color: #fff !important;
+    background: rgba(242,76,76,.18) !important;
+    border-color: rgba(255,122,122,.28) !important;
+  }
+
+  .cc-system-app .topbar-more {
+    position: relative !important;
+  }
+
+  .cc-system-app .topbar-more > summary {
+    display: inline-flex !important;
+    align-items: center !important;
+    cursor: pointer !important;
+    list-style: none !important;
+  }
+
+  .cc-system-app .topbar-more > summary::-webkit-details-marker {
+    display: none !important;
+  }
+
+  .cc-system-app .topbar-more > div {
+    position: absolute !important;
+    right: 0 !important;
+    top: calc(100% + 10px) !important;
+    z-index: 120 !important;
+    display: grid !important;
+    gap: 8px !important;
+    min-width: 240px !important;
+    padding: 12px !important;
+    border: 1px solid rgba(180,236,205,.14) !important;
+    border-radius: 18px !important;
+    background: rgba(5,20,17,.98) !important;
+    box-shadow: 0 24px 70px rgba(0,0,0,.42) !important;
+  }
+
+  .cc-system-app .topbar-more a,
+  .cc-system-app .topbar-more button,
+  .cc-system-app .topbar-more span {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+
+  .camp-pro-steps,
+  .calendar-month-strip,
+  .workflow-rail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+
+  .camp-pro-steps span,
+  .calendar-month-strip button,
+  .workflow-rail button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 0 14px;
+    border: 1px solid rgba(180,236,205,.13);
+    border-radius: 999px;
+    color: #eafff1;
+    background: rgba(255,255,255,.045);
+    font-weight: 900;
+  }
+
+  .camp-pro-steps b {
+    display: grid;
+    width: 26px;
+    height: 26px;
+    place-items: center;
+    border-radius: 50%;
+    color: #061410;
+    background: #a8f0c7;
+  }
+
+  .camp-pro-steps .is-active,
+  .calendar-month-strip .is-active {
+    color: #061410;
+    background: linear-gradient(135deg, #b9f6d2, #38b36f);
+  }
+
+  .camp-pro-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(330px, .55fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  .camp-pro-main,
+  .camp-pro-summary {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .camp-pro-card {
+    display: grid;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid rgba(180,236,205,.11);
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.022)), rgba(7,25,21,.76);
+    box-shadow: 0 24px 90px rgba(0,0,0,.22);
+  }
+
+  .camp-pro-card h3 {
+    margin: 0;
+    color: #f5fff7;
+  }
+
+  .camp-pro-type-grid,
+  .camp-pro-form-grid,
+  .camp-pro-service-grid,
+  .camp-pro-payment {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+
+  .camp-pro-type-grid button,
+  .camp-pro-service-grid article,
+  .camp-pro-payment button,
+  .camp-pro-payment label,
+  .camp-pro-form-grid label {
+    min-width: 0;
+    border: 1px solid rgba(180,236,205,.12) !important;
+    border-radius: 18px !important;
+    background: rgba(255,255,255,.045) !important;
+    color: #f4fff8 !important;
+  }
+
+  .camp-pro-type-grid button {
+    display: grid !important;
+    justify-items: start;
+    gap: 8px;
+    min-height: 120px !important;
+    padding: 16px !important;
+  }
+
+  .camp-pro-type-grid button.is-active,
+  .camp-pro-payment button.is-active {
+    border-color: rgba(60,179,113,.44) !important;
+    background: linear-gradient(135deg, rgba(60,179,113,.22), rgba(255,255,255,.045)) !important;
+  }
+
+  .camp-pro-form-grid label,
+  .camp-pro-payment label {
+    padding: 12px !important;
+  }
+
+  .camp-pro-form-grid input,
+  .camp-pro-payment input {
+    border: 0 !important;
+    background: transparent !important;
+    color: #f4fff8 !important;
+    padding-inline: 0 !important;
+  }
+
+  .camp-pro-service-grid article {
+    grid-template-columns: minmax(0,1fr) auto;
+    display: grid;
+    gap: 4px 10px;
+    padding: 13px;
+  }
+
+  .camp-pro-service-grid small {
+    grid-column: 1 / -1;
+    color: rgba(239,251,243,.58);
+  }
+
+  .camp-pro-client {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .camp-pro-total {
+    padding: 20px;
+    border: 1px solid rgba(60,179,113,.28);
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(60,179,113,.20), rgba(255,255,255,.05));
+  }
+
+  .camp-pro-total small,
+  .camp-pro-total span {
+    display: block;
+    color: rgba(239,251,243,.66);
+    font-weight: 900;
+  }
+
+  .camp-pro-total strong {
+    display: block;
+    color: #fff;
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    line-height: 1;
+  }
+
+  .workflow-rail {
+    align-items: center;
+  }
+
+  .workflow-rail button {
+    border-radius: 15px !important;
+  }
+
+  .calendar-month-strip {
+    overflow-x: auto;
+    padding: 2px 0 4px;
+  }
+
+  .calendar-board__head span.is-today,
+  .calendar-row > span.is-today {
+    background: rgba(60,179,113,.18);
+    box-shadow: inset 0 0 0 1px rgba(90,245,150,.38);
+  }
+
+  .calendar-board__head span.is-today {
+    color: #07140f !important;
+    border-radius: 10px;
+    background: #a8f0c7 !important;
+  }
+
+  .calendar-row article.status-needs_reply,
+  .calendar-row article.status-needs_confirmation,
+  .calendar-row article.status-new {
+    border-color: rgba(255,190,90,.32);
+    background: linear-gradient(135deg, rgba(174,106,25,.94), rgba(82,56,16,.9));
+  }
+
+  .calendar-row article.status-unavailable,
+  .calendar-row article.status-rejected,
+  .calendar-row article.status-cancelled {
+    border-color: rgba(255,91,91,.34);
+    background: linear-gradient(135deg, rgba(140,37,37,.94), rgba(72,20,20,.9));
+  }
+
+  .calendar-row article.status-confirmed,
+  .calendar-row article.status-replied {
+    border-color: rgba(83,225,134,.32);
+  }
+
+  @media (min-width: 881px) {
+    .cc-system-app[data-sidebar-state="pinned"],
+    .cc-system-app[data-sidebar-state="rail"] {
+      grid-template-columns: var(--sidebar-collapsed) minmax(0, 1fr) !important;
+    }
+  }
+
+  @media (max-width: 1120px) {
+    .cc-system-app .app-header {
+      grid-template-columns: auto minmax(0, 1fr) !important;
+    }
+
+    .cc-system-app .global-search,
+    .cc-system-app .header-actions {
+      grid-column: 1 / -1;
+    }
+
+    .camp-pro-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 880px) {
+    .cc-system-app,
+    .cc-system-app[data-sidebar-state="rail"],
+    .cc-system-app[data-sidebar-state="pinned"] {
+      grid-template-columns: 1fr !important;
+      overflow-x: hidden !important;
+    }
+
+    .cc-system-app .cc-sidebar,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar,
+    .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:hover,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:focus-within {
+      position: fixed !important;
+      width: min(88vw, 330px) !important;
+      min-width: min(88vw, 330px) !important;
+      transform: translateX(-105%) !important;
+      transition: transform .22s ease !important;
+    }
+
+    .cc-system-app.is-sidebar-open .cc-sidebar {
+      transform: translateX(0) !important;
+    }
+
+    .cc-system-app .cc-sidebar__brand,
+    .cc-system-app .cc-sidebar .view-tabs button,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__brand,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button {
+      grid-template-columns: 42px minmax(0,1fr) auto !important;
+      justify-content: stretch !important;
+    }
+
+    .cc-system-app .cc-sidebar__brand span,
+    .cc-system-app .cc-sidebar__toggle em,
+    .cc-system-app .cc-sidebar__group-label,
+    .cc-system-app .cc-sidebar .view-tabs button em,
+    .cc-system-app .cc-sidebar .view-tabs button b,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__brand span,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__toggle em,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__group-label,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button em,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button b {
+      display: initial !important;
+      width: auto !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+
+    .cc-system-app .header-actions {
+      overflow-x: auto !important;
+      flex-wrap: nowrap !important;
+      padding-bottom: 4px !important;
+    }
+
+    .cc-system-app .topbar-more > div {
+      position: fixed !important;
+      right: 10px !important;
+      left: 10px !important;
+      top: 84px !important;
+      min-width: 0 !important;
+    }
+
+    .camp-pro-type-grid,
+    .camp-pro-form-grid,
+    .camp-pro-service-grid,
+    .camp-pro-payment {
+      grid-template-columns: 1fr !important;
     }
   }
 </style>
@@ -6016,6 +6573,79 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
     line-height: 1 !important;
   }
 
+  /* TASK 132 FINAL CASCADE: rail is the default offline-style overlay state. */
+  .cc-system-app[data-sidebar-state="rail"],
+  .cc-system-app[data-sidebar-state="pinned"] {
+    --sidebar-expanded: 320px !important;
+    --sidebar-collapsed: 88px !important;
+    grid-template-columns: var(--sidebar-collapsed) minmax(0, 1fr) !important;
+    overflow-x: clip !important;
+  }
+
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar,
+  .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 120 !important;
+    width: var(--sidebar-collapsed) !important;
+    min-width: var(--sidebar-collapsed) !important;
+    max-width: var(--sidebar-expanded) !important;
+    height: 100vh !important;
+    overflow-x: hidden !important;
+    transition: width .22s ease, min-width .22s ease, box-shadow .22s ease, background .22s ease !important;
+  }
+
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:hover,
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:focus-within,
+  .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar {
+    width: var(--sidebar-expanded) !important;
+    min-width: var(--sidebar-expanded) !important;
+    background: linear-gradient(180deg, rgba(5,20,17,.97), rgba(3,13,11,.94)) !important;
+    box-shadow: 22px 0 70px rgba(0,0,0,.42) !important;
+  }
+
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__brand,
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button {
+    grid-template-columns: 42px !important;
+    justify-content: center !important;
+    padding-inline: 9px !important;
+  }
+
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__brand span,
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__toggle em,
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__group-label,
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .cc-sidebar__footer,
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button em,
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button b {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button::after {
+    content: attr(title);
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    z-index: 200;
+    padding: 8px 10px;
+    border: 1px solid rgba(180,236,205,.16);
+    border-radius: 12px;
+    color: #f4fff8;
+    background: rgba(4,16,14,.94);
+    box-shadow: 0 18px 42px rgba(0,0,0,.34);
+    opacity: 0;
+    transform: translateY(-50%) translateX(-4px);
+    pointer-events: none;
+    white-space: nowrap;
+    transition: opacity .16s ease, transform .16s ease;
+  }
+
+  .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:not(:hover):not(:focus-within) .view-tabs button:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+
   @media (max-width: 760px) {
     .cc-system-app .cc-sidebar,
     .cc-system-app .cc-sidebar:hover,
@@ -6044,6 +6674,39 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
     .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar__group-label,
     .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar .view-tabs button em,
     .cc-system-app[data-sidebar-state="collapsed"] .cc-sidebar .view-tabs button b {
+      display: initial !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar,
+    .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:hover,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:focus-within,
+    .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar:hover,
+    .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar:focus-within {
+      width: min(86vw, 320px) !important;
+      min-width: min(86vw, 320px) !important;
+    }
+
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar .cc-sidebar__brand,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar .view-tabs button,
+    .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar .cc-sidebar__brand,
+    .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar .view-tabs button {
+      grid-template-columns: 42px minmax(0,1fr) auto !important;
+      justify-content: stretch !important;
+    }
+
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar .cc-sidebar__brand span,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar .cc-sidebar__toggle em,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar .cc-sidebar__group-label,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar .view-tabs button em,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar .view-tabs button b,
+    .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar .cc-sidebar__brand span,
+    .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar .cc-sidebar__toggle em,
+    .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar .cc-sidebar__group-label,
+    .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar .view-tabs button em,
+    .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar .view-tabs button b {
       display: initial !important;
       opacity: 1 !important;
       pointer-events: auto !important;
