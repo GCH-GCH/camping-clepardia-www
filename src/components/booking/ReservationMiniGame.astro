@@ -1846,7 +1846,15 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const highSeasonCampingInfo = () => touchesSummer() && (state.mode === 'camping' || state.mode === 'combined');
     const summerCampingBlocked = () => highSeasonCampingInfo();
     const bungalowPersonalItemsNotice = () => state.mode === 'bungalow' || state.mode === 'combined';
-    const arrivalTimeLabel = () => state.details.arrivalTime || (config.lang === 'pl' ? 'jeszcze nie wiem' : 'not sure yet');
+    const normalizeArrivalTimeOption = (value) => {
+      const text = String(value || '').trim();
+      const normalized = text.toLowerCase().replace(/\s+/g, ' ').replace(/[—–−]/g, '-');
+      if (/18(?::?00)?\s*-\s*21(?::?00)?/.test(normalized) || /\b18\s*-\s*21\b/.test(normalized) || /6(?::00)?\s*p\.?m\.?\s*-\s*9(?::00)?\s*p\.?m\.?/.test(normalized)) {
+        return '18:00–20:00';
+      }
+      return text;
+    };
+    const arrivalTimeLabel = () => normalizeArrivalTimeOption(state.details.arrivalTime) || (config.lang === 'pl' ? 'jeszcze nie wiem' : 'not sure yet');
     const cityCampingNotice = () => config.lang === 'pl'
       ? 'Camping Clepardia znajduje się w Krakowie: blisko tramwaju, sklepów i atrakcji. To zielona baza w mieście, dlatego czasem słychać tramwaje, samoloty i normalne miejskie życie.'
       : 'Camping Clepardia is a green city campsite close to trams, shops and attractions. You may sometimes hear trams, aircraft and normal city life.';
@@ -2830,7 +2838,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
                       ['przed 12:00', 'przed 12:00'],
                       ['12:00–15:00', '12:00–15:00'],
                       ['15:00–18:00', '15:00–18:00'],
-                      ['18:00–21:00', '18:00–21:00'],
+                      ['18:00–20:00', '18:00–20:00'],
                       ['po 21:00 / skontaktuj się z recepcją', 'po 21:00 / skontaktuj się z recepcją'],
                       ['jeszcze nie wiem', 'jeszcze nie wiem'],
                     ].map(([value,label]) => `<option value="${esc(value)}" ${state.details.arrivalTime === value ? 'selected' : ''}>${esc(label)}</option>`).join('')}
@@ -3441,7 +3449,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const updateField = (path, value) => {
       const [group, key] = path.split('.');
       if (group === 'dates') state.dates[key] = value;
-      if (group === 'details') state.details[key] = value;
+      if (group === 'details') state.details[key] = key === 'arrivalTime' ? normalizeArrivalTimeOption(value) : value;
     };
 
     const normalizeDateRange = () => {

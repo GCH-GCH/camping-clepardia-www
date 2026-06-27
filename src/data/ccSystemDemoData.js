@@ -167,7 +167,7 @@ export const ccSystemDemoData = [
     mail_provider: 'resend',
     mail_delivered: false,
     mail_error: 'DEMO: pokaż fallback mailto.',
-    raw_payload_json: { stayMode: 'camping', stayTypeId: 'camping', arrivalTime: '18:00–21:00', people: people(2) },
+    raw_payload_json: { stayMode: 'camping', stayTypeId: 'camping', arrivalTime: '18:00–20:00', people: people(2) },
   },
   {
     id: 'DEMO-2026-0006',
@@ -435,7 +435,7 @@ export const ccSystemDemoData = [
     mail_provider: 'resend',
     mail_delivered: true,
     mail_error: '',
-    raw_payload_json: { stayMode: 'camping', stayTypeId: 'camping', arrivalTime: '18:00–21:00', people: people(1) },
+    raw_payload_json: { stayMode: 'camping', stayTypeId: 'camping', arrivalTime: '18:00–20:00', people: people(1) },
   },
   {
     id: 'DEMO-2026-0015',

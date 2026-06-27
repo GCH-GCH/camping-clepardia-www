@@ -22,6 +22,22 @@ const oneLine = (value, max = 600) =>
     .trim()
     .slice(0, max);
 
+const normalizeArrivalTimeOption = (value) => {
+  const text = oneLine(value, 120);
+  const normalized = text
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .replace(/[—–−]/g, '-');
+  if (
+    /18(?::?00)?\s*-\s*21(?::?00)?/.test(normalized)
+    || /\b18\s*-\s*21\b/.test(normalized)
+    || /6(?::00)?\s*p\.?m\.?\s*-\s*9(?::00)?\s*p\.?m\.?/.test(normalized)
+  ) {
+    return '18:00–20:00';
+  }
+  return text;
+};
+
 const longText = (value, max = 2400) =>
   String(value ?? '')
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
@@ -442,7 +458,7 @@ const createInquiry = (payload, normalized) => {
       .filter(Boolean)
       .slice(0, 12),
     feedback: normalizeFeedback(payload.feedback),
-    arrivalTime: oneLine(payload.arrivalTime, 120),
+    arrivalTime: normalizeArrivalTimeOption(payload.arrivalTime),
     highSeasonCampingInfo: Boolean(payload.highSeasonCampingInfo),
     bungalowPersonalItemsNotice: Boolean(payload.bungalowPersonalItemsNotice),
     estimatedTotal: oneLine(payload.estimatedTotal || payload.calculatorSummary?.total, 80),
