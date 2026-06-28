@@ -76,33 +76,42 @@ const stats = {
 };
 
 const navGroups = [
-  ['Recepcja', [
-    ['🏠', 'Dashboard', '12'],
+  ['Offline workflow', [
+    ['⚡', 'CAMP', ''],
+    ['⛺', 'Camp PRO', ''],
     ['👤', 'Klienci', '16'],
-  ]],
-  ['Komunikacja', [
-    ['✉️', 'Mail Center', '8'],
-    ['💬', 'Schematy odpowiedzi', ''],
-  ]],
-  ['Operacje', [
-    ['📋', 'Rezerwacje', '24'],
+    ['➕', 'Przedłużenia', ''],
     ['📅', 'Kalendarz', ''],
-    ['⚡', '/camp / Nowe przyjęcie', ''],
-    ['🏡', 'Domki', ''],
-    ['⛺', 'Camping', ''],
-    ['➕', 'Przedłuż pobyt', ''],
-    ['🖨️', 'Drukowanie', ''],
+    ['🏠', 'Recepcja', '12'],
+    ['📊', 'GUS', ''],
+    ['📋', 'Rezerwacje pola', '24'],
+    ['🗺️', 'Plan campu', ''],
+    ['🗓️', 'Grafik pracy', ''],
+    ['📈', 'Raporty', ''],
   ]],
-  ['Raporty', [
-    ['📊', 'GUS / Raporty', ''],
-    ['📈', 'Statystyki', ''],
-  ]],
-  ['Zespół', [
-    ['👥', 'Pracownicy', ''],
+  ['Zespół i operacje', [
+    ['👥', 'Użytkownicy / Pracownicy', ''],
     ['✅', 'Zadania', '5'],
+    ['🚗', 'Wyjazdy dziś', ''],
+    ['🧑‍💼', 'Pracownicy PRO', ''],
+    ['🅿️', 'Parking PRO', ''],
+    ['🚌', 'Wycieczki', ''],
+    ['🛒', 'Zakupy', ''],
   ]],
-  ['Ustawienia', [
+  ['Zaplecze', [
     ['⚙️', 'Ustawienia', ''],
+    ['🧹', 'Sprzątanie', ''],
+    ['🧾', 'Faktury', ''],
+    ['⚠️', 'Alerty', ''],
+    ['⭐', 'VIP / Blacklist', ''],
+    ['📦', 'Magazyn', ''],
+    ['🏡', 'Domki', ''],
+  ]],
+  ['Wiadomości i system', [
+    ['✉️', 'Maile / Centrum wiadomości', '8'],
+    ['💬', 'Schematy odpowiedzi', ''],
+    ['📤', 'Eksporty', ''],
+    ['🛡️', 'Backup PRO', ''],
     ['🧪', 'Testy', ''],
     ['🗄️', 'Archiwum', ''],
   ]],
@@ -121,21 +130,36 @@ const templates = [
 
 const uiTokenMap = {
   Dashboard: 'HO',
-  'Mail Center': 'ML',
+  Recepcja: 'RC',
+  CAMP: 'CP',
+  'Camp PRO': 'CP',
+  'Maile / Centrum wiadomości': 'ML',
   Klienci: 'KL',
-  Rezerwacje: 'RZ',
+  'Rezerwacje pola': 'RZ',
   Kalendarz: 'KA',
-  '/camp / Nowe przyjęcie': 'NP',
+  'Plan campu': 'PC',
+  'Grafik pracy': 'GP',
   Domki: 'DM',
   Camping: 'CP',
-  'Przedłuż pobyt': 'PP',
-  Drukowanie: 'DR',
-  'GUS / Raporty': 'GR',
-  Statystyki: 'ST',
+  Przedłużenia: 'PP',
+  GUS: 'GU',
+  Raporty: 'RP',
   'Schematy odpowiedzi': 'SO',
-  Pracownicy: 'PR',
+  'Użytkownicy / Pracownicy': 'UP',
   Zadania: 'ZD',
+  'Wyjazdy dziś': 'WY',
+  'Pracownicy PRO': 'PR',
+  'Parking PRO': 'PK',
+  Wycieczki: 'WY',
+  Zakupy: 'ZK',
   Ustawienia: 'US',
+  Sprzątanie: 'SP',
+  Faktury: 'FV',
+  Alerty: 'AL',
+  'VIP / Blacklist': 'VB',
+  Magazyn: 'MG',
+  Eksporty: 'EX',
+  'Backup PRO': 'BK',
   Testy: 'TE',
   Archiwum: 'AR',
   Potwierdź: 'PT',
@@ -144,7 +168,6 @@ const uiTokenMap = {
   'Camping L/S': 'LS',
   Domek: 'DM',
   'Prąd / EV': 'EV',
-  Wycieczki: 'WY',
   'Grupa / skauci': 'GS',
 };
 
@@ -161,8 +184,8 @@ const sections = [
   ['sidebar-expanded', 'Sidebar expanded'],
   ['sidebar-collapsed', 'Sidebar collapsed'],
   ['dashboard', 'Dashboard / Recepcja'],
-  ['mail-center', 'Mail Center'],
-  ['mail-summary', 'Mail summary premium'],
+  ['mail-center', 'Centrum wiadomości'],
+  ['mail-summary', 'Mail do klienta'],
   ['clients', 'Klienci / CRM'],
   ['reservations', 'Rezerwacje'],
   ['camp-pro', '/camp PRO'],
@@ -177,7 +200,7 @@ const sections = [
   ['todo', 'Known Issues / TODO'],
 ];
 
-const calendarResources = ['Domek 2-os.', 'Domek 3-os.', 'Domek 4-os.', 'Domek Blue', 'Domek Family', 'Pole A', 'Pole B', 'Pole C'];
+const calendarResources = ['Domek 2-os.', 'Domek 3-os.', 'Domek 4-os.', 'Domek Blue', 'Domek Family', 'Pole A', 'Pole B', 'Pole C', 'Pole D', 'Pole E'];
 const calendarItems = activeItems.slice(0, 10);
 const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
 ---
@@ -228,7 +251,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
               <div class="sidebar-group">
                 <p>{group}</p>
                 {links.map(([icon, label, count]) => (
-                  <article class={label === 'Mail Center' ? 'is-active' : ''}>
+                  <article class={label === 'Maile / Centrum wiadomości' ? 'is-active' : ''}>
                     <span>{uiToken(label)}</span><b>{label}</b>{count && <em>{count}</em>}
                   </article>
                 ))}
@@ -272,7 +295,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
           <span class="section-number">03</span>
           <div>
             <h2>Dashboard / Recepcja</h2>
-            <p>Co sprawdzać: szybkie KPI, pilne sprawy, mały Mail Center, zadania i status operacyjny bez udawania pełnej tabeli rezerwacji.</p>
+            <p>Co sprawdzać: szybkie KPI, pilne sprawy, mini skrzynkę, zadania i status operacyjny bez udawania pełnej tabeli rezerwacji.</p>
           </div>
         </header>
         <div class="dashboard-grid">
@@ -297,12 +320,12 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
             ))}
           </section>
           <section class="work-card">
-            <h3>Mini Mail Center</h3>
+            <h3>Mini skrzynka</h3>
             {activeItems.slice(0, 4).map((item) => (
               <article class="mail-line">
                 <b>{item.full_name}</b>
                 <span>{item.message}</span>
-                <em>{money(item)}</em>
+                <em>{peopleLabel(item)}</em>
               </article>
             ))}
           </section>
@@ -322,13 +345,13 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
         <header>
           <span class="section-number">04</span>
           <div>
-            <h2>Mail Center — widok docelowy</h2>
+            <h2>Centrum wiadomości — widok docelowy</h2>
             <p>Co sprawdzać: czy przypomina Gmail/CRM, czy lista wątków jest kompaktowa, czy panel sprawy jest czytelny i czy odpowiedzi są przygotowane jako akcje.</p>
           </div>
         </header>
         <div class="mail-center-preview">
           <aside class="mail-folders-preview">
-            <h3>Inbox</h3>
+            <h3>Skrzynka</h3>
             {[
               ['Wszystkie', stats.all],
               ['Nowe', items.filter((item) => item.status === 'new').length],
@@ -347,7 +370,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
                 <strong>{flag(item)} {item.full_name}</strong>
                 <span>{item.arrival_date || 'brak daty'} — {item.departure_date || 'brak daty'}</span>
                 <small>{peopleLabel(item)} · {item.stay_type}</small>
-                <b>{money(item)}</b>
+                <b>{peopleLabel(item)}</b>
               </article>
             ))}
           </section>
@@ -364,7 +387,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
               <article><small>Termin</small><b>{dashboardLead.arrival_date} — {dashboardLead.departure_date}</b></article>
               <article><small>Osoby</small><b>{peopleLabel(dashboardLead)}</b></article>
               <article><small>Pobyt</small><b>{dashboardLead.stay_type}</b></article>
-              <article><small>Cena</small><b>{money(dashboardLead)}</b></article>
+              <article><small>Język</small><b>{dashboardLead.language}</b></article>
             </div>
             <section class="warning-box">
               <h4>Ważne informacje</h4>
@@ -397,7 +420,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
           <span class="section-number">04B</span>
           <div>
             <h2>Mail do recepcji — najważniejsze kafelki</h2>
-            <p>Co sprawdzać: mail do Gmaila ma być client-safe, bez providerów i diagnostyki, z konkretnym pobytem/pojazdem oraz skrótem na początku i na końcu.</p>
+            <p>Co sprawdzać: mail do klienta ma być czysty, bez providerów i diagnostyki, z konkretnym pobytem, pojazdem, usługami i jasnymi warunkami.</p>
           </div>
         </header>
         <div class="modal-preview">
@@ -409,11 +432,11 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
               <article><small>Termin</small><b>{dashboardLead.arrival_date} — {dashboardLead.departure_date}</b></article>
               <article><small>Pobyt / pojazd</small><b>Kamper + Prąd 10A</b></article>
               <article><small>Usługi</small><b>{serviceText(dashboardLead)}</b></article>
-              <article><small>Cena</small><b>{money(dashboardLead)}</b></article>
+              <article><small>Mail</small><b>{dashboardLead.mail_delivered ? 'Dostarczony' : 'Do obsługi'}</b></article>
             </div>
             <article class="email-preview">
-              <h4>Najważniejsze informacje — skrót dla recepcji</h4>
-              <p>Klient, kontakt, termin, pobyt/pojazd, usługi i cena są powtórzone na dole maila. Mail nie pokazuje inquiry ID, Supabase, Resend, raw payloadu, feedbacku ani zgód.</p>
+              <h4>Najważniejsze informacje dla klienta</h4>
+              <p>Termin, pobyt/pojazd, usługi i warunki są podane jasno. Mail nie pokazuje inquiry ID, Supabase, Resend, raw payloadu, feedbacku ani zgód.</p>
             </article>
           </section>
         </div>
@@ -438,7 +461,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
             <dl>
               <div><dt>Pierwszy kontakt</dt><dd>26.06.2026</dd></div>
               <div><dt>Liczba pobytów</dt><dd>3</dd></div>
-              <div><dt>Łączny obrót</dt><dd>1 320 PLN</dd></div>
+              <div><dt>Ostatni kontakt</dt><dd>26.06.2026</dd></div>
               <div><dt>Język</dt><dd>{dashboardLead.language}</dd></div>
             </dl>
           </section>
@@ -447,13 +470,13 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
             <article class="stay-card">
               <b>{dashboardLead.stay_type}</b>
               <span>{dashboardLead.arrival_date} — {dashboardLead.departure_date}</span>
-              <em>{money(dashboardLead)}</em>
+              <em>{peopleLabel(dashboardLead)}</em>
             </article>
           </section>
           <section class="work-card">
             <h3>Historia</h3>
             {[dashboardLead, bungalowLead, toursLead].map((item) => (
-              <article class="history-line"><span>{statusLabels[item.status]}</span><b>{item.arrival_date} — {item.departure_date || '—'}</b><em>{money(item)}</em></article>
+              <article class="history-line"><span>{statusLabels[item.status]}</span><b>{item.arrival_date} — {item.departure_date || '—'}</b><em>{peopleLabel(item)}</em></article>
             ))}
           </section>
           <section class="work-card">
@@ -469,7 +492,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
           <span class="section-number">06</span>
           <div>
             <h2>Rezerwacje — system operacyjny</h2>
-            <p>Co sprawdzać: tabela/lista, statusy, panel szczegółów, cena i mini kalendarz pobytu jako osobny moduł, nie kopia Mail Center.</p>
+            <p>Co sprawdzać: tabela/lista, statusy, panel szczegółów, usługi i mini kalendarz pobytu jako osobny moduł, nie kopia centrum wiadomości.</p>
           </div>
         </header>
         <div class="reservations-preview">
@@ -480,13 +503,13 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
             <article><span>⛔</span><b>{items.filter((item) => item.status === 'unavailable').length}</b><small>brak miejsc</small></article>
           </div>
           <section class="reservation-table-preview">
-            <header><span>Klient</span><span>Termin</span><span>Typ</span><span>Cena</span><span>Status</span></header>
+            <header><span>Klient</span><span>Termin</span><span>Typ</span><span>Osoby</span><span>Status</span></header>
             {activeItems.slice(0, 8).map((item) => (
               <article>
                 <strong>{flag(item)} {item.full_name}</strong>
                 <span>{item.arrival_date || '—'} — {item.departure_date || '—'}</span>
                 <span>{item.stay_type}</span>
-                <span>{money(item)}</span>
+                <span>{peopleLabel(item)}</span>
                 <em>{statusLabels[item.status]}</em>
               </article>
             ))}
@@ -498,7 +521,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
               <article><small>Termin</small><b>{unavailableLead.arrival_date} — {unavailableLead.departure_date}</b></article>
               <article><small>Pobyt</small><b>{unavailableLead.stay_type}</b></article>
               <article><small>Status</small><b>{statusLabels[unavailableLead.status]}</b></article>
-              <article><small>Cena</small><b>{money(unavailableLead)}</b></article>
+              <article><small>Mail</small><b>{unavailableLead.mail_delivered ? 'Dostarczony' : 'Do obsługi'}</b></article>
             </div>
             <div class="mini-month">
               {monthDays.slice(0, 31).map((day) => <span class={day >= 1 && day <= 4 ? 'is-stay' : ''}>{day}</span>)}
@@ -557,8 +580,8 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
         <header>
           <span class="section-number">07</span>
           <div>
-            <h2>Kalendarz — miesiąc, domki i camping</h2>
-            <p>Co sprawdzać: zasoby w wierszach, rezerwacje jako paski, ostrzeżenie L/S i boczny panel szczegółów.</p>
+            <h2>Kalendarz offline-style — miesiąc, domki i camping</h2>
+            <p>Co sprawdzać: szeroka siatka zasobów w wierszach, paski pobytów, znaczniki pół-dnia 11:00/16:00, ostrzeżenie L/S i boczny panel szczegółów.</p>
           </div>
         </header>
         <div class="calendar-preview">
@@ -575,7 +598,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
                   const span = Math.max(1, Math.min(6, Number(item.nights || 2)));
                   const cabin = /domek/i.test(item.stay_type);
                   const summer = /2026-07|2026-08/.test(`${item.arrival_date} ${item.departure_date}`) && /camping|kamper|namiot|van|bus/i.test(item.stay_type);
-                  return <article class:list={[cabin ? 'is-cabin' : 'is-camp', summer && 'is-summer']} style={`grid-column:${start + 1} / span ${span};`}><strong>{flag(item)} {item.full_name}</strong><small>{item.arrival_date} — {item.departure_date || '—'}</small></article>;
+                  return <article class:list={[cabin ? 'is-cabin' : 'is-camp', summer && 'is-summer']} style={`grid-column:${start + 1} / span ${span};`}><i class="half-day-out"></i><i class="half-day-in"></i><strong>{flag(item)} {item.full_name}</strong><small>11:00 wyjazd · 16:00 przyjazd</small></article>;
                 })}
               </div>
             ))}
@@ -612,7 +635,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
         </div>
         <div class="module-thread-list">
           {[bungalowLead, unavailableLead, findItem((item) => item.full_name === 'Sophie Lambert')].map((item) => (
-            <article><strong>{flag(item)} {item.full_name}</strong><span>{item.stay_type} · {item.arrival_date} — {item.departure_date}</span><em>{money(item)}</em></article>
+            <article><strong>{flag(item)} {item.full_name}</strong><span>{item.stay_type} · {item.arrival_date} — {item.departure_date}</span><em>{peopleLabel(item)}</em></article>
           ))}
         </div>
       </section>
@@ -637,7 +660,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
         </div>
         <div class="module-thread-list">
           {[dashboardLead, evLead, groupLead, toursLead].map((item) => (
-            <article><strong>{flag(item)} {item.full_name}</strong><span>{serviceText(item)}</span><em>{money(item)}</em></article>
+            <article><strong>{flag(item)} {item.full_name}</strong><span>{serviceText(item)}</span><em>{peopleLabel(item)}</em></article>
           ))}
         </div>
       </section>
@@ -688,7 +711,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
           <span class="section-number">12</span>
           <div>
             <h2>Ustawienia</h2>
-            <p>Co sprawdzać: czy konfiguracja wygląda jak bezpieczny panel administracyjny i nie ujawnia sekretów.</p>
+            <p>Co sprawdzać: czy konfiguracja wygląda jak bezpieczny panel administracyjny, nie ujawnia sekretów i pokazuje plan synchronizacji offline ↔ online.</p>
           </div>
         </header>
         <div class="settings-grid-preview">
@@ -701,6 +724,9 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
             ['Link wycieczek', 'lista opcji demo'],
             ['Języki', 'PL, EN, DE, IT, FR, ES, NL, CS, SK, SV'],
             ['Sekrety', 'niewidoczne w raporcie'],
+            ['Synchronizacja offline', 'eksport/import JSON lub CSV'],
+            ['Konflikty danych', 'log zmian bez automatycznego nadpisywania'],
+            ['Backup', 'kopia przed importem z offline'],
           ].map(([label, value]) => <article><span>{label}</span><strong>{value}</strong></article>)}
         </div>
       </section>
@@ -721,8 +747,8 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
             ['Języki', stats.languages],
             ['Camping', stats.camping],
             ['Domki', stats.bungalows],
-            ['Mail OK', stats.delivered],
-            ['Mail fallback', stats.failed],
+            ['Dostarczone', stats.delivered],
+            ['Mail niedostarczony', stats.failed],
           ].map(([label, value]) => <article><strong>{value}</strong><span>{label}</span><i style={`width:${Math.max(16, Math.min(100, Number(value) * 7))}%`}></i></article>)}
         </div>
       </section>
@@ -732,7 +758,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
           <span class="section-number">14</span>
           <div>
             <h2>Mobile preview 390px</h2>
-            <p>Co sprawdzać: drawer sidebara, kompaktowa lista Mail Center, szczegóły wątku i statyczny modal odpowiedzi w telefonicznym kontenerze.</p>
+            <p>Co sprawdzać: drawer sidebara, kompaktowa lista centrum wiadomości, szczegóły wątku i statyczny modal odpowiedzi w telefonicznym kontenerze.</p>
           </div>
         </header>
         <div class="phone-stage">
@@ -743,11 +769,11 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
               {navGroups[0][1].slice(0, 6).map(([icon, label, count]) => <article><span>{uiToken(label)}</span><b>{label}</b>{count && <em>{count}</em>}</article>)}
             </aside>
             <main>
-              <h3>Mail Center</h3>
+              <h3>Centrum wiadomości</h3>
               {[dashboardLead, evLead, missingLead].map((item) => <article class="phone-thread"><strong>{flag(item)} {item.full_name}</strong><span>{item.stay_type}</span><small>{item.message}</small></article>)}
               <section class="phone-detail">
                 <h4>{dashboardLead.full_name}</h4>
-                <p>{dashboardLead.arrival_date} — {dashboardLead.departure_date} · {money(dashboardLead)}</p>
+                <p>{dashboardLead.arrival_date} — {dashboardLead.departure_date} · {peopleLabel(dashboardLead)}</p>
                 <button>Otwórz odpowiedź</button>
               </section>
               <section class="phone-modal">
@@ -1585,6 +1611,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
 
   .calendar-row-preview article {
     z-index: 4;
+    position: relative;
     align-self: center;
     display: grid;
     gap: 2px;
@@ -1607,6 +1634,25 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
 
   .calendar-row-preview article small {
     color: rgba(255,255,255,.72);
+  }
+
+  .calendar-row-preview article i {
+    position: absolute;
+    top: 50%;
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgba(255,255,255,.88);
+    background: #0b3325;
+    transform: translateY(-50%) rotate(45deg);
+    box-shadow: 0 0 0 4px rgba(3,18,15,.42);
+  }
+
+  .calendar-row-preview article .half-day-out {
+    left: -7px;
+  }
+
+  .calendar-row-preview article .half-day-in {
+    right: -7px;
   }
 
   .summer-note {

@@ -43,41 +43,48 @@ const title = 'CC SYSTEM';
           <button class="cc-sidebar__toggle" type="button" data-sidebar-toggle aria-label="Przypnij lub odepnij menu"><span>⇥</span><em>Przypnij menu</em></button>
           <nav class="view-tabs cc-sidebar__nav" aria-label="Moduły CC SYSTEM">
             <div class="cc-sidebar__group">
-              <span class="cc-sidebar__group-label">Recepcja</span>
-              <button type="button" data-view="dashboard" aria-pressed="true"><span aria-hidden="true"></span><em>Recepcja</em></button>
-              <button type="button" data-view="reservations" aria-pressed="false"><span aria-hidden="true"></span><em>Rezerwacje</em></button>
-              <button type="button" data-view="calendar" aria-pressed="false"><span aria-hidden="true"></span><em>Kalendarz</em></button>
-              <button type="button" data-view="camp" aria-pressed="false"><span aria-hidden="true"></span><em>/camp — Nowe przyjęcie</em></button>
-            </div>
-            <div class="cc-sidebar__group">
-              <span class="cc-sidebar__group-label">Komunikacja</span>
-              <button type="button" data-view="mail" aria-pressed="false"><span aria-hidden="true"></span><em>Mail Center</em><b data-sidebar-badge="inbox">0</b></button>
-              <button type="button" data-view="templates" aria-pressed="false"><span aria-hidden="true"></span><em>Schematy odpowiedzi</em><b data-sidebar-badge="reply">0</b></button>
-              <button type="button" data-view-shortcut="mail" class="cc-sidebar__mail-failed"><span aria-hidden="true"></span><em>Mail niedostarczony</em><b data-sidebar-badge="mailFailed">0</b></button>
-            </div>
-            <div class="cc-sidebar__group">
-              <span class="cc-sidebar__group-label">Operacje</span>
+              <span class="cc-sidebar__group-label">Offline workflow</span>
+              <button type="button" data-view="camp" aria-pressed="false"><span aria-hidden="true"></span><em>CAMP</em></button>
+              <button type="button" data-view="camp-pro" aria-pressed="false"><span aria-hidden="true"></span><em>Camp PRO</em></button>
               <button type="button" data-view="customers" aria-pressed="false"><span aria-hidden="true"></span><em>Klienci</em></button>
-              <button type="button" data-view="bungalows" aria-pressed="false"><span aria-hidden="true"></span><em>Domki</em></button>
-              <button type="button" data-view="camping" aria-pressed="false"><span aria-hidden="true"></span><em>Camping</em></button>
-              <button type="button" data-view="extend" aria-pressed="false"><span aria-hidden="true"></span><em>Przedłuż pobyt</em></button>
-              <button type="button" data-view="print" aria-pressed="false"><span aria-hidden="true"></span><em>Drukowanie</em></button>
+              <button type="button" data-view="extend" aria-pressed="false"><span aria-hidden="true"></span><em>Przedłużenia</em></button>
+              <button type="button" data-view="calendar" aria-pressed="false"><span aria-hidden="true"></span><em>Kalendarz</em></button>
+              <button type="button" data-view="dashboard" aria-pressed="true"><span aria-hidden="true"></span><em>Recepcja</em></button>
+              <button type="button" data-view="reports" aria-pressed="false"><span aria-hidden="true"></span><em>GUS</em></button>
+              <button type="button" data-view="reservations" aria-pressed="false"><span aria-hidden="true"></span><em>Rezerwacje pola</em></button>
+              <button type="button" data-view="camp-plan" aria-pressed="false"><span aria-hidden="true"></span><em>Plan campu</em></button>
+              <button type="button" data-view="work-schedule" aria-pressed="false"><span aria-hidden="true"></span><em>Grafik pracy</em></button>
+              <button type="button" data-view="stats" aria-pressed="false"><span aria-hidden="true"></span><em>Raporty</em></button>
             </div>
             <div class="cc-sidebar__group">
-              <span class="cc-sidebar__group-label">Raporty</span>
-              <button type="button" data-view="reports" aria-pressed="false"><span aria-hidden="true"></span><em>GUS / Raporty</em></button>
-              <button type="button" data-view="stats" aria-pressed="false"><span aria-hidden="true"></span><em>Statystyki</em></button>
-            </div>
-            <div class="cc-sidebar__group">
-              <span class="cc-sidebar__group-label">Zespół</span>
-              <button type="button" data-view="staff" aria-pressed="false"><span aria-hidden="true"></span><em>Pracownicy</em></button>
+              <span class="cc-sidebar__group-label">Zespół i operacje</span>
+              <button type="button" data-view="staff" aria-pressed="false"><span aria-hidden="true"></span><em>Użytkownicy / Pracownicy</em></button>
               <button type="button" data-view="tasks" aria-pressed="false"><span aria-hidden="true"></span><em>Zadania</em><b data-sidebar-badge="tasks">0</b></button>
+              <button type="button" data-view="departures" aria-pressed="false"><span aria-hidden="true"></span><em>Wyjazdy dziś</em></button>
+              <button type="button" data-view="staff-pro" aria-pressed="false"><span aria-hidden="true"></span><em>Pracownicy PRO</em></button>
+              <button type="button" data-view="parking" aria-pressed="false"><span aria-hidden="true"></span><em>Parking PRO</em></button>
+              <button type="button" data-view="tours" aria-pressed="false"><span aria-hidden="true"></span><em>Wycieczki</em></button>
+              <button type="button" data-view="purchases" aria-pressed="false"><span aria-hidden="true"></span><em>Zakupy</em></button>
             </div>
             <div class="cc-sidebar__group">
-              <span class="cc-sidebar__group-label">Ustawienia</span>
+              <span class="cc-sidebar__group-label">Zaplecze</span>
               <button type="button" data-view="settings" aria-pressed="false"><span aria-hidden="true"></span><em>Ustawienia</em></button>
+              <button type="button" data-view="cleaning" aria-pressed="false"><span aria-hidden="true"></span><em>Sprzątanie</em></button>
+              <button type="button" data-view="invoices" aria-pressed="false"><span aria-hidden="true"></span><em>Faktury</em></button>
+              <button type="button" data-view="alerts" aria-pressed="false"><span aria-hidden="true"></span><em>Alerty</em></button>
+              <button type="button" data-view="vip" aria-pressed="false"><span aria-hidden="true"></span><em>VIP / Blacklist</em></button>
+              <button type="button" data-view="warehouse" aria-pressed="false"><span aria-hidden="true"></span><em>Magazyn</em></button>
+              <button type="button" data-view="bungalows" aria-pressed="false"><span aria-hidden="true"></span><em>Domki</em></button>
+            </div>
+            <div class="cc-sidebar__group">
+              <span class="cc-sidebar__group-label">Wiadomości i system</span>
+              <button type="button" data-view="mail" aria-pressed="false"><span aria-hidden="true"></span><em>Maile / Centrum wiadomości</em><b data-sidebar-badge="inbox">0</b></button>
+              <button type="button" data-view="templates" aria-pressed="false"><span aria-hidden="true"></span><em>Schematy odpowiedzi</em><b data-sidebar-badge="reply">0</b></button>
+              <button type="button" data-view="exports" aria-pressed="false"><span aria-hidden="true"></span><em>Eksporty</em></button>
+              <button type="button" data-view="backup" aria-pressed="false"><span aria-hidden="true"></span><em>Backup PRO</em></button>
               <button type="button" data-view="tests" aria-pressed="false"><span aria-hidden="true"></span><em>Testy</em><b data-sidebar-badge="tests">0</b></button>
               <button type="button" data-view="archive" aria-pressed="false"><span aria-hidden="true"></span><em>Archiwum</em></button>
+              <button type="button" data-view-shortcut="mail" class="cc-sidebar__mail-failed"><span aria-hidden="true"></span><em>Mail niedostarczony</em><b data-sidebar-badge="mailFailed">0</b></button>
             </div>
           </nav>
         </aside>
@@ -123,8 +130,8 @@ const title = 'CC SYSTEM';
             </div>
           </header>
 
-        <section class="mail-center-nav" aria-label="Mail Center">
-          <button type="button" data-mail-status="">Inbox / Wiadomości</button>
+        <section class="mail-center-nav" aria-label="Centrum wiadomości">
+          <button type="button" data-mail-status="">Skrzynka / Wiadomości</button>
           <button type="button" data-mail-status="needs_reply">Do odpowiedzi</button>
           <button type="button" data-mail-status="replied">Odpowiedziane</button>
           <button type="button" data-mail-status="needs_confirmation">Do potwierdzenia</button>
@@ -180,19 +187,19 @@ const title = 'CC SYSTEM';
       <section class="reply-modal__card" role="dialog" aria-modal="true" aria-labelledby="reply-modal-title">
         <button class="reply-modal__close" type="button" data-reply-close aria-label="Zamknij">×</button>
         <header>
-          <span class="eyebrow">CC SYSTEM Mail Center</span>
+          <span class="eyebrow">Maile / Centrum wiadomości</span>
           <h2 id="reply-modal-title" data-reply-title>Odpowiedź do klienta</h2>
-          <p data-reply-meta>Podgląd odpowiedzi</p>
+          <p data-reply-meta>Podgląd wiadomości klienta oraz podgląd po polsku dla recepcji</p>
         </header>
         <div class="reply-modal__fields">
           <label><span>Do</span><input type="email" data-reply-to placeholder="email klienta" /></label>
           <label><span>Temat</span><input type="text" data-reply-subject placeholder="Camping Clepardia — odpowiedź na zapytanie" /></label>
           <label><span>Język</span><select data-reply-language><option>PL</option><option>EN</option><option>DE</option><option>IT</option><option>FR</option><option>ES</option><option>NL</option><option>CS</option><option>SK</option><option>SV</option></select></label>
-          <label class="reply-modal__editor"><span>Tekst odpowiedzi / fallback</span><textarea data-reply-editor rows="9" placeholder="Treść odpowiedzi do klienta"></textarea></label>
+          <label class="reply-modal__editor"><span>Treść wysyłana do klienta</span><textarea data-reply-editor rows="9" placeholder="Treść odpowiedzi do klienta"></textarea></label>
         </div>
         <div class="reply-modal__preview" data-reply-preview></div>
         <details class="reply-modal__text">
-          <summary>Tekstowa wersja mailto</summary>
+          <summary>Tekstowa wersja wiadomości</summary>
           <pre data-reply-mailto-text></pre>
         </details>
         <div class="reply-modal__actions">
@@ -1031,6 +1038,10 @@ const title = 'CC SYSTEM';
         };
         const replyVisualPreviewHtml = (item, template, data) => {
           const conditions = dynamicConditions(item, replyCopy[languageCode(item)] || replyCopy.en, data);
+          const plCopySet = replyCopy.pl || replyCopy.en;
+          const plExtraSet = replyExtras.pl || replyExtras.en;
+          const polishMain = fillReply(template.extra ? plExtraSet[template.key] : plCopySet[template.key], data);
+          const polishConditions = dynamicConditions(item, plCopySet, data);
           const cardRows = [
             ['📅','Termin',`${data.arrival} — ${data.departure}`,`${data.nights} nocy`],
             ['👥','Goście',data.people,''],
@@ -1041,6 +1052,7 @@ const title = 'CC SYSTEM';
             <header><span>${esc(template.icon)}</span><div><strong>Camping Clepardia</strong><h3>${esc(template.title)}</h3><p>${esc(template.subject)}</p></div></header>
             <div class="reply-preview-grid">${cardRows.map(([icon,label,value,hint])=>`<section><b>${esc(icon)}</b><small>${esc(label)}</small><strong>${esc(value)}</strong>${hint ? `<em>${esc(hint)}</em>` : ''}</section>`).join('')}</div>
             <section><h4>ℹ️ Ważne informacje</h4><ul>${conditions.map((condition)=>`<li>${esc(condition)}</li>`).join('')}</ul></section>
+            <section class="reply-preview-card__pl"><h4>🇵🇱 Podgląd po polsku dla recepcji</h4><p>${esc(polishMain)}</p><ul>${polishConditions.slice(0,4).map((condition)=>`<li>${esc(condition)}</li>`).join('')}</ul><small>Ten blok pomaga recepcji zweryfikować sens odpowiedzi. Nie jest dodatkowym tekstem dla klienta.</small></section>
             <section><h4>📍 Dojazd</h4><p>Camping znajduje się blisko tramwaju i centrum Krakowa. Prosimy korzystać z Google Maps, bo wjazd zmienił się w 2022 roku.</p></section>
             <section><h4>🗺️ Atrakcje i wycieczki</h4><p>Stare Miasto, Wawel, Kazimierz, Wieliczka, Auschwitz-Birkenau, Ojców, Zakopane, Energylandia.</p><p><a href="https://qr.codes/vksKBT" target="_blank" rel="noopener">Wycieczki z Krakowa</a></p></section>
             <footer>www.clepardia.com.pl · +48 795 294 486</footer>
@@ -1197,8 +1209,8 @@ const title = 'CC SYSTEM';
           if (replyDraftButton instanceof HTMLButtonElement) replyDraftButton.disabled = true;
           try {
             const result = await request('/api/mail-center/save-draft',{method:'POST',body:JSON.stringify(payload)});
-            trackLocalAction(payload.item.id, result.saved ? `Zapisano szkic: ${payload.template.title}` : `Szkic TODO/fallback: ${payload.template.title}`);
-            showToast(result.saved ? 'Szkic zapisany w historii wątku.' : 'Szkic przygotowany — tabele Mail Center nie są jeszcze utworzone.', result.saved ? 'success' : 'info');
+            trackLocalAction(payload.item.id, result.saved ? `Zapisano szkic: ${payload.template.title}` : `Szkic lokalny: ${payload.template.title}`);
+            showToast(result.saved ? 'Szkic zapisany w historii wątku.' : 'Szkic przygotowany — tabele wiadomości nie są jeszcze utworzone.', result.saved ? 'success' : 'info');
           } catch (error) {
             showToast(error.message || 'Nie udało się zapisać szkicu.', 'error');
           } finally {
@@ -1267,15 +1279,23 @@ const title = 'CC SYSTEM';
             badge.hidden = value <= 0;
           });
         };
-        const moduleOnlyViews = new Set(['dashboard','customers','reservations','calendar','camp','bungalows','camping','extend','print','reports','staff','tasks','stats','templates','settings']);
+        const moduleOnlyViews = new Set(['dashboard','customers','reservations','calendar','camp','camp-pro','camp-plan','work-schedule','departures','staff-pro','parking','tours','purchases','cleaning','invoices','alerts','vip','warehouse','exports','backup','bungalows','camping','extend','print','reports','staff','tasks','stats','templates','settings']);
         const uiTokenFor = (text = '') => {
           const value = String(text || '').toLowerCase();
           if (/mail|inbox|odpowiedz/.test(value)) return 'ML';
           if (/przyjaz|check-in|termin|kalendarz|najbli/.test(value)) return 'KA';
           if (/wyjaz|check-out/.test(value)) return 'WY';
           if (/nowe przyj|check-in|\/camp/.test(value)) return 'NP';
+          if (/camp pro|camp$|plan campu/.test(value)) return 'CP';
           if (/camping|kamper|pole|namiot/.test(value)) return 'CP';
           if (/domek|domk|bungalow/.test(value)) return 'DM';
+          if (/gus|raport|eksport/.test(value)) return 'GU';
+          if (/parking/.test(value)) return 'PK';
+          if (/zakup|magazyn/.test(value)) return 'MG';
+          if (/sprzÄ…t|sprząt/.test(value)) return 'SP';
+          if (/faktur/.test(value)) return 'FV';
+          if (/vip|black/.test(value)) return 'VIP';
+          if (/backup/.test(value)) return 'BK';
           if (/zadani|todo/.test(value)) return 'ZD';
           if (/pilne|urgent|warning|niedostarczony/.test(value)) return 'PN';
           if (/pogod|krak/.test(value)) return 'WX';
@@ -1346,7 +1366,7 @@ const title = 'CC SYSTEM';
           const bungalowItems = real.filter((item)=>categoryKeys(item).includes('bungalow') || categoryKeys(item).includes('combined'));
           const urgent = urgentItems();
           const taskRows = [
-            ['Mail niedostarczony', real.filter((item)=>!item.mail_delivered).length, 'Sprawdź w Mail Center i użyj mailto/kopiuj.'],
+            ['Mail niedostarczony', real.filter((item)=>!item.mail_delivered).length, 'Sprawdź centrum wiadomości i użyj mailto/kopiuj.'],
             ['Brak danych', real.filter((item)=>categoryKeys(item).includes('missing')).length, 'Wyślij prośbę o brakujące dane.'],
             ['Grupy/skauci', real.filter((item)=>categoryKeys(item).includes('group') || categoryKeys(item).includes('scouts')).length, 'Wymaga ręcznej weryfikacji recepcji.'],
             ['Ciężkie pojazdy', real.filter((item)=>categoryKeys(item).includes('heavy')).length, 'Kierować na stabilne/asfaltowe miejsca.'],
@@ -1361,7 +1381,7 @@ const title = 'CC SYSTEM';
               ${moduleMetric('📅','Najbliższe 7 dni', next7Items().length)}
               ${moduleMetric('🏕️','Obłożenie camping', campingItems.length, 'z zapytań')}
               ${moduleMetric('🏡','Obłożenie domki', bungalowItems.length, 'z zapytań')}
-              ${moduleMetric('🚀','Mail delivery', mailOk ? 'Resend OK' : env.resendKeyPresent ? 'Resend ENV OK' : 'sprawdź ENV')}
+              ${moduleMetric('🚀','Dostarczenie maila', mailOk ? 'Resend OK' : env.resendKeyPresent ? 'Resend ENV OK' : 'sprawdź ENV')}
               ${moduleMetric('☁️','Pogoda', 'placeholder', 'TODO: integracja pogodowa')}
               ${moduleMetric('✅','Zadania', taskRows.reduce((sum,row)=>sum + Number(row[1] || 0), 0), 'pilne teraz')}
             </div>
@@ -1372,8 +1392,8 @@ const title = 'CC SYSTEM';
           </section>`;
         };
         const renderMailCenterView = (items) => `<section class="dashboard-panel module-view">
-          <header class="module-head"><span class="eyebrow">Mail Center / Inbox</span><h2>Własny Gmail recepcji</h2><p>Wątki rozumieją daty, osoby, usługi, kraj, język, status dostarczenia maila i najlepszą odpowiedź premium.</p></header>
-          <div class="module-status-row">${moduleStatus('Inbox', items.length)}${moduleStatus('Do odpowiedzi', realItems().filter((item)=>['new','needs_reply'].includes(item.status)).length)}${moduleStatus('Mail niedostarczony', realItems().filter((item)=>!item.mail_delivered).length, realItems().some((item)=>!item.mail_delivered) ? 'warn' : 'ok')}${moduleStatus('Auto-refresh', autoRefreshPaused ? 'pauza' : '25 s', autoRefreshPaused ? 'warn' : 'ok')}</div>
+          <header class="module-head"><span class="eyebrow">Maile / Skrzynka</span><h2>Centrum wiadomości recepcji</h2><p>Wątki rozumieją daty, osoby, usługi, kraj, język, status dostarczenia maila i najlepszą odpowiedź premium.</p></header>
+          <div class="module-status-row">${moduleStatus('Skrzynka', items.length)}${moduleStatus('Do odpowiedzi', realItems().filter((item)=>['new','needs_reply'].includes(item.status)).length)}${moduleStatus('Mail niedostarczony', realItems().filter((item)=>!item.mail_delivered).length, realItems().some((item)=>!item.mail_delivered) ? 'warn' : 'ok')}${moduleStatus('Odświeżanie', autoRefreshPaused ? 'pauza' : '25 s', autoRefreshPaused ? 'warn' : 'ok')}</div>
         </section>${items.length ? items.map(card).join('') : '<div class="empty">Brak zapytań dla wybranych filtrów.</div>'}`;
         const renderPremiumDashboardView = () => {
           const real = realItems();
@@ -1386,7 +1406,7 @@ const title = 'CC SYSTEM';
           const urgent = urgentItems();
           const latest = real.slice(0,5);
           const tasks = [
-            ['✉️', 'Mail niedostarczony', real.filter((item)=>!item.mail_delivered).length, 'Otwórz Mail Center i wyślij ręcznie.'],
+            ['✉️', 'Mail niedostarczony', real.filter((item)=>!item.mail_delivered).length, 'Otwórz centrum wiadomości i wyślij ręcznie.'],
             ['🏕️', 'Camping L/S', real.filter((item)=>isSummer(item) && categoryKeys(item).includes('camping')).length, 'Bez rezerwacji miejsc campingowych.'],
             ['🧩', 'Brakuje danych', real.filter((item)=>categoryKeys(item).includes('missing')).length, 'Poproś klienta o uzupełnienie.'],
             ['👥', 'Grupy / skauci', real.filter((item)=>categoryKeys(item).includes('group') || categoryKeys(item).includes('scouts')).length, 'Wymagana ręczna decyzja recepcji.'],
@@ -1399,7 +1419,7 @@ const title = 'CC SYSTEM';
             ['📤','Wyjazdy dziś', departureTodayItems().length, 'check-out'],
             ['🏕️','Obłożenie camping', campingItems.length, 'z zapytań'],
             ['🏡','Obłożenie domki', bungalowItems.length, 'z zapytań'],
-            ['🚀','Mail delivery', demoMode ? 'demo OFF' : (mailOk ? 'Resend OK' : 'sprawdź'), demoMode ? 'bez wysyłki' : 'status recepcji'],
+            ['🚀','Dostarczenie maila', demoMode ? 'demo OFF' : (mailOk ? 'Resend OK' : 'sprawdź'), demoMode ? 'bez wysyłki' : 'status recepcji'],
             ['📅','Najbliższe 7 dni', next7Items().length, 'operacje'],
           ];
           return `<section class="premium-dashboard">
@@ -1408,7 +1428,7 @@ const title = 'CC SYSTEM';
                 <span class="eyebrow">Recepcja online · ${esc(todayLabel)}</span>
                 <h2>Centrum dowodzenia Camping Clepardia</h2>
                 <p>${demoMode ? 'Publiczny widok demo do oceny UI/UX — bez Supabase, bez wysyłki i bez realnych danych.' : 'Operacyjny widok zapytań, maili, klientów i zadań recepcji w jednym miejscu.'}</p>
-                <div class="dashboard-hero__chips"><span>${esc(seasonLabel)}</span><span>Status dnia: ${esc(urgent.length ? `${urgent.length} pilne` : 'spokojnie')}</span><span>Mail Center: ${esc(latest.length)} wątków</span></div>
+                <div class="dashboard-hero__chips"><span>${esc(seasonLabel)}</span><span>Status dnia: ${esc(urgent.length ? `${urgent.length} pilne` : 'spokojnie')}</span><span>Maile: ${esc(latest.length)} wątków</span></div>
               </div>
               <aside class="dashboard-weather-card">
                 <span>☀️ Kraków</span>
@@ -1419,16 +1439,16 @@ const title = 'CC SYSTEM';
             <div class="premium-kpi-grid">${kpis.map(([icon,label,value,hint])=>`<article class="premium-kpi-card"><span>${esc(icon)}</span><small>${esc(label)}</small><strong>${esc(value)}</strong><em>${esc(hint)}</em></article>`).join('')}</div>
             <div class="dashboard-command-grid">
               <section class="command-card command-card--urgent"><header><span>🔥</span><div><h3>Pilne teraz</h3><p>Sprawy, których recepcja nie powinna przegapić.</p></div></header>${moduleThreadList(urgent.slice(0,6), 'Brak pilnych spraw. System oddycha spokojnie.')}</section>
-              <section class="command-card"><header><span>✉️</span><div><h3>Mini Mail Center</h3><p>5 najnowszych wątków z inboxa.</p></div></header>${moduleThreadList(latest, 'Brak zapytań.')}<div class="inline-actions"><button type="button" data-view-shortcut="mail">Otwórz Mail Center</button></div></section>
+              <section class="command-card"><header><span>✉️</span><div><h3>Mini skrzynka</h3><p>5 najnowszych wątków z wiadomości.</p></div></header>${moduleThreadList(latest, 'Brak zapytań.')}<div class="inline-actions"><button type="button" data-view-shortcut="mail">Otwórz centrum wiadomości</button></div></section>
               <section class="command-card"><header><span>✅</span><div><h3>Zadania recepcji</h3><p>Automatyczne TODO z zapytań.</p></div></header><ul class="module-task-list">${tasks.map(([icon,label,count,hint])=>`<li><strong>${esc(icon)} ${esc(count)}</strong><span>${esc(label)}</span><small>${esc(hint)}</small></li>`).join('')}</ul></section>
-              <section class="command-card"><header><span>⚡</span><div><h3>Szybkie akcje</h3><p>Najczęstsze operacje bez szukania.</p></div></header><div class="quick-action-grid"><button type="button" data-view-shortcut="camp">Nowe przyjęcie /camp</button><a href="/rezerwacja/" target="_blank" rel="noopener">Dodaj rezerwację</a><button type="button" data-view-shortcut="mail">Mail Center</button><button type="button" data-view-shortcut="calendar">Dodaj do kalendarza</button><button type="button" data-view-shortcut="print">Drukuj kartę</button><button type="button" data-view-shortcut="extend">Przedłuż pobyt</button></div></section>
+              <section class="command-card"><header><span>⚡</span><div><h3>Szybkie akcje</h3><p>Najczęstsze operacje bez szukania.</p></div></header><div class="quick-action-grid"><button type="button" data-view-shortcut="camp">Nowe przyjęcie /camp</button><a href="/rezerwacja/" target="_blank" rel="noopener">Dodaj rezerwację</a><button type="button" data-view-shortcut="mail">Centrum wiadomości</button><button type="button" data-view-shortcut="calendar">Dodaj do kalendarza</button><button type="button" data-view-shortcut="print">Drukuj kartę</button><button type="button" data-view-shortcut="extend">Przedłuż pobyt</button></div></section>
             </div>
           </section>`;
         };
         const mailFolderDefs = () => {
           const real = realItems();
           return [
-            ['inbox','📥','Inbox',real.filter((item)=>!['archived','spam','test'].includes(item.status)).length],
+            ['inbox','📥','Skrzynka',real.filter((item)=>!['archived','spam','test'].includes(item.status)).length],
             ['needs_reply','🟠','Do odpowiedzi',real.filter((item)=>['new','needs_reply'].includes(item.status)).length],
             ['replied','✅','Odpowiedziane',real.filter((item)=>item.status === 'replied').length],
             ['confirmed','🟢','Potwierdzone',real.filter((item)=>['confirmed','needs_confirmation'].includes(item.status)).length],
@@ -1457,7 +1477,7 @@ const title = 'CC SYSTEM';
           return `<button type="button" class="mail-thread ${String(item.id) === String(selectedId) ? 'is-selected' : ''}" data-id="${esc(item.id)}" data-thread-select="${esc(item.id)}">
             <span class="mail-thread__flag">${esc(country.flag)}</span>
             <span class="mail-thread__body"><strong>${esc(item.full_name || 'Bez nazwy')}</strong><small>${esc(country.label)} · ${esc(languageCode(item).toUpperCase())} · ${esc(formatDate(item.created_at,true))}</small><em>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.stay_type || '-')}</em><span>${badgeKeys.map((key)=>`<b>${esc(categoryLabels[key] || key)}</b>`).join('')}</span></span>
-            <span class="mail-thread__meta"><strong>${esc(moneyLabel(item))}</strong><small>${esc(guests.label)}</small><i class="${item.mail_delivered ? 'is-ok':'is-warn'}">${item.mail_delivered ? 'Mail OK':'Mail fail'}</i></span>
+            <span class="mail-thread__meta"><strong>${esc(item.stay_type || 'Pobyt')}</strong><small>${esc(guests.label)}</small><i class="${item.mail_delivered ? 'is-ok':'is-warn'}">${item.mail_delivered ? 'Mail dostarczony':'Mail problem'}</i></span>
           </button>`;
         };
         const renderCasePanel = (item) => {
@@ -1476,8 +1496,8 @@ const title = 'CC SYSTEM';
           return `<section class="mail-case-panel" data-id="${esc(item.id)}">
             <button type="button" class="mail-back" data-mail-back>← Lista wątków</button>
             <header class="case-hero"><div><span class="eyebrow">Sprawa klienta</span><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(country.flag)} ${esc(country.label)} · ${esc(languageCode(item).toUpperCase())} · ${esc(item.email || item.phone || 'brak kontaktu')}</p></div><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span></header>
-            <div class="case-kpis"><article><span>📅</span><small>Termin</small><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><em>${esc(item.nights || 0)} nocy</em></article><article><span>👥</span><small>Osoby</small><strong>${esc(guests.label)}</strong><em>razem ${esc(guests.total || '-')}</em></article><article><span>🏕️</span><small>Pobyt</small><strong>${esc(item.stay_type || '-')}</strong><em>${esc(cats.includes('camping') ? 'Camping' : cats.includes('bungalow') ? 'Domki' : 'Pobyt')}</em></article><article><span>💰</span><small>Cena</small><strong>${esc(moneyLabel(item))}</strong><em>orientacyjnie</em></article></div>
-            <div class="case-grid"><section class="case-card case-card--wide"><h3>🧾 Usługi i cena</h3><ul class="service-list">${serviceCards(item)}</ul></section><section class="case-card"><h3>💬 Wiadomość klienta</h3><p class="message-copy">${esc(item.message || 'Brak wiadomości')}</p></section><section class="case-card"><h3>ℹ️ Ważne informacje</h3><aside class="crm-warnings">${warnings}</aside></section><section class="case-card case-card--wide best-reply-card"><h3>✨ Najlepsza odpowiedź</h3><p><strong>${esc(best.icon)} ${esc(best.title)}</strong></p><small>Powód: ${esc(best.reason)}</small><div class="inline-actions"><button type="button" data-reply-template="${esc(best.id)}">Utwórz odpowiedź</button><button type="button" data-copy-client-safe>Kopiuj safe summary</button>${item.email ? `<a href="mailto:${esc(item.email)}">Mailto klienta</a>` : ''}</div></section><section class="case-card case-card--wide"><h3>Przepływ recepcji</h3><div class="workflow-rail"><button type="button" data-view-shortcut="customers">Utwórz klienta</button><button type="button" data-view-shortcut="reservations">Utwórz pobyt</button><button type="button" data-view-shortcut="camp">Otwórz w /camp</button><button type="button" data-view-shortcut="calendar">Dodaj do kalendarza</button><button type="button" data-view-shortcut="print">Drukuj kartę</button></div><p class="module-empty">Preview flow: zapis klienta/pobytu wymaga docelowych tabel, więc system nie udaje zapisu.</p></section><section class="case-card"><h3>⚡ Szybkie akcje</h3><div class="quick-action-grid"><button type="button" data-reply-action="confirm" data-target-status="needs_confirmation">Potwierdź</button><button type="button" data-reply-action="askMissingData" data-target-status="needs_reply">Poproś o dane</button><button type="button" data-reply-action="noAvailability" data-target-status="unavailable">Brak miejsc</button><button type="button" data-reply-action="infoCampingSummer" data-target-status="replied">Camping L/S</button><button type="button" data-reply-action="electricityEv" data-target-status="replied">Prąd / EV</button><button type="button" data-reply-action="tours" data-target-status="replied">Wycieczki</button></div></section><section class="case-card"><h3>📝 Notatki i status</h3><label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${item.status === value ? 'selected':''}>${label}</option>`).join('')}</select></label><label><span>Notatka recepcji</span><textarea data-notes rows="4">${esc(item.notes || '')}</textarea></label><button type="button" data-save>Zapisz status</button></section><section class="case-card case-card--wide"><h3>🕒 Historia rozmowy</h3><ul class="timeline-list">${timeline}</ul></section></div>
+            <div class="case-kpis"><article><span>📅</span><small>Termin</small><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><em>${esc(item.nights || 0)} nocy</em></article><article><span>👥</span><small>Osoby</small><strong>${esc(guests.label)}</strong><em>razem ${esc(guests.total || '-')}</em></article><article><span>🏕️</span><small>Pobyt</small><strong>${esc(item.stay_type || '-')}</strong><em>${esc(cats.includes('camping') ? 'Camping' : cats.includes('bungalow') ? 'Domki' : 'Pobyt')}</em></article><article><span>✉️</span><small>Mail</small><strong>${esc(item.mail_delivered ? 'Dostarczony' : 'Do obsługi')}</strong><em>${esc(languageCode(item).toUpperCase())}</em></article></div>
+            <div class="case-grid"><section class="case-card case-card--wide"><h3>🧾 Usługi pobytu</h3><ul class="service-list">${serviceCards(item)}</ul></section><section class="case-card"><h3>💬 Wiadomość klienta</h3><p class="message-copy">${esc(item.message || 'Brak wiadomości')}</p></section><section class="case-card"><h3>ℹ️ Ważne informacje</h3><aside class="crm-warnings">${warnings}</aside></section><section class="case-card case-card--wide best-reply-card"><h3>✨ Najlepsza odpowiedź</h3><p><strong>${esc(best.icon)} ${esc(best.title)}</strong></p><small>Powód: ${esc(best.reason)}</small><div class="inline-actions"><button type="button" data-reply-template="${esc(best.id)}">Utwórz odpowiedź</button><button type="button" data-copy-client-safe>Kopiuj podsumowanie</button>${item.email ? `<a href="mailto:${esc(item.email)}">Mailto klienta</a>` : ''}</div></section><section class="case-card case-card--wide"><h3>Przepływ recepcji</h3><div class="workflow-rail"><button type="button" data-view-shortcut="customers">Utwórz klienta</button><button type="button" data-view-shortcut="reservations">Utwórz pobyt</button><button type="button" data-view-shortcut="camp">Otwórz w /camp</button><button type="button" data-view-shortcut="calendar">Dodaj do kalendarza</button><button type="button" data-view-shortcut="print">Drukuj kartę</button></div><p class="module-empty">Przepływ demo: zapis klienta/pobytu wymaga docelowych tabel, więc system nie udaje zapisu.</p></section><section class="case-card"><h3>⚡ Szybkie akcje</h3><div class="quick-action-grid"><button type="button" data-reply-action="confirm" data-target-status="needs_confirmation">Potwierdź</button><button type="button" data-reply-action="askMissingData" data-target-status="needs_reply">Poproś o dane</button><button type="button" data-reply-action="noAvailability" data-target-status="unavailable">Brak miejsc</button><button type="button" data-reply-action="infoCampingSummer" data-target-status="replied">Camping L/S</button><button type="button" data-reply-action="electricityEv" data-target-status="replied">Prąd / EV</button><button type="button" data-reply-action="tours" data-target-status="replied">Wycieczki</button></div></section><section class="case-card"><h3>📝 Notatki i status</h3><label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${item.status === value ? 'selected':''}>${label}</option>`).join('')}</select></label><label><span>Notatka recepcji</span><textarea data-notes rows="4">${esc(item.notes || '')}</textarea></label><button type="button" data-save>Zapisz status</button></section><section class="case-card case-card--wide"><h3>🕒 Historia rozmowy</h3><ul class="timeline-list">${timeline}</ul></section></div>
           </section>`;
         };
         const renderMailCenterWorkspace = (items) => {
@@ -1485,7 +1505,7 @@ const title = 'CC SYSTEM';
           if (selected) selectedInquiryId = String(selected.id);
           const folder = activeMailFolder();
           return `<section class="mail-center-workspace">
-            <aside class="mail-folders"><header><span class="eyebrow">Mail Center</span><h2>Inbox recepcji</h2><p>${demoMode ? 'Dane demo, bez wysyłki.' : 'Własny Gmail + CRM + akcje.'}</p></header>${mailFolderDefs().map(([key,icon,label,count])=>`<button type="button" data-mail-folder="${esc(key)}" class="${folder === key ? 'is-active' : ''}"><span>${esc(icon)} ${esc(label)}</span><strong>${esc(count)}</strong></button>`).join('')}</aside>
+            <aside class="mail-folders"><header><span class="eyebrow">Centrum wiadomości</span><h2>Skrzynka recepcji</h2><p>${demoMode ? 'Dane demo, bez wysyłki.' : 'Własna skrzynka + CRM + akcje.'}</p></header>${mailFolderDefs().map(([key,icon,label,count])=>`<button type="button" data-mail-folder="${esc(key)}" class="${folder === key ? 'is-active' : ''}"><span>${esc(icon)} ${esc(label)}</span><strong>${esc(count)}</strong></button>`).join('')}</aside>
             <section class="mail-thread-list"><header><div><span class="eyebrow">Wątki</span><h3>${esc(items.length)} w widoku</h3></div><small>${esc(autoRefreshPaused ? 'Auto-refresh pauza' : 'Auto-refresh 25 s')}</small></header><div class="mail-thread-scroll">${items.length ? items.map((item)=>renderThreadCard(item, selected?.id)).join('') : '<div class="empty">Brak wątków dla wybranych filtrów.</div>'}</div></section>
             ${renderCasePanel(selected)}
           </section>`;
@@ -1511,7 +1531,6 @@ const title = 'CC SYSTEM';
           const last = client.items[0] || {};
           const next = client.items.find((item)=>String(item.arrival_date || '') >= new Date().toISOString().slice(0,10)) || last;
           const country = countryInfo({ country:client.country, language:client.language });
-          const totalValue = client.items.reduce((sum,item)=>sum + Number(item.estimated_total_pln || 0),0);
           const ratings = client.items.map((item)=>Number(feedback(item).rating || 0)).filter(Boolean);
           const avg = ratings.length ? (ratings.reduce((sum,value)=>sum+value,0) / ratings.length).toFixed(1) : '4.8';
           const initials = String(client.name || 'CC').trim().split(/\s+/).slice(0,2).map((part)=>part[0]).join('').toUpperCase() || 'CC';
@@ -1527,10 +1546,10 @@ const title = 'CC SYSTEM';
                 <section class="crm-hero">
                   <span class="crm-avatar">${esc(initials)}</span>
                   <div><h3>${esc(client.name)}</h3><p>${esc(country.flag)} ${esc(country.label)} · ${esc(client.email || client.phone || 'brak kontaktu')}</p><div class="crm-badges"><span>Klient</span><span class="is-warn">Camping L/S</span><span>★ ${esc(avg)} / 5</span></div></div>
-                  <dl><div><dt>Pierwszy kontakt</dt><dd>${esc(formatDate(client.items[client.items.length - 1]?.created_at,true) || '-')}</dd></div><div><dt>Ostatni kontakt</dt><dd>${esc(formatDate(last.created_at,true) || '-')}</dd></div><div><dt>Liczba pobytów</dt><dd>${esc(client.items.length)}</dd></div><div><dt>Łączny obrót</dt><dd>${esc(totalValue)} PLN</dd></div></dl>
+                  <dl><div><dt>Pierwszy kontakt</dt><dd>${esc(formatDate(client.items[client.items.length - 1]?.created_at,true) || '-')}</dd></div><div><dt>Ostatni kontakt</dt><dd>${esc(formatDate(last.created_at,true) || '-')}</dd></div><div><dt>Liczba pobytów</dt><dd>${esc(client.items.length)}</dd></div><div><dt>Język</dt><dd>${esc(client.language || '-')}</dd></div></dl>
                 </section>
-                <section class="crm-card crm-card--stay"><h3>Następny pobyt</h3><article><div><span class="status-badge status-${esc(next.status || 'new')}">${esc(statusLabels[next.status] || next.status || 'Nowe')}</span><strong>${esc(next.stay_type || '-')}</strong><small>${esc(next.arrival_date || '-')} — ${esc(next.departure_date || '-')} (${esc(next.nights || 0)} nocy)</small></div><b>${esc(moneyLabel(next))}</b></article><div class="inline-actions"><button type="button" data-view-shortcut="reservations">Zobacz szczegóły rezerwacji</button></div></section>
-                <section class="crm-card"><h3>Historia rezerwacji</h3><div class="crm-history-table">${client.items.slice(0,5).map((item)=>`<article><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><small>${esc(item.stay_type || '-')} · ${esc(normalizeInquiryGuests(item).label)}</small><b>${esc(moneyLabel(item))}</b></article>`).join('')}</div></section>
+                <section class="crm-card crm-card--stay"><h3>Następny pobyt</h3><article><div><span class="status-badge status-${esc(next.status || 'new')}">${esc(statusLabels[next.status] || next.status || 'Nowe')}</span><strong>${esc(next.stay_type || '-')}</strong><small>${esc(next.arrival_date || '-')} — ${esc(next.departure_date || '-')} (${esc(next.nights || 0)} nocy)</small></div><b>${esc(normalizeInquiryGuests(next).label)}</b></article><div class="inline-actions"><button type="button" data-view-shortcut="reservations">Zobacz szczegóły rezerwacji</button></div></section>
+                <section class="crm-card"><h3>Historia rezerwacji</h3><div class="crm-history-table">${client.items.slice(0,5).map((item)=>`<article><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><small>${esc(item.stay_type || '-')} · ${esc(normalizeInquiryGuests(item).label)}</small><b>${esc(languageCode(item).toUpperCase())}</b></article>`).join('')}</div></section>
                 <section class="crm-card"><h3>Notatki recepcji</h3><article class="crm-note"><strong>Recepcja</strong><span>${esc(formatDate(last.created_at,true))}</span><p>Klient preferuje spokojne miejsca, szybki kontakt mailowy i jasne warunki pobytu. Przy L/S pamiętać o zasadzie kolejności przyjazdu.</p></article></section>
               </main>
               <aside class="crm-side">
@@ -1565,9 +1584,9 @@ const title = 'CC SYSTEM';
             <div class="reservations-layout">
               <main class="reservation-table-card">
                 <div class="reservation-toolbar"><div><button class="is-active">Wszystkie <b>${esc(items.length)}</b></button><button>Aktywne</button><button>Zakończone</button><button>Anulowane</button></div><label><span>🔎</span><input type="search" placeholder="Szukaj w rezerwacjach…" /></label></div>
-                <div class="reservation-table"><header><span>Klient</span><span>Termin</span><span>Typ pobytu</span><span>Osoby</span><span>Cena</span><span>Status</span></header>${items.slice(0,9).map((item)=>{ const country=countryInfo(item); return `<button type="button"><strong><i>${esc(String(item.full_name || 'CC').slice(0,2).toUpperCase())}</i>${esc(item.full_name || 'Bez nazwy')}<small>${esc(country.flag)} ${esc(country.label)}</small></strong><span>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}<small>${esc(item.nights || 0)} nocy</small></span><span>${esc(item.stay_type || '-')}</span><span>${esc(normalizeInquiryGuests(item).label)}</span><span>${esc(moneyLabel(item))}</span><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span></button>`; }).join('')}</div>
+                <div class="reservation-table"><header><span>Klient</span><span>Termin</span><span>Typ pobytu</span><span>Osoby</span><span>Mail</span><span>Status</span></header>${items.slice(0,9).map((item)=>{ const country=countryInfo(item); return `<button type="button"><strong><i>${esc(String(item.full_name || 'CC').slice(0,2).toUpperCase())}</i>${esc(item.full_name || 'Bez nazwy')}<small>${esc(country.flag)} ${esc(country.label)}</small></strong><span>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}<small>${esc(item.nights || 0)} nocy</small></span><span>${esc(item.stay_type || '-')}</span><span>${esc(normalizeInquiryGuests(item).label)}</span><span>${esc(item.mail_delivered ? 'OK' : 'Do obsługi')}</span><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span></button>`; }).join('')}</div>
               </main>
-              ${selected ? `<aside class="reservation-detail"><header><span class="crm-avatar">${esc(String(selected.full_name || 'CC').slice(0,2).toUpperCase())}</span><div><h3>${esc(selected.full_name || 'Bez nazwy')}</h3><p>${esc(selectedCountry.flag)} ${esc(selectedCountry.label)} · ${esc(languageCode(selected).toUpperCase())}</p></div><span class="status-badge status-${esc(selected.status)}">${esc(statusLabels[selected.status] || selected.status)}</span></header><div class="case-kpis"><article><small>Termin</small><strong>${esc(selected.arrival_date || '-')} — ${esc(selected.departure_date || '-')}</strong><em>${esc(selected.nights || 0)} nocy</em></article><article><small>Typ pobytu</small><strong>${esc(selected.stay_type || '-')}</strong></article><article><small>Osoby</small><strong>${esc(selectedGuests.label)}</strong></article><article><small>Cena</small><strong>${esc(moneyLabel(selected))}</strong></article></div><section><h4>Dane klienta</h4><p>${esc(selected.email || '-')}<br>${esc(selected.phone || '-')}</p></section><section><h4>Wiadomość klienta</h4><p>${esc(selected.message || 'Brak wiadomości')}</p></section><section class="crm-warnings">${warningsFor(selected, categoryKeys(selected)) || '<p>Brak pilnych ostrzeżeń.</p>'}</section></aside>` : '<aside class="reservation-detail"><p>Brak rezerwacji.</p></aside>'}
+              ${selected ? `<aside class="reservation-detail"><header><span class="crm-avatar">${esc(String(selected.full_name || 'CC').slice(0,2).toUpperCase())}</span><div><h3>${esc(selected.full_name || 'Bez nazwy')}</h3><p>${esc(selectedCountry.flag)} ${esc(selectedCountry.label)} · ${esc(languageCode(selected).toUpperCase())}</p></div><span class="status-badge status-${esc(selected.status)}">${esc(statusLabels[selected.status] || selected.status)}</span></header><div class="case-kpis"><article><small>Termin</small><strong>${esc(selected.arrival_date || '-')} — ${esc(selected.departure_date || '-')}</strong><em>${esc(selected.nights || 0)} nocy</em></article><article><small>Typ pobytu</small><strong>${esc(selected.stay_type || '-')}</strong></article><article><small>Osoby</small><strong>${esc(selectedGuests.label)}</strong></article><article><small>Mail</small><strong>${esc(selected.mail_delivered ? 'Dostarczony' : 'Do obsługi')}</strong></article></div><section><h4>Dane klienta</h4><p>${esc(selected.email || '-')}<br>${esc(selected.phone || '-')}</p></section><section><h4>Wiadomość klienta</h4><p>${esc(selected.message || 'Brak wiadomości')}</p></section><section class="crm-warnings">${warningsFor(selected, categoryKeys(selected)) || '<p>Brak pilnych ostrzeżeń.</p>'}</section></aside>` : '<aside class="reservation-detail"><p>Brak rezerwacji.</p></aside>'}
               <aside class="reservation-side"><section><h3>Kalendarz pobytu</h3><div class="mini-month"><header><span>Lipiec 2026</span></header><div>${miniDays}</div></div></section><section><h3>Podsumowanie ceny</h3><ul>${selected ? services(selected).slice(0,4).map((service)=>`<li><span>${esc(service.label)} × ${esc(service.qty || 1)}</span><b>${esc(Number(service.price || 0) * Math.max(1,Number(service.qty || 1)))} PLN</b></li>`).join('') : ''}<li><strong>Razem</strong><strong>${esc(selected ? moneyLabel(selected) : '-')}</strong></li></ul></section>${best ? `<section class="best-reply-card"><h3>Sugerowana odpowiedź</h3><strong>${esc(best.title)}</strong><small>${esc(best.reason)}</small><button type="button" data-reply-template="${esc(best.id)}" data-id="${esc(selected.id || '')}">Otwórz odpowiedź</button></section>` : ''}<section><h3>Szybkie akcje</h3><div class="quick-action-grid"><button type="button" data-view-shortcut="customers">Utwórz klienta</button><button type="button" data-view-shortcut="reservations">Utwórz pobyt</button><button type="button" data-view-shortcut="camp">Otwórz w /camp</button><button type="button" data-view-shortcut="calendar">Dodaj do kalendarza</button><button type="button" data-view-shortcut="print">Drukuj kartę</button><button>Wyślij mail</button></div></section></aside>
             </div>
           </section>`;
@@ -1575,25 +1594,55 @@ const title = 'CC SYSTEM';
         const renderCalendarView = () => {
           const items = realItems();
           const selected = items[0] || null;
-          const resources = ['Domek 2-os.','Domek 3-os.','Domek 4-os.','Domek Blue','Domek Family','Pole A','Pole B','Pole C','Pole D'];
+          const resources = ['Domek 2-os. · D2','Domek 3-os. · D3','Domek 4-os. · D4','Domek Blue · DB','Domek Family · DF','Pole A (1–20)','Pole B (21–40)','Pole C (41–60)','Pole D (61–80)','Pole E (81–100)'];
           const today = new Date();
-          const todayDay = today.getDate();
-          const monthButtons = ['Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień'];
-          const dayHeaders = Array.from({ length:31 },(_,index)=>`<span class="${index + 1 === todayDay ? 'is-today':''}">${index+1}</span>`).join('');
+          const todayDay = Math.max(1, Math.min(31, today.getDate()));
+          const year = today.getFullYear();
+          const monthNames = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+          const activeMonth = monthNames[today.getMonth()] || 'Lipiec';
+          const monthButtons = ['Dzisiaj','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad'];
+          const dayHeaders = Array.from({ length:31 },(_,index)=>{
+            const day = index + 1;
+            const weekend = [0,6].includes(new Date(year, today.getMonth(), day).getDay());
+            return `<span class="${day === todayDay ? 'is-today':''} ${weekend ? 'is-weekend':''}"><b>${day}</b>${day === todayDay ? '<small>Dziś</small>' : ''}</span>`;
+          }).join('');
+          const statusFor = (item) => {
+            const status = String(item.status || 'new');
+            if (['confirmed','replied'].includes(status)) return 'confirmed';
+            if (['cancelled','rejected'].includes(status)) return 'cancelled';
+            if (['unavailable'].includes(status)) return 'unavailable';
+            if (!item.mail_delivered && item.mail_provider) return 'unpaid';
+            if (categoryKeys(item).includes('group') || categoryKeys(item).includes('scouts')) return 'group';
+            return 'pending';
+          };
           const rows = resources.map((resource,rowIndex)=>{
-            const rowItems = items.filter((_,index)=>index % resources.length === rowIndex).slice(0,3);
-            const bars = rowItems.map((item)=>{ const start=Math.max(1,Math.min(31,Number(String(item.arrival_date || '').slice(8,10)) || (rowIndex+2))); const span=Math.max(1,Math.min(7,Number(item.nights || 2))); const cats=categoryKeys(item); return `<article class="${cats.includes('bungalow') ? 'is-cabin' : 'is-camp'} ${isSummer(item) ? 'is-summer':''} status-${esc(item.status || 'new')}" style="grid-column:${start + 1} / span ${span}"><strong>${esc(item.full_name || '-')} ${esc(countryInfo(item).flag)}</strong><small>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(normalizeInquiryGuests(item).label)}</small></article>`; }).join('');
-            return `<div class="calendar-row"><b>${esc(resource)}</b>${Array.from({ length:31 },(_,dayIndex)=>`<span class="${dayIndex + 1 === todayDay ? 'is-today':''}"></span>`).join('')}${bars}</div>`;
+            const rowItems = items.filter((_,index)=>index % resources.length === rowIndex).slice(0,4);
+            const cells = Array.from({ length:31 },(_,dayIndex)=>`<span class="${dayIndex + 1 === todayDay ? 'is-today':''}"></span>`).join('');
+            const bars = rowItems.map((item)=>{
+              const start = Math.max(1, Math.min(31, Number(String(item.arrival_date || '').slice(8,10)) || (rowIndex + 3)));
+              const span = Math.max(1, Math.min(8, Number(item.nights || 2)));
+              const cats = categoryKeys(item);
+              const status = statusFor(item);
+              return `<button type="button" class="calendar-booking calendar-booking--${esc(status)} ${cats.includes('bungalow') ? 'is-cabin' : 'is-camp'} ${isSummer(item) ? 'is-summer':''}" data-id="${esc(item.id || '')}" data-calendar-edit data-calendar-name="${esc(item.full_name || '-')}" data-calendar-term="${esc(`${item.arrival_date || '-'} — ${item.departure_date || '-'}`)}" title="${esc(`${item.full_name || '-'} · wyjazd 11:00 / przyjazd 16:00`)}" style="grid-column:${start + 1} / span ${span}">
+                <i class="calendar-diamond calendar-diamond--out" aria-hidden="true"></i><i class="calendar-diamond calendar-diamond--in" aria-hidden="true"></i>
+                <strong>${esc(item.full_name || '-')} ${esc(countryInfo(item).flag)}</strong>
+                <small><span>11:00 wyjazd</span><span>16:00 przyjazd</span> · ${esc(normalizeInquiryGuests(item).label)}</small>
+              </button>`;
+            }).join('');
+            return `<div class="calendar-row calendar-row--offline"><b>${esc(resource)}</b>${cells}${bars}</div>`;
           }).join('');
           const best = selected ? suggestBestReply(selected) : null;
           return `<section class="cc-module cc-module--calendar">
-            <header class="cc-module-head"><div><span class="eyebrow">Obłożenie i pobyty</span><h2>Kalendarz</h2><p>Widok operacyjny: zasoby w wierszach, dni w kolumnach, pobyty jako paski i szczegóły po prawej.</p></div><div class="calendar-switcher"><button>Poprzedni</button><button class="is-active">Dzisiaj</button><button>Następny</button><button class="is-active">Miesiąc</button><button>Camping</button><button>Domki</button></div></header>
-            <div class="calendar-month-strip">${monthButtons.map((month)=>`<button class="${month === 'Lipiec' ? 'is-active':''}">${esc(month)}</button>`).join('')}</div>
-            <div class="calendar-kpis">${moduleMetric('🏕️','Obłożenie camping','87%')}${moduleMetric('🏠','Obłożenie domków','68%')}${moduleMetric('📥','Przyjazdy w miesiącu',items.length)}${moduleMetric('📤','Wyjazdy w miesiącu',departureTodayItems().length + items.length)}${moduleMetric('⏭️','Najbliższy przyjazd',selected?.arrival_date || '-')}</div>
-            <div class="calendar-legend" aria-label="Legenda kalendarza"><span class="legend-confirmed">Potwierdzone</span><span class="legend-pending">Do potwierdzenia</span><span class="legend-unpaid">Nieopłacone</span><span class="legend-unavailable">Brak miejsc</span><span class="legend-group">Grupa</span><span class="legend-summer">Camping L/S</span></div>
-            <div class="calendar-layout">
-              <main class="calendar-board"><div class="calendar-board__head"><strong>Lipiec 2026</strong><div>${dayHeaders}</div></div>${rows}<div class="calendar-summer-note">LIPIEC / SIERPIEŃ — CAMPING BEZ REZERWACJI · miejsca według kolejności przyjazdu</div></main>
-              ${selected ? `<aside class="calendar-detail"><button type="button" class="ghost">×</button><header><span class="crm-avatar">${esc(String(selected.full_name || 'CC').slice(0,2).toUpperCase())}</span><div><h3>${esc(selected.full_name || '-')} ${esc(countryInfo(selected).flag)}</h3><p>${esc(selected.stay_type || '-')}</p></div></header><div class="case-kpis"><article><small>Termin</small><strong>${esc(selected.arrival_date || '-')} — ${esc(selected.departure_date || '-')}</strong><em>${esc(selected.nights || 0)} nocy</em></article><article><small>Osoby</small><strong>${esc(normalizeInquiryGuests(selected).label)}</strong></article><article><small>Cena</small><strong>${esc(moneyLabel(selected))}</strong></article><article><small>Status</small><strong>${esc(statusLabels[selected.status] || selected.status)}</strong></article></div><section><h4>Usługi</h4><div class="crm-tags">${services(selected).slice(0,5).map((service)=>`<span>${esc(serviceIcon(service))} ${esc(service.label)}</span>`).join('')}</div></section><section><h4>Ważne informacje</h4><div class="crm-warnings">${warningsFor(selected, categoryKeys(selected)) || '<p>Brak pilnych ostrzeżeń.</p>'}</div></section>${best ? `<section class="best-reply-card"><h4>Sugerowana odpowiedź</h4><strong>${esc(best.title)}</strong><button type="button" data-reply-template="${esc(best.id)}" data-id="${esc(selected.id || '')}">Otwórz odpowiedź</button></section>` : ''}</aside>` : ''}
+            <header class="cc-module-head"><div><span class="eyebrow">Kalendarz offline-style</span><h2>Kalendarz pobytów</h2><p>Szeroka plansza operacyjna: zasoby w wierszach, dni w kolumnach, paski z półdniami check-out 11:00 i check-in 16:00.</p></div><div class="calendar-switcher"><button class="is-active">Dzisiaj</button><button>Domki</button><button>Camping</button><button>Rok ${esc(year)}</button></div></header>
+            <div class="calendar-month-strip calendar-month-strip--offline">${monthButtons.map((month)=>`<button class="${month === activeMonth || month === 'Dzisiaj' ? 'is-active':''}">${esc(month)}</button>`).join('')}<strong>${esc(year)}</strong></div>
+            <div class="calendar-kpis">${moduleMetric('🏕️','Obłożenie camping','87%')}${moduleMetric('🏠','Obłożenie domków','68%')}${moduleMetric('📥','Przyjazdy dziś',arrivalTodayItems().length)}${moduleMetric('📤','Wyjazdy dziś',departureTodayItems().length)}${moduleMetric('⚠️','Do reakcji',urgentItems().length)}</div>
+            <div class="calendar-legend" aria-label="Legenda kalendarza"><span class="legend-confirmed">Potwierdzona</span><span class="legend-pending">Wstępna</span><span class="legend-unpaid">Nieopłacona</span><span class="legend-unavailable">Brak miejsc</span><span class="legend-group">Grupa</span><span class="legend-summer">Camping L/S</span></div>
+            <div class="calendar-layout calendar-layout--offline">
+              <main class="calendar-board calendar-board--offline"><div class="calendar-board__head"><strong>${esc(activeMonth)} ${esc(year)}</strong><div>${dayHeaders}</div></div>${rows}<div class="calendar-summer-note">LIPIEC / SIERPIEŃ — CAMPING BEZ REZERWACJI · miejsca według kolejności przyjazdu</div></main>
+              ${selected ? `<aside class="calendar-detail"><button type="button" class="ghost">×</button><header><span class="crm-avatar">${esc(String(selected.full_name || 'CC').slice(0,2).toUpperCase())}</span><div><h3>${esc(selected.full_name || '-')} ${esc(countryInfo(selected).flag)}</h3><p>${esc(selected.stay_type || '-')}</p></div></header><div class="case-kpis"><article><small>Termin</small><strong>${esc(selected.arrival_date || '-')} — ${esc(selected.departure_date || '-')}</strong><em>${esc(selected.nights || 0)} nocy</em></article><article><small>Osoby</small><strong>${esc(normalizeInquiryGuests(selected).label)}</strong></article><article><small>Usługi</small><strong>${esc(services(selected).length || 0)}</strong></article><article><small>Status</small><strong>${esc(statusLabels[selected.status] || selected.status)}</strong></article></div><section><h4>Panel edycji jak offline</h4><div class="crm-tags"><span>Dane</span><span>Usługi</span><span>Status</span><span>Płatność</span><span>Sprzątanie</span><span>Karta pobytu</span></div></section><section><h4>Ważne informacje</h4><div class="crm-warnings">${warningsFor(selected, categoryKeys(selected)) || '<p>Brak pilnych ostrzeżeń.</p>'}</div></section>${best ? `<section class="best-reply-card"><h4>Sugerowana odpowiedź</h4><strong>${esc(best.title)}</strong><button type="button" data-reply-template="${esc(best.id)}" data-id="${esc(selected.id || '')}">Otwórz odpowiedź</button></section>` : ''}</aside>` : ''}
+            </div>
+            <div class="calendar-edit-modal" data-calendar-modal hidden>
+              <section><button type="button" data-calendar-close aria-label="Zamknij">×</button><span class="eyebrow">Edycja rezerwacji offline-style</span><h3 data-calendar-modal-name>Rezerwacja</h3><p data-calendar-modal-term>Termin</p><div class="crm-tags"><span>Dane</span><span>Usługi</span><span>Status</span><span>Płatność</span><span>Sprzątanie</span><span>Karta pobytu</span></div><p class="module-empty">To bezpieczny modal UI. Zapis edycji wymaga docelowej tabeli rezerwacji, więc system nie udaje zapisu.</p></section>
             </div>
           </section>`;
         };
@@ -1630,7 +1679,7 @@ const title = 'CC SYSTEM';
           const currentServices = selected ? services(selected) : [];
           const price = selected ? moneyLabel(selected) : '0 PLN';
           const steps = ['Dane klienta','Usługi','Płatność','Dokumenty','Zakończenie'];
-          const stayCards = ['Kamper','Przyczepa','Namiot','Rodzina','Domek 2-os.','Domek 3-os.','Domek 4-os.','Grupa'];
+          const stayCards = ['Kamper','Przyczepa','Namiot','Rodzina','Domek','Grupa'];
           const serviceCatalogPreview = [
             ['Osoba dorosła','35 PLN/noc', guests.adults || 2],
             ['Dziecko 4–14','20 PLN/noc', guests.children || 0],
@@ -1642,6 +1691,10 @@ const title = 'CC SYSTEM';
             ['Van','75 PLN/noc', currentServices.some((service)=>/van/i.test(service.label)) ? 1 : 0],
             ['Prąd 10A','30 PLN/noc', currentServices.some((service)=>/prąd|prad|10a|electric/i.test(service.label)) ? 1 : 0],
             ['Pies','0 PLN', currentServices.some((service)=>/pies|dog/i.test(service.label)) ? 1 : 0],
+            ['Bus / ciężki pojazd','160 PLN/noc', currentServices.some((service)=>/bus|cięż|ciez|truck/i.test(service.label)) ? 1 : 0],
+            ['Motocykl','25 PLN/noc', currentServices.some((service)=>/motocykl|motorcycle/i.test(service.label)) ? 1 : 0],
+            ['Domek','wg typu domku', currentServices.some((service)=>/domek|bungalow/i.test(service.label)) ? 1 : 0],
+            ['Dodatki','wg cennika', 0],
           ];
           const serviceRows = (currentServices.length ? currentServices : serviceCatalogPreview.map(([label, priceLabel, qty]) => ({ label, qty, price: priceLabel, preview: true }))).map((service) => `
             <article>
@@ -1652,7 +1705,7 @@ const title = 'CC SYSTEM';
           `).join('');
           return `<section class="cc-module cc-module--camp-pro">
             <header class="cc-module-head camp-pro-hero">
-              <div><span class="eyebrow">/camp · Nowe przyjęcie PRO</span><h2>Nowe przyjęcie</h2><p>Express Check-in PRO — klient w 30–60 sekund. Ten ekran działa jako kalkulator i preview pobytu; zapis do bazy pobytów jest oznaczony jako TODO.</p></div>
+              <div><span class="eyebrow">CAMP / Nowe przyjęcie · Camp PRO</span><h2>Nowe przyjęcie</h2><p>Układ jak w CC SYSTEM offline: dane klienta, usługi, płatność, dokumenty i zakończenie. Ekran działa jako kalkulator recepcji; zapis do bazy pobytów jest oznaczony jako TODO.</p></div>
               <div class="module-actions"><button type="button" disabled>Zapisz pobyt — TODO baza</button><button type="button">Drukuj kartę</button><button type="button">Otwórz kartę</button></div>
             </header>
             <div class="camp-pro-steps">${steps.map((step,index)=>`<span class="${index === 1 ? 'is-active':''}"><b>${index + 1}</b>${esc(step)}</span>`).join('')}</div>
@@ -1698,10 +1751,57 @@ const title = 'CC SYSTEM';
           const personNights = real.reduce((sum,item)=>sum + Number(guestCount(item) || 0) * Number(item.nights || 0), 0);
           const countries = new Set(real.map((item)=>countryInfo(item).code || item.country).filter(Boolean)).size;
           const vehicles = real.filter((item)=>item.vehicle_registration || services(item).some((service)=>/camper|van|przyczep|bus|auto|samoch/.test(`${service.id} ${service.label}`.toLowerCase()))).length;
-          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">GUS / Raporty</span><h2>Raporty z danych zapytań</h2><p>Liczniki orientacyjne z inquiries. TODO: eksport i raporty z potwierdzonych pobytów.</p></header><div class="module-metrics">${moduleMetric('🌍','Kraje',countries)}${moduleMetric('👥','Osobonoce',personNights)}${moduleMetric('🏕️','Camping',real.filter((item)=>categoryKeys(item).includes('camping')).length)}${moduleMetric('🏡','Domki',real.filter((item)=>categoryKeys(item).includes('bungalow')).length)}${moduleMetric('🚐','Pojazdy',vehicles)}${moduleMetric('📆','Miesiące',new Set(real.map((item)=>String(item.arrival_date || '').slice(0,7)).filter(Boolean)).size)}</div></section>`;
+          const camping = real.filter((item)=>categoryKeys(item).includes('camping')).length;
+          const bungalows = real.filter((item)=>categoryKeys(item).includes('bungalow')).length;
+          const tents = real.filter((item)=>/namiot|tent/i.test(`${item.stay_type || ''} ${serviceSummaryShort(item)}`)).length;
+          const months = [...new Set(real.map((item)=>String(item.arrival_date || '').slice(0,7)).filter(Boolean))].sort();
+          const reportRows = [
+            ['Osobonoce', personNights, 'goście × noce'],
+            ['Kraje', countries, 'unikalne kraje klientów'],
+            ['Camping', camping, 'kampery / przyczepy / namioty'],
+            ['Domki', bungalows, 'zapytania domkowe'],
+            ['Pojazdy', vehicles, 'rejestracje i usługi pojazdów'],
+            ['Namioty', tents, 'pobyty namiotowe'],
+          ];
+          const countryRows = [...new Set(real.map((item)=>countryInfo(item).label).filter(Boolean))].slice(0,8);
+          return `<section class="dashboard-panel module-view gus-report">
+            <header class="module-head"><span class="eyebrow">GUS / Raporty offline-style</span><h2>Raport miesięczny recepcji</h2><p>Duże, czytelne liczniki do pracy recepcji: osobonoce, kraje, camping, domki, pojazdy i namioty. Eksport jest przygotowany jako fundament pod synchronizację offline/online.</p></header>
+            <div class="calendar-month-strip calendar-month-strip--offline"><strong>Miesiąc raportu</strong>${(months.length ? months : ['2026-06','2026-07','2026-08']).map((month,index)=>`<button type="button" class="${index === Math.max(0, months.length - 1) ? 'is-active':''}">${esc(month)}</button>`).join('')}<button type="button">Drukuj czarno-biało</button><button type="button">Eksport CSV</button></div>
+            <div class="module-metrics">${reportRows.map(([label,value,hint])=>moduleMetric('📊', label, value, hint)).join('')}</div>
+            <div class="module-grid module-grid--two">
+              <section class="module-card"><h3>Zakres GUS</h3><ul class="module-rule-list">${reportRows.map(([label,value,hint])=>`<li><strong>${esc(label)}:</strong> ${esc(value)} — ${esc(hint)}</li>`).join('')}</ul></section>
+              <section class="module-card"><h3>Kraje w raporcie</h3><div class="crm-tags">${countryRows.map((name)=>`<span>${esc(name)}</span>`).join('') || '<span>Brak danych</span>'}</div><p class="module-empty">TODO: po tabelach aktywnych pobytów raport liczy wyłącznie pobyty potwierdzone, nie same zapytania.</p></section>
+            </div>
+          </section>`;
         };
         const renderStaffView = () => `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Pracownicy</span><h2>Role, dyżury i uprawnienia</h2><p>Status: w przygotowaniu. Docelowo konta pracowników, role, grafiki, notatki i uprawnienia do modułów.</p></header><div class="module-grid"><section class="module-card"><h3>Role docelowe</h3><ul class="module-rule-list"><li>Recepcja</li><li>Manager</li><li>Sprzątanie</li><li>Administrator systemu</li></ul></section><section class="module-card"><h3>Powiązanie z zadaniami</h3><p>Na razie zadania są generowane z pilnych zapytań.</p></section></div></section>`;
         const renderTasksView = () => `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Zadania</span><h2>Lista zadań recepcji</h2><p>Zadania generowane z realnych zapytań: brak danych, mail niedostarczony, grupy, skauci, ciężkie pojazdy, późny przyjazd.</p></header><div class="module-thread-list">${urgentItems().map((item)=>{const best=suggestBestReply(item); return `<article class="module-thread"><header><strong>${esc(best.icon)} ${esc(best.title)}</strong><span>${esc(item.full_name || '-')}</span></header><p>${esc(best.reason)} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</p><small>${esc(best.when)}</small></article>`;}).join('') || '<p class="module-empty">Brak pilnych zadań.</p>'}</div></section>`;
+        const offlineModuleMeta = {
+          'camp-plan': ['Plan campu', 'Mapa pól i miejsc', ['Pola A–E jako zasoby', 'ciężkie pojazdy / asfalt', 'miejsca z prądem', 'notatki recepcji']],
+          'work-schedule': ['Grafik pracy', 'Dyżury recepcji i sprzątania', ['zmiana poranna', 'zmiana popołudniowa', 'dyżur awaryjny', 'zastępstwa']],
+          departures: ['Wyjazdy dziś', 'Lista check-out jak w offline', ['godzina 11:00 domki', '12:00 camping', 'sprzątanie po wyjeździe', 'płatności do zamknięcia']],
+          'staff-pro': ['Pracownicy PRO', 'Role, uprawnienia i dyżury', ['recepcja', 'manager', 'sprzątanie', 'administrator']],
+          parking: ['Parking PRO', 'Kontrola pojazdów i miejsc asfaltowych', ['rejestracja', 'ciężki pojazd', 'bus / przyczepa', 'miejsce stabilne']],
+          tours: ['Wycieczki', 'Zapytania o atrakcje z recepcji', ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Energylandia', 'Ojców']],
+          purchases: ['Zakupy', 'Lista zakupów i braków operacyjnych', ['papier', 'chemia', 'karty pobytu', 'materiały biurowe']],
+          cleaning: ['Sprzątanie', 'Domki, sanitariaty i zadania po wyjazdach', ['domki po 11:00', 'sanitariaty', 'zgłoszenia usterek', 'kontrola gotowości']],
+          invoices: ['Faktury', 'Rachunki i dokumenty sprzedaży', ['dane nabywcy', 'pozycje pobytu', 'wydruk / PDF', 'eksport księgowy']],
+          alerts: ['Alerty', 'Ważne ostrzeżenia recepcji', ['brak danych', 'mail niedostarczony', 'późny przyjazd', 'brak miejsc']],
+          vip: ['VIP / Blacklist', 'Statusy specjalne klienta', ['VIP', 'powracający', 'uwaga recepcji', 'blacklist']],
+          warehouse: ['Magazyn', 'Stan zapasów recepcji i campingu', ['materiały', 'sprzęt', 'wydania', 'minimum magazynowe']],
+          exports: ['Eksporty', 'Pliki dla recepcji, GUS i backupu', ['CSV klientów', 'CSV pobytów', 'druk dzienny', 'eksport GUS']],
+          backup: ['Backup PRO', 'Bezpieczne kopie danych online/offline', ['backup JSON', 'historia kopii', 'kontrola konfliktów', 'odtwarzanie']],
+        };
+        const renderOfflineModuleView = (view) => {
+          const [title, lead, items] = offlineModuleMeta[view] || ['Moduł offline', 'Fundament modułu zgodnego z CC SYSTEM offline', ['mapowanie danych', 'widok recepcji', 'eksport/import', 'log zmian']];
+          return `<section class="dashboard-panel module-view offline-module">
+            <header class="module-head"><span class="eyebrow">CC SYSTEM offline → online</span><h2>${esc(title)}</h2><p>${esc(lead)}. Na tym etapie to bezpieczny widok read-only/TODO — niczego nie zapisuje i nie udaje gotowej synchronizacji.</p></header>
+            <div class="module-grid module-grid--two">
+              <section class="module-card"><h3>Jak w offline</h3><ul class="module-rule-list">${items.map((item)=>`<li>${esc(item)}</li>`).join('')}</ul></section>
+              <section class="module-card"><h3>Fundament synchronizacji</h3><ol><li>eksport/import JSON lub CSV,</li><li>mapowanie klienta i pobytu,</li><li>wykrywanie konfliktów online/offline,</li><li>log ostatniej synchronizacji i backup.</li></ol></section>
+            </div>
+          </section>`;
+        };
         const renderSystemStrip = () => {
           if (!systemStrip) return;
           const env = health?.env || {};
@@ -1716,9 +1816,9 @@ const title = 'CC SYSTEM';
             ['Nowe realne', real.filter((item)=>item.status === 'new').length],
             ['Testy', testItems().length],
             ['Archiwum', archivedItems().length],
-            ['Mail delivery', resendStatus],
+            ['Dostarczenie maila', resendStatus],
             ['Supabase', health?.tableCheck?.ok ? 'OK' : health ? 'błąd' : 'sprawdzanie'],
-            ['Fallback', `Web3Forms ${env.web3FormsKeyPresent ? 'ENV' : 'brak'} · FormSubmit ${env.formSubmitToPresent ? 'ENV' : 'brak'}`],
+            ['Kanały zapasowe', `Web3Forms ${env.web3FormsKeyPresent ? 'ENV' : 'brak'} · FormSubmit ${env.formSubmitToPresent ? 'ENV' : 'brak'}`],
           ].map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('');
         };
         const renderStatsView = () => {
@@ -1783,9 +1883,15 @@ const title = 'CC SYSTEM';
             ['Języki odpowiedzi','PL, EN, DE, IT, FR, ES, NL, CS, SK, SV'],
             ['Cennik camping','Dorośli 35 PLN, dzieci 20 PLN, kamper 80 PLN, prąd 30 PLN'],
             ['Cennik domki','2-os. 200 PLN, 3-os. 250 PLN, 4-os. 400 PLN'],
-            ['Web3Forms/FormSubmit','fallback diagnostyczny'],
+            ['Web3Forms/FormSubmit','kanały zapasowe diagnostyczne'],
           ];
-          return `<section class="dashboard-panel"><h2>Ustawienia</h2><p>Na tym etapie widok jest read-only; edycja ustawień to kolejny moduł CC SYSTEM ONLINE.</p><div class="settings-grid">${rows.map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('')}</div></section>`;
+          const syncRows = [
+            ['Eksport offline', 'JSON / CSV z klientów, pobytów, usług i płatności'],
+            ['Import online', 'mapowanie klienta po emailu/telefonie oraz pobytu po terminie'],
+            ['Konflikty', 'oznaczenie różnic online/offline bez automatycznego nadpisywania'],
+            ['Log synchronizacji', 'ostatni import, operator, liczba zmian, backup przed zmianą'],
+          ];
+          return `<section class="dashboard-panel settings-offline"><h2>Ustawienia</h2><p>Na tym etapie widok jest read-only; edycja ustawień to kolejny moduł CC SYSTEM ONLINE.</p><div class="settings-grid">${rows.map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('')}</div><section class="module-card module-card--wide"><h3>Synchronizacja CC SYSTEM offline ↔ online</h3><p>Plan bezpiecznego spięcia dwóch systemów: najpierw eksport/import i dziennik zmian, dopiero potem zapis dwukierunkowy.</p><div class="settings-grid">${syncRows.map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('')}</div></section></section>`;
         };
         const detailsBody = (item) => {
           const v = vehicle(item);
@@ -1808,7 +1914,7 @@ const title = 'CC SYSTEM';
           ].map(([label,value])=>`<li><span>${esc(label)}</span><strong>${esc(value)}</strong></li>`).join('');
           return `${warnings ? `<aside class="crm-warnings">${warnings}</aside>` : ''}
             <div class="details-grid">
-              <section class="detail-card detail-card--wide conversation-card"><h3>💬 Wątek / rozmowa</h3><p><strong>${esc(conversationTitle)}</strong></p><small>Temat odpowiedzi: Camping Clepardia — odpowiedź na zapytanie</small><small>Thread key roboczy: ${esc(threadKey)}</small><div class="inline-actions"><button type="button" data-reply-template="${esc(recommendedTemplateId(item))}">Otwórz odpowiedź</button><button type="button" data-copy-client-safe>Kopiuj safe summary</button></div></section>
+              <section class="detail-card detail-card--wide conversation-card"><h3>💬 Wątek / rozmowa</h3><p><strong>${esc(conversationTitle)}</strong></p><small>Temat odpowiedzi: Camping Clepardia — odpowiedź na zapytanie</small><small>Klucz wątku roboczy: ${esc(threadKey)}</small><div class="inline-actions"><button type="button" data-reply-template="${esc(recommendedTemplateId(item))}">Otwórz odpowiedź</button><button type="button" data-copy-client-safe>Kopiuj podsumowanie</button></div></section>
               <section class="detail-card"><h3>📇 Kontakt</h3><p>${item.email ? `<a href="mailto:${esc(item.email)}">${esc(item.email)}</a>`:'-'}<br>${item.phone ? `<a href="tel:${esc(item.phone)}">${esc(item.phone)}</a>`:'-'}</p><small>${esc(country.flag)} ${esc(country.label)} ${country.code ? `(${esc(country.code)})` : ''} · język formularza: ${esc(country.language)}</small></section>
               <section class="detail-card"><h3>🌍 Kraj i język</h3><p><strong>${esc(country.flag)} ${esc(country.label)}</strong><br>Kod kraju: ${esc(country.code || '-')}<br>Język: ${esc(country.language)}</p><small>${esc(country.risk || 'Brak widocznego ryzyka tłumaczeniowego.')}</small></section>
               <section class="detail-card"><h3>📅 Pobyt</h3><p><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><br>${esc(item.nights || 0)} nocy</p><small>Przyjazd: ${esc(payload.arrivalTime || 'jeszcze nie wiem')}</small></section>
@@ -1914,7 +2020,7 @@ const title = 'CC SYSTEM';
             else if (activeView === 'customers') list.innerHTML = renderCustomersView();
             else if (activeView === 'reservations') list.innerHTML = renderReservationsView();
             else if (activeView === 'calendar') list.innerHTML = renderCalendarView();
-            else if (activeView === 'camp') list.innerHTML = renderCampProView();
+            else if (activeView === 'camp' || activeView === 'camp-pro') list.innerHTML = renderCampProView();
             else if (activeView === 'bungalows') list.innerHTML = renderBungalowsView();
             else if (activeView === 'camping') list.innerHTML = renderCampingView();
             else if (activeView === 'extend') list.innerHTML = renderExtendStayView();
@@ -1925,6 +2031,7 @@ const title = 'CC SYSTEM';
             else if (activeView === 'stats') list.innerHTML = renderStatsView();
             else if (activeView === 'templates') list.innerHTML = renderTemplatesView();
             else if (activeView === 'settings') list.innerHTML = renderSettingsView();
+            else if (offlineModuleMeta[activeView]) list.innerHTML = renderOfflineModuleView(activeView);
             else list.innerHTML = items.length ? items.map(card).join('') : '<div class="empty">Brak zapytań dla wybranych filtrów.</div>';
             normalizeSystemIcons(list);
           }
@@ -1961,7 +2068,7 @@ const title = 'CC SYSTEM';
               const visibleNew = newItems.filter((item)=>itemBelongsToView(item));
               const noticeItem = visibleNew[0] || newItems[0];
               const country = countryInfo(noticeItem);
-              const where = visibleNew.length ? '' : isTestInquiry(noticeItem) ? ' — w zakładce Testy' : ' — w Inbox';
+              const where = visibleNew.length ? '' : isTestInquiry(noticeItem) ? ' — w zakładce Testy' : ' — w Skrzynce';
               showToast(`Nowe zapytanie od ${noticeItem.full_name || country.label || 'klienta'}${where}`, 'success');
             }
             startAutoRefresh();
@@ -2125,6 +2232,23 @@ const title = 'CC SYSTEM';
         list?.addEventListener('click',(event)=>{
           const target = event.target;
           if (!(target instanceof Element)) return;
+          const calendarClose = target.closest('[data-calendar-close]');
+          if (calendarClose instanceof HTMLElement) {
+            const modal = list.querySelector('[data-calendar-modal]');
+            if (modal instanceof HTMLElement) modal.hidden = true;
+            return;
+          }
+          const calendarEdit = target.closest('[data-calendar-edit]');
+          if (calendarEdit instanceof HTMLElement) {
+            const modal = list.querySelector('[data-calendar-modal]');
+            const name = list.querySelector('[data-calendar-modal-name]');
+            const term = list.querySelector('[data-calendar-modal-term]');
+            if (name instanceof HTMLElement) name.textContent = calendarEdit.dataset.calendarName || 'Rezerwacja';
+            if (term instanceof HTMLElement) term.textContent = calendarEdit.dataset.calendarTerm || 'Termin do potwierdzenia';
+            if (modal instanceof HTMLElement) modal.hidden = false;
+            showToast('Otwieram panel edycji rezerwacji.', 'info');
+            return;
+          }
           const dynamicShortcut = target.closest('[data-view-shortcut]');
           if (dynamicShortcut instanceof HTMLElement) {
             activeView = dynamicShortcut.dataset.viewShortcut || 'mail';
@@ -3012,6 +3136,178 @@ const title = 'CC SYSTEM';
     .cc-system-app .modal-card {
       max-height: min(86vh, 720px);
       overflow: auto;
+    }
+  }
+
+  /* TASK 137: offline-style calendar and module foundations */
+  .cc-system-app .reply-preview-card__pl,
+  .cc-system-app .settings-offline .module-card,
+  .cc-system-app .gus-report .module-card {
+    border: 1px solid rgba(82, 225, 143, .24) !important;
+    background: linear-gradient(135deg, rgba(82,225,143,.12), rgba(8,28,22,.82)) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06) !important;
+  }
+
+  .cc-system-app .reply-preview-card__pl small,
+  .cc-system-app .gus-report .module-empty {
+    color: rgba(224,255,238,.72) !important;
+  }
+
+  .cc-system-app .calendar-layout--offline {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px) !important;
+  }
+
+  .cc-system-app .calendar-board--offline {
+    min-width: 1540px !important;
+    overflow-x: auto !important;
+    border-color: rgba(143,224,180,.20) !important;
+    background:
+      linear-gradient(90deg, rgba(82,225,143,.08) 0 1px, transparent 1px 52px),
+      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)), rgba(3, 18, 15, .90) !important;
+  }
+
+  .cc-system-app .calendar-month-strip--offline {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    padding-bottom: 4px !important;
+  }
+
+  .cc-system-app .calendar-month-strip--offline strong {
+    margin-left: auto;
+    color: #dfffee;
+    padding: 8px 12px;
+    border: 1px solid rgba(143,224,180,.18);
+    border-radius: 999px;
+  }
+
+  .cc-system-app .calendar-board--offline .calendar-board__head,
+  .cc-system-app .calendar-board--offline .calendar-row {
+    grid-template-columns: 168px repeat(31, minmax(42px, 1fr)) !important;
+  }
+
+  .cc-system-app .calendar-board--offline .calendar-board__head span {
+    min-height: 44px !important;
+    display: grid !important;
+    place-items: center !important;
+    gap: 0 !important;
+    font-weight: 900 !important;
+  }
+
+  .cc-system-app .calendar-board--offline .calendar-board__head span small {
+    color: #03120d;
+    font-size: .58rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .cc-system-app .calendar-board--offline .calendar-board__head span.is-weekend {
+    background: rgba(255,255,255,.045);
+  }
+
+  .cc-system-app .calendar-row--offline {
+    min-height: 58px !important;
+  }
+
+  .cc-system-app .calendar-row--offline > b {
+    position: sticky;
+    left: 0;
+    z-index: 6;
+    background: rgba(4, 18, 15, .96);
+  }
+
+  .cc-system-app .calendar-booking {
+    position: relative;
+    z-index: 4;
+    align-self: center;
+    min-height: 40px;
+    padding: 7px 22px !important;
+    border: 1px solid rgba(255,255,255,.18) !important;
+    border-radius: 9px !important;
+    color: #f6fff8 !important;
+    text-align: left !important;
+    overflow: visible !important;
+    clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%);
+    box-shadow: 0 14px 30px rgba(0,0,0,.26);
+  }
+
+  .cc-system-app .calendar-booking strong,
+  .cc-system-app .calendar-booking small {
+    position: relative;
+    z-index: 2;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cc-system-app .calendar-booking small span {
+    font-size: .62rem;
+    color: rgba(255,255,255,.78);
+  }
+
+  .cc-system-app .calendar-booking--confirmed { background: linear-gradient(135deg, #12834f, #0b573c) !important; }
+  .cc-system-app .calendar-booking--pending { background: linear-gradient(135deg, #b97418, #604211) !important; }
+  .cc-system-app .calendar-booking--unpaid { background: linear-gradient(135deg, #d88926, #7b3e0e) !important; }
+  .cc-system-app .calendar-booking--unavailable,
+  .cc-system-app .calendar-booking--cancelled { background: linear-gradient(135deg, #b83847, #641a25) !important; }
+  .cc-system-app .calendar-booking--group { background: linear-gradient(135deg, #2869b7, #18395f) !important; }
+  .cc-system-app .calendar-booking.is-summer { box-shadow: 0 0 0 1px rgba(255,211,110,.25), 0 14px 34px rgba(216,137,38,.24); }
+
+  .cc-system-app .calendar-diamond {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    background: rgba(255,255,255,.92);
+    transform: translateY(-50%) rotate(45deg);
+    box-shadow: 0 0 0 2px rgba(3,18,15,.35);
+  }
+
+  .cc-system-app .calendar-diamond--out { left: 6px; }
+  .cc-system-app .calendar-diamond--in { right: 6px; }
+
+  .cc-system-app .calendar-edit-modal[hidden] {
+    display: none !important;
+  }
+
+  .cc-system-app .calendar-edit-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    background: rgba(0,0,0,.48);
+    backdrop-filter: blur(12px);
+  }
+
+  .cc-system-app .calendar-edit-modal > section {
+    width: min(620px, 100%);
+    padding: 24px;
+    border: 1px solid rgba(143,224,180,.24);
+    border-radius: 26px;
+    background: linear-gradient(180deg, rgba(9,42,30,.98), rgba(3,16,14,.98));
+    box-shadow: 0 30px 90px rgba(0,0,0,.44);
+  }
+
+  .cc-system-app .calendar-edit-modal [data-calendar-close] {
+    float: right;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+    color: #fff;
+  }
+
+  @media (max-width: 900px) {
+    .cc-system-app .calendar-layout--offline {
+      grid-template-columns: 1fr !important;
+    }
+
+    .cc-system-app .calendar-board--offline {
+      min-width: 1280px !important;
     }
   }
 </style>
