@@ -203,6 +203,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
           <span>DEMO</span>
           <span>NOINDEX</span>
           <span>NO API</span>
+          <span>TASK 136 UI POLISH</span>
           <span>SAFE FOR REVIEW</span>
           <small>Build/test: {buildStamp}</small>
         </aside>
@@ -563,6 +564,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
         <div class="calendar-preview">
           <main class="calendar-board-preview">
             <div class="audit-month-strip">{['Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień'].map((month) => <button class={month === 'Lipiec' ? 'is-active' : ''}>{month}</button>)}</div>
+            <div class="audit-calendar-legend"><span>Potwierdzone</span><span>Do potwierdzenia</span><span>Nieopłacone</span><span>Brak miejsc</span><span>Grupa</span><span>Camping L/S</span></div>
             <div class="calendar-head"><strong>Lipiec 2026</strong>{monthDays.map((day) => <span class={day === 27 ? 'is-today' : ''}>{day}</span>)}</div>
             {calendarResources.map((resource, rowIndex) => (
               <div class="calendar-row-preview">
@@ -2114,6 +2116,116 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
       linear-gradient(180deg, rgba(7, 25, 21, .96), rgba(3, 12, 10, .98)),
       #030d0b;
     box-shadow: 0 24px 80px rgba(0, 0, 0, .38);
+  }
+
+  /* TASK 136 audit polish */
+  .audit-hero {
+    background:
+      radial-gradient(circle at 12% 0%, rgba(82, 225, 143, .20), transparent 24rem),
+      radial-gradient(circle at 92% 8%, rgba(255, 211, 110, .10), transparent 22rem),
+      linear-gradient(135deg, rgba(9, 36, 28, .96), rgba(3, 14, 12, .96));
+    box-shadow: 0 28px 90px rgba(0, 0, 0, .34), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+
+  .audit-meta span:nth-child(4) {
+    border-color: rgba(255, 211, 110, .25);
+    color: #ffe7ad;
+    background: rgba(255, 211, 110, .10);
+  }
+
+  .sidebar-demo {
+    backdrop-filter: blur(22px) saturate(1.18);
+    -webkit-backdrop-filter: blur(22px) saturate(1.18);
+    background:
+      radial-gradient(circle at 42% -10%, rgba(84, 223, 142, .20), transparent 18rem),
+      linear-gradient(180deg, rgba(5, 22, 18, .90), rgba(2, 10, 9, .96));
+    box-shadow: 24px 0 78px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+
+  .sidebar-demo article.is-active {
+    background: linear-gradient(135deg, #3fce7c, #127445);
+    box-shadow: 0 18px 42px rgba(53, 202, 119, .28), inset 0 1px 0 rgba(255,255,255,.18);
+  }
+
+  .hero-panel {
+    min-height: 230px;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(82, 225, 143, .20), transparent 24rem),
+      linear-gradient(135deg, rgba(10, 43, 31, .98), rgba(3, 17, 15, .94));
+    box-shadow: 0 24px 80px rgba(0,0,0,.30);
+  }
+
+  .kpi-grid article::after,
+  .stats-preview article i {
+    box-shadow: 0 0 24px rgba(82, 225, 143, .25);
+  }
+
+  .case-preview,
+  .crm-hero-card,
+  .reservation-detail-preview,
+  .calendar-side {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(63, 206, 124, .14), transparent 18rem),
+      linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.024)), rgba(5, 23, 19, .78);
+  }
+
+  .audit-calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 14px;
+  }
+
+  .audit-calendar-legend span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 11px;
+    border: 1px solid rgba(180, 236, 205, .13);
+    border-radius: 999px;
+    color: #dfffee;
+    background: rgba(255,255,255,.055);
+    font-size: .76rem;
+    font-weight: 900;
+  }
+
+  .audit-calendar-legend span::before {
+    content: "";
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: #57de91;
+  }
+
+  .audit-calendar-legend span:nth-child(2)::before { background: #ffd36e; }
+  .audit-calendar-legend span:nth-child(3)::before { background: #ff9f43; }
+  .audit-calendar-legend span:nth-child(4)::before { background: #ff5c73; }
+  .audit-calendar-legend span:nth-child(5)::before { background: #8db7ff; }
+  .audit-calendar-legend span:nth-child(6)::before { background: #d88926; }
+
+  .modal-card {
+    width: min(1180px, 100%);
+  }
+
+  .modal-card footer button:first-child {
+    min-height: 48px;
+    border-color: rgba(143,224,180,.32);
+    color: #04130d;
+    background: linear-gradient(135deg, #9cf4bd, #35c875);
+    box-shadow: 0 18px 42px rgba(60,179,113,.30);
+  }
+
+  .composer-preview,
+  .email-preview {
+    border-radius: 22px;
+  }
+
+  .email-preview {
+    background: #f6fbf7;
+    color: #163124;
+    box-shadow: 0 18px 46px rgba(8, 35, 25, .16);
   }
 
   @media (max-width: 720px) {

@@ -742,17 +742,17 @@ const title = 'CC SYSTEM';
           const env = health?.env || {};
           if (resendStatus) {
             const ok = Boolean(env.resendKeyPresent && env.reservationFromPresent && env.reservationToPresent);
-            resendStatus.textContent = `Resend: ${ok ? 'OK' : 'sprawdź ENV'}`;
+            resendStatus.textContent = ok ? 'Resend OK' : 'Resend ENV';
             resendStatus.classList.toggle('is-ok', ok);
             resendStatus.classList.toggle('is-warn', !ok);
           }
           if (supabaseStatus) {
             const ok = Boolean(health?.tableCheck?.ok);
-            supabaseStatus.textContent = `Supabase: ${ok ? 'OK' : health ? 'błąd' : '—'}`;
+            supabaseStatus.textContent = ok ? 'Supabase OK' : health ? 'Supabase !' : 'Supabase —';
             supabaseStatus.classList.toggle('is-ok', ok);
             supabaseStatus.classList.toggle('is-warn', !ok && Boolean(health));
           }
-          if (autoRefreshStatus) autoRefreshStatus.textContent = autoRefreshPaused ? 'Auto-refresh w pauzie' : 'Auto-refresh aktywny';
+          if (autoRefreshStatus) autoRefreshStatus.textContent = autoRefreshPaused ? 'Auto pauza' : 'Auto 25s';
           if (autoRefreshToggle instanceof HTMLButtonElement) autoRefreshToggle.textContent = autoRefreshPaused ? 'Wznów auto-refresh' : 'Pauza auto-refresh';
         };
         const startAutoRefresh = () => {
@@ -1377,6 +1377,9 @@ const title = 'CC SYSTEM';
         </section>${items.length ? items.map(card).join('') : '<div class="empty">Brak zapytań dla wybranych filtrów.</div>'}`;
         const renderPremiumDashboardView = () => {
           const real = realItems();
+          const todayLabel = new Intl.DateTimeFormat('pl-PL', { weekday:'long', day:'2-digit', month:'long', year:'numeric' }).format(new Date());
+          const currentMonth = new Date().getMonth();
+          const seasonLabel = currentMonth >= 5 && currentMonth <= 7 ? 'Sezon letni' : 'Sezon operacyjny';
           const mailOk = real.some((item)=>item.mail_provider === 'resend' && item.mail_delivered);
           const campingItems = real.filter((item)=>categoryKeys(item).includes('camping'));
           const bungalowItems = real.filter((item)=>categoryKeys(item).includes('bungalow') || categoryKeys(item).includes('combined'));
@@ -1402,9 +1405,10 @@ const title = 'CC SYSTEM';
           return `<section class="premium-dashboard">
             <header class="dashboard-hero">
               <div>
-                <span class="eyebrow">Recepcja online</span>
+                <span class="eyebrow">Recepcja online · ${esc(todayLabel)}</span>
                 <h2>Centrum dowodzenia Camping Clepardia</h2>
                 <p>${demoMode ? 'Publiczny widok demo do oceny UI/UX — bez Supabase, bez wysyłki i bez realnych danych.' : 'Operacyjny widok zapytań, maili, klientów i zadań recepcji w jednym miejscu.'}</p>
+                <div class="dashboard-hero__chips"><span>${esc(seasonLabel)}</span><span>Status dnia: ${esc(urgent.length ? `${urgent.length} pilne` : 'spokojnie')}</span><span>Mail Center: ${esc(latest.length)} wątków</span></div>
               </div>
               <aside class="dashboard-weather-card">
                 <span>☀️ Kraków</span>
@@ -1586,6 +1590,7 @@ const title = 'CC SYSTEM';
             <header class="cc-module-head"><div><span class="eyebrow">Obłożenie i pobyty</span><h2>Kalendarz</h2><p>Widok operacyjny: zasoby w wierszach, dni w kolumnach, pobyty jako paski i szczegóły po prawej.</p></div><div class="calendar-switcher"><button>Poprzedni</button><button class="is-active">Dzisiaj</button><button>Następny</button><button class="is-active">Miesiąc</button><button>Camping</button><button>Domki</button></div></header>
             <div class="calendar-month-strip">${monthButtons.map((month)=>`<button class="${month === 'Lipiec' ? 'is-active':''}">${esc(month)}</button>`).join('')}</div>
             <div class="calendar-kpis">${moduleMetric('🏕️','Obłożenie camping','87%')}${moduleMetric('🏠','Obłożenie domków','68%')}${moduleMetric('📥','Przyjazdy w miesiącu',items.length)}${moduleMetric('📤','Wyjazdy w miesiącu',departureTodayItems().length + items.length)}${moduleMetric('⏭️','Najbliższy przyjazd',selected?.arrival_date || '-')}</div>
+            <div class="calendar-legend" aria-label="Legenda kalendarza"><span class="legend-confirmed">Potwierdzone</span><span class="legend-pending">Do potwierdzenia</span><span class="legend-unpaid">Nieopłacone</span><span class="legend-unavailable">Brak miejsc</span><span class="legend-group">Grupa</span><span class="legend-summer">Camping L/S</span></div>
             <div class="calendar-layout">
               <main class="calendar-board"><div class="calendar-board__head"><strong>Lipiec 2026</strong><div>${dayHeaders}</div></div>${rows}<div class="calendar-summer-note">LIPIEC / SIERPIEŃ — CAMPING BEZ REZERWACJI · miejsca według kolejności przyjazdu</div></main>
               ${selected ? `<aside class="calendar-detail"><button type="button" class="ghost">×</button><header><span class="crm-avatar">${esc(String(selected.full_name || 'CC').slice(0,2).toUpperCase())}</span><div><h3>${esc(selected.full_name || '-')} ${esc(countryInfo(selected).flag)}</h3><p>${esc(selected.stay_type || '-')}</p></div></header><div class="case-kpis"><article><small>Termin</small><strong>${esc(selected.arrival_date || '-')} — ${esc(selected.departure_date || '-')}</strong><em>${esc(selected.nights || 0)} nocy</em></article><article><small>Osoby</small><strong>${esc(normalizeInquiryGuests(selected).label)}</strong></article><article><small>Cena</small><strong>${esc(moneyLabel(selected))}</strong></article><article><small>Status</small><strong>${esc(statusLabels[selected.status] || selected.status)}</strong></article></div><section><h4>Usługi</h4><div class="crm-tags">${services(selected).slice(0,5).map((service)=>`<span>${esc(serviceIcon(service))} ${esc(service.label)}</span>`).join('')}</div></section><section><h4>Ważne informacje</h4><div class="crm-warnings">${warningsFor(selected, categoryKeys(selected)) || '<p>Brak pilnych ostrzeżeń.</p>'}</div></section>${best ? `<section class="best-reply-card"><h4>Sugerowana odpowiedź</h4><strong>${esc(best.title)}</strong><button type="button" data-reply-template="${esc(best.id)}" data-id="${esc(selected.id || '')}">Otwórz odpowiedź</button></section>` : ''}</aside>` : ''}
@@ -1930,7 +1935,7 @@ const title = 'CC SYSTEM';
           const previousIds = new Set(inquiries.map((item)=>String(item.id)));
           isLoading = true;
           if (!silent && appStatus) appStatus.textContent = 'Ładowanie…';
-          if (connectionStatus) connectionStatus.textContent = silent ? 'API: odświeżanie w tle…' : 'API: łączenie…';
+          if (connectionStatus) connectionStatus.textContent = silent ? 'API sync' : 'API ...';
           try {
             const [result, healthResult] = await Promise.all([
               request('/api/inbox/list'),
@@ -1948,7 +1953,7 @@ const title = 'CC SYSTEM';
             setOptions('country',inquiries.map((item)=>item.country));
             setOptions('language',inquiries.map((item)=>item.language));
             if (appStatus) appStatus.textContent = '';
-            if (connectionStatus) connectionStatus.textContent = 'API: połączono';
+            if (connectionStatus) connectionStatus.textContent = 'API OK';
             if (lastRefresh) lastRefresh.textContent = `Ostatnie odświeżenie: ${new Intl.DateTimeFormat('pl-PL', { timeStyle:'short' }).format(new Date())}`;
             render();
             restoreExpandedCards();
@@ -1971,7 +1976,7 @@ const title = 'CC SYSTEM';
             }
             if (appStatus) appStatus.textContent = error.message;
             if (loginStatus) loginStatus.textContent = error.message;
-            if (connectionStatus) connectionStatus.textContent = 'API: błąd';
+            if (connectionStatus) connectionStatus.textContent = 'API blad';
             refreshHeaderStatus();
           } finally {
             isLoading = false;
@@ -6747,6 +6752,837 @@ const title = 'CC SYSTEM';
       display: initial !important;
       opacity: 1 !important;
       pointer-events: auto !important;
+    }
+  }
+
+  /* TASK 136: final premium UI polish cascade */
+  .cc-system-app {
+    --cc-polish-surface: rgba(7, 27, 21, .78);
+    --cc-polish-surface-strong: rgba(8, 35, 25, .92);
+    --cc-polish-line: rgba(175, 239, 203, .14);
+    --cc-polish-line-strong: rgba(93, 224, 142, .38);
+    --cc-polish-glow: 0 28px 90px rgba(0, 0, 0, .38), inset 0 1px 0 rgba(255, 255, 255, .055);
+  }
+
+  .cc-system-app .cc-system-main {
+    min-width: 0 !important;
+    background:
+      radial-gradient(circle at 7% 0%, rgba(66, 202, 124, .10), transparent 28rem),
+      radial-gradient(circle at 92% 4%, rgba(85, 163, 255, .07), transparent 30rem);
+  }
+
+  @media (min-width: 881px) {
+    .cc-system-app[data-sidebar-state="rail"] {
+      grid-template-columns: var(--sidebar-collapsed) minmax(0, 1fr) !important;
+    }
+
+    .cc-system-app[data-sidebar-state="pinned"] {
+      grid-template-columns: var(--sidebar-expanded) minmax(0, 1fr) !important;
+    }
+
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar,
+    .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar {
+      backdrop-filter: blur(24px) saturate(1.22) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(1.22) !important;
+      border-right: 1px solid rgba(179, 239, 205, .16) !important;
+      background:
+        radial-gradient(circle at 44% -12%, rgba(84, 223, 142, .20), transparent 18rem),
+        linear-gradient(180deg, rgba(5, 22, 18, .88), rgba(2, 10, 9, .94)) !important;
+    }
+
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:hover,
+    .cc-system-app[data-sidebar-state="rail"] .cc-sidebar:focus-within {
+      box-shadow: 30px 0 90px rgba(0, 0, 0, .48), 0 0 0 1px rgba(143, 224, 180, .10) !important;
+    }
+
+    .cc-system-app[data-sidebar-state="pinned"] .cc-sidebar {
+      box-shadow: 10px 0 44px rgba(0, 0, 0, .24) !important;
+    }
+  }
+
+  .cc-system-app .cc-sidebar .view-tabs button {
+    position: relative !important;
+    min-height: 52px !important;
+    border-radius: 18px !important;
+  }
+
+  .cc-system-app .cc-sidebar .view-tabs button b {
+    min-width: 22px !important;
+    height: 22px !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    padding: 0 7px !important;
+    border: 1px solid rgba(255, 255, 255, .16) !important;
+    border-radius: 999px !important;
+    color: #062116 !important;
+    background: #8ff0b8 !important;
+    font-size: .68rem !important;
+    line-height: 1 !important;
+  }
+
+  .cc-system-app .cc-sidebar .view-tabs button[aria-pressed="true"] {
+    background: linear-gradient(135deg, #3fce7c, #127445) !important;
+    box-shadow: 0 18px 42px rgba(53, 202, 119, .28), inset 0 1px 0 rgba(255,255,255,.18) !important;
+  }
+
+  .cc-system-app .cc-sidebar .view-tabs button[aria-pressed="true"] b {
+    color: #fff !important;
+    background: rgba(255,255,255,.20) !important;
+  }
+
+  .cc-system-app .app-header {
+    min-height: 68px !important;
+    display: grid !important;
+    grid-template-columns: minmax(178px, .56fr) minmax(260px, 420px) minmax(560px, 1fr) !important;
+    gap: 10px !important;
+    align-items: center !important;
+    margin: 0 0 18px !important;
+    padding: 11px 16px !important;
+    border: 1px solid rgba(176, 239, 203, .10) !important;
+    border-radius: 24px !important;
+    background: linear-gradient(180deg, rgba(6, 24, 20, .86), rgba(4, 15, 13, .72)) !important;
+  }
+
+  .cc-system-app .app-header__logo {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .cc-system-app .app-header__brand,
+  .cc-system-app .app-header__brand > div {
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .cc-system-app .app-header__brand h1 {
+    max-width: 100% !important;
+    margin: 2px 0 0 !important;
+    font-size: clamp(1.05rem, 1.4vw, 1.45rem) !important;
+    letter-spacing: -.045em !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .cc-system-app .app-header__brand .online-badge {
+    display: none !important;
+  }
+
+  .cc-system-app .app-header__brand p {
+    display: none !important;
+  }
+
+  .cc-system-app .app-header__brand small {
+    color: rgba(230,255,241,.58) !important;
+    font-size: .74rem !important;
+  }
+
+  .cc-system-app .global-search {
+    min-height: 42px !important;
+    max-width: 300px !important;
+    margin-inline: auto !important;
+    border-radius: 18px !important;
+    background: rgba(255,255,255,.045) !important;
+  }
+
+  .cc-system-app .header-actions {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 5px !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    min-width: 0 !important;
+  }
+
+  .cc-system-app .connection-pill,
+  .cc-system-app .notification-pill,
+  .cc-system-app .profile-pill,
+  .cc-system-app .topbar-more > summary,
+  .cc-system-app .topbar-action {
+    min-height: 36px !important;
+    padding-inline: 9px !important;
+    border-radius: 999px !important;
+    font-size: .72rem !important;
+    white-space: nowrap !important;
+  }
+
+  .cc-system-app .connection-pill--mini {
+    max-width: 106px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .cc-system-app .connection-pill--online,
+  .cc-system-app .profile-pill {
+    max-width: 120px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .cc-system-app .topbar-action {
+    max-width: 152px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    background: linear-gradient(135deg, #57de91, #13915a) !important;
+    color: #04130d !important;
+    box-shadow: 0 14px 32px rgba(60,179,113,.22) !important;
+  }
+
+  .cc-system-app .topbar-action--ghost {
+    color: #eafff1 !important;
+    background: rgba(255,255,255,.055) !important;
+    box-shadow: none !important;
+  }
+
+  @media (max-width: 1560px) {
+    .cc-system-app .topbar-action--ghost {
+      display: none !important;
+    }
+  }
+
+  .cc-system-app .topbar-more > div {
+    border-radius: 20px !important;
+    background: rgba(5, 20, 17, .98) !important;
+    backdrop-filter: blur(20px) !important;
+    box-shadow: 0 24px 70px rgba(0,0,0,.42) !important;
+  }
+
+  .cc-system-app .demo-banner {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: max-content !important;
+    max-width: 100% !important;
+    margin: -6px 0 14px !important;
+    padding: 8px 12px !important;
+    border: 1px solid rgba(255, 211, 110, .18) !important;
+    border-radius: 999px !important;
+    background: rgba(255, 211, 110, .065) !important;
+  }
+
+  .cc-system-app .demo-banner strong,
+  .cc-system-app .demo-banner p {
+    margin: 0 !important;
+    font-size: .76rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .cc-system-app .demo-banner p {
+    max-width: 64ch !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .cc-system-app .premium-dashboard {
+    display: grid !important;
+    gap: 18px !important;
+  }
+
+  .cc-system-app .dashboard-hero {
+    position: relative !important;
+    overflow: hidden !important;
+    min-height: 220px !important;
+    padding: clamp(22px, 3vw, 34px) !important;
+    border: 1px solid rgba(143,224,180,.18) !important;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(82, 225, 143, .24), transparent 25rem),
+      radial-gradient(circle at 95% 10%, rgba(255, 211, 110, .12), transparent 22rem),
+      linear-gradient(135deg, rgba(10, 43, 31, .98), rgba(3, 17, 15, .94)) !important;
+    box-shadow: var(--cc-polish-glow) !important;
+  }
+
+  .cc-system-app .dashboard-hero::after {
+    content: "";
+    position: absolute;
+    inset: auto 24px 20px 24px;
+    height: 42px;
+    opacity: .55;
+    background:
+      linear-gradient(90deg, transparent, rgba(143,224,180,.42), transparent),
+      repeating-linear-gradient(90deg, transparent 0 24px, rgba(143,224,180,.24) 24px 26px);
+    mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+    pointer-events: none;
+  }
+
+  .cc-system-app .dashboard-hero h2 {
+    max-width: 940px !important;
+    font-size: clamp(2.3rem, 4.8vw, 5rem) !important;
+    line-height: .88 !important;
+  }
+
+  .cc-system-app .dashboard-hero__chips,
+  .cc-system-app .calendar-legend {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin-top: 16px !important;
+  }
+
+  .cc-system-app .dashboard-hero__chips span,
+  .cc-system-app .calendar-legend span {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 30px !important;
+    padding: 0 11px !important;
+    border: 1px solid rgba(143,224,180,.16) !important;
+    border-radius: 999px !important;
+    color: #dffff0 !important;
+    background: rgba(255,255,255,.06) !important;
+    font-size: .76rem !important;
+    font-weight: 900 !important;
+  }
+
+  .cc-system-app .dashboard-weather-card {
+    border-color: rgba(255,211,110,.20) !important;
+    background: linear-gradient(145deg, rgba(255,211,110,.13), rgba(60,179,113,.08)) !important;
+  }
+
+  .cc-system-app .premium-kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(176px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .cc-system-app .premium-kpi-card,
+  .cc-system-app .command-card,
+  .cc-system-app .crm-card,
+  .cc-system-app .reservation-table-card,
+  .cc-system-app .reservation-detail,
+  .cc-system-app .reservation-side > section,
+  .cc-system-app .calendar-board,
+  .cc-system-app .calendar-detail,
+  .cc-system-app .schema-card,
+  .cc-system-app .settings-grid article,
+  .cc-system-app .stats-grid--wide article {
+    border-color: var(--cc-polish-line) !important;
+    background: linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.025)), var(--cc-polish-surface) !important;
+    box-shadow: var(--cc-polish-glow) !important;
+  }
+
+  .cc-system-app .premium-kpi-card {
+    position: relative !important;
+    overflow: hidden !important;
+    min-height: 128px !important;
+    padding: 18px !important;
+  }
+
+  .cc-system-app .premium-kpi-card::after {
+    content: "";
+    height: 24px;
+    margin-top: 8px;
+    opacity: .72;
+    background:
+      linear-gradient(135deg, transparent 0 16%, rgba(143,224,180,.65) 16% 21%, transparent 21% 38%, rgba(143,224,180,.48) 38% 43%, transparent 43% 62%, rgba(143,224,180,.72) 62% 67%, transparent 67%),
+      linear-gradient(180deg, transparent 48%, rgba(143,224,180,.18) 49% 52%, transparent 53%);
+  }
+
+  .cc-system-app .premium-kpi-card strong {
+    font-size: clamp(1.7rem, 2.8vw, 2.6rem) !important;
+  }
+
+  .cc-system-app .command-card--urgent,
+  .cc-system-app .best-reply-card {
+    border-color: rgba(255, 211, 110, .30) !important;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(255, 211, 110, .18), transparent 18rem),
+      linear-gradient(180deg, rgba(55, 44, 18, .76), rgba(12, 35, 25, .82)) !important;
+  }
+
+  .cc-system-app .mail-center-workspace {
+    gap: 16px !important;
+  }
+
+  @media (min-width: 1180px) {
+    .cc-system-app .mail-center-workspace {
+      grid-template-columns: minmax(190px, 230px) minmax(320px, .86fr) minmax(540px, 1.45fr) !important;
+    }
+  }
+
+  .cc-system-app .mail-folders,
+  .cc-system-app .mail-thread-list,
+  .cc-system-app .mail-case-panel,
+  .cc-system-app .case-card {
+    border-color: var(--cc-polish-line) !important;
+    background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.024)), rgba(5, 23, 19, .78) !important;
+    box-shadow: var(--cc-polish-glow) !important;
+  }
+
+  .cc-system-app .mail-thread {
+    min-height: 96px !important;
+    padding: 13px !important;
+    border-radius: 20px !important;
+    border-color: rgba(143,224,180,.12) !important;
+    background: rgba(255,255,255,.035) !important;
+  }
+
+  .cc-system-app .mail-thread:hover,
+  .cc-system-app .mail-thread.is-selected {
+    border-color: var(--cc-polish-line-strong) !important;
+    background: linear-gradient(135deg, rgba(55, 207, 121, .16), rgba(255,255,255,.05)) !important;
+    box-shadow: inset 4px 0 0 #3fce7c, 0 18px 42px rgba(0,0,0,.20) !important;
+  }
+
+  .cc-system-app .mail-thread__flag {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 16px !important;
+    background: rgba(255,255,255,.08) !important;
+  }
+
+  .cc-system-app .mail-thread__body b,
+  .cc-system-app .mail-thread__meta i,
+  .cc-system-app .crm-badges span,
+  .cc-system-app .crm-tags span,
+  .cc-system-app .status-badge {
+    border-radius: 999px !important;
+    letter-spacing: .01em !important;
+  }
+
+  .cc-system-app .case-hero,
+  .cc-system-app .crm-hero {
+    border-radius: 24px !important;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(63, 206, 124, .18), transparent 20rem),
+      linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.025)) !important;
+  }
+
+  .cc-system-app .message-copy {
+    padding: 14px 15px !important;
+    border-left: 3px solid #57de91 !important;
+    border-radius: 16px !important;
+    background: rgba(255,255,255,.05) !important;
+    color: #ecfff3 !important;
+    line-height: 1.65 !important;
+  }
+
+  .cc-system-app .timeline-list li,
+  .cc-system-app .crm-timeline li,
+  .cc-system-app .crm-note,
+  .cc-system-app .crm-history-table article {
+    background: rgba(255,255,255,.045) !important;
+    border: 1px solid rgba(143,224,180,.10) !important;
+  }
+
+  .cc-system-app .workflow-rail button,
+  .cc-system-app .quick-action-grid button,
+  .cc-system-app .quick-action-grid a {
+    min-height: 42px !important;
+    border-radius: 15px !important;
+  }
+
+  .cc-system-app .reply-modal {
+    padding: 14px !important;
+  }
+
+  .cc-system-app .reply-modal__backdrop {
+    background: rgba(0, 7, 5, .78) !important;
+    backdrop-filter: blur(18px) saturate(1.15) !important;
+  }
+
+  .cc-system-app .reply-modal__card {
+    width: min(1180px, calc(100vw - 28px)) !important;
+    max-height: calc(100dvh - 28px) !important;
+    display: grid !important;
+    grid-template-columns: minmax(320px, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-rows: auto minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      "head head"
+      "fields preview"
+      "text actions" !important;
+    gap: 16px !important;
+    padding: clamp(18px, 2.4vw, 28px) !important;
+    border-radius: 30px !important;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(82,225,143,.18), transparent 24rem),
+      linear-gradient(145deg, rgba(8,31,24,.98), rgba(3,14,12,.98)) !important;
+    overflow: hidden !important;
+  }
+
+  .cc-system-app .reply-modal__card > header {
+    grid-area: head !important;
+    padding-right: 48px !important;
+  }
+
+  .cc-system-app .reply-modal__fields {
+    grid-area: fields !important;
+    grid-template-columns: 1fr !important;
+    align-content: start !important;
+    min-height: 0 !important;
+    padding: 16px !important;
+    border: 1px solid rgba(143,224,180,.12) !important;
+    border-radius: 22px !important;
+    background: rgba(255,255,255,.04) !important;
+    overflow: auto !important;
+  }
+
+  .cc-system-app .reply-modal__editor textarea {
+    min-height: 280px !important;
+  }
+
+  .cc-system-app .reply-modal__preview {
+    grid-area: preview !important;
+    min-height: 520px !important;
+    padding: 18px !important;
+    border: 1px solid rgba(143,224,180,.14) !important;
+    border-radius: 24px !important;
+    background: linear-gradient(180deg, #edf8f0, #dfeee5) !important;
+    overflow: auto !important;
+  }
+
+  .cc-system-app .reply-preview-card {
+    max-width: 760px !important;
+    margin: 0 auto !important;
+    padding: 18px !important;
+    border-radius: 24px !important;
+    background: #f6fbf7 !important;
+    box-shadow: 0 18px 46px rgba(8, 35, 25, .18) !important;
+  }
+
+  .cc-system-app .reply-preview-card header {
+    min-height: 92px !important;
+  }
+
+  .cc-system-app .reply-modal__text {
+    grid-area: text !important;
+    max-height: 92px !important;
+    overflow: auto !important;
+  }
+
+  .cc-system-app .reply-modal__actions {
+    grid-area: actions !important;
+    align-content: center !important;
+    justify-content: end !important;
+  }
+
+  .cc-system-app .reply-modal__actions [data-reply-send] {
+    order: -1 !important;
+    min-height: 48px !important;
+    padding-inline: 20px !important;
+    border: 1px solid rgba(143,224,180,.26) !important;
+    color: #04130d !important;
+    background: linear-gradient(135deg, #9cf4bd, #35c875) !important;
+    box-shadow: 0 18px 42px rgba(60,179,113,.30) !important;
+  }
+
+  .cc-system-app .calendar-legend {
+    margin: 2px 0 4px !important;
+  }
+
+  .cc-system-app .calendar-legend span::before {
+    content: "";
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: #57de91;
+  }
+
+  .cc-system-app .calendar-legend .legend-pending::before { background: #ffd36e; }
+  .cc-system-app .calendar-legend .legend-unpaid::before { background: #ff9f43; }
+  .cc-system-app .calendar-legend .legend-unavailable::before { background: #ff5c73; }
+  .cc-system-app .calendar-legend .legend-group::before { background: #8db7ff; }
+  .cc-system-app .calendar-legend .legend-summer::before { background: #d88926; }
+
+  .cc-system-app .calendar-board__head span.is-today {
+    position: relative !important;
+    color: #061410 !important;
+    background: #8ff0b8 !important;
+    border-radius: 999px !important;
+  }
+
+  .cc-system-app .calendar-board__head span.is-today::after {
+    content: "Dziś";
+    position: absolute;
+    left: 50%;
+    top: -21px;
+    transform: translateX(-50%);
+    padding: 2px 7px;
+    border-radius: 999px;
+    color: #061410;
+    background: #8ff0b8;
+    font-size: .62rem;
+    font-weight: 950;
+  }
+
+  .cc-system-app .calendar-row > span.is-today {
+    background: rgba(87,222,145,.18) !important;
+    box-shadow: inset 2px 0 0 rgba(143,240,184,.84), inset -2px 0 0 rgba(143,240,184,.42) !important;
+  }
+
+  .cc-system-app .calendar-row article {
+    min-height: 48px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 14px 30px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.14) !important;
+  }
+
+  .cc-system-app .calendar-row article.status-unavailable {
+    border-color: rgba(255,92,115,.36) !important;
+    background: linear-gradient(135deg, rgba(171,37,61,.92), rgba(82,15,28,.9)) !important;
+  }
+
+  .cc-system-app .calendar-row article.status-needs_confirmation,
+  .cc-system-app .calendar-row article.status-new {
+    border-color: rgba(255,211,110,.36) !important;
+    background: linear-gradient(135deg, rgba(170,100,23,.94), rgba(86,55,15,.90)) !important;
+  }
+
+  .cc-system-app .crm-card--stay {
+    border-color: rgba(87,222,145,.28) !important;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(87,222,145,.18), transparent 18rem),
+      linear-gradient(180deg, rgba(18,74,47,.78), rgba(5,27,21,.78)) !important;
+  }
+
+  .cc-system-app .reservation-table button {
+    min-height: 72px !important;
+    border-radius: 16px !important;
+  }
+
+  .cc-system-app .reservation-kpis article,
+  .cc-system-app .calendar-kpis article {
+    border-color: rgba(143,224,180,.14) !important;
+    background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.022)), rgba(8,31,24,.78) !important;
+  }
+
+  .cc-system-app .schema-card {
+    min-height: 245px !important;
+  }
+
+  .cc-system-app .schema-card p {
+    display: -webkit-box !important;
+    overflow: hidden !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 4 !important;
+  }
+
+  /* Modal odpowiedzi jest poza .cc-system-app, więc dostaje osobny final cascade. */
+  .reply-modal {
+    padding: 14px !important;
+  }
+
+  .reply-modal__backdrop {
+    background: rgba(0, 7, 5, .78) !important;
+    backdrop-filter: blur(18px) saturate(1.15) !important;
+  }
+
+  .reply-modal__card {
+    width: min(1180px, calc(100vw - 28px)) !important;
+    max-height: calc(100dvh - 28px) !important;
+    display: grid !important;
+    grid-template-columns: minmax(320px, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-rows: auto minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      "head head"
+      "fields preview"
+      "text actions" !important;
+    gap: 16px !important;
+    padding: clamp(18px, 2.4vw, 28px) !important;
+    border-radius: 30px !important;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(82,225,143,.18), transparent 24rem),
+      linear-gradient(145deg, rgba(8,31,24,.98), rgba(3,14,12,.98)) !important;
+    overflow: hidden !important;
+  }
+
+  .reply-modal__card > header {
+    grid-area: head !important;
+    padding-right: 48px !important;
+  }
+
+  .reply-modal__fields {
+    grid-area: fields !important;
+    grid-template-columns: 1fr !important;
+    align-content: start !important;
+    min-height: 0 !important;
+    padding: 16px !important;
+    border: 1px solid rgba(143,224,180,.12) !important;
+    border-radius: 22px !important;
+    background: rgba(255,255,255,.04) !important;
+    overflow: auto !important;
+  }
+
+  .reply-modal__editor textarea {
+    min-height: 280px !important;
+  }
+
+  .reply-modal__preview {
+    grid-area: preview !important;
+    min-height: 520px !important;
+    padding: 18px !important;
+    border: 1px solid rgba(143,224,180,.14) !important;
+    border-radius: 24px !important;
+    background: linear-gradient(180deg, #edf8f0, #dfeee5) !important;
+    overflow: auto !important;
+  }
+
+  .reply-preview-card {
+    max-width: 760px !important;
+    margin: 0 auto !important;
+    padding: 18px !important;
+    border-radius: 24px !important;
+    background: #f6fbf7 !important;
+    box-shadow: 0 18px 46px rgba(8, 35, 25, .18) !important;
+  }
+
+  .reply-preview-card header {
+    min-height: 92px !important;
+  }
+
+  .reply-modal__text {
+    grid-area: text !important;
+    max-height: 92px !important;
+    overflow: auto !important;
+  }
+
+  .reply-modal__actions {
+    grid-area: actions !important;
+    align-content: center !important;
+    justify-content: end !important;
+  }
+
+  .reply-modal__actions [data-reply-send] {
+    order: -1 !important;
+    min-height: 48px !important;
+    padding-inline: 20px !important;
+    border: 1px solid rgba(143,224,180,.26) !important;
+    color: #04130d !important;
+    background: linear-gradient(135deg, #9cf4bd, #35c875) !important;
+    box-shadow: 0 18px 42px rgba(60,179,113,.30) !important;
+  }
+
+  @media (max-width: 1320px) {
+    .cc-system-app .app-header {
+      grid-template-columns: minmax(220px, .8fr) minmax(240px, 1fr) !important;
+    }
+
+    .cc-system-app .header-actions {
+      grid-column: 1 / -1 !important;
+      justify-content: flex-start !important;
+      flex-wrap: wrap !important;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .cc-system-app .app-header {
+      grid-template-columns: auto minmax(0, 1fr) !important;
+      border-radius: 20px !important;
+    }
+
+    .cc-system-app .global-search {
+      grid-column: 1 / -1 !important;
+      order: 3 !important;
+      max-width: none !important;
+    }
+
+    .cc-system-app .header-actions {
+      grid-column: 1 / -1 !important;
+      order: 4 !important;
+    }
+
+    .cc-system-app .reply-modal__card,
+    .reply-modal__card {
+      grid-template-columns: 1fr !important;
+      grid-template-rows: auto auto minmax(340px, 46vh) auto auto !important;
+      grid-template-areas:
+        "head"
+        "fields"
+        "preview"
+        "text"
+        "actions" !important;
+      overflow: auto !important;
+    }
+
+    .cc-system-app .reply-modal__preview,
+    .reply-modal__preview {
+      min-height: 340px !important;
+      max-height: 46vh !important;
+    }
+
+    .cc-system-app .reply-modal__editor textarea,
+    .reply-modal__editor textarea {
+      min-height: 190px !important;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .cc-system-app .app-header {
+      padding: 10px !important;
+    }
+
+    .cc-system-app .app-header__brand {
+      min-width: 0 !important;
+    }
+
+    .cc-system-app .app-header__brand small,
+    .cc-system-app .weather-pill,
+    .cc-system-app .connection-pill--mini[data-auto-refresh-status] {
+      display: none !important;
+    }
+
+    .cc-system-app .header-actions {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .cc-system-app .header-actions > * {
+      min-width: 0 !important;
+      width: 100% !important;
+      justify-content: center !important;
+    }
+
+    .cc-system-app .topbar-more {
+      grid-column: 1 / -1 !important;
+    }
+
+    .cc-system-app .demo-banner {
+      width: 100% !important;
+      border-radius: 18px !important;
+      align-items: flex-start !important;
+    }
+
+    .cc-system-app .demo-banner p {
+      white-space: normal !important;
+    }
+
+    .cc-system-app .dashboard-hero {
+      grid-template-columns: 1fr !important;
+      min-height: 0 !important;
+    }
+
+    .cc-system-app .dashboard-hero h2 {
+      font-size: clamp(2.05rem, 13vw, 3.2rem) !important;
+    }
+
+    .cc-system-app .reply-modal,
+    .reply-modal {
+      padding: 6px !important;
+      align-items: stretch !important;
+    }
+
+    .cc-system-app .reply-modal__card,
+    .reply-modal__card {
+      width: 100% !important;
+      max-height: calc(100dvh - 12px) !important;
+      padding: 14px !important;
+      border-radius: 22px !important;
+    }
+
+    .cc-system-app .reply-modal__actions,
+    .reply-modal__actions {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+    }
+
+    .cc-system-app .reply-modal__actions button,
+    .reply-modal__actions button {
+      width: 100% !important;
+    }
+
+    .cc-system-app .calendar-board {
+      max-width: 100% !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
     }
   }
 </style>
