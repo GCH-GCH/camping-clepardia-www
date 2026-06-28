@@ -181,6 +181,7 @@ const uiToken = (label = '') => uiTokenMap[label] || String(label)
 
 const sections = [
   ['audit-header', 'Header audytu'],
+  ['public-i18n', 'Public i18n / CAMPY'],
   ['sidebar-expanded', 'Sidebar expanded'],
   ['sidebar-collapsed', 'Sidebar collapsed'],
   ['dashboard', 'Dashboard / Recepcja'],
@@ -226,7 +227,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
           <span>DEMO</span>
           <span>NOINDEX</span>
           <span>NO API</span>
-          <span>TASK 136 UI POLISH</span>
+          <span>TASK 138 I18N</span>
           <span>SAFE FOR REVIEW</span>
           <small>Build/test: {buildStamp}</small>
         </aside>
@@ -235,6 +236,21 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
       <nav class="toc" aria-label="Spis sekcji audytu">
         {sections.map(([id, label]) => <a href={`#${id}`}>{label}</a>)}
       </nav>
+
+      <section class="audit-section" id="public-i18n">
+        <header>
+          <span class="section-number">00</span>
+          <div>
+            <h2>Public i18n i CAMPY language lock</h2>
+            <p>Co sprawdzać: publiczna strona, formularz rezerwacji i CAMPY mają działać w języku aktualnej wersji: PL, EN, DE, IT, FR, ES, NL, CS, SK, SV. CC SYSTEM pozostaje zawsze po polsku.</p>
+          </div>
+        </header>
+        <div class="audit-note-card">
+          <h3>Zakres TASK 138</h3>
+          <p>Formularz rezerwacji ma lokalne etykiety kroków, dat, gości, usług, danych, wycieczek, podsumowania, walidacji i blokady camping lipiec/sierpień. CAMPY ma twardy język strony oraz lokalizowane intro, placeholder, szybkie tematy, odpowiedzi i fallback.</p>
+          <p>QA/audit są demo-only, mają noindex/nofollow/noarchive, nie wykonują API i nie są przeznaczone do sitemap.</p>
+        </div>
+      </section>
 
       <section class="audit-section" id="sidebar-expanded">
         <header>

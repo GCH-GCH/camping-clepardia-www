@@ -11,12 +11,15 @@ interface Props {
 }
 
 type SupportedLang = 'pl' | 'en' | 'de' | 'it' | 'fr' | 'es' | 'nl' | 'cs' | 'sk' | 'sv';
+const publicReservationLanguages = ['pl', 'en', 'de', 'it', 'fr', 'es', 'nl', 'cs', 'sk', 'sv'] as const;
 
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
-const lang = resolveContentLanguage(languageCode ?? pathContext.languageCode) as SupportedLang;
 const requestedLanguage = languageCode ?? pathContext.languageCode;
-const uiLang = requestedLanguage;
+const uiLang = (publicReservationLanguages.includes(requestedLanguage as SupportedLang)
+  ? requestedLanguage
+  : resolveContentLanguage(requestedLanguage)) as SupportedLang;
+const lang = uiLang;
 const tourUi = getCoreUi(requestedLanguage).tour;
 const attractionsPath = getLocalizedPath(pathContext.explicitLanguage, 'atrakcje');
 const plannerPath = getLocalizedPath(pathContext.explicitLanguage, 'planer-pobytu');
@@ -428,15 +431,73 @@ const reservationCoreCopy: Record<string, any> = {
     hints: { chooseService: 'Välj minst en tjänst.', required: 'Fyll i obligatoriska samtycken.' },
   },
 };
-const coreReservation = reservationCoreCopy[uiLang as keyof typeof reservationCoreCopy];
+const reservationLanguagePatches: Record<string, any> = {
+  fr: {
+    progressHints: ['Très bon choix. Choisissez maintenant les dates.', 'Encore quelques informations sur les voyageurs.', 'Ajoutez les services. L’estimation se met à jour en direct.', 'Presque terminé. Laissez vos coordonnées à la réception.', 'La réception recevra une demande claire.'],
+    stepLead: { dates: 'Choisissez les dates du séjour. Les nuits se calculent automatiquement.', guests: 'Indiquez le nombre approximatif de voyageurs.', services: 'Ajoutez le type de séjour et les services avec les boutons plus/minus.', details: 'Laissez vos coordonnées pour la réception.', summary: 'Vérifiez votre demande avant l’envoi.' },
+    fields: { arrival: 'Date d’arrivée', departure: 'Date de départ', nights: 'Nuits', name: 'Nom et prénom', email: 'E-mail', phone: 'Téléphone', language: 'Langue de contact', country: 'Pays', countryPlaceholder: 'Tapez par ex. de, Allemagne, France...', plate: 'Immatriculation du véhicule', plateHint: 'Facultatif. Indiquez l’immatriculation du véhicule principal ou de la caravane concernée.', message: 'Message', specialNeeds: 'Personne en situation de handicap / besoins particuliers', specialNeedsText: 'Décrivez ce dont vous avez besoin afin que nous préparions mieux le séjour.', lateCheckout: 'Je souhaite demander un départ tardif.', lateTime: 'Heure de départ souhaitée', quiet: 'Je comprends que Camping Clepardia n’est pas un camping de fête et que le calme est de 22:00 à 07:00.', consent: 'J’accepte d’être contacté au sujet de cette demande.' },
+    guests: { adults: 'Adultes', children: 'Enfants 4-14', toddlers: 'Enfants moins de 4 ans', bungalowGuests: 'Personnes en bungalow', campingGuests: 'Personnes au camping' },
+    info: { campingHours: 'Journée camping : 12:00-12:00.', bungalowHours: 'Bungalows : arrivée dès 16:00, départ avant 11:00.', combined: 'Pour les groupes où une partie dort en bungalow et une partie arrive en camping-car ou tente.', summer: 'En juillet et août, les emplacements de camping fonctionnent par ordre d’arrivée. Il est préférable d’arriver peu après 12:00.', lateCheckout: 'La réception confirme la possibilité, l’emplacement, les instructions et le coût éventuel après l’arrivée.' },
+    summary: { title: 'Résumé', empty: 'Choisissez les dates et les services, et l’estimation apparaîtra ici.', total: 'Total indicatif', confirm: 'La disponibilité et les conditions finales sont confirmées par la réception.', stay: 'Type de séjour', dates: 'Dates', guests: 'Voyageurs', services: 'Services', country: 'Pays', language: 'Langue', specialNeeds: 'Besoins particuliers', lateCheckout: 'Départ tardif', success: 'Merci ! Votre demande a été préparée. La réception répondra dès que possible.' },
+  },
+  es: {
+    progressHints: ['Buena elección. Ahora elige las fechas.', 'Solo faltan algunos datos de los huéspedes.', 'Añade servicios. La estimación se actualiza en vivo.', 'Casi listo. Deja tus datos para recepción.', 'Recepción recibirá una consulta clara.'],
+    stepLead: { dates: 'Elige las fechas de estancia. Las noches se calculan automáticamente.', guests: 'Indica el número aproximado de huéspedes.', services: 'Añade tipo de estancia y servicios con controles más/menos.', details: 'Deja tus datos de contacto para recepción.', summary: 'Revisa la consulta antes de enviarla.' },
+    fields: { arrival: 'Fecha de llegada', departure: 'Fecha de salida', nights: 'Noches', name: 'Nombre y apellidos', email: 'Email', phone: 'Teléfono', language: 'Idioma de contacto', country: 'País', countryPlaceholder: 'Escribe p. ej. de, Alemania, España...', plate: 'Matrícula del vehículo', plateHint: 'Opcional. Indica la matrícula del vehículo principal o remolque de la estancia.', message: 'Mensaje', specialNeeds: 'Persona con discapacidad / necesidades especiales', specialNeedsText: 'Cuéntanos qué necesitas para preparar mejor la estancia.', lateCheckout: 'Quiero preguntar por salida tardía.', lateTime: 'Hora de salida preferida', quiet: 'Entiendo que Camping Clepardia no es un camping de fiestas y que el silencio nocturno es de 22:00 a 07:00.', consent: 'Acepto que me contacten sobre esta consulta.' },
+    guests: { adults: 'Adultos', children: 'Niños 4-14', toddlers: 'Niños menores de 4', bungalowGuests: 'Personas en bungalow', campingGuests: 'Personas en camping' },
+    info: { campingHours: 'Día de camping: 12:00-12:00.', bungalowHours: 'Bungalows: entrada desde 16:00, salida antes de 11:00.', combined: 'Para grupos donde una parte duerme en bungalow y otra llega con camper o tienda.', summer: 'En julio y agosto las parcelas de camping funcionan por orden de llegada. Lo mejor es llegar poco después de las 12:00.', lateCheckout: 'Recepción confirmará posibilidad, lugar, instrucciones y posible coste después de la llegada.' },
+    summary: { title: 'Resumen', empty: 'Elige fechas y servicios, y aquí verás el coste orientativo.', total: 'Total orientativo', confirm: 'Disponibilidad y condiciones finales son confirmadas por recepción.', stay: 'Tipo de estancia', dates: 'Fechas', guests: 'Huéspedes', services: 'Servicios', country: 'País', language: 'Idioma', specialNeeds: 'Necesidades especiales', lateCheckout: 'Salida tardía', success: '¡Gracias! Tu consulta se ha preparado. Recepción responderá lo antes posible.' },
+  },
+  nl: {
+    progressHints: ['Goede keuze. Kies nu je data.', 'Nog een paar gegevens over de gasten.', 'Voeg diensten toe. De schatting werkt live bij.', 'Bijna klaar. Laat je contactgegevens achter voor de receptie.', 'De receptie krijgt een duidelijke aanvraag.'],
+    stepLead: { dates: 'Kies de verblijfsdata. Het aantal nachten wordt automatisch berekend.', guests: 'Geef het geschatte aantal gasten op.', services: 'Voeg verblijfstype en diensten toe met plus/min-knoppen.', details: 'Laat contactgegevens achter voor de receptie.', summary: 'Controleer de aanvraag vóór verzending.' },
+    fields: { arrival: 'Aankomstdatum', departure: 'Vertrekdatum', nights: 'Nachten', name: 'Naam', email: 'E-mail', phone: 'Telefoon', language: 'Contacttaal', country: 'Land', countryPlaceholder: 'Typ bv. de, Duitsland, Nederland...', plate: 'Kenteken voertuig', plateHint: 'Optioneel. Vul het kenteken van het hoofdvoertuig of de caravan voor dit verblijf in.', message: 'Bericht', specialNeeds: 'Gast met beperking / speciale behoeften', specialNeedsText: 'Vertel wat je nodig hebt zodat wij het verblijf beter kunnen voorbereiden.', lateCheckout: 'Ik wil vragen naar later uitchecken.', lateTime: 'Gewenste vertrektijd', quiet: 'Ik begrijp dat Camping Clepardia geen feestcamping is en dat nachtrust geldt van 22:00 tot 07:00.', consent: 'Ik ga akkoord met contact over deze aanvraag.' },
+    guests: { adults: 'Volwassenen', children: 'Kinderen 4-14', toddlers: 'Kinderen onder 4', bungalowGuests: 'Gasten in bungalow', campingGuests: 'Gasten op campingplaats' },
+    info: { campingHours: 'Campingdag: 12:00-12:00.', bungalowHours: 'Bungalows: inchecken vanaf 16:00, uitchecken vóór 11:00.', combined: 'Voor groepen waarbij een deel in een bungalow slaapt en een deel met camper of tent komt.', summer: 'In juli en augustus zijn kampeerplaatsen beschikbaar op volgorde van aankomst. Kom liefst kort na 12:00.', lateCheckout: 'De receptie bevestigt mogelijkheid, plaats, instructies en eventuele kosten na aankomst.' },
+    summary: { title: 'Overzicht', empty: 'Kies data en diensten, dan verschijnt hier de richtprijs.', total: 'Geschat totaal', confirm: 'Beschikbaarheid en definitieve voorwaarden worden bevestigd door de receptie.', stay: 'Verblijfstype', dates: 'Data', guests: 'Gasten', services: 'Diensten', country: 'Land', language: 'Taal', specialNeeds: 'Speciale behoeften', lateCheckout: 'Later uitchecken', success: 'Bedankt! Je aanvraag is voorbereid. De receptie antwoordt zo snel mogelijk.' },
+  },
+  cs: {
+    progressHints: ['Dobrá volba. Teď vyberte termín.', 'Ještě několik údajů o hostech.', 'Přidejte služby. Odhad se aktualizuje průběžně.', 'Téměř hotovo. Nechte kontaktní údaje pro recepci.', 'Recepce dostane přehledný dotaz.'],
+    stepLead: { dates: 'Vyberte termín pobytu. Počet nocí se spočítá automaticky.', guests: 'Uveďte orientační počet hostů.', services: 'Přidejte typ pobytu a služby pomocí plus/minus.', details: 'Zanechte kontaktní údaje pro recepci.', summary: 'Zkontrolujte dotaz před odesláním.' },
+    fields: { arrival: 'Datum příjezdu', departure: 'Datum odjezdu', nights: 'Noci', name: 'Jméno a příjmení', email: 'E-mail', phone: 'Telefon', language: 'Jazyk kontaktu', country: 'Země', countryPlaceholder: 'Napište např. de, Německo, Česko...', plate: 'Registrační značka vozidla', plateHint: 'Volitelné. Uveďte SPZ hlavního vozidla nebo přívěsu pro tento pobyt.', message: 'Zpráva', specialNeeds: 'Osoba se zdravotním postižením / zvláštní potřeby', specialNeedsText: 'Napište, co potřebujete, abychom pobyt lépe připravili.', lateCheckout: 'Chci se zeptat na pozdější odjezd.', lateTime: 'Preferovaný čas odjezdu', quiet: 'Rozumím, že Camping Clepardia není párty kemp a noční klid platí 22:00–07:00.', consent: 'Souhlasím s kontaktováním ohledně tohoto dotazu.' },
+    guests: { adults: 'Dospělí', children: 'Děti 4-14', toddlers: 'Děti do 4 let', bungalowGuests: 'Osoby v bungalovu', campingGuests: 'Osoby v kempu' },
+    info: { campingHours: 'Kempovací den: 12:00-12:00.', bungalowHours: 'Bungalovy: příjezd od 16:00, odjezd do 11:00.', combined: 'Pro skupiny, kde část spí v bungalovu a část přijíždí s obytným vozem nebo stanem.', summer: 'V červenci a srpnu fungují místa v kempu podle pořadí příjezdu. Nejlepší je přijet krátce po 12:00.', lateCheckout: 'Recepce po příjezdu potvrdí možnost, místo, instrukce a případný poplatek.' },
+    summary: { title: 'Shrnutí', empty: 'Vyberte termín a služby, zde se zobrazí orientační cena.', total: 'Orientační součet', confirm: 'Dostupnost a konečné podmínky potvrzuje recepce.', stay: 'Typ pobytu', dates: 'Termín', guests: 'Hosté', services: 'Služby', country: 'Země', language: 'Jazyk', specialNeeds: 'Zvláštní potřeby', lateCheckout: 'Pozdější odjezd', success: 'Děkujeme! Dotaz byl připraven. Recepce odpoví co nejdříve.' },
+  },
+  sk: {
+    progressHints: ['Dobrá voľba. Teraz vyberte termín.', 'Ešte niekoľko údajov o hosťoch.', 'Pridajte služby. Odhad sa aktualizuje priebežne.', 'Takmer hotovo. Nechajte kontaktné údaje pre recepciu.', 'Recepcia dostane prehľadný dopyt.'],
+    stepLead: { dates: 'Vyberte termín pobytu. Počet nocí sa spočíta automaticky.', guests: 'Uveďte orientačný počet hostí.', services: 'Pridajte typ pobytu a služby pomocou plus/mínus.', details: 'Zanechajte kontaktné údaje pre recepciu.', summary: 'Skontrolujte dopyt pred odoslaním.' },
+    fields: { arrival: 'Dátum príchodu', departure: 'Dátum odchodu', nights: 'Noci', name: 'Meno a priezvisko', email: 'E-mail', phone: 'Telefón', language: 'Jazyk kontaktu', country: 'Krajina', countryPlaceholder: 'Napíšte napr. de, Nemecko, Slovensko...', plate: 'Evidenčné číslo vozidla', plateHint: 'Voliteľné. Uveďte EČV hlavného vozidla alebo prívesu pre tento pobyt.', message: 'Správa', specialNeeds: 'Osoba so zdravotným postihnutím / špeciálne potreby', specialNeedsText: 'Napíšte, čo potrebujete, aby sme pobyt lepšie pripravili.', lateCheckout: 'Chcem sa opýtať na neskorší odchod.', lateTime: 'Preferovaný čas odchodu', quiet: 'Rozumiem, že Camping Clepardia nie je párty kemp a nočný pokoj platí 22:00–07:00.', consent: 'Súhlasím s kontaktovaním ohľadom tohto dopytu.' },
+    guests: { adults: 'Dospelí', children: 'Deti 4-14', toddlers: 'Deti do 4 rokov', bungalowGuests: 'Osoby v bungalove', campingGuests: 'Osoby v kempe' },
+    info: { campingHours: 'Kempovací deň: 12:00-12:00.', bungalowHours: 'Bungalovy: príchod od 16:00, odchod do 11:00.', combined: 'Pre skupiny, kde časť spí v bungalove a časť prichádza s obytným autom alebo stanom.', summer: 'V júli a auguste fungujú miesta v kempe podľa poradia príchodu. Najlepšie je prísť krátko po 12:00.', lateCheckout: 'Recepcia po príchode potvrdí možnosť, miesto, inštrukcie a prípadný poplatok.' },
+    summary: { title: 'Zhrnutie', empty: 'Vyberte termín a služby, tu sa zobrazí orientačná cena.', total: 'Orientačný súčet', confirm: 'Dostupnosť a konečné podmienky potvrdzuje recepcia.', stay: 'Typ pobytu', dates: 'Termín', guests: 'Hostia', services: 'Služby', country: 'Krajina', language: 'Jazyk', specialNeeds: 'Špeciálne potreby', lateCheckout: 'Neskorší odchod', success: 'Ďakujeme! Dopyt bol pripravený. Recepcia odpovie čo najskôr.' },
+  },
+  sv: {
+    progressHints: ['Bra val. Välj nu datum.', 'Bara några uppgifter om gästerna kvar.', 'Lägg till tjänster. Uppskattningen uppdateras direkt.', 'Nästan klart. Lämna kontaktuppgifter till receptionen.', 'Receptionen får en tydlig förfrågan.'],
+    stepLead: { dates: 'Välj vistelsedatum. Antal nätter räknas automatiskt.', guests: 'Ange ungefärligt antal gäster.', services: 'Lägg till vistelsetyp och tjänster med plus/minus.', details: 'Lämna kontaktuppgifter till receptionen.', summary: 'Kontrollera förfrågan innan du skickar.' },
+    fields: { arrival: 'Ankomstdatum', departure: 'Avresedatum', nights: 'Nätter', name: 'Namn', email: 'E-post', phone: 'Telefon', language: 'Kontaktspråk', country: 'Land', countryPlaceholder: 'Skriv t.ex. de, Tyskland, Sverige...', plate: 'Registreringsnummer', plateHint: 'Valfritt. Ange registreringsnummer för huvudfordon eller släp för vistelsen.', message: 'Meddelande', specialNeeds: 'Person med funktionsnedsättning / särskilda behov', specialNeedsText: 'Berätta vad du behöver så att vi kan förbereda vistelsen bättre.', lateCheckout: 'Jag vill fråga om senare utcheckning.', lateTime: 'Önskad avresetid', quiet: 'Jag förstår att Camping Clepardia inte är en partycamping och att nattro gäller 22:00–07:00.', consent: 'Jag godkänner kontakt om denna förfrågan.' },
+    guests: { adults: 'Vuxna', children: 'Barn 4-14', toddlers: 'Barn under 4', bungalowGuests: 'Gäster i bungalow', campingGuests: 'Gäster på campingplats' },
+    info: { campingHours: 'Campingdygn: 12:00-12:00.', bungalowHours: 'Bungalows: incheckning från 16:00, utcheckning senast 11:00.', combined: 'För grupper där en del bor i bungalow och en del kommer med husbil eller tält.', summer: 'I juli och augusti gäller campingplatser enligt ankomstordning. Kom helst strax efter 12:00.', lateCheckout: 'Receptionen bekräftar möjlighet, plats, instruktioner och eventuell kostnad efter ankomst.' },
+    summary: { title: 'Sammanfattning', empty: 'Välj datum och tjänster så visas uppskattad kostnad här.', total: 'Uppskattad summa', confirm: 'Tillgänglighet och slutliga villkor bekräftas av receptionen.', stay: 'Vistelsetyp', dates: 'Datum', guests: 'Gäster', services: 'Tjänster', country: 'Land', language: 'Språk', specialNeeds: 'Särskilda behov', lateCheckout: 'Senare utcheckning', success: 'Tack! Din förfrågan har förberetts. Receptionen svarar så snart som möjligt.' },
+  },
+};
+const mergeReservationCopy = (base: any, patch: any) => ({
+  ...base,
+  ...(patch ?? {}),
+  modes: { ...(base?.modes ?? {}), ...(patch?.modes ?? {}) },
+  stepLead: { ...(base?.stepLead ?? {}), ...(patch?.stepLead ?? {}) },
+  fields: { ...(base?.fields ?? {}), ...(patch?.fields ?? {}) },
+  guests: { ...(base?.guests ?? {}), ...(patch?.guests ?? {}) },
+  info: { ...(base?.info ?? {}), ...(patch?.info ?? {}) },
+  summary: { ...(base?.summary ?? {}), ...(patch?.summary ?? {}) },
+  actions: { ...(base?.actions ?? {}), ...(patch?.actions ?? {}) },
+  hints: { ...(base?.hints ?? {}), ...(patch?.hints ?? {}) },
+});
+const coreReservation = reservationCoreCopy[uiLang as keyof typeof reservationCoreCopy]
+  ? mergeReservationCopy(reservationCoreCopy[uiLang as keyof typeof reservationCoreCopy], reservationLanguagePatches[uiLang])
+  : undefined;
 const baseCopy = copy[lang] ?? copy.en;
-const t = coreReservation ? {
-  ...baseCopy,
-  ...coreReservation,
-  modes: { ...baseCopy.modes, ...coreReservation.modes },
-  actions: { ...baseCopy.actions, ...coreReservation.actions },
-  hints: { ...baseCopy.hints, ...coreReservation.hints },
-} : baseCopy;
+const t = coreReservation ? mergeReservationCopy(baseCopy, coreReservation) : baseCopy;
 const modeChipsCopy = {
   pl: {
     camping: ['Kamper', 'Van', 'Namiot', 'Prąd 10A'],
@@ -550,6 +611,96 @@ const beforeArrivalCopy = {
       'Bungalow: porta asciugamani ed effetti personali',
       'Arrivo dopo le 21:00: contatta la reception',
       'Check-out camping entro le 12:00',
+    ],
+  },
+  fr: {
+    title: 'À savoir avant l’arrivée',
+    items: [
+      'Pièce d’identité',
+      'Immatriculation du véhicule et de la caravane',
+      'Utilisez Google Maps — l’accès a changé en 2022',
+      'Silence nocturne 22:00–07:00',
+      'Électricité 10A, pas pour la recharge EV',
+      'Chien 0 PLN — merci de ramasser',
+      'C’est un camping urbain vert',
+      'Bungalows : apportez serviettes et effets personnels',
+      'Arrivée après 21:00 : contactez la réception',
+      'Camping : départ avant 12:00',
+    ],
+  },
+  es: {
+    title: 'Información útil antes de llegar',
+    items: [
+      'Documento de identidad',
+      'Matrícula del vehículo y de la caravana',
+      'Usa Google Maps — el acceso cambió en 2022',
+      'Silencio nocturno 22:00–07:00',
+      'Electricidad 10A, no para cargar EV',
+      'Perro 0 PLN — recoge sus excrementos',
+      'Es un camping urbano verde',
+      'Bungalows: trae toallas y objetos personales',
+      'Llegada después de 21:00: contacta con recepción',
+      'Camping: salida antes de 12:00',
+    ],
+  },
+  nl: {
+    title: 'Goed om te weten vóór aankomst',
+    items: [
+      'Identiteitsbewijs',
+      'Kenteken van voertuig en caravan',
+      'Gebruik Google Maps — de ingang veranderde in 2022',
+      'Nachtrust 22:00–07:00',
+      '10A-stroom, niet voor EV-laden',
+      'Hond 0 PLN — ruim op na je hond',
+      'Dit is een groene stadscamping',
+      'Bungalows: neem handdoeken en persoonlijke spullen mee',
+      'Aankomst na 21:00: neem contact op met de receptie',
+      'Camping check-out vóór 12:00',
+    ],
+  },
+  cs: {
+    title: 'Dobré vědět před příjezdem',
+    items: [
+      'Doklad totožnosti',
+      'SPZ vozidla a karavanu',
+      'Použijte Google Maps — vjezd se změnil v roce 2022',
+      'Noční klid 22:00–07:00',
+      'Elektřina 10A, ne pro nabíjení EV',
+      'Pes 0 PLN — prosíme uklidit po psovi',
+      'Je to zelený městský kemp',
+      'Bungalovy: vezměte ručníky a osobní věci',
+      'Příjezd po 21:00: kontaktujte recepci',
+      'Camping: odjezd do 12:00',
+    ],
+  },
+  sk: {
+    title: 'Dobré vedieť pred príchodom',
+    items: [
+      'Doklad totožnosti',
+      'EČV vozidla a karavanu',
+      'Použite Google Maps — vjazd sa zmenil v roku 2022',
+      'Nočný pokoj 22:00–07:00',
+      'Elektrina 10A, nie na nabíjanie EV',
+      'Pes 0 PLN — prosíme upratať po psovi',
+      'Je to zelený mestský kemp',
+      'Bungalovy: vezmite uteráky a osobné veci',
+      'Príchod po 21:00: kontaktujte recepciu',
+      'Camping: odchod do 12:00',
+    ],
+  },
+  sv: {
+    title: 'Bra att veta före ankomst',
+    items: [
+      'Identitetshandling',
+      'Registreringsnummer för fordon och husvagn',
+      'Använd Google Maps — infarten ändrades 2022',
+      'Nattro 22:00–07:00',
+      '10A-el, inte för EV-laddning',
+      'Hund 0 PLN — plocka upp efter hunden',
+      'Det är en grön stadscamping',
+      'Bungalows: ta med handdukar och personliga saker',
+      'Ankomst efter 21:00: kontakta receptionen',
+      'Camping check-out senast 12:00',
     ],
   },
 } as const;
@@ -1185,32 +1336,140 @@ const uxCopy = {
   de: null,
   it: null,
 } as const;
-const ux = uxCopy[lang as keyof typeof uxCopy] ?? uxCopy.en;
+const reservationUxLock: Record<string, any> = {
+  de: {
+    popularCountries: 'Beliebte Länder', suggestedCountries: 'Suchergebnisse', noCountries: 'Tippen Sie mind. 1 Zeichen, z.B. de oder Deutschland.', presetsTitle: 'Beliebte Auswahl', presetsLead: 'Wählen Sie ein fertiges Set oder stellen Sie alles manuell ein.', presetAdded: 'Beliebtes Set hinzugefügt 🌿', progressLabel: 'Fortschritt der Anfrage', datesHelperTitle: 'Aufenthaltszeiten', datesHelperLead: 'Wählen Sie Daten, Nächte und Saisonhinweise aktualisieren sich automatisch.', sending: 'Senden...', summerCamping: 'Im Juli und August sind Campingplätze nach Ankunftsreihenfolge verfügbar. Am besten kurz nach 12:00 anreisen.', summerBungalow: 'Bungalows in der Hochsaison am besten früher reservieren.',
+    calendar: { title: 'Aufenthaltskalender', lead: 'Klicken Sie Anreise und Abreise. Auf Mobilgerät genügt Tippen, kein Ziehen nötig.', previous: 'Vorheriger Monat', next: 'Nächster Monat', summaryTitle: 'Ihr Aufenthalt', adviceTitle: 'Vorschlag für den Aufenthalt', ctaAttractions: 'Attraktionen ansehen', ctaCampy: 'CAMPY nach Tagesplan fragen', ctaTours: 'Touren ab Krakau', past: 'Vergangene Termine sind nicht verfügbar', arrival: 'Anreise', departure: 'Abreise', weekDays: ['Mo','Di','Mi','Do','Fr','Sa','So'] },
+    stayAdvice: { none: 'Wählen Sie Daten, dann schlagen wir Krakau und Umgebung vor.', one: 'Kurzer Aufenthalt: Altstadt, Hauptmarkt und Wawel-Umgebung.', two: 'Gut für Zentrum, Wawel und Kazimierz in ruhigerem Tempo.', three: 'Sehr gut für Krakau plus einen größeren Ausflug, z.B. Wieliczka oder Auschwitz-Birkenau.', four: 'Sie können Krakau, Kazimierz, Wieliczka und einen ruhigeren Tag einplanen.', five: 'Sehr gute Basis für Krakau und Małopolska ohne Eile.' },
+    serviceSuggestions: { title: 'Tipps zum Aufenthalt', camperPower: 'Camper-Gäste wählen oft 10A Strom dazu.', addPower: '10A Strom hinzufügen', caravanCar: 'Zum Wohnwagen wird meist auch ein Auto/Parkplatz benötigt. Hinzufügen?', addCar: 'Auto hinzufügen', tentCar: 'Wenn Sie mit Auto anreisen, fügen Sie Auto/Parkplatz hinzu.', dogFree: 'Hund ist kostenlos — bitte betreuen und aufräumen.', summerCamping: 'Im Juli und August gilt Ankunftsreihenfolge für Campingplätze.' },
+    stepRewards: { dates: 'Prima, der Termin ist gesetzt 🌿', guests: 'Super, die Gästeangaben sind da', services: 'Gut, die Leistungen sind in der Zusammenfassung', details: 'Fast fertig — bitte finale Zusammenfassung prüfen' },
+    help: { title: 'Hilfe', open: 'Hilfe', close: 'Hilfe schließen', sections: [['Camping, Bungalows oder kombiniert?', 'Camping ist für Camper, Van, Zelt oder Wohnwagen. Bungalows sind für 2, 3 oder 4 Personen. Kombiniert ist Bungalow plus Campingplatz.'], ['Anfrage, keine automatische Buchung', 'Die Rezeption bestätigt Verfügbarkeit, Preis und finale Bedingungen.'], ['Orientierungspreis', 'Wir zählen Nächte, Personen und Leistungen nach Preisliste.'], ['10A Strom und Hund', '10A Strom nach Preisliste. Hunde sind kostenlos.'], ['Aufenthaltszeiten', 'Camping: 12:00-12:00. Bungalows: Check-in ab 16:00, Check-out bis 11:00.'], ['Anfahrt', 'Wir empfehlen Google Maps, da sich die Zufahrt 2022 geändert hat.']], shortTitle: 'Sie möchten nicht alles ausfüllen?', shortCta: 'Kurze Anfrage senden' },
+    simple: { cta: 'Ich weiß nicht, was ich wählen soll — bitte helfen', title: 'Kurze Anfrage', desc: 'Beschreiben Sie kurz, wie Sie reisen und was Sie brauchen — die Rezeption hilft bei der Auswahl.' },
+    summary: { statusLabel: 'Anfragestatus', status: 'Von der Rezeption zu bestätigen', badge: 'Orientierungspreis', depositBungalow: 'Für Bungalows kann eine Anzahlung erforderlich sein. Details senden wir per E-Mail.', depositCombined: 'Die Anfrage enthält einen Bungalow, daher kann die Rezeption eine Anzahlung erbitten.' },
+  },
+  it: {
+    popularCountries: 'Paesi popolari', suggestedCountries: 'Risultati di ricerca', noCountries: 'Digita almeno 1 carattere, es. it o Germania.', presetsTitle: 'Scelte più popolari', presetsLead: 'Scegli un set pronto o imposta tutto manualmente.', presetAdded: 'Set popolare aggiunto 🌿', progressLabel: 'Avanzamento richiesta', datesHelperTitle: 'Orari del soggiorno', datesHelperLead: 'Scegli le date: notti e note stagionali si aggiornano automaticamente.', sending: 'Invio...', summerCamping: 'A luglio e agosto le piazzole camping sono in ordine di arrivo. Meglio arrivare poco dopo le 12:00.', summerBungalow: 'In alta stagione conviene prenotare i bungalow in anticipo.',
+    calendar: { title: 'Calendario del soggiorno', lead: 'Tocca arrivo e partenza. Su mobile non serve trascinare.', previous: 'Mese precedente', next: 'Mese successivo', summaryTitle: 'Il tuo soggiorno', adviceTitle: 'Suggerimento per il soggiorno', ctaAttractions: 'Vedi attrazioni', ctaCampy: 'Chiedi a CAMPY un piano', ctaTours: 'Tour da Cracovia', past: 'Date passate non disponibili', arrival: 'Arrivo', departure: 'Partenza', weekDays: ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'] },
+    stayAdvice: { none: 'Scegli le date e suggeriremo cosa vedere a Cracovia e dintorni.', one: 'Soggiorno breve: Città Vecchia, Rynek e zona Wawel.', two: 'Buono per centro, Wawel e Kazimierz con ritmo tranquillo.', three: 'Ottimo per Cracovia più una gita grande: Wieliczka o Auschwitz-Birkenau.', four: 'Puoi vedere Cracovia, Kazimierz, Wieliczka e tenere un giorno più calmo.', five: 'Base perfetta per Cracovia e Małopolska senza fretta.' },
+    serviceSuggestions: { title: 'Suggerimenti soggiorno', camperPower: 'Chi arriva in camper spesso aggiunge corrente 10A.', addPower: 'Aggiungi corrente 10A', caravanCar: 'Con roulotte spesso serve anche auto/parcheggio. Aggiungere?', addCar: 'Aggiungi auto', tentCar: 'Se arrivi in auto, aggiungi auto/parcheggio.', dogFree: 'Il cane è gratuito — cura e pulizia richieste.', summerCamping: 'A luglio e agosto le piazzole sono in ordine di arrivo.' },
+    stepRewards: { dates: 'Perfetto, date impostate 🌿', guests: 'Ottimo, ospiti inseriti', services: 'Bene, servizi nel riepilogo', details: 'Quasi fatto — controlla il riepilogo finale' },
+    help: { title: 'Aiuto', open: 'Aiuto', close: 'Chiudi aiuto', sections: [['Camping, bungalow o insieme?', 'Camping è per camper, van, tenda o roulotte. Bungalow per 2, 3 o 4 persone. Insieme combina bungalow e piazzola.'], ['Richiesta, non prenotazione automatica', 'La reception conferma disponibilità, prezzo e condizioni finali.'], ['Prezzo indicativo', 'Calcoliamo notti, ospiti e servizi secondo il listino.'], ['Corrente 10A e cane', 'Corrente 10A secondo listino. Il cane è gratuito.'], ['Orari soggiorno', 'Camping: 12:00-12:00. Bungalow: check-in dalle 16:00, check-out entro 11:00.'], ['Indicazioni', 'Consigliamo Google Maps: accesso cambiato nel 2022.']], shortTitle: 'Non vuoi compilare tutto?', shortCta: 'Invia richiesta breve' },
+    simple: { cta: 'Non so cosa scegliere — aiutatemi', title: 'Richiesta breve', desc: 'Descrivi brevemente come viaggi e cosa ti serve — la reception aiuterà a scegliere.' },
+    summary: { statusLabel: 'Stato richiesta', status: 'Da confermare dalla reception', badge: 'Prezzo indicativo', depositBungalow: 'Per i bungalow può essere richiesta una caparra. I dettagli arriveranno via email.', depositCombined: 'La richiesta include un bungalow, quindi la reception può chiedere una caparra.' },
+  },
+  fr: {
+    popularCountries: 'Pays populaires', suggestedCountries: 'Résultats de recherche', noCountries: 'Tapez au moins 1 caractère, par ex. de ou France.', presetsTitle: 'Choix populaires', presetsLead: 'Cliquez un ensemble prêt ou réglez tout manuellement.', presetAdded: 'Choix populaire ajouté 🌿', progressLabel: 'Progression de la demande', datesHelperTitle: 'Horaires du séjour', datesHelperLead: 'Choisissez les dates, les nuits et notes de saison se mettent à jour.', sending: 'Envoi...', summerCamping: 'En juillet et août, les emplacements fonctionnent par ordre d’arrivée. Arrivez idéalement peu après 12:00.', summerBungalow: 'Les bungalows en haute saison se réservent idéalement à l’avance.',
+    calendar: { title: 'Calendrier du séjour', lead: 'Touchez l’arrivée puis le départ. Sur mobile, aucun glisser-déposer n’est nécessaire.', previous: 'Mois précédent', next: 'Mois suivant', summaryTitle: 'Votre séjour', adviceTitle: 'Suggestion pour votre séjour', ctaAttractions: 'Voir les attractions', ctaCampy: 'Demander un plan à CAMPY', ctaTours: 'Excursions depuis Cracovie', past: 'Les dates passées sont indisponibles', arrival: 'Arrivée', departure: 'Départ', weekDays: ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'] },
+    stayAdvice: { none: 'Choisissez les dates et nous suggérerons quoi voir à Cracovie et dans la région.', one: 'Séjour court : Vieille Ville, Rynek et environs du Wawel.', two: 'Bon rythme pour le centre, Wawel et Kazimierz.', three: 'Très bon pour Cracovie plus une grande excursion : Wieliczka ou Auschwitz-Birkenau.', four: 'Vous pouvez prévoir Cracovie, Kazimierz, Wieliczka et une journée plus calme.', five: 'Excellente base pour Cracovie et la Petite-Pologne sans se presser.' },
+    serviceSuggestions: { title: 'Conseils de séjour', camperPower: 'Les voyageurs en camping-car ajoutent souvent l’électricité 10A.', addPower: 'Ajouter électricité 10A', caravanCar: 'Avec une caravane, il faut souvent aussi une voiture / parking. Ajouter ?', addCar: 'Ajouter voiture', tentCar: 'Si vous arrivez en voiture, ajoutez voiture / parking.', dogFree: 'Le chien est gratuit — merci de le surveiller et de nettoyer.', summerCamping: 'En juillet et août, les emplacements sont par ordre d’arrivée.' },
+    stepRewards: { dates: 'Parfait, les dates sont choisies 🌿', guests: 'Super, les voyageurs sont indiqués', services: 'Très bien, les services sont dans le résumé', details: 'Presque terminé — vérifiez le résumé final' },
+    help: { title: 'Aide', open: 'Aide', close: 'Fermer l’aide', sections: [['Camping, bungalows ou combiné ?', 'Camping pour camping-car, van, tente ou caravane. Bungalows pour 2, 3 ou 4 personnes. Combiné = bungalow + emplacement.'], ['Demande, pas réservation automatique', 'La réception confirme disponibilité, prix et conditions finales.'], ['Prix indicatif', 'Nous comptons nuits, personnes et services selon le tarif.'], ['Électricité 10A et chien', 'Électricité 10A selon tarif. Les chiens sont gratuits.'], ['Horaires', 'Camping : 12:00-12:00. Bungalows : arrivée dès 16:00, départ avant 11:00.'], ['Accès', 'Nous recommandons Google Maps car l’accès a changé en 2022.']], shortTitle: 'Vous ne voulez pas tout remplir ?', shortCta: 'Envoyer une demande courte' },
+    simple: { cta: 'Je ne sais pas quoi choisir — aidez-moi', title: 'Demande courte', desc: 'Décrivez brièvement votre voyage et vos besoins — la réception aidera à choisir.' },
+    summary: { statusLabel: 'Statut de la demande', status: 'À confirmer par la réception', badge: 'Prix indicatif', depositBungalow: 'Pour les bungalows, un acompte peut être demandé. Les détails seront envoyés par e-mail.', depositCombined: 'La demande inclut un bungalow, la réception peut donc demander un acompte.' },
+  },
+  es: {
+    popularCountries: 'Países populares', suggestedCountries: 'Resultados de búsqueda', noCountries: 'Escribe mín. 1 carácter, p. ej. de o España.', presetsTitle: 'Opciones populares', presetsLead: 'Haz clic en un set preparado o configura todo manualmente.', presetAdded: 'Opción popular añadida 🌿', progressLabel: 'Progreso de la consulta', datesHelperTitle: 'Horarios de estancia', datesHelperLead: 'Elige fechas y las noches/notas de temporada se actualizarán automáticamente.', sending: 'Enviando...', summerCamping: 'En julio y agosto las parcelas van por orden de llegada. Lo mejor es llegar poco después de las 12:00.', summerBungalow: 'En temporada alta conviene reservar los bungalows con antelación.',
+    calendar: { title: 'Calendario de estancia', lead: 'Toca llegada y salida. En móvil no hace falta arrastrar.', previous: 'Mes anterior', next: 'Mes siguiente', summaryTitle: 'Tu estancia', adviceTitle: 'Sugerencia para tu estancia', ctaAttractions: 'Ver atracciones', ctaCampy: 'Preguntar a CAMPY por un plan', ctaTours: 'Excursiones desde Cracovia', past: 'Las fechas pasadas no están disponibles', arrival: 'Llegada', departure: 'Salida', weekDays: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'] },
+    stayAdvice: { none: 'Elige fechas y sugeriremos qué ver en Cracovia y alrededores.', one: 'Estancia rápida: Casco Antiguo, Plaza del Mercado y zona de Wawel.', two: 'Buena opción para centro, Wawel y Kazimierz con ritmo tranquilo.', three: 'Muy buen tiempo para Cracovia y una excursión grande: Wieliczka o Auschwitz-Birkenau.', four: 'Puedes ver Cracovia, Kazimierz, Wieliczka y dejar un día más tranquilo.', five: 'Base excelente para Cracovia y Małopolska sin prisas.' },
+    serviceSuggestions: { title: 'Consejos de estancia', camperPower: 'Los huéspedes con autocaravana suelen añadir electricidad 10A.', addPower: 'Añadir electricidad 10A', caravanCar: 'Con caravana normalmente hace falta coche / parking. ¿Añadir?', addCar: 'Añadir coche', tentCar: 'Si llegas en coche, añade coche / parking.', dogFree: 'El perro es gratis — cuídalo y recoge después.', summerCamping: 'En julio y agosto las parcelas son por orden de llegada.' },
+    stepRewards: { dates: 'Perfecto, fechas elegidas 🌿', guests: 'Genial, ya tenemos huéspedes', services: 'Bien, servicios añadidos al resumen', details: 'Casi listo — revisa el resumen final' },
+    help: { title: 'Ayuda', open: 'Ayuda', close: 'Cerrar ayuda', sections: [['¿Camping, bungalows o combinado?', 'Camping es para autocaravana, van, tienda o caravana. Bungalows son para 2, 3 o 4 personas. Combinado une bungalow y parcela.'], ['Consulta, no reserva automática', 'Recepción confirma disponibilidad, precio y condiciones finales.'], ['Precio orientativo', 'Calculamos noches, personas y servicios según la tarifa.'], ['Electricidad 10A y perro', 'Electricidad 10A según tarifa. El perro es gratis.'], ['Horarios', 'Camping: 12:00-12:00. Bungalows: entrada desde 16:00, salida antes de 11:00.'], ['Cómo llegar', 'Recomendamos Google Maps porque el acceso cambió en 2022.']], shortTitle: '¿No quieres completar todo?', shortCta: 'Enviar consulta breve' },
+    simple: { cta: 'No sé qué elegir — ayudadme', title: 'Consulta breve', desc: 'Describe brevemente cómo viajas y qué necesitas; recepción ayudará a elegir.' },
+    summary: { statusLabel: 'Estado de la consulta', status: 'A confirmar por recepción', badge: 'Precio orientativo', depositBungalow: 'Para bungalows puede requerirse una señal. Los datos se enviarán por email.', depositCombined: 'La consulta incluye bungalow, por lo que recepción puede pedir una señal.' },
+  },
+  nl: {
+    popularCountries: 'Populaire landen', suggestedCountries: 'Zoekresultaten', noCountries: 'Typ minimaal 1 teken, bv. de of Nederland.', presetsTitle: 'Populaire keuzes', presetsLead: 'Klik een kant-en-klare set of stel alles handmatig in.', presetAdded: 'Populaire set toegevoegd 🌿', progressLabel: 'Voortgang aanvraag', datesHelperTitle: 'Verblijfsuren', datesHelperLead: 'Kies data; nachten en seizoensinfo worden automatisch bijgewerkt.', sending: 'Verzenden...', summerCamping: 'In juli en augustus werken campingplaatsen op volgorde van aankomst. Kom liefst kort na 12:00.', summerBungalow: 'Bungalows in het hoogseizoen boek je best op tijd.',
+    calendar: { title: 'Verblijfskalender', lead: 'Tik aankomst en vertrek. Op mobiel hoef je niet te slepen.', previous: 'Vorige maand', next: 'Volgende maand', summaryTitle: 'Je verblijf', adviceTitle: 'Tip voor je verblijf', ctaAttractions: 'Attracties bekijken', ctaCampy: 'Vraag CAMPY om een plan', ctaTours: 'Tours vanuit Krakau', past: 'Data in het verleden zijn niet beschikbaar', arrival: 'Aankomst', departure: 'Vertrek', weekDays: ['Ma','Di','Wo','Do','Vr','Za','Zo'] },
+    stayAdvice: { none: 'Kies data en we stellen Krakau en omgeving voor.', one: 'Kort verblijf: Oude Stad, Marktplein en Wawel-omgeving.', two: 'Goed voor centrum, Wawel en Kazimierz in rustig tempo.', three: 'Heel goed voor Krakau plus één grote uitstap: Wieliczka of Auschwitz-Birkenau.', four: 'Je kunt Krakau, Kazimierz, Wieliczka en een rustige dag plannen.', five: 'Prima basis voor Krakau en Małopolska zonder haast.' },
+    serviceSuggestions: { title: 'Verblijfstips', camperPower: 'Campergasten voegen vaak 10A-stroom toe.', addPower: '10A-stroom toevoegen', caravanCar: 'Bij caravan is vaak ook auto / parking nodig. Toevoegen?', addCar: 'Auto toevoegen', tentCar: 'Kom je met auto, voeg auto / parking toe.', dogFree: 'Hond is gratis — graag onder toezicht en opruimen.', summerCamping: 'In juli en augustus geldt aankomstvolgorde voor campingplaatsen.' },
+    stepRewards: { dates: 'Mooi, data zijn ingesteld 🌿', guests: 'Top, gasten zijn ingevuld', services: 'Goed, diensten staan in het overzicht', details: 'Bijna klaar — controleer het eindoverzicht' },
+    help: { title: 'Hulp', open: 'Hulp', close: 'Hulp sluiten', sections: [['Camping, bungalows of gecombineerd?', 'Camping is voor camper, van, tent of caravan. Bungalows zijn voor 2, 3 of 4 personen. Gecombineerd is bungalow + kampeerplaats.'], ['Aanvraag, geen automatische boeking', 'De receptie bevestigt beschikbaarheid, prijs en voorwaarden.'], ['Richtprijs', 'We tellen nachten, gasten en diensten volgens de prijslijst.'], ['10A-stroom en hond', '10A-stroom volgens prijslijst. Honden zijn gratis.'], ['Verblijfsuren', 'Camping: 12:00-12:00. Bungalows: incheck vanaf 16:00, uitcheck vóór 11:00.'], ['Route', 'We raden Google Maps aan, want de toegang veranderde in 2022.']], shortTitle: 'Wil je niet alles invullen?', shortCta: 'Korte aanvraag sturen' },
+    simple: { cta: 'Ik weet niet wat te kiezen — help mij', title: 'Korte aanvraag', desc: 'Beschrijf kort hoe je reist en wat je nodig hebt — de receptie helpt kiezen.' },
+    summary: { statusLabel: 'Status aanvraag', status: 'Te bevestigen door receptie', badge: 'Richtprijs', depositBungalow: 'Voor bungalows kan een aanbetaling nodig zijn. Details volgen per e-mail.', depositCombined: 'De aanvraag bevat een bungalow; de receptie kan een aanbetaling vragen.' },
+  },
+  cs: {
+    popularCountries: 'Oblíbené země', suggestedCountries: 'Výsledky hledání', noCountries: 'Napište alespoň 1 znak, např. de nebo Česko.', presetsTitle: 'Nejoblíbenější volby', presetsLead: 'Klikněte na hotovou sadu nebo vše nastavte ručně.', presetAdded: 'Oblíbená sada přidána 🌿', progressLabel: 'Postup dotazu', datesHelperTitle: 'Časy pobytu', datesHelperLead: 'Vyberte termín, noci a sezónní poznámky se aktualizují automaticky.', sending: 'Odesílám...', summerCamping: 'V červenci a srpnu jsou místa v kempu podle pořadí příjezdu. Nejlepší je přijet krátce po 12:00.', summerBungalow: 'Bungalovy ve vysoké sezóně je dobré rezervovat dříve.',
+    calendar: { title: 'Kalendář pobytu', lead: 'Klepněte na příjezd a odjezd. Na mobilu není potřeba přetahovat.', previous: 'Předchozí měsíc', next: 'Další měsíc', summaryTitle: 'Váš pobyt', adviceTitle: 'Doporučení k pobytu', ctaAttractions: 'Zobrazit atrakce', ctaCampy: 'Zeptat se CAMPY na plán', ctaTours: 'Výlety z Krakova', past: 'Minulé termíny nejsou dostupné', arrival: 'Příjezd', departure: 'Odjezd', weekDays: ['Po','Út','St','Čt','Pá','So','Ne'] },
+    stayAdvice: { none: 'Vyberte termín a navrhneme, co vidět v Krakově a okolí.', one: 'Krátký pobyt: Staré Město, Rynek a okolí Wawelu.', two: 'Dobré pro centrum, Wawel a Kazimierz v klidném tempu.', three: 'Velmi dobré pro Krakov plus jeden větší výlet: Wieliczka nebo Auschwitz-Birkenau.', four: 'Můžete naplánovat Krakov, Kazimierz, Wieliczku a klidnější den.', five: 'Skvělá základna pro Krakov a Malopolsko bez spěchu.' },
+    serviceSuggestions: { title: 'Tipy k pobytu', camperPower: 'Hosté s obytným vozem často přidávají elektřinu 10A.', addPower: 'Přidat elektřinu 10A', caravanCar: 'Ke karavanu bývá potřeba také auto / parkování. Přidat?', addCar: 'Přidat auto', tentCar: 'Pokud přijedete autem, přidejte auto / parkování.', dogFree: 'Pes je zdarma — prosíme dohled a úklid.', summerCamping: 'V červenci a srpnu platí pořadí příjezdu.' },
+    stepRewards: { dates: 'Skvělé, termín je nastaven 🌿', guests: 'Výborně, hosté jsou vyplněni', services: 'Dobře, služby jsou ve shrnutí', details: 'Téměř hotovo — zkontrolujte závěrečné shrnutí' },
+    help: { title: 'Pomoc', open: 'Pomoc', close: 'Zavřít pomoc', sections: [['Kemp, bungalovy nebo kombinace?', 'Kemp je pro obytný vůz, dodávku, stan nebo karavan. Bungalovy jsou pro 2, 3 nebo 4 osoby. Kombinace = bungalov + místo.'], ['Dotaz, ne automatická rezervace', 'Recepce potvrzuje dostupnost, cenu a podmínky.'], ['Orientační cena', 'Počítáme noci, osoby a služby podle ceníku.'], ['Elektřina 10A a pes', 'Elektřina 10A dle ceníku. Psi zdarma.'], ['Časy pobytu', 'Kemp: 12:00-12:00. Bungalovy: příjezd od 16:00, odjezd do 11:00.'], ['Doprava', 'Doporučujeme Google Maps, vjezd se změnil v roce 2022.']], shortTitle: 'Nechcete vyplňovat vše?', shortCta: 'Odeslat krátký dotaz' },
+    simple: { cta: 'Nevím, co vybrat — pomozte mi', title: 'Krátký dotaz', desc: 'Stručně popište, jak cestujete a co potřebujete — recepce pomůže vybrat.' },
+    summary: { statusLabel: 'Stav dotazu', status: 'Potvrdí recepce', badge: 'Orientační cena', depositBungalow: 'U bungalovů může být vyžadována záloha. Detaily pošleme e-mailem.', depositCombined: 'Dotaz obsahuje bungalov, recepce může požádat o zálohu.' },
+  },
+  sk: {
+    popularCountries: 'Obľúbené krajiny', suggestedCountries: 'Výsledky hľadania', noCountries: 'Napíšte aspoň 1 znak, napr. de alebo Slovensko.', presetsTitle: 'Najobľúbenejšie voľby', presetsLead: 'Kliknite na hotovú sadu alebo všetko nastavte ručne.', presetAdded: 'Obľúbená sada pridaná 🌿', progressLabel: 'Postup dopytu', datesHelperTitle: 'Časy pobytu', datesHelperLead: 'Vyberte termín, noci a sezónne poznámky sa aktualizujú automaticky.', sending: 'Odosielam...', summerCamping: 'V júli a auguste sú miesta v kempe podľa poradia príchodu. Najlepšie je prísť krátko po 12:00.', summerBungalow: 'Bungalovy vo vysokej sezóne je dobré rezervovať skôr.',
+    calendar: { title: 'Kalendár pobytu', lead: 'Ťuknite na príchod a odchod. Na mobile netreba ťahať rozsah.', previous: 'Predchádzajúci mesiac', next: 'Ďalší mesiac', summaryTitle: 'Váš pobyt', adviceTitle: 'Odporúčanie k pobytu', ctaAttractions: 'Zobraziť atrakcie', ctaCampy: 'Opýtať sa CAMPY na plán', ctaTours: 'Výlety z Krakova', past: 'Minulé termíny nie sú dostupné', arrival: 'Príchod', departure: 'Odchod', weekDays: ['Po','Ut','St','Št','Pi','So','Ne'] },
+    stayAdvice: { none: 'Vyberte termín a navrhneme, čo vidieť v Krakove a okolí.', one: 'Krátky pobyt: Staré Mesto, Rynek a okolie Wawelu.', two: 'Dobré pre centrum, Wawel a Kazimierz v pokojnom tempe.', three: 'Veľmi dobré pre Krakov plus jeden väčší výlet: Wieliczka alebo Auschwitz-Birkenau.', four: 'Môžete naplánovať Krakov, Kazimierz, Wieliczku a pokojnejší deň.', five: 'Skvelá základňa pre Krakov a Malopoľsko bez zhonu.' },
+    serviceSuggestions: { title: 'Tipy k pobytu', camperPower: 'Hostia s obytným autom často pridávajú elektrinu 10A.', addPower: 'Pridať elektrinu 10A', caravanCar: 'Ku karavanu býva potrebné aj auto / parkovanie. Pridať?', addCar: 'Pridať auto', tentCar: 'Ak prídete autom, pridajte auto / parkovanie.', dogFree: 'Pes je zadarmo — prosíme dohľad a upratanie.', summerCamping: 'V júli a auguste platí poradie príchodu.' },
+    stepRewards: { dates: 'Skvelé, termín je nastavený 🌿', guests: 'Výborne, hostia sú vyplnení', services: 'Dobre, služby sú v zhrnutí', details: 'Takmer hotovo — skontrolujte záverečné zhrnutie' },
+    help: { title: 'Pomoc', open: 'Pomoc', close: 'Zavrieť pomoc', sections: [['Kemp, bungalovy alebo kombinácia?', 'Kemp je pre obytné auto, dodávku, stan alebo karavan. Bungalovy sú pre 2, 3 alebo 4 osoby. Kombinácia = bungalov + miesto.'], ['Dopyt, nie automatická rezervácia', 'Recepcia potvrdzuje dostupnosť, cenu a podmienky.'], ['Orientačná cena', 'Počítame noci, osoby a služby podľa cenníka.'], ['Elektrina 10A a pes', 'Elektrina 10A podľa cenníka. Psy zadarmo.'], ['Časy pobytu', 'Kemp: 12:00-12:00. Bungalovy: príchod od 16:00, odchod do 11:00.'], ['Doprava', 'Odporúčame Google Maps, vjazd sa zmenil v roku 2022.']], shortTitle: 'Nechcete vyplniť všetko?', shortCta: 'Odoslať krátky dopyt' },
+    simple: { cta: 'Neviem, čo vybrať — pomôžte mi', title: 'Krátky dopyt', desc: 'Stručne opíšte, ako cestujete a čo potrebujete — recepcia pomôže vybrať.' },
+    summary: { statusLabel: 'Stav dopytu', status: 'Potvrdí recepcia', badge: 'Orientačná cena', depositBungalow: 'Pri bungalovoch môže byť požadovaná záloha. Detaily pošleme e-mailom.', depositCombined: 'Dopyt obsahuje bungalov, recepcia môže požiadať o zálohu.' },
+  },
+  sv: {
+    popularCountries: 'Populära länder', suggestedCountries: 'Sökresultat', noCountries: 'Skriv minst 1 tecken, t.ex. de eller Sverige.', presetsTitle: 'Populära val', presetsLead: 'Klicka på ett färdigt paket eller ställ in allt manuellt.', presetAdded: 'Populärt paket tillagt 🌿', progressLabel: 'Förfrågans status', datesHelperTitle: 'Vistelsens tider', datesHelperLead: 'Välj datum, nätter och säsongsinfo uppdateras automatiskt.', sending: 'Skickar...', summerCamping: 'I juli och augusti gäller campingplatser enligt ankomstordning. Kom helst strax efter 12:00.', summerBungalow: 'Bungalows under högsäsong bör bokas tidigare.',
+    calendar: { title: 'Vistelsekalender', lead: 'Tryck på ankomst och avresa. På mobil behövs inget drag.', previous: 'Föregående månad', next: 'Nästa månad', summaryTitle: 'Din vistelse', adviceTitle: 'Förslag för vistelsen', ctaAttractions: 'Se sevärdheter', ctaCampy: 'Fråga CAMPY om plan', ctaTours: 'Turer från Kraków', past: 'Tidigare datum är inte tillgängliga', arrival: 'Ankomst', departure: 'Avresa', weekDays: ['Mån','Tis','Ons','Tor','Fre','Lör','Sön'] },
+    stayAdvice: { none: 'Välj datum så föreslår vi Kraków och regionen.', one: 'Kort vistelse: Gamla stan, Stora torget och Wawelområdet.', two: 'Bra för centrum, Wawel och Kazimierz i lugnt tempo.', three: 'Mycket bra för Kraków plus en större tur: Wieliczka eller Auschwitz-Birkenau.', four: 'Du kan planera Kraków, Kazimierz, Wieliczka och en lugnare dag.', five: 'Utmärkt bas för Kraków och Małopolska utan stress.' },
+    serviceSuggestions: { title: 'Vistelsetips', camperPower: 'Husbilsresenärer lägger ofta till 10A-el.', addPower: 'Lägg till 10A-el', caravanCar: 'Med husvagn behövs ofta även bil / parkering. Lägg till?', addCar: 'Lägg till bil', tentCar: 'Kommer du med bil, lägg till bil / parkering.', dogFree: 'Hund är gratis — håll uppsikt och plocka upp.', summerCamping: 'I juli och augusti gäller ankomstordning.' },
+    stepRewards: { dates: 'Fint, datum är valda 🌿', guests: 'Toppen, gäster är ifyllda', services: 'Bra, tjänster finns i sammanfattningen', details: 'Nästan klart — kontrollera slutlig sammanfattning' },
+    help: { title: 'Hjälp', open: 'Hjälp', close: 'Stäng hjälp', sections: [['Camping, bungalows eller kombinerat?', 'Camping är för husbil, van, tält eller husvagn. Bungalows för 2, 3 eller 4 personer. Kombinerat = bungalow + campingplats.'], ['Förfrågan, inte automatisk bokning', 'Receptionen bekräftar tillgänglighet, pris och villkor.'], ['Uppskattat pris', 'Vi räknar nätter, personer och tjänster enligt prislista.'], ['10A-el och hund', '10A-el enligt prislista. Hundar är gratis.'], ['Vistelsens tider', 'Camping: 12:00-12:00. Bungalows: incheck från 16:00, utcheck senast 11:00.'], ['Vägbeskrivning', 'Vi rekommenderar Google Maps eftersom infarten ändrades 2022.']], shortTitle: 'Vill du inte fylla i allt?', shortCta: 'Skicka kort förfrågan' },
+    simple: { cta: 'Jag vet inte vad jag ska välja — hjälp mig', title: 'Kort förfrågan', desc: 'Beskriv kort hur du reser och vad du behöver — receptionen hjälper att välja.' },
+    summary: { statusLabel: 'Förfrågans status', status: 'Bekräftas av receptionen', badge: 'Uppskattat pris', depositBungalow: 'För bungalows kan deposition krävas. Detaljer skickas via e-post.', depositCombined: 'Förfrågan innehåller bungalow, så receptionen kan begära deposition.' },
+  },
+};
+const mergeNestedCopy = (base: any, patch: any) => ({
+  ...(base ?? {}),
+  ...(patch ?? {}),
+  calendar: { ...(base?.calendar ?? {}), ...(patch?.calendar ?? {}) },
+  stayAdvice: { ...(base?.stayAdvice ?? {}), ...(patch?.stayAdvice ?? {}) },
+  serviceSuggestions: { ...(base?.serviceSuggestions ?? {}), ...(patch?.serviceSuggestions ?? {}) },
+  stepRewards: { ...(base?.stepRewards ?? {}), ...(patch?.stepRewards ?? {}) },
+  help: { ...(base?.help ?? {}), ...(patch?.help ?? {}) },
+  simple: { ...(base?.simple ?? {}), ...(patch?.simple ?? {}) },
+  summary: { ...(base?.summary ?? {}), ...(patch?.summary ?? {}) },
+  success: { ...(base?.success ?? {}), ...(patch?.success ?? {}) },
+});
+const uxBase = (uxCopy[lang as keyof typeof uxCopy] ?? uxCopy.en) || uxCopy.en;
+const ux = mergeNestedCopy(uxBase, reservationUxLock[uiLang]);
 
 const stayPrice = (id: string) => pricingConfig.stayTypes.find((item) => item.id === id) as any;
 const addonPrice = (id: string) => pricingConfig.addons.find((item) => item.id === id) as any;
+const serviceLabelCopy = {
+  pl: { camper: 'Kamper', van: 'Van', caravan: 'Przyczepa', tentSmall: 'Namiot 1-2 os.', tentLarge: 'Namiot 3-4 os.', rooftopTent: 'Auto + namiot dachowy', parking: 'Samochód / parking', motorcycle: 'Motocykl', cargoTrailer: 'Przyczepa bagażowa', bus: 'Bus / ciężarówka', electricity: 'Prąd 10A', dog: 'Pies', bungalow2: 'Domek 2-os.', bungalow3: 'Domek 3-os.', bungalow4: 'Domek 4-os.' },
+  en: { camper: 'Motorhome', van: 'Van', caravan: 'Caravan', tentSmall: 'Tent 1-2 pers.', tentLarge: 'Tent 3-4 pers.', rooftopTent: 'Car + rooftop tent', parking: 'Car / parking', motorcycle: 'Motorcycle', cargoTrailer: 'Cargo trailer', bus: 'Bus / truck', electricity: '10A electricity', dog: 'Dog', bungalow2: '2-person bungalow', bungalow3: '3-person bungalow', bungalow4: '4-person bungalow' },
+  de: { camper: 'Wohnmobil', van: 'Van', caravan: 'Wohnwagen', tentSmall: 'Zelt 1-2 Pers.', tentLarge: 'Zelt 3-4 Pers.', rooftopTent: 'Auto + Dachzelt', parking: 'Auto / Parkplatz', motorcycle: 'Motorrad', cargoTrailer: 'Gepäckanhänger', bus: 'Bus / Lkw', electricity: '10A Strom', dog: 'Hund', bungalow2: 'Bungalow 2 Pers.', bungalow3: 'Bungalow 3 Pers.', bungalow4: 'Bungalow 4 Pers.' },
+  it: { camper: 'Camper', van: 'Van', caravan: 'Roulotte', tentSmall: 'Tenda 1-2 pers.', tentLarge: 'Tenda 3-4 pers.', rooftopTent: 'Auto + tenda da tetto', parking: 'Auto / parcheggio', motorcycle: 'Moto', cargoTrailer: 'Rimorchio bagagli', bus: 'Bus / camion', electricity: 'Corrente 10A', dog: 'Cane', bungalow2: 'Bungalow 2 pers.', bungalow3: 'Bungalow 3 pers.', bungalow4: 'Bungalow 4 pers.' },
+  fr: { camper: 'Camping-car', van: 'Van', caravan: 'Caravane', tentSmall: 'Tente 1-2 pers.', tentLarge: 'Tente 3-4 pers.', rooftopTent: 'Voiture + tente de toit', parking: 'Voiture / parking', motorcycle: 'Moto', cargoTrailer: 'Remorque bagages', bus: 'Bus / camion', electricity: 'Électricité 10A', dog: 'Chien', bungalow2: 'Bungalow 2 pers.', bungalow3: 'Bungalow 3 pers.', bungalow4: 'Bungalow 4 pers.' },
+  es: { camper: 'Autocaravana', van: 'Furgoneta', caravan: 'Caravana', tentSmall: 'Tienda 1-2 pers.', tentLarge: 'Tienda 3-4 pers.', rooftopTent: 'Coche + tienda de techo', parking: 'Coche / parking', motorcycle: 'Moto', cargoTrailer: 'Remolque de equipaje', bus: 'Bus / camión', electricity: 'Electricidad 10A', dog: 'Perro', bungalow2: 'Bungalow 2 pers.', bungalow3: 'Bungalow 3 pers.', bungalow4: 'Bungalow 4 pers.' },
+  nl: { camper: 'Camper', van: 'Van', caravan: 'Caravan', tentSmall: 'Tent 1-2 pers.', tentLarge: 'Tent 3-4 pers.', rooftopTent: 'Auto + daktent', parking: 'Auto / parking', motorcycle: 'Motor', cargoTrailer: 'Bagageaanhanger', bus: 'Bus / vrachtwagen', electricity: '10A-stroom', dog: 'Hond', bungalow2: 'Bungalow 2 pers.', bungalow3: 'Bungalow 3 pers.', bungalow4: 'Bungalow 4 pers.' },
+  cs: { camper: 'Obytný vůz', van: 'Dodávka', caravan: 'Karavan', tentSmall: 'Stan 1-2 os.', tentLarge: 'Stan 3-4 os.', rooftopTent: 'Auto + střešní stan', parking: 'Auto / parkování', motorcycle: 'Motocykl', cargoTrailer: 'Přívěs na zavazadla', bus: 'Bus / nákladní vůz', electricity: 'Elektřina 10A', dog: 'Pes', bungalow2: 'Bungalov 2 os.', bungalow3: 'Bungalov 3 os.', bungalow4: 'Bungalov 4 os.' },
+  sk: { camper: 'Obytné auto', van: 'Dodávka', caravan: 'Karavan', tentSmall: 'Stan 1-2 os.', tentLarge: 'Stan 3-4 os.', rooftopTent: 'Auto + strešný stan', parking: 'Auto / parkovanie', motorcycle: 'Motorka', cargoTrailer: 'Príves na batožinu', bus: 'Bus / nákladné auto', electricity: 'Elektrina 10A', dog: 'Pes', bungalow2: 'Bungalov 2 os.', bungalow3: 'Bungalov 3 os.', bungalow4: 'Bungalov 4 os.' },
+  sv: { camper: 'Husbil', van: 'Van', caravan: 'Husvagn', tentSmall: 'Tält 1-2 pers.', tentLarge: 'Tält 3-4 pers.', rooftopTent: 'Bil + taktält', parking: 'Bil / parkering', motorcycle: 'Motorcykel', cargoTrailer: 'Bagagesläp', bus: 'Buss / lastbil', electricity: '10A-el', dog: 'Hund', bungalow2: 'Bungalow 2 pers.', bungalow3: 'Bungalow 3 pers.', bungalow4: 'Bungalow 4 pers.' },
+} as const;
+const serviceLabels = serviceLabelCopy[uiLang as keyof typeof serviceLabelCopy] ?? serviceLabelCopy.en;
 
 const campingServices = [
-  { id: 'camper', label: 'Kamper', price: stayPrice('camper')?.price ?? 0 },
-  { id: 'van', label: 'Van', price: stayPrice('van')?.price ?? 0 },
-  { id: 'caravan', label: 'Przyczepa', price: stayPrice('caravan')?.price ?? 0 },
-  { id: 'tent-small', label: 'Namiot 1-2 os.', price: stayPrice('tent-small')?.price ?? 0 },
-  { id: 'tent-large', label: 'Namiot 3-4 os.', price: stayPrice('tent-large')?.price ?? 0 },
-  { id: 'rooftop-tent', label: 'Auto + namiot dachowy', price: stayPrice('rooftop-tent')?.price ?? 0 },
-  { id: 'parking', label: 'Samochód / parking', price: addonPrice('parking')?.price ?? 0 },
-  { id: 'motorcycle', label: 'Motocykl', price: addonPrice('motorcycle')?.price ?? 0 },
-  { id: 'cargo-trailer', label: 'Przyczepa bagażowa', price: addonPrice('cargo-trailer')?.price ?? 0 },
-  { id: 'bus', label: 'Bus / ciężarówka', price: addonPrice('bus')?.price ?? 0 },
-  { id: 'electricity', label: 'Prąd 10A', price: addonPrice('electricity')?.price ?? 0 },
-  { id: 'dog', label: 'Pies', price: addonPrice('dog')?.price ?? 0 },
+  { id: 'camper', label: serviceLabels.camper, price: stayPrice('camper')?.price ?? 0 },
+  { id: 'van', label: serviceLabels.van, price: stayPrice('van')?.price ?? 0 },
+  { id: 'caravan', label: serviceLabels.caravan, price: stayPrice('caravan')?.price ?? 0 },
+  { id: 'tent-small', label: serviceLabels.tentSmall, price: stayPrice('tent-small')?.price ?? 0 },
+  { id: 'tent-large', label: serviceLabels.tentLarge, price: stayPrice('tent-large')?.price ?? 0 },
+  { id: 'rooftop-tent', label: serviceLabels.rooftopTent, price: stayPrice('rooftop-tent')?.price ?? 0 },
+  { id: 'parking', label: serviceLabels.parking, price: addonPrice('parking')?.price ?? 0 },
+  { id: 'motorcycle', label: serviceLabels.motorcycle, price: addonPrice('motorcycle')?.price ?? 0 },
+  { id: 'cargo-trailer', label: serviceLabels.cargoTrailer, price: addonPrice('cargo-trailer')?.price ?? 0 },
+  { id: 'bus', label: serviceLabels.bus, price: addonPrice('bus')?.price ?? 0 },
+  { id: 'electricity', label: serviceLabels.electricity, price: addonPrice('electricity')?.price ?? 0 },
+  { id: 'dog', label: serviceLabels.dog, price: addonPrice('dog')?.price ?? 0 },
 ];
 
 const bungalowServices = [
-  { id: 'bungalow-2', label: 'Domek 2-os.', seasonalPrices: stayPrice('bungalow-2')?.seasonalPrices ?? { low: 0, high: 0 } },
-  { id: 'bungalow-3', label: 'Domek 3-os.', seasonalPrices: stayPrice('bungalow-3')?.seasonalPrices ?? { low: 0, high: 0 } },
-  { id: 'bungalow-4', label: 'Domek 4-os.', seasonalPrices: stayPrice('bungalow-4')?.seasonalPrices ?? { low: 0, high: 0 } },
-  { id: 'parking', label: 'Samochód / parking', price: addonPrice('parking')?.price ?? 0 },
-  { id: 'dog', label: 'Pies', price: addonPrice('dog')?.price ?? 0 },
+  { id: 'bungalow-2', label: serviceLabels.bungalow2, seasonalPrices: stayPrice('bungalow-2')?.seasonalPrices ?? { low: 0, high: 0 } },
+  { id: 'bungalow-3', label: serviceLabels.bungalow3, seasonalPrices: stayPrice('bungalow-3')?.seasonalPrices ?? { low: 0, high: 0 } },
+  { id: 'bungalow-4', label: serviceLabels.bungalow4, seasonalPrices: stayPrice('bungalow-4')?.seasonalPrices ?? { low: 0, high: 0 } },
+  { id: 'parking', label: serviceLabels.parking, price: addonPrice('parking')?.price ?? 0 },
+  { id: 'dog', label: serviceLabels.dog, price: addonPrice('dog')?.price ?? 0 },
 ];
 
 const config = {
@@ -1378,7 +1637,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         vehicleLarge: false,
         vehicleAsphalt: false,
         vehicleNotes: '',
-        arrivalTime: 'jeszcze nie wiem',
+        arrivalTime: 'unknown',
         message: '',
         specialNeeds: false,
         specialNeedsText: '',
@@ -1509,6 +1768,42 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           car: 'Per l’auto inserisci la targa dell’auto.',
           default: 'Inserisci la targa del veicolo principale o del rimorchio relativo al soggiorno.',
         },
+      },
+      fr: {
+        privacy: 'J’accepte le traitement des données personnelles pour gérer cette demande.',
+        privacyHelper: 'Obligatoire. Nous utilisons les données uniquement pour répondre à cette demande.',
+        validation: { name: 'Indiquez votre nom et prénom.', contact: 'Indiquez un e-mail ou un téléphone.', country: 'Choisissez un pays dans la liste.', dates: 'Choisissez les dates d’arrivée et de départ.', service: 'Choisissez au moins un type de séjour ou service.', consents: 'Cochez les consentements obligatoires avant l’envoi.' },
+        plateHints: { camper: 'Pour un camping-car, indiquez son immatriculation.', van: 'Pour un van, indiquez son immatriculation.', caravan: 'Pour une caravane, indiquez l’immatriculation de la caravane/remorque.', rooftop: 'Pour une voiture avec tente de toit, indiquez l’immatriculation de la voiture.', bus: 'Pour un bus ou camion, indiquez l’immatriculation de ce véhicule.', car: 'Pour une voiture, indiquez son immatriculation.', default: 'Indiquez l’immatriculation du véhicule principal ou de la remorque concernée.' },
+      },
+      es: {
+        privacy: 'Acepto el tratamiento de datos personales para gestionar esta consulta.',
+        privacyHelper: 'Obligatorio. Usamos los datos solo para responder a esta consulta.',
+        validation: { name: 'Introduce nombre y apellidos.', contact: 'Introduce email o teléfono.', country: 'Elige un país de la lista.', dates: 'Elige fecha de llegada y salida.', service: 'Elige al menos una opción de estancia o servicio.', consents: 'Marca los consentimientos obligatorios antes de enviar.' },
+        plateHints: { camper: 'Para autocaravana, introduce su matrícula.', van: 'Para furgoneta, introduce su matrícula.', caravan: 'Para caravana, introduce la matrícula de la caravana/remolque.', rooftop: 'Para coche con tienda de techo, introduce la matrícula del coche.', bus: 'Para bus o camión, introduce la matrícula de ese vehículo.', car: 'Para coche, introduce la matrícula del coche.', default: 'Introduce la matrícula del vehículo principal o remolque de esta estancia.' },
+      },
+      nl: {
+        privacy: 'Ik ga akkoord met verwerking van persoonsgegevens voor deze aanvraag.',
+        privacyHelper: 'Verplicht. We gebruiken de gegevens alleen om deze aanvraag te beantwoorden.',
+        validation: { name: 'Vul je naam in.', contact: 'Vul e-mail of telefoon in.', country: 'Kies een land uit de lijst.', dates: 'Kies aankomst- en vertrekdatum.', service: 'Kies minstens één verblijfstype of dienst.', consents: 'Vink de verplichte toestemmingen aan vóór verzending.' },
+        plateHints: { camper: 'Vul bij een camper het kenteken van de camper in.', van: 'Vul bij een van het kenteken van de van in.', caravan: 'Vul bij een caravan het kenteken van de caravan/aanhanger in.', rooftop: 'Vul bij een auto met daktent het kenteken van de auto in.', bus: 'Vul bij bus of vrachtwagen het kenteken van dat voertuig in.', car: 'Vul bij een auto het kenteken van de auto in.', default: 'Vul het kenteken van het hoofdvoertuig of de aanhanger voor dit verblijf in.' },
+      },
+      cs: {
+        privacy: 'Souhlasím se zpracováním osobních údajů pro vyřízení tohoto dotazu.',
+        privacyHelper: 'Povinné. Údaje použijeme pouze k odpovědi na dotaz.',
+        validation: { name: 'Uveďte jméno a příjmení.', contact: 'Uveďte e-mail nebo telefon.', country: 'Vyberte zemi ze seznamu.', dates: 'Vyberte datum příjezdu a odjezdu.', service: 'Vyberte alespoň jeden typ pobytu nebo službu.', consents: 'Před odesláním zaškrtněte povinné souhlasy.' },
+        plateHints: { camper: 'U obytného vozu uveďte jeho SPZ.', van: 'U dodávky uveďte její SPZ.', caravan: 'U karavanu uveďte SPZ karavanu/přívěsu.', rooftop: 'U auta se střešním stanem uveďte SPZ auta.', bus: 'U busu nebo nákladního vozu uveďte SPZ tohoto vozidla.', car: 'U auta uveďte SPZ auta.', default: 'Uveďte SPZ hlavního vozidla nebo přívěsu pro tento pobyt.' },
+      },
+      sk: {
+        privacy: 'Súhlasím so spracovaním osobných údajov na vybavenie tohto dopytu.',
+        privacyHelper: 'Povinné. Údaje použijeme iba na odpoveď na dopyt.',
+        validation: { name: 'Uveďte meno a priezvisko.', contact: 'Uveďte e-mail alebo telefón.', country: 'Vyberte krajinu zo zoznamu.', dates: 'Vyberte dátum príchodu a odchodu.', service: 'Vyberte aspoň jeden typ pobytu alebo službu.', consents: 'Pred odoslaním zaškrtnite povinné súhlasy.' },
+        plateHints: { camper: 'Pri obytnom aute uveďte jeho EČV.', van: 'Pri dodávke uveďte jej EČV.', caravan: 'Pri karavane uveďte EČV karavanu/prívesu.', rooftop: 'Pri aute so strešným stanom uveďte EČV auta.', bus: 'Pri buse alebo nákladnom aute uveďte EČV vozidla.', car: 'Pri aute uveďte EČV auta.', default: 'Uveďte EČV hlavného vozidla alebo prívesu pre tento pobyt.' },
+      },
+      sv: {
+        privacy: 'Jag samtycker till behandling av personuppgifter för denna förfrågan.',
+        privacyHelper: 'Obligatoriskt. Uppgifterna används bara för att svara på förfrågan.',
+        validation: { name: 'Ange namn.', contact: 'Ange e-post eller telefon.', country: 'Välj ett land i listan.', dates: 'Välj ankomst- och avresedatum.', service: 'Välj minst en vistelsetyp eller tjänst.', consents: 'Markera obligatoriska samtycken före skickande.' },
+        plateHints: { camper: 'För husbil, ange husbilens registreringsnummer.', van: 'För van, ange vanens registreringsnummer.', caravan: 'För husvagn, ange husvagnens/släpets registreringsnummer.', rooftop: 'För bil med taktält, ange bilens registreringsnummer.', bus: 'För buss eller lastbil, ange fordonets registreringsnummer.', car: 'För bil, ange bilens registreringsnummer.', default: 'Ange registreringsnummer för huvudfordon eller släp för vistelsen.' },
       },
     };
     const formText = formTextByLang[config.lang] || formTextByLang.en;
@@ -1651,7 +1946,356 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         },
       },
     };
-    const detailText = detailTextByLang[config.lang] || detailTextByLang.en;
+    const detailLocaleLabels = {
+      de: {
+        required: 'Erforderlich', optional: 'Optional', conditionalContact: 'Erforderlich, wenn die andere Kontaktmethode fehlt', missingTitle: 'Vor dem Senden fehlt noch:', readyTitle: 'Alles bereit — Sie können die Anfrage senden 🌿', summaryStatusMissing: 'Pflichtfelder ausfüllen', summaryStatusReady: 'Bereit zum Senden', copySummary: 'Gesamte Zusammenfassung kopieren', copied: 'Zusammenfassung kopiert 🌿', copyHelper: 'Der Zusammenfassungstext ist markiert. Kopieren Sie ihn mit Ctrl+C.', statusConfirmedByReception: 'Von der Rezeption zu bestätigen', privacyLink: 'Datenschutzerklärung', consentSectionTitle: 'Erforderliche Zustimmungen', consentSectionLead: 'Diese Zustimmungen sind vor dem Senden an die Rezeption erforderlich.',
+        registrationTitle: 'Anmeldung an der Rezeption', registrationDocument: 'Bei der Anmeldung fragen wir nach einem Ausweisdokument.', registrationPlate: 'Wenn Sie mit Auto, Camper, Van oder Wohnwagen kommen, bereiten Sie das Kennzeichen vor.', registrationTrailer: 'Beim Wohnwagen bitte das Kennzeichen des Anhängers/Wohnwagens angeben.',
+        vehicleTitle: 'Fahrzeugdaten — optional', vehicleLead: 'Diese Angaben helfen der Rezeption, besonders für größere Fahrzeuge einen passenden Platz zu wählen.', model: 'Fahrzeugmarke/-modell', length: 'Länge', width: 'Breite', height: 'Höhe', weight: 'Gewicht', large: 'Das Fahrzeug ist groß oder schwer', asphalt: 'Ich brauche einen Asphaltplatz', notes: 'Fahrzeughinweise',
+        namePlaceholder: 'z.B. Jan Kowalski', nameHelper: 'Geben Sie den Namen der Kontaktperson ein.', emailPlaceholder: 'z.B. jan@email.com', emailHelper: 'Die Rezeption antwortet an diese Adresse. E-Mail oder Telefon ist erforderlich.', phonePlaceholder: 'z.B. +48 123 456 789', phoneHelper: 'Geben Sie eine Nummer an, wenn Sie Telefon/WhatsApp bevorzugen. E-Mail oder Telefon ist erforderlich.', languageHelper: 'Wählen Sie die Sprache für die Antwort der Rezeption.', countryPlaceholder: 'z.B. de, Deutschland, Germany...', countryHelper: 'Beginnen Sie mit Land, Code oder lokalem Namen.', plateHelper: 'Beim Camper Kennzeichen des Campers, beim Wohnwagen Kennzeichen des Anhängers, beim Dachzelt Kennzeichen des Autos.', messagePlaceholder: 'z.B. wir kommen später, bitte Platz nahe Sanitär...', messageHelper: 'Fügen Sie Informationen hinzu, die der Rezeption helfen.', specialNeedsHelper: 'Optional. Nach Auswahl erscheint ein Feld für Details.', lateCheckoutHelper: 'Optional. Die Rezeption bestätigt Möglichkeit und Kosten nach Ankunft.',
+      },
+      it: {
+        required: 'Obbligatorio', optional: 'Facoltativo', conditionalContact: 'Obbligatorio se manca l’altro contatto', missingTitle: 'Manca ancora prima dell’invio:', readyTitle: 'Tutto pronto — puoi inviare la richiesta 🌿', summaryStatusMissing: 'Completa i campi obbligatori', summaryStatusReady: 'Pronto per inviare', copySummary: 'Copia riepilogo completo', copied: 'Riepilogo copiato 🌿', copyHelper: 'Il testo del riepilogo è selezionato. Copialo con Ctrl+C.', statusConfirmedByReception: 'Da confermare dalla reception', privacyLink: 'Privacy policy', consentSectionTitle: 'Consensi obbligatori', consentSectionLead: 'Questi consensi sono necessari prima di inviare la richiesta alla reception.',
+        registrationTitle: 'Registrazione alla reception', registrationDocument: 'Alla registrazione chiederemo un documento d’identità.', registrationPlate: 'Se arrivi con auto, camper, van o roulotte prepara la targa.', registrationTrailer: 'Con roulotte/rimorchio inserisci la targa del rimorchio.',
+        vehicleTitle: 'Dati veicolo — facoltativi', vehicleLead: 'Queste informazioni aiutano la reception a scegliere una piazzola comoda, soprattutto per veicoli grandi.', model: 'Marca/modello veicolo', length: 'Lunghezza', width: 'Larghezza', height: 'Altezza', weight: 'Peso', large: 'Il veicolo è grande o pesante', asphalt: 'Ho bisogno di posto su asfalto', notes: 'Note veicolo',
+        namePlaceholder: 'es. Jan Kowalski', nameHelper: 'Inserisci nome e cognome del contatto.', emailPlaceholder: 'es. jan@email.com', emailHelper: 'La reception risponderà a questo indirizzo. Email o telefono è obbligatorio.', phonePlaceholder: 'es. +48 123 456 789', phoneHelper: 'Aggiungi un numero se preferisci telefono o WhatsApp. Email o telefono è obbligatorio.', languageHelper: 'Scegli la lingua della risposta della reception.', countryPlaceholder: 'es. it, Italia, Germany...', countryHelper: 'Inizia a digitare paese, codice o nome locale.', plateHelper: 'Per camper inserisci targa del camper; per roulotte targa del rimorchio; per tenda da tetto targa dell’auto.', messagePlaceholder: 'Es. arriveremo più tardi, posto vicino ai servizi...', messageHelper: 'Aggiungi informazioni utili alla reception.', specialNeedsHelper: 'Facoltativo. Dopo la selezione appare un campo dettagli.', lateCheckoutHelper: 'Facoltativo. La reception conferma possibilità e costo dopo l’arrivo.',
+      },
+      fr: {
+        required: 'Obligatoire', optional: 'Facultatif', conditionalContact: 'Obligatoire si l’autre contact manque', missingTitle: 'Il manque avant l’envoi :', readyTitle: 'Tout est prêt — vous pouvez envoyer la demande 🌿', summaryStatusMissing: 'Complétez les champs obligatoires', summaryStatusReady: 'Prêt à envoyer', copySummary: 'Copier le résumé complet', copied: 'Résumé copié 🌿', copyHelper: 'Le texte du résumé est sélectionné. Copiez-le avec Ctrl+C.', statusConfirmedByReception: 'À confirmer par la réception', privacyLink: 'Politique de confidentialité', consentSectionTitle: 'Consentements obligatoires', consentSectionLead: 'Ces consentements sont nécessaires avant l’envoi à la réception.',
+        registrationTitle: 'Enregistrement à la réception', registrationDocument: 'À l’enregistrement, nous demanderons une pièce d’identité.', registrationPlate: 'Si vous arrivez en voiture, camping-car, van ou caravane, préparez l’immatriculation.', registrationTrailer: 'Pour une caravane/remorque, indiquez son immatriculation.',
+        vehicleTitle: 'Détails du véhicule — facultatif', vehicleLead: 'Ces informations aident la réception à choisir un emplacement confortable, surtout pour les grands véhicules.', model: 'Marque/modèle du véhicule', length: 'Longueur', width: 'Largeur', height: 'Hauteur', weight: 'Poids', large: 'Le véhicule est grand ou lourd', asphalt: 'J’ai besoin d’une place sur asphalte', notes: 'Notes véhicule',
+        namePlaceholder: 'p. ex. Jan Kowalski', nameHelper: 'Indiquez le nom de la personne de contact.', emailPlaceholder: 'p. ex. jan@email.com', emailHelper: 'La réception répondra à cette adresse. E-mail ou téléphone obligatoire.', phonePlaceholder: 'p. ex. +48 123 456 789', phoneHelper: 'Ajoutez un numéro si vous préférez téléphone ou WhatsApp. E-mail ou téléphone obligatoire.', languageHelper: 'Choisissez la langue de réponse de la réception.', countryPlaceholder: 'p. ex. fr, France, Allemagne...', countryHelper: 'Commencez par un pays, un code ou un nom local.', plateHelper: 'Pour camping-car : son immatriculation. Pour caravane : l’immatriculation de la remorque. Pour tente de toit : l’immatriculation de la voiture.', messagePlaceholder: 'Ex. arrivée tardive, place près des sanitaires...', messageHelper: 'Ajoutez toute information utile pour préparer votre séjour.', specialNeedsHelper: 'Facultatif. Un champ détail apparaît après sélection.', lateCheckoutHelper: 'Facultatif. La réception confirme la possibilité et le coût après l’arrivée.',
+      },
+      es: {
+        required: 'Obligatorio', optional: 'Opcional', conditionalContact: 'Obligatorio si falta el otro contacto', missingTitle: 'Falta antes de enviar:', readyTitle: 'Todo listo — puedes enviar la consulta 🌿', summaryStatusMissing: 'Completa los campos obligatorios', summaryStatusReady: 'Listo para enviar', copySummary: 'Copiar resumen completo', copied: 'Resumen copiado 🌿', copyHelper: 'El texto del resumen está seleccionado. Cópialo con Ctrl+C.', statusConfirmedByReception: 'A confirmar por recepción', privacyLink: 'Política de privacidad', consentSectionTitle: 'Consentimientos obligatorios', consentSectionLead: 'Estos consentimientos son necesarios antes de enviar la consulta a recepción.',
+        registrationTitle: 'Registro en recepción', registrationDocument: 'En el registro pediremos un documento de identidad.', registrationPlate: 'Si llegas en coche, autocaravana, van o caravana, prepara la matrícula.', registrationTrailer: 'Para caravana/remolque, introduce la matrícula del remolque.',
+        vehicleTitle: 'Datos del vehículo — opcional', vehicleLead: 'Estos datos ayudan a recepción a elegir una parcela cómoda, sobre todo para vehículos grandes.', model: 'Marca/modelo del vehículo', length: 'Longitud', width: 'Anchura', height: 'Altura', weight: 'Peso', large: 'El vehículo es grande o pesado', asphalt: 'Necesito sitio en asfalto', notes: 'Notas del vehículo',
+        namePlaceholder: 'p. ej. Jan Kowalski', nameHelper: 'Introduce nombre y apellidos de la persona de contacto.', emailPlaceholder: 'p. ej. jan@email.com', emailHelper: 'Recepción responderá a esta dirección. Email o teléfono es obligatorio.', phonePlaceholder: 'p. ej. +48 123 456 789', phoneHelper: 'Añade un número si prefieres teléfono o WhatsApp. Email o teléfono es obligatorio.', languageHelper: 'Elige el idioma de respuesta de recepción.', countryPlaceholder: 'p. ej. es, España, Alemania...', countryHelper: 'Empieza a escribir país, código o nombre local.', plateHelper: 'Para autocaravana, matrícula de la autocaravana. Para caravana, matrícula del remolque. Para tienda de techo, matrícula del coche.', messagePlaceholder: 'P. ej. llegaremos tarde, sitio cerca de sanitarios...', messageHelper: 'Añade información útil para preparar la estancia.', specialNeedsHelper: 'Opcional. Al marcarlo aparecerá un campo de detalles.', lateCheckoutHelper: 'Opcional. Recepción confirma posibilidad y coste después de la llegada.',
+      },
+      nl: {
+        required: 'Verplicht', optional: 'Optioneel', conditionalContact: 'Verplicht als de andere contactmethode ontbreekt', missingTitle: 'Nog nodig vóór verzending:', readyTitle: 'Alles is klaar — je kunt de aanvraag sturen 🌿', summaryStatusMissing: 'Vul verplichte velden in', summaryStatusReady: 'Klaar om te verzenden', copySummary: 'Volledig overzicht kopiëren', copied: 'Overzicht gekopieerd 🌿', copyHelper: 'De overzichtstekst is geselecteerd. Kopieer met Ctrl+C.', statusConfirmedByReception: 'Te bevestigen door de receptie', privacyLink: 'Privacybeleid', consentSectionTitle: 'Verplichte toestemmingen', consentSectionLead: 'Deze toestemmingen zijn nodig voordat de aanvraag naar de receptie gaat.',
+        registrationTitle: 'Registratie bij receptie', registrationDocument: 'Bij registratie vragen we om één identiteitsbewijs.', registrationPlate: 'Kom je met auto, camper, van of caravan, houd het kenteken klaar.', registrationTrailer: 'Voor caravan/aanhanger vul je het kenteken van de aanhanger in.',
+        vehicleTitle: 'Voertuiggegevens — optioneel', vehicleLead: 'Deze gegevens helpen de receptie een comfortabele plaats te kiezen, vooral voor grotere voertuigen.', model: 'Merk/model voertuig', length: 'Lengte', width: 'Breedte', height: 'Hoogte', weight: 'Gewicht', large: 'Het voertuig is groot of zwaar', asphalt: 'Ik heb een asfaltplaats nodig', notes: 'Voertuignotities',
+        namePlaceholder: 'bv. Jan Kowalski', nameHelper: 'Vul de naam van de contactpersoon in.', emailPlaceholder: 'bv. jan@email.com', emailHelper: 'De receptie antwoordt op dit adres. E-mail of telefoon is verplicht.', phonePlaceholder: 'bv. +48 123 456 789', phoneHelper: 'Voeg een nummer toe als je telefoon of WhatsApp verkiest. E-mail of telefoon is verplicht.', languageHelper: 'Kies de taal voor het antwoord van de receptie.', countryPlaceholder: 'bv. nl, Nederland, Duitsland...', countryHelper: 'Begin met land, code of lokale naam.', plateHelper: 'Voor camper: kenteken camper. Voor caravan: kenteken caravan/aanhanger. Voor daktent: kenteken auto.', messagePlaceholder: 'Bv. we komen later, graag plaats bij sanitair...', messageHelper: 'Voeg informatie toe die de receptie helpt.', specialNeedsHelper: 'Optioneel. Na selectie verschijnt een veld voor details.', lateCheckoutHelper: 'Optioneel. De receptie bevestigt mogelijkheid en kosten na aankomst.',
+      },
+      cs: {
+        required: 'Povinné', optional: 'Volitelné', conditionalContact: 'Povinné, pokud chybí druhý kontakt', missingTitle: 'Před odesláním chybí:', readyTitle: 'Vše je připraveno — můžete dotaz odeslat 🌿', summaryStatusMissing: 'Doplňte povinná pole', summaryStatusReady: 'Připraveno k odeslání', copySummary: 'Kopírovat celé shrnutí', copied: 'Shrnutí zkopírováno 🌿', copyHelper: 'Text shrnutí je označen. Zkopírujte ho pomocí Ctrl+C.', statusConfirmedByReception: 'Potvrdí recepce', privacyLink: 'Zásady ochrany soukromí', consentSectionTitle: 'Povinné souhlasy', consentSectionLead: 'Tyto souhlasy jsou nutné před odesláním dotazu recepci.',
+        registrationTitle: 'Registrace na recepci', registrationDocument: 'Při registraci požádáme o jeden doklad totožnosti.', registrationPlate: 'Pokud přijedete autem, obytným vozem, dodávkou nebo karavanem, připravte SPZ.', registrationTrailer: 'U karavanu/přívěsu uveďte SPZ přívěsu.',
+        vehicleTitle: 'Údaje o vozidle — volitelné', vehicleLead: 'Tyto údaje pomohou recepci vybrat pohodlné místo, hlavně pro větší vozidla.', model: 'Značka/model vozidla', length: 'Délka', width: 'Šířka', height: 'Výška', weight: 'Hmotnost', large: 'Vozidlo je velké nebo těžké', asphalt: 'Potřebuji místo na asfaltu', notes: 'Poznámky k vozidlu',
+        namePlaceholder: 'např. Jan Kowalski', nameHelper: 'Uveďte jméno kontaktní osoby.', emailPlaceholder: 'např. jan@email.com', emailHelper: 'Recepce odpoví na tuto adresu. E-mail nebo telefon je povinný.', phonePlaceholder: 'např. +48 123 456 789', phoneHelper: 'Přidejte číslo, pokud preferujete telefon nebo WhatsApp. E-mail nebo telefon je povinný.', languageHelper: 'Vyberte jazyk odpovědi recepce.', countryPlaceholder: 'např. cz, Česko, Německo...', countryHelper: 'Začněte psát zemi, kód nebo místní název.', plateHelper: 'U obytného vozu SPZ obytného vozu, u karavanu SPZ přívěsu, u střešního stanu SPZ auta.', messagePlaceholder: 'Např. přijedeme později, prosíme místo u sociálního zařízení...', messageHelper: 'Přidejte informace, které pomohou recepci.', specialNeedsHelper: 'Volitelné. Po výběru se zobrazí pole s detaily.', lateCheckoutHelper: 'Volitelné. Recepce potvrdí možnost a cenu po příjezdu.',
+      },
+      sk: {
+        required: 'Povinné', optional: 'Voliteľné', conditionalContact: 'Povinné, ak chýba druhý kontakt', missingTitle: 'Pred odoslaním chýba:', readyTitle: 'Všetko je pripravené — môžete dopyt odoslať 🌿', summaryStatusMissing: 'Doplňte povinné polia', summaryStatusReady: 'Pripravené na odoslanie', copySummary: 'Kopírovať celé zhrnutie', copied: 'Zhrnutie skopírované 🌿', copyHelper: 'Text zhrnutia je označený. Skopírujte ho pomocou Ctrl+C.', statusConfirmedByReception: 'Potvrdí recepcia', privacyLink: 'Zásady ochrany súkromia', consentSectionTitle: 'Povinné súhlasy', consentSectionLead: 'Tieto súhlasy sú nutné pred odoslaním dopytu recepcii.',
+        registrationTitle: 'Registrácia na recepcii', registrationDocument: 'Pri registrácii požiadame o jeden doklad totožnosti.', registrationPlate: 'Ak prídete autom, obytným autom, dodávkou alebo karavanom, pripravte EČV.', registrationTrailer: 'Pri karavane/prívese uveďte EČV prívesu.',
+        vehicleTitle: 'Údaje o vozidle — voliteľné', vehicleLead: 'Tieto údaje pomôžu recepcii vybrať pohodlné miesto, hlavne pre väčšie vozidlá.', model: 'Značka/model vozidla', length: 'Dĺžka', width: 'Šírka', height: 'Výška', weight: 'Hmotnosť', large: 'Vozidlo je veľké alebo ťažké', asphalt: 'Potrebujem miesto na asfalte', notes: 'Poznámky k vozidlu',
+        namePlaceholder: 'napr. Jan Kowalski', nameHelper: 'Uveďte meno kontaktnej osoby.', emailPlaceholder: 'napr. jan@email.com', emailHelper: 'Recepcia odpovie na túto adresu. E-mail alebo telefón je povinný.', phonePlaceholder: 'napr. +48 123 456 789', phoneHelper: 'Pridajte číslo, ak preferujete telefón alebo WhatsApp. E-mail alebo telefón je povinný.', languageHelper: 'Vyberte jazyk odpovede recepcie.', countryPlaceholder: 'napr. sk, Slovensko, Nemecko...', countryHelper: 'Začnite písať krajinu, kód alebo miestny názov.', plateHelper: 'Pri obytnom aute EČV obytného auta, pri karavane EČV prívesu, pri strešnom stane EČV auta.', messagePlaceholder: 'Napr. prídeme neskôr, prosíme miesto pri sociálnych zariadeniach...', messageHelper: 'Pridajte informácie, ktoré pomôžu recepcii.', specialNeedsHelper: 'Voliteľné. Po výbere sa zobrazí pole s detailmi.', lateCheckoutHelper: 'Voliteľné. Recepcia potvrdí možnosť a cenu po príchode.',
+      },
+      sv: {
+        required: 'Obligatoriskt', optional: 'Valfritt', conditionalContact: 'Obligatoriskt om annan kontakt saknas', missingTitle: 'Saknas före skickande:', readyTitle: 'Allt är klart — du kan skicka förfrågan 🌿', summaryStatusMissing: 'Fyll i obligatoriska fält', summaryStatusReady: 'Klart att skicka', copySummary: 'Kopiera hela sammanfattningen', copied: 'Sammanfattning kopierad 🌿', copyHelper: 'Sammanfattningstexten är markerad. Kopiera med Ctrl+C.', statusConfirmedByReception: 'Bekräftas av receptionen', privacyLink: 'Integritetspolicy', consentSectionTitle: 'Obligatoriska samtycken', consentSectionLead: 'Dessa samtycken behövs innan förfrågan skickas till receptionen.',
+        registrationTitle: 'Registrering i receptionen', registrationDocument: 'Vid registrering ber vi om en identitetshandling.', registrationPlate: 'Kommer du med bil, husbil, van eller husvagn, ha registreringsnummer redo.', registrationTrailer: 'För husvagn/släp anger du släpets registreringsnummer.',
+        vehicleTitle: 'Fordonsuppgifter — valfritt', vehicleLead: 'Uppgifterna hjälper receptionen att välja en bekväm plats, särskilt för större fordon.', model: 'Märke/modell', length: 'Längd', width: 'Bredd', height: 'Höjd', weight: 'Vikt', large: 'Fordonet är stort eller tungt', asphalt: 'Jag behöver plats på asfalt', notes: 'Fordonsnoteringar',
+        namePlaceholder: 't.ex. Jan Kowalski', nameHelper: 'Ange kontaktpersonens namn.', emailPlaceholder: 't.ex. jan@email.com', emailHelper: 'Receptionen svarar till denna adress. E-post eller telefon krävs.', phonePlaceholder: 't.ex. +48 123 456 789', phoneHelper: 'Lägg till nummer om du föredrar telefon eller WhatsApp. E-post eller telefon krävs.', languageHelper: 'Välj språk för receptionens svar.', countryPlaceholder: 't.ex. se, Sverige, Tyskland...', countryHelper: 'Börja skriva land, kod eller lokalt namn.', plateHelper: 'För husbil: husbilens nummer. För husvagn: släpets nummer. För taktält: bilens nummer.', messagePlaceholder: 'T.ex. vi kommer senare, gärna plats nära servicehus...', messageHelper: 'Lägg till information som hjälper receptionen.', specialNeedsHelper: 'Valfritt. Ett detaljfält visas efter val.', lateCheckoutHelper: 'Valfritt. Receptionen bekräftar möjlighet och kostnad efter ankomst.',
+      },
+    };
+    const makeDetailText = (labels) => labels ? ({
+      required: labels.required,
+      optional: labels.optional,
+      conditionalContact: labels.conditionalContact,
+      missingTitle: labels.missingTitle,
+      readyTitle: labels.readyTitle,
+      summaryStatusMissing: labels.summaryStatusMissing,
+      summaryStatusReady: labels.summaryStatusReady,
+      copySummary: labels.copySummary,
+      copied: labels.copied,
+      copyHelper: labels.copyHelper,
+      statusConfirmedByReception: labels.statusConfirmedByReception,
+      privacyLink: labels.privacyLink,
+      consentSectionTitle: labels.consentSectionTitle,
+      consentSectionLead: labels.consentSectionLead,
+      registration: {
+        title: labels.registrationTitle,
+        document: labels.registrationDocument,
+        plate: labels.registrationPlate,
+        trailer: labels.registrationTrailer,
+      },
+      vehicle: {
+        title: labels.vehicleTitle,
+        lead: labels.vehicleLead,
+        model: labels.model,
+        length: labels.length,
+        width: labels.width,
+        height: labels.height,
+        weight: labels.weight,
+        large: labels.large,
+        asphalt: labels.asphalt,
+        notes: labels.notes,
+        trailer: labels.registrationTrailer,
+      },
+      field: {
+        name: { placeholder: labels.namePlaceholder, helper: labels.nameHelper },
+        email: { placeholder: labels.emailPlaceholder, helper: labels.emailHelper },
+        phone: { placeholder: labels.phonePlaceholder, helper: labels.phoneHelper },
+        language: { helper: labels.languageHelper },
+        country: { placeholder: labels.countryPlaceholder, helper: labels.countryHelper },
+        plate: {
+          helper: labels.plateHelper,
+          placeholders: {
+            camper: labels.namePlaceholder.replace(/Jan Kowalski|jan@email\.com/g, 'KR 12345'),
+            van: labels.namePlaceholder.replace(/Jan Kowalski|jan@email\.com/g, 'KR 12345'),
+            caravan: labels.namePlaceholder.replace(/Jan Kowalski|jan@email\.com/g, 'KRA 1234'),
+            rooftop: labels.namePlaceholder.replace(/Jan Kowalski|jan@email\.com/g, 'KR 12345'),
+            bus: labels.namePlaceholder.replace(/Jan Kowalski|jan@email\.com/g, 'KR 12345'),
+            car: labels.namePlaceholder.replace(/Jan Kowalski|jan@email\.com/g, 'KR 12345'),
+            default: 'KR 12345',
+          },
+        },
+        message: { placeholder: labels.messagePlaceholder, helper: labels.messageHelper },
+        specialNeeds: { helper: labels.specialNeedsHelper },
+        lateCheckout: { helper: labels.lateCheckoutHelper },
+      },
+      missing: {
+        dates: t.summary.dates,
+        guests: t.summary.guests,
+        service: t.summary.services,
+        name: t.fields.name,
+        contact: `${t.fields.email} / ${t.fields.phone}`,
+        country: t.fields.country,
+        quiet: t.fields.quiet,
+        consent: t.fields.consent,
+        privacy: labels.privacyLink,
+      },
+    }) : null;
+    const detailText = detailTextByLang[config.lang] || makeDetailText(detailLocaleLabels[config.lang]) || detailTextByLang.en;
+    const runtimeTextByLang = {
+      pl: {
+        perNight: '/ noc',
+        nightsShort: 'n.',
+        stepWord: 'Krok',
+        ofWord: 'z',
+        startLinks: {
+          planner: 'Dodaj plan pobytu',
+          attractions: 'Zobacz atrakcje',
+          directions: 'Jak dojechać do centrum?',
+        },
+        tripCtas: {
+          none: [['planner', 'Dodaj plan pobytu'], ['attractions', 'Zobacz, co zwiedzić']],
+          one: [['directions', 'Jak dojechać do centrum?'], ['attractions', 'Stare Miasto i Wawel']],
+          two: [['planner', 'Plan na 2 noce'], ['attractions', 'Kazimierz i centrum']],
+          three: [['attractions', 'Wieliczka / Auschwitz-Birkenau'], ['planner', 'Plan na 3 noce']],
+          many: [['planner', 'Plan pobytu 4+ nocy'], ['attractions', 'Kraków i Małopolska']],
+        },
+        info: {
+          hours: 'Godziny',
+          firstDay: 'Pierwszy dzień pobytu.',
+          departureAfter: 'Wyjazd musi być po przyjeździe.',
+          counted: 'Liczone automatycznie.',
+          goodToKnow: 'Dobrze wiedzieć',
+          highSeason: 'Lipiec/sierpień',
+          bungalowItems: 'Domki — co zabrać',
+          tours: 'Wycieczki',
+        },
+        toursTitle: 'Czy chcesz zapytać też o wycieczkę?',
+        toursLead: 'Opcjonalnie — wybór nie zmienia ceny zapytania.',
+        tourOptions: ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Park Wodny Kraków', 'Bagry', 'Kryspinów', 'Stare Miasto i Wawel', 'Nie wiem — proszę o propozycję'],
+        yes: 'Tak',
+        arrivalTime: {
+          label: 'Orientacyjna godzina przyjazdu',
+          helper: 'Godzina jest orientacyjna i pomaga recepcji przygotować przyjazd.',
+          warning: 'Recepcja i brama mają określone godziny pracy. Przy późnym przyjeździe skontaktuj się z recepcją.',
+          unknown: 'jeszcze nie wiem',
+          before12: 'przed 12:00',
+          noonAfternoon: '12:00–15:00',
+          afternoonEvening: '15:00–18:00',
+          evening: '18:00–20:00',
+          after21: 'po 21:00 / skontaktuj się z recepcją',
+        },
+        notices: {
+          cityCamping: 'Camping Clepardia znajduje się w Krakowie: blisko tramwaju, sklepów i atrakcji. To zielona baza w mieście, dlatego czasem słychać tramwaje, samoloty i normalne miejskie życie.',
+          bungalowItems: 'Przy pobycie w domkach prosimy zabrać własne rzeczy osobiste, w tym ręczniki i kosmetyki.',
+          highSeason: 'W lipcu i sierpniu nie prowadzimy rezerwacji miejsc campingowych z wyprzedzeniem. Miejsca dla kamperów, przyczep, vanów i namiotów są dostępne według kolejności przyjazdu. W tym terminie można wysłać zapytanie tylko o domek.',
+        },
+        detailsSection: {
+          contactTitle: 'Dane kontaktowe',
+          contactLead: 'Recepcja użyje ich tylko do odpowiedzi na zapytanie.',
+          stayTitle: 'Szczegóły pobytu',
+          stayLead: 'Dopisz informacje, które pomogą przygotować przyjazd.',
+          consentTitle: 'Potwierdzenia',
+          consentLead: 'Kilka ważnych zasad, żeby zapytanie było kompletne.',
+          quietHelper: 'Wymagane przed wysłaniem.',
+          consentHelper: 'Wymagane przed wysłaniem.',
+        },
+        campy: { helpPrompt: 'Pomóż mi przygotować pobyt', dayPlanPrompt: 'Zaplanuj dzień w Krakowie' },
+        payloadLabels: { vehiclePlate: 'Numer rejestracyjny', vehicleDetails: 'Dane pojazdu', specialNeeds: 'Specjalne potrzeby', lateCheckout: 'Późniejszy wyjazd' },
+      },
+      en: {
+        perNight: '/ night',
+        nightsShort: 'nights',
+        stepWord: 'Step',
+        ofWord: 'of',
+        startLinks: { planner: 'Add a stay plan', attractions: 'See attractions', directions: 'How to reach the centre?' },
+        tripCtas: {
+          none: [['planner', 'Add a stay plan'], ['attractions', 'See what to visit']],
+          one: [['directions', 'How to reach the centre?'], ['attractions', 'Old Town and Wawel']],
+          two: [['planner', '2-night plan'], ['attractions', 'Kazimierz and centre']],
+          three: [['attractions', 'Wieliczka / Auschwitz-Birkenau'], ['planner', '3-night plan']],
+          many: [['planner', '4+ night stay plan'], ['attractions', 'Krakow and Lesser Poland']],
+        },
+        info: { hours: 'Hours', firstDay: 'First day of stay.', departureAfter: 'Departure must be after arrival.', counted: 'Counted automatically.', goodToKnow: 'Good to know', highSeason: 'July/August', bungalowItems: 'Bungalows — what to bring', tours: 'Trips' },
+        toursTitle: 'Would you also like to ask about a trip?',
+        toursLead: 'Optional — this does not change the estimated price.',
+        tourOptions: ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Kraków Water Park', 'Bagry', 'Kryspinów', 'Old Town and Wawel', 'I am not sure — please suggest'],
+        yes: 'Yes',
+        arrivalTime: { label: 'Estimated arrival time', helper: 'The time is indicative and helps reception prepare your arrival.', warning: 'Reception and gate have set opening hours. Contact reception before a late arrival.', unknown: 'not sure yet', before12: 'before 12:00', noonAfternoon: '12:00–15:00', afternoonEvening: '15:00–18:00', evening: '18:00–20:00', after21: 'after 21:00 / contact reception' },
+        notices: { cityCamping: 'Camping Clepardia is a green city campsite close to trams, shops and attractions. You may sometimes hear trams, aircraft and normal city life.', bungalowItems: 'For a bungalow stay, please bring personal items, including towels and toiletries.', highSeason: 'In July and August we do not accept advance reservations for camping pitches. Places for campers, caravans, vans and tents are available in arrival order. For this period you can only send an enquiry for a bungalow.' },
+        detailsSection: { contactTitle: 'Contact details', contactLead: 'Reception will use them only to answer this enquiry.', stayTitle: 'Stay details', stayLead: 'Add anything that helps prepare your arrival.', consentTitle: 'Confirmations', consentLead: 'A few important rules to complete the enquiry.', quietHelper: 'Required before sending.', consentHelper: 'Required before sending.' },
+        campy: { helpPrompt: 'Help me prepare my stay', dayPlanPrompt: 'Plan a Krakow day' },
+        payloadLabels: { vehiclePlate: 'Registration plate', vehicleDetails: 'Vehicle details', specialNeeds: 'Special needs', lateCheckout: 'Later check-out' },
+      },
+      de: {
+        perNight: '/ Nacht',
+        nightsShort: 'Nächte',
+        stepWord: 'Schritt',
+        ofWord: 'von',
+        startLinks: { planner: 'Aufenthaltsplan hinzufügen', attractions: 'Attraktionen ansehen', directions: 'Wie ins Zentrum?' },
+        tripCtas: { none: [['planner', 'Aufenthaltsplan hinzufügen'], ['attractions', 'Sehenswürdigkeiten ansehen']], one: [['directions', 'Wie ins Zentrum?'], ['attractions', 'Altstadt und Wawel']], two: [['planner', 'Plan für 2 Nächte'], ['attractions', 'Kazimierz und Zentrum']], three: [['attractions', 'Wieliczka / Auschwitz-Birkenau'], ['planner', 'Plan für 3 Nächte']], many: [['planner', 'Plan für 4+ Nächte'], ['attractions', 'Krakau und Kleinpolen']] },
+        info: { hours: 'Zeiten', firstDay: 'Erster Aufenthaltstag.', departureAfter: 'Abreise muss nach der Anreise liegen.', counted: 'Automatisch berechnet.', goodToKnow: 'Gut zu wissen', highSeason: 'Juli/August', bungalowItems: 'Bungalows — was mitbringen', tours: 'Ausflüge' },
+        toursTitle: 'Möchten Sie auch nach einem Ausflug fragen?',
+        toursLead: 'Optional — das ändert den geschätzten Preis nicht.',
+        tourOptions: ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Wasserpark Krakau', 'Bagry', 'Kryspinów', 'Altstadt und Wawel', 'Ich weiß nicht — bitte Vorschlag senden'],
+        yes: 'Ja',
+        arrivalTime: { label: 'Ungefähre Ankunftszeit', helper: 'Die Zeit hilft der Rezeption, Ihre Ankunft vorzubereiten.', warning: 'Rezeption und Tor haben feste Öffnungszeiten. Bei später Ankunft kontaktieren Sie bitte die Rezeption.', unknown: 'noch nicht sicher', before12: 'vor 12:00', noonAfternoon: '12:00–15:00', afternoonEvening: '15:00–18:00', evening: '18:00–20:00', after21: 'nach 21:00 / Rezeption kontaktieren' },
+        notices: { cityCamping: 'Camping Clepardia liegt in Krakau, nahe Straßenbahn, Geschäften und Attraktionen. Es ist eine grüne Basis in der Stadt; manchmal hört man Straßenbahnen, Flugzeuge und normales Stadtleben.', bungalowItems: 'Für Bungalows bitte eigene persönliche Sachen mitbringen, darunter Handtücher und Kosmetik.', highSeason: 'Im Juli und August nehmen wir keine Vorreservierungen für Campingplätze an. Plätze für Camper, Wohnwagen, Vans und Zelte sind nach Ankunftsreihenfolge verfügbar. In diesem Zeitraum können Sie nur eine Anfrage für einen Bungalow senden.' },
+        detailsSection: { contactTitle: 'Kontaktdaten', contactLead: 'Die Rezeption nutzt sie nur zur Antwort auf diese Anfrage.', stayTitle: 'Aufenthaltsdetails', stayLead: 'Ergänzen Sie Informationen, die bei der Vorbereitung helfen.', consentTitle: 'Bestätigungen', consentLead: 'Einige wichtige Regeln, damit die Anfrage vollständig ist.', quietHelper: 'Vor dem Senden erforderlich.', consentHelper: 'Vor dem Senden erforderlich.' },
+        campy: { helpPrompt: 'Hilf mir, den Aufenthalt vorzubereiten', dayPlanPrompt: 'Plane einen Tag in Krakau' },
+        payloadLabels: { vehiclePlate: 'Kennzeichen', vehicleDetails: 'Fahrzeugdaten', specialNeeds: 'Besondere Bedürfnisse', lateCheckout: 'Spätere Abreise' },
+      },
+      it: {
+        perNight: '/ notte',
+        nightsShort: 'notti',
+        stepWord: 'Passo',
+        ofWord: 'di',
+        startLinks: { planner: 'Aggiungi piano soggiorno', attractions: 'Vedi attrazioni', directions: 'Come arrivare in centro?' },
+        tripCtas: { none: [['planner', 'Aggiungi piano soggiorno'], ['attractions', 'Cosa visitare']], one: [['directions', 'Come arrivare in centro?'], ['attractions', 'Centro storico e Wawel']], two: [['planner', 'Piano per 2 notti'], ['attractions', 'Kazimierz e centro']], three: [['attractions', 'Wieliczka / Auschwitz-Birkenau'], ['planner', 'Piano per 3 notti']], many: [['planner', 'Piano per 4+ notti'], ['attractions', 'Cracovia e Piccola Polonia']] },
+        info: { hours: 'Orari', firstDay: 'Primo giorno del soggiorno.', departureAfter: 'La partenza deve essere dopo l’arrivo.', counted: 'Calcolato automaticamente.', goodToKnow: 'Da sapere', highSeason: 'Luglio/agosto', bungalowItems: 'Bungalow — cosa portare', tours: 'Escursioni' },
+        toursTitle: 'Vuoi chiedere anche un’escursione?',
+        toursLead: 'Opzionale — non cambia il prezzo stimato.',
+        tourOptions: ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Parco Acquatico Cracovia', 'Bagry', 'Kryspinów', 'Centro storico e Wawel', 'Non so — chiedo una proposta'],
+        yes: 'Sì',
+        arrivalTime: { label: 'Orario indicativo di arrivo', helper: 'L’orario aiuta la reception a preparare l’arrivo.', warning: 'Reception e cancello hanno orari definiti. Per arrivo tardivo contatta la reception.', unknown: 'non lo so ancora', before12: 'prima delle 12:00', noonAfternoon: '12:00–15:00', afternoonEvening: '15:00–18:00', evening: '18:00–20:00', after21: 'dopo le 21:00 / contatta la reception' },
+        notices: { cityCamping: 'Camping Clepardia è a Cracovia, vicino a tram, negozi e attrazioni. È una base verde in città; a volte si sentono tram, aerei e la normale vita urbana.', bungalowItems: 'Per il soggiorno in bungalow porta effetti personali, asciugamani e cosmetici.', highSeason: 'A luglio e agosto non accettiamo prenotazioni anticipate per piazzole camping. I posti per camper, roulotte, van e tende sono disponibili in ordine di arrivo. In questo periodo puoi inviare una richiesta solo per un bungalow.' },
+        detailsSection: { contactTitle: 'Dati di contatto', contactLead: 'La reception li userà solo per rispondere alla richiesta.', stayTitle: 'Dettagli soggiorno', stayLead: 'Aggiungi informazioni utili per preparare l’arrivo.', consentTitle: 'Conferme', consentLead: 'Alcune regole importanti per completare la richiesta.', quietHelper: 'Obbligatorio prima dell’invio.', consentHelper: 'Obbligatorio prima dell’invio.' },
+        campy: { helpPrompt: 'Aiutami a preparare il soggiorno', dayPlanPrompt: 'Pianifica una giornata a Cracovia' },
+        payloadLabels: { vehiclePlate: 'Targa', vehicleDetails: 'Dati veicolo', specialNeeds: 'Esigenze speciali', lateCheckout: 'Partenza più tardi' },
+      },
+      fr: {
+        perNight: '/ nuit',
+        nightsShort: 'nuits',
+        stepWord: 'Étape',
+        ofWord: 'sur',
+        startLinks: { planner: 'Ajouter un plan de séjour', attractions: 'Voir les attractions', directions: 'Comment aller au centre ?' },
+        tripCtas: { none: [['planner', 'Ajouter un plan de séjour'], ['attractions', 'Que visiter']], one: [['directions', 'Comment aller au centre ?'], ['attractions', 'Vieille Ville et Wawel']], two: [['planner', 'Plan pour 2 nuits'], ['attractions', 'Kazimierz et centre']], three: [['attractions', 'Wieliczka / Auschwitz-Birkenau'], ['planner', 'Plan pour 3 nuits']], many: [['planner', 'Plan pour 4+ nuits'], ['attractions', 'Cracovie et Petite-Pologne']] },
+        info: { hours: 'Horaires', firstDay: 'Premier jour du séjour.', departureAfter: 'Le départ doit être après l’arrivée.', counted: 'Calculé automatiquement.', goodToKnow: 'Bon à savoir', highSeason: 'Juillet/août', bungalowItems: 'Bungalows — à apporter', tours: 'Excursions' },
+        toursTitle: 'Souhaitez-vous aussi demander une excursion ?',
+        toursLead: 'Optionnel — cela ne change pas le prix estimatif.',
+        tourOptions: ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Parc aquatique de Cracovie', 'Bagry', 'Kryspinów', 'Vieille Ville et Wawel', 'Je ne sais pas — merci de proposer'],
+        yes: 'Oui',
+        arrivalTime: { label: 'Heure d’arrivée approximative', helper: 'L’heure aide la réception à préparer votre arrivée.', warning: 'La réception et le portail ont des horaires fixes. Pour une arrivée tardive, contactez la réception.', unknown: 'je ne sais pas encore', before12: 'avant 12:00', noonAfternoon: '12:00–15:00', afternoonEvening: '15:00–18:00', evening: '18:00–20:00', after21: 'après 21:00 / contactez la réception' },
+        notices: { cityCamping: 'Camping Clepardia est à Cracovie, près du tram, des magasins et des attractions. C’est une base verte en ville ; on peut parfois entendre les trams, avions et la vie urbaine normale.', bungalowItems: 'Pour un séjour en bungalow, merci d’apporter vos effets personnels, serviettes et produits de toilette.', highSeason: 'En juillet et août, nous ne prenons pas de réservations à l’avance pour les emplacements camping. Les places pour camping-cars, caravanes, vans et tentes sont disponibles par ordre d’arrivée. Pour cette période, vous pouvez envoyer une demande uniquement pour un bungalow.' },
+        detailsSection: { contactTitle: 'Coordonnées', contactLead: 'La réception les utilisera uniquement pour répondre à cette demande.', stayTitle: 'Détails du séjour', stayLead: 'Ajoutez les informations utiles pour préparer votre arrivée.', consentTitle: 'Confirmations', consentLead: 'Quelques règles importantes pour compléter la demande.', quietHelper: 'Obligatoire avant l’envoi.', consentHelper: 'Obligatoire avant l’envoi.' },
+        campy: { helpPrompt: 'Aidez-moi à préparer mon séjour', dayPlanPrompt: 'Planifier une journée à Cracovie' },
+        payloadLabels: { vehiclePlate: 'Immatriculation', vehicleDetails: 'Détails du véhicule', specialNeeds: 'Besoins particuliers', lateCheckout: 'Départ plus tardif' },
+      },
+      es: {
+        perNight: '/ noche',
+        nightsShort: 'noches',
+        stepWord: 'Paso',
+        ofWord: 'de',
+        startLinks: { planner: 'Añadir plan de estancia', attractions: 'Ver atracciones', directions: '¿Cómo llegar al centro?' },
+        tripCtas: { none: [['planner', 'Añadir plan de estancia'], ['attractions', 'Ver qué visitar']], one: [['directions', '¿Cómo llegar al centro?'], ['attractions', 'Casco antiguo y Wawel']], two: [['planner', 'Plan de 2 noches'], ['attractions', 'Kazimierz y centro']], three: [['attractions', 'Wieliczka / Auschwitz-Birkenau'], ['planner', 'Plan de 3 noches']], many: [['planner', 'Plan para 4+ noches'], ['attractions', 'Cracovia y Pequeña Polonia']] },
+        info: { hours: 'Horarios', firstDay: 'Primer día de la estancia.', departureAfter: 'La salida debe ser posterior a la llegada.', counted: 'Calculado automáticamente.', goodToKnow: 'Información útil', highSeason: 'Julio/agosto', bungalowItems: 'Bungalows — qué traer', tours: 'Excursiones' },
+        toursTitle: '¿Quieres preguntar también por una excursión?',
+        toursLead: 'Opcional — no cambia el precio estimado.',
+        tourOptions: ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Parque Acuático de Cracovia', 'Bagry', 'Kryspinów', 'Casco antiguo y Wawel', 'No lo sé — por favor propongan algo'],
+        yes: 'Sí',
+        arrivalTime: { label: 'Hora aproximada de llegada', helper: 'La hora orientativa ayuda a recepción a preparar la llegada.', warning: 'Recepción y la puerta tienen horarios definidos. Para una llegada tardía, contacta con recepción.', unknown: 'todavía no lo sé', before12: 'antes de 12:00', noonAfternoon: '12:00–15:00', afternoonEvening: '15:00–18:00', evening: '18:00–20:00', after21: 'después de 21:00 / contacta con recepción' },
+        notices: { cityCamping: 'Camping Clepardia está en Cracovia, cerca del tranvía, tiendas y atracciones. Es una base verde en la ciudad; a veces se oyen tranvías, aviones y la vida urbana normal.', bungalowItems: 'Para una estancia en bungalow, trae tus objetos personales, incluidas toallas y artículos de aseo.', highSeason: 'En julio y agosto no aceptamos reservas anticipadas de parcelas de camping. Las plazas para autocaravanas, caravanas, vans y tiendas están disponibles por orden de llegada. En este periodo solo puedes enviar una consulta para bungalow.' },
+        detailsSection: { contactTitle: 'Datos de contacto', contactLead: 'Recepción los usará solo para responder a esta consulta.', stayTitle: 'Detalles de la estancia', stayLead: 'Añade información que ayude a preparar la llegada.', consentTitle: 'Confirmaciones', consentLead: 'Algunas reglas importantes para completar la consulta.', quietHelper: 'Obligatorio antes de enviar.', consentHelper: 'Obligatorio antes de enviar.' },
+        campy: { helpPrompt: 'Ayúdame a preparar mi estancia', dayPlanPrompt: 'Planifica un día en Cracovia' },
+        payloadLabels: { vehiclePlate: 'Matrícula', vehicleDetails: 'Datos del vehículo', specialNeeds: 'Necesidades especiales', lateCheckout: 'Salida más tarde' },
+      },
+      nl: {
+        perNight: '/ nacht',
+        nightsShort: 'nachten',
+        stepWord: 'Stap',
+        ofWord: 'van',
+        startLinks: { planner: 'Voeg verblijfsplan toe', attractions: 'Bekijk attracties', directions: 'Hoe naar het centrum?' },
+        tripCtas: { none: [['planner', 'Voeg verblijfsplan toe'], ['attractions', 'Wat te bezoeken']], one: [['directions', 'Hoe naar het centrum?'], ['attractions', 'Oude Stad en Wawel']], two: [['planner', 'Plan voor 2 nachten'], ['attractions', 'Kazimierz en centrum']], three: [['attractions', 'Wieliczka / Auschwitz-Birkenau'], ['planner', 'Plan voor 3 nachten']], many: [['planner', 'Plan voor 4+ nachten'], ['attractions', 'Krakau en Klein-Polen']] },
+        info: { hours: 'Tijden', firstDay: 'Eerste verblijfsdag.', departureAfter: 'Vertrek moet na aankomst liggen.', counted: 'Automatisch berekend.', goodToKnow: 'Goed om te weten', highSeason: 'Juli/augustus', bungalowItems: 'Bungalows — wat meenemen', tours: 'Excursies' },
+        toursTitle: 'Wil je ook naar een excursie vragen?',
+        toursLead: 'Optioneel — dit verandert de geschatte prijs niet.',
+        tourOptions: ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Waterpark Krakau', 'Bagry', 'Kryspinów', 'Oude Stad en Wawel', 'Ik weet het niet — graag een voorstel'],
+        yes: 'Ja',
+        arrivalTime: { label: 'Geschatte aankomsttijd', helper: 'De tijd helpt de receptie je aankomst voor te bereiden.', warning: 'Receptie en poort hebben vaste openingstijden. Neem bij late aankomst contact op met de receptie.', unknown: 'nog niet zeker', before12: 'voor 12:00', noonAfternoon: '12:00–15:00', afternoonEvening: '15:00–18:00', evening: '18:00–20:00', after21: 'na 21:00 / contacteer receptie' },
+        notices: { cityCamping: 'Camping Clepardia ligt in Krakau, dicht bij tram, winkels en attracties. Het is een groene uitvalsbasis in de stad; soms hoor je trams, vliegtuigen en normaal stadsleven.', bungalowItems: 'Voor een bungalowverblijf neem je persoonlijke spullen mee, inclusief handdoeken en toiletartikelen.', highSeason: 'In juli en augustus nemen we geen reserveringen vooraf aan voor kampeerplaatsen. Plaatsen voor campers, caravans, vans en tenten zijn beschikbaar op volgorde van aankomst. In deze periode kun je alleen een aanvraag voor een bungalow sturen.' },
+        detailsSection: { contactTitle: 'Contactgegevens', contactLead: 'De receptie gebruikt ze alleen om deze aanvraag te beantwoorden.', stayTitle: 'Verblijfsdetails', stayLead: 'Voeg informatie toe die helpt bij de voorbereiding van je aankomst.', consentTitle: 'Bevestigingen', consentLead: 'Enkele belangrijke regels om de aanvraag compleet te maken.', quietHelper: 'Verplicht vóór verzending.', consentHelper: 'Verplicht vóór verzending.' },
+        campy: { helpPrompt: 'Help me mijn verblijf voorbereiden', dayPlanPrompt: 'Plan een dag in Krakau' },
+        payloadLabels: { vehiclePlate: 'Kenteken', vehicleDetails: 'Voertuiggegevens', specialNeeds: 'Speciale behoeften', lateCheckout: 'Later uitchecken' },
+      },
+      cs: {
+        perNight: '/ noc',
+        nightsShort: 'nocí',
+        stepWord: 'Krok',
+        ofWord: 'z',
+        startLinks: { planner: 'Přidat plán pobytu', attractions: 'Zobrazit atrakce', directions: 'Jak do centra?' },
+        tripCtas: { none: [['planner', 'Přidat plán pobytu'], ['attractions', 'Co navštívit']], one: [['directions', 'Jak do centra?'], ['attractions', 'Staré Město a Wawel']], two: [['planner', 'Plán na 2 noci'], ['attractions', 'Kazimierz a centrum']], three: [['attractions', 'Wieliczka / Auschwitz-Birkenau'], ['planner', 'Plán na 3 noci']], many: [['planner', 'Plán na 4+ noci'], ['attractions', 'Krakov a Malopolsko']] },
+        info: { hours: 'Časy', firstDay: 'První den pobytu.', departureAfter: 'Odjezd musí být po příjezdu.', counted: 'Počítá se automaticky.', goodToKnow: 'Dobré vědět', highSeason: 'Červenec/srpen', bungalowItems: 'Bungalovy — co vzít', tours: 'Výlety' },
+        toursTitle: 'Chcete se zeptat také na výlet?',
+        toursLead: 'Volitelné — nemění orientační cenu.',
+        tourOptions: ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Aquapark Krakov', 'Bagry', 'Kryspinów', 'Staré Město a Wawel', 'Nevím — prosím o návrh'],
+        yes: 'Ano',
+        arrivalTime: { label: 'Orientační čas příjezdu', helper: 'Čas pomůže recepci připravit váš příjezd.', warning: 'Recepce a brána mají stanovené otevírací hodiny. Při pozdním příjezdu kontaktujte recepci.', unknown: 'ještě nevím', before12: 'před 12:00', noonAfternoon: '12:00–15:00', afternoonEvening: '15:00–18:00', evening: '18:00–20:00', after21: 'po 21:00 / kontaktujte recepci' },
+        notices: { cityCamping: 'Camping Clepardia se nachází v Krakově, blízko tramvaje, obchodů a atrakcí. Je to zelená základna ve městě; občas uslyšíte tramvaje, letadla a běžný městský život.', bungalowItems: 'Při pobytu v bungalovu si vezměte osobní věci včetně ručníků a hygienických potřeb.', highSeason: 'V červenci a srpnu nepřijímáme rezervace kempovacích míst předem. Místa pro obytná auta, karavany, dodávky a stany jsou dostupná podle pořadí příjezdu. V tomto termínu lze poslat dotaz pouze na bungalov.' },
+        detailsSection: { contactTitle: 'Kontaktní údaje', contactLead: 'Recepce je použije jen pro odpověď na tento dotaz.', stayTitle: 'Detaily pobytu', stayLead: 'Doplňte informace, které pomohou připravit příjezd.', consentTitle: 'Potvrzení', consentLead: 'Několik důležitých pravidel pro dokončení dotazu.', quietHelper: 'Povinné před odesláním.', consentHelper: 'Povinné před odesláním.' },
+        campy: { helpPrompt: 'Pomozte mi připravit pobyt', dayPlanPrompt: 'Naplánovat den v Krakově' },
+        payloadLabels: { vehiclePlate: 'SPZ', vehicleDetails: 'Údaje o vozidle', specialNeeds: 'Speciální potřeby', lateCheckout: 'Pozdější odjezd' },
+      },
+      sk: {
+        perNight: '/ noc',
+        nightsShort: 'nocí',
+        stepWord: 'Krok',
+        ofWord: 'z',
+        startLinks: { planner: 'Pridať plán pobytu', attractions: 'Zobraziť atrakcie', directions: 'Ako do centra?' },
+        tripCtas: { none: [['planner', 'Pridať plán pobytu'], ['attractions', 'Čo navštíviť']], one: [['directions', 'Ako do centra?'], ['attractions', 'Staré Mesto a Wawel']], two: [['planner', 'Plán na 2 noci'], ['attractions', 'Kazimierz a centrum']], three: [['attractions', 'Wieliczka / Auschwitz-Birkenau'], ['planner', 'Plán na 3 noci']], many: [['planner', 'Plán na 4+ noci'], ['attractions', 'Krakov a Malopoľsko']] },
+        info: { hours: 'Časy', firstDay: 'Prvý deň pobytu.', departureAfter: 'Odchod musí byť po príchode.', counted: 'Počíta sa automaticky.', goodToKnow: 'Dobré vedieť', highSeason: 'Júl/august', bungalowItems: 'Bungalovy — čo si vziať', tours: 'Výlety' },
+        toursTitle: 'Chcete sa spýtať aj na výlet?',
+        toursLead: 'Voliteľné — nemení orientačnú cenu.',
+        tourOptions: ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Aquapark Krakov', 'Bagry', 'Kryspinów', 'Staré Mesto a Wawel', 'Neviem — prosím o návrh'],
+        yes: 'Áno',
+        arrivalTime: { label: 'Orientačný čas príchodu', helper: 'Čas pomôže recepcii pripraviť váš príchod.', warning: 'Recepcia a brána majú stanovené otváracie hodiny. Pri neskorom príchode kontaktujte recepciu.', unknown: 'ešte neviem', before12: 'pred 12:00', noonAfternoon: '12:00–15:00', afternoonEvening: '15:00–18:00', evening: '18:00–20:00', after21: 'po 21:00 / kontaktujte recepciu' },
+        notices: { cityCamping: 'Camping Clepardia sa nachádza v Krakove, blízko električky, obchodov a atrakcií. Je to zelená základňa v meste; občas počuť električky, lietadlá a bežný mestský život.', bungalowItems: 'Pri pobyte v bungalove si prineste osobné veci vrátane uterákov a hygienických potrieb.', highSeason: 'V júli a auguste neprijímame rezervácie kempovacích miest vopred. Miesta pre obytné autá, karavany, vany a stany sú dostupné podľa poradia príchodu. V tomto termíne môžete poslať dopyt iba na bungalov.' },
+        detailsSection: { contactTitle: 'Kontaktné údaje', contactLead: 'Recepcia ich použije iba na odpoveď na tento dopyt.', stayTitle: 'Detaily pobytu', stayLead: 'Doplňte informácie, ktoré pomôžu pripraviť príchod.', consentTitle: 'Potvrdenia', consentLead: 'Niekoľko dôležitých pravidiel na dokončenie dopytu.', quietHelper: 'Povinné pred odoslaním.', consentHelper: 'Povinné pred odoslaním.' },
+        campy: { helpPrompt: 'Pomôžte mi pripraviť pobyt', dayPlanPrompt: 'Naplánovať deň v Krakove' },
+        payloadLabels: { vehiclePlate: 'EČV', vehicleDetails: 'Údaje o vozidle', specialNeeds: 'Špeciálne potreby', lateCheckout: 'Neskorší odchod' },
+      },
+      sv: {
+        perNight: '/ natt',
+        nightsShort: 'nätter',
+        stepWord: 'Steg',
+        ofWord: 'av',
+        startLinks: { planner: 'Lägg till vistelseplan', attractions: 'Se sevärdheter', directions: 'Hur tar man sig till centrum?' },
+        tripCtas: { none: [['planner', 'Lägg till vistelseplan'], ['attractions', 'Vad kan man se']], one: [['directions', 'Hur tar man sig till centrum?'], ['attractions', 'Gamla stan och Wawel']], two: [['planner', 'Plan för 2 nätter'], ['attractions', 'Kazimierz och centrum']], three: [['attractions', 'Wieliczka / Auschwitz-Birkenau'], ['planner', 'Plan för 3 nätter']], many: [['planner', 'Plan för 4+ nätter'], ['attractions', 'Kraków och Lillpolen']] },
+        info: { hours: 'Tider', firstDay: 'Första vistelsedagen.', departureAfter: 'Avresa måste vara efter ankomst.', counted: 'Beräknas automatiskt.', goodToKnow: 'Bra att veta', highSeason: 'Juli/augusti', bungalowItems: 'Bungalows — att ta med', tours: 'Utflykter' },
+        toursTitle: 'Vill du också fråga om en utflykt?',
+        toursLead: 'Valfritt — det ändrar inte det uppskattade priset.',
+        tourOptions: ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Vattenpark Kraków', 'Bagry', 'Kryspinów', 'Gamla stan och Wawel', 'Jag vet inte — ge gärna förslag'],
+        yes: 'Ja',
+        arrivalTime: { label: 'Ungefärlig ankomsttid', helper: 'Tiden hjälper receptionen att förbereda din ankomst.', warning: 'Receptionen och grinden har fasta öppettider. Kontakta receptionen vid sen ankomst.', unknown: 'jag vet inte ännu', before12: 'före 12:00', noonAfternoon: '12:00–15:00', afternoonEvening: '15:00–18:00', evening: '18:00–20:00', after21: 'efter 21:00 / kontakta receptionen' },
+        notices: { cityCamping: 'Camping Clepardia ligger i Kraków nära spårvagn, butiker och sevärdheter. Det är en grön bas i staden; ibland hörs spårvagnar, flygplan och vanligt stadsliv.', bungalowItems: 'Vid bungalowvistelse, ta med personliga saker inklusive handdukar och toalettartiklar.', highSeason: 'I juli och augusti tar vi inte emot förhandsbokningar för campingplatser. Platser för husbilar, husvagnar, vans och tält finns enligt ankomstordning. Under denna period kan du bara skicka en fråga om bungalow.' },
+        detailsSection: { contactTitle: 'Kontaktuppgifter', contactLead: 'Receptionen använder dem bara för att svara på denna förfrågan.', stayTitle: 'Vistelsedetaljer', stayLead: 'Lägg till information som hjälper oss att förbereda ankomsten.', consentTitle: 'Bekräftelser', consentLead: 'Några viktiga regler för att slutföra förfrågan.', quietHelper: 'Obligatoriskt före skickande.', consentHelper: 'Obligatoriskt före skickande.' },
+        campy: { helpPrompt: 'Hjälp mig förbereda vistelsen', dayPlanPrompt: 'Planera en dag i Kraków' },
+        payloadLabels: { vehiclePlate: 'Registreringsnummer', vehicleDetails: 'Fordonsuppgifter', specialNeeds: 'Särskilda behov', lateCheckout: 'Senare utcheckning' },
+      },
+    };
+    const rt = runtimeTextByLang[config.lang] || runtimeTextByLang.en;
 
     const esc = (value) => String(value ?? '')
       .replace(/&/g, '&amp;')
@@ -1768,34 +2412,16 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const tripCtas = () => {
       const count = nights();
-      if (!count) {
-        return [
-          { href: config.links?.planner || '/planer-pobytu', label: config.lang === 'pl' ? 'Dodaj plan pobytu' : 'Add a stay plan' },
-          { href: config.links?.attractions || '/atrakcje', label: config.lang === 'pl' ? 'Zobacz, co zwiedzić' : 'See what to visit' },
-        ];
-      }
-      if (count === 1) {
-        return [
-          { href: config.links?.directions || '/dojazd', label: config.lang === 'pl' ? 'Jak dojechać do centrum?' : 'How to reach the centre?' },
-          { href: config.links?.attractions || '/atrakcje', label: config.lang === 'pl' ? 'Stare Miasto i Wawel' : 'Old Town and Wawel' },
-        ];
-      }
-      if (count === 2) {
-        return [
-          { href: config.links?.planner || '/planer-pobytu', label: config.lang === 'pl' ? 'Plan na 2 noce' : '2-night plan' },
-          { href: config.links?.attractions || '/atrakcje', label: config.lang === 'pl' ? 'Kazimierz i centrum' : 'Kazimierz and centre' },
-        ];
-      }
-      if (count === 3) {
-        return [
-          { href: config.links?.attractions || '/atrakcje', label: config.lang === 'pl' ? 'Wieliczka / Auschwitz-Birkenau' : 'Wieliczka / Auschwitz-Birkenau' },
-          { href: config.links?.planner || '/planer-pobytu', label: config.lang === 'pl' ? 'Plan na 3 noce' : '3-night plan' },
-        ];
-      }
-      return [
-        { href: config.links?.planner || '/planer-pobytu', label: config.lang === 'pl' ? 'Plan pobytu 4+ nocy' : '4+ night stay plan' },
-        { href: config.links?.attractions || '/atrakcje', label: config.lang === 'pl' ? 'Kraków i Małopolska' : 'Krakow and Lesser Poland' },
-      ];
+      const key = !count ? 'none' : count === 1 ? 'one' : count === 2 ? 'two' : count === 3 ? 'three' : 'many';
+      const hrefByKey = {
+        planner: config.links?.planner || '/planer-pobytu',
+        attractions: config.links?.attractions || '/atrakcje',
+        directions: config.links?.directions || '/dojazd',
+      };
+      return (rt.tripCtas?.[key] || runtimeTextByLang.en.tripCtas[key]).map(([hrefKey, label]) => ({
+        href: hrefByKey[hrefKey] || hrefByKey.attractions,
+        label,
+      }));
     };
 
     const tripCtaTemplate = (compact = false) => `
@@ -1848,22 +2474,30 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const bungalowPersonalItemsNotice = () => state.mode === 'bungalow' || state.mode === 'combined';
     const normalizeArrivalTimeOption = (value) => {
       const text = String(value || '').trim();
+      const tokenLabels = {
+        unknown: rt.arrivalTime.unknown,
+        before_12: rt.arrivalTime.before12,
+        noon_afternoon: rt.arrivalTime.noonAfternoon,
+        afternoon_evening: rt.arrivalTime.afternoonEvening,
+        evening: rt.arrivalTime.evening,
+        after_21: rt.arrivalTime.after21,
+      };
+      if (tokenLabels[text]) return tokenLabels[text];
       const normalized = text.toLowerCase().replace(/\s+/g, ' ').replace(/[—–−]/g, '-');
+      if (/jeszcze nie wiem|not sure|noch nicht|non lo so|je ne sais|todav[ií]a no|nog niet|nev[ií]m|neviem|vet inte/.test(normalized)) return rt.arrivalTime.unknown;
+      if (/przed 12|before 12|vor 12|prima delle 12|avant 12|antes de 12|voor 12|p[řr]ed 12|pred 12|f[öo]re 12/.test(normalized)) return rt.arrivalTime.before12;
       if (/18(?::?00)?\s*-\s*21(?::?00)?/.test(normalized) || /\b18\s*-\s*21\b/.test(normalized) || /6(?::00)?\s*p\.?m\.?\s*-\s*9(?::00)?\s*p\.?m\.?/.test(normalized)) {
-        return '18:00–20:00';
+        return rt.arrivalTime.evening;
       }
+      if (/po 21|after 21|nach 21|dopo le 21|apr[eè]s 21|despu[eé]s de 21|na 21|efter 21/.test(normalized)) return rt.arrivalTime.after21;
       return text;
     };
-    const arrivalTimeLabel = () => normalizeArrivalTimeOption(state.details.arrivalTime) || (config.lang === 'pl' ? 'jeszcze nie wiem' : 'not sure yet');
-    const cityCampingNotice = () => config.lang === 'pl'
-      ? 'Camping Clepardia znajduje się w Krakowie: blisko tramwaju, sklepów i atrakcji. To zielona baza w mieście, dlatego czasem słychać tramwaje, samoloty i normalne miejskie życie.'
-      : 'Camping Clepardia is a green city campsite close to trams, shops and attractions. You may sometimes hear trams, aircraft and normal city life.';
-    const bungalowItemsNotice = () => config.lang === 'pl'
-      ? 'Przy pobycie w domkach prosimy zabrać własne rzeczy osobiste, w tym ręczniki i kosmetyki.'
-      : 'For a bungalow stay, please bring personal items, including towels and toiletries.';
-    const highSeasonCampingNotice = () => config.summerBlock?.message || (config.lang === 'pl'
-      ? 'W lipcu i sierpniu nie prowadzimy rezerwacji miejsc campingowych z wyprzedzeniem. Miejsca dla kamperów, przyczep, vanów i namiotów są dostępne według kolejności przyjazdu. W tym terminie można wysłać zapytanie tylko o domek.'
-      : 'In July and August we do not accept advance reservations for camping pitches. Places for campers, caravans, vans and tents are available in arrival order. For this period you can only send an enquiry for a bungalow.');
+    const isLateArrival = () => String(state.details.arrivalTime || '') === 'after_21'
+      || /po 21|after 21|nach 21|dopo le 21|apr[eè]s 21|despu[eé]s de 21|na 21|efter 21/.test(normalizeArrivalTimeOption(state.details.arrivalTime).toLowerCase());
+    const arrivalTimeLabel = () => normalizeArrivalTimeOption(state.details.arrivalTime) || rt.arrivalTime.unknown;
+    const cityCampingNotice = () => rt.notices.cityCamping;
+    const bungalowItemsNotice = () => rt.notices.bungalowItems;
+    const highSeasonCampingNotice = () => config.summerBlock?.message || rt.notices.highSeason;
 
     const servicePrice = (item) => {
       if (item.seasonalPrices) return highSeason() ? item.seasonalPrices.high : item.seasonalPrices.low;
@@ -2163,9 +2797,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       return selected.length ? selected.map((item) => `${item.label} x ${item.qty}`).join(', ') : '';
     };
 
-    const tourOptions = config.lang === 'pl'
-      ? ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Kazimierz / Stare Miasto', 'Nie wiem — proszę o propozycję']
-      : ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia', 'Kazimierz / Old Town', 'I am not sure — please suggest'];
+    const tourOptions = rt.tourOptions || runtimeTextByLang.en.tourOptions;
 
     const toursText = () => state.tours.join(', ');
 
@@ -2177,7 +2809,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       `${detailText.missing.privacy}: ${state.details.privacy ? 'OK' : '-'}`,
     ].join(', ');
 
-    const yesLabel = () => config.lang === 'pl' ? 'Tak' : 'Yes';
+    const yesLabel = () => rt.yes || runtimeTextByLang.en.yes;
 
     const findScrollContainer = (element) => {
       let parent = element?.parentElement;
@@ -2270,9 +2902,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         </div>
         <button class="reservation-simple-link" type="button" data-simple-start>${esc(ui.simple.cta)}</button>
         <div class="reservation-trip-ctas reservation-trip-ctas--start">
-          <a href="${esc(config.links?.planner || '/planer-pobytu')}" class="reservation-mini-link">${esc(config.lang === 'pl' ? 'Dodaj plan pobytu' : 'Add a stay plan')}</a>
-          <a href="${esc(config.links?.attractions || '/atrakcje')}" class="reservation-mini-link">${esc(config.lang === 'pl' ? 'Zobacz atrakcje' : 'See attractions')}</a>
-          <a href="${esc(config.links?.directions || '/dojazd')}" class="reservation-mini-link">${esc(config.lang === 'pl' ? 'Jak dojechać do centrum?' : 'How to reach the centre?')}</a>
+          <a href="${esc(config.links?.planner || '/planer-pobytu')}" class="reservation-mini-link">${esc(rt.startLinks.planner)}</a>
+          <a href="${esc(config.links?.attractions || '/atrakcje')}" class="reservation-mini-link">${esc(rt.startLinks.attractions)}</a>
+          <a href="${esc(config.links?.directions || '/dojazd')}" class="reservation-mini-link">${esc(rt.startLinks.directions)}</a>
         </div>
         <aside class="reservation-before-arrival">
           <strong>${esc(config.beforeArrival.title)}</strong>
@@ -2296,7 +2928,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             <p>${esc(activeHint)}</p>
           </div>
           <div class="reservation-progress__mobile">
-            <strong>Krok ${state.step} z ${steps.length}</strong>
+            <strong>${esc(rt.stepWord)} ${state.step} ${esc(rt.ofWord)} ${steps.length}</strong>
             <span>${esc(stepTitles[state.step - 1])}</span>
             <i><b style="width:${percent}%"></b></i>
           </div>
@@ -2333,9 +2965,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const calendarTemplate = () => {
       const labels = ui.calendar || {};
       const { start, end } = rangeBounds();
-      const weekDays = (config.lang === 'pl'
-        ? ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd']
-        : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
+      const weekDays = labels.weekDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       return `
         <div class="reservation-calendar" data-date-calendar>
           <header class="reservation-calendar__head">
@@ -2395,7 +3025,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             <div><dt>${esc(t.fields.arrival)}</dt><dd>${esc(state.dates.arrival || '-')}</dd></div>
             <div><dt>${esc(t.fields.departure)}</dt><dd>${esc(state.dates.departure || '-')}</dd></div>
             <div><dt>${esc(t.fields.nights)}</dt><dd>${nights()}</dd></div>
-            <div><dt>${esc(config.lang === 'pl' ? 'Godziny' : 'Hours')}</dt><dd>${esc(stayHours)}</dd></div>
+            <div><dt>${esc(rt.info.hours)}</dt><dd>${esc(stayHours)}</dd></div>
           </dl>
           <section class="reservation-stay-advice">
             <i aria-hidden="true">${detailIcon('map')}</i>
@@ -2422,18 +3052,18 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           <label class="reservation-field">
             ${fieldLabel({ icon: 'calendar', label: t.fields.arrival, badge: 'required' })}
             <input type="date" data-field="dates.arrival" min="${todayIso}" value="${esc(state.dates.arrival)}" />
-            <small>${esc(config.lang === 'pl' ? 'Pierwszy dzień pobytu.' : 'First day of stay.')}</small>
+            <small>${esc(rt.info.firstDay)}</small>
           </label>
           <label class="reservation-field">
             ${fieldLabel({ icon: 'calendar', label: t.fields.departure, badge: 'required' })}
             <input type="date" data-field="dates.departure" min="${todayIso}" value="${esc(state.dates.departure)}" />
-            <small>${esc(config.lang === 'pl' ? 'Wyjazd musi być po przyjeździe.' : 'Departure must be after arrival.')}</small>
+            <small>${esc(rt.info.departureAfter)}</small>
           </label>
           <div class="reservation-night-card">
             <i aria-hidden="true">${detailIcon('calendar')}</i>
             <span>${esc(t.fields.nights)}</span>
             <strong>${nights()}</strong>
-            <small>${esc(config.lang === 'pl' ? 'Liczone automatycznie.' : 'Counted automatically.')}</small>
+            <small>${esc(rt.info.counted)}</small>
           </div>
         </div>
         ${calendarTemplate()}
@@ -2466,7 +3096,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
               <span class="reservation-item-card__icon" aria-hidden="true">${guestIcon(key)}</span>
               <div>
                 <strong>${esc(label)}</strong>
-                <small>${Number(price) > 0 ? `${fmt(price)} / noc` : '0 PLN / noc'}</small>
+                <small>${Number(price) > 0 ? `${fmt(price)} ${rt.perNight}` : `0 PLN ${rt.perNight}`}</small>
               </div>
               ${stepperTemplate({ kind: 'guest', key, label, price, value: state.guests[key] })}
             </article>
@@ -2536,8 +3166,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
                       <span class="reservation-item-card__icon" aria-hidden="true">${serviceIcon(item.id)}</span>
                       <div>
                         <strong>${esc(item.label)}</strong>
-                        <small>${fmt(price)} / noc</small>
-                        <em data-service-subtotal ${qty > 0 ? '' : 'hidden'}>${fmt(price * qty)} / noc</em>
+                        <small>${fmt(price)} ${rt.perNight}</small>
+                        <em data-service-subtotal ${qty > 0 ? '' : 'hidden'}>${fmt(price * qty)} ${rt.perNight}</em>
                       </div>
                       ${stepperTemplate({ kind: 'service', scope: group.scope, id: item.id, label: item.label, price, value: qty })}
                     </article>
@@ -2550,8 +3180,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         ${serviceSuggestionsTemplate()}
         <section class="reservation-tour-options">
           <div>
-            <strong>${esc(config.lang === 'pl' ? 'Czy chcesz zapytać też o wycieczkę?' : 'Would you also like to ask about a trip?')}</strong>
-            <p>${esc(config.lang === 'pl' ? 'Opcjonalnie — wybór nie zmienia ceny zapytania.' : 'Optional — this does not change the estimated price.')}</p>
+            <strong>${esc(rt.toursTitle)}</strong>
+            <p>${esc(rt.toursLead)}</p>
           </div>
           <div class="reservation-tour-options__grid">
             ${tourOptions.map((tour) => `
@@ -2597,29 +3227,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       `;
     };
 
-    const detailsSectionCopy = () => (config.lang === 'pl' ? {
-      contactTitle: 'Dane kontaktowe',
-      contactLead: 'Recepcja użyje ich tylko do odpowiedzi na zapytanie.',
-      stayTitle: 'Szczegóły pobytu',
-      stayLead: 'Dopisz informacje, które pomogą przygotować przyjazd.',
-      consentTitle: 'Potwierdzenia',
-      consentLead: 'Kilka ważnych zasad, żeby zapytanie było kompletne.',
-      specialHelper: 'Opcjonalnie. Pokażemy dodatkowe pole po zaznaczeniu.',
-      lateHelper: 'Recepcja potwierdzi możliwość po przyjeździe.',
-      quietHelper: 'Wymagane przed wysłaniem.',
-      consentHelper: 'Wymagane przed wysłaniem.',
-    } : {
-      contactTitle: 'Contact details',
-      contactLead: 'Reception will use them only to answer this enquiry.',
-      stayTitle: 'Stay details',
-      stayLead: 'Add anything that helps prepare your arrival.',
-      consentTitle: 'Confirmations',
-      consentLead: 'A few important rules to complete the enquiry.',
-      specialHelper: 'Optional. An extra field appears after selecting it.',
-      lateHelper: 'Reception confirms possibility after arrival.',
-      quietHelper: 'Required before sending.',
-      consentHelper: 'Required before sending.',
-    });
+    const detailsSectionCopy = () => rt.detailsSection || runtimeTextByLang.en.detailsSection;
 
     const optionRow = ({ check, icon, label, labelHtml = '', helper, required = false }) => `
       <label class="reservation-option-row ${required ? 'is-required' : ''} ${required && state.submitAttempted && !state.details[check] ? 'is-invalid' : ''}">
@@ -2832,19 +3440,19 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
               </div>
               <div class="reservation-form-grid">
                 <label class="reservation-field">
-                  ${fieldLabel({ icon: 'late', label: config.lang === 'pl' ? 'Orientacyjna godzina przyjazdu' : 'Estimated arrival time', badge: 'optional' })}
+                  ${fieldLabel({ icon: 'late', label: rt.arrivalTime.label, badge: 'optional' })}
                   <select data-field="details.arrivalTime">
                     ${[
-                      ['przed 12:00', 'przed 12:00'],
-                      ['12:00–15:00', '12:00–15:00'],
-                      ['15:00–18:00', '15:00–18:00'],
-                      ['18:00–20:00', '18:00–20:00'],
-                      ['po 21:00 / skontaktuj się z recepcją', 'po 21:00 / skontaktuj się z recepcją'],
-                      ['jeszcze nie wiem', 'jeszcze nie wiem'],
+                      ['before_12', rt.arrivalTime.before12],
+                      ['noon_afternoon', rt.arrivalTime.noonAfternoon],
+                      ['afternoon_evening', rt.arrivalTime.afternoonEvening],
+                      ['evening', rt.arrivalTime.evening],
+                      ['after_21', rt.arrivalTime.after21],
+                      ['unknown', rt.arrivalTime.unknown],
                     ].map(([value,label]) => `<option value="${esc(value)}" ${state.details.arrivalTime === value ? 'selected' : ''}>${esc(label)}</option>`).join('')}
                   </select>
-                  <small>${esc(config.lang === 'pl' ? 'Godzina jest orientacyjna i pomaga recepcji przygotować przyjazd.' : 'The time is indicative and helps reception prepare your arrival.')}</small>
-                  ${state.details.arrivalTime.startsWith('po 21:00') ? `<small class="reservation-field-warning">${esc(config.lang === 'pl' ? 'Recepcja i brama mają określone godziny pracy. Przy późnym przyjeździe skontaktuj się z recepcją.' : 'Reception and gate have set opening hours. Contact reception before a late arrival.')}</small>` : ''}
+                  <small>${esc(rt.arrivalTime.helper)}</small>
+                  ${isLateArrival() ? `<small class="reservation-field-warning">${esc(rt.arrivalTime.warning)}</small>` : ''}
                 </label>
                 <label class="reservation-field">
                   ${fieldLabel({ icon: 'plate', label: t.fields.plate, badge: 'optional' })}
@@ -2919,7 +3527,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const depositNote = state.mode === 'bungalow' ? ui.summary.depositBungalow : state.mode === 'combined' ? ui.summary.depositCombined : '';
       const statusText = missingItems().length ? detailText.summaryStatusMissing : detailText.summaryStatusReady;
       const dateText = state.dates.arrival || state.dates.departure
-        ? `${state.dates.arrival || '-'} - ${state.dates.departure || '-'} (${nights()} n.)`
+        ? `${state.dates.arrival || '-'} - ${state.dates.departure || '-'} (${nights()} ${rt.nightsShort})`
         : '';
       if (!hasCostData) {
         return `
@@ -2938,17 +3546,17 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           <dl>
             ${summaryRow('stay', t.summary.stay, modeTitle())}
             ${summaryRow('calendar', t.summary.dates, dateText)}
-            ${summaryRow('late', config.lang === 'pl' ? 'Orientacyjna godzina przyjazdu' : 'Estimated arrival time', arrivalTimeLabel())}
+            ${summaryRow('late', rt.arrivalTime.label, arrivalTimeLabel())}
             ${summaryRow('guests', t.summary.guests, guestsText())}
-            ${state.tours.length ? summaryRow('map', config.lang === 'pl' ? 'Wycieczki' : 'Trips', toursText()) : ''}
+            ${state.tours.length ? summaryRow('map', rt.info.tours, toursText()) : ''}
             ${summaryRow('language', t.summary.language, state.details.language)}
             ${state.details.countryCode ? summaryRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
             ${state.details.plate ? summaryRow('plate', t.fields.plate, state.details.plate) : ''}
             ${vehicleDetailsText() ? summaryRow('plate', vehicleLabels().title, vehicleDetailsText()) : ''}
             ${summaryRow('info', detailText.registration.title, `${detailText.registration.document} ${detailText.registration.trailer}`)}
-            ${summaryRow('info', config.lang === 'pl' ? 'Dobrze wiedzieć' : 'Good to know', cityCampingNotice())}
-            ${highSeasonCampingInfo() ? summaryRow('status', config.lang === 'pl' ? 'Lipiec/sierpień' : 'July/August', highSeasonCampingNotice()) : ''}
-            ${bungalowPersonalItemsNotice() ? summaryRow('info', config.lang === 'pl' ? 'Domki — co zabrać' : 'Bungalows — what to bring', bungalowItemsNotice()) : ''}
+            ${summaryRow('info', rt.info.goodToKnow, cityCampingNotice())}
+            ${highSeasonCampingInfo() ? summaryRow('status', rt.info.highSeason, highSeasonCampingNotice()) : ''}
+            ${bungalowPersonalItemsNotice() ? summaryRow('info', rt.info.bungalowItems, bungalowItemsNotice()) : ''}
             ${summaryRow('privacy', detailText.consentSectionTitle, consentsText())}
           </dl>
           ${missingListTemplate(true)}
@@ -2972,18 +3580,18 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         <dl>
           ${summaryRow('stay', t.summary.stay, modeTitle())}
           ${summaryRow('calendar', t.summary.dates, dateText)}
-          ${summaryRow('late', config.lang === 'pl' ? 'Orientacyjna godzina przyjazdu' : 'Estimated arrival time', arrivalTimeLabel())}
+          ${summaryRow('late', rt.arrivalTime.label, arrivalTimeLabel())}
           ${summaryRow('guests', t.summary.guests, guestsText())}
           ${summaryRow('services', t.summary.services, servicesText())}
-          ${state.tours.length ? summaryRow('map', config.lang === 'pl' ? 'Wycieczki' : 'Trips', toursText()) : ''}
+          ${state.tours.length ? summaryRow('map', rt.info.tours, toursText()) : ''}
           ${state.details.countryCode ? summaryRow('country', t.summary.country, `${state.details.countryName} (${state.details.countryCode})`) : ''}
           ${summaryRow('language', t.summary.language, state.details.language)}
           ${state.details.plate ? summaryRow('plate', t.fields.plate, state.details.plate) : ''}
           ${vehicleDetailsText() ? summaryRow('plate', vehicleLabels().title, vehicleDetailsText()) : ''}
           ${summaryRow('info', detailText.registration.title, `${detailText.registration.document} ${detailText.registration.trailer}`)}
-          ${summaryRow('info', config.lang === 'pl' ? 'Dobrze wiedzieć' : 'Good to know', cityCampingNotice())}
-          ${highSeasonCampingInfo() ? summaryRow('status', config.lang === 'pl' ? 'Lipiec/sierpień' : 'July/August', highSeasonCampingNotice()) : ''}
-          ${bungalowPersonalItemsNotice() ? summaryRow('info', config.lang === 'pl' ? 'Domki — co zabrać' : 'Bungalows — what to bring', bungalowItemsNotice()) : ''}
+          ${summaryRow('info', rt.info.goodToKnow, cityCampingNotice())}
+          ${highSeasonCampingInfo() ? summaryRow('status', rt.info.highSeason, highSeasonCampingNotice()) : ''}
+          ${bungalowPersonalItemsNotice() ? summaryRow('info', rt.info.bungalowItems, bungalowItemsNotice()) : ''}
           ${state.details.specialNeeds ? summaryRow('accessibility', t.summary.specialNeeds, yesLabel()) : ''}
           ${state.details.lateCheckout ? summaryRow('late', t.summary.lateCheckout, state.details.lateTime) : ''}
           ${summaryRow('privacy', detailText.consentSectionTitle, consentsText())}
@@ -3170,10 +3778,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         addons: services.map((item) => `${item.label} x ${item.qty}`),
         message: [
           state.details.message,
-          state.details.plate ? `Numer rejestracyjny: ${state.details.plate}` : '',
-          vehicleDetailsText() ? `Dane pojazdu: ${vehicleDetailsText()}` : '',
-          specialNeeds ? `Specjalne potrzeby: ${specialNeeds}` : '',
-          lateCheckout ? `Późniejszy wyjazd: ${lateCheckout}` : '',
+          state.details.plate ? `${rt.payloadLabels.vehiclePlate}: ${state.details.plate}` : '',
+          vehicleDetailsText() ? `${rt.payloadLabels.vehicleDetails}: ${vehicleDetailsText()}` : '',
+          specialNeeds ? `${rt.payloadLabels.specialNeeds}: ${specialNeeds}` : '',
+          lateCheckout ? `${rt.payloadLabels.lateCheckout}: ${lateCheckout}` : '',
         ].filter(Boolean).join('\n\n'),
         summerNotice: touchesSummer(),
         highSeasonCampingInfo: highSeasonCampingInfo(),
@@ -3765,7 +4373,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         window.requestAnimationFrame(() => {
           window.dispatchEvent(new CustomEvent('campy:prompt', {
             detail: {
-              prompt: config.lang === 'pl' ? 'Pomóż mi przygotować pobyt' : 'Help me prepare my stay',
+              prompt: rt.campy.helpPrompt,
               actionKey: 'reservationHelp',
             },
           }));
@@ -3811,8 +4419,8 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (target.closest('[data-ask-campy-plan]')) {
         event.preventDefault();
         window.dispatchEvent(new CustomEvent('campy:prompt', {
-          detail: {
-            prompt: config.lang === 'pl' ? 'Zaplanuj dzień w Krakowie' : 'Plan a Krakow day',
+            detail: {
+            prompt: rt.campy.dayPlanPrompt,
             actionKey: 'dayPlan',
           },
         }));
@@ -4015,14 +4623,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         }
         else if (target.dataset.field === 'details.arrivalTime') {
           render();
-          if (state.details.arrivalTime.startsWith('po 21:00')) {
-            showViewportToast(
-              config.lang === 'pl'
-                ? 'Recepcja i brama mają określone godziny pracy. Przy późnym przyjeździe skontaktuj się z recepcją.'
-                : 'Reception and gate have set opening hours. Contact reception before a late arrival.',
-              'warning',
-            );
-          }
+          if (isLateArrival()) showViewportToast(rt.arrivalTime.warning, 'warning');
         }
         else {
           updateSummaryDom();

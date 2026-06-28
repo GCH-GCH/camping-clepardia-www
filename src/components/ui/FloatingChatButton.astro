@@ -9,19 +9,34 @@ import { getHomepageSiteNotices, getNoticeCopy } from '@/data/siteNotices';
 import { getSearchIndex } from '@/data/searchIndex';
 
 const pathContext = getPathContext(Astro.url.pathname);
-const t = getTranslations(pathContext.languageCode);
+const campySupportedLanguages = ['pl', 'en', 'de', 'it', 'fr', 'es', 'nl', 'cs', 'sk', 'sv'] as const;
+type CampySupportedLanguage = typeof campySupportedLanguages[number];
+const campyLanguage = (campySupportedLanguages.includes(pathContext.languageCode as CampySupportedLanguage)
+  ? pathContext.languageCode
+  : 'en') as CampySupportedLanguage;
+const t = getTranslations(campyLanguage);
 const chatTexts = t.chat;
-const coreCopy = getCoreUi(pathContext.languageCode);
+const coreCopy = getCoreUi(campyLanguage);
 const hasCampyIcon = publicAssetExists(campyIcon);
 const campyIconSrc = `${campyIcon}?v=task103`;
 const activeNoticeCopy = getHomepageSiteNotices()
   .slice(0, 5)
-  .map((notice) => getNoticeCopy(notice, pathContext.languageCode));
+  .map((notice) => getNoticeCopy(notice, campyLanguage));
+const noNoticeCopy: Record<CampySupportedLanguage, string> = {
+  pl: 'Nie ma teraz specjalnego komunikatu. Warto sprawdzić dojazd tramwajem, Google Maps i aktualny cennik przed przyjazdem.',
+  en: 'There is no special notice right now. Check tram directions, Google Maps and current prices before arrival.',
+  de: 'Aktuell gibt es keinen besonderen Hinweis. Prüfen Sie vor der Anreise Straßenbahn, Google Maps und die aktuellen Preise.',
+  it: 'Al momento non ci sono avvisi speciali. Controlla tram, Google Maps e prezzi attuali prima dell’arrivo.',
+  fr: 'Il n’y a pas d’avis spécial pour le moment. Vérifiez le tram, Google Maps et les tarifs actuels avant l’arrivée.',
+  es: 'Ahora no hay ningún aviso especial. Revisa el tranvía, Google Maps y los precios actuales antes de llegar.',
+  nl: 'Er is nu geen speciale melding. Controleer tramroute, Google Maps en actuele prijzen vóór aankomst.',
+  cs: 'Aktuálně není žádné zvláštní oznámení. Před příjezdem zkontrolujte tramvaj, Google Maps a aktuální ceny.',
+  sk: 'Aktuálne nie je žiadne špeciálne oznámenie. Pred príchodom skontrolujte električku, Google Maps a aktuálne ceny.',
+  sv: 'Det finns inget särskilt meddelande just nu. Kontrollera spårvagn, Google Maps och aktuella priser före ankomst.',
+};
 const activeNoticesAnswer = activeNoticeCopy.length
   ? activeNoticeCopy.map((notice) => `${notice.badge ? `${notice.badge}: ` : ''}${notice.title} - ${notice.description}`).join(' ')
-  : (pathContext.languageCode === 'pl'
-    ? 'Nie ma teraz specjalnego komunikatu. Warto sprawdzić dojazd tramwajem, Google Maps i aktualny cennik przed przyjazdem.'
-    : 'There is no special notice right now. Check tram directions, Google Maps and current prices before arrival.');
+  : noNoticeCopy[campyLanguage];
 const stayPrice = (id: string) => {
   const item = pricingConfig.stayTypes.find((entry) => entry.id === id);
   return item && 'price' in item ? item.price : 0;
@@ -119,11 +134,11 @@ const campyUxCopy = {
     },
   },
 };
-const campyEnhancement = campyUxCopy[pathContext.languageCode as keyof typeof campyUxCopy] ?? campyUxCopy.en;
-const bookingHref = getBookingLocalizedPath(pathContext.languageCode);
-const bookingCampingHref = getBookingLocalizedPath(pathContext.languageCode, 'camping');
-const bookingBungalowHref = getBookingLocalizedPath(pathContext.languageCode, 'bungalow');
-const bookingCombinedHref = getBookingLocalizedPath(pathContext.languageCode, 'combined');
+const campyEnhancement = campyUxCopy[campyLanguage as keyof typeof campyUxCopy] ?? campyUxCopy.en;
+const bookingHref = getBookingLocalizedPath(campyLanguage);
+const bookingCampingHref = getBookingLocalizedPath(campyLanguage, 'camping');
+const bookingBungalowHref = getBookingLocalizedPath(campyLanguage, 'bungalow');
+const bookingCombinedHref = getBookingLocalizedPath(campyLanguage, 'combined');
 const pricesHref = getLocalizedPath(pathContext.explicitLanguage, 'cennik');
 const directionsHref = getLocalizedPath(pathContext.explicitLanguage, 'dojazd');
 const contactHref = getLocalizedPath(pathContext.explicitLanguage, 'kontakt');
@@ -633,8 +648,201 @@ type CampyCopyPatch = {
     groups?: Record<string, string>;
   };
 };
-const finalCampyBase = finalCampyCopy[pathContext.languageCode as keyof typeof finalCampyCopy] ?? finalCampyCopy.en;
-const finalCampyCritical = (campyCriticalCopy[pathContext.languageCode as keyof typeof campyCriticalCopy] ?? {}) as CampyCopyPatch;
+const campyShellCopy: Record<CampySupportedLanguage, CampyCopyPatch & Record<string, any>> = {
+  pl: {
+    title: 'CAMPY — pomocnik',
+    mobileTitle: 'CAMPY — pomocnik',
+    status: 'online',
+    open: 'Otwórz CAMPY',
+    close: 'Zamknij CAMPY',
+    inputLabel: 'Wpisz pytanie do CAMPY',
+    inputPlaceholder: 'Zapytaj o rezerwację, prąd, psa, tramwaj...',
+    send: 'Wyślij',
+    intro: 'Cześć! Pomogę z rezerwacją, cenami, dojazdem, domkami, campingiem i wycieczkami.',
+    notice: 'Odpowiadam w języku tej strony.',
+    searchResultPrefix: 'Znalazłem podobne tematy:',
+    actions: { summerCamping: 'Lipiec/sierpień', evCharging: 'Prąd / EV', lateArrival: 'Późny przyjazd', attractions: 'Atrakcje' },
+    answers: {
+      bookStay: 'Jasne. Najwygodniej przejść do rezerwacji i wybrać Camping, Domki albo Razem. To zapytanie do recepcji, a dostępność i warunki potwierdza obiekt.',
+      fallback: 'Nie jestem pewien odpowiedzi. Najlepiej napisz do recepcji albo wybierz jeden z szybkich tematów.',
+      kazimierz: 'Kazimierz to klimatyczna, historyczna dzielnica Krakowa — dawna dzielnica żydowska, dziś pełna restauracji, kawiarni, synagog i miejsc na spacer. Dobrze pasuje na popołudnie lub wieczór. Z campingu najlepiej dojechać tramwajem w stronę centrum, a dalej przejść pieszo lub sprawdzić Google Maps/Jakdojade.',
+    },
+  },
+  en: {
+    title: 'CAMPY — helper',
+    mobileTitle: 'CAMPY — helper',
+    status: 'online',
+    open: 'Open CAMPY',
+    close: 'Close CAMPY',
+    inputLabel: 'Type a question for CAMPY',
+    inputPlaceholder: 'Ask about booking, power, dog, tram...',
+    send: 'Send',
+    intro: 'Hi! I can help with booking, prices, access, bungalows, camping and trips.',
+    notice: 'I answer in the language of this page.',
+    searchResultPrefix: 'I found similar topics:',
+    actions: { summerCamping: 'July/August', evCharging: 'Power / EV', lateArrival: 'Late arrival', attractions: 'Attractions' },
+    answers: {
+      bookStay: 'Sure. Open the booking flow and choose Camping, Bungalows or Combined. It is an enquiry; reception confirms availability and final conditions.',
+      fallback: 'I am not sure about the answer. Please contact reception or choose one of the quick topics.',
+      kazimierz: 'Kazimierz is a historic Krakow district, once the Jewish quarter and now full of restaurants, cafés, synagogues and walking spots. It works well for an afternoon or evening. From the campsite, take the tram towards the centre and continue on foot or check Google Maps/Jakdojade.',
+    },
+  },
+  de: {
+    title: 'CAMPY — Hilfe',
+    mobileTitle: 'CAMPY — Hilfe',
+    status: 'online',
+    open: 'CAMPY öffnen',
+    close: 'CAMPY schließen',
+    inputLabel: 'Frage an CAMPY eingeben',
+    inputPlaceholder: 'Fragen Sie zu Buchung, Strom, Hund, Tram...',
+    send: 'Senden',
+    intro: 'Hallo! Ich helfe mit Buchung, Preisen, Anfahrt, Bungalows, Camping und Ausflügen.',
+    notice: 'Ich antworte in der Sprache dieser Seite.',
+    searchResultPrefix: 'Ich habe ähnliche Themen gefunden:',
+    actions: { summerCamping: 'Juli/August', evCharging: 'Strom / EV', lateArrival: 'Späte Anreise', attractions: 'Attraktionen' },
+    answers: {
+      bookStay: 'Gern. Öffnen Sie die Buchungsanfrage und wählen Sie Camping, Bungalows oder Kombiniert. Es ist eine Anfrage; die Rezeption bestätigt Verfügbarkeit und endgültige Bedingungen.',
+      fallback: 'Ich bin mir nicht sicher. Bitte kontaktieren Sie die Rezeption oder wählen Sie ein schnelles Thema.',
+      kazimierz: 'Kazimierz ist ein historisches Viertel von Krakau, das ehemalige jüdische Viertel, heute voller Restaurants, Cafés, Synagogen und Spazierwege. Es passt gut für Nachmittag oder Abend. Vom Camping fahren Sie am besten mit der Straßenbahn Richtung Zentrum und gehen weiter zu Fuß oder prüfen Google Maps/Jakdojade.',
+    },
+  },
+  it: {
+    title: 'CAMPY — assistente',
+    mobileTitle: 'CAMPY — assistente',
+    status: 'online',
+    open: 'Apri CAMPY',
+    close: 'Chiudi CAMPY',
+    inputLabel: 'Scrivi una domanda a CAMPY',
+    inputPlaceholder: 'Chiedi di prenotazione, corrente, cane, tram...',
+    send: 'Invia',
+    intro: 'Ciao! Aiuto con prenotazioni, prezzi, accesso, bungalow, camping e gite.',
+    notice: 'Rispondo nella lingua di questa pagina.',
+    searchResultPrefix: 'Ho trovato temi simili:',
+    actions: { summerCamping: 'Luglio/agosto', evCharging: 'Corrente / EV', lateArrival: 'Arrivo tardi', attractions: 'Attrazioni' },
+    answers: {
+      bookStay: 'Certo. Apri il modulo di prenotazione e scegli Camping, Bungalow o Combinato. È una richiesta: la reception conferma disponibilità e condizioni finali.',
+      fallback: 'Non sono sicuro della risposta. Contatta la reception o scegli un tema rapido.',
+      kazimierz: 'Kazimierz è un quartiere storico di Cracovia, ex quartiere ebraico, oggi pieno di ristoranti, caffè, sinagoghe e luoghi per passeggiare. È perfetto per pomeriggio o sera. Dal camping prendi il tram verso il centro e poi continua a piedi o controlla Google Maps/Jakdojade.',
+    },
+  },
+  fr: {
+    title: 'CAMPY — aide',
+    mobileTitle: 'CAMPY — aide',
+    status: 'en ligne',
+    open: 'Ouvrir CAMPY',
+    close: 'Fermer CAMPY',
+    inputLabel: 'Écrivez une question à CAMPY',
+    inputPlaceholder: 'Demandez réservation, électricité, chien, tram...',
+    send: 'Envoyer',
+    intro: 'Bonjour ! J’aide pour réservation, tarifs, accès, bungalows, camping et excursions.',
+    notice: 'Je réponds dans la langue de cette page.',
+    searchResultPrefix: 'J’ai trouvé des sujets similaires :',
+    actions: { summerCamping: 'Juillet/août', evCharging: 'Électricité / EV', lateArrival: 'Arrivée tardive', attractions: 'Attractions' },
+    answers: {
+      bookStay: 'Bien sûr. Ouvrez le formulaire et choisissez Camping, Bungalows ou Combiné. C’est une demande; la réception confirme la disponibilité et les conditions finales.',
+      fallback: 'Je ne suis pas sûr de la réponse. Contactez la réception ou choisissez un sujet rapide.',
+      kazimierz: 'Kazimierz est un quartier historique de Cracovie, ancien quartier juif, aujourd’hui plein de restaurants, cafés, synagogues et lieux de promenade. Il convient bien à un après-midi ou une soirée. Depuis le camping, prenez le tram vers le centre puis marchez ou vérifiez Google Maps/Jakdojade.',
+    },
+  },
+  es: {
+    title: 'CAMPY — ayuda',
+    mobileTitle: 'CAMPY — ayuda',
+    status: 'online',
+    open: 'Abrir CAMPY',
+    close: 'Cerrar CAMPY',
+    inputLabel: 'Escribe una pregunta para CAMPY',
+    inputPlaceholder: 'Pregunta por reserva, electricidad, perro, tranvía...',
+    send: 'Enviar',
+    intro: '¡Hola! Ayudo con reservas, precios, acceso, bungalows, camping y excursiones.',
+    notice: 'Respondo en el idioma de esta página.',
+    searchResultPrefix: 'He encontrado temas similares:',
+    actions: { summerCamping: 'Julio/agosto', evCharging: 'Electricidad / EV', lateArrival: 'Llegada tardía', attractions: 'Atracciones' },
+    answers: {
+      bookStay: 'Claro. Abre el formulario de reserva y elige Camping, Bungalows o Combinado. Es una consulta; recepción confirma disponibilidad y condiciones finales.',
+      fallback: 'No estoy seguro de la respuesta. Contacta con recepción o elige uno de los temas rápidos.',
+      kazimierz: 'Kazimierz es un barrio histórico de Cracovia, antiguo barrio judío y hoy lleno de restaurantes, cafeterías, sinagogas y lugares para pasear. Encaja bien por la tarde o noche. Desde el camping toma el tranvía hacia el centro y sigue a pie o revisa Google Maps/Jakdojade.',
+    },
+  },
+  nl: {
+    title: 'CAMPY — hulp',
+    mobileTitle: 'CAMPY — hulp',
+    status: 'online',
+    open: 'Open CAMPY',
+    close: 'Sluit CAMPY',
+    inputLabel: 'Typ een vraag voor CAMPY',
+    inputPlaceholder: 'Vraag over boeken, stroom, hond, tram...',
+    send: 'Verstuur',
+    intro: 'Hoi! Ik help met boeken, prijzen, route, bungalows, camping en excursies.',
+    notice: 'Ik antwoord in de taal van deze pagina.',
+    searchResultPrefix: 'Ik vond vergelijkbare onderwerpen:',
+    actions: { summerCamping: 'Juli/augustus', evCharging: 'Stroom / EV', lateArrival: 'Late aankomst', attractions: 'Attracties' },
+    answers: {
+      bookStay: 'Zeker. Open het boekingsformulier en kies Camping, Bungalows of Gecombineerd. Het is een aanvraag; de receptie bevestigt beschikbaarheid en definitieve voorwaarden.',
+      fallback: 'Ik weet het antwoord niet zeker. Neem contact op met de receptie of kies een snel onderwerp.',
+      kazimierz: 'Kazimierz is een historische wijk van Krakau, vroeger de Joodse wijk en nu vol restaurants, cafés, synagogen en wandelplekken. Het past goed voor middag of avond. Vanaf de camping neem je de tram richting centrum en ga je verder te voet of check je Google Maps/Jakdojade.',
+    },
+  },
+  cs: {
+    title: 'CAMPY — pomocník',
+    mobileTitle: 'CAMPY — pomocník',
+    status: 'online',
+    open: 'Otevřít CAMPY',
+    close: 'Zavřít CAMPY',
+    inputLabel: 'Napište otázku pro CAMPY',
+    inputPlaceholder: 'Zeptejte se na rezervaci, elektřinu, psa, tramvaj...',
+    send: 'Odeslat',
+    intro: 'Dobrý den! Pomohu s rezervací, cenami, příjezdem, chatkami, kempem a výlety.',
+    notice: 'Odpovídám v jazyce této stránky.',
+    searchResultPrefix: 'Našel jsem podobná témata:',
+    actions: { summerCamping: 'Červenec/srpen', evCharging: 'Elektřina / EV', lateArrival: 'Pozdní příjezd', attractions: 'Atrakce' },
+    answers: {
+      bookStay: 'Jistě. Otevřete rezervační formulář a vyberte Kemp, Chatky nebo Kombinované. Jde o dotaz; recepce potvrzuje dostupnost a konečné podmínky.',
+      fallback: 'Nejsem si jistý odpovědí. Kontaktujte prosím recepci nebo vyberte rychlé téma.',
+      kazimierz: 'Kazimierz je historická čtvrť Krakova, bývalá židovská čtvrť, dnes plná restaurací, kaváren, synagog a míst na procházku. Hodí se na odpoledne nebo večer. Z kempu je nejlepší jet tramvají směrem do centra a pokračovat pěšky nebo podle Google Maps/Jakdojade.',
+    },
+  },
+  sk: {
+    title: 'CAMPY — pomocník',
+    mobileTitle: 'CAMPY — pomocník',
+    status: 'online',
+    open: 'Otvoriť CAMPY',
+    close: 'Zavrieť CAMPY',
+    inputLabel: 'Napíšte otázku pre CAMPY',
+    inputPlaceholder: 'Opýtajte sa na rezerváciu, elektrinu, psa, električku...',
+    send: 'Odoslať',
+    intro: 'Dobrý deň! Pomôžem s rezerváciou, cenami, príchodom, chatkami, kempom a výletmi.',
+    notice: 'Odpovedám v jazyku tejto stránky.',
+    searchResultPrefix: 'Našiel som podobné témy:',
+    actions: { summerCamping: 'Júl/august', evCharging: 'Elektrina / EV', lateArrival: 'Neskorý príchod', attractions: 'Atrakcie' },
+    answers: {
+      bookStay: 'Jasné. Otvorte rezervačný formulár a vyberte Kemp, Chatky alebo Kombinované. Ide o dopyt; recepcia potvrdzuje dostupnosť a konečné podmienky.',
+      fallback: 'Nie som si istý odpoveďou. Kontaktujte prosím recepciu alebo vyberte rýchlu tému.',
+      kazimierz: 'Kazimierz je historická štvrť Krakova, bývalá židovská štvrť, dnes plná reštaurácií, kaviarní, synagóg a miest na prechádzku. Hodí sa na popoludnie alebo večer. Z kempu je najlepšie ísť električkou smerom do centra a pokračovať pešo alebo podľa Google Maps/Jakdojade.',
+    },
+  },
+  sv: {
+    title: 'CAMPY — hjälp',
+    mobileTitle: 'CAMPY — hjälp',
+    status: 'online',
+    open: 'Öppna CAMPY',
+    close: 'Stäng CAMPY',
+    inputLabel: 'Skriv en fråga till CAMPY',
+    inputPlaceholder: 'Fråga om bokning, el, hund, spårvagn...',
+    send: 'Skicka',
+    intro: 'Hej! Jag hjälper med bokning, priser, infart, stugor, camping och turer.',
+    notice: 'Jag svarar på språkversionens språk.',
+    searchResultPrefix: 'Jag hittade liknande ämnen:',
+    actions: { summerCamping: 'Juli/augusti', evCharging: 'El / EV', lateArrival: 'Sen ankomst', attractions: 'Sevärdheter' },
+    answers: {
+      bookStay: 'Absolut. Öppna bokningsformuläret och välj Camping, Bungalows eller Kombinerat. Det är en förfrågan; receptionen bekräftar tillgänglighet och slutliga villkor.',
+      fallback: 'Jag är inte säker på svaret. Kontakta receptionen eller välj ett snabbt ämne.',
+      kazimierz: 'Kazimierz är en historisk stadsdel i Kraków, tidigare judiska kvarteren och idag full av restauranger, kaféer, synagogor och promenadplatser. Den passar bra på eftermiddag eller kväll. Från campingen tar du spårvagn mot centrum och fortsätter till fots eller följer Google Maps/Jakdojade.',
+    },
+  },
+};
+const campyShell = campyShellCopy[campyLanguage] ?? campyShellCopy.en;
+const finalCampyBase = finalCampyCopy[campyLanguage as keyof typeof finalCampyCopy] ?? finalCampyCopy.en;
+const finalCampyCritical = (campyCriticalCopy[campyLanguage as keyof typeof campyCriticalCopy] ?? {}) as CampyCopyPatch;
 const finalCampy = {
   ...finalCampyBase,
   actions: {
@@ -673,29 +881,22 @@ const pageKey = isBookingSlug(pathContext.slug)
 const pageWelcome = coreCopy.welcome[pageKey as keyof typeof coreCopy.welcome] ?? coreCopy.welcome['/'];
 const enhancedChatTexts = {
   ...chatTexts,
+  ...campyShell,
+  language: campyLanguage,
   pageWelcome,
-  pageWelcomeKey: `${pathContext.explicitLanguage ?? 'root'}:${pathContext.languageCode}:${pageKey}`,
-  mobileTitle: {
-    pl: 'CAMPY — pomocnik',
-    en: 'CAMPY — helper',
-    de: 'CAMPY — Hilfe',
-    it: 'CAMPY — assistente',
-    fr: 'CAMPY — aide',
-    es: 'CAMPY — ayuda',
-    nl: 'CAMPY — hulp',
-    cs: 'CAMPY — pomocník',
-    sk: 'CAMPY — pomocník',
-    sv: 'CAMPY — hjälp',
-  }[pathContext.languageCode] ?? 'CAMPY — helper',
+  pageWelcomeKey: `${pathContext.explicitLanguage ?? 'root'}:${campyLanguage}:${pageKey}`,
+  mobileTitle: campyShell.mobileTitle,
   actions: {
     ...chatTexts.actions,
     ...campyEnhancement.actions,
     ...finalCampy.actions,
+    ...(campyShell.actions ?? {}),
   },
   answers: {
     ...chatTexts.answers,
     ...campyEnhancement.answers,
     ...finalCampy.answers,
+    ...(campyShell.answers ?? {}),
   },
   links: {
     booking: bookingHref,
@@ -712,7 +913,7 @@ const enhancedChatTexts = {
     etoll: etollHref,
     tours: tourBookingHref,
   },
-  searchIndex: getSearchIndex(pathContext.languageCode),
+  searchIndex: getSearchIndex(campyLanguage),
   tourLabels: coreCopy.tour,
 };
 const chatConfigEncoded = Buffer.from(JSON.stringify(enhancedChatTexts), 'utf8').toString('base64');
@@ -727,7 +928,9 @@ const allQuickActionGroups = [
       { key: 'registration', icon: 'BadgeCheck', label: enhancedChatTexts.actions.registration },
       { key: 'stayCompare', icon: 'Split', label: enhancedChatTexts.actions.stayCompare },
       { key: 'combinedStay', icon: 'Combine', label: enhancedChatTexts.actions.combinedStay },
+      { key: 'summerCamping', icon: 'CalendarCheck', label: enhancedChatTexts.actions.summerCamping },
       { key: 'lateCheckout', icon: 'Clock', label: enhancedChatTexts.actions.lateCheckout },
+      { key: 'lateArrival', icon: 'Clock', label: enhancedChatTexts.actions.lateArrival },
       { key: 'cityCamping', icon: 'MapPinned', label: enhancedChatTexts.actions.cityCamping || 'City campsite' },
     ],
   },
@@ -740,6 +943,7 @@ const allQuickActionGroups = [
       { key: 'currency', icon: 'Coins', label: enhancedChatTexts.actions.currency },
       { key: 'campingPricing', icon: 'Calculator', label: enhancedChatTexts.actions.campingPricing },
       { key: 'powerDog', icon: 'PlugZap', label: enhancedChatTexts.actions.powerDog },
+      { key: 'evCharging', icon: 'PlugZap', label: enhancedChatTexts.actions.evCharging },
       { key: 'dog', icon: 'PawPrint', label: enhancedChatTexts.actions.dog },
       { key: 'bungalowOptions', icon: 'House', label: enhancedChatTexts.actions.bungalowOptions },
     ],
@@ -808,7 +1012,7 @@ const quickActionGroups = preferredQuickKeys
     class="floating-chat__button"
     type="button"
     data-chat-toggle
-    aria-label={chatTexts.open}
+    aria-label={enhancedChatTexts.open}
     aria-expanded="false"
     aria-controls="floatingChatPanel"
   >
@@ -831,7 +1035,7 @@ const quickActionGroups = preferredQuickKeys
     data-chat-panel
     role="dialog"
     aria-modal="true"
-    aria-label={chatTexts.title}
+    aria-label={enhancedChatTexts.title}
     aria-hidden="true"
     hidden
     inert
@@ -851,7 +1055,7 @@ const quickActionGroups = preferredQuickKeys
         <span data-chat-title-node></span>
         <strong><i aria-hidden="true"></i><span data-chat-status-node></span></strong>
       </div>
-      <button type="button" data-chat-close aria-label={chatTexts.close}>
+      <button type="button" data-chat-close aria-label={enhancedChatTexts.close}>
         <Icon name="close" size={20} strokeWidth={2} />
       </button>
     </header>
@@ -1123,6 +1327,9 @@ const quickActionGroups = preferredQuickKeys
       if (key === 'stayCompare') return { text: answers.stayCompare, actions: [{ label: actionLabels.camping, href: links.bookingCamping }, { label: actionLabels.bungalow, href: links.bookingBungalow }, { label: actionLabels.combined, href: links.bookingCombined }] };
       if (key === 'campingPricing') return { text: answers.campingPricing, actions: [{ label: actionLabels.prices, href: links.prices }] };
       if (key === 'powerDog') return { text: answers.powerDog, actions: [{ label: actionLabels.prices, href: links.prices }] };
+      if (key === 'evCharging') return { text: answers.evCharging ?? answers.powerDog, actions: [{ label: actionLabels.directions, href: links.directions }, { label: actionLabels.contact, href: links.contact }] };
+      if (key === 'summerCamping') return { text: answers.summerCamping, actions: [{ label: actionLabels.bungalow, href: links.bookingBungalow }, { label: actionLabels.contact, href: links.contact }] };
+      if (key === 'lateArrival') return { text: answers.lateArrival ?? answers.receptionHours, actions: [{ label: actionLabels.contact, href: links.contact }, { label: actionLabels.booking, href: links.booking }] };
       if (key === 'lateCheckout') return { text: answers.lateCheckout, actions: [{ label: actionLabels.booking, href: links.booking }] };
       if (key === 'cityCamping') return { text: answers.cityCamping, actions: [{ label: actionLabels.camping, href: links.bookingCamping }, { label: actionLabels.directions, href: links.directions }] };
       if (key === 'centerTransit') return { text: answers.centerTransit, actions: [{ label: actionLabels.maps, href: links.maps }, { label: actionLabels.jakdojade, href: links.jakdojade }, { label: actionLabels.directions, href: links.directions }] };
@@ -1170,7 +1377,7 @@ const quickActionGroups = preferredQuickKeys
         .map((item) => item.entry);
       if (!matches.length) return null;
       return {
-        text: `Znalazłem podobne tematy: ${matches.map((entry) => entry.title).join(', ')}.`,
+        text: `${chatTexts.searchResultPrefix || 'I found similar topics:'} ${matches.map((entry) => entry.title).join(', ')}.`,
         actions: matches.map((entry) => ({ label: entry.title, href: entry.href })),
       };
     };
@@ -1271,8 +1478,8 @@ const quickActionGroups = preferredQuickKeys
 
       if (hasAny('kazimierz')) {
         return {
-          text: 'Kazimierz to klimatyczna, historyczna dzielnica Krakowa — dawna dzielnica żydowska, dziś pełna restauracji, kawiarni, synagog i miejsc na spacer. Dobrze pasuje na popołudnie lub wieczór. Z campingu najlepiej dojechać tramwajem w stronę centrum, a dalej przejść pieszo lub przesiąść się zgodnie z Google Maps albo Jakdojade.',
-          actions: [{ label: 'Zobacz atrakcje', href: chatTexts.links?.attractions }, { label: 'Sprawdź dojazd', href: chatTexts.links?.directions }],
+          text: chatTexts.answers.kazimierz ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback,
+          actions: [{ label: chatTexts.actions?.attractions || actionLabels.attractions, href: chatTexts.links?.attractions }, { label: chatTexts.actions?.centerTransit || actionLabels.directions, href: chatTexts.links?.directions }],
         };
       }
 
