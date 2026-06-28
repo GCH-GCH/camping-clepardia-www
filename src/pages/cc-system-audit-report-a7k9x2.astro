@@ -108,8 +108,7 @@ const navGroups = [
     ['🏡', 'Domki', ''],
   ]],
   ['Wiadomości i system', [
-    ['✉️', 'Maile / Centrum wiadomości', '8'],
-    ['💬', 'Schematy odpowiedzi', ''],
+    ['✉️', 'Maile / Mail Center', '8'],
     ['📤', 'Eksporty', ''],
     ['🛡️', 'Backup PRO', ''],
     ['🧪', 'Testy', ''],
@@ -133,7 +132,7 @@ const uiTokenMap = {
   Recepcja: 'RC',
   CAMP: 'CP',
   'Camp PRO': 'CP',
-  'Maile / Centrum wiadomości': 'ML',
+  'Maile / Mail Center': 'ML',
   Klienci: 'KL',
   'Rezerwacje pola': 'RZ',
   Kalendarz: 'KA',
@@ -144,7 +143,6 @@ const uiTokenMap = {
   Przedłużenia: 'PP',
   GUS: 'GU',
   Raporty: 'RP',
-  'Schematy odpowiedzi': 'SO',
   'Użytkownicy / Pracownicy': 'UP',
   Zadania: 'ZD',
   'Wyjazdy dziś': 'WY',
@@ -182,8 +180,8 @@ const uiToken = (label = '') => uiTokenMap[label] || String(label)
 const sections = [
   ['audit-header', 'Header audytu'],
   ['public-i18n', 'Public i18n / CAMPY'],
-  ['sidebar-expanded', 'Sidebar expanded'],
-  ['sidebar-collapsed', 'Sidebar collapsed'],
+  ['sidebar-expanded', 'Sidebar rozwinięty'],
+  ['sidebar-collapsed', 'Sidebar rail'],
   ['dashboard', 'Dashboard / Recepcja'],
   ['mail-center', 'Centrum wiadomości'],
   ['mail-summary', 'Mail do klienta'],
@@ -212,7 +210,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex,nofollow,noarchive" />
-    <title>CC SYSTEM — Audit Preview</title>
+    <title>CC SYSTEM — raport audytu</title>
     <meta name="description" content="Statyczny podgląd UI/UX CC SYSTEM na danych demo, bez API i bez prawdziwych danych." />
   </head>
   <body>
@@ -220,14 +218,14 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
       <header class="audit-hero" id="audit-header">
         <div>
           <p class="eyebrow">Camping Clepardia · CC SYSTEM ONLINE</p>
-          <h1>CC SYSTEM — Audit Preview</h1>
+          <h1>CC SYSTEM — raport audytu</h1>
           <p class="hero-copy">Statyczny podgląd UI/UX na danych demo, bez prawdziwych danych i bez requestów API.</p>
         </div>
         <aside class="audit-meta">
           <span>DEMO</span>
           <span>NOINDEX</span>
           <span>NO API</span>
-          <span>TASK 138 I18N</span>
+          <span>TASK 139 OFFLINE PARITY</span>
           <span>SAFE FOR REVIEW</span>
           <small>Build/test: {buildStamp}</small>
         </aside>
@@ -246,8 +244,9 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
           </div>
         </header>
         <div class="audit-note-card">
-          <h3>Zakres TASK 138</h3>
-          <p>Formularz rezerwacji ma lokalne etykiety kroków, dat, gości, usług, danych, wycieczek, podsumowania, walidacji i blokady camping lipiec/sierpień. CAMPY ma twardy język strony oraz lokalizowane intro, placeholder, szybkie tematy, odpowiedzi i fallback.</p>
+          <h3>Zakres TASK 138/139</h3>
+          <p>Formularz rezerwacji ma lokalne etykiety kroków, dat, gości, usług, danych, wycieczek, podsumowania, walidacji i blokady camping lipiec/sierpień. CAMPY ma twardy język strony oraz lokalizowane intro, placeholder, szybkie tematy i odpowiedzi.</p>
+          <p>TASK 139 rozszerza raport o offline parity: sidebar w kolejności offline, szeroki kalendarz z rombami/półdniami, /camp jako Nowe przyjęcie, Klienci offline+CRM, GUS offline-style, Rezerwacje operacyjne, Mail Center po polsku i plan synchronizacji offline ↔ online.</p>
           <p>QA/audit są demo-only, mają noindex/nofollow/noarchive, nie wykonują API i nie są przeznaczone do sitemap.</p>
         </div>
       </section>
@@ -256,7 +255,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
         <header>
           <span class="section-number">01</span>
           <div>
-            <h2>Sidebar expanded</h2>
+            <h2>Sidebar rozwinięty</h2>
             <p>Co sprawdzać: czy moduły są pogrupowane, czy nazwy są czytelne i czy panel wygląda jak narzędzie recepcji, nie jak lista przypadkowych przycisków.</p>
           </div>
         </header>
@@ -267,7 +266,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
               <div class="sidebar-group">
                 <p>{group}</p>
                 {links.map(([icon, label, count]) => (
-                  <article class={label === 'Maile / Centrum wiadomości' ? 'is-active' : ''}>
+                  <article class={label === 'Maile / Mail Center' ? 'is-active' : ''}>
                     <span>{uiToken(label)}</span><b>{label}</b>{count && <em>{count}</em>}
                   </article>
                 ))}
@@ -322,7 +321,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
               <article><span>🟢</span><b>{stats.active}</b><small>aktywnych demo</small></article>
               <article><span>🏕️</span><b>{stats.camping}</b><small>camping</small></article>
               <article><span>🏡</span><b>{stats.bungalows}</b><small>domki</small></article>
-              <article><span>✉️</span><b>{stats.delivered}/{stats.all}</b><small>mail delivery</small></article>
+              <article><span>✉️</span><b>{stats.delivered}/{stats.all}</b><small>dostarczenie maili</small></article>
             </div>
           </section>
           <section class="work-card urgent-card">
@@ -414,17 +413,18 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
               </ul>
             </section>
             <section class="warning-box">
-              <h4>Historia wątku</h4>
+              <h4>Historia rozmowy</h4>
               <ul>
-                <li>Inbound: wiadomość z formularza publicznego.</li>
-                <li>Outbound: odpowiedź premium wysłana przez Resend.</li>
-                <li>Internal: notatki i zmiany statusu recepcji.</li>
+                <li>Wiadomość przychodząca: formularz publiczny.</li>
+                <li>Wiadomość wychodząca: odpowiedź wysłana przez Resend.</li>
+                <li>Notatki recepcji: zmiany statusu i ważne informacje.</li>
               </ul>
             </section>
             <div class="reply-actions">
               <button>Utwórz odpowiedź premium</button>
               <button>Wyślij przez Resend</button>
-              <button>Kopiuj summary</button>
+              <button>Kopiuj podsumowanie</button>
+              <button>Podgląd PL dla recepcji</button>
               <button>Oznacz jako odpowiedziane</button>
             </div>
           </section>
@@ -436,7 +436,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
           <span class="section-number">04B</span>
           <div>
             <h2>Mail do recepcji — najważniejsze kafelki</h2>
-            <p>Co sprawdzać: mail do klienta ma być czysty, bez providerów i diagnostyki, z konkretnym pobytem, pojazdem, usługami i jasnymi warunkami.</p>
+            <p>Co sprawdzać: mail do klienta ma być czysty, bez kanałów technicznych i diagnostyki, z konkretnym pobytem, pojazdem, usługami i jasnymi warunkami.</p>
           </div>
         </header>
         <div class="modal-preview">
@@ -603,7 +603,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
         <div class="calendar-preview">
           <main class="calendar-board-preview">
             <div class="audit-month-strip">{['Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień'].map((month) => <button class={month === 'Lipiec' ? 'is-active' : ''}>{month}</button>)}</div>
-            <div class="audit-calendar-legend"><span>Potwierdzone</span><span>Do potwierdzenia</span><span>Nieopłacone</span><span>Brak miejsc</span><span>Grupa</span><span>Camping L/S</span></div>
+            <div class="audit-calendar-legend"><span>Potwierdzone</span><span>Wstępne</span><span>Zaliczka</span><span>Opłacone</span><span>Nieopłacone</span><span>Brak miejsc</span><span>Grupa</span><span>Camping L/S</span></div>
             <div class="calendar-head"><strong>Lipiec 2026</strong>{monthDays.map((day) => <span class={day === 27 ? 'is-today' : ''}>{day}</span>)}</div>
             {calendarResources.map((resource, rowIndex) => (
               <div class="calendar-row-preview">
@@ -628,6 +628,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
               <li>Nie potwierdzać miejsca campingowego w lipcu.</li>
               <li>Poprosić o dokładną liczbę namiotów i aut.</li>
               <li>Zaproponować przyjazd ok. 12:00.</li>
+              <li>Klik paska otwiera modal edycji offline-style: dane, usługi, status, płatność, sprzątanie i karta pobytu.</li>
             </ul>
           </aside>
         </div>
@@ -740,7 +741,10 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
             ['Link wycieczek', 'lista opcji demo'],
             ['Języki', 'PL, EN, DE, IT, FR, ES, NL, CS, SK, SV'],
             ['Sekrety', 'niewidoczne w raporcie'],
-            ['Synchronizacja offline', 'eksport/import JSON lub CSV'],
+            ['Synchronizacja offline ↔ online', 'status: planowane, eksport/import JSON lub CSV'],
+            ['Mapowanie klientów', 'email, telefon, kraj, VIP/Blacklist, powracający'],
+            ['Mapowanie rezerwacji', 'daty, zasób, osoby, usługi, status, płatność'],
+            ['Wspólne słowniki', 'cenniki, usługi, kraje, zasoby'],
             ['Konflikty danych', 'log zmian bez automatycznego nadpisywania'],
             ['Backup', 'kopia przed importem z offline'],
           ].map(([label, value]) => <article><span>{label}</span><strong>{value}</strong></article>)}
@@ -752,7 +756,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
           <span class="section-number">13</span>
           <div>
             <h2>Statystyki</h2>
-            <p>Co sprawdzać: przykładowe metryki z danych demo — zapytania, kraje, języki, camping/domki, mail delivery i feedback.</p>
+            <p>Co sprawdzać: przykładowe metryki z danych demo — zapytania, kraje, języki, camping/domki, dostarczenie maili i opinie.</p>
           </div>
         </header>
         <div class="stats-preview">
@@ -773,7 +777,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
         <header>
           <span class="section-number">14</span>
           <div>
-            <h2>Mobile preview 390px</h2>
+            <h2>Mobile 390px</h2>
             <p>Co sprawdzać: drawer sidebara, kompaktowa lista centrum wiadomości, szczegóły wątku i statyczny modal odpowiedzi w telefonicznym kontenerze.</p>
           </div>
         </header>
@@ -812,7 +816,7 @@ const monthDays = Array.from({ length: 31 }, (_, index) => index + 1);
         </header>
         <div class="todo-grid">
           <article><h3>Makiety świadome</h3><p>Widoki kalendarza zasobów, CRM 360, pracownicy, zadania i GUS są statycznym kierunkiem UI — bez zapisu do docelowych tabel.</p></article>
-          <article><h3>Wymaga tabel</h3><p>Docelowe clients, reservations, mail_threads, mail_messages, tasks, staff i assets powinny być osobnym etapem backendowym.</p></article>
+          <article><h3>Wymaga tabel</h3><p>Docelowe dane klientów, pobytów, wiadomości, zadań, pracowników i plików powinny być osobnym etapem backendowym.</p></article>
           <article><h3>Do UI polish</h3><p>Dalsze dopracowanie proporcji tabel, dostępności keyboard, microcopy statusów i eksportu potwierdzeń.</p></article>
           <article><h3>Bezpieczeństwo</h3><p>Ta strona używa wyłącznie danych demo, ma noindex/nofollow/noarchive i nie wykonuje requestów API.</p></article>
         </div>

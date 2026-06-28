@@ -12,7 +12,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex,nofollow,noarchive" />
     <meta name="referrer" content="no-referrer" />
-    <title>{title} — QA preview demo</title>
+    <title>{title} — podgląd QA demo</title>
     <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
     <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=3" />
@@ -81,13 +81,11 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
             </div>
             <div class="cc-sidebar__group">
               <span class="cc-sidebar__group-label">Wiadomości i system</span>
-              <button type="button" data-view="mail" aria-pressed="false"><span aria-hidden="true"></span><em>Maile / Centrum wiadomości</em><b data-sidebar-badge="inbox">0</b></button>
-              <button type="button" data-view="templates" aria-pressed="false"><span aria-hidden="true"></span><em>Schematy odpowiedzi</em><b data-sidebar-badge="reply">0</b></button>
+              <button type="button" data-view="mail" aria-pressed="false"><span aria-hidden="true"></span><em>Maile / Mail Center</em><b data-sidebar-badge="inbox">0</b></button>
               <button type="button" data-view="exports" aria-pressed="false"><span aria-hidden="true"></span><em>Eksporty</em></button>
               <button type="button" data-view="backup" aria-pressed="false"><span aria-hidden="true"></span><em>Backup PRO</em></button>
               <button type="button" data-view="tests" aria-pressed="false"><span aria-hidden="true"></span><em>Testy</em><b data-sidebar-badge="tests">0</b></button>
               <button type="button" data-view="archive" aria-pressed="false"><span aria-hidden="true"></span><em>Archiwum</em></button>
-              <button type="button" data-view-shortcut="mail" class="cc-sidebar__mail-failed"><span aria-hidden="true"></span><em>Mail niedostarczony</em><b data-sidebar-badge="mailFailed">0</b></button>
             </div>
           </nav>
         </aside>
@@ -134,9 +132,9 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           </header>
 
           <section class="demo-banner" aria-label="Tryb demo">
-            <strong>DEMO / QA PREVIEW</strong>
+            <strong>DEMO / PODGLĄD QA</strong>
             <p>To jest publiczny podgląd testowy CC SYSTEM na danych demo. Nie zawiera prawdziwych danych klientów, nie pobiera Supabase i nie wysyła maili.</p>
-            <p><strong>TASK 138:</strong> publiczna strona ma i18n/CAMPY language lock dla PL/EN/DE/IT/FR/ES/NL/CS/SK/SV, a CC SYSTEM pozostaje po polsku i idzie w stronę workflow offline: rail/sidebar, CAMP, GUS, kalendarz i Mail Center.</p>
+            <p><strong>TASK 139:</strong> podgląd pokazuje sidebar w kolejności offline, kalendarz offline-style z rombami/półdniami, CAMP / Camp PRO, Klienci offline+CRM, GUS offline-style, Mail Center po polsku i plan synchronizacji offline ↔ online. Publiczne i18n/CAMPY z TASK 138 pozostaje nienaruszone.</p>
           </section>
 
         <section class="mail-center-nav" aria-label="Centrum wiadomości">
@@ -197,7 +195,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
       <section class="reply-modal__card" role="dialog" aria-modal="true" aria-labelledby="reply-modal-title">
         <button class="reply-modal__close" type="button" data-reply-close aria-label="Zamknij">×</button>
         <header>
-          <span class="eyebrow">Maile / Centrum wiadomości</span>
+          <span class="eyebrow">Maile / Mail Center</span>
           <h2 id="reply-modal-title" data-reply-title>Odpowiedź do klienta</h2>
           <p data-reply-meta>Podgląd wiadomości klienta oraz podgląd po polsku dla recepcji</p>
         </header>
@@ -307,7 +305,22 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           settings: 'settings',
           tests: 'tests',
           archive: 'archive',
+          'camp-pro': 'camp',
+          'camp-plan': 'camping',
+          'work-schedule': 'calendar',
+          departures: 'extend',
           all: 'archive',
+          'staff-pro': 'staff',
+          parking: 'reservations',
+          tours: 'templates',
+          purchases: 'reports',
+          cleaning: 'tasks',
+          invoices: 'print',
+          alerts: 'alert',
+          vip: 'customers',
+          warehouse: 'archive',
+          exports: 'reports',
+          backup: 'archive',
         };
         const sidebarSvg = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${sidebarIcons[name] || sidebarIcons.dashboard}</svg>`;
         Array.from(document.querySelectorAll('.cc-sidebar [data-view], .cc-sidebar [data-view-shortcut]')).forEach((button) => {
@@ -329,7 +342,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
         const sidebarMobileToggle = document.querySelector('[data-sidebar-mobile-toggle]');
         const sidebarCloseButtons = Array.from(document.querySelectorAll('[data-sidebar-close]'));
         const sidebarBadges = Array.from(document.querySelectorAll('[data-sidebar-badge]'));
-        const statusLabels = { new:'Nowe', needs_reply:'Do odpowiedzi', replied:'Odpowiedziane', needs_confirmation:'Do potwierdzenia', confirmed:'Potwierdzone', unavailable:'Brak miejsc', rejected:'Odrzucone', cancelled:'Anulowane', archived:'Archiwum', test:'Test', spam:'Spam/test' };
+        const statusLabels = { new:'Nowe', needs_reply:'Do odpowiedzi', replied:'Odpowiedziane', needs_confirmation:'Do potwierdzenia', confirmed:'Potwierdzone', deposit:'Zaliczka', paid:'Opłacona', unpaid:'Nieopłacona', unavailable:'Brak miejsc', rejected:'Odrzucone', cancelled:'Anulowane', archived:'Archiwum', test:'Test', spam:'Spam/test' };
         const categoryLabels = {
           urgent:'Pilne', today:'Przyjazd dzisiaj', next7:'Przyjazd ≤ 7 dni', camping:'Camping', bungalow:'Domki', combined:'Pobyt łączony',
           group:'Grupa', scouts:'Harcerze / skauci', trips:'Wycieczki', feedback:'Opinia o stronie',
@@ -770,7 +783,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           `Cena orientacyjna: ${item.estimated_total_pln ?? '-'} PLN`,
           `Wiadomość: ${item.message || '-'}`,
         ].join('\n');
-        const mailText = (item) => `DEMO QA — Nowe zapytanie rezerwacyjne — Camping Clepardia\n\n${summaryText(item)}\n\nSprawdź w publicznym QA preview:\n${location.origin}${demoPath}`;
+        const mailText = (item) => `DEMO QA — Nowe zapytanie rezerwacyjne — Camping Clepardia\n\n${summaryText(item)}\n\nSprawdź w publicznym podglądzie QA:\n${location.origin}${demoPath}`;
         const copy = async (text, button) => {
           try {
             if (!navigator.clipboard?.writeText) throw new Error('CLIPBOARD_API_UNAVAILABLE');
@@ -1235,7 +1248,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           }
           if (demoMode) {
             trackLocalAction(payload.item.id, `DEMO: wysyłka przez Resend (${payload.template.title})`);
-            showToast('QA preview: wysyłka przez Resend jest zablokowana, pokazuję tylko demo.', 'success');
+            showToast('Podgląd QA: wysyłka przez Resend jest zablokowana, pokazuję tylko demo.', 'success');
             return;
           }
           if (replySendButton instanceof HTMLButtonElement) {
@@ -1267,7 +1280,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           if (!payload) return;
           if (demoMode) {
             trackLocalAction(payload.item.id, `DEMO: zapis szkicu (${payload.template.title})`);
-            showToast('QA preview: szkic zapisany tylko lokalnie w historii demo.', 'success');
+            showToast('Podgląd QA: szkic zapisany tylko lokalnie w historii demo.', 'success');
             return;
           }
           if (replyDraftButton instanceof HTMLButtonElement) replyDraftButton.disabled = true;
@@ -1397,6 +1410,10 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           });
         };
         const moneyLabel = (item) => item.estimated_total_pln !== null && item.estimated_total_pln !== undefined ? `${item.estimated_total_pln} PLN` : '-';
+        const mailChannelLabel = (provider) => {
+          const key = String(provider || '').toLowerCase();
+          return { resend:'Resend', web3forms:'Web3Forms', formsubmit:'FormSubmit', mock:'tryb testowy', fallback:'awaryjny mailto', none:'brak kanału' }[key] || 'brak kanału';
+        };
         const serviceSummaryShort = (item) => services(item).map((service)=>`${service.label} × ${service.qty}`).join(', ') || '-';
         const arrivalTodayItems = () => realItems().filter((item)=>categoryKeys(item).includes('today'));
         const departureTodayItems = () => {
@@ -1484,7 +1501,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
             ['⚡', 'EV / prąd', real.filter((item)=>categoryKeys(item).includes('ev')).length, 'Prąd 10A nie służy do ładowania EV.'],
           ];
           const kpis = [
-            ['🟢','Nowe zapytania', real.filter((item)=>item.status === 'new').length, demoMode ? 'demo inbox' : 'realni klienci'],
+            ['🟢','Nowe zapytania', real.filter((item)=>item.status === 'new').length, demoMode ? 'skrzynka demo' : 'realni klienci'],
             ['✉️','Do odpowiedzi', real.filter((item)=>['new','needs_reply'].includes(item.status)).length, 'kolejka recepcji'],
             ['📥','Przyjazdy dziś', arrivalTodayItems().length, 'check-in'],
             ['📤','Wyjazdy dziś', departureTodayItems().length, 'check-out'],
@@ -1548,7 +1565,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           return `<button type="button" class="mail-thread ${String(item.id) === String(selectedId) ? 'is-selected' : ''}" data-id="${esc(item.id)}" data-thread-select="${esc(item.id)}">
             <span class="mail-thread__flag">${esc(country.flag)}</span>
             <span class="mail-thread__body"><strong>${esc(item.full_name || 'Bez nazwy')}</strong><small>${esc(country.label)} · ${esc(languageCode(item).toUpperCase())} · ${esc(formatDate(item.created_at,true))}</small><em>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.stay_type || '-')}</em><span>${badgeKeys.map((key)=>`<b>${esc(categoryLabels[key] || key)}</b>`).join('')}</span></span>
-            <span class="mail-thread__meta"><strong>${esc(item.stay_type || 'Pobyt')}</strong><small>${esc(guests.label)}</small><i class="${item.mail_delivered ? 'is-ok':'is-warn'}">${item.mail_delivered ? 'Mail dostarczony':'Mail problem'}</i></span>
+            <span class="mail-thread__meta"><strong>${esc(item.stay_type || 'Pobyt')}</strong><small>${esc(guests.label)}</small><i class="${item.mail_delivered ? 'is-ok':'is-warn'}">${item.mail_delivered ? 'Mail dostarczony':'Problem z mailem'}</i></span>
           </button>`;
         };
         const renderCasePanel = (item) => {
@@ -1561,7 +1578,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           const timeline = [
             ['Wpłynęło', formatDate(item.created_at,true)],
             [demoMode ? 'Zapis demo' : 'Zapis Supabase', demoMode ? 'lokalna tablica demo' : 'OK — reservation_inquiries'],
-            ['Mail', demoMode ? 'status demo — bez wysyłki' : `${item.mail_provider || 'none'} / ${item.mail_delivered ? 'dostarczony' : 'niedostarczony'}`],
+            ['Wysyłka maila', demoMode ? 'status demo — bez wysyłki' : `${mailChannelLabel(item.mail_provider)} / ${item.mail_delivered ? 'dostarczony' : 'niedostarczony'}`],
             ['Status', statusLabels[item.status] || item.status],
           ].map(([label,value])=>`<li><span>${esc(label)}</span><strong>${esc(value)}</strong></li>`).join('');
           return `<section class="mail-case-panel" data-id="${esc(item.id)}">
@@ -1577,7 +1594,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           const folder = activeMailFolder();
           return `<section class="mail-center-workspace">
             <aside class="mail-folders"><header><span class="eyebrow">Centrum wiadomości</span><h2>Skrzynka recepcji</h2><p>${demoMode ? 'Dane demo, bez wysyłki.' : 'Własna skrzynka + CRM + akcje.'}</p></header>${mailFolderDefs().map(([key,icon,label,count])=>`<button type="button" data-mail-folder="${esc(key)}" class="${folder === key ? 'is-active' : ''}"><span>${esc(icon)} ${esc(label)}</span><strong>${esc(count)}</strong></button>`).join('')}</aside>
-            <section class="mail-thread-list"><header><div><span class="eyebrow">Wątki</span><h3>${esc(items.length)} w widoku</h3></div><small>${esc(autoRefreshPaused ? 'Auto-refresh pauza' : 'Auto-refresh 25 s')}</small></header><div class="mail-thread-scroll">${items.length ? items.map((item)=>renderThreadCard(item, selected?.id)).join('') : '<div class="empty">Brak wątków dla wybranych filtrów.</div>'}</div></section>
+            <section class="mail-thread-list"><header><div><span class="eyebrow">Wątki</span><h3>${esc(items.length)} w widoku</h3></div><small>${esc(autoRefreshPaused ? 'Odświeżanie wstrzymane' : 'Odświeżanie co 25 s')}</small></header><div class="mail-thread-scroll">${items.length ? items.map((item)=>renderThreadCard(item, selected?.id)).join('') : '<div class="empty">Brak wątków dla wybranych filtrów.</div>'}</div></section>
             ${renderCasePanel(selected)}
           </section>`;
         };
@@ -1607,11 +1624,23 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           const initials = String(client.name || 'CC').trim().split(/\s+/).slice(0,2).map((part)=>part[0]).join('').toUpperCase() || 'CC';
           const best = suggestBestReply(next);
           const prefs = ['Blisko sanitariatów','Cisza','Poranna kawa','Pies mile widziany','Miejsce z prądem','Powraca co roku'];
+          const customerFilters = ['Kraj','Typ pobytu','Status','Domki / camping','Premium / VIP','Blacklist','Powracający','Grupa'];
+          const customerRows = customers.slice(0,8).map((entry)=>{
+            const entryCountry = countryInfo({ country:entry.country, language:entry.language });
+            const lastStay = entry.items[0] || {};
+            const flags = [
+              entry.items.length > 1 ? 'Powracający' : 'Nowy',
+              categoryKeys(lastStay).includes('group') ? 'Grupa' : '',
+              categoryKeys(lastStay).includes('bungalow') ? 'Domki' : 'Camping',
+            ].filter(Boolean).join(' · ');
+            return `<article class="crm-list-row"><strong>${esc(entry.name)}</strong><span>${esc(entryCountry.flag)} ${esc(entryCountry.label)}</span><span>${esc(entry.phone || '-')}</span><span>${esc(entry.email || '-')}</span><span>${esc(lastStay.arrival_date || '-')} — ${esc(lastStay.departure_date || '-')}</span><span>${esc(statusLabels[lastStay.status] || lastStay.status || '-')}</span><small>${esc(flags)}</small><button type="button">Akcje</button></article>`;
+          }).join('');
           return `<section class="cc-module cc-module--crm">
             <header class="cc-module-head">
               <div><span class="eyebrow">Klienci › Profil klienta</span><h2>Klienci</h2><p>CRM klienta: kontakt, historia pobytów, preferencje, notatki i szybkie akcje recepcji.</p></div>
               <div class="module-actions"><button type="button" data-view-shortcut="reservations">+ Nowa rezerwacja</button><button type="button">Edytuj klienta</button></div>
             </header>
+            <section class="crm-card crm-card--wide crm-offline-list"><h3>Lista klientów jak w offline</h3><div class="crm-tags">${customerFilters.map((filter)=>`<span>${esc(filter)}</span>`).join('')}</div><div class="crm-list-head"><span>Imię / nazwisko</span><span>Kraj</span><span>Telefon</span><span>Email</span><span>Ostatni / następny pobyt</span><span>Status</span><span>Notatki</span><span>Akcje</span></div><div class="crm-list-table">${customerRows || '<p class="module-empty">Brak klientów do wyświetlenia.</p>'}</div></section>
             <div class="crm-layout">
               <main class="crm-main">
                 <section class="crm-hero">
@@ -1650,7 +1679,8 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           ];
           const miniDays = Array.from({ length:31 },(_,index)=>index+1).map((day)=>`<span class="${selected && [Number(String(selected.arrival_date || '').slice(8,10)), Number(String(selected.departure_date || '').slice(8,10))].includes(day) ? 'is-stay':''}">${day}</span>`).join('');
           return `<section class="cc-module cc-module--reservations">
-            <header class="cc-module-head"><div><span class="eyebrow">Recepcja online</span><h2>Rezerwacje</h2><p>Lista rezerwacji i zapytań z panelem szczegółów, kalendarzem pobytu, ceną i szybkimi akcjami.</p></div><div class="module-actions"><button type="button">+ Utwórz rezerwację</button><button type="button">Więcej filtrów</button></div></header>
+            <header class="cc-module-head"><div><span class="eyebrow">Recepcja online</span><h2>Rezerwacje</h2><p>Lista rezerwacji i zapytań z panelem szczegółów, kalendarzem pobytu i szybkimi akcjami. Camping lipiec/sierpień oznaczamy jako informację, nie potwierdzoną rezerwację miejsca.</p></div><div class="module-actions"><button type="button">+ Utwórz rezerwację</button><button type="button">Więcej filtrów</button></div></header>
+            <div class="reservation-context-tabs"><button class="is-active">Rezerwacje domków</button><button>Rezerwacje pola / camping info</button><button>Przyjazdy</button><button>Wyjazdy</button><button>Przedłużenia</button></div>
             <div class="reservation-kpis">${kpis.map(([icon,label,value,hint])=>`<article><span>${esc(icon)}</span><small>${esc(label)}</small><strong>${esc(value)}</strong><em>${esc(hint)}</em></article>`).join('')}</div>
             <div class="reservations-layout">
               <main class="reservation-table-card">
@@ -1679,6 +1709,11 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           }).join('');
           const statusFor = (item) => {
             const status = String(item.status || 'new');
+            const payment = normalizeText(`${raw(item)?.paymentStatus || raw(item)?.payment || item.payment_status || ''}`);
+            if (['paid','deposit','unpaid'].includes(status)) return status;
+            if (/zalicz|deposit|przedplat/.test(payment)) return 'deposit';
+            if (/oplac|opłac|paid|karta|gotowka|gotówka/.test(payment)) return 'paid';
+            if (/nieoplac|nieopłac|unpaid/.test(payment)) return 'unpaid';
             if (['confirmed','replied'].includes(status)) return 'confirmed';
             if (['cancelled','rejected'].includes(status)) return 'cancelled';
             if (['unavailable'].includes(status)) return 'unavailable';
@@ -1694,10 +1729,25 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
               const span = Math.max(1, Math.min(8, Number(item.nights || 2)));
               const cats = categoryKeys(item);
               const status = statusFor(item);
-              return `<button type="button" class="calendar-booking calendar-booking--${esc(status)} ${cats.includes('bungalow') ? 'is-cabin' : 'is-camp'} ${isSummer(item) ? 'is-summer':''}" data-id="${esc(item.id || '')}" data-calendar-edit data-calendar-name="${esc(item.full_name || '-')}" data-calendar-term="${esc(`${item.arrival_date || '-'} — ${item.departure_date || '-'}`)}" title="${esc(`${item.full_name || '-'} · wyjazd 11:00 / przyjazd 16:00`)}" style="grid-column:${start + 1} / span ${span}">
+              const guests = normalizeInquiryGuests(item).label;
+              const paymentLabel = status === 'paid' ? 'opłacona' : status === 'deposit' ? 'zaliczka' : status === 'unpaid' ? 'nieopłacona' : moneyLabel(item);
+              const tooltip = `${item.full_name || '-'} · ${resource} · ${item.arrival_date || '-'} — ${item.departure_date || '-'} · ${guests} · ${statusLabels[item.status] || statusLabels[status] || status} · płatność: ${paymentLabel}`;
+              const modalRows = [
+                ['Gość', item.full_name || '-'],
+                ['Domek / pole', resource],
+                ['Daty', `${item.arrival_date || '-'} — ${item.departure_date || '-'}`],
+                ['Noce', `${item.nights || 0}`],
+                ['Kraj', countryInfo(item).label || '-'],
+                ['Telefon', item.phone || '-'],
+                ['Email', item.email || '-'],
+                ['Usługi', services(item).map((service)=>`${service.label} × ${service.qty || 1}`).join(', ') || '-'],
+                ['Status', statusLabels[item.status] || statusLabels[status] || status],
+                ['Płatność', paymentLabel],
+              ];
+              return `<button type="button" class="calendar-booking calendar-booking--${esc(status)} ${cats.includes('bungalow') ? 'is-cabin' : 'is-camp'} ${isSummer(item) ? 'is-summer':''}" data-id="${esc(item.id || '')}" data-calendar-edit data-calendar-name="${esc(item.full_name || '-')}" data-calendar-term="${esc(`${item.arrival_date || '-'} — ${item.departure_date || '-'}`)}" data-calendar-rows="${esc(JSON.stringify(modalRows))}" title="${esc(tooltip)}" style="grid-column:${start + 1} / span ${span}">
                 <i class="calendar-diamond calendar-diamond--out" aria-hidden="true"></i><i class="calendar-diamond calendar-diamond--in" aria-hidden="true"></i>
                 <strong>${esc(item.full_name || '-')} ${esc(countryInfo(item).flag)}</strong>
-                <small><span>11:00 wyjazd</span><span>16:00 przyjazd</span> · ${esc(normalizeInquiryGuests(item).label)}</small>
+                <small><span>11:00 wyjazd</span><span>16:00 przyjazd</span> · ${esc(guests)}</small>
               </button>`;
             }).join('');
             return `<div class="calendar-row calendar-row--offline"><b>${esc(resource)}</b>${cells}${bars}</div>`;
@@ -1707,13 +1757,13 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
             <header class="cc-module-head"><div><span class="eyebrow">Kalendarz offline-style</span><h2>Kalendarz pobytów</h2><p>Szeroka plansza operacyjna: zasoby w wierszach, dni w kolumnach, paski z półdniami check-out 11:00 i check-in 16:00.</p></div><div class="calendar-switcher"><button class="is-active">Dzisiaj</button><button>Domki</button><button>Camping</button><button>Rok ${esc(year)}</button></div></header>
             <div class="calendar-month-strip calendar-month-strip--offline">${monthButtons.map((month)=>`<button class="${month === activeMonth || month === 'Dzisiaj' ? 'is-active':''}">${esc(month)}</button>`).join('')}<strong>${esc(year)}</strong></div>
             <div class="calendar-kpis">${moduleMetric('🏕️','Obłożenie camping','87%')}${moduleMetric('🏠','Obłożenie domków','68%')}${moduleMetric('📥','Przyjazdy dziś',arrivalTodayItems().length)}${moduleMetric('📤','Wyjazdy dziś',departureTodayItems().length)}${moduleMetric('⚠️','Do reakcji',urgentItems().length)}</div>
-            <div class="calendar-legend" aria-label="Legenda kalendarza"><span class="legend-confirmed">Potwierdzona</span><span class="legend-pending">Wstępna</span><span class="legend-unpaid">Nieopłacona</span><span class="legend-unavailable">Brak miejsc</span><span class="legend-group">Grupa</span><span class="legend-summer">Camping L/S</span></div>
+            <div class="calendar-legend" aria-label="Legenda kalendarza"><span class="legend-confirmed">Potwierdzona</span><span class="legend-pending">Wstępna</span><span class="legend-deposit">Zaliczka</span><span class="legend-paid">Opłacona</span><span class="legend-unpaid">Nieopłacona</span><span class="legend-unavailable">Brak miejsc</span><span class="legend-group">Grupa</span><span class="legend-summer">Camping L/S</span></div>
             <div class="calendar-layout calendar-layout--offline">
               <main class="calendar-board calendar-board--offline"><div class="calendar-board__head"><strong>${esc(activeMonth)} ${esc(year)}</strong><div>${dayHeaders}</div></div>${rows}<div class="calendar-summer-note">LIPIEC / SIERPIEŃ — CAMPING BEZ REZERWACJI · miejsca według kolejności przyjazdu</div></main>
               ${selected ? `<aside class="calendar-detail"><button type="button" class="ghost">×</button><header><span class="crm-avatar">${esc(String(selected.full_name || 'CC').slice(0,2).toUpperCase())}</span><div><h3>${esc(selected.full_name || '-')} ${esc(countryInfo(selected).flag)}</h3><p>${esc(selected.stay_type || '-')}</p></div></header><div class="case-kpis"><article><small>Termin</small><strong>${esc(selected.arrival_date || '-')} — ${esc(selected.departure_date || '-')}</strong><em>${esc(selected.nights || 0)} nocy</em></article><article><small>Osoby</small><strong>${esc(normalizeInquiryGuests(selected).label)}</strong></article><article><small>Usługi</small><strong>${esc(services(selected).length || 0)}</strong></article><article><small>Status</small><strong>${esc(statusLabels[selected.status] || selected.status)}</strong></article></div><section><h4>Panel edycji jak offline</h4><div class="crm-tags"><span>Dane</span><span>Usługi</span><span>Status</span><span>Płatność</span><span>Sprzątanie</span><span>Karta pobytu</span></div></section><section><h4>Ważne informacje</h4><div class="crm-warnings">${warningsFor(selected, categoryKeys(selected)) || '<p>Brak pilnych ostrzeżeń.</p>'}</div></section>${best ? `<section class="best-reply-card"><h4>Sugerowana odpowiedź</h4><strong>${esc(best.title)}</strong><button type="button" data-reply-template="${esc(best.id)}" data-id="${esc(selected.id || '')}">Otwórz odpowiedź</button></section>` : ''}</aside>` : ''}
             </div>
             <div class="calendar-edit-modal" data-calendar-modal hidden>
-              <section><button type="button" data-calendar-close aria-label="Zamknij">×</button><span class="eyebrow">Edycja rezerwacji offline-style</span><h3 data-calendar-modal-name>Rezerwacja</h3><p data-calendar-modal-term>Termin</p><div class="crm-tags"><span>Dane</span><span>Usługi</span><span>Status</span><span>Płatność</span><span>Sprzątanie</span><span>Karta pobytu</span></div><p class="module-empty">To bezpieczny modal UI. Zapis edycji wymaga docelowej tabeli rezerwacji, więc system nie udaje zapisu.</p></section>
+              <section><button type="button" data-calendar-close aria-label="Zamknij">×</button><span class="eyebrow">Edycja rezerwacji offline-style</span><h3 data-calendar-modal-name>Rezerwacja</h3><p data-calendar-modal-term>Termin</p><div class="crm-tags"><span>Dane gościa</span><span>Domek / pole</span><span>Daty</span><span>Usługi</span><span>Status</span><span>Płatność</span><span>Sprzątanie</span><span>Karta pobytu</span></div><dl class="calendar-modal-data" data-calendar-modal-data></dl><div class="calendar-modal-actions"><button type="button">Zapisz</button><button type="button" data-view-shortcut="print">Karta pobytu</button><button type="button" data-view-shortcut="camp">Rozszerz w CAMP</button><button type="button" data-copy-summary>Kopiuj</button><button type="button">Przenieś</button><button type="button" data-calendar-close>Anuluj</button></div><p class="module-empty">To bezpieczny modal UI. Zapis edycji wymaga docelowej tabeli rezerwacji, więc system nie udaje zapisu.</p></section>
             </div>
           </section>`;
         };
@@ -1736,12 +1786,13 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
             ['Van','75 PLN/noc', currentServices.some((service)=>/van/i.test(service.label)) ? 1 : 0],
             ['Prąd 10A','30 PLN/noc', currentServices.some((service)=>/prąd|prad|10a|electric/i.test(service.label)) ? 1 : 0],
             ['Pies','0 PLN', currentServices.some((service)=>/pies|dog/i.test(service.label)) ? 1 : 0],
-            ['Bus / ciężki pojazd','160 PLN/noc', currentServices.some((service)=>/bus|cięż|ciez|truck/i.test(service.label)) ? 1 : 0],
+            ['Autobus / bus','160 PLN/noc', currentServices.some((service)=>/bus|autobus|coach|cięż|ciez|truck/i.test(service.label)) ? 1 : 0],
             ['Motocykl','25 PLN/noc', currentServices.some((service)=>/motocykl|motorcycle/i.test(service.label)) ? 1 : 0],
+            ['Przyczepa bagażowa','35 PLN/noc', currentServices.some((service)=>/bagaż|bagaz|cargo/i.test(service.label)) ? 1 : 0],
             ['Domek','wg typu domku', currentServices.some((service)=>/domek|bungalow/i.test(service.label)) ? 1 : 0],
             ['Dodatki','wg cennika', 0],
           ];
-          const serviceRows = (currentServices.length ? currentServices : serviceCatalogPreview.map(([label, priceLabel, qty]) => ({ label, qty, price: priceLabel, preview: true }))).map((service) => `
+          const serviceRows = serviceCatalogPreview.map(([label, priceLabel, qty]) => ({ label, qty, price: priceLabel, preview: true })).map((service) => `
             <article>
               <strong>${esc(service.label || '-')}</strong>
               <span>${esc(service.qty || 0)}</span>
@@ -1750,7 +1801,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           `).join('');
           return `<section class="cc-module cc-module--camp-pro">
             <header class="cc-module-head camp-pro-hero">
-              <div><span class="eyebrow">CAMP / Nowe przyjęcie · Camp PRO</span><h2>Nowe przyjęcie</h2><p>Układ jak w CC SYSTEM offline: dane klienta, usługi, płatność, dokumenty i zakończenie. Ekran działa jako kalkulator recepcji; zapis do bazy pobytów jest oznaczony jako TODO.</p></div>
+              <div><span class="eyebrow">Camping Clepardia · CAMP / Camp PRO</span><h2>Nowe przyjęcie</h2><p><strong>Express Check-in PRO.</strong> Układ jak w CC SYSTEM offline: dane klienta, usługi, płatność, dokumenty i zakończenie. Ekran działa jako kalkulator recepcji i podgląd karty; zapis do bazy pobytów jest oznaczony jako TODO.</p></div>
               <div class="module-actions"><button type="button" disabled>Zapisz pobyt — TODO baza</button><button type="button">Drukuj kartę</button><button type="button">Otwórz kartę</button></div>
             </header>
             <div class="camp-pro-steps">${steps.map((step,index)=>`<span class="${index === 1 ? 'is-active':''}"><b>${index + 1}</b>${esc(step)}</span>`).join('')}</div>
@@ -1764,6 +1815,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
                   <label><span>Email</span><input value="${esc(selected?.email || '')}" /></label>
                   <label><span>Telefon</span><input value="${esc(selected?.phone || '')}" /></label>
                   <label><span>Rejestracja pojazdu</span><input value="${esc(selected?.vehicle_registration || '')}" placeholder="np. KR 12345" /></label>
+                  <label><span>Rejestracja przyczepy</span><input value="${esc(vehicle(selected || {}).trailerPlate || raw(selected || {})?.trailerPlate || '')}" placeholder="np. KR 98765" /></label>
                   <label><span>Przyjazd *</span><input value="${esc(selected?.arrival_date || new Date().toISOString().slice(0,10))}" /></label>
                   <label><span>Liczba nocy *</span><input value="${esc(selected?.nights || 1)}" /></label>
                   <label><span>Wyjazd</span><input value="${esc(selected?.departure_date || '')}" /></label>
@@ -1775,7 +1827,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
               <aside class="camp-pro-summary">
                 <section class="camp-pro-card"><h3>Podsumowanie pobytu</h3><div class="camp-pro-client"><span class="crm-avatar">${esc(String(selected?.full_name || 'CC').slice(0,2).toUpperCase())}</span><div><strong>${esc(selected?.full_name || 'BRAK IMIENIA')}</strong><small>${esc(country.flag || '🌍')} ${esc(country.label || 'Kraj do ustalenia')}</small></div></div><div class="case-kpis"><article><small>Termin</small><strong>${esc(selected?.arrival_date || '-')} → ${esc(selected?.departure_date || '-')}</strong></article><article><small>Noce</small><strong>${esc(selected?.nights || 1)}</strong></article><article><small>Typ</small><strong>${esc(selected?.stay_type || 'Pole / CAMP')}</strong></article><article><small>Osoby</small><strong>${esc(guests.total || 0)}</strong></article></div><div class="camp-pro-total"><small>Do zapłaty</small><strong>${esc(price)}</strong><span>≈ EUR / USD / GBP informacyjnie</span></div></section>
                 <section class="camp-pro-card"><h3>Dokumenty</h3><div class="quick-action-grid"><button>Podgląd karty</button><button>PDF pobytu</button><button>Drukuj kartę</button><button>Wyślij</button></div></section>
-                <section class="camp-pro-card"><h3>Szybkie akcje</h3><div class="quick-action-grid"><button>Wyczyść</button><button disabled>Zapisz pobyt — TODO</button><button>Drukuj</button><button>Otwórz kartę</button></div><p class="module-empty">Zapis nie jest udawany: dopóki nie ma tabeli aktywnych pobytów, ekran działa jako preview/kalkulator recepcji.</p></section>
+                <section class="camp-pro-card"><h3>Szybkie akcje</h3><div class="quick-action-grid"><button>Wyczyść</button><button disabled>Zapisz pobyt — TODO</button><button>Drukuj</button><button>Otwórz kartę</button></div><p class="module-empty">Zapis nie jest udawany: dopóki nie ma tabeli aktywnych pobytów, ekran działa jako podgląd i kalkulator recepcji.</p></section>
               </aside>
             </div>
           </section>`;
@@ -1811,11 +1863,12 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           const countryRows = [...new Set(real.map((item)=>countryInfo(item).label).filter(Boolean))].slice(0,8);
           return `<section class="dashboard-panel module-view gus-report">
             <header class="module-head"><span class="eyebrow">GUS / Raporty offline-style</span><h2>Raport miesięczny recepcji</h2><p>Duże, czytelne liczniki do pracy recepcji: osobonoce, kraje, camping, domki, pojazdy i namioty. Eksport jest przygotowany jako fundament pod synchronizację offline/online.</p></header>
-            <div class="calendar-month-strip calendar-month-strip--offline"><strong>Miesiąc raportu</strong>${(months.length ? months : ['2026-06','2026-07','2026-08']).map((month,index)=>`<button type="button" class="${index === Math.max(0, months.length - 1) ? 'is-active':''}">${esc(month)}</button>`).join('')}<button type="button">Drukuj czarno-biało</button><button type="button">Eksport CSV</button></div>
+            <div class="calendar-month-strip calendar-month-strip--offline"><strong>Miesiąc raportu</strong>${(months.length ? months : ['2026-06','2026-07','2026-08']).map((month,index)=>`<button type="button" class="${index === Math.max(0, months.length - 1) ? 'is-active':''}">${esc(month)}</button>`).join('')}<button type="button">Drukuj czarno-biało</button><button type="button">Eksport CSV</button><button type="button">Eksport PDF</button></div>
             <div class="module-metrics">${reportRows.map(([label,value,hint])=>moduleMetric('📊', label, value, hint)).join('')}</div>
             <div class="module-grid module-grid--two">
-              <section class="module-card"><h3>Zakres GUS</h3><ul class="module-rule-list">${reportRows.map(([label,value,hint])=>`<li><strong>${esc(label)}:</strong> ${esc(value)} — ${esc(hint)}</li>`).join('')}</ul></section>
+              <section class="module-card"><h3>Zakres GUS</h3><ul class="module-rule-list">${reportRows.map(([label,value,hint])=>`<li><strong>${esc(label)}:</strong> ${esc(value)} — ${esc(hint)}</li>`).join('')}<li><strong>Bez Polski:</strong> opcja raportu dostępna przy wydruku, jeśli wymaga tego aktualny formularz GUS.</li></ul></section>
               <section class="module-card"><h3>Kraje w raporcie</h3><div class="crm-tags">${countryRows.map((name)=>`<span>${esc(name)}</span>`).join('') || '<span>Brak danych</span>'}</div><p class="module-empty">TODO: po tabelach aktywnych pobytów raport liczy wyłącznie pobyty potwierdzone, nie same zapytania.</p></section>
+              <section class="module-card module-card--wide"><h3>Układ wydruku offline</h3><div class="gus-print-table"><span>Miesiąc</span><span>Osobonoce</span><span>Kraje</span><span>Domki</span><span>Camping</span><span>Pojazdy</span><span>Namioty</span><strong>${esc((months.length ? months[months.length - 1] : '2026-07'))}</strong><strong>${esc(personNights)}</strong><strong>${esc(countries)}</strong><strong>${esc(bungalows)}</strong><strong>${esc(camping)}</strong><strong>${esc(vehicles)}</strong><strong>${esc(tents)}</strong></div></section>
             </div>
           </section>`;
         };
@@ -1863,7 +1916,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
             ['Archiwum', archivedItems().length],
             ['Dostarczenie maila', demoMode ? 'demo OFF — bez wysyłki' : resendStatus],
             ['Supabase', demoMode ? 'demo OFF — brak pobierania' : (health?.tableCheck?.ok ? 'OK' : health ? 'błąd' : 'sprawdzanie')],
-            ['Kanały zapasowe', demoMode ? 'wyłączone w QA preview' : `Web3Forms ${env.web3FormsKeyPresent ? 'ENV' : 'brak'} · FormSubmit ${env.formSubmitToPresent ? 'ENV' : 'brak'}`],
+            ['Kanały zapasowe', demoMode ? 'wyłączone w podglądzie QA' : `Web3Forms ${env.web3FormsKeyPresent ? 'ENV' : 'brak'} · FormSubmit ${env.formSubmitToPresent ? 'ENV' : 'brak'}`],
           ].map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('');
         };
         const renderStatsView = () => {
@@ -1915,12 +1968,12 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
         const renderSettingsView = () => {
           const env = health?.env || {};
           const rows = [
-            ['Tryb','Publiczny QA preview — tylko dane demo'],
+            ['Tryb','Publiczny podgląd QA — tylko dane demo'],
             ['Źródło danych','statyczny plik ccSystemDemoData.js'],
             ['Email recepcji demo','demo-recepcja@example.com'],
             ['Resend','wyłączony w demo — brak wysyłki'],
             ['Supabase','nieużywany w demo — brak pobierania produkcji'],
-            ['Web3Forms/FormSubmit','wyłączone w QA preview'],
+            ['Web3Forms/FormSubmit','wyłączone w podglądzie QA'],
             ['Robots','noindex, nofollow, noarchive'],
             ['Sitemap','trasa wykluczona'],
             ['Języki odpowiedzi','PL, EN, DE, IT, FR, ES, NL, CS, SK, SV'],
@@ -1928,12 +1981,17 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
             ['Cennik domki','2-os. 200 PLN, 3-os. 250 PLN, 4-os. 400 PLN'],
           ];
           const syncRows = [
+            ['Status', 'planowane — bez automatycznej synchronizacji w tym etapie'],
             ['Eksport offline', 'JSON / CSV z klientów, pobytów, usług i płatności'],
             ['Import online', 'mapowanie klienta po emailu/telefonie oraz pobytu po terminie'],
+            ['Mapowanie klientów', 'email, telefon, kraj, język, VIP/Blacklist, powracający'],
+            ['Mapowanie rezerwacji', 'daty, zasób, typ pobytu, osoby, usługi, status, płatność'],
             ['Konflikty', 'oznaczenie różnic online/offline bez automatycznego nadpisywania'],
             ['Log synchronizacji', 'ostatni import, operator, liczba zmian, backup przed zmianą'],
+            ['Wspólne słowniki', 'cenniki, usługi, kraje, zasoby i statusy'],
+            ['Docelowo', 'zmiany online ↔ offline po ręcznej akceptacji konfliktów'],
           ];
-          return `<section class="dashboard-panel settings-offline"><h2>Ustawienia</h2><p>Widok read-only: pokazuje konfigurację QA bez sekretów, bez ENV i bez połączeń produkcyjnych.</p><div class="settings-grid">${rows.map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('')}</div><section class="module-card module-card--wide"><h3>Synchronizacja CC SYSTEM offline ↔ online</h3><p>Plan bezpiecznego spięcia dwóch systemów: najpierw eksport/import i dziennik zmian, dopiero potem zapis dwukierunkowy.</p><div class="settings-grid">${syncRows.map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('')}</div></section></section>`;
+          return `<section class="dashboard-panel settings-offline"><h2>Ustawienia</h2><p><strong>CC SYSTEM ONLINE rozwijany jako wersja online obecnego CC SYSTEM OFFLINE.</strong> Widok read-only: pokazuje konfigurację QA bez sekretów, bez ENV i bez połączeń produkcyjnych.</p><div class="settings-grid">${rows.map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('')}</div><section class="module-card module-card--wide"><h3>Synchronizacja offline ↔ online</h3><p>Plan bezpiecznego spięcia CC SYSTEM OFFLINE i CC SYSTEM ONLINE: najpierw eksport/import i dziennik zmian, dopiero potem zapis dwukierunkowy.</p><div class="settings-grid">${syncRows.map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('')}</div></section></section>`;
         };
         const detailsBody = (item) => {
           const v = vehicle(item);
@@ -1951,13 +2009,13 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           const timeline = [
             ['Wpłynęło', formatDate(item.created_at,true)],
             demoMode ? ['Zapis demo', 'lokalna tablica demo — bez Supabase'] : ['Zapis Supabase', 'OK — rekord w reservation_inquiries'],
-            demoMode ? ['Mail', `${item.mail_provider || 'none'} / status demo — bez wysyłki`] : ['Mail', `${item.mail_provider || 'none'} / ${item.mail_delivered ? 'dostarczony' : 'niedostarczony'}`],
+            demoMode ? ['Wysyłka maila', `${mailChannelLabel(item.mail_provider)} / status demo — bez wysyłki`] : ['Wysyłka maila', `${mailChannelLabel(item.mail_provider)} / ${item.mail_delivered ? 'dostarczony' : 'niedostarczony'}`],
             ['Status', statusLabels[item.status] || item.status],
             ...(localTimeline.get(String(item.id)) || []).map((entry)=>[entry.label, entry.value]),
           ].map(([label,value])=>`<li><span>${esc(label)}</span><strong>${esc(value)}</strong></li>`).join('');
           return `${warnings ? `<aside class="crm-warnings">${warnings}</aside>` : ''}
             <div class="details-grid">
-              <section class="detail-card detail-card--wide conversation-card"><h3>💬 Wątek / rozmowa</h3><p><strong>${esc(conversationTitle)}</strong></p><small>Temat odpowiedzi: Camping Clepardia — odpowiedź na zapytanie</small><small>Klucz wątku roboczy: ${esc(threadKey)}</small><div class="inline-actions"><button type="button" data-reply-template="${esc(recommendedTemplateId(item))}">Otwórz odpowiedź</button><button type="button" data-copy-client-safe>Kopiuj podsumowanie</button></div></section>
+              <section class="detail-card detail-card--wide conversation-card"><h3>💬 Wątek / rozmowa</h3><p><strong>${esc(conversationTitle)}</strong></p><small>Temat odpowiedzi: Camping Clepardia — odpowiedź na zapytanie</small><small>Oznaczenie rozmowy w panelu: ${esc(item.id || threadKey)}</small><div class="inline-actions"><button type="button" data-reply-template="${esc(recommendedTemplateId(item))}">Otwórz odpowiedź</button><button type="button" data-copy-client-safe>Kopiuj podsumowanie</button></div></section>
               <section class="detail-card"><h3>📇 Kontakt</h3><p>${item.email ? `<a href="mailto:${esc(item.email)}">${esc(item.email)}</a>`:'-'}<br>${item.phone ? `<a href="tel:${esc(item.phone)}">${esc(item.phone)}</a>`:'-'}</p><small>${esc(country.flag)} ${esc(country.label)} ${country.code ? `(${esc(country.code)})` : ''} · język formularza: ${esc(country.language)}</small></section>
               <section class="detail-card"><h3>🌍 Kraj i język</h3><p><strong>${esc(country.flag)} ${esc(country.label)}</strong><br>Kod kraju: ${esc(country.code || '-')}<br>Język: ${esc(country.language)}</p><small>${esc(country.risk || 'Brak widocznego ryzyka tłumaczeniowego.')}</small></section>
               <section class="detail-card"><h3>📅 Pobyt</h3><p><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><br>${esc(item.nights || 0)} nocy</p><small>Przyjazd: ${esc(payload.arrivalTime || 'jeszcze nie wiem')}</small></section>
@@ -1974,8 +2032,8 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
               <section class="detail-card detail-card--wide best-reply-card"><h3>✨ Najlepsza odpowiedź</h3><p><strong>${esc(bestSuggestion.icon)} ${esc(bestSuggestion.title)}</strong></p><small>Kiedy używać: ${esc(bestSuggestion.when)}</small><small>Powód: ${esc(bestSuggestion.reason)}</small><div class="inline-actions"><button type="button" data-reply-template="${esc(bestSuggestion.id)}">Otwórz najlepszą odpowiedź</button></div></section>
               <section class="detail-card detail-card--wide"><h3>✨ Dodatkowe podpowiedzi</h3><ul class="suggestion-list">${suggestions}</ul></section>
               ${replyTemplatesSection(item)}
-              <section class="detail-card detail-card--wide mail-status-card ${item.mail_delivered ? 'is-ok':'is-failed'}"><h3>✉️ Status maila</h3><p><strong>${demoMode ? 'Status demo' : (item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony')}</strong> · provider: ${esc(item.mail_provider || 'none')}</p><small>${esc(demoMode ? 'Symulowany status — QA preview nie wysyła maili.' : (item.mail_error || (item.mail_delivered ? 'Brak błędu.':'Brak szczegółów błędu.')))}</small>${item.mail_delivered && !demoMode ? '' : `<p>${demoMode ? 'W trybie demo możesz skopiować treść lub otworzyć mailto na adres example.com.' : 'Zapytanie jest zapisane w panelu recepcji. Skopiuj treść maila lub użyj przycisku mailto.'}</p>`}<div class="inline-actions"><button type="button" data-copy-mail>Kopiuj treść maila</button><a href="mailto:${esc(mailtoTarget)}?subject=${encodeURIComponent(`Zapytanie ${item.id}`)}&body=${encodeURIComponent(mailText(item))}">${demoMode ? 'Otwórz mailto demo' : 'Otwórz Gmail / mailto'}</a></div></section>
-              <section class="detail-card detail-card--wide"><h3>🕒 Historia rozmowy</h3><ul class="timeline-list">${timeline}</ul><small>TODO: docelowo zapisywać wiadomości i akcje w tabelach mail_threads, mail_messages i mail_actions.</small></section>
+              <section class="detail-card detail-card--wide mail-status-card ${item.mail_delivered ? 'is-ok':'is-failed'}"><h3>✉️ Status maila</h3><p><strong>${demoMode ? 'Status demo' : (item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony')}</strong> · kanał: ${esc(mailChannelLabel(item.mail_provider))}</p><small>${esc(demoMode ? 'Symulowany status — podgląd QA nie wysyła maili.' : (item.mail_error || (item.mail_delivered ? 'Brak błędu.':'Brak szczegółów błędu.')))}</small>${item.mail_delivered && !demoMode ? '' : `<p>${demoMode ? 'W trybie demo możesz skopiować treść lub otworzyć mailto na adres example.com.' : 'Zapytanie jest zapisane w panelu recepcji. Skopiuj treść maila lub użyj przycisku mailto.'}</p>`}<div class="inline-actions"><button type="button" data-copy-mail>Kopiuj treść maila</button><a href="mailto:${esc(mailtoTarget)}?subject=${encodeURIComponent(`Zapytanie ${item.id}`)}&body=${encodeURIComponent(mailText(item))}">${demoMode ? 'Otwórz mailto demo' : 'Otwórz Gmail / mailto'}</a></div></section>
+              <section class="detail-card detail-card--wide"><h3>🕒 Historia rozmowy</h3><ul class="timeline-list">${timeline}</ul><small>TODO: docelowo zapisywać pełną historię rozmowy, status wysyłki i akcje recepcji w module Mail Center.</small></section>
               <details class="technical-data"><summary>Dane techniczne</summary><pre data-raw-debug>Otwórz panel techniczny, żeby załadować raw JSON.</pre></details>
             </div>
             <div class="edit-row"><label><span>Status</span><select data-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${item.status === value ? 'selected':''}>${label}</option>`).join('')}</select></label><label class="note"><span>Notatka recepcji</span><textarea data-notes rows="3">${esc(item.notes || '')}</textarea></label><button type="button" data-save>Zapisz status i notatkę</button></div>
@@ -2192,7 +2250,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
             void load({ silent:true, reason:'manual' });
           } else {
             window.clearInterval(autoRefreshTimer);
-            showToast('Auto-refresh zatrzymany. Widok i filtry zostają bez zmian.', 'info');
+            showToast('Automatyczne odświeżanie zatrzymane. Widok i filtry zostają bez zmian.', 'info');
           }
           startAutoRefresh();
           refreshHeaderStatus();
@@ -2304,8 +2362,16 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
             const modal = list.querySelector('[data-calendar-modal]');
             const name = list.querySelector('[data-calendar-modal-name]');
             const term = list.querySelector('[data-calendar-modal-term]');
+            const dataList = list.querySelector('[data-calendar-modal-data]');
             if (name instanceof HTMLElement) name.textContent = calendarEdit.dataset.calendarName || 'Rezerwacja';
             if (term instanceof HTMLElement) term.textContent = calendarEdit.dataset.calendarTerm || 'Termin do potwierdzenia';
+            if (dataList instanceof HTMLElement) {
+              let rows = [];
+              try { rows = JSON.parse(calendarEdit.dataset.calendarRows || '[]'); } catch {}
+              dataList.innerHTML = Array.isArray(rows) && rows.length
+                ? rows.map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')
+                : '<div><dt>Status</dt><dd>Dane do uzupełnienia w docelowej tabeli rezerwacji.</dd></div>';
+            }
             if (modal instanceof HTMLElement) modal.hidden = false;
             showToast('Otwieram panel edycji rezerwacji.', 'info');
             return;
@@ -3318,6 +3384,8 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
 
   .cc-system-app .calendar-booking--confirmed { background: linear-gradient(135deg, #12834f, #0b573c) !important; }
   .cc-system-app .calendar-booking--pending { background: linear-gradient(135deg, #b97418, #604211) !important; }
+  .cc-system-app .calendar-booking--deposit { background: linear-gradient(135deg, #5b8cff, #174579) !important; }
+  .cc-system-app .calendar-booking--paid { background: linear-gradient(135deg, #41c97b, #0f6641) !important; }
   .cc-system-app .calendar-booking--unpaid { background: linear-gradient(135deg, #d88926, #7b3e0e) !important; }
   .cc-system-app .calendar-booking--unavailable,
   .cc-system-app .calendar-booking--cancelled { background: linear-gradient(135deg, #b83847, #641a25) !important; }
@@ -3368,6 +3436,143 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
     border-radius: 50%;
     background: rgba(255,255,255,.08);
     color: #fff;
+  }
+
+  .cc-system-app .calendar-modal-data {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  .cc-system-app .calendar-modal-data > div {
+    padding: 12px;
+    border: 1px solid rgba(143,224,180,.18);
+    border-radius: 14px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .cc-system-app .calendar-modal-data dt {
+    margin: 0 0 4px;
+    color: rgba(229,244,233,.68);
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  .cc-system-app .calendar-modal-data dd {
+    margin: 0;
+    color: #fff;
+    font-weight: 800;
+  }
+
+  .cc-system-app .calendar-modal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 14px 0;
+  }
+
+  .cc-system-app .calendar-modal-actions button {
+    min-height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(143,224,180,.24);
+    background: rgba(42,199,116,.15);
+    color: #effff4;
+    font-weight: 800;
+  }
+
+  .cc-system-app .crm-offline-list {
+    margin: 14px 0 18px;
+  }
+
+  .cc-system-app .crm-list-head,
+  .cc-system-app .crm-list-row,
+  .cc-system-app .gus-print-table {
+    display: grid;
+    grid-template-columns: 1.35fr .9fr .9fr 1.25fr 1.15fr .8fr .85fr .65fr;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .cc-system-app .crm-list-head {
+    min-width: 960px;
+    margin-top: 12px;
+    padding: 0 10px 8px;
+    color: rgba(229,244,233,.62);
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  .cc-system-app .crm-list-row {
+    min-height: 52px;
+    min-width: 960px;
+    padding: 10px;
+    border-top: 1px solid rgba(143,224,180,.12);
+  }
+
+  .cc-system-app .crm-list-table {
+    overflow-x: auto;
+  }
+
+  .cc-system-app .crm-offline-list {
+    overflow-x: auto;
+  }
+
+  .cc-system-app .crm-list-row strong,
+  .cc-system-app .crm-list-row span,
+  .cc-system-app .crm-list-row small {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cc-system-app .crm-list-row button,
+  .cc-system-app .reservation-context-tabs button {
+    border: 1px solid rgba(143,224,180,.22);
+    border-radius: 12px;
+    background: rgba(255,255,255,.045);
+    color: #ecfff3;
+    font-weight: 800;
+  }
+
+  .cc-system-app .reservation-context-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .cc-system-app .reservation-context-tabs button {
+    min-height: 38px;
+    padding: 0 14px;
+  }
+
+  .cc-system-app .reservation-context-tabs .is-active {
+    border-color: rgba(72,214,132,.55);
+    background: linear-gradient(135deg, rgba(45,189,111,.82), rgba(11,83,54,.82));
+  }
+
+  .cc-system-app .gus-print-table {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    overflow: auto;
+    padding: 10px;
+    border: 1px solid rgba(143,224,180,.16);
+    border-radius: 16px;
+    background: rgba(255,255,255,.035);
+  }
+
+  .cc-system-app .gus-print-table span {
+    color: rgba(229,244,233,.66);
+    font-size: .72rem;
+    text-transform: uppercase;
+  }
+
+  .cc-system-app .gus-print-table strong {
+    color: #fff;
+    font-size: 1rem;
   }
 
   @media (max-width: 900px) {
@@ -7683,6 +7888,8 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
   }
 
   .cc-system-app .calendar-legend .legend-pending::before { background: #ffd36e; }
+  .cc-system-app .calendar-legend .legend-deposit::before { background: #5b8cff; }
+  .cc-system-app .calendar-legend .legend-paid::before { background: #41c97b; }
   .cc-system-app .calendar-legend .legend-unpaid::before { background: #ff9f43; }
   .cc-system-app .calendar-legend .legend-unavailable::before { background: #ff5c73; }
   .cc-system-app .calendar-legend .legend-group::before { background: #8db7ff; }
