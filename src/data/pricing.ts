@@ -36,7 +36,7 @@ export const pricingConfig = {
       id: 'bungalow-3',
       label: 'Domek 3-os.',
       category: 'bungalow',
-      seasonalPrices: { low: 250, high: 300 },
+      seasonalPrices: { low: 300, high: 350 },
     },
     {
       id: 'bungalow-4',
@@ -55,6 +55,11 @@ export const pricingConfig = {
     { id: 'extra-car', label: 'Dodatkowe auto', price: 35 },
   ],
 } as const;
+
+export const BUNGALOW_DEPOSIT_RATE = 0.3;
+
+export const calculateBungalowDeposit = (bungalowStayValue: number) =>
+  Math.round(Math.max(0, Number(bungalowStayValue) || 0) * BUNGALOW_DEPOSIT_RATE);
 
 export const currencyEstimateConfig = {
   baseCurrency: 'PLN',

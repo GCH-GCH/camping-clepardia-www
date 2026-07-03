@@ -7,6 +7,10 @@ export interface InquiryPeople {
 export interface InquiryCalculatorSummary {
   total?: string;
   pricePerNight?: string;
+  deposit?: string;
+  depositAmount?: number;
+  depositCurrency?: string;
+  depositScope?: string;
   currencyEstimate?: string;
   currencyDisclaimer?: string;
   season?: string;

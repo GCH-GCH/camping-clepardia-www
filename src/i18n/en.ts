@@ -134,7 +134,7 @@ export const en = {
       transit:
         'The easiest way to reach the city centre is by tram: the stop is about 40 m from the gate, Stary Kleparz / the centre is about 9 stops away and the ride takes around 14 minutes.',
       bungalows:
-        'Bungalows have separate availability. 2-person: 200/220 PLN, 3-person: 250/300 PLN, 4-person: 400/450 PLN depending on season.',
+        'Bungalows have separate availability. 2-person: 200/220 PLN, 3-person: 300/350 PLN, 4-person: 400/450 PLN depending on season.',
       dog:
         'Yes, dogs are 0 PLN. Please clean up after your dog and keep it under control around the campsite.',
       campingBooking:

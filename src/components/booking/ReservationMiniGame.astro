@@ -1,7 +1,7 @@
 ---
 import { icons } from 'lucide';
 import { countries } from '@/data/countries';
-import { currencyEstimateConfig, pricingConfig } from '@/data/pricing';
+import { BUNGALOW_DEPOSIT_RATE, currencyEstimateConfig, pricingConfig } from '@/data/pricing';
 import { resolveContentLanguage } from '@/i18n/config';
 import { getCoreUi, tourBookingHref } from '@/i18n/coreUi';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
@@ -1448,6 +1448,19 @@ const serviceLabelCopy = {
   sv: { camper: 'Husbil', van: 'Van', caravan: 'Husvagn', tentSmall: 'Tält 1-2 pers.', tentLarge: 'Tält 3-4 pers.', rooftopTent: 'Bil + taktält', parking: 'Bil / parkering', motorcycle: 'Motorcykel', cargoTrailer: 'Bagagesläp', bus: 'Buss / lastbil', electricity: '10A-el', dog: 'Hund', bungalow2: 'Bungalow 2 pers.', bungalow3: 'Bungalow 3 pers.', bungalow4: 'Bungalow 4 pers.' },
 } as const;
 const serviceLabels = serviceLabelCopy[uiLang as keyof typeof serviceLabelCopy] ?? serviceLabelCopy.en;
+const depositLabelCopy = {
+  pl: 'Zaliczka 30%',
+  en: '30% deposit',
+  de: '30% Anzahlung',
+  it: 'Acconto del 30%',
+  fr: 'Acompte de 30%',
+  es: 'Depósito del 30%',
+  nl: '30% aanbetaling',
+  cs: 'Záloha 30 %',
+  sk: 'Záloha 30 %',
+  sv: '30% deposition',
+} as const;
+const depositLabel = depositLabelCopy[uiLang as keyof typeof depositLabelCopy] ?? depositLabelCopy.en;
 
 const campingServices = [
   { id: 'camper', label: serviceLabels.camper, price: stayPrice('camper')?.price ?? 0 },
@@ -1476,6 +1489,8 @@ const config = {
   lang: uiLang,
   t,
   currency: pricingConfig.currency,
+  depositRate: BUNGALOW_DEPOSIT_RATE,
+  depositLabel,
   currencyEstimate: currencyEstimateConfig,
   seasons: pricingConfig.seasons,
   people: {
@@ -2623,6 +2638,15 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const servicesTotal = () => selectedServices().reduce((sum, item) => sum + item.qty * item.price, 0);
     const perNightTotal = () => guestsTotal() + servicesTotal();
     const estimatedTotal = () => perNightTotal() * Math.max(1, nights() || 1);
+    const bungalowStaySubtotal = () => selectedServices()
+      .filter((item) => item.scope === 'bungalow' && /^bungalow-/.test(item.id))
+      .reduce((sum, item) => sum + item.qty * item.price, 0) * Math.max(1, nights() || 1);
+    const bungalowDepositAmount = () => Math.round(bungalowStaySubtotal() * Number(config.depositRate || 0.3));
+    const depositPriceText = (value) => `${Math.round(Number(value || 0))} zł`;
+    const bungalowDepositText = () => {
+      const amount = bungalowDepositAmount();
+      return amount > 0 ? `${config.depositLabel || 'Zaliczka 30%'}: ${depositPriceText(amount)}` : '';
+    };
 
     const hasChosenService = () => selectedServices().length > 0;
     const vehicleDetailServiceIds = ['camper', 'van', 'caravan', 'rooftop-tent', 'cargo-trailer', 'bus'];
@@ -3524,7 +3548,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const summaryContent = (full = false) => {
       const selected = selectedServices();
       const hasCostData = selected.length > 0;
-      const depositNote = state.mode === 'bungalow' ? ui.summary.depositBungalow : state.mode === 'combined' ? ui.summary.depositCombined : '';
+      const depositNote = bungalowDepositText();
       const statusText = missingItems().length ? detailText.summaryStatusMissing : detailText.summaryStatusReady;
       const dateText = state.dates.arrival || state.dates.departure
         ? `${state.dates.arrival || '-'} - ${state.dates.departure || '-'} (${nights()} ${rt.nightsShort})`
@@ -3796,6 +3820,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         calculatorSummary: {
           total: selectedServices().length ? fmt(estimatedTotal()) : '',
           pricePerNight: selectedServices().length ? fmt(perNightTotal()) : '',
+          deposit: bungalowDepositText(),
+          depositAmount: bungalowDepositAmount(),
+          depositCurrency: 'PLN',
+          depositScope: bungalowDepositAmount() > 0 ? 'bungalow' : '',
           currencyEstimate: selectedServices().length ? currencyEstimateText(estimatedTotal()) : '',
           currencyDisclaimer: selectedServices().length ? currencyDisclaimer() : '',
           season: highSeason() ? 'high' : 'low',

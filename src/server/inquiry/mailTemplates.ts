@@ -1,5 +1,6 @@
 import type { MailMessage, NormalizedReservationInquiry } from './types';
 import { escapeHtml } from './security';
+import { calculateBungalowDeposit } from '../../data/pricing';
 
 const env = (key: string, fallback = '') => process.env[key] || fallback;
 const firstConfigured = (...values: string[]) => values.find((value) => value.trim()) || '';
@@ -37,6 +38,21 @@ const servicesByScope = (inquiry: NormalizedReservationInquiry, scope: string) =
   inquiry.services
     .filter((service) => service.scope === scope)
     .map((service) => `${service.label} x ${service.qty} (${service.price} PLN / noc)`);
+
+const bungalowStaySubtotal = (inquiry: NormalizedReservationInquiry) => {
+  const nights = Math.max(1, Number(inquiry.nights) || 1);
+  return inquiry.services
+    .filter((service) => service.scope === 'bungalow' && /^bungalow-/.test(service.id))
+    .reduce((sum, service) => sum + (service.price * service.qty * nights), 0);
+};
+
+const bungalowDepositAmount = (inquiry: NormalizedReservationInquiry) =>
+  calculateBungalowDeposit(bungalowStaySubtotal(inquiry));
+
+const bungalowDepositLine = (inquiry: NormalizedReservationInquiry) => {
+  const amount = bungalowDepositAmount(inquiry);
+  return amount > 0 ? `Zaliczka 30%: ${amount} zł` : '';
+};
 
 const vehicleDetailsSummary = (inquiry: NormalizedReservationInquiry) => {
   const details = inquiry.vehicleDetails;
@@ -86,15 +102,18 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
   const campingServices = servicesByScope(inquiry, 'camping');
   const isCombined = /combined|razem/i.test(`${inquiry.selectedStayMode} ${inquiry.stayCategory}`);
   const plateLabel = vehiclePlateLabel(inquiry);
+  const depositAmount = bungalowDepositAmount(inquiry);
+  const depositLine = bungalowDepositLine(inquiry);
   const bungalowNote = isBungalowInquiry(inquiry)
-    ? 'W przypadku domków może być wymagana zaliczka. Dane do zaliczki należy wysłać klientowi w odpowiedzi mailowej po potwierdzeniu dostępności.'
+    ? 'Zaliczka 30% jest informacyjna i liczona od części domkowej pobytu.'
     : '';
   const combinedNote = isCombined
-    ? 'Zapytanie obejmuje domek i część campingową. Może być wymagana zaliczka za część noclegową.'
+    ? 'Zapytanie obejmuje domek i część campingową. Zaliczka dotyczy tylko części domkowej.'
     : '';
 
   const calculatorRows = [
     ['Cena orientacyjna', inquiry.estimatedTotal || inquiry.calculatorSummary?.total || 'brak'],
+    ...(depositLine ? [['Zaliczka 30%', `${depositAmount} zł`] as [string, unknown]] : []),
     ['Waluty orientacyjnie', inquiry.currencyEstimate || inquiry.calculatorSummary?.currencyEstimate || 'brak'],
     ['Cena / noc', inquiry.calculatorSummary?.pricePerNight || 'brak'],
     ['Sezon', inquiry.calculatorSummary?.season || 'brak'],
@@ -138,6 +157,7 @@ export const buildReceptionMail = (inquiry: NormalizedReservationInquiry): MailM
       ...(campingServices.length ? campingServices.map((service) => `- ${service}`) : ['- brak']),
     ] : []),
     line('Suma orientacyjna', inquiry.estimatedTotal || inquiry.calculatorSummary?.total || 'brak'),
+    depositLine,
     line('Waluty orientacyjnie', inquiry.currencyEstimate || inquiry.calculatorSummary?.currencyEstimate || 'brak'),
     currencyDisclaimer,
     '',
