@@ -69,6 +69,9 @@ const title = 'CC SYSTEM';
             <div class="cc-sidebar__group">
               <span class="cc-sidebar__group-label">Zaplecze</span>
               <button type="button" data-view="settings" aria-pressed="false"><span aria-hidden="true"></span><em>Ustawienia</em></button>
+              <button type="button" data-view="print" aria-pressed="false"><span aria-hidden="true"></span><em>Drukowanie</em></button>
+              <button type="button" data-view="info" aria-pressed="false"><span aria-hidden="true"></span><em>Info recepcji</em></button>
+              <button type="button" data-view="products" aria-pressed="false"><span aria-hidden="true"></span><em>Produkty</em></button>
               <button type="button" data-view="cleaning" aria-pressed="false"><span aria-hidden="true"></span><em>Sprzątanie</em></button>
               <button type="button" data-view="invoices" aria-pressed="false"><span aria-hidden="true"></span><em>Faktury</em></button>
               <button type="button" data-view="alerts" aria-pressed="false"><span aria-hidden="true"></span><em>Alerty</em></button>
@@ -79,6 +82,7 @@ const title = 'CC SYSTEM';
             <div class="cc-sidebar__group">
               <span class="cc-sidebar__group-label">Wiadomości i system</span>
               <button type="button" data-view="mail" aria-pressed="false"><span aria-hidden="true"></span><em>Maile / Mail Center</em><b data-sidebar-badge="inbox">0</b></button>
+              <button type="button" data-view="inbox" aria-pressed="false"><span aria-hidden="true"></span><em>Inbox</em></button>
               <button type="button" data-view="exports" aria-pressed="false"><span aria-hidden="true"></span><em>Eksporty</em></button>
               <button type="button" data-view="backup" aria-pressed="false"><span aria-hidden="true"></span><em>Backup PRO</em></button>
               <button type="button" data-view="tests" aria-pressed="false"><span aria-hidden="true"></span><em>Testy</em><b data-sidebar-badge="tests">0</b></button>
@@ -201,8 +205,8 @@ const title = 'CC SYSTEM';
           <pre data-reply-mailto-text></pre>
         </details>
         <div class="reply-modal__actions">
-          <button type="button" data-reply-send disabled title="TODO: podłączyć bezpieczny endpoint /api/inbox/send-reply">Wyślij z CC SYSTEM — wkrótce</button>
-          <button type="button" data-reply-draft>Zapisz szkic lokalnie</button>
+          <button type="button" data-reply-send>Wyślij z CC SYSTEM</button>
+          <button type="button" data-reply-draft>Zapisz szkic</button>
           <button type="button" data-reply-copy>Kopiuj treść</button>
           <button type="button" data-reply-mailto>Otwórz mailto</button>
           <button type="button" data-reply-mark>Oznacz jako odpowiedziane</button>
@@ -215,7 +219,9 @@ const title = 'CC SYSTEM';
       (() => {
         const demoMode = false;
         const storageKey = 'cc-inbox-access-code';
-        const futureInboxSendReplyEndpoint = '/api/inbox/send-reply';
+        const inboxSendReplyEndpoint = '/api/inbox/send-reply';
+        const inboxSaveDraftEndpoint = '/api/inbox/save-draft';
+        const inboxActivityEndpoint = '/api/inbox/activity';
         const login = document.querySelector('[data-login]');
         const app = document.querySelector('[data-app]');
         const loginForm = document.querySelector('[data-login-form]');
@@ -269,6 +275,7 @@ const title = 'CC SYSTEM';
         const sidebarIconMap = {
           dashboard: 'dashboard',
           mail: 'mail',
+          inbox: 'mail',
           customers: 'customers',
           reservations: 'reservations',
           calendar: 'calendar',
@@ -294,6 +301,8 @@ const title = 'CC SYSTEM';
           parking: 'reservations',
           tours: 'templates',
           purchases: 'reports',
+          products: 'reports',
+          info: 'templates',
           cleaning: 'tasks',
           invoices: 'print',
           alerts: 'alert',
@@ -493,7 +502,7 @@ const title = 'CC SYSTEM';
           'extra-car': { id:'extra-car', scope:'camping', label:'Dodatkowe auto', price:35 },
           'bungalow-2': { id:'bungalow-2', scope:'bungalow', label:'Domek 2-os.', price:200 },
           'bungalow-3': { id:'bungalow-3', scope:'bungalow', label:'Domek 3-os.', price:300 },
-          'bungalow-4': { id:'bungalow-4', scope:'bungalow', label:'Domek 4-os.', price:400 },
+          'bungalow-4': { id:'bungalow-4', scope:'bungalow', label:'Domek 4-os.', price:450 },
           adults: { id:'adults', scope:'people', label:'Osoba dorosła', price:35 },
           children: { id:'children', scope:'people', label:'Dziecko 4-14', price:20 },
           toddlers: { id:'toddlers', scope:'people', label:'Dziecko do 4', price:0 },
@@ -1156,10 +1165,10 @@ const title = 'CC SYSTEM';
           if (replyLanguageSelect instanceof HTMLSelectElement) replyLanguageSelect.value = template.language || 'PL';
           if (replyEditor instanceof HTMLTextAreaElement) replyEditor.value = template.mailtoBodyText || '';
           if (replySendButton instanceof HTMLButtonElement) {
-            replySendButton.disabled = true;
-            replySendButton.textContent = item.email ? 'Wyślij z CC SYSTEM — wkrótce' : 'Brak emaila klienta';
+            replySendButton.disabled = !item.email;
+            replySendButton.textContent = item.email ? 'Wyślij z CC SYSTEM' : 'Brak emaila klienta';
           }
-          if (replyDraftButton instanceof HTMLButtonElement) replyDraftButton.textContent = 'Zapisz szkic lokalnie';
+          if (replyDraftButton instanceof HTMLButtonElement) replyDraftButton.textContent = 'Zapisz szkic';
           if (replyModal instanceof HTMLElement) replyModal.hidden = false;
           document.body.style.overflow = 'hidden';
           trackLocalAction(item.id, `Otworzono modal odpowiedzi: ${template.title}`);
@@ -1185,6 +1194,14 @@ const title = 'CC SYSTEM';
             statusAfterSend: activeReplyDraft.targetStatus || 'replied',
           };
         };
+        const logReplyActivity = async (payload = {}) => {
+          try {
+            await request(inboxActivityEndpoint, {
+              method: 'POST',
+              body: JSON.stringify(payload),
+            });
+          } catch {}
+        };
         const launchReplyMailto = () => {
           const payload = activeReplyPayload();
           if (!payload?.item?.email && !payload?.to) {
@@ -1193,19 +1210,93 @@ const title = 'CC SYSTEM';
           }
           window.location.href = createMailtoUrl(payload);
           trackLocalAction(payload.item.id, `Otworzono mailto: ${payload.template.title}`);
+          void logReplyActivity({
+            inquiryId: payload.item.id,
+            threadId: payload.threadId,
+            action: 'opened_mailto',
+            meta: { templateId: payload.template.id, subject: payload.subject },
+          });
           showToast(`Otwieram mailto: ${payload.template.title}`, 'success');
         };
         const sendReplyThroughResend = async () => {
           const payload = activeReplyPayload();
           if (!payload) return;
-          trackLocalAction(payload.item.id, `TODO: wysyłka z CC SYSTEM przez ${futureInboxSendReplyEndpoint} (${payload.template.title})`);
-          showToast(`Wysyłka z CC SYSTEM jest przygotowana jako TODO. Użyj teraz „Kopiuj treść” albo „Otwórz mailto”.`, 'info');
+          if (!payload.to) {
+            showToast('Brak emaila klienta. Skopiuj odpowiedź albo uzupełnij adres w modalu.', 'error');
+            return;
+          }
+          const confirmed = window.confirm(`Wysłać odpowiedź do ${payload.to} przez CC SYSTEM / Resend?`);
+          if (!confirmed) return;
+
+          if (replySendButton instanceof HTMLButtonElement) {
+            replySendButton.disabled = true;
+            replySendButton.textContent = 'Wysyłanie…';
+          }
+          try {
+            const result = await request(inboxSendReplyEndpoint, {
+              method: 'POST',
+              body: JSON.stringify(payload),
+            });
+            trackLocalAction(payload.item.id, `Wysłano odpowiedź z CC SYSTEM: ${payload.template.title}`);
+            void logReplyActivity({
+              inquiryId: payload.item.id,
+              threadId: result.threadId || payload.threadId,
+              action: 'sent_reply',
+              meta: { templateId: payload.template.id, provider: result.provider, delivered: result.delivered },
+            });
+            const targetIndex = inquiries.findIndex((entry)=>String(entry.id) === String(payload.item.id));
+            if (targetIndex >= 0 && result.delivered) {
+              inquiries[targetIndex] = { ...inquiries[targetIndex], status: payload.statusAfterSend || 'replied', mail_delivered: true, mail_provider: result.provider || inquiries[targetIndex].mail_provider };
+            }
+            closeReplyModal();
+            render();
+            void load({ silent:true, reason:'reply-sent' });
+            showToast(result.delivered ? 'Odpowiedź wysłana z CC SYSTEM.' : 'Wysyłka nie została potwierdzona.', result.delivered ? 'success' : 'error');
+          } catch (error) {
+            trackLocalAction(payload.item.id, `Nieudana wysyłka z CC SYSTEM: ${error.message || 'błąd'}`);
+            void logReplyActivity({
+              inquiryId: payload.item.id,
+              threadId: payload.threadId,
+              action: 'reply_failed',
+              meta: { templateId: payload.template.id, reason: error.message || 'SEND_REPLY_FAILED' },
+            });
+            showToast(error.message || 'Nie udało się wysłać odpowiedzi z CC SYSTEM. Użyj kopii lub mailto.', 'error');
+          } finally {
+            if (replySendButton instanceof HTMLButtonElement) {
+              replySendButton.disabled = !payload.to;
+              replySendButton.textContent = payload.to ? 'Wyślij z CC SYSTEM' : 'Brak emaila klienta';
+            }
+          }
         };
         const saveReplyDraft = async () => {
           const payload = activeReplyPayload();
           if (!payload) return;
-          trackLocalAction(payload.item.id, `Szkic lokalny: ${payload.template.title}`);
-          showToast('Szkic zapisany lokalnie w historii panelu. Pełne mail_threads/mail_messages zostają jako TODO.', 'success');
+          if (replyDraftButton instanceof HTMLButtonElement) {
+            replyDraftButton.disabled = true;
+            replyDraftButton.textContent = 'Zapisywanie…';
+          }
+          try {
+            const result = await request(inboxSaveDraftEndpoint, {
+              method: 'POST',
+              body: JSON.stringify(payload),
+            });
+            trackLocalAction(payload.item.id, `Szkic odpowiedzi: ${payload.template.title}`);
+            void logReplyActivity({
+              inquiryId: payload.item.id,
+              threadId: result.threadId || payload.threadId,
+              action: 'saved_draft',
+              meta: { templateId: payload.template.id, source: result.source, saved: result.saved },
+            });
+            showToast(result.saved ? 'Szkic zapisany w CC SYSTEM.' : 'Szkic nie ma jeszcze tabeli docelowej — zachowano historię lokalną panelu.', result.saved ? 'success' : 'info');
+          } catch (error) {
+            trackLocalAction(payload.item.id, `Szkic lokalny po błędzie API: ${payload.template.title}`);
+            showToast(error.message || 'Nie udało się zapisać szkicu. Treść nadal jest w modalu.', 'error');
+          } finally {
+            if (replyDraftButton instanceof HTMLButtonElement) {
+              replyDraftButton.disabled = false;
+              replyDraftButton.textContent = 'Zapisz szkic';
+            }
+          }
         };
         const markReplyHandled = () => {
           if (!activeReplyDraft) return;
@@ -1766,7 +1857,7 @@ const title = 'CC SYSTEM';
         };
         const renderBungalowsView = () => {
           const items = realItems().filter((item)=>categoryKeys(item).includes('bungalow') || categoryKeys(item).includes('combined'));
-          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Domki</span><h2>Domki 2-os., 3-os. i 4-os.</h2><p>Zasady: check-in 16:00, check-out 11:00, ręczniki/kosmetyki/rzeczy osobiste własne.</p></header><div class="module-metrics">${moduleMetric('🏡','Domek 2-os.','200 PLN/noc')}${moduleMetric('🏡','Domek 3-os.','300/350 PLN/noc')}${moduleMetric('🏡','Domek 4-os.','400 PLN/noc')}${moduleMetric('📬','Zapytania o domki',items.length)}</div>${moduleThreadList(items, 'Brak aktualnych zapytań o domki.')}</section>`;
+          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Domki</span><h2>Domki 2-os., 3-os. i 4-os.</h2><p>Zasady: check-in 16:00, check-out 11:00, ręczniki/kosmetyki/rzeczy osobiste własne.</p></header><div class="module-metrics">${moduleMetric('🏡','Domek 2-os.','200 PLN/noc')}${moduleMetric('🏡','Domek 3-os.','300/350 PLN/noc')}${moduleMetric('🏡','Domek 4-os.','450 PLN/noc')}${moduleMetric('📬','Zapytania o domki',items.length)}</div>${moduleThreadList(items, 'Brak aktualnych zapytań o domki.')}</section>`;
         };
         const renderCampingView = () => {
           const items = realItems().filter((item)=>categoryKeys(item).includes('camping'));
@@ -1814,6 +1905,8 @@ const title = 'CC SYSTEM';
           parking: ['Parking PRO', 'Kontrola pojazdów i miejsc asfaltowych', ['rejestracja', 'ciężki pojazd', 'bus / przyczepa', 'miejsce stabilne']],
           tours: ['Wycieczki', 'Zapytania o atrakcje z recepcji', ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Energylandia', 'Ojców']],
           purchases: ['Zakupy', 'Lista zakupów i braków operacyjnych', ['papier', 'chemia', 'karty pobytu', 'materiały biurowe']],
+          info: ['Info recepcji', 'Baza wiedzy recepcji jak w CC SYSTEM offline', ['regulamin', 'cennik', 'tramwaj', 'EV', 'Fakturownia', 'FAQ']],
+          products: ['Produkty recepcji', 'Sprzedaż i koszyk recepcji', ['lody', 'napoje', 'koszyk', 'płatność', 'historia zakupów']],
           cleaning: ['Sprzątanie', 'Domki, sanitariaty i zadania po wyjazdach', ['domki po 11:00', 'sanitariaty', 'zgłoszenia usterek', 'kontrola gotowości']],
           invoices: ['Faktury', 'Rachunki i dokumenty sprzedaży', ['dane nabywcy', 'pozycje pobytu', 'wydruk / PDF', 'eksport księgowy']],
           alerts: ['Alerty', 'Ważne ostrzeżenia recepcji', ['brak danych', 'mail niedostarczony', 'późny przyjazd', 'brak miejsc']],
@@ -1912,7 +2005,7 @@ const title = 'CC SYSTEM';
             ['Google Maps','Używać Google Maps — wjazd zmienił się w 2022 roku'],
             ['Języki odpowiedzi','PL, EN, DE, IT, FR, ES, NL, CS, SK, SV'],
             ['Cennik camping','Dorośli 35 PLN, dzieci 20 PLN, kamper 80 PLN, prąd 30 PLN'],
-            ['Cennik domki','2-os. 200 PLN, 3-os. 300/350 PLN, 4-os. 400 PLN'],
+            ['Cennik domki','2-os. 200 PLN, 3-os. 300/350 PLN, 4-os. 450 PLN'],
             ['Web3Forms/FormSubmit','kanały zapasowe diagnostyczne'],
           ];
           const syncRows = [
@@ -2051,7 +2144,7 @@ const title = 'CC SYSTEM';
           }
           if (list) {
             if (activeView === 'dashboard') list.innerHTML = renderPremiumDashboardView();
-            else if (activeView === 'mail') list.innerHTML = renderMailCenterWorkspace(items);
+            else if (activeView === 'mail' || activeView === 'inbox') list.innerHTML = renderMailCenterWorkspace(items);
             else if (activeView === 'customers') list.innerHTML = renderCustomersView();
             else if (activeView === 'reservations') list.innerHTML = renderReservationsView();
             else if (activeView === 'calendar') list.innerHTML = renderCalendarView();
@@ -2164,6 +2257,14 @@ const title = 'CC SYSTEM';
           if (!activeReplyDraft?.template?.mailtoBodyText || !(event.currentTarget instanceof HTMLButtonElement)) return;
           const payload = activeReplyPayload();
           trackLocalAction(activeReplyDraft.itemId, 'Skopiowano odpowiedź z modala');
+          if (payload) {
+            void logReplyActivity({
+              inquiryId: payload.item.id,
+              threadId: payload.threadId,
+              action: 'copied_reply',
+              meta: { templateId: payload.template.id, subject: payload.subject },
+            });
+          }
           void copy(payload?.bodyText || activeReplyDraft.template.mailtoBodyText, event.currentTarget);
         });
         document.querySelector('[data-reply-send]')?.addEventListener('click',()=>void sendReplyThroughResend());

@@ -8,6 +8,8 @@ import {
 const MAIL_THREADS_TABLE = 'mail_threads';
 const MAIL_MESSAGES_TABLE = 'mail_messages';
 const MAIL_EVENTS_TABLE = 'mail_thread_events';
+const REPLY_DRAFTS_TABLE = 'reply_drafts';
+const MAIL_ACTIVITY_TABLE = 'inbox_activity_log';
 const RESERVATION_TABLE = 'reservation_inquiries';
 
 export const MAIL_CENTER_STATUSES = [
@@ -30,6 +32,12 @@ export const MAIL_CENTER_FOLDERS = [
   { id: 'needs_confirmation', label: 'Do potwierdzenia' },
   { id: 'confirmed', label: 'Potwierdzone' },
   { id: 'unavailable', label: 'Brak miejsc' },
+  { id: 'bungalow', label: 'Domki' },
+  { id: 'camping', label: 'Camping' },
+  { id: 'late', label: 'Późny przyjazd' },
+  { id: 'tours', label: 'Wycieczki' },
+  { id: 'group', label: 'Grupy / skauci' },
+  { id: 'feedback', label: 'Feedback' },
   { id: 'urgent', label: 'Pilne' },
   { id: 'mail_failed', label: 'Mail niedostarczony' },
   { id: 'test', label: 'Testy' },
@@ -170,7 +178,7 @@ const tableMissing = (error) => {
     error?.details,
     error?.hint,
   ].filter(Boolean).join(' ').toLowerCase();
-  return /mail_threads|mail_messages|mail_thread_events|relation .* does not exist|pgrst|schema cache/.test(text);
+  return /mail_threads|mail_messages|mail_thread_events|reply_drafts|inbox_activity_log|relation .* does not exist|pgrst|schema cache/.test(text);
 };
 
 const safeSupabase = async (path, options = {}) => {
@@ -496,6 +504,25 @@ const applyThreadFilters = (threads, query = {}) => {
     if (status && status !== 'inbox') {
       if (status === 'mail_failed' && thread.metadata_json?.mailDelivered !== false) return false;
       else if (status === 'urgent' && thread.priority !== 'high') return false;
+      else if (['bungalow', 'camping', 'late', 'tours', 'group', 'feedback'].includes(status)) {
+        const text = stripAccents([
+          thread.client_name,
+          thread.client_country,
+          thread.subject,
+          thread.summary?.stayType,
+          thread.summary?.vehicle,
+          thread.summary?.servicesText,
+          thread.summary?.message,
+          Array.isArray(thread.summary?.trips) ? thread.summary.trips.join(' ') : '',
+          thread.metadata_json?.categories,
+        ].filter(Boolean).join(' '));
+        if (status === 'bungalow' && !/domek|bungalow/.test(text)) return false;
+        if (status === 'camping' && !/camping|kamper|camper|van|namiot|tent|przyczep|caravan/.test(text)) return false;
+        if (status === 'late' && !/po 21|after 21|late|p[oó]z|21:/.test(text)) return false;
+        if (status === 'tours' && !/wyciecz|wielicz|auschwitz|zakopan|ojcow|energylandia|wawel|stare miasto/.test(text)) return false;
+        if (status === 'group' && !/grup|scout|skaut|harcer|pfadfinder/.test(text)) return false;
+        if (status === 'feedback' && !/feedback|opinia|ocena/.test(text)) return false;
+      }
       else if (!['mail_failed', 'urgent'].includes(status) && thread.status !== status) return false;
     }
     if (search) {
@@ -576,18 +603,32 @@ export const getMailCenterThread = async (id) => {
     : { ok: false, tableMissing: false };
   if (tableThread.ok && Array.isArray(tableThread.body) && tableThread.body[0]) {
     const thread = tableThread.body[0];
-    const [messagesResult, eventsResult, inquiry] = await Promise.all([
+    const [messagesResult, eventsResult, activityResult, inquiry] = await Promise.all([
       safeSupabase(`${MAIL_MESSAGES_TABLE}?thread_id=eq.${encodeURIComponent(thread.id)}&select=*&order=created_at.asc`, { method: 'GET' }),
       safeSupabase(`${MAIL_EVENTS_TABLE}?thread_id=eq.${encodeURIComponent(thread.id)}&select=*&order=created_at.asc`, { method: 'GET' }),
+      safeSupabase(`${MAIL_ACTIVITY_TABLE}?thread_id=eq.${encodeURIComponent(thread.id)}&select=*&order=created_at.asc`, { method: 'GET' }),
       thread.inquiry_id ? getInquiryById(thread.inquiry_id).catch(() => null) : Promise.resolve(null),
     ]);
+    const legacyEvents = eventsResult.ok && Array.isArray(eventsResult.body) ? eventsResult.body : [];
+    const activityEvents = activityResult.ok && Array.isArray(activityResult.body)
+      ? activityResult.body.map((entry) => ({
+          id: entry.id,
+          thread_id: entry.thread_id,
+          event_type: entry.action,
+          label: entry.action,
+          note: entry.meta_json?.label || entry.meta_json?.note || '',
+          created_by: entry.actor || 'Recepcja',
+          created_at: entry.created_at,
+          metadata_json: entry.meta_json || {},
+        }))
+      : [];
     return {
       tablesReady: true,
       source: MAIL_THREADS_TABLE,
       thread,
       inquiry,
       messages: messagesResult.ok && Array.isArray(messagesResult.body) ? messagesResult.body : [],
-      events: eventsResult.ok && Array.isArray(eventsResult.body) ? eventsResult.body : [],
+      events: [...legacyEvents, ...activityEvents].sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || ''))),
       suggestedReplies: buildSuggestedReplies(inquiry || thread),
       clientStaySummary: inquiry ? buildStaySummary(inquiry) : null,
       fallbackReason: null,
@@ -684,6 +725,66 @@ export const sendResendCustomerReply = async ({ to, subject, html, text }) => {
 
 const appendNote = (existing, text) => [existing, text].filter(Boolean).join('\n\n').slice(0, 5000);
 
+const insertInboxActivity = async ({ inquiryId = null, threadId = null, action, actor = 'Recepcja', meta = {} }) =>
+  safeSupabase(`${MAIL_ACTIVITY_TABLE}?select=*`, {
+    method: 'POST',
+    headers: { prefer: 'return=representation' },
+    body: JSON.stringify({
+      inquiry_id: inquiryId ? String(inquiryId) : null,
+      thread_id: threadId && !String(threadId).startsWith('inquiry:') ? threadId : null,
+      action: oneLine(action || 'activity', 120),
+      actor: oneLine(actor || 'Recepcja', 120),
+      meta_json: meta && typeof meta === 'object' ? meta : {},
+      created_at: new Date().toISOString(),
+    }),
+  });
+
+export const logInboxActivity = async (payload = {}) => {
+  const action = oneLine(payload.action || '', 120);
+  if (!action) throw new InboxApiError('MISSING_ACTION', 'Brak typu aktywności.', { httpStatus: 400 });
+
+  const id = oneLine(payload.threadId || payload.inquiryId || payload.id || '', 140);
+  let bundle = null;
+  if (id) {
+    try {
+      bundle = await getMailCenterThread(id);
+    } catch (error) {
+      if (!(error instanceof InboxApiError && error.code === 'THREAD_NOT_FOUND')) throw error;
+    }
+  }
+
+  const inquiryId = oneLine(payload.inquiryId || bundle?.inquiry?.id || '', 140) || null;
+  const threadId = oneLine(payload.threadId || bundle?.thread?.id || '', 140) || null;
+  const insert = await insertInboxActivity({
+    inquiryId,
+    threadId,
+    action,
+    actor: oneLine(payload.actor || 'Recepcja', 120),
+    meta: {
+      ...(payload.meta && typeof payload.meta === 'object' ? payload.meta : {}),
+      source: 'cc-system-ui',
+    },
+  });
+
+  if (insert.ok) {
+    return {
+      ok: true,
+      saved: true,
+      tablesReady: true,
+      source: MAIL_ACTIVITY_TABLE,
+      activity: Array.isArray(insert.body) ? insert.body[0] : insert.body,
+    };
+  }
+
+  return {
+    ok: true,
+    saved: false,
+    tablesReady: false,
+    source: RESERVATION_TABLE,
+    fallbackReason: insert.tableMissing ? 'MAIL_CENTER_ACTIVITY_TABLE_MISSING' : insert.error?.message || 'ACTIVITY_LOG_UNAVAILABLE',
+  };
+};
+
 export const persistOutboundReply = async ({ inquiry, thread, payload, delivery, html, text }) => {
   const createdAt = new Date().toISOString();
   const threadId = thread?.id || inquiryThreadId(inquiry);
@@ -755,6 +856,32 @@ export const persistOutboundReply = async ({ inquiry, thread, payload, delivery,
         metadata_json: { provider: delivery.provider, delivered: delivery.delivered, messageId: delivery.messageId || null },
       }),
     });
+    await insertInboxActivity({
+      inquiryId: inquiry.id,
+      threadId,
+      action: delivery.delivered ? 'sent_reply' : 'reply_failed',
+      actor: 'Recepcja',
+      meta: {
+        provider: delivery.provider || 'resend',
+        delivered: Boolean(delivery.delivered),
+        messageId: delivery.messageId || null,
+        templateId: payload.templateId || null,
+      },
+    });
+  } else {
+    await insertInboxActivity({
+      inquiryId: inquiry.id,
+      threadId: null,
+      action: delivery.delivered ? 'sent_reply' : 'reply_failed',
+      actor: 'Recepcja',
+      meta: {
+        provider: delivery.provider || 'resend',
+        delivered: Boolean(delivery.delivered),
+        messageId: delivery.messageId || null,
+        templateId: payload.templateId || null,
+        fallbackThread: true,
+      },
+    });
   }
 
   return {
@@ -818,7 +945,54 @@ export const saveDraft = async (payload = {}) => {
   if (!threadState.tablesReady || String(threadState.thread?.id || '').startsWith('inquiry:')) {
     return { ok: true, saved: false, tablesReady: false, fallbackReason: 'MAIL_CENTER_TABLES_MISSING' };
   }
-  const insert = await safeSupabase(`${MAIL_MESSAGES_TABLE}?select=*`, {
+  const draftRecord = {
+    thread_id: threadState.thread.id,
+    inquiry_id: inquiry.id,
+    template_type: oneLine(payload.templateId || '', 80) || null,
+    language: normalizeLanguage(payload.language || inquiry.language),
+    subject: oneLine(payload.subject || subjectForLanguage(payload.language || inquiry.language), 180),
+    body_text: longText(payload.bodyText || '', 12000),
+    body_html: longText(payload.bodyHtml || '', 20000),
+    status: 'draft',
+    metadata_json: {
+      to: oneLine(payload.to || inquiry.email || '', 254),
+      createdBy: 'Recepcja',
+    },
+    updated_at: new Date().toISOString(),
+  };
+  const draftInsert = await safeSupabase(`${REPLY_DRAFTS_TABLE}?select=*`, {
+    method: 'POST',
+    headers: { prefer: 'return=representation' },
+    body: JSON.stringify(draftRecord),
+  });
+  if (draftInsert.ok) {
+    await insertInboxActivity({
+      inquiryId: inquiry.id,
+      threadId: threadState.thread.id,
+      action: 'saved_draft',
+      actor: 'Recepcja',
+      meta: { templateId: draftRecord.template_type, language: draftRecord.language, source: REPLY_DRAFTS_TABLE },
+    });
+    return {
+      ok: true,
+      saved: true,
+      tablesReady: true,
+      source: REPLY_DRAFTS_TABLE,
+      draft: Array.isArray(draftInsert.body) ? draftInsert.body[0] : draftInsert.body,
+      fallbackReason: null,
+    };
+  }
+  if (!draftInsert.tableMissing) {
+    return {
+      ok: false,
+      saved: false,
+      tablesReady: true,
+      source: REPLY_DRAFTS_TABLE,
+      fallbackReason: draftInsert.error?.message || 'DRAFT_INSERT_FAILED',
+    };
+  }
+
+  const legacyInsert = await safeSupabase(`${MAIL_MESSAGES_TABLE}?select=*`, {
     method: 'POST',
     headers: { prefer: 'return=representation' },
     body: JSON.stringify({
@@ -838,7 +1012,27 @@ export const saveDraft = async (payload = {}) => {
       metadata_json: { draft: true },
     }),
   });
-  return { ok: Boolean(insert.ok), saved: Boolean(insert.ok), tablesReady: Boolean(insert.ok), draft: insert.body?.[0] || null, fallbackReason: insert.ok ? null : insert.error?.message };
+  if (legacyInsert.ok) {
+    await insertInboxActivity({
+      inquiryId: inquiry.id,
+      threadId: threadState.thread.id,
+      action: 'saved_draft',
+      actor: 'Recepcja',
+      meta: {
+        templateId: oneLine(payload.templateId || '', 80) || null,
+        language: normalizeLanguage(payload.language || inquiry.language),
+        source: MAIL_MESSAGES_TABLE,
+      },
+    });
+  }
+  return {
+    ok: legacyInsert.ok || legacyInsert.tableMissing,
+    saved: Boolean(legacyInsert.ok),
+    tablesReady: Boolean(legacyInsert.ok),
+    source: legacyInsert.ok ? MAIL_MESSAGES_TABLE : RESERVATION_TABLE,
+    draft: Array.isArray(legacyInsert.body) ? legacyInsert.body[0] : null,
+    fallbackReason: legacyInsert.ok ? 'REPLY_DRAFTS_TABLE_MISSING' : (legacyInsert.tableMissing ? 'MAIL_CENTER_TABLES_MISSING' : legacyInsert.error?.message || 'DRAFT_SAVE_FAILED'),
+  };
 };
 
 export const updateMailCenterStatus = async (payload = {}) => {
