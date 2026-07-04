@@ -201,8 +201,8 @@ const title = 'CC SYSTEM';
           <pre data-reply-mailto-text></pre>
         </details>
         <div class="reply-modal__actions">
-          <button type="button" data-reply-send>Wyślij przez Resend</button>
-          <button type="button" data-reply-draft>Zapisz szkic</button>
+          <button type="button" data-reply-send disabled title="TODO: podłączyć bezpieczny endpoint /api/inbox/send-reply">Wyślij z CC SYSTEM — wkrótce</button>
+          <button type="button" data-reply-draft>Zapisz szkic lokalnie</button>
           <button type="button" data-reply-copy>Kopiuj treść</button>
           <button type="button" data-reply-mailto>Otwórz mailto</button>
           <button type="button" data-reply-mark>Oznacz jako odpowiedziane</button>
@@ -215,6 +215,7 @@ const title = 'CC SYSTEM';
       (() => {
         const demoMode = false;
         const storageKey = 'cc-inbox-access-code';
+        const futureInboxSendReplyEndpoint = '/api/inbox/send-reply';
         const login = document.querySelector('[data-login]');
         const app = document.querySelector('[data-app]');
         const loginForm = document.querySelector('[data-login-form]');
@@ -874,7 +875,7 @@ const title = 'CC SYSTEM';
         const feedbackSection = (item, categories) => {
           if (!categories.includes('feedback')) return '';
           const review = feedback(item);
-          return `<section class="detail-card detail-card--wide feedback-card"><h3>⭐ Opinia o stronie</h3><p class="feedback-stars" aria-label="Ocena ${esc(review.rating || 0)} z 5">${stars(review.rating)}</p><p><strong>${review.rating ? `${esc(review.rating)}/5` : 'Bez oceny liczbowej'}</strong></p><small>Podobało się: ${esc(likedFeedback(review).join(', ') || '-')}</small><small>Łatwo znaleźć informacje: ${esc(review.easyInfo || '-')} · Prostota formularza: ${esc(review.easyForm || '-')}</small><p class="message-copy">${esc(review.improve || 'Brak dodatkowej sugestii.')}</p></section>`;
+          return `<details class="technical-data feedback-card"><summary>Feedback strony</summary><h3>⭐ Opinia o stronie</h3><p class="feedback-stars" aria-label="Ocena ${esc(review.rating || 0)} z 5">${stars(review.rating)}</p><p><strong>${review.rating ? `${esc(review.rating)}/5` : 'Bez oceny liczbowej'}</strong></p><small>Podobało się: ${esc(likedFeedback(review).join(', ') || '-')}</small><small>Łatwo znaleźć informacje: ${esc(review.easyInfo || '-')} · Prostota formularza: ${esc(review.easyForm || '-')}</small><p class="message-copy">${esc(review.improve || 'Bez dodatkowej sugestii.')}</p></details>`;
         };
         const languageCode = (item) => {
           const value = String(item?.language || raw(item).contactLanguage || raw(item).locale || 'en').toLowerCase();
@@ -1071,14 +1072,9 @@ const title = 'CC SYSTEM';
             <footer>www.clepardia.com.pl · +48 795 294 486</footer>
           </article>`;
         };
-        const generateReplyTemplates = (item) => {
-          const lang = languageCode(item);
-          const copySet = replyCopy[lang] || replyCopy.en;
-          const extraSet = replyExtras[lang] || replyExtras.en;
-          const categories = categoryKeys(item);
+        const replyDataForItem = (item) => {
           const guests = normalizeInquiryGuests(item);
-          const templateSubject = replySubjects[lang] || replySubjects.en;
-          const data = {
+          return {
             arrival: item.arrival_date || '-',
             departure: item.departure_date || '-',
             dates: `${item.arrival_date || '-'} — ${item.departure_date || '-'}`,
@@ -1090,19 +1086,42 @@ const title = 'CC SYSTEM';
             trips: trips(item).join(', ') || 'Wieliczka, Auschwitz-Birkenau, Zakopane, Ojców, Energylandia',
             dynamic: 'Finalne warunki i dostępność potwierdza recepcja Camping Clepardia.',
           };
-          const templates = templateDefs.map((def) => {
-            const mailtoBodyText = premiumReplyBody(item, def, copySet, extraSet, data);
-            const suggested = isSuggestedTemplate(item, def);
-            return {
-              ...def,
-              language: lang.toUpperCase(),
-              subject: templateSubject,
-              mailtoBodyText,
-              body: mailtoBodyText,
-              visualPreviewHtml: replyVisualPreviewHtml(item, def, data),
-              suggested,
-            };
-          });
+        };
+        const buildClientReplyHtml = (item, template, data = replyDataForItem(item)) =>
+          replyVisualPreviewHtml(item, template, data);
+        const buildClientReplyText = (item, template, language = languageCode(item), data = replyDataForItem(item)) => {
+          const lang = String(language || languageCode(item)).toLowerCase();
+          const copySet = replyCopy[lang] || replyCopy.en;
+          const extraSet = replyExtras[lang] || replyExtras.en;
+          return premiumReplyBody(item, template, copySet, extraSet, data);
+        };
+        const generateClientReply = (item, type = recommendedTemplateId(item), language = languageCode(item)) => {
+          const lang = String(language || languageCode(item)).toLowerCase();
+          const data = replyDataForItem(item);
+          const templateSubject = replySubjects[lang] || replySubjects.en;
+          const requestedId = recommendedTemplateId(item, type);
+          const template = templateDefs.find((def)=>def.id === requestedId)
+            || templateDefs.find((def)=>def.id === recommendedTemplateId(item))
+            || templateDefs[0];
+          const mailtoBodyText = buildClientReplyText(item, template, lang, data);
+          const bodyHtml = buildClientReplyHtml(item, template, data);
+          return {
+            ...template,
+            language: lang.toUpperCase(),
+            subject: templateSubject,
+            mailtoBodyText,
+            body: mailtoBodyText,
+            bodyText: mailtoBodyText,
+            bodyHtml,
+            visualPreviewHtml: bodyHtml,
+            suggested: isSuggestedTemplate(item, template),
+          };
+        };
+        const createMailtoUrl = ({ to, subject, bodyText }) =>
+          `mailto:${encodeURIComponent(to || '')}?subject=${encodeURIComponent(subject || 'Camping Clepardia — odpowiedź na zapytanie')}&body=${encodeURIComponent(bodyText || '')}`;
+        const generateReplyTemplates = (item) => {
+          const lang = languageCode(item);
+          const templates = templateDefs.map((def) => generateClientReply(item, def.id, lang));
           return templates.sort((a,b)=>Number(b.suggested)-Number(a.suggested) || b.priority-a.priority);
         };
         const replyTemplatesSection = (item) => {
@@ -1137,9 +1156,10 @@ const title = 'CC SYSTEM';
           if (replyLanguageSelect instanceof HTMLSelectElement) replyLanguageSelect.value = template.language || 'PL';
           if (replyEditor instanceof HTMLTextAreaElement) replyEditor.value = template.mailtoBodyText || '';
           if (replySendButton instanceof HTMLButtonElement) {
-            replySendButton.disabled = !item.email;
-            replySendButton.textContent = item.email ? 'Wyślij przez Resend' : 'Brak emaila klienta';
+            replySendButton.disabled = true;
+            replySendButton.textContent = item.email ? 'Wyślij z CC SYSTEM — wkrótce' : 'Brak emaila klienta';
           }
+          if (replyDraftButton instanceof HTMLButtonElement) replyDraftButton.textContent = 'Zapisz szkic lokalnie';
           if (replyModal instanceof HTMLElement) replyModal.hidden = false;
           document.body.style.overflow = 'hidden';
           trackLocalAction(item.id, `Otworzono modal odpowiedzi: ${template.title}`);
@@ -1171,64 +1191,21 @@ const title = 'CC SYSTEM';
             showToast('Brak emaila klienta. Skopiuj odpowiedź z modala.', 'error');
             return;
           }
-          window.location.href = `mailto:${encodeURIComponent(payload.to || payload.item.email)}?subject=${encodeURIComponent(payload.subject)}&body=${encodeURIComponent(payload.bodyText)}`;
+          window.location.href = createMailtoUrl(payload);
           trackLocalAction(payload.item.id, `Otworzono mailto: ${payload.template.title}`);
           showToast(`Otwieram mailto: ${payload.template.title}`, 'success');
         };
         const sendReplyThroughResend = async () => {
           const payload = activeReplyPayload();
           if (!payload) return;
-          if (!payload.to) {
-            showToast('Brak emaila klienta. Nie można wysłać przez Resend.', 'error');
-            return;
-          }
-          if (demoMode) {
-            trackLocalAction(payload.item.id, `DEMO: wysyłka przez Resend (${payload.template.title})`);
-            showToast('Podgląd QA: wysyłka przez Resend jest zablokowana, pokazuję tylko demo.', 'success');
-            return;
-          }
-          if (replySendButton instanceof HTMLButtonElement) {
-            replySendButton.disabled = true;
-            replySendButton.textContent = 'Wysyłanie…';
-          }
-          try {
-            const result = await request('/api/mail-center/send-reply',{method:'POST',body:JSON.stringify(payload)});
-            trackLocalAction(payload.item.id, `Wysłano odpowiedź przez Resend: ${payload.template.title}`);
-            showToast(result.delivered ? 'Wysłano odpowiedź do klienta.' : 'Odpowiedź nie została dostarczona — użyj mailto/kopiuj.', result.delivered ? 'success' : 'error');
-            if (result.delivered) {
-              const index = inquiries.findIndex((entry)=>String(entry.id) === String(payload.item.id));
-              if (index >= 0) inquiries[index] = { ...inquiries[index], status: payload.statusAfterSend || 'replied' };
-              closeReplyModal();
-              await load({ silent:true, reason:'reply-sent' });
-            }
-          } catch (error) {
-            showToast(error.message || 'Nie udało się wysłać odpowiedzi przez Resend.', 'error');
-          } finally {
-            if (replySendButton instanceof HTMLButtonElement) {
-              const current = activeReplyPayload();
-              replySendButton.disabled = !current?.to;
-              replySendButton.textContent = current?.to ? 'Wyślij przez Resend' : 'Brak emaila klienta';
-            }
-          }
+          trackLocalAction(payload.item.id, `TODO: wysyłka z CC SYSTEM przez ${futureInboxSendReplyEndpoint} (${payload.template.title})`);
+          showToast(`Wysyłka z CC SYSTEM jest przygotowana jako TODO. Użyj teraz „Kopiuj treść” albo „Otwórz mailto”.`, 'info');
         };
         const saveReplyDraft = async () => {
           const payload = activeReplyPayload();
           if (!payload) return;
-          if (demoMode) {
-            trackLocalAction(payload.item.id, `DEMO: zapis szkicu (${payload.template.title})`);
-            showToast('Podgląd QA: szkic zapisany tylko lokalnie w historii demo.', 'success');
-            return;
-          }
-          if (replyDraftButton instanceof HTMLButtonElement) replyDraftButton.disabled = true;
-          try {
-            const result = await request('/api/mail-center/save-draft',{method:'POST',body:JSON.stringify(payload)});
-            trackLocalAction(payload.item.id, result.saved ? `Zapisano szkic: ${payload.template.title}` : `Szkic lokalny: ${payload.template.title}`);
-            showToast(result.saved ? 'Szkic zapisany w historii wątku.' : 'Szkic przygotowany — tabele wiadomości nie są jeszcze utworzone.', result.saved ? 'success' : 'info');
-          } catch (error) {
-            showToast(error.message || 'Nie udało się zapisać szkicu.', 'error');
-          } finally {
-            if (replyDraftButton instanceof HTMLButtonElement) replyDraftButton.disabled = false;
-          }
+          trackLocalAction(payload.item.id, `Szkic lokalny: ${payload.template.title}`);
+          showToast('Szkic zapisany lokalnie w historii panelu. Pełne mail_threads/mail_messages zostają jako TODO.', 'success');
         };
         const markReplyHandled = () => {
           if (!activeReplyDraft) return;
@@ -1506,8 +1483,8 @@ const title = 'CC SYSTEM';
           const warnings = warningsFor(item, cats) || '<p>Brak pilnych ostrzeżeń operacyjnych.</p>';
           const timeline = [
             ['Wpłynęło', formatDate(item.created_at,true)],
-            [demoMode ? 'Zapis demo' : 'Zapis Supabase', demoMode ? 'lokalna tablica demo' : 'OK — reservation_inquiries'],
-            ['Wysyłka maila', demoMode ? 'status demo — bez wysyłki' : `${mailChannelLabel(item.mail_provider)} / ${item.mail_delivered ? 'dostarczony' : 'niedostarczony'}`],
+            ['Zapis sprawy', demoMode ? 'lokalna tablica demo' : 'zgłoszenie widoczne w panelu recepcji'],
+            ['Mail do recepcji', demoMode ? 'status demo — bez wysyłki' : (item.mail_delivered ? 'wysłany' : 'wymaga obsługi ręcznej')],
             ['Status', statusLabels[item.status] || item.status],
           ].map(([label,value])=>`<li><span>${esc(label)}</span><strong>${esc(value)}</strong></li>`).join('');
           return `<section class="mail-case-panel" data-id="${esc(item.id)}">
@@ -1965,8 +1942,8 @@ const title = 'CC SYSTEM';
           const conversationTitle = [item.full_name || 'Klient', item.stay_type, `${item.arrival_date || '-'} — ${item.departure_date || '-'}`].filter(Boolean).join(' · ');
           const timeline = [
             ['Wpłynęło', formatDate(item.created_at,true)],
-            ['Zapis Supabase', 'OK — rekord w reservation_inquiries'],
-            ['Wysyłka maila', `${mailChannelLabel(item.mail_provider)} / ${item.mail_delivered ? 'dostarczony' : 'niedostarczony'}`],
+            ['Zapis sprawy', 'zgłoszenie widoczne w panelu recepcji'],
+            ['Mail do recepcji', item.mail_delivered ? 'wysłany' : 'wymaga obsługi ręcznej'],
             ['Status', statusLabels[item.status] || item.status],
             ...(localTimeline.get(String(item.id)) || []).map((entry)=>[entry.label, entry.value]),
           ].map(([label,value])=>`<li><span>${esc(label)}</span><strong>${esc(value)}</strong></li>`).join('');
@@ -1983,13 +1960,13 @@ const title = 'CC SYSTEM';
               <section class="detail-card detail-card--wide"><h3>🧾 Usługi</h3><ul class="service-list">${serviceCards(item)}</ul></section>
               <section class="detail-card"><h3>🚐 Pojazd</h3><dl class="plain-list"><div><dt>Rejestracja</dt><dd>${esc(item.vehicle_registration || '-')}</dd></div><div><dt>Przyczepa</dt><dd>${esc(v.trailerPlate || payload.trailerPlate || '-')}</dd></div><div><dt>Typ / model</dt><dd>${esc(v.type || v.model || '-')}</dd></div><div><dt>Wymiary</dt><dd>${esc([v.length,v.width,v.height].filter(Boolean).join(' × ') || '-')}</dd></div><div><dt>Masa</dt><dd>${esc(v.weight || '-')}</dd></div><div><dt>Ciężki pojazd</dt><dd>${yesNo(v.large)}</dd></div><div><dt>Potrzeba asfaltu</dt><dd>${yesNo(v.asphaltNeeded)}</dd></div><div><dt>Uwagi</dt><dd>${esc(v.notes || v.summary || '-')}</dd></div></dl></section>
               <section class="detail-card"><h3>♿ Specjalne potrzeby</h3><p>${esc(item.special_needs || 'Brak')}</p></section>
-              <section class="detail-card"><h3>✅ Zgody</h3><ul class="consent-list"><li>Cisza nocna: <b>${c.quiet ? 'OK':'BRAK'}</b></li><li>Kontakt: <b>${c.contact ? 'OK':'BRAK'}</b></li><li>Polityka prywatności: <b>${c.privacy ? 'OK':'BRAK'}</b></li></ul></section>
+              <details class="technical-data"><summary>Dane techniczne — zgody</summary><ul class="consent-list"><li>Cisza nocna: <b>${c.quiet ? 'OK':'BRAK'}</b></li><li>Kontakt: <b>${c.contact ? 'OK':'BRAK'}</b></li><li>Polityka prywatności: <b>${c.privacy ? 'OK':'BRAK'}</b></li></ul></details>
               <section class="detail-card detail-card--wide"><h3>💬 Wiadomość</h3><p class="message-copy">${esc(item.message || 'Brak wiadomości')}</p></section>
               ${feedbackSection(item, categories)}
               <section class="detail-card detail-card--wide best-reply-card"><h3>✨ Najlepsza odpowiedź</h3><p><strong>${esc(bestSuggestion.icon)} ${esc(bestSuggestion.title)}</strong></p><small>Kiedy używać: ${esc(bestSuggestion.when)}</small><small>Powód: ${esc(bestSuggestion.reason)}</small><div class="inline-actions"><button type="button" data-reply-template="${esc(bestSuggestion.id)}">Otwórz najlepszą odpowiedź</button></div></section>
               <section class="detail-card detail-card--wide"><h3>✨ Dodatkowe podpowiedzi</h3><ul class="suggestion-list">${suggestions}</ul></section>
               ${replyTemplatesSection(item)}
-              <section class="detail-card detail-card--wide mail-status-card ${item.mail_delivered ? 'is-ok':'is-failed'}"><h3>✉️ Status maila</h3><p><strong>${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</strong> · kanał: ${esc(mailChannelLabel(item.mail_provider))}</p><small>${esc(item.mail_error || (item.mail_delivered ? 'Brak błędu.':'Brak szczegółów błędu.'))}</small>${item.mail_delivered ? '' : '<p>Zapytanie jest zapisane w panelu recepcji. Skopiuj treść maila lub użyj przycisku mailto.</p>'}<div class="inline-actions"><button type="button" data-copy-mail>Kopiuj treść maila</button><a href="mailto:clepardia@gmail.com?subject=${encodeURIComponent(`Zapytanie ${item.id}`)}&body=${encodeURIComponent(mailText(item))}">Otwórz Gmail / mailto</a></div></section>
+              <details class="technical-data mail-status-card ${item.mail_delivered ? 'is-ok':'is-failed'}"><summary>Diagnostyka maila</summary><p><strong>${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</strong> · kanał: ${esc(mailChannelLabel(item.mail_provider))}</p><small>${esc(item.mail_error || (item.mail_delivered ? 'Brak błędu.':'Brak szczegółów błędu.'))}</small>${item.mail_delivered ? '' : '<p>Zapytanie jest zapisane w panelu recepcji. Skopiuj treść maila lub użyj przycisku mailto.</p>'}<div class="inline-actions"><button type="button" data-copy-mail>Kopiuj treść maila</button><a href="mailto:clepardia@gmail.com?subject=${encodeURIComponent(`Zapytanie ${item.id}`)}&body=${encodeURIComponent(mailText(item))}">Otwórz Gmail / mailto</a></div></details>
               <section class="detail-card detail-card--wide"><h3>🕒 Historia rozmowy</h3><ul class="timeline-list">${timeline}</ul><small>TODO: docelowo zapisywać pełną historię rozmowy, status wysyłki i akcje recepcji w module Mail Center.</small></section>
               <details class="technical-data"><summary>Dane techniczne</summary><pre data-raw-debug>Otwórz panel techniczny, żeby załadować raw JSON.</pre></details>
             </div>
@@ -2000,7 +1977,8 @@ const title = 'CC SYSTEM';
           const payload = raw(item);
           const categories = categoryKeys(item);
           const country = countryInfo(item);
-          const categoryBadges = categories.map((key)=>`<span class="category-badge category-${esc(key)}">${esc(categoryLabels[key] || key)}</span>`).join('');
+          const visibleCategoryBadges = categories.filter((key)=>!['mailFailed','mailSent','feedback'].includes(key));
+          const categoryBadges = visibleCategoryBadges.map((key)=>`<span class="category-badge category-${esc(key)}">${esc(categoryLabels[key] || key)}</span>`).join('');
           const highSeason = Boolean(payload.highSeasonCampingInfo) || (isSummer(item) && /camping|kamper|van|namiot|przyczep|bus/i.test(item.stay_type || ''));
           const countrySummary = `${country.flag} ${country.label}${country.code ? ` (${country.code})` : ''} · ${country.language}`;
           const guests = normalizeInquiryGuests(item);
@@ -2010,7 +1988,7 @@ const title = 'CC SYSTEM';
           const bestSuggestion = suggestBestReply(item);
           return `<article class="inquiry-card" data-id="${esc(item.id)}">
             <header>
-              <div><div class="card-badges"><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span><span class="mail-badge ${item.mail_delivered ? 'is-ok':'is-failed'}">${item.mail_delivered ? 'Mail dostarczony':'Mail niedostarczony'}</span>${categoryBadges}${highSeason ? '<span class="season-badge">Lipiec/sierpień — camping bez rezerwacji</span>':''}</div><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.nights || 0)} nocy</p></div>
+              <div><div class="card-badges"><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span>${categoryBadges}${highSeason ? '<span class="season-badge">Lipiec/sierpień — camping bez rezerwacji</span>':''}</div><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.nights || 0)} nocy</p></div>
               <div class="card-date"><small>Dodano</small><strong>${esc(formatDate(item.created_at,true))}</strong><code>${esc(item.id)}</code></div>
             </header>
             <div class="inquiry-card__summary">
@@ -2022,7 +2000,6 @@ const title = 'CC SYSTEM';
               <span>💰 ${esc(item.estimated_total_pln ?? '-')} PLN</span>
               <span>⚑ ${esc(priority)}</span>
               <span>✨ ${esc(bestSuggestion.title)} · ${esc(bestSuggestion.reason)}</span>
-              <span>✉️ ${item.mail_delivered ? 'mail OK':'mail niedostarczony'}</span>
               ${item.email ? `<a href="mailto:${esc(item.email)}">${esc(item.email)}</a>` : ''}
               ${item.phone ? `<a href="tel:${esc(item.phone)}">${esc(item.phone)}</a>` : ''}
             </div>

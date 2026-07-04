@@ -2,6 +2,8 @@ export interface InquiryPeople {
   adults: number;
   children: number;
   toddlers: number;
+  bungalowGuests?: number;
+  campingGuests?: number;
 }
 
 export interface InquiryCalculatorSummary {
@@ -37,6 +39,14 @@ export interface InquiryVehicleDetails {
   summary: string;
 }
 
+export interface InquiryFeedback {
+  rating: number;
+  liked: string[];
+  improve: string;
+  easyInfo: string;
+  easyForm: string;
+}
+
 export interface ReservationInquiryPayload {
   fullName: string;
   email: string;
@@ -53,7 +63,11 @@ export interface ReservationInquiryPayload {
   stayCategory?: string;
   people?: InquiryPeople;
   addons?: string[];
+  tours?: string[];
+  arrivalTime?: string;
+  eventInterest?: string;
   message?: string;
+  feedback?: Partial<InquiryFeedback>;
   summerNotice?: boolean;
   quietConsent?: boolean;
   consent?: boolean;
@@ -92,7 +106,11 @@ export interface NormalizedReservationInquiry extends ReservationInquiryPayload 
   stayCategory: string;
   people: InquiryPeople;
   addons: string[];
+  tours: string[];
+  arrivalTime: string;
+  eventInterest: string;
   message: string;
+  feedback: InquiryFeedback;
   summerNotice: boolean;
   quietConsent: boolean;
   consent: boolean;
@@ -135,6 +153,9 @@ export interface CcSystemLeadDraft {
     stayCategory: string;
     people: InquiryPeople;
     addons: string[];
+    tours: string[];
+    arrivalTime: string;
+    eventInterest: string;
     services: InquiryServiceLine[];
     estimatedTotal: string;
     currencyEstimate: string;
@@ -148,6 +169,7 @@ export interface CcSystemLeadDraft {
     consent: boolean;
     privacyConsent: boolean;
   };
+  feedback: InquiryFeedback;
   notes: string;
   createdAt: string;
 }

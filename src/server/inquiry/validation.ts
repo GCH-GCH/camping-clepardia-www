@@ -64,7 +64,29 @@ const normalizePeople = (people?: InquiryPeople): InquiryPeople => ({
   adults: toNonNegativeInteger(people?.adults, 0),
   children: toNonNegativeInteger(people?.children, 0),
   toddlers: toNonNegativeInteger(people?.toddlers, 0),
+  bungalowGuests: toNonNegativeInteger(people?.bungalowGuests, 0),
+  campingGuests: toNonNegativeInteger(people?.campingGuests, 0),
 });
+
+const normalizeStringList = (values: unknown, maxItems = 12, maxLength = 120) => {
+  if (!Array.isArray(values)) return [];
+
+  return values
+    .map((value) => sanitizeInlineText(value, maxLength))
+    .filter(Boolean)
+    .slice(0, maxItems);
+};
+
+const normalizeFeedback = (feedback: ReservationInquiryPayload['feedback']) => {
+  const value = feedback || {};
+  return {
+    rating: Math.min(5, toNonNegativeInteger(value.rating, 0)),
+    liked: normalizeStringList(value.liked, 12, 80),
+    improve: sanitizeText(value.improve, 800),
+    easyInfo: sanitizeInlineText(value.easyInfo, 80),
+    easyForm: sanitizeInlineText(value.easyForm, 80),
+  };
+};
 
 const normalizeServices = (services?: InquiryServiceLine[]): InquiryServiceLine[] => {
   if (!Array.isArray(services)) return [];
@@ -114,6 +136,10 @@ export const normalizeReservationInquiry = (rawPayload: unknown) => {
   const stayCategory = sanitizeInlineText(payload.stayCategory, 40);
   const selectedStayMode = sanitizeInlineText(payload.selectedStayMode || payload.stayMode || stayCategory, 40);
   const people = normalizePeople(payload.people);
+  const tours = normalizeStringList(payload.tours, 12, 120);
+  const arrivalTime = sanitizeInlineText(payload.arrivalTime, 120);
+  const eventInterest = sanitizeInlineText(payload.eventInterest, 160);
+  const feedback = normalizeFeedback(payload.feedback);
   const addons = Array.isArray(payload.addons)
     ? payload.addons.map((addon) => sanitizeInlineText(addon, 100)).filter(Boolean).slice(0, 12)
     : [];
@@ -173,7 +199,11 @@ export const normalizeReservationInquiry = (rawPayload: unknown) => {
     selectedStayMode,
     people,
     addons,
+    tours,
+    arrivalTime,
+    eventInterest,
     message,
+    feedback,
     services,
     estimatedTotal,
     currencyEstimate,
@@ -219,6 +249,9 @@ export const createCcSystemLeadDraft = (inquiry: NormalizedReservationInquiry): 
     stayCategory: inquiry.stayCategory,
     people: inquiry.people,
     addons: inquiry.addons,
+    tours: inquiry.tours,
+    arrivalTime: inquiry.arrivalTime,
+    eventInterest: inquiry.eventInterest,
     services: inquiry.services,
     estimatedTotal: inquiry.estimatedTotal,
     currencyEstimate: inquiry.currencyEstimate,
@@ -232,6 +265,7 @@ export const createCcSystemLeadDraft = (inquiry: NormalizedReservationInquiry): 
     consent: inquiry.consent,
     privacyConsent: inquiry.privacyConsent,
   },
+  feedback: inquiry.feedback,
   notes: inquiry.message,
   createdAt: inquiry.submittedAt,
 });
