@@ -353,6 +353,12 @@ const title = 'CC SYSTEM';
         let selectedInquiryId = '';
         let campSavedStays = [];
         let campStorageStatus = { ok: false, loaded: false, migrationRequired: false, error: '' };
+        let clientsOnline = { ok: false, loaded: false, migrationRequired: false, error: '', clients: [], stats: {}, source: 'camp_stays' };
+        let clientSearchValue = '';
+        let activeClientFilter = 'all';
+        let selectedClientKey = '';
+        let selectedClientStayId = '';
+        let clientSearchTimer = 0;
         let campValidationErrors = [];
         let lastCampSave = null;
         let analyticsStorageStatus = { ok: false, loaded: false, migrationRequired: false, error: '', eventCount: 0, recentEvents: [] };
@@ -1840,53 +1846,256 @@ const title = 'CC SYSTEM';
           });
           return [...map.values()].sort((a,b)=>String(b.items[0]?.created_at || '').localeCompare(String(a.items[0]?.created_at || '')));
         };
-        const renderCustomersView = () => {
-          const customers = customersFromInquiries();
-          const client = customers[0] || null;
-          if (!client) return `<section class="cc-module cc-module--crm"><header class="cc-module-head"><div><span class="eyebrow">Kartoteka 360</span><h2>Klienci</h2><p>Brak realnych klientów.</p></div></header></section>`;
-          const last = client.items[0] || {};
-          const next = client.items.find((item)=>String(item.arrival_date || '') >= new Date().toISOString().slice(0,10)) || last;
-          const country = countryInfo({ country:client.country, language:client.language });
-          const ratings = client.items.map((item)=>Number(feedback(item).rating || 0)).filter(Boolean);
-          const avg = ratings.length ? (ratings.reduce((sum,value)=>sum+value,0) / ratings.length).toFixed(1) : '4.8';
-          const initials = String(client.name || 'CC').trim().split(/\s+/).slice(0,2).map((part)=>part[0]).join('').toUpperCase() || 'CC';
-          const best = suggestBestReply(next);
-          const prefs = ['Blisko sanitariatów','Cisza','Poranna kawa','Pies mile widziany','Miejsce z prądem','Powraca co roku'];
-          const customerFilters = ['Kraj','Typ pobytu','Status','Domki / camping','Premium / VIP','Blacklist','Powracający','Grupa'];
-          const customerRows = customers.slice(0,8).map((entry)=>{
-            const entryCountry = countryInfo({ country:entry.country, language:entry.language });
-            const lastStay = entry.items[0] || {};
-            const flags = [
-              entry.items.length > 1 ? 'Powracający' : 'Nowy',
-              categoryKeys(lastStay).includes('group') ? 'Grupa' : '',
-              categoryKeys(lastStay).includes('bungalow') ? 'Domki' : 'Camping',
-            ].filter(Boolean).join(' · ');
-            return `<article class="crm-list-row"><strong>${esc(entry.name)}</strong><span>${esc(entryCountry.flag)} ${esc(entryCountry.label)}</span><span>${esc(entry.phone || '-')}</span><span>${esc(entry.email || '-')}</span><span>${esc(lastStay.arrival_date || '-')} — ${esc(lastStay.departure_date || '-')}</span><span>${esc(statusLabels[lastStay.status] || lastStay.status || '-')}</span><small>${esc(flags)}</small><button type="button">Akcje</button></article>`;
+        const clientFilterDefs = () => [
+          ['all','Wszystko'],
+          ['active','Aktywne pobyty'],
+          ['arrival_today','Przyjazdy dziś'],
+          ['departure_today','Wyjazdy dziś'],
+          ['next7','Najbliższe 7 dni'],
+          ['bajt','BAJT'],
+          ['camping','Camping'],
+          ['bungalow','Domki'],
+          ['camper','Kamper'],
+          ['caravan','Przyczepa'],
+          ['tent','Namiot'],
+          ['electricity','Prąd 10A'],
+          ['dog','Pies'],
+          ['payment','Płatność do sprawdzenia'],
+          ['countries','Kraje'],
+          ['languages','Języki'],
+          ['returning','Powracający'],
+          ['tests','Testy'],
+          ['archived','Archiwum / zakończone'],
+        ];
+        const clientStayStatus = (stay = {}) => {
+          const today = dateStamp();
+          const arrival = String(stay.arrivalDate || stay.arrival_date || '');
+          const departure = String(stay.departureDate || stay.departure_date || '');
+          if (arrival === today) return ['arrival_today','Przyjazd dziś'];
+          if (departure === today) return ['departure_today','Wyjazd dziś'];
+          if (arrival && arrival > today) return ['future','Przyszły'];
+          if (arrival && departure && arrival <= today && departure >= today) return ['active','Aktywny'];
+          if (departure && departure < today) return ['finished','Wyjechał'];
+          return [stay.computedStatus || 'unknown', stay.computedStatusLabel || 'Do sprawdzenia'];
+        };
+        const clientDaysInfo = (stay = {}) => {
+          const date = new Date(`${stay.arrivalDate || ''}T12:00:00`);
+          if (Number.isNaN(date.getTime())) return 'termin do sprawdzenia';
+          const diff = Math.round((date.getTime() - new Date(`${dateStamp()}T12:00:00`).getTime()) / 86400000);
+          if (diff === 0) return 'dzisiaj';
+          if (diff > 0) return `za ${diff} dni`;
+          return `${Math.abs(diff)} dni temu`;
+        };
+        const clientPaymentText = (stay = {}) => {
+          const total = Number(stay.totalPln ?? stay.total_pln ?? 0);
+          const paid = Number(stay.paidPln ?? stay.paid_pln ?? 0);
+          const remaining = Number(stay.remainingPln ?? stay.remaining_pln ?? Math.max(0, total - paid));
+          const method = stay.paymentMethod || stay.payment_json?.method || stay.payment?.method || 'brak metody';
+          if (remaining <= 0 && total > 0) return `opłacone · ${method}`;
+          if (paid > 0) return `częściowo · pozostało ${money(remaining)}`;
+          return `do sprawdzenia · ${method}`;
+        };
+        const clientServiceText = (stay = {}) => {
+          const servicesList = Array.isArray(stay.services) ? stay.services : Array.isArray(stay.services_json) ? stay.services_json : [];
+          return stay.serviceSummary || servicesList.filter((service)=>Number(service?.qty || 0) > 0).slice(0,5).map((service)=>`${service.label || service.id || 'Usługa'} × ${service.qty}`).join(', ') || 'Brak usług';
+        };
+        const clientStayAmount = (stay = {}) => Number(stay.totalPln ?? stay.total_pln ?? 0);
+        const clientRawStayToNormalized = (stay = {}) => {
+          const rawStay = stay?.raw_payload_json && typeof stay.raw_payload_json === 'object' ? stay.raw_payload_json : {};
+          const servicesList = Array.isArray(stay.services_json) ? stay.services_json : Array.isArray(rawStay.services) ? rawStay.services : [];
+          const payment = stay?.payment_json && typeof stay.payment_json === 'object' ? stay.payment_json : rawStay.payment || {};
+          const total = Number(stay.total_pln ?? rawStay.totalPln ?? 0);
+          const paid = Number(stay.paid_pln ?? rawStay.paidPln ?? payment.paidPln ?? 0);
+          const normalized = {
+            id: stay.id || rawStay.id || '',
+            caseNumber: stay.case_number || rawStay.caseNumber || '',
+            clientName: stay.client_name || rawStay.clientName || 'Bez imienia',
+            country: stay.country || rawStay.country || '',
+            countryCode: String(stay.country_code || rawStay.countryCode || '').toUpperCase(),
+            language: String(stay.language || rawStay.language || '').toUpperCase(),
+            email: stay.email || rawStay.email || '',
+            phone: stay.phone || rawStay.phone || '',
+            arrivalDate: stay.arrival_date || rawStay.arrivalDate || '',
+            departureDate: stay.departure_date || rawStay.departureDate || '',
+            nights: Number(stay.nights ?? rawStay.nights ?? 0),
+            arrivalTime: stay.arrival_time || rawStay.arrivalTime || '',
+            stayType: stay.stay_type || rawStay.stayType || '',
+            adults: Number(stay.adults ?? rawStay.adults ?? 0),
+            children414: Number(stay.children_4_14 ?? rawStay.children414 ?? 0),
+            children04: Number(stay.children_0_4 ?? rawStay.children04 ?? 0),
+            totalGuests: Number(stay.total_guests ?? rawStay.totalGuests ?? 0),
+            vehicleType: stay.vehicle_type || rawStay.vehicleType || '',
+            vehiclePlate: stay.vehicle_plate || rawStay.vehiclePlate || '',
+            trailerPlate: stay.trailer_plate || rawStay.trailerPlate || '',
+            vehicleNotes: stay.vehicle_notes || rawStay.vehicleNotes || '',
+            services: servicesList,
+            serviceSummary: clientServiceText({ services: servicesList }),
+            paymentMethod: payment.method || rawStay.paymentMethod || '',
+            totalPln: total,
+            paidPln: paid,
+            remainingPln: Number(stay.remaining_pln ?? rawStay.remainingPln ?? payment.remainingPln ?? Math.max(0, total - paid)),
+            isBajt: Boolean(stay.is_bajt || rawStay.isBajt),
+            notes: stay.notes || rawStay.notes || '',
+            createdAt: stay.created_at || rawStay.createdAt || '',
+            isTest: /test|demo|qa/i.test([stay.client_name, stay.email, stay.notes, rawStay.clientName, rawStay.email, rawStay.notes].join(' ')),
+          };
+          normalized.clientKey = normalized.email ? `email:${normalized.email.toLowerCase()}` : normalized.phone ? `phone:${normalized.phone.replace(/\s+/g,'')}` : normalized.vehiclePlate ? `plate:${normalized.vehiclePlate}` : `name:${normalizeText(normalized.clientName)}:${normalizeText(normalized.countryCode || normalized.country)}`;
+          normalized.searchText = normalizeText([normalized.id, normalized.caseNumber, normalized.clientName, normalized.country, normalized.countryCode, normalized.language, normalized.email, normalized.phone, normalized.vehiclePlate, normalized.trailerPlate, normalized.vehicleType, normalized.arrivalDate, normalized.departureDate, normalized.stayType, normalized.serviceSummary, normalized.notes, normalized.isBajt ? 'BAJT' : ''].join(' '));
+          const [statusKey, statusLabel] = clientStayStatus(normalized);
+          normalized.computedStatus = statusKey;
+          normalized.computedStatusLabel = statusLabel;
+          return normalized;
+        };
+        const clientsFromCampSavedStays = () => {
+          const map = new Map();
+          campSavedStays.map(clientRawStayToNormalized).forEach((stay) => {
+            const current = map.get(stay.clientKey) || { clientKey:stay.clientKey, clientName:stay.clientName, country:stay.country, countryCode:stay.countryCode, language:stay.language, email:stay.email, phone:stay.phone, primaryVehiclePlate:stay.vehiclePlate, stays:[] };
+            current.stays.push(stay);
+            current.clientName = current.clientName || stay.clientName;
+            current.country = current.country || stay.country;
+            current.countryCode = current.countryCode || stay.countryCode;
+            current.language = current.language || stay.language;
+            current.email = current.email || stay.email;
+            current.phone = current.phone || stay.phone;
+            current.primaryVehiclePlate = current.primaryVehiclePlate || stay.vehiclePlate;
+            map.set(stay.clientKey, current);
+          });
+          return [...map.values()].map((client) => {
+            const stays = client.stays.sort((a,b)=>String(b.arrivalDate || b.createdAt).localeCompare(String(a.arrivalDate || a.createdAt)));
+            const searchText = normalizeText([client.clientName, client.country, client.countryCode, client.language, client.email, client.phone, client.primaryVehiclePlate, stays.map((stay)=>stay.searchText).join(' ')].join(' '));
+            return { ...client, stays, latestStay:stays[0] || {}, staysCount:stays.length, returning:stays.length > 1, hasBajt:stays.some((stay)=>stay.isBajt), hasPaymentToCheck:stays.some((stay)=>Number(stay.remainingPln || 0) > 0), countries:[...new Set(stays.map((stay)=>stay.countryCode || stay.country).filter(Boolean))], languages:[...new Set(stays.map((stay)=>stay.language).filter(Boolean))], searchText, isTest:stays.some((stay)=>stay.isTest) };
+          });
+        };
+        const clientsBaseList = () => {
+          if (clientsOnline.ok && Array.isArray(clientsOnline.clients)) return clientsOnline.clients;
+          return clientsFromCampSavedStays();
+        };
+        const clientMatchesFilter = (client, filter) => {
+          const stays = client.stays || [];
+          const today = dateStamp();
+          if (!filter || filter === 'all') return !client.isTest;
+          if (filter === 'everything') return true;
+          if (filter === 'tests') return client.isTest;
+          if (filter === 'active') return stays.some((stay)=>clientStayStatus(stay)[0] === 'active');
+          if (filter === 'arrival_today') return stays.some((stay)=>String(stay.arrivalDate || '') === today);
+          if (filter === 'departure_today') return stays.some((stay)=>String(stay.departureDate || '') === today);
+          if (filter === 'next7') return stays.some((stay)=>String(stay.arrivalDate || '') >= today && String(stay.arrivalDate || '') <= addDaysStamp(today, 7));
+          if (filter === 'bajt') return Boolean(client.hasBajt);
+          if (filter === 'payment') return Boolean(client.hasPaymentToCheck);
+          if (filter === 'returning') return Boolean(client.returning);
+          if (filter === 'archived') return stays.length && stays.every((stay)=>clientStayStatus(stay)[0] === 'finished');
+          if (filter === 'countries') return Boolean(client.country || client.countryCode || client.countries?.length);
+          if (filter === 'languages') return Boolean(client.language || client.languages?.length);
+          const text = normalizeText(stays.map((stay)=>[stay.stayType, stay.vehicleType, clientServiceText(stay)].join(' ')).join(' '));
+          if (filter === 'camping') return /camping|camper|kamper|caravan|przyczep|tent|namiot|van/.test(text);
+          if (filter === 'bungalow') return /bungalow|domek/.test(text);
+          if (filter === 'camper') return /camper|kamper/.test(text);
+          if (filter === 'caravan') return /caravan|przyczep/.test(text);
+          if (filter === 'tent') return /tent|namiot/.test(text);
+          if (filter === 'electricity') return /electric|prad|10a/.test(text);
+          if (filter === 'dog') return /dog|pies|hund|chien|perro/.test(text);
+          return true;
+        };
+        const filteredClientsOnline = () => {
+          const q = normalizeText(clientSearchValue);
+          return clientsBaseList()
+            .filter((client)=>clientMatchesFilter(client, activeClientFilter))
+            .filter((client)=>!q || normalizeText(client.searchText || '').includes(q))
+            .sort((a,b)=>String(b.latestStay?.arrivalDate || b.lastStayAt || '').localeCompare(String(a.latestStay?.arrivalDate || a.lastStayAt || '')));
+        };
+        const clientStatsFor = (clients) => {
+          const today = dateStamp();
+          const countries = new Set(clients.map((client)=>client.countryCode || client.country).filter(Boolean));
+          const languages = new Set(clients.flatMap((client)=>client.languages || [client.language]).filter(Boolean));
+          return {
+            clients: clients.length,
+            active: clients.filter((client)=>client.stays?.some((stay)=>clientStayStatus(stay)[0] === 'active')).length,
+            arrivalsToday: clients.filter((client)=>client.stays?.some((stay)=>String(stay.arrivalDate || '') === today)).length,
+            departuresToday: clients.filter((client)=>client.stays?.some((stay)=>String(stay.departureDate || '') === today)).length,
+            bajt: clients.filter((client)=>client.hasBajt).length,
+            countries: countries.size,
+            languages: languages.size,
+            paymentToCheck: clients.filter((client)=>client.hasPaymentToCheck).length,
+            returning: clients.filter((client)=>client.returning).length,
+          };
+        };
+        const findClientByStayId = (stayId) => clientsBaseList().find((client)=>client.stays?.some((stay)=>String(stay.id || stay.caseNumber) === String(stayId)));
+        const renderClientDetailModal = (client) => {
+          if (!client) return '';
+          const latest = client.latestStay || client.stays?.[0] || {};
+          const countryCode = client.countryCode || latest.countryCode || '';
+          const status = clientStayStatus(latest);
+          const people = `${Number(latest.adults || 0)} dor., ${Number(latest.children414 || 0)} dzieci 4–14, ${Number(latest.children04 || 0)} dzieci 0–4`;
+          const history = (client.stays || []).map((stay)=> {
+            const stayStatus = clientStayStatus(stay);
+            return `<article><span class="client-status client-status--${esc(stayStatus[0])}">${esc(stayStatus[1])}</span><strong>${esc(stay.arrivalDate || '-')} → ${esc(stay.departureDate || '-')}</strong><small>${esc(clientServiceText(stay))}</small><b>${esc(stay.isBajt ? 'BAJT' : stay.stayType || 'CAMP')}</b></article>`;
           }).join('');
-          return `<section class="cc-module cc-module--crm">
-            <header class="cc-module-head">
-              <div><span class="eyebrow">Klienci › Profil klienta</span><h2>Klienci</h2><p>CRM klienta: kontakt, historia pobytów, preferencje, notatki i szybkie akcje recepcji.</p></div>
-              <div class="module-actions"><button type="button" data-view-shortcut="reservations">+ Nowa rezerwacja</button><button type="button">Edytuj klienta</button></div>
-            </header>
-            <section class="crm-card crm-card--wide crm-offline-list"><h3>Lista klientów jak w offline</h3><div class="crm-tags">${customerFilters.map((filter)=>`<span>${esc(filter)}</span>`).join('')}</div><div class="crm-list-head"><span>Imię / nazwisko</span><span>Kraj</span><span>Telefon</span><span>Email</span><span>Ostatni / następny pobyt</span><span>Status</span><span>Notatki</span><span>Akcje</span></div><div class="crm-list-table">${customerRows || '<p class="module-empty">Brak klientów do wyświetlenia.</p>'}</div></section>
-            <div class="crm-layout">
-              <main class="crm-main">
-                <section class="crm-hero">
-                  <span class="crm-avatar">${esc(initials)}</span>
-                  <div><h3>${esc(client.name)}</h3><p>${esc(country.flag)} ${esc(country.label)} · ${esc(client.email || client.phone || 'brak kontaktu')}</p><div class="crm-badges"><span>Klient</span><span class="is-warn">Camping L/S</span><span>★ ${esc(avg)} / 5</span></div></div>
-                  <dl><div><dt>Pierwszy kontakt</dt><dd>${esc(formatDate(client.items[client.items.length - 1]?.created_at,true) || '-')}</dd></div><div><dt>Ostatni kontakt</dt><dd>${esc(formatDate(last.created_at,true) || '-')}</dd></div><div><dt>Liczba pobytów</dt><dd>${esc(client.items.length)}</dd></div><div><dt>Język</dt><dd>${esc(client.language || '-')}</dd></div></dl>
-                </section>
-                <section class="crm-card crm-card--stay"><h3>Następny pobyt</h3><article><div><span class="status-badge status-${esc(next.status || 'new')}">${esc(statusLabels[next.status] || next.status || 'Nowe')}</span><strong>${esc(next.stay_type || '-')}</strong><small>${esc(next.arrival_date || '-')} — ${esc(next.departure_date || '-')} (${esc(next.nights || 0)} nocy)</small></div><b>${esc(normalizeInquiryGuests(next).label)}</b></article><div class="inline-actions"><button type="button" data-view-shortcut="reservations">Zobacz szczegóły rezerwacji</button></div></section>
-                <section class="crm-card"><h3>Historia rezerwacji</h3><div class="crm-history-table">${client.items.slice(0,5).map((item)=>`<article><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><small>${esc(item.stay_type || '-')} · ${esc(normalizeInquiryGuests(item).label)}</small><b>${esc(languageCode(item).toUpperCase())}</b></article>`).join('')}</div></section>
-                <section class="crm-card"><h3>Notatki recepcji</h3><article class="crm-note"><strong>Recepcja</strong><span>${esc(formatDate(last.created_at,true))}</span><p>Klient preferuje spokojne miejsca, szybki kontakt mailowy i jasne warunki pobytu. Przy L/S pamiętać o zasadzie kolejności przyjazdu.</p></article></section>
-              </main>
-              <aside class="crm-side">
-                <section class="crm-card best-reply-card"><h3>Najlepsza odpowiedź</h3><p><strong>${esc(best.icon)} ${esc(best.title)}</strong></p><small>${esc(best.reason)}</small><button type="button" data-reply-template="${esc(best.id)}" data-id="${esc(next.id || '')}">Otwórz odpowiedź</button></section>
-                <section class="crm-card"><h3>Dane klienta</h3><dl class="crm-data"><div><dt>Email</dt><dd>${esc(client.email || '-')}</dd></div><div><dt>Telefon</dt><dd>${esc(client.phone || '-')}</dd></div><div><dt>Kraj</dt><dd>${esc(country.flag)} ${esc(country.label)}</dd></div><div><dt>Język</dt><dd>${esc(client.language || '-')}</dd></div></dl></section>
-                <section class="crm-card"><h3>Preferencje</h3><div class="crm-tags">${prefs.map((pref)=>`<span>${esc(pref)}</span>`).join('')}</div></section>
-                <section class="crm-card"><h3>Historia kontaktu</h3><ul class="crm-timeline">${client.items.slice(0,4).map((item)=>`<li><span></span><strong>${esc(formatDate(item.created_at,true))}</strong><small>${esc(statusLabels[item.status] || item.status)} · ${esc(item.stay_type || '-')}</small></li>`).join('')}</ul></section>
-              </aside>
-            </div>
+          const servicesHtml = (latest.services || []).filter((service)=>Number(service?.qty || 0) > 0).map((service)=>`<li><span>${esc(service.label || service.id || 'Usługa')} × ${esc(service.qty || 0)}</span><strong>${esc(money(Number(service.total || 0)))}</strong></li>`).join('') || '<li><span>Brak usług</span><strong>0 PLN</strong></li>';
+          return `<div class="client-detail-modal" data-client-modal>
+            <section class="client-detail-card">
+              <button type="button" class="client-detail-close" data-client-close aria-label="Zamknij">×</button>
+              <header class="client-detail-hero"><span class="crm-avatar">${esc(String(client.clientName || 'CC').slice(0,2).toUpperCase())}</span><div><span class="eyebrow">Klienci Online · karta klienta</span><h2>${esc(client.clientName || 'Bez imienia')}</h2><p>${esc(flagEmoji(countryCode))} ${esc(client.country || latest.country || '-')} · ${esc(client.language || latest.language || '-')} · ${esc(client.returning ? 'Powracający klient' : 'Pierwszy pobyt')}</p><div class="crm-badges"><span class="client-status client-status--${esc(status[0])}">${esc(status[1])}</span>${client.hasBajt ? '<span class="is-warn">BAJT</span>' : ''}${client.returning ? `<span>Powracający · ${esc(client.staysCount || client.stays?.length || 1)} pobyty</span>` : ''}</div></div></header>
+              <div class="client-detail-grid">
+                <section><h3>Kontakt</h3><dl><div><dt>Email</dt><dd>${esc(client.email || latest.email || '-')}</dd></div><div><dt>Telefon</dt><dd>${esc(client.phone || latest.phone || '-')}</dd></div></dl></section>
+                <section><h3>Pobyt</h3><dl><div><dt>Termin</dt><dd>${esc(latest.arrivalDate || '-')} → ${esc(latest.departureDate || '-')}</dd></div><div><dt>Kiedy</dt><dd>${esc(clientDaysInfo(latest))}</dd></div><div><dt>Noce</dt><dd>${esc(latest.nights || 0)}</dd></div><div><dt>Typ</dt><dd>${esc(latest.stayType || '-')}</dd></div><div><dt>Osoby</dt><dd>${esc(people)}</dd></div></dl></section>
+                <section><h3>Pojazd</h3><dl><div><dt>Typ</dt><dd>${esc(latest.vehicleType || '-')}</dd></div><div><dt>Rejestracja</dt><dd>${esc(latest.vehiclePlate || '-')}</dd></div><div><dt>Przyczepa</dt><dd>${esc(latest.trailerPlate || '-')}</dd></div></dl></section>
+                <section><h3>Usługi i płatność</h3><ul class="client-service-list">${servicesHtml}</ul><p><strong>${esc(money(clientStayAmount(latest)))}</strong> · ${esc(clientPaymentText(latest))}</p></section>
+                <section class="client-detail-wide"><h3>Karta pobytu</h3><div class="quick-action-grid"><button type="button" data-client-stay-card="${esc(latest.id || latest.caseNumber || '')}">Podgląd karty</button><button type="button" data-client-stay-print="${esc(latest.id || latest.caseNumber || '')}">Druk komplet</button><button type="button" data-client-stay-print-client="${esc(latest.id || latest.caseNumber || '')}">Druk kopia</button><button type="button" data-client-stay-print-office="${esc(latest.id || latest.caseNumber || '')}">Druk oryginał</button></div></section>
+                <section class="client-detail-wide"><h3>Historia pobytów</h3><div class="client-history-list">${history || '<p class="module-empty">Brak historii pobytów.</p>'}</div></section>
+                <section><h3>Timeline</h3><ul class="crm-timeline"><li><span></span><strong>${esc(formatDate(latest.createdAt || latest.created_at, true) || '-')}</strong><small>Zapis pobytu CAMP</small></li><li><span></span><strong>TODO</strong><small>Druk karty / notatki będą logowane po tabeli client_notes.</small></li></ul></section>
+                <section><h3>Notatki recepcji</h3><p>${esc(latest.notes || 'Brak zapisanych notatek w camp_stays.')}</p><textarea data-client-note rows="3" placeholder="Nowa notatka — zapis po tabeli client_notes"></textarea><button type="button" data-client-note-save="${esc(client.clientKey)}">Dodaj notatkę — TODO</button></section>
+                <section class="client-detail-wide"><h3>Akcje</h3><div class="quick-action-grid"><button type="button" disabled>Edytuj w CAMP — wkrótce</button><button type="button" disabled>Przedłuż pobyt / PP — wkrótce</button><button type="button" disabled>Utwórz rezerwację — wkrótce</button><button type="button" disabled>VIP / problematyczny — wkrótce</button></div></section>
+              </div>
+            </section>
+          </div>`;
+        };
+        const renderCustomersView = () => {
+          const clients = filteredClientsOnline();
+          if (selectedClientStayId && !selectedClientKey) {
+            const byStay = findClientByStayId(selectedClientStayId);
+            if (byStay) selectedClientKey = byStay.clientKey;
+          }
+          const selectedClient = selectedClientKey
+            ? clientsBaseList().find((client)=>client.clientKey === selectedClientKey) || findClientByStayId(selectedClientStayId)
+            : null;
+          const statsData = clientStatsFor(clients);
+          const migrationNotice = clientsOnline.loaded && !clientsOnline.ok && clientsOnline.migrationRequired
+            ? `<section class="client-migration-warning"><strong>Moduł Klienci wymaga uruchomienia migracji CAMP w Supabase.</strong><span>Plik: supabase/migrations/20260705121500_camp_stays_and_site_events.sql</span></section>`
+            : '';
+          const rows = clients.slice(0,120).map((client)=>{
+            const latest = client.latestStay || client.stays?.[0] || {};
+            const status = clientStayStatus(latest);
+            const code = client.countryCode || latest.countryCode || '';
+            const badges = [client.returning ? `Powracający · ${client.staysCount || client.stays?.length || 1}` : 'Nowy', client.hasBajt ? 'BAJT' : '', latest.stayType || '', client.hasPaymentToCheck ? 'Płatność do sprawdzenia' : ''].filter(Boolean);
+            return `<article class="client-online-row">
+              <div><strong>${esc(client.clientName || 'Bez imienia')}</strong><span>${esc(flagEmoji(code))} ${esc(client.country || latest.country || '-')} · ${esc(client.language || latest.language || '-')}</span><small>${esc(client.email || client.phone || latest.email || latest.phone || 'brak kontaktu')}</small></div>
+              <div><span class="client-status client-status--${esc(status[0])}">${esc(status[1])}</span><small>${esc(latest.arrivalDate || '-')} → ${esc(latest.departureDate || '-')} · ${esc(latest.nights || 0)} n.</small></div>
+              <div><strong>${esc(latest.stayType || '-')}</strong><small>${esc(Number(latest.totalGuests || 0) || [latest.adults, latest.children414, latest.children04].map(Number).reduce((a,b)=>a+b,0))} os. · ${esc(clientServiceText(latest))}</small></div>
+              <div><strong>${esc(latest.vehiclePlate || client.primaryVehiclePlate || '-')}</strong><small>${esc(latest.vehicleType || 'pojazd')} ${latest.trailerPlate ? `· przyczepa ${esc(latest.trailerPlate)}` : ''}</small></div>
+              <div><strong>${esc(clientPaymentText(latest))}</strong><small>${esc(money(clientStayAmount(latest)))}</small></div>
+              <div class="client-online-badges">${badges.map((badge)=>`<span>${esc(badge)}</span>`).join('')}</div>
+              <div class="client-online-actions"><button type="button" data-client-open="${esc(client.clientKey)}">Otwórz</button><button type="button" data-client-stay-card="${esc(latest.id || latest.caseNumber || '')}">Karta pobytu</button><button type="button" data-client-stay-print="${esc(latest.id || latest.caseNumber || '')}">Drukuj</button><button type="button" disabled>PP — wkrótce</button><button type="button" disabled>Edytuj w CAMP — wkrótce</button></div>
+            </article>`;
+          }).join('');
+          return `<section class="cc-module cc-module--clients-online">
+            <header class="cc-module-head"><div><span class="eyebrow">CC SYSTEM → Klienci</span><h2>Klienci Online</h2><p>Historia pobytów, dane kontaktowe, pojazdy, kraje i karty pobytu</p></div><div class="module-actions"><button type="button" data-view-shortcut="camp">+ Nowe przyjęcie CAMP</button><button type="button" data-client-clear>Wyczyść filtry</button></div></header>
+            ${migrationNotice}
+            <div class="client-kpis">${[
+              ['Klienci', statsData.clients],
+              ['Aktywne pobyty', statsData.active],
+              ['Przyjazdy dziś', statsData.arrivalsToday],
+              ['Wyjazdy dziś', statsData.departuresToday],
+              ['BAJT', statsData.bajt],
+              ['Kraje', statsData.countries],
+              ['Języki', statsData.languages],
+              ['Płatności do sprawdzenia', statsData.paymentToCheck],
+              ['Powracający', statsData.returning],
+            ].map(([label,value])=>`<article><strong>${esc(value)}</strong><span>${esc(label)}</span></article>`).join('')}</div>
+            <section class="client-toolbar"><label><span>🔎</span><input type="search" data-client-search value="${esc(clientSearchValue)}" placeholder="Szukaj klienta, kraju, rejestracji, telefonu…" autocomplete="off" /></label><button type="button" data-client-clear>Wyczyść</button><strong>${esc(clients.length)} wyników</strong></section>
+            <section class="client-filter-bar">${clientFilterDefs().map(([key,label])=>`<button type="button" data-client-filter="${esc(key)}" class="${activeClientFilter === key ? 'is-active':''}">${esc(label)}</button>`).join('')}</section>
+            <section class="client-online-list">${rows || `<p class="module-empty">${esc(clientsOnline.loaded && !clientsOnline.ok ? 'Moduł Klienci wymaga uruchomienia migracji CAMP w Supabase.' : 'Brak klientów dla wybranych filtrów.')}</p>`}</section>
+            <p class="module-empty">Dedykowane tabele clients/client_notes/client_flags są w przygotowaniu. Obecnie moduł działa bezpiecznie z camp_stays bez trwałej deduplikacji.</p>
+            ${renderClientDetailModal(selectedClient)}
           </section>`;
         };
         const renderReservationsView = () => {
@@ -2111,7 +2320,7 @@ const title = 'CC SYSTEM';
             ? `<div class="crm-warnings camp-validation-box"><strong>Uzupełnij przed zapisem:</strong>${campValidationErrors.map(([, message])=>`<p>${esc(message)}</p>`).join('')}</div>`
             : '';
           const saveSuccessHtml = lastCampSave
-            ? `<div class="camp-save-success"><strong>Zapisano pobyt ${esc(lastCampSave.caseNumber || lastCampSave.stayId || '')}</strong><span>ID: ${esc(lastCampSave.stayId || '-')}</span><p>Ten pobyt będzie widoczny w module Klienci po aktywacji Klienci Online.</p><div class="quick-action-grid"><button type="button" data-camp-card>Podgląd komplet</button><button type="button" data-camp-print>Drukuj komplet</button><button type="button" data-camp-print-client>Drukuj kopię klienta</button><button type="button" data-camp-print-office>Drukuj oryginał recepcji</button><button type="button" disabled>Otwórz w Klienci — wkrótce</button><button type="button" data-camp-reset>Nowy pobyt</button></div></div>`
+            ? `<div class="camp-save-success"><strong>Zapisano pobyt ${esc(lastCampSave.caseNumber || lastCampSave.stayId || '')}</strong><span>ID: ${esc(lastCampSave.stayId || '-')}</span><p>Ten pobyt jest dostępny w module Klienci Online na podstawie camp_stays.</p><div class="quick-action-grid"><button type="button" data-camp-card>Podgląd komplet</button><button type="button" data-camp-print>Drukuj komplet</button><button type="button" data-camp-print-client>Drukuj kopię klienta</button><button type="button" data-camp-print-office>Drukuj oryginał recepcji</button><button type="button" data-client-open-stay="${esc(lastCampSave.stayId || '')}">Otwórz w Klienci</button><button type="button" data-camp-reset>Nowy pobyt</button></div></div>`
             : '';
           const recentStayHtml = recentStays.length ? recentStays.map((stay)=>{
             const rawStay = stay?.raw_payload_json && typeof stay.raw_payload_json === 'object' ? stay.raw_payload_json : {};
@@ -2290,7 +2499,7 @@ const title = 'CC SYSTEM';
         const roadmapRows = [
           { offline:'CAMP', online:'CAMP / Nowe przyjęcie', status:'Aktywne', priority:1, notes:'Kalkulator recepcji, BAJT, karta pobytu i zapis do camp_stays po migracji.' },
           { offline:'Karty pobytu / drukowanie', online:'Drukowanie / karta pobytu', status:'W budowie', priority:2, notes:'Jest fundament wydruku. Docelowo pełna karta jak offline, ale w czystszym układzie.' },
-          { offline:'Klienci', online:'Klienci Online', status:'W budowie', priority:3, notes:'Następny priorytet po stabilizacji CAMP: osobna tabela klientów, notatki, historia pobytów i przejście z camp_stays.' },
+          { offline:'Klienci', online:'Klienci Online', status:'Aktywne', priority:3, notes:'Aktywny moduł z camp_stays: wyszukiwarka, filtry, karta klienta i historia pobytów. Dedykowane tabele klientów/notatek są kolejnym krokiem.' },
           { offline:'PP / przedłużenia', online:'Przedłuż pobyt', status:'Placeholder', priority:4, notes:'Gotowy schemat procesu bez zapisu. Wymaga tabeli aktywnych pobytów.' },
           { offline:'Kalendarz', online:'Kalendarz pobytów', status:'W budowie', priority:5, notes:'Widok planszy i zasobów jest przygotowany; drag/drop i konflikty dopiero po tabelach rezerwacji.' },
           { offline:'campk', online:'Plan campu / miejsca', status:'Do analizy', priority:5, notes:'Offline ma mapę miejsc i statusy. Online powinien używać zasobów, nie statycznej grafiki 1:1.' },
@@ -2744,11 +2953,12 @@ const title = 'CC SYSTEM';
           if (!silent && appStatus) appStatus.textContent = 'Ładowanie…';
           if (connectionStatus) connectionStatus.textContent = silent ? 'API sync' : 'API ...';
           try {
-            const [result, healthResult, campResult, analyticsResult] = await Promise.all([
+            const [result, healthResult, campResult, analyticsResult, clientsResult] = await Promise.all([
               request('/api/inbox/list'),
               request('/api/inbox/health').catch((error)=>({ ok:false, env:{}, tableCheck:{ ok:false, error:error.message } })),
               request('/api/camp/stays').catch((error)=>({ ok:false, stays:[], migrationRequired:true, error:error.message || 'CAMP_STAYS_UNAVAILABLE' })),
               request('/api/analytics/status').catch((error)=>({ ok:false, migrationRequired:true, eventCount:0, recentEvents:[], error:error.message || 'SITE_EVENTS_UNAVAILABLE' })),
+              request('/api/clients/list?filter=everything&limit=1000').catch((error)=>({ ok:false, clients:[], stats:{}, migrationRequired:true, error:error.message || 'CLIENTS_UNAVAILABLE' })),
             ]);
             const nextInquiries = result.inquiries || [];
             const newItems = previousIds.size
@@ -2758,6 +2968,15 @@ const title = 'CC SYSTEM';
             health = healthResult;
             campStorageStatus = { ok:Boolean(campResult?.ok), loaded:true, migrationRequired:Boolean(campResult?.migrationRequired), error:campResult?.error || campResult?.reason || campResult?.code || '' };
             if (campResult?.ok && Array.isArray(campResult.stays)) campSavedStays = campResult.stays;
+            clientsOnline = {
+              ok:Boolean(clientsResult?.ok),
+              loaded:true,
+              migrationRequired:Boolean(clientsResult?.migrationRequired),
+              error:clientsResult?.error || clientsResult?.reason || clientsResult?.code || '',
+              clients:Array.isArray(clientsResult?.clients) ? clientsResult.clients : [],
+              stats:clientsResult?.stats || {},
+              source:clientsResult?.source || 'camp_stays',
+            };
             analyticsStorageStatus = {
               ok:Boolean(analyticsResult?.ok),
               loaded:true,
@@ -3018,6 +3237,65 @@ const title = 'CC SYSTEM';
           win.document.close();
           if (printNow) win.setTimeout(() => win.print(), 250);
         };
+        const findClientStay = (stayId) => {
+          const key = String(stayId || '');
+          if (!key) return null;
+          for (const client of clientsBaseList()) {
+            const stay = (client.stays || []).find((entry)=>String(entry.id || entry.caseNumber) === key);
+            if (stay) return stay;
+          }
+          return null;
+        };
+        const openClientStayCard = (stayId, variant = 'complete', printNow = false) => {
+          const rawStay = campSavedStays.find((entry)=>String(entry.id || entry.case_number || entry.caseNumber) === String(stayId));
+          if (rawStay) {
+            openSavedCampCard(stayId, variant, printNow);
+            return;
+          }
+          const stay = findClientStay(stayId);
+          if (!stay) {
+            showToast('Nie znaleziono pobytu klienta do podglądu.', 'error');
+            return;
+          }
+          const win = window.open('', '_blank', 'noopener,noreferrer,width=980,height=820');
+          if (!win) {
+            showToast('Przeglądarka zablokowała podgląd. Zezwól na popup lub użyj druku.', 'error');
+            return;
+          }
+          const payload = {
+            clientName: stay.clientName,
+            country: stay.country,
+            countryCode: stay.countryCode,
+            countryFlag: flagEmoji(String(stay.countryCode || '').toUpperCase()),
+            language: stay.language,
+            phone: stay.phone,
+            email: stay.email,
+            documentNumber: stay.documentNumber,
+            arrivalDate: stay.arrivalDate,
+            departureDate: stay.departureDate,
+            nights: stay.nights,
+            arrivalTime: stay.arrivalTime,
+            adults: stay.adults,
+            children414: stay.children414,
+            children04: stay.children04,
+            vehicleType: stay.vehicleType,
+            vehiclePlate: stay.vehiclePlate,
+            trailerPlate: stay.trailerPlate,
+            vehicleNotes: stay.vehicleNotes,
+            paymentMethod: stay.paymentMethod,
+            isBajt: Boolean(stay.isBajt),
+            notes: stay.notes,
+          };
+          win.document.open();
+          win.document.write(campPrintableDocument({
+            payload,
+            totals: { lines: stay.services || [], totalPln: clientStayAmount(stay), paidPln: Number(stay.paidPln || 0), remainingPln: Number(stay.remainingPln || 0) },
+            variant,
+            countryFlag: payload.countryFlag,
+          }));
+          win.document.close();
+          if (printNow) win.setTimeout(() => win.print(), 250);
+        };
 
         loginForm?.addEventListener('submit', async (event) => {
           event.preventDefault();
@@ -3118,6 +3396,19 @@ const title = 'CC SYSTEM';
         list?.addEventListener('input',(event)=>{
           const target = event.target;
           if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)) return;
+          if (target.matches('[data-client-search]')) {
+            clientSearchValue = target.value;
+            window.clearTimeout(clientSearchTimer);
+            clientSearchTimer = window.setTimeout(() => {
+              render();
+              const nextInput = list?.querySelector('[data-client-search]');
+              if (nextInput instanceof HTMLInputElement) {
+                nextInput.focus();
+                nextInput.setSelectionRange(nextInput.value.length, nextInput.value.length);
+              }
+            }, 320);
+            return;
+          }
           const field = target.dataset.campField;
           if (!field) return;
           updateCampField(field, target instanceof HTMLInputElement && target.type === 'checkbox' ? target.checked : target.value, { commit:false });
@@ -3205,6 +3496,74 @@ const title = 'CC SYSTEM';
             resetCampState();
             render();
             showToast('Formularz CAMP wyczyszczony.', 'info');
+            return;
+          }
+          const clientOpenStay = target.closest('[data-client-open-stay]');
+          if (clientOpenStay instanceof HTMLElement) {
+            selectedClientStayId = clientOpenStay.dataset.clientOpenStay || '';
+            const client = findClientByStayId(selectedClientStayId);
+            selectedClientKey = client?.clientKey || '';
+            clientSearchValue = selectedClientStayId || '';
+            activeClientFilter = 'everything';
+            activeView = 'customers';
+            render();
+            void load({ silent:true, reason:'manual' });
+            return;
+          }
+          const clientOpen = target.closest('[data-client-open]');
+          if (clientOpen instanceof HTMLElement) {
+            selectedClientKey = clientOpen.dataset.clientOpen || '';
+            selectedClientStayId = '';
+            render();
+            return;
+          }
+          if (target.closest('[data-client-close]')) {
+            selectedClientKey = '';
+            selectedClientStayId = '';
+            render();
+            return;
+          }
+          const clientFilter = target.closest('[data-client-filter]');
+          if (clientFilter instanceof HTMLElement) {
+            activeClientFilter = clientFilter.dataset.clientFilter || 'all';
+            render();
+            return;
+          }
+          if (target.closest('[data-client-clear]')) {
+            activeClientFilter = 'all';
+            clientSearchValue = '';
+            selectedClientKey = '';
+            selectedClientStayId = '';
+            render();
+            return;
+          }
+          const clientStayCard = target.closest('[data-client-stay-card]');
+          if (clientStayCard instanceof HTMLElement) {
+            openClientStayCard(clientStayCard.dataset.clientStayCard || '', 'complete', false);
+            return;
+          }
+          const clientStayPrint = target.closest('[data-client-stay-print]');
+          if (clientStayPrint instanceof HTMLElement) {
+            openClientStayCard(clientStayPrint.dataset.clientStayPrint || '', 'complete', true);
+            return;
+          }
+          const clientStayPrintClient = target.closest('[data-client-stay-print-client]');
+          if (clientStayPrintClient instanceof HTMLElement) {
+            openClientStayCard(clientStayPrintClient.dataset.clientStayPrintClient || '', 'client', true);
+            return;
+          }
+          const clientStayPrintOffice = target.closest('[data-client-stay-print-office]');
+          if (clientStayPrintOffice instanceof HTMLElement) {
+            openClientStayCard(clientStayPrintOffice.dataset.clientStayPrintOffice || '', 'office', true);
+            return;
+          }
+          const clientNoteSave = target.closest('[data-client-note-save]');
+          if (clientNoteSave instanceof HTMLElement) {
+            const noteField = list?.querySelector('[data-client-note]');
+            const note = noteField instanceof HTMLTextAreaElement ? noteField.value.trim() : '';
+            void request('/api/clients/note', { method:'POST', body:JSON.stringify({ clientKey:clientNoteSave.dataset.clientNoteSave || '', note }) })
+              .then((result)=>showToast(result.saved ? 'Notatka zapisana.' : (result.reason || 'Notatki Klienci Online są jeszcze TODO.'), result.saved ? 'success' : 'info'))
+              .catch((error)=>showToast(error.message || 'Nie udało się obsłużyć notatki.', 'error'));
             return;
           }
           if (target.closest('[data-camp-card]')) {
@@ -4608,6 +4967,33 @@ const title = 'CC SYSTEM';
       width: 100%;
     }
 
+    .cc-system-app .client-kpis,
+    .cc-system-app .client-toolbar,
+    .cc-system-app .client-online-row,
+    .cc-system-app .client-detail-grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    .cc-system-app .client-online-actions {
+      justify-content: stretch;
+    }
+
+    .cc-system-app .client-online-actions button {
+      width: 100%;
+    }
+
+    .cc-system-app .client-detail-modal {
+      padding: 10px;
+      align-items: start;
+    }
+
+    .cc-system-app .client-detail-card {
+      width: 100%;
+      max-height: 94vh;
+      padding: 14px;
+      border-radius: 20px;
+    }
+
     .cc-system-app .reply-modal__card,
     .cc-system-app .modal-card {
       max-height: min(86vh, 720px);
@@ -4877,6 +5263,278 @@ const title = 'CC SYSTEM';
     background: rgba(255,255,255,.045);
     color: #ecfff3;
     font-weight: 800;
+  }
+
+  .cc-system-app .cc-module--clients-online {
+    position: relative;
+  }
+
+  .cc-system-app .client-migration-warning {
+    display: grid;
+    gap: 6px;
+    margin: 12px 0;
+    padding: 14px 16px;
+    border: 1px solid rgba(244,178,79,.38);
+    border-radius: 18px;
+    background: rgba(244,178,79,.12);
+    color: #fff4d4;
+  }
+
+  .cc-system-app .client-kpis {
+    display: grid;
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    gap: 10px;
+    margin: 14px 0;
+  }
+
+  .cc-system-app .client-kpis article,
+  .cc-system-app .client-toolbar,
+  .cc-system-app .client-online-row,
+  .cc-system-app .client-detail-card {
+    border: 1px solid rgba(143,224,180,.16);
+    background: linear-gradient(135deg, rgba(82,225,143,.08), rgba(3,18,15,.82));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  }
+
+  .cc-system-app .client-kpis article {
+    min-height: 78px;
+    display: grid;
+    align-content: center;
+    gap: 4px;
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .cc-system-app .client-kpis strong {
+    color: #fff;
+    font-size: 1.45rem;
+    font-weight: 950;
+  }
+
+  .cc-system-app .client-kpis span,
+  .cc-system-app .client-online-row small,
+  .cc-system-app .client-online-badges span {
+    color: rgba(232,250,240,.68);
+  }
+
+  .cc-system-app .client-toolbar {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) auto auto;
+    gap: 10px;
+    align-items: center;
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .cc-system-app .client-toolbar label {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    min-height: 46px;
+    padding: 0 12px;
+    border: 1px solid rgba(143,224,180,.18);
+    border-radius: 15px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .cc-system-app .client-toolbar input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    font-weight: 800;
+  }
+
+  .cc-system-app .client-toolbar button,
+  .cc-system-app .client-filter-bar button,
+  .cc-system-app .client-online-actions button,
+  .cc-system-app .client-detail-card button {
+    border: 1px solid rgba(143,224,180,.22);
+    border-radius: 12px;
+    background: rgba(255,255,255,.05);
+    color: #effff4;
+    font-weight: 850;
+  }
+
+  .cc-system-app .client-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .cc-system-app .client-filter-bar button {
+    min-height: 36px;
+    padding: 0 12px;
+  }
+
+  .cc-system-app .client-filter-bar .is-active,
+  .cc-system-app .client-online-actions button:not(:disabled):hover,
+  .cc-system-app .client-toolbar button:hover {
+    border-color: rgba(82,225,143,.55);
+    background: linear-gradient(135deg, rgba(45,189,111,.78), rgba(11,83,54,.78));
+  }
+
+  .cc-system-app .client-online-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .cc-system-app .client-online-row {
+    display: grid;
+    grid-template-columns: 1.25fr .9fr 1.1fr .75fr .85fr .75fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .cc-system-app .client-online-row > div {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  .cc-system-app .client-online-row strong,
+  .cc-system-app .client-online-row span,
+  .cc-system-app .client-online-row small {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cc-system-app .client-status,
+  .cc-system-app .client-online-badges span {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    min-height: 26px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(143,224,180,.22);
+    background: rgba(255,255,255,.06);
+    color: #effff4;
+    font-size: .72rem;
+    font-weight: 900;
+  }
+
+  .cc-system-app .client-status--active,
+  .cc-system-app .client-status--arrival_today {
+    border-color: rgba(82,225,143,.45);
+    background: rgba(45,189,111,.24);
+  }
+
+  .cc-system-app .client-status--departure_today,
+  .cc-system-app .client-status--future {
+    border-color: rgba(96,165,250,.45);
+    background: rgba(96,165,250,.18);
+  }
+
+  .cc-system-app .client-status--finished {
+    border-color: rgba(148,163,184,.35);
+    background: rgba(148,163,184,.12);
+  }
+
+  .cc-system-app .client-online-actions {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 7px;
+  }
+
+  .cc-system-app .client-online-actions button {
+    min-height: 34px;
+    padding: 0 10px;
+  }
+
+  .cc-system-app .client-detail-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 220;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(0,0,0,.62);
+    backdrop-filter: blur(12px);
+  }
+
+  .cc-system-app .client-detail-card {
+    position: relative;
+    width: min(1320px, 96vw);
+    max-height: min(90vh, 980px);
+    overflow: auto;
+    padding: 20px;
+    border-radius: 26px;
+  }
+
+  .cc-system-app .client-detail-close {
+    position: sticky;
+    top: 0;
+    float: right;
+    z-index: 2;
+    min-width: 42px;
+    min-height: 42px;
+    border-radius: 999px !important;
+  }
+
+  .cc-system-app .client-detail-hero {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .cc-system-app .client-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .cc-system-app .client-detail-grid section {
+    padding: 14px;
+    border: 1px solid rgba(143,224,180,.14);
+    border-radius: 18px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .cc-system-app .client-detail-wide {
+    grid-column: 1 / -1;
+  }
+
+  .cc-system-app .client-detail-grid dl,
+  .cc-system-app .client-service-list,
+  .cc-system-app .client-history-list {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .cc-system-app .client-detail-grid dt {
+    color: rgba(232,250,240,.58);
+    font-size: .72rem;
+    text-transform: uppercase;
+  }
+
+  .cc-system-app .client-detail-grid dd {
+    margin: 0;
+    color: #fff;
+    font-weight: 850;
+  }
+
+  .cc-system-app .client-service-list li,
+  .cc-system-app .client-history-list article {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    padding: 9px 0;
+    border-top: 1px solid rgba(143,224,180,.1);
   }
 
   .cc-system-app .reservation-context-tabs {
