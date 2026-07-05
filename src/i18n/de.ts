@@ -137,7 +137,7 @@ export const de = {
       transit:
         'Ins Zentrum kommen Sie am bequemsten mit der Straßenbahn: Die Haltestelle ist ca. 40 m vom Tor entfernt, bis Stary Kleparz / Zentrum sind es ca. 9 Haltestellen und rund 14 Minuten Fahrt.',
       bungalows:
-        'Bungalows haben separate Verfügbarkeit. Es gibt nur 2-, 3- und 4-Personen-Bungalows. Preise: 200/220 PLN, 300/350 PLN und 400/450 PLN je nach Saison.',
+        'Bungalows haben separate Verfügbarkeit. Es gibt nur 2-, 3- und 4-Personen-Bungalows. Preise: 200/220 PLN, 3-Personen ab 250 PLN und 400/450 PLN je nach Saison.',
       dog:
         'Ja, Hunde kosten 0 PLN. Bitte räumen Sie nach dem Hund auf und halten Sie ihn auf dem Campingplatz unter Kontrolle.',
       campingBooking:

@@ -51,6 +51,34 @@ const cleanPlate = (value) =>
 
 const safeArray = (value) => Array.isArray(value) ? value : [];
 const safeObject = (value) => value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+const analyticsPrivateKeyPattern = /(email|e-mail|mail|phone|telefon|tel|name|nazw|client|klient|message|wiadom|document|passport|dowod|dowód|plate|registration|rejestr|vehicle|pojazd|token|secret|cookie|ip|address|adres)/i;
+
+const sanitizeAnalyticsMetadata = (value, depth = 0) => {
+  if (depth > 2) return {};
+  if (Array.isArray(value)) {
+    return value
+      .slice(0, 20)
+      .map((entry) => (entry && typeof entry === 'object'
+        ? sanitizeAnalyticsMetadata(entry, depth + 1)
+        : oneLine(entry, 160)))
+      .filter((entry) => !(entry && typeof entry === 'object' && Object.keys(entry).length === 0));
+  }
+  if (!safeObject(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => !analyticsPrivateKeyPattern.test(key))
+      .slice(0, 40)
+      .map(([key, entry]) => {
+        if (entry === null || entry === undefined) return [oneLine(key, 80), null];
+        if (typeof entry === 'number') return [oneLine(key, 80), Number.isFinite(entry) ? entry : 0];
+        if (typeof entry === 'boolean') return [oneLine(key, 80), entry];
+        if (Array.isArray(entry) || typeof entry === 'object') {
+          return [oneLine(key, 80), sanitizeAnalyticsMetadata(entry, depth + 1)];
+        }
+        return [oneLine(key, 80), oneLine(entry, 240)];
+      }),
+  );
+};
 
 const makeCaseNumber = () => {
   const now = new Date();
@@ -151,6 +179,21 @@ export const listCampStays = async () => {
   return Array.isArray(body) ? body : [];
 };
 
+export const getSiteEventsStatus = async () => {
+  const { body, status } = await supabaseRequest(
+    `${SITE_EVENTS_TABLE}?select=id,event_type,locale,country_guess,created_at&order=created_at.desc&limit=200`,
+    { method: 'GET' },
+  );
+  const events = Array.isArray(body) ? body : [];
+  return {
+    ok: true,
+    status,
+    table: SITE_EVENTS_TABLE,
+    eventCount: events.length,
+    recentEvents: events.slice(0, 20),
+  };
+};
+
 export const saveCampStay = async (payload = {}) => {
   const validation = validateCampStay(payload);
   if (!validation.ok) {
@@ -198,7 +241,7 @@ export const saveSiteEvent = async (payload = {}) => {
     });
   }
 
-  const metadata = safeObject(payload.metadata || payload.metadata_json);
+  const metadata = sanitizeAnalyticsMetadata(payload.metadata || payload.metadata_json);
   const metadataText = JSON.stringify(metadata).slice(0, 5000);
   const record = {
     event_type: eventType,

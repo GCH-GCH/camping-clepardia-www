@@ -36,7 +36,7 @@ export const pricingConfig = {
       id: 'bungalow-3',
       label: 'Domek 3-os.',
       category: 'bungalow',
-      seasonalPrices: { low: 300, high: 350 },
+      seasonalPrices: { low: 250, high: 250 },
     },
     {
       id: 'bungalow-4',

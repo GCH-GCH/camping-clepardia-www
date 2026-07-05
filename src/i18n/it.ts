@@ -137,7 +137,7 @@ export const it = {
       transit:
         'Il modo più comodo per raggiungere il centro è il tram: la fermata è a circa 40 m dal cancello, Stary Kleparz / centro dista circa 9 fermate e il viaggio dura circa 14 minuti.',
       bungalows:
-        'I bungalow hanno disponibilità separata. Sono disponibili solo bungalow da 2, 3 e 4 persone. Prezzi: 200/220 PLN, 300/350 PLN e 400/450 PLN secondo la stagione.',
+        'I bungalow hanno disponibilità separata. Sono disponibili solo bungalow da 2, 3 e 4 persone. Prezzi: 200/220 PLN, 3 persone da 250 PLN e 400/450 PLN secondo la stagione.',
       dog:
         'Sì, il cane costa 0 PLN. Ti chiediamo di raccogliere e tenere il cane sotto controllo nel campeggio.',
       campingBooking:

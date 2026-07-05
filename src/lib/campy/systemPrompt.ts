@@ -43,7 +43,7 @@ export const campyKnowledge = {
     electricity: addonPrice('electricity'),
     dog: addonPrice('dog'),
     bungalow2: `${bungalowPrice('bungalow-2').low} PLN niski sezon / ${bungalowPrice('bungalow-2').high} PLN wysoki sezon`,
-    bungalow3: `${bungalowPrice('bungalow-3').low} PLN niski sezon / ${bungalowPrice('bungalow-3').high} PLN wysoki sezon`,
+    bungalow3: `od ${bungalowPrice('bungalow-3').low} PLN / noc`,
     bungalow4: `${bungalowPrice('bungalow-4').low} PLN niski sezon / ${bungalowPrice('bungalow-4').high} PLN wysoki sezon`,
     currencies: `${currencyEstimateConfig.shortDisclaimer} Przykład 180 PLN to ${formatCurrencyEstimates(180)}.`,
   },

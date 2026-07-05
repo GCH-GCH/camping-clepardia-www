@@ -12,6 +12,12 @@ import {
   saveCampStay,
 } from '../_lib/camp.js';
 
+const isCampMigrationError = (payload = {}) => {
+  const text = `${payload.error || ''} ${payload.details || ''}`.toLowerCase();
+  return payload.code === 'SUPABASE_QUERY_FAILED'
+    && (/camp_stays/.test(text) || /relation .*does not exist/.test(text) || /schema cache/.test(text));
+};
+
 export default async function handler(req, res) {
   try {
     if (req.method !== 'GET' && req.method !== 'POST') {
@@ -44,12 +50,16 @@ export default async function handler(req, res) {
   } catch (error) {
     logInboxError('camp-stays', error, { method: req.method || '' });
     const diagnostic = serializeInboxError(error);
+    const migrationRequired = isCampMigrationError(diagnostic.payload);
+    const migrationMessage = 'Migracja CAMP nie została jeszcze uruchomiona w Supabase.';
     return sendJson(res, diagnostic.status, {
       ...diagnostic.payload,
       ok: false,
       saved: false,
       table: 'camp_stays',
-      migrationRequired: diagnostic.payload.code === 'SUPABASE_QUERY_FAILED',
+      migrationRequired,
+      reason: migrationRequired ? migrationMessage : diagnostic.payload.error,
+      error: migrationRequired ? migrationMessage : diagnostic.payload.error,
     });
   }
 }
