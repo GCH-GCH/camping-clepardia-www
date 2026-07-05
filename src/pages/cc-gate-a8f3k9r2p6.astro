@@ -112,6 +112,7 @@ const title = 'CC SYSTEM';
               <span class="connection-pill connection-pill--mini" data-auto-refresh-status>Auto 25 s</span>
               <span class="connection-pill connection-pill--mini" data-resend-status>Resend</span>
               <span class="connection-pill connection-pill--mini" data-supabase-status>Supabase</span>
+              <span class="connection-pill connection-pill--mini" data-mail-center-status>Mail Center</span>
               <span class="connection-pill weather-pill">☀️ 23°C</span>
               <span class="notification-pill" aria-label="Powiadomienia">8</span>
               <button type="button" class="topbar-action" data-view-shortcut="camp">Nowe przyjęcie</button>
@@ -234,6 +235,7 @@ const title = 'CC SYSTEM';
         const lastRefresh = document.querySelector('[data-last-refresh]');
         const resendStatus = document.querySelector('[data-resend-status]');
         const supabaseStatus = document.querySelector('[data-supabase-status]');
+        const mailCenterStatus = document.querySelector('[data-mail-center-status]');
         const autoRefreshStatus = document.querySelector('[data-auto-refresh-status]');
         const autoRefreshToggle = document.querySelector('[data-auto-refresh-toggle]');
         const panelToast = document.querySelector('[data-panel-toast]');
@@ -782,6 +784,12 @@ const title = 'CC SYSTEM';
             supabaseStatus.classList.toggle('is-ok', ok);
             supabaseStatus.classList.toggle('is-warn', !ok && Boolean(health));
           }
+          if (mailCenterStatus) {
+            const ok = Boolean(health?.mailCenter?.ok);
+            mailCenterStatus.textContent = ok ? 'Mail Center OK' : health ? 'Mail Center: migracja' : 'Mail Center';
+            mailCenterStatus.classList.toggle('is-ok', ok);
+            mailCenterStatus.classList.toggle('is-warn', !ok && Boolean(health));
+          }
           if (autoRefreshStatus) autoRefreshStatus.textContent = autoRefreshPaused ? 'Auto pauza' : 'Auto 25s';
           if (autoRefreshToggle instanceof HTMLButtonElement) autoRefreshToggle.textContent = autoRefreshPaused ? 'Wznów auto-refresh' : 'Pauza auto-refresh';
         };
@@ -1251,7 +1259,12 @@ const title = 'CC SYSTEM';
             closeReplyModal();
             render();
             void load({ silent:true, reason:'reply-sent' });
-            showToast(result.delivered ? 'Odpowiedź wysłana z CC SYSTEM.' : 'Wysyłka nie została potwierdzona.', result.delivered ? 'success' : 'error');
+            const sentMessage = result.delivered && (result.tablesReady || !result.fallbackReason)
+              ? 'Odpowiedź wysłana z CC SYSTEM.'
+              : result.delivered
+                ? 'Odpowiedź wysłana. Historia wiadomości wymaga migracji Supabase.'
+                : 'Wysyłka nie została potwierdzona.';
+            showToast(sentMessage, result.delivered ? 'success' : 'error');
           } catch (error) {
             trackLocalAction(payload.item.id, `Nieudana wysyłka z CC SYSTEM: ${error.message || 'błąd'}`);
             void logReplyActivity({
@@ -1287,7 +1300,7 @@ const title = 'CC SYSTEM';
               action: 'saved_draft',
               meta: { templateId: payload.template.id, source: result.source, saved: result.saved },
             });
-            showToast(result.saved ? 'Szkic zapisany w CC SYSTEM.' : 'Szkic nie ma jeszcze tabeli docelowej — zachowano historię lokalną panelu.', result.saved ? 'success' : 'info');
+            showToast(result.saved ? 'Szkic zapisany w CC SYSTEM.' : 'Historia wiadomości wymaga migracji Supabase — szkic pozostaje w fallbacku panelu.', result.saved ? 'success' : 'info');
           } catch (error) {
             trackLocalAction(payload.item.id, `Szkic lokalny po błędzie API: ${payload.template.title}`);
             showToast(error.message || 'Nie udało się zapisać szkicu. Treść nadal jest w modalu.', 'error');
@@ -1928,6 +1941,7 @@ const title = 'CC SYSTEM';
         const renderSystemStrip = () => {
           if (!systemStrip) return;
           const env = health?.env || {};
+          const mailCenter = health?.mailCenter || {};
           const real = realItems();
           const mailOk = inquiries.some((item)=>item.mail_provider === 'resend' && item.mail_delivered);
           const mailFallback = inquiries.some((item)=>item.mail_provider === 'fallback');
@@ -1941,6 +1955,9 @@ const title = 'CC SYSTEM';
             ['Archiwum', archivedItems().length],
             ['Dostarczenie maila', resendStatus],
             ['Supabase', health?.tableCheck?.ok ? 'OK' : health ? 'błąd' : 'sprawdzanie'],
+            ['Tabele Mail Center', mailCenter.ok ? 'aktywne' : health ? 'wymagają migracji' : 'sprawdzanie'],
+            ['Historia wiadomości', mailCenter.historyActive ? 'aktywna' : health ? 'fallback / migracja' : 'sprawdzanie'],
+            ['Szkice', mailCenter.draftsActive ? 'aktywne' : health ? 'fallback / migracja' : 'sprawdzanie'],
             ['Kanały zapasowe', `Web3Forms ${env.web3FormsKeyPresent ? 'ENV' : 'brak'} · FormSubmit ${env.formSubmitToPresent ? 'ENV' : 'brak'}`],
           ].map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('');
         };
@@ -1992,11 +2009,20 @@ const title = 'CC SYSTEM';
         };
         const renderSettingsView = () => {
           const env = health?.env || {};
+          const mailCenter = health?.mailCenter || {};
+          const missingMailCenterTables = Object.entries(mailCenter.tables || {})
+            .filter(([, table])=>!table?.ok)
+            .map(([name])=>name)
+            .join(', ') || '—';
           const rows = [
             ['Email recepcji','clepardia@gmail.com'],
             ['Nadawca Resend', env.reservationFromPresent ? 'skonfigurowany w Vercel' : 'brak ENV'],
             ['RESEND_API_KEY', env.resendKeyPresent ? `obecny, długość ${env.resendKeyLength}` : 'brak'],
             ['Supabase', env.supabaseUrlPresent && env.serviceRolePresent ? `ENV OK · ${env.supabaseHost || ''}` : 'ENV niepełny'],
+            ['Tabele Mail Center', mailCenter.ok ? 'aktywne' : health ? 'wymagają migracji Supabase' : 'sprawdzanie'],
+            ['Historia wiadomości', mailCenter.historyActive ? 'aktywna' : 'fallback: reservation_inquiries / wymagana migracja'],
+            ['Szkice', mailCenter.draftsActive ? 'aktywne' : 'fallback: wymagana migracja'],
+            ['Brakujące tabele Mail Center', missingMailCenterTables],
             ['Link wycieczek','https://qr.codes/vksKBT'],
             ['Telefon','+48 795 294 486'],
             ['Recepcja','9:00–21:00'],

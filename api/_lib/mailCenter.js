@@ -1081,6 +1081,36 @@ export const addMailCenterNote = async (payload = {}) => {
   return { ok: true, saved: true, tablesReady: false, fallbackReason: 'SAVED_IN_RESERVATION_NOTES', inquiry: updated };
 };
 
+export const checkMailCenterTables = async () => {
+  const requiredTables = [
+    MAIL_THREADS_TABLE,
+    MAIL_MESSAGES_TABLE,
+    REPLY_DRAFTS_TABLE,
+    MAIL_ACTIVITY_TABLE,
+  ];
+  const tables = {};
+  for (const table of requiredTables) {
+    const result = await safeSupabase(`${table}?select=id&limit=1`, { method: 'GET' });
+    tables[table] = {
+      ok: Boolean(result.ok),
+      status: result.status ?? null,
+      missing: Boolean(!result.ok && result.tableMissing),
+      error: result.ok ? null : oneLine(result.error?.message || result.error?.code || 'TABLE_CHECK_FAILED', 240),
+    };
+  }
+  const historyActive = Boolean(tables[MAIL_THREADS_TABLE]?.ok && tables[MAIL_MESSAGES_TABLE]?.ok && tables[MAIL_ACTIVITY_TABLE]?.ok);
+  const draftsActive = Boolean(tables[REPLY_DRAFTS_TABLE]?.ok);
+  const ok = requiredTables.every((table) => tables[table]?.ok);
+  return {
+    ok,
+    historyActive,
+    draftsActive,
+    migrationRequired: !ok,
+    message: ok ? 'Tabele Mail Center aktywne.' : 'Historia wiadomości wymaga migracji Supabase.',
+    tables,
+  };
+};
+
 export const mailCenterDiagnostics = () => ({
   resendKeyPresent: Boolean(resendApiKey()),
   resendKeyLength: resendApiKey().length,

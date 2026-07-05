@@ -5,6 +5,9 @@ import {
   logInboxError,
   serializeInboxError,
 } from '../_lib/inbox.js';
+import {
+  checkMailCenterTables,
+} from '../_lib/mailCenter.js';
 
 const sendJson = (res, status, payload) => {
   res.status(status);
@@ -25,11 +28,22 @@ export default async function handler(req, res) {
 
     const env = getInboxEnvHealth();
     try {
-      const tableCheck = await checkReservationInquiriesTable();
-      return sendJson(res, 200, { ok: true, env, tableCheck });
+      const [tableCheck, mailCenter] = await Promise.all([
+        checkReservationInquiriesTable(),
+        checkMailCenterTables(),
+      ]);
+      return sendJson(res, 200, { ok: true, env, tableCheck, mailCenter });
     } catch (error) {
       logInboxError('inbox-health-table', error);
       const diagnostic = serializeInboxError(error);
+      const mailCenter = await checkMailCenterTables().catch(() => ({
+        ok: false,
+        historyActive: false,
+        draftsActive: false,
+        migrationRequired: true,
+        message: 'Nie udało się sprawdzić tabel Mail Center.',
+        tables: {},
+      }));
       return sendJson(res, diagnostic.status, {
         ok: false,
         env,
@@ -38,6 +52,7 @@ export default async function handler(req, res) {
           status: diagnostic.payload.supabaseStatus ?? null,
           error: diagnostic.payload.error,
         },
+        mailCenter,
         code: diagnostic.payload.code,
         details: diagnostic.payload.details,
       });
