@@ -356,6 +356,7 @@ const title = 'CC SYSTEM';
         let campValidationErrors = [];
         let lastCampSave = null;
         let analyticsStorageStatus = { ok: false, loaded: false, migrationRequired: false, error: '', eventCount: 0, recentEvents: [] };
+        const campMigrationRequiredMessage = 'CAMP wymaga uruchomienia migracji Supabase przed zapisem pobytów.';
         let autoRefreshTimer = 0;
         let autoRefreshPaused = false;
         let isLoading = false;
@@ -575,6 +576,7 @@ const title = 'CC SYSTEM';
             vehiclePlate: campState.vehiclePlate,
             trailerPlate: campState.trailerPlate,
             vehicleNotes: campState.vehicleNotes,
+            paymentMethod: campState.paymentMethod,
             services: totals.lines.filter((line)=>line.qty > 0),
             payment: { method: campState.paymentMethod, currency:'PLN', paidPln: totals.paidPln, remainingPln: totals.remainingPln, fx: totals.fx },
             totalPln: totals.totalPln,
@@ -2103,22 +2105,34 @@ const title = 'CC SYSTEM';
           const storageNote = campStorageStatus.loaded
             ? campStorageStatus.ok
               ? 'Tabela camp_stays aktywna.'
-              : `Migracja CAMP wymagana: ${campStorageStatus.error || 'Migracja CAMP nie została jeszcze uruchomiona w Supabase.'}`
+              : campMigrationRequiredMessage
             : 'Status zapisu zostanie sprawdzony po odświeżeniu.';
           const validationHtml = campValidationErrors.length
             ? `<div class="crm-warnings camp-validation-box"><strong>Uzupełnij przed zapisem:</strong>${campValidationErrors.map(([, message])=>`<p>${esc(message)}</p>`).join('')}</div>`
             : '';
           const saveSuccessHtml = lastCampSave
-            ? `<div class="camp-save-success"><strong>Zapisano pobyt ${esc(lastCampSave.caseNumber || lastCampSave.stayId || '')}</strong><span>ID: ${esc(lastCampSave.stayId || '-')}</span><div class="quick-action-grid"><button type="button" data-camp-card>Podgląd karty</button><button type="button" data-camp-print>Drukuj komplet</button><button type="button" data-camp-print-client>Drukuj kopię</button><button type="button" data-camp-print-office>Drukuj oryginał</button><button type="button" data-camp-reset>Nowy pobyt</button><button type="button" data-camp-reset>Wyczyść formularz</button></div></div>`
+            ? `<div class="camp-save-success"><strong>Zapisano pobyt ${esc(lastCampSave.caseNumber || lastCampSave.stayId || '')}</strong><span>ID: ${esc(lastCampSave.stayId || '-')}</span><p>Ten pobyt będzie widoczny w module Klienci po aktywacji Klienci Online.</p><div class="quick-action-grid"><button type="button" data-camp-card>Podgląd komplet</button><button type="button" data-camp-print>Drukuj komplet</button><button type="button" data-camp-print-client>Drukuj kopię klienta</button><button type="button" data-camp-print-office>Drukuj oryginał recepcji</button><button type="button" disabled>Otwórz w Klienci — wkrótce</button><button type="button" data-camp-reset>Nowy pobyt</button></div></div>`
             : '';
           const recentStayHtml = recentStays.length ? recentStays.map((stay)=>{
+            const rawStay = stay?.raw_payload_json && typeof stay.raw_payload_json === 'object' ? stay.raw_payload_json : {};
             const code = String(stay.country_code || stay.countryCode || stay.raw_payload_json?.countryCode || '').toUpperCase();
-            const guests = Number(stay.total_guests ?? stay.totalGuests ?? 0);
+            const guests = Number(stay.total_guests ?? stay.totalGuests ?? rawStay.totalGuests ?? 0);
             const stayType = stay.stay_type || stay.stayType || 'CAMP';
             const amount = Number(stay.total_pln ?? stay.totalPln ?? 0);
+            const paid = Number(stay.paid_pln ?? rawStay.paidPln ?? rawStay.payment?.paidPln ?? 0);
+            const remaining = Number(stay.remaining_pln ?? rawStay.remainingPln ?? Math.max(0, amount - paid));
+            const paymentMethod = stay.payment_json?.method || rawStay.payment?.method || 'nie podano';
+            const paymentLabel = remaining <= 0 && amount > 0 ? `opłacone (${paymentMethod})` : paid > 0 ? `częściowo: ${money(paid)} / ${paymentMethod}` : `do zapłaty / ${paymentMethod}`;
+            const services = Array.isArray(stay.services_json) ? stay.services_json : Array.isArray(rawStay.services) ? rawStay.services : [];
+            const serviceSummary = services
+              .filter((service)=>Number(service?.qty || 0) > 0)
+              .slice(0,4)
+              .map((service)=>`${service.label || service.id || 'usługa'} × ${service.qty}`)
+              .join(', ') || 'Brak usług';
             const id = stay.id || stay.case_number || stay.caseNumber || '';
-            return `<article><div><strong>${esc(stay.client_name || stay.clientName || '-')}</strong><span>${esc(flagEmoji(code))} ${esc(stay.country || '-')} ${stay.is_bajt || stay.isBajt ? '<b>BAJT</b>' : ''}</span></div><small>${esc(stay.arrival_date || stay.arrivalDate || '-')} → ${esc(stay.departure_date || stay.departureDate || '-')} · ${esc(stayType)} · ${esc(guests)} os. · ${esc(money(amount))}</small><button type="button" data-camp-saved-card="${esc(id)}">Podgląd karty</button></article>`;
-          }).join('') : '<p class="module-empty">Brak zapisanych pobytów w tej sesji.</p>';
+            const nights = Number(stay.nights ?? rawStay.nights ?? 0);
+            return `<article class="camp-recent-stay"><div class="camp-recent-main"><strong>${esc(stay.client_name || stay.clientName || rawStay.clientName || '-')}</strong><span>${esc(flagEmoji(code))} ${esc(stay.country || rawStay.country || '-')} ${stay.is_bajt || stay.isBajt || rawStay.isBajt ? '<b>BAJT</b>' : ''}</span><small>${esc(stay.arrival_date || rawStay.arrivalDate || '-')} → ${esc(stay.departure_date || rawStay.departureDate || '-')} · ${esc(nights)} n. · ${esc(stayType)} · ${esc(guests)} os.</small></div><div class="camp-recent-meta"><span>${esc(serviceSummary)}</span><strong>${esc(money(amount))}</strong><small>${esc(paymentLabel)}</small></div><div class="camp-recent-actions"><button type="button" data-camp-saved-card="${esc(id)}">Podgląd karty</button><button type="button" data-camp-saved-print="${esc(id)}">Drukuj</button><button type="button" data-camp-saved-details="${esc(id)}">Otwórz szczegóły</button></div></article>`;
+          }).join('') : `<p class="module-empty">${esc(campStorageStatus.loaded && !campStorageStatus.ok ? campMigrationRequiredMessage : 'Brak zapisanych pobytów w tej sesji.')}</p>`;
           const serviceGroupHtml = [...grouped.entries()].map(([group, defs]) => `
             <section class="camp-service-group">
               <header><strong>${esc(group)}</strong><small>${group === 'Domki' ? `sezon: ${campSeason(campState.arrivalDate) === 'high' ? 'wysoki' : 'niski'}` : 'cena za noc, jeśli nie opisano inaczej'}</small></header>
@@ -2198,7 +2212,7 @@ const title = 'CC SYSTEM';
                   ${warnings.length ? `<div class="crm-warnings">${warnings.map((warning)=>`<p>${esc(warning)}</p>`).join('')}</div>` : '<p class="module-empty">Brak krytycznych ostrzeżeń.</p>'}
                 </section>
                 <section class="camp-pro-card camp-card-preview"><h3>8. Karta pobytu — podgląd</h3><div class="stay-card-preview" data-camp-card-preview><header><strong>Camping Clepardia</strong><span>${esc(campState.isBajt ? 'BAJT' : 'Karta pobytu')}</span></header><p><b>${esc(campState.clientName || 'Klient')}</b><br>${esc(campState.countryFlag)} ${esc(campState.country || '-')} · ${esc(campState.arrivalDate)} — ${esc(campState.departureDate)} · ${esc(totals.nights)} n.</p><ul>${cardRows || '<li><span>Brak usług</span><strong>0 PLN</strong></li>'}</ul><footer><strong>${esc(money(totals.totalPln))}</strong><span>${esc(campState.vehiclePlate || 'bez rejestracji')}</span></footer></div><div class="quick-action-grid"><button type="button" data-camp-card>Podgląd komplet</button><button type="button" data-camp-print-client>Drukuj kopię klienta</button><button type="button" data-camp-print-office>Drukuj oryginał recepcji</button><button type="button" data-camp-print>Drukuj komplet</button></div></section>
-                <section class="camp-pro-card"><h3>Zapis / ostatnie pobyty CAMP</h3><p class="module-empty">${esc(storageNote)}</p>${saveSuccessHtml}<div class="quick-action-grid"><button type="button" data-camp-save>Zapisz pobyt</button><button type="button" data-camp-reset>Nowy pobyt</button><button type="button" data-view-shortcut="customers">Otwórz Klienci</button><button type="button" data-view-shortcut="calendar">Kalendarz</button></div><div class="camp-recent-stays">${recentStayHtml}</div></section>
+                <section class="camp-pro-card"><h3>Zapis / ostatnie pobyty CAMP</h3><p class="module-empty">${esc(storageNote)}</p>${saveSuccessHtml}<div class="quick-action-grid"><button type="button" data-camp-save>Zapisz pobyt</button><button type="button" data-camp-reset>Nowy pobyt</button><button type="button" disabled>Utwórz klienta — wkrótce</button><button type="button" data-view-shortcut="calendar">Kalendarz</button></div><div class="camp-recent-stays">${recentStayHtml}</div></section>
               </aside>
             </div>
           </section>`;
@@ -2276,7 +2290,7 @@ const title = 'CC SYSTEM';
         const roadmapRows = [
           { offline:'CAMP', online:'CAMP / Nowe przyjęcie', status:'Aktywne', priority:1, notes:'Kalkulator recepcji, BAJT, karta pobytu i zapis do camp_stays po migracji.' },
           { offline:'Karty pobytu / drukowanie', online:'Drukowanie / karta pobytu', status:'W budowie', priority:2, notes:'Jest fundament wydruku. Docelowo pełna karta jak offline, ale w czystszym układzie.' },
-          { offline:'Klienci', online:'Klienci Online', status:'W budowie', priority:3, notes:'Agregacja z zapytań działa. Potrzebna osobna tabela klientów, notatki i historia pobytów.' },
+          { offline:'Klienci', online:'Klienci Online', status:'W budowie', priority:3, notes:'Następny priorytet po stabilizacji CAMP: osobna tabela klientów, notatki, historia pobytów i przejście z camp_stays.' },
           { offline:'PP / przedłużenia', online:'Przedłuż pobyt', status:'Placeholder', priority:4, notes:'Gotowy schemat procesu bez zapisu. Wymaga tabeli aktywnych pobytów.' },
           { offline:'Kalendarz', online:'Kalendarz pobytów', status:'W budowie', priority:5, notes:'Widok planszy i zasobów jest przygotowany; drag/drop i konflikty dopiero po tabelach rezerwacji.' },
           { offline:'campk', online:'Plan campu / miejsca', status:'Do analizy', priority:5, notes:'Offline ma mapę miejsc i statusy. Online powinien używać zasobów, nie statycznej grafiki 1:1.' },
@@ -2314,11 +2328,15 @@ const title = 'CC SYSTEM';
           const analyticsStatusLabel = analyticsStorageStatus.loaded
             ? analyticsStorageStatus.ok
               ? 'Aktywne'
-              : 'Wymaga migracji'
+              : analyticsStorageStatus.migrationRequired
+                ? 'Fallback'
+                : 'Wymaga migracji'
             : 'Sprawdzanie';
           const analyticsStatusHint = analyticsStorageStatus.ok
             ? `site_events aktywne; ostatnie eventy: ${analyticsStorageStatus.eventCount || 0}`
-            : 'Endpoint analityki ma fallback, ale site_events wymaga migracji.';
+            : analyticsStorageStatus.migrationRequired
+              ? 'Endpoint analityki przyjmuje eventy w trybie fallback, ale site_events wymaga migracji.'
+              : 'Status analityki wymaga sprawdzenia w Supabase.';
           const tableRows = roadmapRows.map((row)=>`
             <tr>
               <td><strong>${esc(row.offline)}</strong></td>
@@ -2403,14 +2421,22 @@ const title = 'CC SYSTEM';
           const resendStatus = env.resendKeyPresent && env.reservationFromPresent && env.reservationToPresent
             ? (mailOk ? 'Resend OK' : mailFallback || mailFailed ? 'Resend gotowy / sprawdź nowe wysyłki' : 'Resend ENV OK')
             : 'Resend ENV niepełny';
+          const campStripStatus = campStorageStatus.loaded ? (campStorageStatus.ok ? 'aktywna' : 'wymaga migracji') : 'sprawdzanie';
+          const analyticsStripStatus = analyticsStorageStatus.loaded
+            ? analyticsStorageStatus.ok
+              ? 'aktywna'
+              : analyticsStorageStatus.migrationRequired
+                ? 'fallback / migracja'
+                : 'błąd'
+            : 'sprawdzanie';
           systemStrip.innerHTML = [
             ['Nowe realne', real.filter((item)=>item.status === 'new').length],
             ['Testy', testItems().length],
             ['Archiwum', archivedItems().length],
             ['Dostarczenie maila', resendStatus],
             ['Supabase', health?.tableCheck?.ok ? 'OK' : health ? 'błąd' : 'sprawdzanie'],
-            ['CAMP baza', campStorageStatus.loaded ? (campStorageStatus.ok ? 'aktywna' : 'wymaga migracji') : 'sprawdzanie'],
-            ['Analityka', analyticsStorageStatus.loaded ? (analyticsStorageStatus.ok ? 'aktywna' : 'wymaga migracji') : 'sprawdzanie'],
+            ['CAMP baza', campStripStatus],
+            ['Analityka', analyticsStripStatus],
             ['Tabele Mail Center', mailCenter.ok ? 'aktywne' : health ? 'wymagają migracji' : 'sprawdzanie'],
             ['Historia wiadomości', mailCenter.historyActive ? 'aktywna' : health ? 'fallback / migracja' : 'sprawdzanie'],
             ['Szkice', mailCenter.draftsActive ? 'aktywne' : health ? 'fallback / migracja' : 'sprawdzanie'],
@@ -2443,7 +2469,7 @@ const title = 'CC SYSTEM';
           const eventStatusLabel = analyticsStorageStatus.loaded
             ? analyticsStorageStatus.ok
               ? 'aktywny'
-              : 'wymaga migracji'
+              : analyticsStorageStatus.migrationRequired ? 'fallback' : 'błąd'
             : 'sprawdzanie';
           const eventStatusHint = analyticsStorageStatus.ok
             ? `ostatnie eventy: ${analyticsStorageStatus.eventCount || 0}`
@@ -2535,6 +2561,8 @@ const title = 'CC SYSTEM';
             ['Nadawca Resend', env.reservationFromPresent ? 'skonfigurowany w Vercel' : 'brak ENV'],
             ['RESEND_API_KEY', env.resendKeyPresent ? `obecny, długość ${env.resendKeyLength}` : 'brak'],
             ['Supabase', env.supabaseUrlPresent && env.serviceRolePresent ? `ENV OK · ${env.supabaseHost || ''}` : 'ENV niepełny'],
+            ['CAMP baza', campStorageStatus.loaded ? (campStorageStatus.ok ? 'aktywna' : campMigrationRequiredMessage) : 'sprawdzanie'],
+            ['Analityka site_events', analyticsStorageStatus.loaded ? (analyticsStorageStatus.ok ? 'aktywna' : analyticsStorageStatus.migrationRequired ? 'fallback / wymagana migracja' : 'błąd') : 'sprawdzanie'],
             ['Tabele Mail Center', mailCenter.ok ? 'aktywne' : health ? 'wymagają migracji Supabase' : 'sprawdzanie'],
             ['Historia wiadomości', mailCenter.historyActive ? 'aktywna' : 'fallback: reservation_inquiries / wymagana migracja'],
             ['Szkice', mailCenter.draftsActive ? 'aktywne' : 'fallback: wymagana migracja'],
@@ -2871,21 +2899,54 @@ const title = 'CC SYSTEM';
             showToast(`Zapisano pobyt ${result.caseNumber || result.stayId || ''}. Karta pobytu gotowa do druku.`, 'success');
             render();
           } catch (error) {
-            campStorageStatus = { ok:false, loaded:true, migrationRequired:true, error:error.message || 'CAMP_SAVE_FAILED' };
-            showToast(error.message || 'Nie udało się zapisać pobytu. Sprawdź migrację camp_stays.', 'error');
+            const message = error.message || campMigrationRequiredMessage;
+            campStorageStatus = { ok:false, loaded:true, migrationRequired:true, error:message };
+            showToast(message, 'error');
             render();
           }
         };
         const campPrintableDocument = ({ payload, totals, variant = 'complete', countryFlag = '' }) => {
-          const docType = variant === 'client' ? 'KOPIA DLA KLIENTA' : variant === 'office' ? 'ORYGINAŁ — RECEPCJA' : 'KOMPLET DO DRUKU';
-          const showBajt = Boolean(payload.isBajt) && variant !== 'client';
-          const rows = (totals.lines || [])
+          const lines = Array.isArray(totals.lines) ? totals.lines : [];
+          const flag = countryFlag || payload.countryFlag || flagEmoji(String(payload.countryCode || '').toUpperCase());
+          const paymentMethodLabels = { cash:'gotówka', card:'karta', transfer:'przelew', mixed:'mieszana', unpaid:'nieopłacone' };
+          const paymentMethod = paymentMethodLabels[payload.paymentMethod] || payload.payment?.method || payload.paymentMethod || '-';
+          const totalGuests = Number(payload.adults || 0) + Number(payload.children414 || 0) + Number(payload.children04 || 0);
+          const rows = lines
             .filter((line)=>Number(line.qty || 0) > 0)
-            .map((line)=>`<tr><td>${esc(line.label)} × ${esc(line.qty)}</td><td>${esc(line.perNight === false ? 'szt.' : 'noc')}</td><td>${esc(money(line.total))}</td></tr>`)
+            .map((line)=>`<tr><td>${esc(line.label || line.id || 'Usługa')} × ${esc(line.qty)}</td><td>${esc(line.perNight === false ? 'jednorazowo' : 'za noc')}</td><td>${esc(money(line.total))}</td></tr>`)
             .join('');
+          const contact = [payload.phone ? `tel. ${payload.phone}` : '', payload.email ? `email ${payload.email}` : '']
+            .filter(Boolean)
+            .join(' · ') || 'kontakt podany w recepcji';
+          const vehicle = `${payload.vehicleType || '-'} · ${payload.vehiclePlate || 'bez rejestracji'}${payload.trailerPlate ? ` · przyczepa ${payload.trailerPlate}` : ''}`;
+          const notes = [payload.notes, payload.vehicleNotes].filter(Boolean).join(' · ');
+          const printDate = new Intl.DateTimeFormat('pl-PL', { dateStyle:'short', timeStyle:'short' }).format(new Date());
+          const rules = [
+            'Cisza nocna: 22:00–07:00.',
+            'Recepcja: 9:00–21:00, brama: 8:00–22:00.',
+            'Camping checkout do 12:00, domki checkout do 11:00.',
+            'Prąd 10A jest przeznaczony do wyposażenia kampera/przyczepy; nie służy do ładowania EV.',
+            'Prosimy korzystać z Google Maps — wjazd na camping zmienił się w 2022 roku.',
+            'Kontakt: Camping Clepardia, ul. gen. J. Mackiewicza 14, Kraków.',
+          ];
+          const renderCard = (type) => {
+            const isOffice = type === 'office';
+            const docType = isOffice ? 'ORYGINAŁ — RECEPCJA' : 'KOPIA DLA KLIENTA';
+            const badge = isOffice && payload.isBajt ? 'BAJT' : 'CAMP';
+            const paymentHtml = isOffice
+              ? `<div class="box box--payment"><small>Płatność</small><strong>${esc(paymentMethod)} · zapłacono ${esc(money(totals.paidPln))} · pozostało ${esc(money(totals.remainingPln))}</strong></div>`
+              : '';
+            const notesHtml = isOffice
+              ? `<div class="office-notes"><strong>Recepcja</strong><p>BAJT: ${payload.isBajt ? 'TAK' : 'NIE'} · dokument: ${esc(payload.documentNumber || 'nie wpisano')}</p><p>Notatki: ${esc(notes || 'brak')}</p><label><input type="checkbox" /> dane sprawdzone</label><label><input type="checkbox" /> płatność sprawdzona</label><label><input type="checkbox" /> karta wydana klientowi</label></div>`
+              : '';
+            return `<section class="card ${isOffice ? 'card--office' : 'card--client'}"><div class="head"><div><h1>Camping Clepardia — karta pobytu</h1><p>${esc(docType)}</p></div><span class="badge ${badge === 'BAJT' ? 'bajt' : ''}">${esc(badge)}</span></div><h2>${esc(payload.clientName || 'Klient')}</h2><p>${esc(flag)} ${esc(payload.country || '-')} (${esc(payload.countryCode || '-')}) · język ${esc(payload.language || '-')} · ${esc(contact)}</p><div class="grid"><div class="box"><small>Termin</small><strong>${esc(payload.arrivalDate || '-')} — ${esc(payload.departureDate || '-')}</strong></div><div class="box"><small>Noce / przyjazd</small><strong>${esc(payload.nights || 0)} · ${esc(payload.arrivalTime || '-')}</strong></div><div class="box"><small>Goście</small><strong>${esc(totalGuests)} os. · ${esc(payload.adults || 0)} dor., ${esc(payload.children414 || 0)} dzieci 4–14, ${esc(payload.children04 || 0)} dzieci 0–4</strong></div><div class="box"><small>Pojazd</small><strong>${esc(vehicle)}</strong></div>${paymentHtml}</div><table><thead><tr><th>Usługa</th><th>Typ</th><th>Kwota</th></tr></thead><tbody>${rows || '<tr><td>Brak usług</td><td>-</td><td>0 PLN</td></tr>'}</tbody></table><p class="total">Razem: ${esc(money(totals.totalPln))}</p><div class="rules"><strong>Najważniejsze informacje</strong><ul>${rules.map((rule)=>`<li>${esc(rule)}</li>`).join('')}</ul></div>${notesHtml}<div class="sign"><div>Podpis klienta</div><div>Recepcja / data: ${esc(printDate)}</div></div></section>`;
+          };
+          const body = variant === 'complete'
+            ? `${renderCard('client')}${renderCard('office')}`
+            : renderCard(variant === 'office' ? 'office' : 'client');
           return `<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>Karta pobytu CAMP</title><style>
-            @page{size:A4;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#10251b;margin:0;background:#f7fbf8}.card{border:2px solid #0f6b43;border-radius:18px;padding:24px;max-width:820px;margin:18px auto;background:#fff}.head{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #d7eadf;padding-bottom:14px;margin-bottom:14px}.head h1{margin:0;font-size:24px}.head p{margin:6px 0 0;color:#476557;font-weight:700}.badge{background:#0f6b43;color:white;border-radius:999px;padding:8px 12px;font-weight:800;align-self:flex-start}.bajt{background:#f4b24f;color:#2d1b00}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:16px 0}.box{border:1px solid #d7eadf;border-radius:14px;padding:12px;background:#f7fbf8}.box small{display:block;color:#5c7166;text-transform:uppercase;font-size:10px;font-weight:800;letter-spacing:.08em}.box strong{display:block;margin-top:4px}table{width:100%;border-collapse:collapse;margin-top:16px}th,td{border-top:1px solid #d7eadf;padding:10px;text-align:left}th{color:#476557;font-size:11px;text-transform:uppercase}.total{font-size:28px;font-weight:900;color:#0f6b43}.rules{margin-top:18px;border:1px solid #d7eadf;border-radius:14px;padding:14px;background:#f8fbf6}.rules li{margin:6px 0}.sign{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:28px}.sign div{border-top:1px solid #8da79a;padding-top:8px;color:#5c7166}.copy{margin-top:18px;color:#65756d}@media print{body{background:white}.card{margin:0;max-width:none;box-shadow:none}.no-print{display:none!important}}
-          </style></head><body><section class="card"><div class="head"><div><h1>Camping Clepardia — karta pobytu</h1><p>${esc(docType)}</p></div><span class="badge ${showBajt ? 'bajt':''}">${esc(showBajt ? 'BAJT' : 'CAMP')}</span></div><h2>${esc(payload.clientName || 'Klient')}</h2><p>${esc(countryFlag || payload.countryFlag || flagEmoji(String(payload.countryCode || '').toUpperCase()))} ${esc(payload.country || '-')} (${esc(payload.countryCode || '-')}) · język ${esc(payload.language || '-')}</p><div class="grid"><div class="box"><small>Termin</small><strong>${esc(payload.arrivalDate || '-')} — ${esc(payload.departureDate || '-')}</strong></div><div class="box"><small>Noce / przyjazd</small><strong>${esc(payload.nights || 0)} · ${esc(payload.arrivalTime || '-')}</strong></div><div class="box"><small>Goście</small><strong>${esc(payload.adults || 0)} dor., ${esc(payload.children414 || 0)} dzieci 4–14, ${esc(payload.children04 || 0)} dzieci 0–4</strong></div><div class="box"><small>Pojazd</small><strong>${esc(payload.vehicleType || '-')} · ${esc(payload.vehiclePlate || 'bez rejestracji')} ${payload.trailerPlate ? `· przyczepa ${esc(payload.trailerPlate)}` : ''}</strong></div></div><table><thead><tr><th>Usługa</th><th>Typ</th><th>Kwota</th></tr></thead><tbody>${rows || '<tr><td>Brak usług</td><td>-</td><td>0 PLN</td></tr>'}</tbody></table><p class="total">Razem: ${esc(money(totals.totalPln))}</p><p>Zapłacono: ${esc(money(totals.paidPln))} · Pozostało: ${esc(money(totals.remainingPln))}</p><div class="rules"><strong>Najważniejsze informacje</strong><ul><li>Cisza nocna: 22:00–07:00.</li><li>Prąd 10A jest przeznaczony do wyposażenia kampera/przyczepy; nie służy do ładowania EV.</li><li>Recepcja: 9:00–21:00, brama: 8:00–22:00.</li><li>Camping checkout do 12:00, domki checkout do 11:00.</li><li>Prosimy korzystać z Google Maps — wjazd na camping zmienił się w 2022 roku.</li></ul></div>${showBajt ? '<p class="copy"><strong>BAJT:</strong> pobyt oznaczony do pominięcia w późniejszym raporcie GUS.</p>' : ''}<div class="sign"><div>Podpis klienta</div><div>Recepcja / uwagi</div></div></section></body></html>`;
+            @page{size:A4;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#10251b;margin:0;background:#f7fbf8}.card{border:2px solid #0f6b43;border-radius:18px;padding:22px;max-width:820px;margin:18px auto;background:#fff}.card+.card{break-before:page;page-break-before:always}.head{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #d7eadf;padding-bottom:14px;margin-bottom:14px}.head h1{margin:0;font-size:24px}.head p{margin:6px 0 0;color:#476557;font-weight:700}.badge{background:#0f6b43;color:white;border-radius:999px;padding:8px 12px;font-weight:800;align-self:flex-start}.bajt{background:#f4b24f;color:#2d1b00}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:16px 0}.box{border:1px solid #d7eadf;border-radius:14px;padding:12px;background:#f7fbf8}.box--payment{grid-column:1/-1}.box small{display:block;color:#5c7166;text-transform:uppercase;font-size:10px;font-weight:800;letter-spacing:.08em}.box strong{display:block;margin-top:4px}table{width:100%;border-collapse:collapse;margin-top:16px}th,td{border-top:1px solid #d7eadf;padding:10px;text-align:left}th{color:#476557;font-size:11px;text-transform:uppercase}.total{font-size:28px;font-weight:900;color:#0f6b43}.rules,.office-notes{margin-top:18px;border:1px solid #d7eadf;border-radius:14px;padding:14px;background:#f8fbf6}.rules li{margin:6px 0}.office-notes label{display:inline-flex;gap:6px;margin:8px 14px 0 0}.sign{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:28px}.sign div{border-top:1px solid #8da79a;padding-top:8px;color:#5c7166}.no-print{position:fixed;right:18px;bottom:18px}.no-print button{border:0;border-radius:999px;background:#0f6b43;color:#fff;font-weight:800;padding:12px 18px}@media print{body{background:white;color:#000}.card{margin:0;max-width:none;box-shadow:none;border-color:#111;color:#000}.card+.card{margin-top:0}.box,.rules,.office-notes{background:white;border-color:#777}.head{border-color:#777}.badge{background:white!important;color:#000!important;border:1px solid #000}.total{color:#000}.no-print{display:none!important}}
+          </style></head><body>${body}<div class="no-print"><button onclick="window.print()">Drukuj</button></div></body></html>`;
         };
         const campCardHtml = (variant = 'complete') => {
           const payload = campPayload();
@@ -2897,12 +2958,16 @@ const title = 'CC SYSTEM';
           const services = Array.isArray(stay?.services_json) ? stay.services_json : Array.isArray(rawPayload.services) ? rawPayload.services : [];
           const totalPln = Number(stay?.total_pln ?? rawPayload.totalPln ?? 0);
           const paidPln = Number(stay?.paid_pln ?? rawPayload.paidPln ?? rawPayload.payment?.paidPln ?? 0);
+          const payment = stay?.payment_json && typeof stay.payment_json === 'object' ? stay.payment_json : rawPayload.payment || {};
           const payload = {
             clientName: stay?.client_name || rawPayload.clientName || '',
             country: stay?.country || rawPayload.country || '',
             countryCode: stay?.country_code || rawPayload.countryCode || '',
             countryFlag: flagEmoji(String(stay?.country_code || rawPayload.countryCode || '').toUpperCase()),
             language: stay?.language || rawPayload.language || '',
+            phone: stay?.phone || rawPayload.phone || '',
+            email: stay?.email || rawPayload.email || '',
+            documentNumber: stay?.document_number || rawPayload.documentNumber || '',
             arrivalDate: stay?.arrival_date || rawPayload.arrivalDate || '',
             departureDate: stay?.departure_date || rawPayload.departureDate || '',
             nights: stay?.nights || rawPayload.nights || 0,
@@ -2913,7 +2978,11 @@ const title = 'CC SYSTEM';
             vehicleType: stay?.vehicle_type || rawPayload.vehicleType || '',
             vehiclePlate: stay?.vehicle_plate || rawPayload.vehiclePlate || '',
             trailerPlate: stay?.trailer_plate || rawPayload.trailerPlate || '',
+            vehicleNotes: stay?.vehicle_notes || rawPayload.vehicleNotes || '',
+            paymentMethod: payment.method || rawPayload.paymentMethod || '',
+            payment,
             isBajt: Boolean(stay?.is_bajt || rawPayload.isBajt),
+            notes: stay?.notes || rawPayload.notes || '',
           };
           return campPrintableDocument({
             payload,
@@ -3145,6 +3214,16 @@ const title = 'CC SYSTEM';
           const savedCampCard = target.closest('[data-camp-saved-card]');
           if (savedCampCard instanceof HTMLElement) {
             openSavedCampCard(savedCampCard.dataset.campSavedCard || '', 'complete', false);
+            return;
+          }
+          const savedCampPrint = target.closest('[data-camp-saved-print]');
+          if (savedCampPrint instanceof HTMLElement) {
+            openSavedCampCard(savedCampPrint.dataset.campSavedPrint || '', 'complete', true);
+            return;
+          }
+          const savedCampDetails = target.closest('[data-camp-saved-details]');
+          if (savedCampDetails instanceof HTMLElement) {
+            openSavedCampCard(savedCampDetails.dataset.campSavedDetails || '', 'office', false);
             return;
           }
           if (target.closest('[data-camp-print-client]')) {
@@ -3518,9 +3597,39 @@ const title = 'CC SYSTEM';
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
+  .cc-system-app .camp-recent-stays article.camp-recent-stay {
+    grid-template-columns: minmax(170px, 1.05fr) minmax(170px, .95fr) auto;
+    align-items: stretch;
+  }
+
   .cc-system-app .camp-recent-stays article div {
     display: grid;
     gap: 3px;
+  }
+
+  .cc-system-app .camp-recent-main,
+  .cc-system-app .camp-recent-meta,
+  .cc-system-app .camp-recent-actions {
+    min-width: 0;
+  }
+
+  .cc-system-app .camp-recent-meta span {
+    color: rgba(239,251,243,.72);
+    font-size: .78rem;
+    line-height: 1.35;
+  }
+
+  .cc-system-app .camp-recent-meta strong {
+    color: #fff;
+    font-size: 1rem;
+  }
+
+  .cc-system-app .camp-recent-actions {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-content: center;
+    gap: 7px;
   }
 
   .cc-system-app .camp-recent-stays b,
@@ -3547,6 +3656,11 @@ const title = 'CC SYSTEM';
   .cc-system-app .camp-save-success,
   .cc-system-app .camp-validation-box {
     margin: 12px 0;
+  }
+
+  .cc-system-app .camp-save-success p {
+    margin: 8px 0 10px;
+    color: rgba(239,251,243,.72);
   }
 
   .cc-system-app .camp-save-success {
@@ -4480,6 +4594,18 @@ const title = 'CC SYSTEM';
     .cc-system-app .kpi-grid,
     .cc-system-app .module-metrics {
       grid-template-columns: 1fr !important;
+    }
+
+    .cc-system-app .camp-recent-stays article.camp-recent-stay {
+      grid-template-columns: 1fr !important;
+    }
+
+    .cc-system-app .camp-recent-actions {
+      justify-content: stretch;
+    }
+
+    .cc-system-app .camp-recent-actions button {
+      width: 100%;
     }
 
     .cc-system-app .reply-modal__card,

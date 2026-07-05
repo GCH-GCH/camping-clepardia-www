@@ -51,7 +51,7 @@ export default async function handler(req, res) {
     logInboxError('camp-stays', error, { method: req.method || '' });
     const diagnostic = serializeInboxError(error);
     const migrationRequired = isCampMigrationError(diagnostic.payload);
-    const migrationMessage = 'Migracja CAMP nie została jeszcze uruchomiona w Supabase.';
+    const migrationMessage = 'CAMP wymaga uruchomienia migracji Supabase przed zapisem pobytów.';
     return sendJson(res, diagnostic.status, {
       ...diagnostic.payload,
       ok: false,
