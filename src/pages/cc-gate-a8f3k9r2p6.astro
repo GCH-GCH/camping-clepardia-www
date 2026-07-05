@@ -220,8 +220,8 @@ const title = 'CC SYSTEM';
       (() => {
         const demoMode = false;
         const storageKey = 'cc-inbox-access-code';
-        const inboxSendReplyEndpoint = '/api/inbox/send-reply';
-        const inboxSaveDraftEndpoint = '/api/inbox/save-draft';
+        const inboxSendReplyEndpoints = ['/api/inbox/send-reply', '/api/mail-center/send-reply'];
+        const inboxSaveDraftEndpoints = ['/api/inbox/save-draft', '/api/mail-center/save-draft'];
         const inboxActivityEndpoint = '/api/inbox/activity';
         const login = document.querySelector('[data-login]');
         const app = document.querySelector('[data-app]');
@@ -715,6 +715,19 @@ const title = 'CC SYSTEM';
             throw error;
           }
           return result;
+        };
+        const requestWithFallback = async (urls, options = {}) => {
+          let lastError = null;
+          for (const url of urls) {
+            try {
+              const result = await request(url, options);
+              return { ...result, endpoint: url };
+            } catch (error) {
+              lastError = error;
+              if (error?.status !== 404) throw error;
+            }
+          }
+          throw lastError || new Error('Endpoint CC SYSTEM jest niedostępny.');
         };
         const summaryText = (item) => {
           const v = vehicle(item);
@@ -1241,7 +1254,7 @@ const title = 'CC SYSTEM';
             replySendButton.textContent = 'Wysyłanie…';
           }
           try {
-            const result = await request(inboxSendReplyEndpoint, {
+            const result = await requestWithFallback(inboxSendReplyEndpoints, {
               method: 'POST',
               body: JSON.stringify(payload),
             });
@@ -1289,7 +1302,7 @@ const title = 'CC SYSTEM';
             replyDraftButton.textContent = 'Zapisywanie…';
           }
           try {
-            const result = await request(inboxSaveDraftEndpoint, {
+            const result = await requestWithFallback(inboxSaveDraftEndpoints, {
               method: 'POST',
               body: JSON.stringify(payload),
             });
