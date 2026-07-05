@@ -164,11 +164,26 @@ const serviceCatalog = {
   parking: { id: 'parking', scope: 'camping', label: 'Samochód', price: 35 },
   'extra-car': { id: 'extra-car', scope: 'camping', label: 'Dodatkowe auto', price: 35 },
   'bungalow-2': { id: 'bungalow-2', scope: 'bungalow', label: 'Domek 2-os.', price: 200 },
-  'bungalow-3': { id: 'bungalow-3', scope: 'bungalow', label: 'Domek 3-os.', price: 250 },
+  'bungalow-3': { id: 'bungalow-3', scope: 'bungalow', label: 'Domek 3-os.', price: 300, seasonalPrices: { low: 300, high: 350 } },
   'bungalow-4': { id: 'bungalow-4', scope: 'bungalow', label: 'Domek 4-os.', price: 400 },
   adults: { id: 'adults', scope: 'people', label: 'Osoba dorosła', price: 35 },
   children: { id: 'children', scope: 'people', label: 'Dziecko 4-14', price: 20 },
   toddlers: { id: 'toddlers', scope: 'people', label: 'Dziecko do 4', price: 0 },
+};
+
+const seasonFromPayload = (payload = {}) => {
+  const date = parseDate(payload.arrival || payload.arrivalDate || payload.arrival_date);
+  const month = date ? date.getUTCMonth() + 1 : 0;
+  return month === 7 || month === 8 ? 'high' : 'low';
+};
+
+const catalogUnitPrice = (catalog, payload = {}) => {
+  if (!catalog) return 0;
+  if (catalog.seasonalPrices) {
+    const season = seasonFromPayload(payload);
+    return Number(catalog.seasonalPrices[season] ?? catalog.seasonalPrices.low ?? catalog.price ?? 0);
+  }
+  return Number(catalog.price ?? 0);
 };
 
 const normalizeServiceText = (value) =>
@@ -234,7 +249,12 @@ const normalizeServices = (payload) => {
       scope: catalog?.scope || oneLine(service?.scope || (source === 'legacy' ? 'legacy' : 'pobyt'), 40),
       label: catalog?.label || oneLine(service?.label || service?.id || canonicalId, 120),
       qty,
-      price: Math.max(0, Number(service?.price ?? catalog?.price ?? 0)),
+      price: (() => {
+        const explicit = Number(service?.price ?? service?.unitPrice ?? service?.pricePln ?? service?.price_pln);
+        const fallback = catalogUnitPrice(catalog, payload);
+        if (canonicalId === 'bungalow-3' && explicit > 0 && explicit < fallback) return Math.max(0, fallback);
+        return Math.max(0, Number.isFinite(explicit) && explicit >= 0 ? explicit : fallback);
+      })(),
       source,
     };
     const key = `${entry.scope}:${canonicalId}`;

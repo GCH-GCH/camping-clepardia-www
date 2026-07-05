@@ -56,6 +56,7 @@ const title = 'CC SYSTEM';
               <button type="button" data-view="work-schedule" aria-pressed="false"><span aria-hidden="true"></span><em>Grafik pracy</em></button>
               <button type="button" data-view="stats" aria-pressed="false"><span aria-hidden="true"></span><em>Raporty</em></button>
               <button type="button" data-view="analytics" aria-pressed="false"><span aria-hidden="true"></span><em>Analityka strony</em></button>
+              <button type="button" data-view="roadmap" aria-pressed="false"><span aria-hidden="true"></span><em>Moduły / Roadmap</em></button>
             </div>
             <div class="cc-sidebar__group">
               <span class="cc-sidebar__group-label">Zespół i operacje</span>
@@ -268,6 +269,7 @@ const title = 'CC SYSTEM';
           reports: '<path d="M4 20h16"/><path d="M7 16v-5M12 16V7M17 16v-8"/>',
           stats: '<path d="M4 19h16"/><path d="m5 15 4-4 3 3 6-8"/><circle cx="9" cy="11" r="1"/><circle cx="12" cy="14" r="1"/><circle cx="18" cy="6" r="1"/>',
           analytics: '<path d="M4 19V5"/><path d="M4 19h17"/><path d="M8 16v-5"/><path d="M13 16V8"/><path d="M18 16v-9"/><path d="m7 7 4 2 4-5 4 3"/>',
+          roadmap: '<path d="M4 6h5v5H4z"/><path d="M15 4h5v5h-5z"/><path d="M14 15h6v5h-6z"/><path d="M9 8h6M17.5 9v6M9 16h5"/>',
           templates: '<path d="M21 12a8 8 0 0 1-8 8H6l-3 2 1.5-4A8 8 0 1 1 21 12Z"/><path d="M8 10h8M8 14h5"/>',
           staff: '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2.5"/><path d="M3.5 20a6 6 0 0 1 11 0"/><path d="M14 19a5 5 0 0 1 6.5 0"/>',
           tasks: '<rect x="4" y="5" width="16" height="15" rx="3"/><path d="m8 12 2.5 2.5L16 9"/>',
@@ -291,6 +293,7 @@ const title = 'CC SYSTEM';
           reports: 'reports',
           stats: 'stats',
           analytics: 'analytics',
+          roadmap: 'roadmap',
           templates: 'templates',
           staff: 'staff',
           tasks: 'tasks',
@@ -469,7 +472,7 @@ const title = 'CC SYSTEM';
           { id:'electricity', key:'electricity', group:'Pojazdy i noclegi', label:'Prąd 10A', price:30, scope:'camping' },
           { id:'dog', key:'dog', group:'Pojazdy i noclegi', label:'Pies', price:0, scope:'camping' },
           { id:'bungalow-2', key:'bungalow2', group:'Domki', label:'Domek 2-os.', price:(state)=>campSeason(state.arrivalDate) === 'high' ? 220 : 200, scope:'bungalow' },
-          { id:'bungalow-3', key:'bungalow3', group:'Domki', label:'Domek 3-os.', price:250, scope:'bungalow' },
+          { id:'bungalow-3', key:'bungalow3', group:'Domki', label:'Domek 3-os.', price:(state)=>campSeason(state.arrivalDate) === 'high' ? 350 : 300, scope:'bungalow' },
           { id:'bungalow-4', key:'bungalow4', group:'Domki', label:'Domek 4-os.', price:(state)=>campSeason(state.arrivalDate) === 'high' ? 450 : 400, scope:'bungalow' },
           { id:'adapter', key:'adapter', group:'Dodatkowe', label:'Adapter — TODO stan magazynu', price:0, perNight:false, scope:'extra' },
           { id:'cable', key:'cable', group:'Dodatkowe', label:'Kabel — TODO stan magazynu', price:0, perNight:false, scope:'extra' },
@@ -703,7 +706,7 @@ const title = 'CC SYSTEM';
           parking: { id:'parking', scope:'camping', label:'Samochód', price:35 },
           'extra-car': { id:'extra-car', scope:'camping', label:'Dodatkowe auto', price:35 },
           'bungalow-2': { id:'bungalow-2', scope:'bungalow', label:'Domek 2-os.', price:200 },
-          'bungalow-3': { id:'bungalow-3', scope:'bungalow', label:'Domek 3-os.', price:250 },
+          'bungalow-3': { id:'bungalow-3', scope:'bungalow', label:'Domek 3-os.', price:300, seasonalPrices:{ low:300, high:350 } },
           'bungalow-4': { id:'bungalow-4', scope:'bungalow', label:'Domek 4-os.', price:450 },
           adults: { id:'adults', scope:'people', label:'Osoba dorosła', price:35 },
           children: { id:'children', scope:'people', label:'Dziecko 4-14', price:20 },
@@ -1586,7 +1589,7 @@ const title = 'CC SYSTEM';
             badge.hidden = value <= 0;
           });
         };
-        const moduleOnlyViews = new Set(['dashboard','customers','reservations','calendar','camp','camp-pro','camp-plan','work-schedule','departures','staff-pro','parking','tours','purchases','cleaning','invoices','alerts','vip','warehouse','exports','backup','bungalows','camping','extend','print','reports','analytics','staff','tasks','stats','templates','settings']);
+        const moduleOnlyViews = new Set(['dashboard','customers','reservations','calendar','camp','camp-pro','camp-plan','work-schedule','departures','staff-pro','parking','tours','purchases','cleaning','invoices','alerts','vip','warehouse','exports','backup','bungalows','camping','extend','print','reports','analytics','roadmap','staff','tasks','stats','templates','settings']);
         const uiTokenFor = (text = '') => {
           const value = String(text || '').toLowerCase();
           if (/mail|inbox|odpowiedz/.test(value)) return 'ML';
@@ -2202,7 +2205,7 @@ const title = 'CC SYSTEM';
         };
         const renderBungalowsView = () => {
           const items = realItems().filter((item)=>categoryKeys(item).includes('bungalow') || categoryKeys(item).includes('combined'));
-          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Domki</span><h2>Domki 2-os., 3-os. i 4-os.</h2><p>Zasady: check-in 16:00, check-out 11:00, ręczniki/kosmetyki/rzeczy osobiste własne.</p></header><div class="module-metrics">${moduleMetric('🏡','Domek 2-os.','200/220 PLN/noc')}${moduleMetric('🏡','Domek 3-os.','od 250 PLN/noc')}${moduleMetric('🏡','Domek 4-os.','400/450 PLN/noc')}${moduleMetric('📬','Zapytania o domki',items.length)}</div>${moduleThreadList(items, 'Brak aktualnych zapytań o domki.')}</section>`;
+          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Domki</span><h2>Domki 2-os., 3-os. i 4-os.</h2><p>Zasady: check-in 16:00, check-out 11:00, ręczniki/kosmetyki/rzeczy osobiste własne.</p></header><div class="module-metrics">${moduleMetric('🏡','Domek 2-os.','200/220 PLN/noc')}${moduleMetric('🏡','Domek 3-os.','300/350 PLN/noc')}${moduleMetric('🏡','Domek 4-os.','400/450 PLN/noc')}${moduleMetric('📬','Zapytania o domki',items.length)}</div>${moduleThreadList(items, 'Brak aktualnych zapytań o domki.')}</section>`;
         };
         const renderCampingView = () => {
           const items = realItems().filter((item)=>categoryKeys(item).includes('camping'));
@@ -2270,6 +2273,125 @@ const title = 'CC SYSTEM';
             </div>
           </section>`;
         };
+        const roadmapRows = [
+          { offline:'CAMP', online:'CAMP / Nowe przyjęcie', status:'Aktywne', priority:1, notes:'Kalkulator recepcji, BAJT, karta pobytu i zapis do camp_stays po migracji.' },
+          { offline:'Karty pobytu / drukowanie', online:'Drukowanie / karta pobytu', status:'W budowie', priority:2, notes:'Jest fundament wydruku. Docelowo pełna karta jak offline, ale w czystszym układzie.' },
+          { offline:'Klienci', online:'Klienci Online', status:'W budowie', priority:3, notes:'Agregacja z zapytań działa. Potrzebna osobna tabela klientów, notatki i historia pobytów.' },
+          { offline:'PP / przedłużenia', online:'Przedłuż pobyt', status:'Placeholder', priority:4, notes:'Gotowy schemat procesu bez zapisu. Wymaga tabeli aktywnych pobytów.' },
+          { offline:'Kalendarz', online:'Kalendarz pobytów', status:'W budowie', priority:5, notes:'Widok planszy i zasobów jest przygotowany; drag/drop i konflikty dopiero po tabelach rezerwacji.' },
+          { offline:'campk', online:'Plan campu / miejsca', status:'Do analizy', priority:5, notes:'Offline ma mapę miejsc i statusy. Online powinien używać zasobów, nie statycznej grafiki 1:1.' },
+          { offline:'Domki', online:'Domki / dostępność', status:'W budowie', priority:5, notes:'Ceny domków: 2-os. 200/220, 3-os. 300/350, 4-os. 400/450 PLN.' },
+          { offline:'GUS', online:'GUS / raporty', status:'Placeholder', priority:6, notes:'Fundament raportu jest read-only. Docelowo GUS z pomijaniem BAJT i eksportem.' },
+          { offline:'Recepcja', online:'Dashboard recepcji', status:'W budowie', priority:7, notes:'Dashboard i alerty działają z zapytań. Trzeba dopiąć aktywne pobyty i dyżury.' },
+          { offline:'Info recepcji', online:'Baza wiedzy / schematy', status:'Placeholder', priority:7, notes:'Regulamin, cennik, dojazd, EV, tramwaj i FAQ jako szybka baza recepcji.' },
+          { offline:'Produkty recepcji', online:'Produkty / koszyk', status:'Do analizy', priority:8, notes:'Offline ma zakupy/magazyn. Online potrzebuje prostego koszyka i historii sprzedaży.' },
+          { offline:'Wycieczki', online:'Wycieczki', status:'Placeholder', priority:8, notes:'Zapytywania z formularza są widoczne; potrzebne rezerwacje wycieczek i rozliczenia.' },
+          { offline:'Pracownicy', online:'Pracownicy / role', status:'Placeholder', priority:9, notes:'Docelowo konta, role, grafiki, dyżury i uprawnienia.' },
+          { offline:'Zadania', online:'Zadania recepcji', status:'W budowie', priority:9, notes:'Zadania generowane z braków danych i pilnych zapytań. Potrzebny zapis manualny.' },
+          { offline:'Ustawienia', online:'Ustawienia online', status:'W budowie', priority:9, notes:'Widok read-only. Edycja słowników i cenników musi być bezpieczna i audytowana.' },
+          { offline:'Backup / eksporty', online:'Eksporty / Backup PRO', status:'Placeholder', priority:10, notes:'Planowany eksport JSON/CSV, backup przed importem i log synchronizacji.' },
+          { offline:'VIP / blacklist', online:'VIP / Blacklist', status:'Placeholder', priority:10, notes:'Statusy specjalne klienta, ostrzeżenia recepcji i historia decyzji.' },
+          { offline:'Magazyn', online:'Magazyn', status:'Placeholder', priority:10, notes:'Stany minimalne, wydania i sprzęt recepcji — nie kopiować arkusza 1:1.' },
+          { offline:'Faktury', online:'Faktury', status:'Placeholder', priority:10, notes:'Dane nabywcy, pozycje pobytu, PDF/druk i eksport księgowy.' },
+        ];
+        const renderRoadmapView = () => {
+          const statusClass = (status) => {
+            if (/aktywne/i.test(status)) return 'active';
+            if (/budowie/i.test(status)) return 'build';
+            if (/placeholder/i.test(status)) return 'placeholder';
+            if (/analizy/i.test(status)) return 'analysis';
+            return 'hold';
+          };
+          const statusBadge = (status) => `<span class="roadmap-status roadmap-status--${statusClass(status)}">${esc(status)}</span>`;
+          const campStatusLabel = campStorageStatus.loaded
+            ? campStorageStatus.ok
+              ? 'Aktywne'
+              : 'Wymaga migracji'
+            : 'Sprawdzanie';
+          const campStatusHint = campStorageStatus.ok
+            ? 'camp_stays gotowe do zapisu pobytów'
+            : 'CAMP wymaga uruchomienia migracji Supabase przed zapisem pobytów.';
+          const analyticsStatusLabel = analyticsStorageStatus.loaded
+            ? analyticsStorageStatus.ok
+              ? 'Aktywne'
+              : 'Wymaga migracji'
+            : 'Sprawdzanie';
+          const analyticsStatusHint = analyticsStorageStatus.ok
+            ? `site_events aktywne; ostatnie eventy: ${analyticsStorageStatus.eventCount || 0}`
+            : 'Endpoint analityki ma fallback, ale site_events wymaga migracji.';
+          const tableRows = roadmapRows.map((row)=>`
+            <tr>
+              <td><strong>${esc(row.offline)}</strong></td>
+              <td>${esc(row.online)}</td>
+              <td>${statusBadge(row.status)}</td>
+              <td><span class="roadmap-priority">${esc(row.priority)}</span></td>
+              <td>${esc(row.notes)}</td>
+            </tr>
+          `).join('');
+          const nextSteps = [
+            'Uruchomić migrację CAMP/site_events w Supabase.',
+            'Przetestować zapis CAMP live.',
+            'Dopracować finalną kartę pobytu.',
+            'Zrobić Klienci Online.',
+            'Zrobić Przedłużenia / PP.',
+            'Zrobić Kalendarz / Domki.',
+            'Zrobić GUS z pomijaniem BAJT.',
+            'Zrobić Info recepcji.',
+            'Zrobić Produkty recepcji.',
+            'Zrobić uprawnienia pracowników.',
+          ];
+          const offlineFiles = ['app/camp.js','app/clients.js','app/calendar.js','app/reception.js','app/gus.js','app/stay_pdf.js','app/countries.js','app/tours.js','app/purchases.js','app/settings.js','app/database.js'];
+          const transfer = [
+            'proces CAMP: klient → usługi → płatność → dokument → karta pobytu',
+            'logika sezonu domków i cenniki jako centralne słowniki',
+            'kalendarz zasobów, konflikty terminów i statusy sprzątania',
+            'GUS z filtrami, BAJT i eksportem',
+            'klienci 360: kontakt, historia, VIP/blacklist i notatki',
+            'wycieczki, zakupy, magazyn i zadania jako lekkie moduły online',
+          ];
+          const doNotCopy = [
+            'nie kopiować starego UI Electron 1:1',
+            'nie przenosić lokalnego SQLite bez mapowania konfliktów',
+            'nie robić jednego wielkiego modułu; każdy zapis ma mieć własną tabelę i audyt',
+            'nie automatyzować synchronizacji offline ↔ online bez ręcznej akceptacji',
+          ];
+          const analyticsNeeds = ['kraje odwiedzających stronę','języki','kliknięcia CTA','filtry/kategorie','zachowania w formularzu','CAMPY pytania','feedback i oceny','podpowiedzi co poprawić na stronie'];
+          return `<section class="dashboard-panel module-view roadmap-view">
+            <header class="module-head">
+              <span class="eyebrow">CC SYSTEM offline → online</span>
+              <h2>Moduły / Roadmap</h2>
+              <p>Mapa funkcji starego CC SYSTEM OFFLINE z ZIP-a do nowego panelu online. To plan migracji procesów, nie kopia starego UI.</p>
+            </header>
+            <div class="module-metrics">
+              ${moduleMetric('CP','CAMP baza',campStatusLabel,campStatusHint)}
+              ${moduleMetric('AN','Analityka',analyticsStatusLabel,analyticsStatusHint)}
+              ${moduleMetric('SQL','Migracja','20260705121500','camp_stays + site_events')}
+              ${moduleMetric('ZIP','ZIP offline','przeanalizowany','Electron + SQLite + moduły recepcji')}
+            </div>
+            <section class="module-card module-card--wide roadmap-migration">
+              <h3>Status migracji Supabase</h3>
+              <p><strong>SQL do uruchomienia ręcznie:</strong> supabase/migrations/20260705121500_camp_stays_and_site_events.sql</p>
+              <div class="crm-tags">
+                <span>CAMP baza: ${esc(campStatusLabel)}</span>
+                <span>Analityka: ${esc(analyticsStatusLabel)}</span>
+                <span>Bez DROP / DELETE / TRUNCATE</span>
+              </div>
+            </section>
+            <div class="roadmap-table-wrap">
+              <table class="roadmap-table">
+                <thead><tr><th>OFFLINE MODULE</th><th>ONLINE MODULE</th><th>STATUS</th><th>PRIORYTET</th><th>UWAGI</th></tr></thead>
+                <tbody>${tableRows}</tbody>
+              </table>
+            </div>
+            <div class="module-grid module-grid--two">
+              <section class="module-card"><h3>Najważniejsze pliki z ZIP</h3><div class="crm-tags">${offlineFiles.map((file)=>`<span>${esc(file)}</span>`).join('')}</div><p class="module-empty">ZIP zawiera lokalny Electron/SQLite; online ma przejąć procesy i reguły, nie architekturę desktopową.</p></section>
+              <section class="module-card"><h3>Najbliższe kroki</h3><ol class="roadmap-steps">${nextSteps.map((step)=>`<li>${esc(step)}</li>`).join('')}</ol></section>
+              <section class="module-card"><h3>Co warto przenieść</h3><ul class="module-rule-list">${transfer.map((item)=>`<li>${esc(item)}</li>`).join('')}</ul></section>
+              <section class="module-card"><h3>Czego nie kopiować 1:1</h3><ul class="module-rule-list">${doNotCopy.map((item)=>`<li>${esc(item)}</li>`).join('')}</ul></section>
+              <section class="module-card module-card--wide"><h3>Analityka — przyszłe potrzeby</h3><div class="crm-tags">${analyticsNeeds.map((item)=>`<span>${esc(item)}</span>`).join('')}</div></section>
+            </div>
+          </section>`;
+        };
         const renderSystemStrip = () => {
           if (!systemStrip) return;
           const env = health?.env || {};
@@ -2287,6 +2409,8 @@ const title = 'CC SYSTEM';
             ['Archiwum', archivedItems().length],
             ['Dostarczenie maila', resendStatus],
             ['Supabase', health?.tableCheck?.ok ? 'OK' : health ? 'błąd' : 'sprawdzanie'],
+            ['CAMP baza', campStorageStatus.loaded ? (campStorageStatus.ok ? 'aktywna' : 'wymaga migracji') : 'sprawdzanie'],
+            ['Analityka', analyticsStorageStatus.loaded ? (analyticsStorageStatus.ok ? 'aktywna' : 'wymaga migracji') : 'sprawdzanie'],
             ['Tabele Mail Center', mailCenter.ok ? 'aktywne' : health ? 'wymagają migracji' : 'sprawdzanie'],
             ['Historia wiadomości', mailCenter.historyActive ? 'aktywna' : health ? 'fallback / migracja' : 'sprawdzanie'],
             ['Szkice', mailCenter.draftsActive ? 'aktywne' : health ? 'fallback / migracja' : 'sprawdzanie'],
@@ -2423,7 +2547,7 @@ const title = 'CC SYSTEM';
             ['Google Maps','Używać Google Maps — wjazd zmienił się w 2022 roku'],
             ['Języki odpowiedzi','PL, EN, DE, IT, FR, ES, NL, CS, SK, SV'],
             ['Cennik camping','Dorośli 35 PLN, dzieci 20 PLN, kamper 80 PLN, prąd 30 PLN'],
-            ['Cennik domki','2-os. 200/220 PLN, 3-os. od 250 PLN, 4-os. 400/450 PLN'],
+            ['Cennik domki','2-os. 200/220 PLN, 3-os. 300/350 PLN, 4-os. 400/450 PLN'],
             ['Web3Forms/FormSubmit','kanały zapasowe diagnostyczne'],
           ];
           const syncRows = [
@@ -2573,6 +2697,7 @@ const title = 'CC SYSTEM';
             else if (activeView === 'print') list.innerHTML = renderPrintView();
             else if (activeView === 'reports') list.innerHTML = renderReportsView();
             else if (activeView === 'analytics') list.innerHTML = renderAnalyticsView();
+            else if (activeView === 'roadmap') list.innerHTML = renderRoadmapView();
             else if (activeView === 'staff') list.innerHTML = renderStaffView();
             else if (activeView === 'tasks') list.innerHTML = renderTasksView();
             else if (activeView === 'stats') list.innerHTML = renderStatsView();
@@ -3894,6 +4019,94 @@ const title = 'CC SYSTEM';
   .cc-system-app .crm-metric strong {
     color: #fff;
     letter-spacing: -.04em;
+  }
+
+  .cc-system-app .roadmap-table-wrap {
+    overflow-x: auto;
+    border: 1px solid rgba(180, 236, 205, .1);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, .035);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035);
+  }
+
+  .cc-system-app .roadmap-table {
+    width: 100%;
+    min-width: 920px;
+    border-collapse: collapse;
+  }
+
+  .cc-system-app .roadmap-table th,
+  .cc-system-app .roadmap-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(180, 236, 205, .08);
+    color: rgba(241, 255, 246, .86);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .cc-system-app .roadmap-table th {
+    color: var(--cc-green-strong);
+    font-size: .72rem;
+    font-weight: 900;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+  }
+
+  .cc-system-app .roadmap-table td strong {
+    color: #fff;
+  }
+
+  .cc-system-app .roadmap-status,
+  .cc-system-app .roadmap-priority {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(180, 236, 205, .15);
+    background: rgba(255, 255, 255, .06);
+    color: #fff;
+    font-size: .78rem;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  .cc-system-app .roadmap-status--active {
+    border-color: rgba(74, 222, 128, .35);
+    background: rgba(34, 197, 94, .16);
+    color: #86efac;
+  }
+
+  .cc-system-app .roadmap-status--build {
+    border-color: rgba(96, 165, 250, .32);
+    background: rgba(59, 130, 246, .13);
+    color: #bfdbfe;
+  }
+
+  .cc-system-app .roadmap-status--placeholder {
+    border-color: rgba(250, 204, 21, .32);
+    background: rgba(234, 179, 8, .12);
+    color: #fde68a;
+  }
+
+  .cc-system-app .roadmap-status--analysis {
+    border-color: rgba(196, 181, 253, .32);
+    background: rgba(139, 92, 246, .12);
+    color: #ddd6fe;
+  }
+
+  .cc-system-app .roadmap-migration p {
+    margin: 0 0 14px;
+    color: rgba(241, 255, 246, .78);
+  }
+
+  .cc-system-app .roadmap-steps {
+    display: grid;
+    gap: 9px;
+    margin: 0;
+    padding-left: 20px;
+    color: rgba(241, 255, 246, .82);
   }
 
   .cc-system-app .mail-center-workspace {

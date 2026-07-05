@@ -512,7 +512,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
           parking: { id:'parking', scope:'camping', label:'Samochód', price:35 },
           'extra-car': { id:'extra-car', scope:'camping', label:'Dodatkowe auto', price:35 },
           'bungalow-2': { id:'bungalow-2', scope:'bungalow', label:'Domek 2-os.', price:200 },
-          'bungalow-3': { id:'bungalow-3', scope:'bungalow', label:'Domek 3-os.', price:250 },
+          'bungalow-3': { id:'bungalow-3', scope:'bungalow', label:'Domek 3-os.', price:300, seasonalPrices:{ low:300, high:350 } },
           'bungalow-4': { id:'bungalow-4', scope:'bungalow', label:'Domek 4-os.', price:400 },
           adults: { id:'adults', scope:'people', label:'Osoba dorosła', price:35 },
           children: { id:'children', scope:'people', label:'Dziecko 4-14', price:20 },
@@ -1834,7 +1834,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
         };
         const renderBungalowsView = () => {
           const items = realItems().filter((item)=>categoryKeys(item).includes('bungalow') || categoryKeys(item).includes('combined'));
-          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Domki</span><h2>Domki 2-os., 3-os. i 4-os.</h2><p>Zasady: check-in 16:00, check-out 11:00, ręczniki/kosmetyki/rzeczy osobiste własne.</p></header><div class="module-metrics">${moduleMetric('🏡','Domek 2-os.','200/220 PLN/noc')}${moduleMetric('🏡','Domek 3-os.','od 250 PLN/noc')}${moduleMetric('🏡','Domek 4-os.','400/450 PLN/noc')}${moduleMetric('📬','Zapytania o domki',items.length)}</div>${moduleThreadList(items, 'Brak aktualnych zapytań o domki.')}</section>`;
+          return `<section class="dashboard-panel module-view"><header class="module-head"><span class="eyebrow">Domki</span><h2>Domki 2-os., 3-os. i 4-os.</h2><p>Zasady: check-in 16:00, check-out 11:00, ręczniki/kosmetyki/rzeczy osobiste własne.</p></header><div class="module-metrics">${moduleMetric('🏡','Domek 2-os.','200/220 PLN/noc')}${moduleMetric('🏡','Domek 3-os.','300/350 PLN/noc')}${moduleMetric('🏡','Domek 4-os.','400/450 PLN/noc')}${moduleMetric('📬','Zapytania o domki',items.length)}</div>${moduleThreadList(items, 'Brak aktualnych zapytań o domki.')}</section>`;
         };
         const renderCampingView = () => {
           const items = realItems().filter((item)=>categoryKeys(item).includes('camping'));
@@ -1978,7 +1978,7 @@ const demoDataJson = JSON.stringify(ccSystemDemoData).replace(/</g, '\\u003c');
             ['Sitemap','trasa wykluczona'],
             ['Języki odpowiedzi','PL, EN, DE, IT, FR, ES, NL, CS, SK, SV'],
             ['Cennik camping','Dorośli 35 PLN, dzieci 20 PLN, kamper 80 PLN, prąd 30 PLN'],
-            ['Cennik domki','2-os. 200/220 PLN, 3-os. od 250 PLN, 4-os. 400/450 PLN'],
+            ['Cennik domki','2-os. 200/220 PLN, 3-os. 300/350 PLN, 4-os. 400/450 PLN'],
           ];
           const syncRows = [
             ['Status', 'planowane — bez automatycznej synchronizacji w tym etapie'],

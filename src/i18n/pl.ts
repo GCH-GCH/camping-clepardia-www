@@ -129,7 +129,7 @@ export const pl = {
       transit:
         'Do centrum najwygodniej pojechać tramwajem: przystanek jest ok. 40 m od bramy, do Starego Kleparza / centrum jest ok. 9 przystanków i ok. 14 minut jazdy.',
       bungalows:
-        'Domki mają osobną dostępność. Dostępne są tylko domki 2-os., 3-os. i 4-os. Ceny: 200/220 PLN, 3-os. od 250 PLN oraz 400/450 PLN zależnie od sezonu.',
+        'Domki mają osobną dostępność. Dostępne są tylko domki 2-os., 3-os. i 4-os. Ceny: 200/220 PLN, 3-os. 300/350 PLN oraz 400/450 PLN zależnie od sezonu.',
       dog:
         'Tak, pies ma stawkę 0 PLN. Prosimy sprzątać po psie i trzymać go pod kontrolą na terenie campingu.',
       campingBooking:
