@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/audit-pricing-i18n.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "images:webp": "node scripts/convert-raw-to-webp.mjs"
