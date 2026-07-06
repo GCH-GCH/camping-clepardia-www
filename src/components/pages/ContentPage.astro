@@ -14,6 +14,7 @@ import { pricingConfig } from '@/data/pricing';
 import type { SitePage } from '@/data/sitePages';
 import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import { getTranslations, resolveContentLanguage } from '@/i18n/config';
+import { getPremiumPricingText } from '@/i18n/premiumPricing';
 import { getCurrentYear } from '@/utils/currentYear';
 
 interface Props {
@@ -28,6 +29,7 @@ const contentLanguage = languageCode ?? pathContext.languageCode;
 const resolvedContentLanguage = resolveContentLanguage(contentLanguage);
 const linkLanguage = pathContext.explicitLanguage;
 const t = getTranslations(contentLanguage);
+const premiumPricingText = getPremiumPricingText(contentLanguage);
 const currentYear = getCurrentYear();
 const pricingOverlineByLanguage = {
   pl: `Cennik Camping Clepardia ${currentYear}`,
@@ -64,6 +66,8 @@ const pricingHeroTextByLanguage = {
     lead: 'Sprawdź orientacyjny koszt pobytu i wybierz najlepszy wariant dla siebie.',
     primary: 'Oblicz koszt',
     secondary: 'Zarezerwuj pobyt',
+    actionsAria: 'Szybkie akcje cennika',
+    featuredLabel: 'Najczęściej wybierany pobyt',
     notes: ['Cena jest orientacyjna', 'Dostępność potwierdza recepcja', 'Camping 12:00-12:00', 'Domki 16:00-11:00'],
   },
   en: {
@@ -72,6 +76,8 @@ const pricingHeroTextByLanguage = {
     lead: 'Check the indicative stay cost and choose the best option for you.',
     primary: 'Calculate cost',
     secondary: 'Book your stay',
+    actionsAria: 'Quick price actions',
+    featuredLabel: 'Most popular stay',
     notes: ['Indicative price', 'Reception confirms availability', 'Camping 12:00-12:00', 'Bungalows 16:00-11:00'],
   },
   de: {
@@ -80,6 +86,8 @@ const pricingHeroTextByLanguage = {
     lead: 'Prüfen Sie die ungefähren Aufenthaltskosten und wählen Sie die passende Option.',
     primary: 'Kosten berechnen',
     secondary: 'Aufenthalt buchen',
+    actionsAria: 'Schnelle Preisaktionen',
+    featuredLabel: 'Beliebtester Aufenthalt',
     notes: ['Richtpreis', 'Rezeption bestätigt Verfügbarkeit', 'Camping 12:00-12:00', 'Bungalows 16:00-11:00'],
   },
   it: {
@@ -88,11 +96,73 @@ const pricingHeroTextByLanguage = {
     lead: 'Controlla il costo indicativo del soggiorno e scegli la soluzione migliore.',
     primary: 'Calcola costo',
     secondary: 'Prenota soggiorno',
+    actionsAria: 'Azioni rapide prezzi',
+    featuredLabel: 'Soggiorno più scelto',
     notes: ['Prezzo indicativo', 'La reception conferma disponibilità', 'Camping 12:00-12:00', 'Bungalow 16:00-11:00'],
+  },
+  fr: {
+    overline: `Tarifs Camping Clepardia ${currentYear}`,
+    title: 'Tarifs Camping Clepardia',
+    lead: 'Vérifiez le coût indicatif du séjour et choisissez la meilleure option.',
+    primary: 'Calculer le coût',
+    secondary: 'Réserver le séjour',
+    actionsAria: 'Actions rapides des tarifs',
+    featuredLabel: 'Séjour le plus choisi',
+    notes: ['Prix indicatif', 'La réception confirme la disponibilité', 'Camping 12:00-12:00', 'Bungalows 16:00-11:00'],
+  },
+  es: {
+    overline: `Precios Camping Clepardia ${currentYear}`,
+    title: 'Precios Camping Clepardia',
+    lead: 'Consulta el coste orientativo de la estancia y elige la mejor opción.',
+    primary: 'Calcular coste',
+    secondary: 'Reservar estancia',
+    actionsAria: 'Acciones rápidas de precios',
+    featuredLabel: 'Estancia más elegida',
+    notes: ['Precio orientativo', 'Recepción confirma disponibilidad', 'Camping 12:00-12:00', 'Bungalows 16:00-11:00'],
+  },
+  nl: {
+    overline: `Prijzen Camping Clepardia ${currentYear}`,
+    title: 'Prijzen Camping Clepardia',
+    lead: 'Bekijk de indicatieve verblijfskosten en kies de beste optie.',
+    primary: 'Kosten berekenen',
+    secondary: 'Verblijf boeken',
+    actionsAria: 'Snelle prijsacties',
+    featuredLabel: 'Meest gekozen verblijf',
+    notes: ['Indicatieve prijs', 'Receptie bevestigt beschikbaarheid', 'Camping 12:00-12:00', 'Bungalows 16:00-11:00'],
+  },
+  cs: {
+    overline: `Ceny Camping Clepardia ${currentYear}`,
+    title: 'Ceny Camping Clepardia',
+    lead: 'Zkontrolujte orientační cenu pobytu a vyberte nejlepší možnost.',
+    primary: 'Spočítat cenu',
+    secondary: 'Rezervovat pobyt',
+    actionsAria: 'Rychlé akce ceníku',
+    featuredLabel: 'Nejčastěji vybraný pobyt',
+    notes: ['Orientační cena', 'Recepce potvrzuje dostupnost', 'Camping 12:00-12:00', 'Bungalovy 16:00-11:00'],
+  },
+  sk: {
+    overline: `Ceny Camping Clepardia ${currentYear}`,
+    title: 'Ceny Camping Clepardia',
+    lead: 'Skontrolujte orientačnú cenu pobytu a vyberte najlepšiu možnosť.',
+    primary: 'Vypočítať cenu',
+    secondary: 'Rezervovať pobyt',
+    actionsAria: 'Rýchle akcie cenníka',
+    featuredLabel: 'Najčastejšie vybraný pobyt',
+    notes: ['Orientačná cena', 'Recepcia potvrdzuje dostupnosť', 'Camping 12:00-12:00', 'Bungalovy 16:00-11:00'],
+  },
+  sv: {
+    overline: `Priser Camping Clepardia ${currentYear}`,
+    title: 'Priser Camping Clepardia',
+    lead: 'Kontrollera ungefärlig vistelsekostnad och välj bästa alternativet.',
+    primary: 'Beräkna kostnad',
+    secondary: 'Boka vistelse',
+    actionsAria: 'Snabba prisåtgärder',
+    featuredLabel: 'Mest valda vistelse',
+    notes: ['Ungefärligt pris', 'Receptionen bekräftar tillgänglighet', 'Camping 12:00-12:00', 'Bungalower 16:00-11:00'],
   },
 };
 const contactHeroText = contactHeroTextByLanguage[resolvedContentLanguage];
-const pricingHeroText = pricingHeroTextByLanguage[resolvedContentLanguage];
+const pricingHeroText = pricingHeroTextByLanguage[contentLanguage as keyof typeof pricingHeroTextByLanguage] ?? pricingHeroTextByLanguage.en;
 const displayOverline = page.slug === 'kontakt'
   ? contactHeroText.overline
   : page.slug === 'cennik'
@@ -161,22 +231,22 @@ const pricingHeroStats = [
   {
     icon: 'camper',
     value: formatPrice((pricingConfig.people.adults.price * 2) + flatPricingStayPrice('camper') + pricingAddonPrice('electricity')),
-    label: '2 osoby + kamper + prąd',
+    label: premiumPricingText.spotlight.cards.camperElectricity.title,
   },
   {
     icon: 'dog',
     value: formatPrice(pricingAddonPrice('dog')),
-    label: 'Pies',
+    label: premiumPricingText.services.dog.label,
   },
   {
     icon: 'electricity',
     value: formatPrice(pricingAddonPrice('electricity')),
-    label: 'Prąd 10A',
+    label: premiumPricingText.services.electricity.label,
   },
   {
     icon: 'clock',
     value: '12:00-12:00',
-    label: 'Doba campingowa',
+    label: pricingHeroText.notes[2],
   },
 ];
 const pricingInfoBarItems = [
@@ -324,10 +394,10 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
     <h1>{displayTitle}</h1>
     <p>{displayLead}</p>
     {page.slug === 'cennik' && (
-      <div class="pricing-hero-actions" aria-label="Szybkie akcje cennika">
+      <div class="pricing-hero-actions" aria-label={pricingHeroText.actionsAria}>
         <article class="pricing-hero-actions__featured">
-          <span>Najczęściej wybierany pobyt</span>
-          <strong>{pricingHeroStats[0].value} <small>/ noc</small></strong>
+          <span>{pricingHeroText.featuredLabel}</span>
+          <strong>{pricingHeroStats[0].value} <small>{premiumPricingText.units.perNight}</small></strong>
           <p>{pricingHeroStats[0].label}</p>
         </article>
         <div class="pricing-hero-actions__buttons">
@@ -551,7 +621,7 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
   </section>
 )}
 
-{page.slug === 'cennik' && <PremiumPricingApp languageCode={resolvedContentLanguage} />}
+{page.slug === 'cennik' && <PremiumPricingApp languageCode={contentLanguage} />}
 
 {page.slug === 'dojazd' && <TransportDirections languageCode={resolvedContentLanguage} />}
 

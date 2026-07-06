@@ -1,7 +1,8 @@
 ---
-import { currencyEstimateConfig, formatCurrencyEstimates, pricingConfig } from '@/data/pricing';
+import { currencyEstimateConfig, pricingConfig } from '@/data/pricing';
 import Icon from '@/components/ui/Icon.astro';
-import { getBookingLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getPremiumPricingText } from '@/i18n/premiumPricing';
+import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 
 interface Props {
   languageCode?: string;
@@ -11,9 +12,20 @@ const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
 const activeLanguage = languageCode ?? pathContext.languageCode;
 const bookingHref = getBookingLocalizedPath(activeLanguage);
+const localizedLanguage = activeLanguage === 'pl' ? undefined : activeLanguage;
+const contactHref = getLocalizedPath(localizedLanguage, 'kontakt');
+const pricingText = getPremiumPricingText(activeLanguage);
 const currency = pricingConfig.currency;
 const formatPrice = (price: number) => `${price} ${currency}`;
-const formatEstimate = (price: number) => formatCurrencyEstimates(price);
+const formatEstimate = (price: number) => {
+  const pln = Math.max(0, Number(price) || 0);
+  const rates = currencyEstimateConfig.rates;
+  return `${pricingText.units.approx} ${Math.round(pln / rates.EUR)} EUR / ${Math.round(pln / rates.USD)} USD / ${Math.round(pln / rates.GBP)} GBP`;
+};
+const formatPerNight = (price: number) => `${formatPrice(price)} ${pricingText.units.perNight}`;
+const formatZeroPerNight = () => `0 ${currency} ${pricingText.units.perNight}`;
+const replaceTokens = (value: string, replacements: Record<string, string | number>) =>
+  Object.entries(replacements).reduce((text, [key, replacement]) => text.replaceAll(`{${key}}`, String(replacement)), value);
 const findStayType = (id: string) => pricingConfig.stayTypes.find((item) => item.id === id);
 const findAddon = (id: string) => pricingConfig.addons.find((item) => item.id === id);
 const flatStay = (id: string) => {
@@ -66,31 +78,31 @@ const modeCards = [
   {
     mode: 'camping',
     icon: 'camper',
-    title: 'Camping',
-    copy: 'Kamper, van, namiot, przyczepa, auto + namiot dachowy.',
-    chips: ['Kamper', 'Namiot', 'Prąd 10A'],
+    title: pricingText.modes.camping.title,
+    copy: pricingText.modes.camping.copy,
+    chips: pricingText.modes.camping.chips,
   },
   {
     mode: 'bungalow',
     icon: 'house',
-    title: 'Domki',
-    copy: 'Domki 2-, 3- i 4-osobowe.',
-    chips: ['2-os.', '3-os.', '4-os.'],
+    title: pricingText.modes.bungalow.title,
+    copy: pricingText.modes.bungalow.copy,
+    chips: pricingText.modes.bungalow.chips,
   },
   {
     mode: 'combined',
     icon: 'users',
-    title: 'Camping + domek',
-    copy: 'Dla rodzin i grup, gdy część osób śpi w domku, a część przyjeżdża kamperem lub przyczepą.',
-    chips: ['Domek', 'Kamper', 'Grupa'],
+    title: pricingText.modes.combined.title,
+    copy: pricingText.modes.combined.copy,
+    chips: pricingText.modes.combined.chips,
   },
 ];
 
 const counters = [
-  { id: 'nights', label: 'Liczba nocy', value: 1, min: 1, price: null, icon: 'calendar' },
-  { id: 'adults', label: 'Dorośli', value: 2, min: 0, price: adult.price, icon: 'users' },
-  { id: 'children', label: 'Dzieci 4-14', value: 0, min: 0, price: child.price, icon: 'baby' },
-  { id: 'toddlers', label: 'Dzieci do 4', value: 0, min: 0, price: toddler.price, icon: 'baby' },
+  { id: 'nights', label: pricingText.counters.nights, value: 1, min: 1, price: null, icon: 'calendar' },
+  { id: 'adults', label: pricingText.counters.adults, value: 2, min: 0, price: adult.price, icon: 'users' },
+  { id: 'children', label: pricingText.counters.children, value: 0, min: 0, price: child.price, icon: 'baby' },
+  { id: 'toddlers', label: pricingText.counters.toddlers, value: 0, min: 0, price: toddler.price, icon: 'baby' },
 ];
 
 const personCounters = counters.filter((counter) => counter.id !== 'nights');
@@ -98,66 +110,66 @@ const personCounters = counters.filter((counter) => counter.id !== 'nights');
 const counterGroups = [
   {
     icon: 'calendar',
-    title: 'Liczba nocy',
-    copy: 'Ustaw długość pobytu. Suma mnoży się przez liczbę nocy.',
+    title: pricingText.counters.nights,
+    copy: pricingText.calculator.lead,
     counters: counters.filter((counter) => counter.id === 'nights'),
   },
   {
     icon: 'users',
-    title: 'Goście',
-    copy: 'Osoby doliczane są do wariantów campingowych. W domkach cena bazuje na typie domku.',
+    title: pricingText.calculator.peopleTitle,
+    copy: pricingText.calculator.peopleCopy,
     counters: counters.filter((counter) => counter.id !== 'nights'),
   },
 ];
 
 const campingServices = [
-  { id: 'camper', label: camper.label, price: camper.price, icon: 'camper', note: 'Najczęstszy wybór' },
-  { id: 'van', label: van.label, price: van.price, icon: 'busFront', note: 'Kompaktowy pobyt' },
-  { id: 'caravan', label: caravan.label, price: caravan.price, icon: 'caravan', note: 'Przyczepa kempingowa' },
-  { id: 'tent-small', label: tentSmall.label, price: tentSmall.price, icon: 'tent', note: 'Namiot 1-2 os.' },
-  { id: 'tent-large', label: tentLarge.label, price: tentLarge.price, icon: 'tent', note: 'Namiot 3-4 os.' },
-  { id: 'rooftop-tent', label: rooftopTent.label, price: rooftopTent.price, icon: 'tent', note: 'Auto + namiot' },
-  { id: 'parking', label: 'Samochód / parking', price: parking.price, icon: 'car', note: 'Auto przy zestawie' },
-  { id: 'motorcycle', label: motorcycle.label, price: motorcycle.price, icon: 'motorcycle', note: 'Motocykl' },
-  { id: 'cargo-trailer', label: cargoTrailer.label, price: cargoTrailer.price, icon: 'caravan', note: 'Dodatkowy bagaż' },
-  { id: 'bus', label: bus.label, price: bus.price, icon: 'truck', note: 'Cięższy pojazd' },
-  { id: 'electricity', label: 'Prąd 10A', price: electricity.price, icon: 'electricity', note: 'Bez ładowania EV' },
-  { id: 'dog', label: dog.label, price: dog.price, icon: 'dog', note: 'Pies bezpłatnie' },
+  { id: 'camper', label: pricingText.services.camper.label, price: camper.price, icon: 'camper', note: pricingText.services.camper.note },
+  { id: 'van', label: pricingText.services.van.label, price: van.price, icon: 'busFront', note: pricingText.services.van.note },
+  { id: 'caravan', label: pricingText.services.caravan.label, price: caravan.price, icon: 'caravan', note: pricingText.services.caravan.note },
+  { id: 'tent-small', label: pricingText.services.tentSmall.label, price: tentSmall.price, icon: 'tent', note: pricingText.services.tentSmall.note },
+  { id: 'tent-large', label: pricingText.services.tentLarge.label, price: tentLarge.price, icon: 'tent', note: pricingText.services.tentLarge.note },
+  { id: 'rooftop-tent', label: pricingText.services.rooftopTent.label, price: rooftopTent.price, icon: 'tent', note: pricingText.services.rooftopTent.note },
+  { id: 'parking', label: pricingText.services.parking.label, price: parking.price, icon: 'car', note: pricingText.services.parking.note },
+  { id: 'motorcycle', label: pricingText.services.motorcycle.label, price: motorcycle.price, icon: 'motorcycle', note: pricingText.services.motorcycle.note },
+  { id: 'cargo-trailer', label: pricingText.services.cargoTrailer.label, price: cargoTrailer.price, icon: 'caravan', note: pricingText.services.cargoTrailer.note },
+  { id: 'bus', label: pricingText.services.bus.label, price: bus.price, icon: 'truck', note: pricingText.services.bus.note },
+  { id: 'electricity', label: pricingText.services.electricity.label, price: electricity.price, icon: 'electricity', note: pricingText.services.electricity.note },
+  { id: 'dog', label: pricingText.services.dog.label, price: dog.price, icon: 'dog', note: pricingText.services.dog.note },
 ];
 
 const campingServiceGroups = [
   {
-    title: 'Pojazd / nocleg',
-    copy: 'Wybierz główny sposób pobytu na campingu.',
+    title: pricingText.serviceGroups.campingStay.title,
+    copy: pricingText.serviceGroups.campingStay.copy,
     icon: 'camper',
     items: campingServices.filter((item) => ['camper', 'van', 'caravan', 'tent-small', 'tent-large', 'rooftop-tent', 'bus'].includes(item.id)),
   },
   {
-    title: 'Dodatki',
-    copy: 'Dodatkowe elementy liczone za noc pobytu.',
+    title: pricingText.serviceGroups.campingAddons.title,
+    copy: pricingText.serviceGroups.campingAddons.copy,
     icon: 'plug',
     items: campingServices.filter((item) => ['parking', 'motorcycle', 'cargo-trailer', 'electricity', 'dog'].includes(item.id)),
   },
 ];
 
 const bungalowServices = [
-  { id: 'bungalow-2', label: bungalow2.label, seasonalPrices: bungalow2.seasonalPrices, icon: 'house', note: '2 osoby' },
-  { id: 'bungalow-3', label: bungalow3.label, seasonalPrices: bungalow3.seasonalPrices, icon: 'house', note: '2 lub 3 osoby' },
-  { id: 'bungalow-4', label: bungalow4.label, seasonalPrices: bungalow4.seasonalPrices, icon: 'house', note: 'Dla rodziny' },
-  { id: 'bungalow-parking', label: 'Samochód / parking', price: parking.price, icon: 'car', note: 'Auto przy domku' },
-  { id: 'bungalow-dog', label: dog.label, price: dog.price, icon: 'dog', note: 'Pies bezpłatnie' },
+  { id: 'bungalow-2', label: pricingText.services.bungalow2.label, seasonalPrices: bungalow2.seasonalPrices, icon: 'house', note: pricingText.services.bungalow2.note },
+  { id: 'bungalow-3', label: pricingText.services.bungalow3.label, seasonalPrices: bungalow3.seasonalPrices, icon: 'house', note: pricingText.services.bungalow3.note },
+  { id: 'bungalow-4', label: pricingText.services.bungalow4.label, seasonalPrices: bungalow4.seasonalPrices, icon: 'house', note: pricingText.services.bungalow4.note },
+  { id: 'bungalow-parking', label: pricingText.services.bungalowParking.label, price: parking.price, icon: 'car', note: pricingText.services.bungalowParking.note },
+  { id: 'bungalow-dog', label: pricingText.services.bungalowDog.label, price: dog.price, icon: 'dog', note: pricingText.services.bungalowDog.note },
 ];
 
 const bungalowServiceGroups = [
   {
-    title: 'Domki',
-    copy: 'Ceny domków zależą od sezonu. Osoby pomagają dobrać wariant, ale nie są doliczane osobno.',
+    title: pricingText.serviceGroups.bungalowStay.title,
+    copy: pricingText.serviceGroups.bungalowStay.copy,
     icon: 'house',
     items: bungalowServices.filter((item) => ['bungalow-2', 'bungalow-3', 'bungalow-4'].includes(item.id)),
   },
   {
-    title: 'Dodatki do domku',
-    copy: 'Opcje praktyczne przy pobycie w domku.',
+    title: pricingText.serviceGroups.bungalowAddons.title,
+    copy: pricingText.serviceGroups.bungalowAddons.copy,
     icon: 'car',
     items: bungalowServices.filter((item) => ['bungalow-parking', 'bungalow-dog'].includes(item.id)),
   },
@@ -177,7 +189,7 @@ const presets = [
     id: 'camper-electricity',
     mode: 'camping',
     icon: 'camper',
-    title: '2 osoby + kamper + prąd',
+    title: pricingText.spotlight.cards.camperElectricity.title,
     price: popularPrice.camperElectricity,
     href: `${bookingHref}?stay=camping&preset=camper-electricity`,
     values: { adults: 2, children: 0, toddlers: 0 },
@@ -187,7 +199,7 @@ const presets = [
     id: 'van',
     mode: 'camping',
     icon: 'busFront',
-    title: '2 osoby + van',
+    title: pricingText.spotlight.cards.van.title,
     price: popularPrice.van,
     href: `${bookingHref}?stay=camping&preset=van`,
     values: { adults: 2, children: 0, toddlers: 0 },
@@ -197,7 +209,7 @@ const presets = [
     id: 'caravan-electricity-car',
     mode: 'camping',
     icon: 'caravan',
-    title: '2 osoby + auto + przyczepa + prąd',
+    title: pricingText.spotlight.cards.caravanElectricityCar.title,
     price: popularPrice.caravanElectricityCar,
     href: `${bookingHref}?stay=camping&preset=caravan-electricity`,
     values: { adults: 2, children: 0, toddlers: 0 },
@@ -207,7 +219,7 @@ const presets = [
     id: 'tent-small',
     mode: 'camping',
     icon: 'tent',
-    title: '2 osoby + namiot 1-2 os.',
+    title: pricingText.spotlight.cards.tentSmall.title,
     price: popularPrice.tentSmall,
     href: `${bookingHref}?stay=camping&preset=tent-small`,
     values: { adults: 2, children: 0, toddlers: 0 },
@@ -217,7 +229,7 @@ const presets = [
     id: 'tent-large',
     mode: 'camping',
     icon: 'tent',
-    title: '2 osoby + namiot 3-4 os.',
+    title: pricingText.spotlight.cards.tentLarge.title,
     price: popularPrice.tentLarge,
     href: `${bookingHref}?stay=camping&preset=tent-large`,
     values: { adults: 2, children: 0, toddlers: 0 },
@@ -227,7 +239,7 @@ const presets = [
     id: 'bungalow-2',
     mode: 'bungalow',
     icon: 'house',
-    title: 'Domek 2-os.',
+    title: pricingText.spotlight.cards.bungalow2.title,
     price: popularPrice.bungalow2,
     href: `${bookingHref}?stay=bungalow&preset=bungalow-2`,
     values: { adults: 2, children: 0, toddlers: 0 },
@@ -237,7 +249,7 @@ const presets = [
     id: 'bungalow-4',
     mode: 'bungalow',
     icon: 'house',
-    title: 'Domek 4-os.',
+    title: pricingText.spotlight.cards.bungalow4.title,
     price: popularPrice.bungalow4,
     href: `${bookingHref}?stay=bungalow&preset=bungalow-4`,
     values: { adults: 2, children: 2, toddlers: 0 },
@@ -249,73 +261,73 @@ const popularSpotlightCards = [
   {
     presetId: 'camper-electricity',
     icon: 'camper',
-    label: 'Najczęściej wybierany camping',
-    title: '2 osoby + kamper + prąd',
+    label: pricingText.spotlight.cards.camperElectricity.label,
+    title: pricingText.spotlight.cards.camperElectricity.title,
     price: popularPrice.camperElectricity,
-    composition: '2 dorosłych, kamper, prąd 10A',
-    copy: 'Pełny campingowy klasyk z szybkim podłączeniem do prądu.',
+    composition: pricingText.spotlight.cards.camperElectricity.composition,
+    copy: pricingText.spotlight.cards.camperElectricity.copy,
     href: `${bookingHref}?stay=camping&preset=camper-electricity`,
   },
   {
     presetId: 'van',
     icon: 'busFront',
-    label: 'Lekki city break',
-    title: '2 osoby + van',
+    label: pricingText.spotlight.cards.van.label,
+    title: pricingText.spotlight.cards.van.title,
     price: popularPrice.van,
-    composition: '2 dorosłych, van',
-    copy: 'Prosty wariant dla krótszego pobytu blisko centrum.',
+    composition: pricingText.spotlight.cards.van.composition,
+    copy: pricingText.spotlight.cards.van.copy,
     href: `${bookingHref}?stay=camping&preset=van`,
   },
   {
     presetId: 'caravan-electricity-car',
     icon: 'caravan',
-    label: 'Przyczepa z autem',
-    title: '2 osoby + auto + przyczepa + prąd',
+    label: pricingText.spotlight.cards.caravanElectricityCar.label,
+    title: pricingText.spotlight.cards.caravanElectricityCar.title,
     price: popularPrice.caravanElectricityCar,
-    composition: '2 dorosłych, auto, przyczepa, prąd 10A',
-    copy: 'Czytelny zestaw dla pary podróżującej z przyczepą.',
+    composition: pricingText.spotlight.cards.caravanElectricityCar.composition,
+    copy: pricingText.spotlight.cards.caravanElectricityCar.copy,
     href: `${bookingHref}?stay=camping&preset=caravan-electricity`,
   },
   {
     presetId: 'tent-small',
     icon: 'tent',
-    label: 'Najprostszy namiot',
-    title: '2 osoby + namiot 1-2 os.',
+    label: pricingText.spotlight.cards.tentSmall.label,
+    title: pricingText.spotlight.cards.tentSmall.title,
     price: popularPrice.tentSmall,
-    composition: '2 dorosłych, namiot 1-2 os.',
-    copy: 'Budżetowy wariant z pełnym dostępem do campingu.',
+    composition: pricingText.spotlight.cards.tentSmall.composition,
+    copy: pricingText.spotlight.cards.tentSmall.copy,
     href: `${bookingHref}?stay=camping&preset=tent-small`,
   },
   {
     presetId: 'tent-large',
     icon: 'tent',
-    label: 'Większy namiot',
-    title: '2 osoby + namiot 3-4 os.',
+    label: pricingText.spotlight.cards.tentLarge.label,
+    title: pricingText.spotlight.cards.tentLarge.title,
     price: popularPrice.tentLarge,
-    composition: '2 dorosłych, namiot 3-4 os.',
-    copy: 'Wariant dla większego namiotu, bez zmiany ceny przyczepy campingowej.',
+    composition: pricingText.spotlight.cards.tentLarge.composition,
+    copy: pricingText.spotlight.cards.tentLarge.copy,
     href: `${bookingHref}?stay=camping&preset=tent-large`,
   },
   {
     presetId: 'bungalow-2',
     icon: 'house',
-    label: 'Domek dla pary',
-    title: 'Domek 2-os.',
+    label: pricingText.spotlight.cards.bungalow2.label,
+    title: pricingText.spotlight.cards.bungalow2.title,
     price: popularPrice.bungalow2,
-    prefix: 'od ',
-    composition: 'Domek 2-osobowy, niski sezon',
-    copy: 'Najprostszy wariant domku dla dwóch osób.',
+    prefix: pricingText.units.from,
+    composition: pricingText.spotlight.cards.bungalow2.composition,
+    copy: pricingText.spotlight.cards.bungalow2.copy,
     href: `${bookingHref}?stay=bungalow&preset=bungalow-2`,
   },
   {
     presetId: 'bungalow-4',
     icon: 'house',
-    label: 'Domek rodzinny',
-    title: 'Domek 4-os.',
+    label: pricingText.spotlight.cards.bungalow4.label,
+    title: pricingText.spotlight.cards.bungalow4.title,
     price: popularPrice.bungalow4,
-    prefix: 'od ',
-    composition: 'Domek 4-osobowy, niski sezon',
-    copy: 'Dla rodziny lub małej grupy, z rezerwacją domku.',
+    prefix: pricingText.units.from,
+    composition: pricingText.spotlight.cards.bungalow4.composition,
+    copy: pricingText.spotlight.cards.bungalow4.copy,
     href: `${bookingHref}?stay=bungalow&preset=bungalow-4`,
   },
 ];
@@ -323,83 +335,83 @@ const popularSpotlightCards = [
 const fullPriceGroups = [
   {
     icon: 'users',
-    title: 'Camping - osoby',
-    copy: 'Osoby doliczane są do pojazdu, namiotu albo zestawu campingowego.',
+    title: pricingText.full.groups.people.title,
+    copy: pricingText.full.groups.people.copy,
     rows: [
-      { label: 'Osoba dorosła', price: adult.price, note: 'Podstawowa opłata osobowa za noc.' },
-      { label: 'Dziecko 4-14 lat', price: child.price, note: 'Cena dla dzieci w wieku 4-14 lat.' },
-      { label: 'Dziecko do 4 lat', price: toddler.price, note: 'Najmłodsze dzieci bez opłaty.' },
+      { label: pricingText.counters.adults, price: adult.price, note: pricingText.full.groups.people.rows[0] },
+      { label: pricingText.counters.children, price: child.price, note: pricingText.full.groups.people.rows[1] },
+      { label: pricingText.counters.toddlers, price: toddler.price, note: pricingText.full.groups.people.rows[2] },
     ],
   },
   {
     icon: 'camper',
-    title: 'Camping - pojazdy i nocleg',
-    copy: 'Wybierz główny typ pobytu campingowego.',
+    title: pricingText.full.groups.stay.title,
+    copy: pricingText.full.groups.stay.copy,
     rows: [
-      { label: camper.label, price: camper.price, note: 'Najczęstszy wariant dla kamperów.' },
-      { label: 'Van / minibus', price: van.price, note: 'Kompaktowy pojazd turystyczny.' },
-      { label: caravan.label, price: caravan.price, note: 'Przyczepa kempingowa, auto doliczane osobno.' },
-      { label: tentSmall.label, price: tentSmall.price, note: 'Mały namiot dla 1-2 osób.' },
-      { label: tentLarge.label, price: tentLarge.price, note: 'Większy namiot dla 3-4 osób.' },
-      { label: rooftopTent.label, price: rooftopTent.price, note: 'Auto z namiotem dachowym.' },
-      { label: bus.label, price: bus.price, note: 'Cięższe pojazdy ustawiamy na asfalcie.' },
+      { label: pricingText.services.camper.label, price: camper.price, note: pricingText.full.groups.stay.rows[0] },
+      { label: pricingText.services.van.label, price: van.price, note: pricingText.full.groups.stay.rows[1] },
+      { label: pricingText.services.caravan.label, price: caravan.price, note: pricingText.full.groups.stay.rows[2] },
+      { label: pricingText.services.tentSmall.label, price: tentSmall.price, note: pricingText.full.groups.stay.rows[3] },
+      { label: pricingText.services.tentLarge.label, price: tentLarge.price, note: pricingText.full.groups.stay.rows[4] },
+      { label: pricingText.services.rooftopTent.label, price: rooftopTent.price, note: pricingText.full.groups.stay.rows[5] },
+      { label: pricingText.services.bus.label, price: bus.price, note: pricingText.full.groups.stay.rows[6] },
     ],
   },
   {
     icon: 'plug',
-    title: 'Camping - dodatki',
-    copy: 'Dodatki liczone za noc pobytu.',
+    title: pricingText.full.groups.addons.title,
+    copy: pricingText.full.groups.addons.copy,
     rows: [
-      { label: 'Prąd 10A', price: electricity.price, note: 'Standardowe przyłącze campingowe. Bez ładowania aut EV.' },
-      { label: 'Samochód / parking', price: parking.price, note: 'Auto przy zestawie campingowym.' },
-      { label: motorcycle.label, price: motorcycle.price, note: 'Miejsce dla motocykla.' },
-      { label: cargoTrailer.label, price: cargoTrailer.price, note: 'Dodatkowa przyczepa bagażowa.' },
-      { label: dog.label, price: dog.price, note: 'Pies jest bezpłatny. Prosimy o opiekę i sprzątanie.' },
+      { label: pricingText.services.electricity.label, price: electricity.price, note: pricingText.full.groups.addons.rows[0] },
+      { label: pricingText.services.parking.label, price: parking.price, note: pricingText.full.groups.addons.rows[1] },
+      { label: pricingText.services.motorcycle.label, price: motorcycle.price, note: pricingText.full.groups.addons.rows[2] },
+      { label: pricingText.services.cargoTrailer.label, price: cargoTrailer.price, note: pricingText.full.groups.addons.rows[3] },
+      { label: pricingText.services.dog.label, price: dog.price, note: pricingText.full.groups.addons.rows[4] },
     ],
   },
   {
     icon: 'house',
-    title: 'Domki - niski sezon',
-    copy: 'Ceny domków poza wysokim sezonem wakacyjnym.',
+    title: pricingText.full.groups.bungalowLow.title,
+    copy: pricingText.full.groups.bungalowLow.copy,
     rows: [
-      { label: bungalow2.label, price: bungalow2.seasonalPrices.low, note: 'Dla 2 osób.' },
-      { label: bungalow3.label, price: bungalow3.seasonalPrices.low, note: 'Dla 2 lub 3 osób.' },
-      { label: bungalow4.label, price: bungalow4.seasonalPrices.low, note: 'Dla rodziny lub małej grupy.' },
+      { label: pricingText.services.bungalow2.label, price: bungalow2.seasonalPrices.low, note: pricingText.full.groups.bungalowLow.rows[0] },
+      { label: pricingText.services.bungalow3.label, price: bungalow3.seasonalPrices.low, note: pricingText.full.groups.bungalowLow.rows[1] },
+      { label: pricingText.services.bungalow4.label, price: bungalow4.seasonalPrices.low, note: pricingText.full.groups.bungalowLow.rows[2] },
     ],
   },
   {
     icon: 'wallet',
-    title: 'Domki - wysoki sezon',
-    copy: `Wysoki sezon: ${highSeasonRange}. Dostępność i ewentualną zaliczkę potwierdza recepcja.`,
+    title: pricingText.full.groups.bungalowHigh.title,
+    copy: replaceTokens(pricingText.full.groups.bungalowHigh.copy, { range: highSeasonRange }),
     rows: [
-      { label: bungalow2.label, price: bungalow2.seasonalPrices.high, note: 'Wakacyjna cena domku 2-os.' },
-      { label: bungalow3.label, price: bungalow3.seasonalPrices.high, note: 'Wakacyjna cena domku 3-os.' },
-      { label: bungalow4.label, price: bungalow4.seasonalPrices.high, note: 'Wakacyjna cena domku 4-os.' },
+      { label: pricingText.services.bungalow2.label, price: bungalow2.seasonalPrices.high, note: pricingText.full.groups.bungalowHigh.rows[0] },
+      { label: pricingText.services.bungalow3.label, price: bungalow3.seasonalPrices.high, note: pricingText.full.groups.bungalowHigh.rows[1] },
+      { label: pricingText.services.bungalow4.label, price: bungalow4.seasonalPrices.high, note: pricingText.full.groups.bungalowHigh.rows[2] },
     ],
   },
 ];
 
 const infoCards = [
-  { icon: 'clock', title: 'Camping 12:00-12:00', copy: 'Doba campingowa trwa od 12:00 do 12:00.' },
-  { icon: 'house', title: 'Domki 16:00-11:00', copy: 'Check-in od 16:00, check-out do 11:00.' },
-  { icon: 'moon', title: 'Cisza nocna 22:00-07:00', copy: 'Camping Clepardia nie jest miejscem imprezowym.' },
-  { icon: 'plug', title: 'Prąd 10A', copy: 'Standardowe przyłącze campingowe. Bez ładowania aut EV.' },
-  { icon: 'calendar', title: 'Lipiec i sierpień', copy: 'Miejsca campingowe są dostępne według kolejności przyjazdu. Domki można rezerwować.' },
-  { icon: 'map', title: 'Google Maps', copy: 'Dojazd zmienił się w 2022 roku, dlatego polecamy Google Maps.' },
+  { icon: 'clock', title: pricingText.info.cards[0][0], copy: pricingText.info.cards[0][1] },
+  { icon: 'house', title: pricingText.info.cards[1][0], copy: pricingText.info.cards[1][1] },
+  { icon: 'moon', title: pricingText.info.cards[2][0], copy: pricingText.info.cards[2][1] },
+  { icon: 'plug', title: pricingText.info.cards[3][0], copy: pricingText.info.cards[3][1] },
+  { icon: 'calendar', title: pricingText.info.cards[4][0], copy: pricingText.info.cards[4][1] },
+  { icon: 'map', title: pricingText.info.cards[5][0], copy: pricingText.info.cards[5][1] },
 ];
 
 const faqItems = [
-  ['Czy cena z kalkulatora jest ostateczna?', 'Nie, kalkulator pokazuje koszt orientacyjny. Dostępność i finalne warunki potwierdza recepcja.'],
-  ['Czy pies jest płatny?', 'Nie, pies jest bezpłatny. Prosimy tylko o opiekę i sprzątanie po pupilu.'],
-  ['Czy prąd jest w cenie?', `Prąd 10A jest płatny według cennika - ${electricity.price} PLN / noc.`],
-  ['Czy można rezerwować miejsca campingowe w lipcu i sierpniu?', 'W wysokim sezonie miejsca campingowe są dostępne według kolejności przyjazdu. Najlepiej przyjechać krótko po 12:00. Rezerwacje online dotyczą głównie domków.'],
-  ['Czy domki wymagają zaliczki?', 'Dla domków może być wymagana zaliczka. Szczegóły recepcja przesyła po potwierdzeniu dostępności.'],
-  ['Czy można przyjechać cięższym pojazdem?', 'Tak, ale cięższe pojazdy ustawiamy na asfalcie, aby uniknąć zakopania się na trawie.'],
+  ...pricingText.faq.items.map(([question, answer]) => [
+    question,
+    replaceTokens(answer, { price: electricity.price }),
+  ]),
 ];
 
 const pricingAppConfig = {
   currency,
-  currencyEstimate: currencyEstimateConfig,
+  currencyEstimate: {
+    rates: currencyEstimateConfig.rates,
+  },
   people: {
     adults: adult.price,
     children: child.price,
@@ -408,14 +420,17 @@ const pricingAppConfig = {
   services: Object.fromEntries(serviceConfigEntries),
   presets: Object.fromEntries(presets.map((preset) => [preset.id, preset])),
   seasonLabels: {
-    low: 'Niski sezon',
-    high: 'Wysoki sezon',
+    low: pricingText.calculator.lowSeason,
+    high: pricingText.calculator.highSeason,
   },
   modeLabels: {
-    camping: 'Camping',
-    bungalow: 'Domki',
-    combined: 'Camping + domek',
+    camping: pricingText.modes.camping.title,
+    bungalow: pricingText.modes.bungalow.title,
+    combined: pricingText.modes.combined.title,
   },
+  locale: pricingText.locale,
+  unit: pricingText.units,
+  text: pricingText.runtime,
 };
 ---
 
@@ -423,9 +438,9 @@ const pricingAppConfig = {
   <div class="container pricing-app__container">
     <section class="pricing-spotlight reveal-section" aria-labelledby="pricingSpotlightTitle">
       <div class="pricing-app__section-head pricing-app__section-head--wide">
-        <span class="section-kicker">Najpopularniejsze ceny</span>
-        <h2 id="pricingSpotlightTitle">Szybki podgląd najczęstszych pobytów</h2>
-        <p>Najpierw zobacz realne przykłady, potem dopasuj szczegóły w kalkulatorze.</p>
+        <span class="section-kicker">{pricingText.spotlight.kicker}</span>
+        <h2 id="pricingSpotlightTitle">{pricingText.spotlight.title}</h2>
+        <p>{pricingText.spotlight.lead}</p>
       </div>
       <div class="pricing-spotlight__grid">
         {popularSpotlightCards.map((card, index) => (
@@ -433,7 +448,7 @@ const pricingAppConfig = {
             class:list={['pricing-spotlight-card', 'premium-card', index < 2 && 'pricing-spotlight-card--featured']}
             style={`--delay: ${index * 70}ms`}
           >
-            {index === 0 && <span class="pricing-spotlight-card__ribbon">Najczęściej wybierane</span>}
+            {index === 0 && <span class="pricing-spotlight-card__ribbon">{pricingText.spotlight.ribbon}</span>}
             <span class="pricing-spotlight-card__icon"><Icon name={card.icon} size={32} strokeWidth={2.35} /></span>
             <div class="pricing-spotlight-card__body">
               <small>{card.label}</small>
@@ -441,11 +456,11 @@ const pricingAppConfig = {
               <p>{card.copy}</p>
               <em>{card.composition}</em>
             </div>
-            <strong>{card.prefix ?? ''}{formatPrice(card.price)} <small>/ noc</small></strong>
+            <strong>{card.prefix ?? ''}{formatPrice(card.price)} <small>{pricingText.units.perNight}</small></strong>
             <small class="pricing-currency-estimate">{formatEstimate(card.price)}</small>
             <div class="pricing-spotlight-card__actions">
-              <button type="button" data-pricing-preset={card.presetId}>Użyj w kalkulatorze</button>
-              <a href={card.href}>Zarezerwuj</a>
+              <button type="button" data-pricing-preset={card.presetId}>{pricingText.cta.useCalculator}</button>
+              <a href={card.href}>{pricingText.cta.book}</a>
             </div>
           </article>
         ))}
@@ -454,12 +469,12 @@ const pricingAppConfig = {
 
     <section class="pricing-app__choice reveal-section" aria-labelledby="pricingStayTypeTitle">
       <div class="pricing-app__section-head">
-        <span class="section-kicker">Wybierz typ pobytu</span>
-        <h2 id="pricingStayTypeTitle">Najpierw wybierz, co chcesz policzyć</h2>
-        <p>Aktywny wariant dopasuje kalkulator, podsumowanie i najważniejsze opcje.</p>
+        <span class="section-kicker">{pricingText.choice.kicker}</span>
+        <h2 id="pricingStayTypeTitle">{pricingText.choice.title}</h2>
+        <p>{pricingText.choice.lead}</p>
       </div>
 
-      <div class="pricing-mode-grid" role="group" aria-label="Typ pobytu w cenniku">
+      <div class="pricing-mode-grid" role="group" aria-label={pricingText.aria.stayTypeGroup}>
         {modeCards.map((card, index) => (
           <button
             type="button"
@@ -480,40 +495,40 @@ const pricingAppConfig = {
 
     <section class="pricing-app__calculator reveal-section" id="oblicz-koszt" aria-labelledby="pricingCalculatorTitle">
       <div class="pricing-app__section-head pricing-app__section-head--wide">
-        <span class="section-kicker">Kalkulator orientacyjny</span>
-        <h2 id="pricingCalculatorTitle">Kalkulator w 3 prostych krokach</h2>
-        <p>Najpierw ustaw gości i noce, potem wybierz sposób pobytu oraz dodatki. Bez danych klienta i bez zgód.</p>
+        <span class="section-kicker">{pricingText.calculator.kicker}</span>
+        <h2 id="pricingCalculatorTitle">{pricingText.calculator.title}</h2>
+        <p>{pricingText.calculator.lead}</p>
       </div>
 
       <div class="pricing-app__layout">
         <div class="pricing-app__panel premium-card">
           <div class="pricing-app__toolbar pricing-app__toolbar--simple">
-            <div class="pricing-season-toggle" role="group" aria-label="Sezon dla domków">
-              <button type="button" class="is-active" data-pricing-season="low">Niski sezon</button>
-              <button type="button" data-pricing-season="high">Wysoki sezon</button>
+            <div class="pricing-season-toggle" role="group" aria-label={pricingText.aria.bungalowSeason}>
+              <button type="button" class="is-active" data-pricing-season="low">{pricingText.calculator.lowSeason}</button>
+              <button type="button" data-pricing-season="high">{pricingText.calculator.highSeason}</button>
             </div>
-            <p><Icon name="info" size={16} /> Domki zmieniają cenę w sezonie wysokim. Camping ma stałą cenę za noc.</p>
+            <p><Icon name="info" size={16} /> {pricingText.calculator.seasonNotice}</p>
           </div>
 
-          <div class="pricing-live-strip" aria-label="Szybkie podsumowanie kosztu">
+          <div class="pricing-live-strip" aria-label={pricingText.aria.quickSummary}>
             <article class="pricing-live-card pricing-live-card--nights">
-              <span><Icon name="calendar" size={22} strokeWidth={2.25} /> Liczba nocy</span>
+              <span><Icon name="calendar" size={22} strokeWidth={2.25} /> {pricingText.calculator.nights}</span>
               <div class="pricing-stepper pricing-stepper--live">
-                <button type="button" data-stepper-target="nights" data-stepper-delta="-1" aria-label="Zmniejsz liczbę nocy">
+                <button type="button" data-stepper-target="nights" data-stepper-delta="-1" aria-label={`${pricingText.aria.decrease} ${pricingText.calculator.nights}`}>
                   <Icon name="minus" size={20} strokeWidth={2.8} />
                 </button>
-                <input id="pricing-nights" type="number" min="1" value="1" inputmode="numeric" data-pricing-input="nights" aria-label="Liczba nocy" />
-                <button type="button" data-stepper-target="nights" data-stepper-delta="1" aria-label="Zwiększ liczbę nocy">
+                <input id="pricing-nights" type="number" min="1" value="1" inputmode="numeric" data-pricing-input="nights" aria-label={pricingText.calculator.nights} />
+                <button type="button" data-stepper-target="nights" data-stepper-delta="1" aria-label={`${pricingText.aria.increase} ${pricingText.calculator.nights}`}>
                   <Icon name="plus" size={20} strokeWidth={2.8} />
                 </button>
               </div>
             </article>
             <article class="pricing-live-card">
-              <span><Icon name="pricing" size={22} strokeWidth={2.25} /> Cena za noc</span>
-              <strong data-summary-nightly>{formatPrice(popularPrice.camperElectricity)} / noc</strong>
+              <span><Icon name="pricing" size={22} strokeWidth={2.25} /> {pricingText.calculator.pricePerNight}</span>
+              <strong data-summary-nightly>{formatPerNight(popularPrice.camperElectricity)}</strong>
             </article>
             <article class="pricing-live-card pricing-live-card--total">
-              <span><Icon name="receipt" size={22} strokeWidth={2.25} /> Razem</span>
+              <span><Icon name="receipt" size={22} strokeWidth={2.25} /> {pricingText.calculator.total}</span>
               <strong data-summary-total>{formatPrice(popularPrice.camperElectricity)}</strong>
             </article>
           </div>
@@ -524,8 +539,8 @@ const pricingAppConfig = {
                 <span class="pricing-calc-step__number">01</span>
                 <span class="pricing-calc-step__icon"><Icon name="users" size={28} strokeWidth={2.25} /></span>
                 <div>
-                  <h3>Kto przyjeżdża?</h3>
-                  <p>Osoby są doliczane do wariantów campingowych. W domkach cena bazuje na wybranym typie domku.</p>
+                  <h3>{pricingText.calculator.peopleTitle}</h3>
+                  <p>{pricingText.calculator.peopleCopy}</p>
                 </div>
               </div>
               <div class="pricing-person-list">
@@ -534,14 +549,14 @@ const pricingAppConfig = {
                     <span class="pricing-counter-row__icon"><Icon name={counter.icon} size={23} strokeWidth={2.25} /></span>
                     <div class="pricing-counter-row__copy">
                       <label for={`pricing-${counter.id}`}>{counter.label}</label>
-                      <strong>{counter.price === 0 ? '0 PLN / noc' : `${formatPrice(counter.price)} / noc`}</strong>
+                      <strong>{counter.price === 0 ? formatZeroPerNight() : formatPerNight(counter.price)}</strong>
                     </div>
                     <div class="pricing-stepper pricing-stepper--row">
-                      <button type="button" data-stepper-target={counter.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${counter.label}`}>
+                      <button type="button" data-stepper-target={counter.id} data-stepper-delta="-1" aria-label={`${pricingText.aria.decrease} ${counter.label}`}>
                         <Icon name="minus" size={18} strokeWidth={2.6} />
                       </button>
                       <input id={`pricing-${counter.id}`} type="number" min={counter.min} value={counter.value} inputmode="numeric" data-pricing-input={counter.id} />
-                      <button type="button" data-stepper-target={counter.id} data-stepper-delta="1" aria-label={`Zwiększ ${counter.label}`}>
+                      <button type="button" data-stepper-target={counter.id} data-stepper-delta="1" aria-label={`${pricingText.aria.increase} ${counter.label}`}>
                         <Icon name="plus" size={18} strokeWidth={2.6} />
                       </button>
                     </div>
@@ -555,8 +570,8 @@ const pricingAppConfig = {
                 <span class="pricing-calc-step__number">02</span>
                 <span class="pricing-calc-step__icon"><Icon name="camping" size={28} strokeWidth={2.25} /></span>
                 <div>
-                  <h3>Czym przyjeżdżasz / gdzie śpisz?</h3>
-                  <p>Wybierz główny element pobytu. Wariant strony pokaże tylko pasujące opcje.</p>
+                  <h3>{pricingText.calculator.stayTitle}</h3>
+                  <p>{pricingText.calculator.stayCopy}</p>
                 </div>
               </div>
               <div class="pricing-service-groups pricing-service-groups--stay">
@@ -564,18 +579,18 @@ const pricingAppConfig = {
                   <div class="pricing-service-grid">
                     {campingServiceGroups[0].items.map((item) => (
                       <article class="pricing-service-card pricing-service-card--primary" data-service-card={item.id}>
-                        <span class="pricing-service-card__icon"><Icon name={item.icon} size={30} strokeWidth={2.25} /></span>
-                        <div class="pricing-option-content">
-                          <strong class="pricing-option-title">{item.label}</strong>
-                          <em class="pricing-option-price">{formatPrice(item.price)} / noc</em>
+                          <span class="pricing-service-card__icon"><Icon name={item.icon} size={30} strokeWidth={2.25} /></span>
+                          <div class="pricing-option-content">
+                            <strong class="pricing-option-title">{item.label}</strong>
+                          <em class="pricing-option-price">{formatPerNight(item.price)}</em>
                           <small class="pricing-option-note">{item.note}</small>
                         </div>
                         <div class="pricing-stepper pricing-stepper--service">
-                          <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${item.label}`}>
+                          <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`${pricingText.aria.decrease} ${item.label}`}>
                             <Icon name="minus" size={17} strokeWidth={2.6} />
                           </button>
                           <input type="number" min="0" value={item.id === 'camper' ? '1' : '0'} inputmode="numeric" data-service-input={item.id} />
-                          <button type="button" data-stepper-target={item.id} data-stepper-delta="1" aria-label={`Zwiększ ${item.label}`}>
+                          <button type="button" data-stepper-target={item.id} data-stepper-delta="1" aria-label={`${pricingText.aria.increase} ${item.label}`}>
                             <Icon name="plus" size={17} strokeWidth={2.6} />
                           </button>
                         </div>
@@ -595,15 +610,15 @@ const pricingAppConfig = {
                           <span class="pricing-service-card__icon"><Icon name={item.icon} size={30} strokeWidth={2.25} /></span>
                           <div class="pricing-option-content">
                             <strong class="pricing-option-title">{item.label}</strong>
-                            <em class="pricing-option-price">{priceLabel} / noc</em>
+                            <em class="pricing-option-price">{priceLabel} {pricingText.units.perNight}</em>
                             <small class="pricing-option-note">{item.note}</small>
                           </div>
                           <div class="pricing-stepper pricing-stepper--service">
-                            <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${item.label}`}>
+                            <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`${pricingText.aria.decrease} ${item.label}`}>
                               <Icon name="minus" size={17} strokeWidth={2.6} />
                             </button>
                             <input type="number" min="0" value="0" inputmode="numeric" data-service-input={item.id} />
-                            <button type="button" data-stepper-target={item.id} data-stepper-delta="1" aria-label={`Zwiększ ${item.label}`}>
+                            <button type="button" data-stepper-target={item.id} data-stepper-delta="1" aria-label={`${pricingText.aria.increase} ${item.label}`}>
                               <Icon name="plus" size={17} strokeWidth={2.6} />
                             </button>
                           </div>
@@ -620,8 +635,8 @@ const pricingAppConfig = {
                 <span class="pricing-calc-step__number">03</span>
                 <span class="pricing-calc-step__icon"><Icon name="sparkles" size={28} strokeWidth={2.25} /></span>
                 <div>
-                  <h3>Co dodać?</h3>
-                  <p>Prąd 10A, parking, pies i praktyczne dodatki. Pies pozostaje bezpłatny.</p>
+                  <h3>{pricingText.calculator.addonsTitle}</h3>
+                  <p>{pricingText.calculator.addonsCopy}</p>
                 </div>
               </div>
               <div class="pricing-service-groups pricing-service-groups--addons">
@@ -629,18 +644,18 @@ const pricingAppConfig = {
                   <div class="pricing-addon-list">
                     {campingServiceGroups[1].items.map((item) => (
                       <article class="pricing-addon-row" data-service-card={item.id}>
-                        <span class="pricing-addon-row__icon"><Icon name={item.icon} size={24} strokeWidth={2.25} /></span>
-                        <div class="pricing-option-content">
-                          <strong class="pricing-option-title">{item.label}</strong>
-                          <em class="pricing-option-price">{formatPrice(item.price)} / noc</em>
+                          <span class="pricing-addon-row__icon"><Icon name={item.icon} size={24} strokeWidth={2.25} /></span>
+                          <div class="pricing-option-content">
+                            <strong class="pricing-option-title">{item.label}</strong>
+                          <em class="pricing-option-price">{formatPerNight(item.price)}</em>
                           <small class="pricing-option-note">{item.note}</small>
                         </div>
                         <div class="pricing-stepper pricing-stepper--row">
-                          <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${item.label}`}>
+                          <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`${pricingText.aria.decrease} ${item.label}`}>
                             <Icon name="minus" size={17} strokeWidth={2.6} />
                           </button>
                           <input type="number" min="0" value={item.id === 'electricity' ? '1' : '0'} inputmode="numeric" data-service-input={item.id} />
-                          <button type="button" data-stepper-target={item.id} data-stepper-delta="1" aria-label={`Zwiększ ${item.label}`}>
+                          <button type="button" data-stepper-target={item.id} data-stepper-delta="1" aria-label={`${pricingText.aria.increase} ${item.label}`}>
                             <Icon name="plus" size={17} strokeWidth={2.6} />
                           </button>
                         </div>
@@ -660,15 +675,15 @@ const pricingAppConfig = {
                           <span class="pricing-addon-row__icon"><Icon name={item.icon} size={24} strokeWidth={2.25} /></span>
                           <div class="pricing-option-content">
                             <strong class="pricing-option-title">{item.label}</strong>
-                            <em class="pricing-option-price">{priceLabel} / noc</em>
+                            <em class="pricing-option-price">{priceLabel} {pricingText.units.perNight}</em>
                             <small class="pricing-option-note">{item.note}</small>
                           </div>
                           <div class="pricing-stepper pricing-stepper--row">
-                            <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`Zmniejsz ${item.label}`}>
+                            <button type="button" data-stepper-target={item.id} data-stepper-delta="-1" aria-label={`${pricingText.aria.decrease} ${item.label}`}>
                               <Icon name="minus" size={17} strokeWidth={2.6} />
                             </button>
                             <input type="number" min="0" value="0" inputmode="numeric" data-service-input={item.id} />
-                            <button type="button" data-stepper-target={item.id} data-stepper-delta="1" aria-label={`Zwiększ ${item.label}`}>
+                            <button type="button" data-stepper-target={item.id} data-stepper-delta="1" aria-label={`${pricingText.aria.increase} ${item.label}`}>
                               <Icon name="plus" size={17} strokeWidth={2.6} />
                             </button>
                           </div>
@@ -686,46 +701,46 @@ const pricingAppConfig = {
 
         <aside class="pricing-app-summary premium-card" aria-live="polite">
           <div class="pricing-app-summary__top">
-            <span class="pricing-app-summary__badge"><Icon name="receipt" size={16} strokeWidth={2.4} /> Status: do potwierdzenia</span>
-            <h3 class="pricing-app-summary__title">Twój koszt</h3>
-            <small data-summary-title>2 osoby + kamper + prąd</small>
+            <span class="pricing-app-summary__badge"><Icon name="receipt" size={16} strokeWidth={2.4} /> {pricingText.summary.status}</span>
+            <h3 class="pricing-app-summary__title">{pricingText.summary.title}</h3>
+            <small data-summary-title>{pricingText.summary.defaultTitle}</small>
           </div>
           <div class="pricing-app-summary__selected">
-            <span>Wybrane</span>
+            <span>{pricingText.summary.selected}</span>
             <div class="pricing-app-summary__lines" data-summary-lines></div>
           </div>
           <div class="pricing-checkout-totals">
-            <p><span>Cena za noc</span><strong data-summary-nightly>{formatPrice(popularPrice.camperElectricity)} / noc</strong></p>
-            <p><span>Liczba nocy</span><strong data-summary-nights>1 noc</strong></p>
-            <p class="pricing-checkout-totals__mode"><span>Typ pobytu</span><strong data-summary-mode>Camping</strong></p>
+            <p><span>{pricingText.summary.pricePerNight}</span><strong data-summary-nightly>{formatPerNight(popularPrice.camperElectricity)}</strong></p>
+            <p><span>{pricingText.summary.nights}</span><strong data-summary-nights>1 {pricingText.runtime.nightOne}</strong></p>
+            <p class="pricing-checkout-totals__mode"><span>{pricingText.summary.stayType}</span><strong data-summary-mode>{pricingText.modes.camping.title}</strong></p>
             <div class="pricing-app-summary__price">
-              <span>Razem orientacyjnie</span>
+              <span>{pricingText.summary.total}</span>
               <h3 data-summary-total>{formatPrice(popularPrice.camperElectricity)}</h3>
               <em data-summary-currency>{formatEstimate(popularPrice.camperElectricity)}</em>
             </div>
           </div>
-          <p data-summary-hint>Wybrano domyślnie: 2 osoby + kamper + prąd 10A. Możesz od razu zmienić każdy element.</p>
-          <p class="pricing-currency-disclaimer">{currencyEstimateConfig.disclaimer}</p>
+          <p data-summary-hint>{pricingText.summary.defaultHint}</p>
+          <p class="pricing-currency-disclaimer">{pricingText.summary.currencyDisclaimer}</p>
           <div class="pricing-app-summary__actions">
             <a class="pricing-app-summary__cta" href={bookingHref}>
               <Icon name="booking" size={18} strokeWidth={2.3} />
-              Zarezerwuj pobyt
+              {pricingText.cta.bookStay}
             </a>
             <button type="button" class="pricing-app-summary__campy" data-pricing-ask-campy>
               <Icon name="chat" size={18} strokeWidth={2.3} />
-              Zapytaj CAMPY
+              {pricingText.cta.askCampy}
             </button>
           </div>
-          <small>Dostępność i finalne warunki potwierdza recepcja.</small>
+          <small>{pricingText.summary.availability}</small>
         </aside>
       </div>
     </section>
 
     <section class="pricing-full reveal-section" aria-labelledby="pricingFullTitle">
       <div class="pricing-app__section-head pricing-app__section-head--wide">
-        <span class="section-kicker">Pełny cennik</span>
-        <h2 id="pricingFullTitle">Ceny w czytelnych grupach</h2>
-        <p>Wszystkie kwoty pochodzą z konfiguracji cenowej strony. Kalkulator i rezerwacja korzystają z tej samej logiki.</p>
+        <span class="section-kicker">{pricingText.full.kicker}</span>
+        <h2 id="pricingFullTitle">{pricingText.full.title}</h2>
+        <p>{pricingText.full.lead}</p>
       </div>
       <div class="pricing-full__grid">
         {fullPriceGroups.map((group) => (
@@ -741,9 +756,9 @@ const pricingAppConfig = {
                     {'note' in row && <small>{row.note}</small>}
                   </span>
                   {'price' in row ? (
-                    <em>{row.price === 0 ? '0 PLN' : `${formatPrice(row.price)} / noc`}</em>
+                    <em>{row.price === 0 ? `0 ${currency}` : formatPerNight(row.price)}</em>
                   ) : (
-                    <em>{formatPrice(row.low)} niski / {formatPrice(row.high)} wysoki</em>
+                    <em>{formatPrice(row.low)} {pricingText.units.low} / {formatPrice(row.high)} {pricingText.units.high}</em>
                   )}
                 </div>
               ))}
@@ -755,8 +770,8 @@ const pricingAppConfig = {
 
     <section class="pricing-info reveal-section" aria-labelledby="pricingInfoTitle">
       <div class="pricing-app__section-head">
-        <span class="section-kicker">Przed przyjazdem</span>
-        <h2 id="pricingInfoTitle">Ważne informacje przed przyjazdem</h2>
+        <span class="section-kicker">{pricingText.info.kicker}</span>
+        <h2 id="pricingInfoTitle">{pricingText.info.title}</h2>
       </div>
       <div class="pricing-info__grid">
         {infoCards.map((item) => (
@@ -771,8 +786,8 @@ const pricingAppConfig = {
 
     <section class="pricing-faq reveal-section" aria-labelledby="pricingFaqTitle">
       <div class="pricing-app__section-head">
-        <span class="section-kicker">FAQ cennika</span>
-        <h2 id="pricingFaqTitle">Najczęstsze pytania o ceny</h2>
+        <span class="section-kicker">{pricingText.faq.kicker}</span>
+        <h2 id="pricingFaqTitle">{pricingText.faq.title}</h2>
       </div>
       <div class="pricing-faq__list">
         {faqItems.map(([question, answer]) => (
@@ -790,20 +805,20 @@ const pricingAppConfig = {
     <section class="pricing-final-cta reveal-section">
       <div class="pricing-final-cta__panel premium-card">
         <div>
-          <span class="section-kicker">Następny krok</span>
-          <h2>Wiesz już, co wybrać?</h2>
-          <p>Wyślij zapytanie, a recepcja potwierdzi dostępność i szczegóły pobytu.</p>
+          <span class="section-kicker">{pricingText.finalCta.kicker}</span>
+          <h2>{pricingText.finalCta.title}</h2>
+          <p>{pricingText.finalCta.copy}</p>
         </div>
         <div class="pricing-final-cta__actions">
-          <a href={bookingHref} class="btn btn-primary premium-button"><Icon name="booking" size={18} /> Zarezerwuj pobyt</a>
-          <button type="button" class="btn btn-glass" data-pricing-ask-campy><Icon name="chat" size={18} /> Zapytaj CAMPY</button>
-          <a href="/kontakt" class="btn btn-glass"><Icon name="phone" size={18} /> Kontakt z recepcją</a>
+          <a href={bookingHref} class="btn btn-primary premium-button"><Icon name="booking" size={18} /> {pricingText.cta.bookStay}</a>
+          <button type="button" class="btn btn-glass" data-pricing-ask-campy><Icon name="chat" size={18} /> {pricingText.cta.askCampy}</button>
+          <a href={contactHref} class="btn btn-glass"><Icon name="phone" size={18} /> {pricingText.cta.contactReception}</a>
         </div>
       </div>
     </section>
   </div>
 
-  <div class="pricing-toast" data-pricing-toast role="status" aria-live="polite">Dodano popularny zestaw 🌿</div>
+  <div class="pricing-toast" data-pricing-toast role="status" aria-live="polite">{pricingText.runtime.presetToast}</div>
 </section>
 
 <script define:vars={{ pricingAppConfig }}>
@@ -812,6 +827,8 @@ const pricingAppConfig = {
     if (!(root instanceof HTMLElement)) return;
 
     const config = pricingAppConfig;
+    const text = config.text || {};
+    const unit = config.unit || { perNight: '/ night', approx: 'approx.' };
     const modeButtons = Array.from(root.querySelectorAll('[data-pricing-mode]'));
     const seasonButtons = Array.from(root.querySelectorAll('[data-pricing-season]'));
     const serviceGroups = Array.from(root.querySelectorAll('[data-service-group]'));
@@ -831,12 +848,19 @@ const pricingAppConfig = {
     let summaryPulseTimer = 0;
     let toastTimer = 0;
 
-    const formatMoney = (value) => `${Math.round(Math.max(0, value)).toLocaleString('pl-PL')} ${config.currency}`;
+    const escapeHtml = (value) => String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+    const perNight = () => unit.perNight || '/ night';
+    const formatMoney = (value) => `${Math.round(Math.max(0, value)).toLocaleString(config.locale || 'pl-PL')} ${config.currency}`;
     const formatCurrencyEstimate = (value) => {
       const rates = config.currencyEstimate?.rates || {};
       const pln = Math.max(0, Number(value) || 0);
       if (!rates.EUR || !rates.USD || !rates.GBP) return '';
-      return `ok. ${Math.round(pln / rates.EUR)} EUR / ${Math.round(pln / rates.USD)} USD / ${Math.round(pln / rates.GBP)} GBP`;
+      return `${unit.approx || 'approx.'} ${Math.round(pln / rates.EUR)} EUR / ${Math.round(pln / rates.USD)} USD / ${Math.round(pln / rates.GBP)} GBP`;
     };
     const numberInput = (id) => root.querySelector(`[data-pricing-input="${id}"], [data-service-input="${id}"]`);
     const getValue = (id) => {
@@ -973,23 +997,23 @@ const pricingAppConfig = {
       if (getValue('camper') > 0 && getValue('electricity') === 0) {
         suggestions.push(`
           <article class="pricing-smart-hint">
-            <span>Goście z kamperem najczęściej wybierają także prąd 10A.</span>
-            <button type="button" data-suggestion-service="electricity">Dodaj prąd</button>
+            <span>${escapeHtml(text.addElectricitySuggestion || 'Motorhome guests often also choose 10A electricity.')}</span>
+            <button type="button" data-suggestion-service="electricity">${escapeHtml(text.addElectricityButton || 'Add electricity')}</button>
           </article>
         `);
       }
       if (getValue('caravan') > 0 && getValue('parking') === 0) {
         suggestions.push(`
           <article class="pricing-smart-hint">
-            <span>Przy przyczepie zwykle potrzebne jest też miejsce dla auta.</span>
-            <button type="button" data-suggestion-service="parking">Dodaj samochód</button>
+            <span>${escapeHtml(text.addParkingSuggestion || 'With a caravan, a car space is usually needed too.')}</span>
+            <button type="button" data-suggestion-service="parking">${escapeHtml(text.addParkingButton || 'Add car')}</button>
           </article>
         `);
       }
       if (getValue('dog') > 0 || getValue('bungalow-dog') > 0) {
         suggestions.push(`
           <article class="pricing-smart-hint pricing-smart-hint--quiet">
-            <span>Pies jest bezpłatny — prosimy tylko o opiekę i sprzątanie.</span>
+            <span>${escapeHtml(text.dogFree || 'Dog is free — please supervise and clean up.')}</span>
           </article>
         `);
       }
@@ -1001,37 +1025,37 @@ const pricingAppConfig = {
       summaryTotals.forEach((element) => animateTextMoney(element, result.total));
       if (summaryCurrency) summaryCurrency.textContent = formatCurrencyEstimate(result.total);
       if (summaryMode) summaryMode.textContent = config.modeLabels[state.mode] || state.mode;
-      if (summaryNights) summaryNights.textContent = `${result.nights} ${result.nights === 1 ? 'noc' : 'noce'}`;
+      if (summaryNights) summaryNights.textContent = `${result.nights} ${result.nights === 1 ? (text.nightOne || 'night') : (text.nightOther || 'nights')}`;
       summaryNightlyItems.forEach((element) => {
-        element.textContent = `${formatMoney(result.nightly)} / noc`;
+        element.textContent = `${formatMoney(result.nightly)} ${perNight()}`;
       });
       if (summaryTitle) {
         const peopleLabel = state.mode === 'bungalow'
-          ? 'Pobyt w domku'
-          : `${result.adults + result.children + result.toddlers || 0} os.`;
+          ? (text.bungalowStay || 'Bungalow stay')
+          : `${result.adults + result.children + result.toddlers || 0} ${text.peopleShort || 'people'}`;
         const servicesLabel = result.services.length
           ? result.services.slice(0, 3).map((service) => service.label).join(' + ')
-          : 'wybierz elementy pobytu';
+          : (text.chooseElements || 'choose stay elements');
         summaryTitle.textContent = `${peopleLabel} + ${servicesLabel}`;
       }
       if (summaryHint) {
         summaryHint.textContent = result.services.length
-          ? 'Cena obejmuje wybrane elementy, liczbę nocy i aktualny wariant. To nadal koszt orientacyjny.'
-          : 'Wybierz usługi, a tutaj zobaczysz orientacyjny koszt.';
+          ? (text.hintSelected || 'The price includes selected elements, number of nights and the current option. It is still indicative.')
+          : (text.hintEmpty || 'Choose services and the indicative cost will appear here.');
       }
       if (summaryLines) {
         const lines = [];
         if (state.mode !== 'bungalow') {
-          if (result.adults > 0) lines.push(`<p><span>Dorośli x ${result.adults}</span><strong>${formatMoney(result.adults * config.people.adults)} / noc</strong></p>`);
-          if (result.children > 0) lines.push(`<p><span>Dzieci 4-14 x ${result.children}</span><strong>${formatMoney(result.children * config.people.children)} / noc</strong></p>`);
-          if (result.toddlers > 0) lines.push(`<p><span>Dzieci do 4 x ${result.toddlers}</span><strong>0 PLN</strong></p>`);
+          if (result.adults > 0) lines.push(`<p><span>${escapeHtml(text.adults || 'Adults')} x ${result.adults}</span><strong>${escapeHtml(formatMoney(result.adults * config.people.adults))} ${escapeHtml(perNight())}</strong></p>`);
+          if (result.children > 0) lines.push(`<p><span>${escapeHtml(text.children || 'Children')} x ${result.children}</span><strong>${escapeHtml(formatMoney(result.children * config.people.children))} ${escapeHtml(perNight())}</strong></p>`);
+          if (result.toddlers > 0) lines.push(`<p><span>${escapeHtml(text.toddlers || 'Toddlers')} x ${result.toddlers}</span><strong>${escapeHtml(formatMoney(0))}</strong></p>`);
         } else {
-          lines.push('<p><span>Osoby w domku</span><strong>W cenie domku</strong></p>');
+          lines.push(`<p><span>${escapeHtml(text.bungalowPeople || 'People in bungalow')}</span><strong>${escapeHtml(text.includedInBungalow || 'Included in bungalow price')}</strong></p>`);
         }
         result.services.forEach((service) => {
-          lines.push(`<p><span>${service.label} x ${service.qty}</span><strong>${formatMoney(service.total)} / noc</strong></p>`);
+          lines.push(`<p><span>${escapeHtml(service.label)} x ${service.qty}</span><strong>${escapeHtml(formatMoney(service.total))} ${escapeHtml(perNight())}</strong></p>`);
         });
-        summaryLines.innerHTML = lines.length ? lines.join('') : '<p><span>Wybrane elementy</span><strong>Do wyboru</strong></p>';
+        summaryLines.innerHTML = lines.length ? lines.join('') : `<p><span>${escapeHtml(text.selectedElements || 'Selected elements')}</span><strong>${escapeHtml(text.choose || 'To choose')}</strong></p>`;
       }
       summaryCard?.classList.add('is-pulsing');
       window.clearTimeout(summaryPulseTimer);
@@ -1092,7 +1116,7 @@ const pricingAppConfig = {
       button.addEventListener('click', () => {
         window.dispatchEvent(new CustomEvent('campy:prompt', {
           detail: {
-            prompt: 'Pomóż mi wybrać najlepszy wariant pobytu i policzyć orientacyjny koszt na Camping Clepardia.',
+            prompt: text.campyPrompt || 'Help me choose the best stay option and estimate the cost at Camping Clepardia.',
             actionKey: 'campingPricing',
           },
         }));
