@@ -25,6 +25,19 @@ const attractionsPath = getLocalizedPath(pathContext.explicitLanguage, 'atrakcje
 const plannerPath = getLocalizedPath(pathContext.explicitLanguage, 'planer-pobytu');
 const directionsPath = getLocalizedPath(pathContext.explicitLanguage, 'dojazd');
 const contactPath = getLocalizedPath(pathContext.explicitLanguage, 'kontakt');
+const startLinksByLanguage: Record<SupportedLang, { planner: string; attractions: string; directions: string }> = {
+  pl: { planner: 'Dodaj plan pobytu', attractions: 'Zobacz atrakcje', directions: 'Jak dojechać do centrum?' },
+  en: { planner: 'Add a stay plan', attractions: 'See attractions', directions: 'How to reach the centre?' },
+  de: { planner: 'Aufenthaltsplan hinzufügen', attractions: 'Attraktionen ansehen', directions: 'Wie ins Zentrum?' },
+  it: { planner: 'Aggiungi piano soggiorno', attractions: 'Vedi attrazioni', directions: 'Come arrivare in centro?' },
+  fr: { planner: 'Ajouter un plan de séjour', attractions: 'Voir les attractions', directions: 'Comment aller au centre ?' },
+  es: { planner: 'Añadir plan de estancia', attractions: 'Ver atracciones', directions: '¿Cómo llegar al centro?' },
+  nl: { planner: 'Voeg verblijfsplan toe', attractions: 'Bekijk attracties', directions: 'Hoe naar het centrum?' },
+  cs: { planner: 'Přidat plán pobytu', attractions: 'Zobrazit atrakce', directions: 'Jak do centra?' },
+  sk: { planner: 'Pridať plán pobytu', attractions: 'Zobraziť atrakcie', directions: 'Ako do centra?' },
+  sv: { planner: 'Lägg till vistelseplan', attractions: 'Se sevärdheter', directions: 'Hur tar man sig till centrum?' },
+};
+const startLinks = startLinksByLanguage[uiLang] ?? startLinksByLanguage.en;
 
 const renderLucideIcon = (name: keyof typeof icons | string) => {
   const iconNode = icons[name as keyof typeof icons] ?? icons.CircleHelp;
@@ -1562,9 +1575,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         </div>
         <button class="reservation-simple-link" type="button" data-simple-start>{ux.simple.cta}</button>
         <div class="reservation-trip-ctas reservation-trip-ctas--start">
-          <a href={plannerPath} class="reservation-mini-link">Dodaj plan pobytu</a>
-          <a href={attractionsPath} class="reservation-mini-link">Zobacz atrakcje</a>
-          <a href={directionsPath} class="reservation-mini-link">Jak dojechać do centrum?</a>
+          <a href={plannerPath} class="reservation-mini-link">{startLinks.planner}</a>
+          <a href={attractionsPath} class="reservation-mini-link">{startLinks.attractions}</a>
+          <a href={directionsPath} class="reservation-mini-link">{startLinks.directions}</a>
         </div>
         <aside class="reservation-before-arrival">
           <strong>{beforeArrival.title}</strong>
