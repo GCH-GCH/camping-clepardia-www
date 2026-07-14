@@ -2,13 +2,13 @@ import {
   authorizeInboxRequest,
   logInboxError,
   serializeInboxError,
-} from '../_lib/inbox.js';
+} from '../../_lib/inbox.js';
 import {
   sendJson,
-} from '../_lib/mailCenter.js';
+} from '../../_lib/mailCenter.js';
 import {
   getSiteEventsStatus,
-} from '../_lib/camp.js';
+} from '../../_lib/camp.js';
 
 const isAnalyticsMigrationError = (payload = {}) => {
   const text = `${payload.error || ''} ${payload.details || ''}`.toLowerCase();

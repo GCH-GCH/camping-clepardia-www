@@ -1,14 +1,14 @@
 import {
   logInboxError,
   serializeInboxError,
-} from '../_lib/inbox.js';
+} from '../../_lib/inbox.js';
 import {
   readJsonBody,
   sendJson,
-} from '../_lib/mailCenter.js';
+} from '../../_lib/mailCenter.js';
 import {
   saveSiteEvent,
-} from '../_lib/camp.js';
+} from '../../_lib/camp.js';
 
 export default async function handler(req, res) {
   try {

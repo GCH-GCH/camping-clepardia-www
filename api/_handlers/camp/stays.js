@@ -2,15 +2,15 @@ import {
   authorizeInboxRequest,
   logInboxError,
   serializeInboxError,
-} from '../_lib/inbox.js';
+} from '../../_lib/inbox.js';
 import {
   readJsonBody,
   sendJson,
-} from '../_lib/mailCenter.js';
+} from '../../_lib/mailCenter.js';
 import {
   listCampStays,
   saveCampStay,
-} from '../_lib/camp.js';
+} from '../../_lib/camp.js';
 
 const isCampMigrationError = (payload = {}) => {
   const text = `${payload.error || ''} ${payload.details || ''}`.toLowerCase();

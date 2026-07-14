@@ -2,14 +2,14 @@ import {
   authorizeInboxRequest,
   logInboxError,
   serializeInboxError,
-} from '../_lib/inbox.js';
+} from '../../_lib/inbox.js';
 import {
   readJsonBody,
   sendJson,
-} from '../_lib/mailCenter.js';
+} from '../../_lib/mailCenter.js';
 import {
   buildClientNoteFallback,
-} from '../_lib/clients.js';
+} from '../../_lib/clients.js';
 
 export default async function handler(req, res) {
   try {
