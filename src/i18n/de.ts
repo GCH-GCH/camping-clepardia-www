@@ -494,6 +494,7 @@ export const de = {
       title: 'Häufig gestellte Fragen',
       lead: 'Die wichtigsten Informationen zu Aufenthalt, Buchungen, Preisen, Anfahrt und Regeln bei Camping Clepardia.',
       seoTitle: 'FAQ Camping Clepardia - Fragen und Antworten',
+      seoDescription: 'FAQ von Camping Clepardia: Buchungen, Preise, Ankunft, Bungalows, Camping, Anfahrt, Hunde und Ausstattung.',
       highlights: [
         { title: 'Verfügbarkeit von Stellplätzen', copy: 'In der Saison lohnt es sich, Campingplatz-Verfügbarkeit mit der Rezeption zu bestätigen.' },
         { title: 'Ins Zentrum fahren', copy: 'Am einfachsten nutzen Sie die Straßenbahn und lassen das Auto auf dem Campingplatz.' },
@@ -603,6 +604,14 @@ export const de = {
         { title: 'Kontakt zur Rezeption', copy: 'Für Daten- und Anfrageangelegenheiten nutzen Sie clepardia@gmail.com.' },
         { title: 'Entwurf zu ergänzen', copy: 'Vollständige Administratorangaben müssen vor der Veröffentlichung bestätigt werden.' },
       ],
+      cta: {
+        title: 'Fragen zum Datenschutz?',
+        copy: 'Kontaktieren Sie die Rezeption, wenn Sie Fragen zur Verarbeitung von Anfragedaten haben.',
+        primaryLabel: 'Rezeption fragen',
+        primaryHref: '/kontakt',
+        secondaryLabel: 'FAQ ansehen',
+        secondaryHref: '/faq',
+      },
     },
   },
   home: {

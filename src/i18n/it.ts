@@ -494,6 +494,7 @@ export const it = {
       title: 'Domande frequenti',
       lead: 'Abbiamo raccolto le informazioni più importanti su soggiorni, prenotazioni, prezzi, arrivo e regole di Camping Clepardia.',
       seoTitle: 'FAQ Camping Clepardia - domande e risposte',
+      seoDescription: 'FAQ di Camping Clepardia: prenotazioni, prezzi, arrivo, bungalow, camping, accesso, cani e servizi.',
       highlights: [
         { title: 'Disponibilità piazzole', copy: 'In stagione vale la pena confermare la disponibilità delle piazzole con la reception.' },
         { title: 'Arrivare in centro', copy: 'È più semplice usare il tram e lasciare l’auto al camping.' },
@@ -593,16 +594,24 @@ export const it = {
     },
     'polityka-prywatnosci': {
       ...en.pages['polityka-prywatnosci'],
-      overline: 'Privacy policy',
+      overline: 'Informativa privacy',
       title: 'Come trattiamo i dati del modulo',
       lead: 'Bozza sicura di informativa privacy per le richieste inviate tramite il sito Camping Clepardia.',
-      seoTitle: 'Privacy policy - Camping Clepardia',
-      seoDescription: 'Privacy policy Camping Clepardia: dati del modulo, finalità di contatto, email reception, cookie e informazioni da completare prima della pubblicazione.',
+      seoTitle: 'Informativa privacy - Camping Clepardia',
+      seoDescription: 'Informativa privacy Camping Clepardia: dati del modulo, finalità di contatto, email reception, cookie e informazioni da completare prima della pubblicazione.',
       highlights: [
         { title: 'Dati del modulo', copy: 'I dati vengono usati per rispondere alla richiesta di soggiorno e disponibilità.' },
         { title: 'Contatto reception', copy: 'Per questioni sui dati e richieste usa clepardia@gmail.com.' },
         { title: 'Bozza da completare', copy: 'I dati completi dell’amministratore devono essere confermati prima della pubblicazione.' },
       ],
+      cta: {
+        title: 'Domande sulla privacy?',
+        copy: 'Contatta la reception se vuoi chiarire il trattamento dei dati inviati tramite il modulo.',
+        primaryLabel: 'Chiedi alla reception',
+        primaryHref: '/kontakt',
+        secondaryLabel: 'Vedi FAQ',
+        secondaryHref: '/faq',
+      },
     },
   },
   home: {

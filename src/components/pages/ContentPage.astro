@@ -58,6 +58,36 @@ const contactHeroTextByLanguage = {
     title: 'Contatta Camping Clepardia',
     lead: 'Telefono, email, indirizzo, Google Maps e accesso rapido alla prenotazione.',
   },
+  fr: {
+    overline: 'Contact',
+    title: 'Contacter Camping Clepardia',
+    lead: 'Téléphone, e-mail, adresse, Google Maps et accès rapide à la demande de séjour.',
+  },
+  es: {
+    overline: 'Contacto',
+    title: 'Contacta con Camping Clepardia',
+    lead: 'Teléfono, email, dirección, Google Maps y acceso rápido a la consulta de estancia.',
+  },
+  nl: {
+    overline: 'Contact',
+    title: 'Contact met Camping Clepardia',
+    lead: 'Telefoon, e-mail, adres, Google Maps en snelle toegang tot de verblijfsaanvraag.',
+  },
+  cs: {
+    overline: 'Kontakt',
+    title: 'Kontaktujte Camping Clepardia',
+    lead: 'Telefon, e-mail, adresa, Google Maps a rychlý přístup k dotazu na pobyt.',
+  },
+  sk: {
+    overline: 'Kontakt',
+    title: 'Kontaktujte Camping Clepardia',
+    lead: 'Telefón, e-mail, adresa, Google Maps a rýchly prístup k dopytu na pobyt.',
+  },
+  sv: {
+    overline: 'Kontakt',
+    title: 'Kontakta Camping Clepardia',
+    lead: 'Telefon, e-post, adress, Google Maps och snabb väg till vistelseförfrågan.',
+  },
 };
 const pricingHeroTextByLanguage = {
   pl: {
@@ -161,7 +191,7 @@ const pricingHeroTextByLanguage = {
     notes: ['Ungefärligt pris', 'Receptionen bekräftar tillgänglighet', 'Camping 12:00-12:00', 'Bungalower 16:00-11:00'],
   },
 };
-const contactHeroText = contactHeroTextByLanguage[resolvedContentLanguage];
+const contactHeroText = contactHeroTextByLanguage[resolvedContentLanguage as keyof typeof contactHeroTextByLanguage] ?? contactHeroTextByLanguage.en;
 const pricingHeroText = pricingHeroTextByLanguage[contentLanguage as keyof typeof pricingHeroTextByLanguage] ?? pricingHeroTextByLanguage.en;
 const displayOverline = page.slug === 'kontakt'
   ? contactHeroText.overline
@@ -204,7 +234,7 @@ const dogAddon = pricingConfig.addons.find((addon) => addon.id === 'dog');
 const electricityAddon = pricingConfig.addons.find((addon) => addon.id === 'electricity');
 const googleMapsHref = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
 const bookingHref = getBookingLocalizedPath(contentLanguage);
-const campingSummerNotice = {
+const campingSummerNoticeByLanguage = {
   pl: {
     title: 'Lipiec i sierpień — ważna zasada',
     text: 'W lipcu i sierpniu rezerwacje z wyprzedzeniem przyjmujemy tylko na domki. Miejsca campingowe dla kamperów, vanów, namiotów i przyczep są dostępne według kolejności przyjazdu. Check-out z campingu jest do 12:00, dlatego przyjazd około południa daje największą szansę na miejsce.',
@@ -221,7 +251,85 @@ const campingSummerNotice = {
     title: 'Luglio e agosto — regola importante',
     text: 'A luglio e agosto accettiamo prenotazioni anticipate solo per i bungalow. Le piazzole per camper, van, tende e roulotte sono disponibili in ordine di arrivo. Il check-out è entro le 12:00, quindi arrivare verso mezzogiorno offre la migliore possibilità di trovare posto.',
   },
-}[resolvedContentLanguage];
+  fr: {
+    title: 'Juillet et août — règle importante',
+    text: 'En juillet et août, les réservations à l’avance sont acceptées uniquement pour les bungalows. Les emplacements pour camping-cars, vans, tentes et caravanes sont disponibles par ordre d’arrivée. Le départ du camping se fait avant 12h00 ; arriver vers midi donne donc les meilleures chances de trouver une place.',
+  },
+  es: {
+    title: 'Julio y agosto — norma importante',
+    text: 'En julio y agosto, las reservas anticipadas se aceptan solo para bungalows. Las parcelas para autocaravanas, furgonetas, tiendas y caravanas están disponibles por orden de llegada. La salida del camping es hasta las 12:00, por lo que llegar alrededor del mediodía ofrece más posibilidades de encontrar sitio.',
+  },
+  nl: {
+    title: 'Juli en augustus — belangrijke regel',
+    text: 'In juli en augustus accepteren we vooraf reserveren alleen voor bungalows. Kampeerplaatsen voor campers, vans, tenten en caravans zijn beschikbaar op volgorde van aankomst. Uitchecken op de camping is tot 12.00 uur; aankomen rond de middag geeft daarom de beste kans op een plaats.',
+  },
+  cs: {
+    title: 'Červenec a srpen — důležité pravidlo',
+    text: 'V červenci a srpnu přijímáme rezervace předem pouze pro bungalovy. Místa pro obytné vozy, dodávky, stany a karavany jsou dostupná podle pořadí příjezdu. Odjezd z kempu je do 12:00, proto příjezd kolem poledne dává největší šanci na místo.',
+  },
+  sk: {
+    title: 'Júl a august — dôležité pravidlo',
+    text: 'V júli a auguste prijímame rezervácie vopred iba pre bungalovy. Miesta pre obytné autá, dodávky, stany a karavany sú dostupné podľa poradia príchodu. Odchod z kempu je do 12:00, preto príchod okolo poludnia dáva najväčšiu šancu na miesto.',
+  },
+  sv: {
+    title: 'Juli och augusti — viktig regel',
+    text: 'I juli och augusti tar vi endast emot förhandsbokningar för bungalower. Platser för husbilar, vans, tält och husvagnar finns i ankomstordning. Utcheckning från campingen är senast 12.00, så ankomst runt lunchtid ger bäst chans att få plats.',
+  },
+};
+const campingSummerNotice = campingSummerNoticeByLanguage[resolvedContentLanguage as keyof typeof campingSummerNoticeByLanguage] ?? campingSummerNoticeByLanguage.en;
+const cityCampingNoteByLanguage = {
+  pl: {
+    kicker: 'Dobrze wiedzieć',
+    title: 'Zielony camping w mieście',
+    text: 'Camping Clepardia znajduje się w Krakowie, dlatego jest świetną bazą do zwiedzania miasta — blisko tramwaju, sklepów i atrakcji. To jednak nie jest camping w lesie ani na odludnej polanie: czasem słychać tramwaje, samoloty i normalne miejskie życie. W zamian goście zyskują wygodny dojazd do centrum i spokojną, zieloną przestrzeń jak na warunki miejskie.',
+  },
+  en: {
+    kicker: 'Good to know',
+    title: 'A green campsite in the city',
+    text: 'Camping Clepardia is in Krakow, close to trams, shops and attractions. It is not a remote woodland campsite, so guests may sometimes hear trams, aircraft and normal city life. In return, it offers convenient access to the centre and a calm green space for an urban location.',
+  },
+  de: {
+    kicker: 'Gut zu wissen',
+    title: 'Ein grüner Campingplatz in der Stadt',
+    text: 'Camping Clepardia liegt in Krakau, nahe Straßenbahn, Geschäften und Sehenswürdigkeiten. Es ist kein abgelegener Waldcampingplatz: manchmal hört man Straßenbahnen, Flugzeuge und normales Stadtleben. Dafür bietet der Platz eine bequeme Verbindung ins Zentrum und eine ruhige, grüne Fläche für eine Stadtlage.',
+  },
+  it: {
+    kicker: 'Da sapere',
+    title: 'Un campeggio verde in città',
+    text: 'Camping Clepardia si trova a Cracovia, vicino a tram, negozi e attrazioni. Non è un campeggio isolato nel bosco: a volte si possono sentire tram, aerei e la normale vita cittadina. In cambio offre un accesso comodo al centro e uno spazio verde tranquillo in un contesto urbano.',
+  },
+  fr: {
+    kicker: 'Bon à savoir',
+    title: 'Un camping vert en ville',
+    text: 'Camping Clepardia se trouve à Cracovie, près des tramways, des commerces et des attractions. Ce n’est pas un camping isolé en forêt : on peut parfois entendre les tramways, les avions et la vie normale de la ville. En échange, vous profitez d’un accès pratique au centre et d’un espace vert calme pour un emplacement urbain.',
+  },
+  es: {
+    kicker: 'Información útil',
+    title: 'Un camping verde dentro de la ciudad',
+    text: 'Camping Clepardia está en Cracovia, cerca de tranvías, tiendas y atracciones. No es un camping aislado en el bosque: a veces se oyen tranvías, aviones y la vida normal de la ciudad. A cambio ofrece acceso cómodo al centro y un espacio verde tranquilo dentro del entorno urbano.',
+  },
+  nl: {
+    kicker: 'Goed om te weten',
+    title: 'Een groene stadscamping',
+    text: 'Camping Clepardia ligt in Krakau, dicht bij tram, winkels en bezienswaardigheden. Het is geen afgelegen boscamping: soms hoor je tram, vliegtuigen en normaal stadsleven. Daarvoor krijg je een handige verbinding met het centrum en een rustige groene plek in de stad.',
+  },
+  cs: {
+    kicker: 'Dobré vědět',
+    title: 'Zelený kemp ve městě',
+    text: 'Camping Clepardia je v Krakově, blízko tramvaje, obchodů a atrakcí. Není to odlehlý lesní kemp: někdy je slyšet tramvaje, letadla a běžný život města. Na oplátku nabízí pohodlný přístup do centra a klidný zelený prostor v městském prostředí.',
+  },
+  sk: {
+    kicker: 'Dobré vedieť',
+    title: 'Zelený kemp v meste',
+    text: 'Camping Clepardia je v Krakove, blízko električky, obchodov a atrakcií. Nie je to odľahlý lesný kemp: niekedy počuť električky, lietadlá a bežný život mesta. Na oplátku ponúka pohodlný prístup do centra a pokojný zelený priestor v mestskom prostredí.',
+  },
+  sv: {
+    kicker: 'Bra att veta',
+    title: 'En grön camping i staden',
+    text: 'Camping Clepardia ligger i Kraków, nära spårvagn, butiker och sevärdheter. Det är ingen avlägsen skogscamping: ibland hörs spårvagnar, flygplan och vanligt stadsliv. I gengäld får du smidig tillgång till centrum och en lugn grön plats i stadsmiljö.',
+  },
+};
+const cityCampingNote = cityCampingNoteByLanguage[resolvedContentLanguage as keyof typeof cityCampingNoteByLanguage] ?? cityCampingNoteByLanguage.en;
 const flatPricingStayPrice = (id: string) => {
   const item = pricingConfig.stayTypes.find((type) => type.id === id);
   return item && 'price' in item ? item.price : 0;
@@ -298,8 +406,62 @@ const contactActionTextByLanguage = {
     maps: 'Google Maps',
     email: 'Email',
   },
+  fr: {
+    kicker: 'Contact et réservation',
+    title: 'Besoin d’une réponse claire ?',
+    copy: 'Appelez, envoyez un e-mail ou ouvrez le formulaire de séjour dédié. La demande de séjour est séparée pour garder la page contact simple et rapide.',
+    booking: 'Envoyer une demande',
+    call: 'Appeler',
+    maps: 'Google Maps',
+    email: 'E-mail',
+  },
+  es: {
+    kicker: 'Contacto y reserva',
+    title: '¿Necesitas el siguiente paso?',
+    copy: 'Llama, escribe un email o abre el formulario de estancia. La consulta de estancia está en una página separada para que contacto sea rápido y claro.',
+    booking: 'Enviar consulta',
+    call: 'Llamar',
+    maps: 'Google Maps',
+    email: 'Email',
+  },
+  nl: {
+    kicker: 'Contact en boeken',
+    title: 'Een duidelijke volgende stap nodig?',
+    copy: 'Bel, mail of open de aparte verblijfsaanvraag. Het formulier staat op een aparte pagina zodat contact snel en overzichtelijk blijft.',
+    booking: 'Aanvraag sturen',
+    call: 'Bellen',
+    maps: 'Google Maps',
+    email: 'E-mail',
+  },
+  cs: {
+    kicker: 'Kontakt a rezervace',
+    title: 'Potřebujete jasný další krok?',
+    copy: 'Zavolejte, napište e-mail nebo otevřete samostatný formulář pobytu. Dotaz na pobyt je na samostatné stránce, aby kontakt zůstal rychlý a přehledný.',
+    booking: 'Odeslat dotaz',
+    call: 'Zavolat',
+    maps: 'Google Maps',
+    email: 'E-mail',
+  },
+  sk: {
+    kicker: 'Kontakt a rezervácia',
+    title: 'Potrebujete jasný ďalší krok?',
+    copy: 'Zavolajte, napíšte e-mail alebo otvorte samostatný formulár pobytu. Dopyt na pobyt je na samostatnej stránke, aby kontakt zostal rýchly a prehľadný.',
+    booking: 'Odoslať dopyt',
+    call: 'Zavolať',
+    maps: 'Google Maps',
+    email: 'E-mail',
+  },
+  sv: {
+    kicker: 'Kontakt och bokning',
+    title: 'Behöver du ett tydligt nästa steg?',
+    copy: 'Ring, mejla eller öppna den separata vistelseförfrågan. Formuläret ligger på en egen sida så att kontaktsidan förblir snabb och tydlig.',
+    booking: 'Skicka förfrågan',
+    call: 'Ring',
+    maps: 'Google Maps',
+    email: 'E-post',
+  },
 };
-const contactActionText = contactActionTextByLanguage[resolvedContentLanguage];
+const contactActionText = contactActionTextByLanguage[resolvedContentLanguage as keyof typeof contactActionTextByLanguage] ?? contactActionTextByLanguage.en;
 const campingGuideExists = publicAssetExists(siteAssets.documents.campingGuidePdf);
 const operationalTextByLanguage = {
   pl: {
@@ -378,8 +540,122 @@ const operationalTextByLanguage = {
       { icon: 'laundry', title: 'Stenditoio', copy: 'Lo stenditoio è utile dopo il viaggio, la pioggia o il bucato.' },
     ],
   },
+  fr: {
+    arrivalKicker: 'Arrivée au camping',
+    arrivalTitle: 'À l’arrivée, arrêtez-vous près de la réception',
+    arrivalCopy:
+      'À l’arrivée, arrêtez-vous sur le parking près de la réception. L’équipe viendra vers vous, indiquera votre emplacement et expliquera le camping. L’enregistrement se fait ensuite.',
+    mapsCopy:
+      'Pour la navigation, nous recommandons Google Maps. L’entrée / l’accès a changé en 2022 ; les anciens GPS peuvent donc indiquer un mauvais itinéraire.',
+    practicalKicker: 'Informations pratiques sur place',
+    practicalTitle: 'Les points utiles pour les clients',
+    guideReady: 'Télécharger Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — en préparation.',
+    cards: [
+      { icon: 'phone', title: 'Téléphone de la réception', copy: '+48 795 294 486' },
+      { icon: 'warning', title: 'Réfrigérateur', copy: 'Merci de surveiller vos affaires et d’étiqueter vos produits.' },
+      { icon: 'utensils', title: 'Cuisine touristique', copy: 'Un espace simple pour préparer un repas est disponible sur place.' },
+      { icon: 'shower', title: 'Toilettes et sanitaires', copy: 'Les sanitaires sont disponibles pour les clients du camping.' },
+      { icon: 'laundry', title: 'Séchoir', copy: 'Le séchoir est pratique après le voyage, la pluie ou une lessive.' },
+    ],
+  },
+  es: {
+    arrivalKicker: 'Llegada al camping',
+    arrivalTitle: 'Al llegar, detente cerca de recepción',
+    arrivalCopy:
+      'Al llegar, detente en el aparcamiento cerca de recepción. El personal se acercará, indicará tu parcela y explicará el camping. Después se completa el registro.',
+    mapsCopy:
+      'Para navegar recomendamos Google Maps. La entrada / ruta de acceso cambió en 2022, por lo que los GPS antiguos pueden indicar mal.',
+    practicalKicker: 'Información práctica en el camping',
+    practicalTitle: 'Lo más útil para los huéspedes',
+    guideReady: 'Descargar Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — en preparación.',
+    cards: [
+      { icon: 'phone', title: 'Teléfono de recepción', copy: '+48 795 294 486' },
+      { icon: 'warning', title: 'Nevera', copy: 'Vigila tus cosas y etiqueta los productos.' },
+      { icon: 'utensils', title: 'Cocina turística', copy: 'Hay un espacio básico para preparar comida.' },
+      { icon: 'shower', title: 'Baños y sanitarios', copy: 'Los sanitarios están disponibles para huéspedes del camping.' },
+      { icon: 'laundry', title: 'Secadero', copy: 'El secadero ayuda después del viaje, la lluvia o la colada.' },
+    ],
+  },
+  nl: {
+    arrivalKicker: 'Aankomst op de camping',
+    arrivalTitle: 'Stop na aankomst bij de receptie',
+    arrivalCopy:
+      'Stop na aankomst op de parkeerzone bij de receptie. Het team komt naar je toe, wijst je plaats en legt de camping uit. Daarna volgt de registratie.',
+    mapsCopy:
+      'Voor navigatie adviseren we Google Maps. De ingang / route is in 2022 gewijzigd, waardoor oudere navigatie verkeerd kan sturen.',
+    practicalKicker: 'Praktische informatie op locatie',
+    practicalTitle: 'Handige punten voor gasten',
+    guideReady: 'Download Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — binnenkort.',
+    cards: [
+      { icon: 'phone', title: 'Telefoon receptie', copy: '+48 795 294 486' },
+      { icon: 'warning', title: 'Koelkast', copy: 'Let op je spullen en label je producten.' },
+      { icon: 'utensils', title: 'Gastenkeuken', copy: 'Er is een eenvoudige ruimte om een maaltijd te bereiden.' },
+      { icon: 'shower', title: 'Toiletten en sanitair', copy: 'Sanitair is beschikbaar voor campinggasten.' },
+      { icon: 'laundry', title: 'Droogruimte', copy: 'De droogruimte is handig na reizen, regen of was.' },
+    ],
+  },
+  cs: {
+    arrivalKicker: 'Příjezd do kempu',
+    arrivalTitle: 'Po příjezdu zastavte u recepce',
+    arrivalCopy:
+      'Po příjezdu zastavte na parkovišti u recepce. Personál za vámi přijde, ukáže místo a vysvětlí kemp. Poté proběhne registrace.',
+    mapsCopy:
+      'Pro navigaci doporučujeme Google Maps. Vjezd / příjezdová trasa se změnila v roce 2022, takže starší navigace může vést špatně.',
+    practicalKicker: 'Praktické informace na místě',
+    practicalTitle: 'Nejdůležitější věci pro hosty',
+    guideReady: 'Stáhnout Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — připravujeme.',
+    cards: [
+      { icon: 'phone', title: 'Telefon recepce', copy: '+48 795 294 486' },
+      { icon: 'warning', title: 'Lednice', copy: 'Prosíme, hlídejte si své věci a označujte potraviny.' },
+      { icon: 'utensils', title: 'Turistická kuchyňka', copy: 'Na místě je jednoduchý prostor pro přípravu jídla.' },
+      { icon: 'shower', title: 'Toalety a sociální zařízení', copy: 'Sociální zařízení je dostupné hostům kempu.' },
+      { icon: 'laundry', title: 'Sušárna', copy: 'Sušárna se hodí po cestě, dešti nebo praní.' },
+    ],
+  },
+  sk: {
+    arrivalKicker: 'Príchod do kempu',
+    arrivalTitle: 'Po príchode zastavte pri recepcii',
+    arrivalCopy:
+      'Po príchode zastavte na parkovisku pri recepcii. Personál príde za vami, ukáže miesto a vysvetlí kemp. Potom prebehne registrácia.',
+    mapsCopy:
+      'Na navigáciu odporúčame Google Maps. Vjazd / prístupová trasa sa zmenila v roku 2022, takže staršia navigácia môže viesť nesprávne.',
+    practicalKicker: 'Praktické informácie na mieste',
+    practicalTitle: 'Najdôležitejšie veci pre hostí',
+    guideReady: 'Stiahnuť Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — pripravujeme.',
+    cards: [
+      { icon: 'phone', title: 'Telefón recepcie', copy: '+48 795 294 486' },
+      { icon: 'warning', title: 'Chladnička', copy: 'Prosíme, strážte si svoje veci a označujte potraviny.' },
+      { icon: 'utensils', title: 'Turistická kuchynka', copy: 'Na mieste je jednoduchý priestor na prípravu jedla.' },
+      { icon: 'shower', title: 'Toalety a sociálne zariadenia', copy: 'Sociálne zariadenia sú dostupné hosťom kempu.' },
+      { icon: 'laundry', title: 'Sušiareň', copy: 'Sušiareň pomáha po ceste, daždi alebo praní.' },
+    ],
+  },
+  sv: {
+    arrivalKicker: 'Ankomst till campingen',
+    arrivalTitle: 'Stanna vid receptionen efter ankomst',
+    arrivalCopy:
+      'Efter ankomst, stanna på parkeringen nära receptionen. Personalen kommer till dig, visar platsen och förklarar campingen. Registrering görs därefter.',
+    mapsCopy:
+      'För navigering rekommenderar vi Google Maps. Infarten / vägen ändrades 2022, så äldre navigation kan visa fel.',
+    practicalKicker: 'Praktisk information på plats',
+    practicalTitle: 'Viktigt för gäster',
+    guideReady: 'Ladda ner Camping Guide PDF',
+    guidePending: 'Camping Guide PDF — kommer snart.',
+    cards: [
+      { icon: 'phone', title: 'Receptionens telefon', copy: '+48 795 294 486' },
+      { icon: 'warning', title: 'Kylskåp', copy: 'Håll uppsikt över dina saker och märk dina produkter.' },
+      { icon: 'utensils', title: 'Gästkök', copy: 'En enkel plats för att laga mat finns på området.' },
+      { icon: 'shower', title: 'Toaletter och sanitetsutrymmen', copy: 'Sanitetsutrymmen finns för campinggäster.' },
+      { icon: 'laundry', title: 'Torkrum', copy: 'Torkrummet är praktiskt efter resa, regn eller tvätt.' },
+    ],
+  },
 };
-const operationalText = operationalTextByLanguage[resolvedContentLanguage];
+const operationalText = operationalTextByLanguage[resolvedContentLanguage as keyof typeof operationalTextByLanguage] ?? operationalTextByLanguage.en;
 ---
 
 <section class:list={['page-mini-hero', page.slug !== 'cennik' && 'reveal-section', page.slug === 'cennik' && 'page-mini-hero--pricing']}>
@@ -509,11 +785,9 @@ const operationalText = operationalTextByLanguage[resolvedContentLanguage];
       <article class="premium-card city-camping-note__card">
         <span aria-hidden="true"><Icon name="MapPinned" size={28} strokeWidth={1.8} /></span>
         <div>
-          <span class="section-kicker">{contentLanguage === 'pl' ? 'Dobrze wiedzieć' : 'Good to know'}</span>
-          <h2>{contentLanguage === 'pl' ? 'Zielony camping w mieście' : 'A green campsite in the city'}</h2>
-          <p>{contentLanguage === 'pl'
-            ? 'Camping Clepardia znajduje się w Krakowie, dlatego jest świetną bazą do zwiedzania miasta — blisko tramwaju, sklepów i atrakcji. To jednak nie jest camping w lesie ani na odludnej polanie: czasem słychać tramwaje, samoloty i normalne miejskie życie. W zamian goście zyskują wygodny dojazd do centrum i spokojną, zieloną przestrzeń jak na warunki miejskie.'
-            : 'Camping Clepardia is in Krakow, close to trams, shops and attractions. It is not a remote woodland campsite, so guests may sometimes hear trams, aircraft and normal city life. In return, it offers convenient access to the centre and a calm green space for an urban location.'}</p>
+          <span class="section-kicker">{cityCampingNote.kicker}</span>
+          <h2>{cityCampingNote.title}</h2>
+          <p>{cityCampingNote.text}</p>
         </div>
       </article>
     </div>

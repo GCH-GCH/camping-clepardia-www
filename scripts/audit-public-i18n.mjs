@@ -2,25 +2,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const distDir = path.resolve('dist');
-const languages = ['en', 'de', 'it', 'fr', 'es', 'nl', 'cs', 'sk', 'sv'];
-const publicRouteCandidates = [
-  '',
-  'camping',
-  'domki',
-  'cennik',
-  'dojazd',
-  'atrakcje',
-  'galeria',
-  'kontakt',
-  'faq',
-  'rezerwacja',
-  'booking',
-  'buchung',
-  'prenotazione',
-  'aktualnosci',
-];
+const locales = ['en', 'de', 'it', 'fr', 'es', 'nl', 'cs', 'sk', 'sv'];
+const nonEnglishLocales = locales.filter((locale) => locale !== 'en');
 
-const obviousPhrases = [
+const polishLeakPhrases = [
   'Użyj w kalkulatorze',
   'Kto przyjeżdża',
   'Czym przyjeżdżasz',
@@ -40,7 +25,6 @@ const obviousPhrases = [
   'Jak dojechać do centrum?',
   'Pomóż mi przygotować pobyt',
   'Zaplanuj dzień w Krakowie',
-
   'Budynek sanitarny',
   'Przystanek przy campingu',
   'Domek 4-osobowy',
@@ -66,7 +50,52 @@ const obviousPhrases = [
   'Camping z lotu ptaka',
 ];
 
-const ambiguousPhrases = [
+const englishFallbackPhrases = [
+  'July and August — important rule',
+  'July and August - important rule',
+  'In July and August',
+  'Good to know',
+  'Good to know before arrival',
+  'A green campsite in the city',
+  'green city campsite',
+  'A green base',
+  'Why it works',
+  'What you will find on site',
+  'Important information',
+  'Before arriving',
+  'Next step',
+  'Check availability',
+  'Send inquiry',
+  'Book now',
+  'See prices',
+  'Read more',
+  'Frequently asked questions',
+  'Find an answer before arrival',
+  'Search FAQ',
+  'No answer found',
+  'Need help',
+  'Ask CAMPY',
+  'Start planning',
+  'Choose language',
+  'Form sent',
+  'Thank you',
+  'Contact reception',
+  'Your stay',
+  'Practical facilities',
+  'Vehicle and extra prices',
+  'Bungalows and camping for families',
+  'Attractions for children',
+  'Practical information',
+  'Family prices',
+  'Property character',
+  'Arrival and registration',
+  'Check-in and check-out',
+  'Bookings and availability',
+  'Privacy policy',
+  'Data administrator',
+];
+
+const ambiguousPolishWatch = [
   'Zarezerwuj',
   'Dorośli',
   'Dzieci',
@@ -83,6 +112,24 @@ const ambiguousPhrases = [
   'noc',
   'od',
   'ok.',
+];
+
+const ambiguousEnglishWatch = [
+  'Arrival',
+  'Departure',
+  'Guests',
+  'Adults',
+  'Children',
+  'Campsite',
+  'Bungalows',
+  'Directions',
+  'Attractions',
+  'Message',
+  'Phone',
+  'Country',
+  'Name',
+  'Email',
+  'Camping',
 ];
 
 const decodeEntities = (value) =>
@@ -128,16 +175,38 @@ const countOccurrences = (haystack, needle) => {
   return count;
 };
 
-const routeToFile = (lang, route) => {
-  const routePart = route ? `${route}/` : '';
-  return path.join(distDir, lang, routePart, 'index.html');
+const toRoute = (locale, file) => {
+  const localeDir = path.join(distDir, locale);
+  const relative = path.relative(localeDir, file).replaceAll(path.sep, '/').replace(/(^|\/)index\.html$/, '');
+  return `/${locale}${relative ? `/${relative}` : ''}/`;
 };
 
-const scanSurface = ({ lang, route, label, content, phrases }) => {
+const collectHtmlFiles = (dir) => {
+  if (!fs.existsSync(dir)) return [];
+
+  const files = [];
+  const visit = (current) => {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const target = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        visit(target);
+      } else if (entry.isFile() && entry.name === 'index.html') {
+        files.push(target);
+      }
+    }
+  };
+
+  visit(dir);
+  return files;
+};
+
+const scanSurface = ({ locale, route, label, content, phrases, type }) => {
   const rows = [];
   for (const phrase of phrases) {
     const count = countOccurrences(content, phrase);
-    if (count > 0) rows.push({ locale: lang, route: `/${lang}/${route ? `${route}/` : ''}`, phrase, count, surface: label });
+    if (count > 0) {
+      rows.push({ type, locale, route, phrase, count, surface: label });
+    }
   }
   return rows;
 };
@@ -151,32 +220,28 @@ const failures = [];
 const warnings = [];
 let filesChecked = 0;
 
-for (const lang of languages) {
-  for (const route of publicRouteCandidates) {
-    const file = routeToFile(lang, route);
-    if (!fs.existsSync(file)) continue;
+for (const locale of locales) {
+  const files = collectHtmlFiles(path.join(distDir, locale));
 
+  for (const file of files) {
     filesChecked += 1;
+    const route = toRoute(locale, file);
     const html = fs.readFileSync(file, 'utf8');
     const text = visibleText(html);
     const attrsAndText = htmlWithoutInactiveBlocks(html);
     const scripts = scriptText(html);
 
-    failures.push(...scanSurface({ lang, route, label: 'visible-text', content: text, phrases: obviousPhrases }));
-    failures.push(...scanSurface({ lang, route, label: 'attr/html', content: attrsAndText, phrases: obviousPhrases }));
+    failures.push(...scanSurface({ locale, route, label: 'visible-text', content: text, phrases: polishLeakPhrases, type: 'PL_LEAK' }));
+    failures.push(...scanSurface({ locale, route, label: 'attr/html', content: attrsAndText, phrases: polishLeakPhrases, type: 'PL_LEAK' }));
+    warnings.push(...scanSurface({ locale, route, label: 'visible-text-watch', content: text, phrases: ambiguousPolishWatch, type: 'PL_WATCH' }));
+    warnings.push(...scanSurface({ locale, route, label: 'runtime-js-watch', content: scripts, phrases: polishLeakPhrases, type: 'PL_JS_WATCH' }));
 
-    // Runtime JS is a hard failure for the components fixed in this task:
-    // pricing and gallery. The booking form still carries a multilingual
-    // dictionary in JS; it is reported below as a watchlist item unless it
-    // becomes visible in HTML/attributes.
-    if (route === 'cennik' || route === 'galeria') {
-      failures.push(...scanSurface({ lang, route, label: 'runtime-js', content: scripts, phrases: obviousPhrases }));
-    } else {
-      warnings.push(...scanSurface({ lang, route, label: 'runtime-js-watch', content: scripts, phrases: obviousPhrases }));
+    if (nonEnglishLocales.includes(locale)) {
+      failures.push(...scanSurface({ locale, route, label: 'visible-text', content: text, phrases: englishFallbackPhrases, type: 'EN_FALLBACK' }));
+      failures.push(...scanSurface({ locale, route, label: 'attr/html', content: attrsAndText, phrases: englishFallbackPhrases, type: 'EN_FALLBACK' }));
+      warnings.push(...scanSurface({ locale, route, label: 'visible-text-watch', content: text, phrases: ambiguousEnglishWatch, type: 'EN_WATCH' }));
+      warnings.push(...scanSurface({ locale, route, label: 'runtime-js-watch', content: scripts, phrases: englishFallbackPhrases, type: 'EN_JS_WATCH' }));
     }
-
-    warnings.push(...scanSurface({ lang, route, label: 'visible-text-watch', content: text, phrases: ambiguousPhrases }));
-    warnings.push(...scanSurface({ lang, route, label: 'runtime-js-watch', content: scripts, phrases: ambiguousPhrases }));
   }
 }
 
@@ -187,9 +252,9 @@ if (warnings.length) {
 }
 
 if (failures.length) {
-  console.error(`I18N audit failed: ${failures.length} oczywistych polskich przecieków w obcych wersjach.`);
+  console.error(`I18N audit failed: ${failures.length} twardych przecieków PL/EN fallback w obcych wersjach.`);
   console.table(failures);
   process.exit(1);
 }
 
-console.log(`I18N audit passed: sprawdzono ${filesChecked} publicznych plików HTML dla ${languages.length} języków.`);
+console.log(`I18N audit passed: sprawdzono ${filesChecked} publicznych plików HTML dla ${locales.length} języków; EN_FALLBACK aktywny dla ${nonEnglishLocales.length} języków.`);

@@ -121,7 +121,175 @@ const content = {
   },
 };
 
-const active = content[lang];
+const coreLegalContent = {
+  fr: {
+    rules: {
+      note: 'Les règles de cette page sont informatives ; les règles finales sont confirmées par la réception ou les documents de l’établissement.',
+      sections: [
+        ['Caractère du lieu', ['Camping Clepardia n’est pas un camping de fête.', 'Le calme nocturne s’applique de 22h00 à 07h00.', 'Les clients qui souhaitent faire la fête doivent choisir un autre lieu.']],
+        ['Arrivée et enregistrement', ['À l’arrivée, arrêtez-vous près de la réception ou sur le parking.', 'L’équipe indique votre place et explique le camping.', 'L’enregistrement se fait après l’indication de la place.', 'Nous recommandons Google Maps, car l’accès a changé en 2022.']],
+        ['Horaires de séjour', ['Camping : 12h00-12h00.', 'Bungalows : arrivée à partir de 16h00.', 'Bungalows : départ jusqu’à 11h00.']],
+        ['Emplacements camping', ['Les camping-cars sont placés principalement sur dalles béton.', 'Les vans, bus et véhicules lourds sont placés sur asphalte afin d’éviter l’enlisement.', 'L’accès à l’herbe est possible selon les indications du personnel.']],
+        ['Bungalows', ['Seuls les bungalows pour 2, 3 et 4 personnes sont disponibles.', 'Aucune catégorie supplémentaire n’est proposée.', 'La réception confirme la disponibilité des bungalows.']],
+        ['Électricité', ['L’électricité est facturée selon le tarif.', 'Le branchement est destiné aux camping-cars et caravanes.', 'La recharge de voitures électriques ou hybrides n’est pas autorisée.', 'Les appareils à très forte consommation ne doivent pas être branchés.']],
+        ['Chiens', ['Le chien séjourne gratuitement.', 'Merci de ramasser après votre chien.', 'Le chien doit rester sous le contrôle de son propriétaire.']],
+        ['Sécurité et ordre', ['Merci de respecter le calme des autres clients.', 'Merci de prendre soin des équipements et de l’ordre.', 'Les effets personnels dans les réfrigérateurs et la cuisine touristique restent sous la responsabilité des clients.']],
+        ['Factures', ['Les factures sont émises uniquement pour les sociétés enregistrées en Pologne.', 'Nous n’émettons pas de factures pour les entités étrangères.']],
+        ['Réservations et disponibilité', ['Le calculateur affiche un prix indicatif.', 'La disponibilité finale et le prix sont confirmés par la réception.', 'En été, les réservations d’emplacements peuvent être limitées.']],
+      ],
+    },
+    privacy: {
+      note: 'Les coordonnées complètes de l’administrateur doivent être complétées avant la publication de production.',
+      sections: [
+        ['Administrateur des données', ['L’administrateur des données est Camping Clepardia. Les coordonnées complètes doivent être complétées avant la publication.', 'Contact pour les données et les demandes : clepardia@gmail.com.']],
+        ['Données traitées', ['Le formulaire peut collecter le nom, l’e-mail, le téléphone, le pays, la langue de contact, les dates, le type de séjour, le nombre de personnes, les options et le message.', 'Merci de ne pas envoyer de données sensibles via le formulaire.']],
+        ['Finalité', ['Les données servent à répondre aux demandes de disponibilité, de prix et de détails de séjour.', 'Elles peuvent être utilisées pour préparer la correspondance e-mail avec la réception.']],
+        ['Cookies et analytique', ['Si des outils analytiques ou cookies supplémentaires sont ajoutés, cette section devra être mise à jour.', 'À ce stade, la politique est un brouillon informatif sécurisé.']],
+        ['Durée et sécurité', ['Les données sont conservées uniquement le temps nécessaire au traitement de la demande et au contact avec le client.', 'Les données des clients ne sont pas publiées sur le site.']],
+      ],
+    },
+  },
+  es: {
+    rules: {
+      note: 'Las normas de esta página son informativas; las normas finales las confirma recepción o los documentos del establecimiento.',
+      sections: [
+        ['Carácter del lugar', ['Camping Clepardia no es un camping de fiestas.', 'El silencio nocturno es de 22:00 a 07:00.', 'Quienes planeen fiestas deben elegir otro lugar.']],
+        ['Llegada y registro', ['Al llegar, detente junto a recepción o en el aparcamiento.', 'El personal indicará tu lugar y explicará el camping.', 'El registro se realiza después de indicar el lugar.', 'Recomendamos Google Maps porque el acceso cambió en 2022.']],
+        ['Horarios de estancia', ['Camping: 12:00-12:00.', 'Bungalows: entrada desde las 16:00.', 'Bungalows: salida hasta las 11:00.']],
+        ['Parcelas de camping', ['Las autocaravanas se colocan principalmente sobre placas de hormigón.', 'Furgonetas, autobuses y vehículos pesados se colocan sobre asfalto para evitar quedarse atrapados.', 'El acceso al césped es posible según indicación del personal.']],
+        ['Bungalows', ['Solo hay bungalows para 2, 3 y 4 personas.', 'No ofrecemos categorías adicionales.', 'Recepción confirma la disponibilidad de bungalows.']],
+        ['Electricidad', ['La electricidad se cobra según la lista de precios.', 'La conexión está destinada a autocaravanas y caravanas.', 'No se permite cargar coches eléctricos ni híbridos.', 'No deben conectarse aparatos de consumo muy alto.']],
+        ['Perros', ['El perro se aloja gratis.', 'Por favor, recoge siempre sus excrementos.', 'El perro debe permanecer bajo control de su cuidador.']],
+        ['Seguridad y orden', ['Respetamos la tranquilidad de otros huéspedes.', 'Pedimos cuidar el equipamiento y el orden.', 'Los objetos en neveras y cocina turística son responsabilidad del huésped.']],
+        ['Facturas', ['Emitimos facturas solo para empresas registradas en Polonia.', 'No emitimos facturas para entidades extranjeras.']],
+        ['Reservas y disponibilidad', ['La calculadora muestra un precio orientativo.', 'La disponibilidad final y el precio los confirma recepción.', 'En verano, las reservas de parcelas pueden estar limitadas.']],
+      ],
+    },
+    privacy: {
+      note: 'Los datos completos del administrador deben completarse antes de la publicación en producción.',
+      sections: [
+        ['Administrador de datos', ['El administrador de datos es Camping Clepardia. Los datos completos deben completarse antes de la publicación.', 'Contacto para datos y consultas: clepardia@gmail.com.']],
+        ['Ámbito de datos', ['El formulario puede recopilar nombre, email, teléfono, país, idioma de contacto, fechas, tipo de estancia, número de personas, extras y mensaje.', 'No envíes datos sensibles a través del formulario.']],
+        ['Finalidad', ['Los datos se usan para responder consultas sobre disponibilidad, precio y detalles de estancia.', 'Pueden usarse para preparar correspondencia por email con recepción.']],
+        ['Cookies y analítica', ['Si se implementan analítica o herramientas cookies adicionales, esta sección deberá actualizarse.', 'En esta etapa la política es un borrador informativo seguro.']],
+        ['Conservación y seguridad', ['Los datos se conservan solo el tiempo necesario para atender la consulta y el contacto con el huésped.', 'Los datos de huéspedes no se publican en la web.']],
+      ],
+    },
+  },
+  nl: {
+    rules: {
+      note: 'De regels op deze pagina zijn informatief; definitieve regels worden bevestigd door de receptie of objectdocumenten.',
+      sections: [
+        ['Karakter van de locatie', ['Camping Clepardia is geen feestcamping.', 'Nachtrust geldt van 22.00 tot 07.00 uur.', 'Gasten die willen feesten kiezen beter een andere plek.']],
+        ['Aankomst en registratie', ['Stop na aankomst bij de receptie of parkeerplaats.', 'Het team wijst je plaats aan en legt de camping uit.', 'Registratie gebeurt nadat de plaats is aangewezen.', 'Wij raden Google Maps aan omdat de toegangsroute in 2022 veranderde.']],
+        ['Verblijfstijden', ['Camping: 12.00-12.00 uur.', 'Bungalows: inchecken vanaf 16.00 uur.', 'Bungalows: uitchecken tot 11.00 uur.']],
+        ['Kampeerplaatsen', ['Campers staan meestal op betonplaten.', 'Vans, bussen en zware voertuigen worden op asfalt geplaatst om vastzitten te voorkomen.', 'Toegang tot gras is mogelijk volgens aanwijzing van het personeel.']],
+        ['Bungalows', ['Er zijn alleen bungalows voor 2, 3 en 4 personen.', 'Er worden geen extra categorieën aangeboden.', 'De receptie bevestigt beschikbaarheid van bungalows.']],
+        ['Stroom', ['Stroom wordt volgens de prijslijst berekend.', 'De aansluiting is bedoeld voor campers en caravans.', 'Elektrische of hybride auto’s laden is niet toegestaan.', 'Apparaten met zeer hoog verbruik mogen niet worden aangesloten.']],
+        ['Honden', ['Honden verblijven gratis.', 'Ruim altijd op na je hond.', 'De hond moet onder controle van de eigenaar blijven.']],
+        ['Veiligheid en orde', ['Respecteer de rust van andere gasten.', 'Zorg goed voor apparatuur en orde.', 'Spullen in koelkasten en gastenkeuken blijven verantwoordelijkheid van de gast.']],
+        ['Facturen', ['Facturen worden alleen uitgegeven aan bedrijven geregistreerd in Polen.', 'Wij geven geen facturen aan buitenlandse entiteiten.']],
+        ['Reserveringen en beschikbaarheid', ['De calculator toont een indicatieve prijs.', 'Definitieve beschikbaarheid en prijs worden bevestigd door de receptie.', 'In de zomer kunnen reserveringen voor kampeerplaatsen beperkt zijn.']],
+      ],
+    },
+    privacy: {
+      note: 'Beheerdersgegevens moeten vóór productiepublicatie worden aangevuld.',
+      sections: [
+        ['Gegevensbeheerder', ['De gegevensbeheerder is Camping Clepardia. Volledige gegevens moeten vóór publicatie worden aangevuld.', 'Contact voor gegevens en aanvragen: clepardia@gmail.com.']],
+        ['Omvang van gegevens', ['Het formulier kan naam, e-mail, telefoon, land, contacttaal, verblijfsdata, type verblijf, aantal gasten, extra’s en bericht verzamelen.', 'Stuur geen gevoelige gegevens via het formulier.']],
+        ['Doel', ['Gegevens worden gebruikt om te antwoorden op vragen over beschikbaarheid, prijs en verblijf.', 'Gegevens kunnen worden gebruikt voor e-mailcorrespondentie met de receptie.']],
+        ['Cookies en analyse', ['Als analyse of extra cookietools worden toegevoegd, moet deze sectie worden bijgewerkt.', 'Op dit moment is het beleid een veilige informatieve concepttekst.']],
+        ['Bewaring en veiligheid', ['Gegevens worden alleen bewaard zolang nodig is voor de aanvraag en gastcontact.', 'Gastgegevens worden niet op de website gepubliceerd.']],
+      ],
+    },
+  },
+  cs: {
+    rules: {
+      note: 'Pravidla na této stránce jsou informační; konečná pravidla potvrzuje recepce nebo dokumenty objektu.',
+      sections: [
+        ['Charakter objektu', ['Camping Clepardia není párty kemp.', 'Noční klid platí od 22:00 do 07:00.', 'Hosté plánující oslavy by měli zvolit jiné místo.']],
+        ['Příjezd a registrace', ['Po příjezdu zastavte u recepce nebo na parkovišti.', 'Personál ukáže místo a vysvětlí kemp.', 'Registrace probíhá po přidělení místa.', 'Doporučujeme Google Maps, protože příjezdová trasa se v roce 2022 změnila.']],
+        ['Časy pobytu', ['Camping: 12:00-12:00.', 'Bungalovy: příjezd od 16:00.', 'Bungalovy: odjezd do 11:00.']],
+        ['Campingová místa', ['Obytné vozy stojí hlavně na betonových deskách.', 'Dodávky, autobusy a těžká vozidla dáváme na asfalt, aby nezapadla.', 'Přístup k trávě je možný podle pokynů personálu.']],
+        ['Bungalovy', ['K dispozici jsou pouze bungalovy pro 2, 3 a 4 osoby.', 'Další kategorie nenabízíme.', 'Dostupnost bungalovů potvrzuje recepce.']],
+        ['Elektřina', ['Elektřina se platí podle ceníku.', 'Přípojka je určena pro obytné vozy a karavany.', 'Nabíjení elektrických nebo hybridních aut není povoleno.', 'Nepřipojujte zařízení s velmi vysokým odběrem.']],
+        ['Psi', ['Pes má pobyt zdarma.', 'Prosíme, uklízejte po psovi.', 'Pes musí zůstat pod kontrolou majitele.']],
+        ['Bezpečnost a pořádek', ['Respektujte klid ostatních hostů.', 'Prosíme o péči o vybavení a pořádek.', 'Věci v lednicích a turistické kuchyňce si host hlídá sám.']],
+        ['Faktury', ['Faktury vystavujeme pouze firmám registrovaným v Polsku.', 'Faktury zahraničním subjektům nevystavujeme.']],
+        ['Rezervace a dostupnost', ['Kalkulačka ukazuje orientační cenu.', 'Konečnou dostupnost a cenu potvrzuje recepce.', 'V létě mohou být rezervace campingových míst omezené.']],
+      ],
+    },
+    privacy: {
+      note: 'Údaje správce je třeba doplnit před produkčním zveřejněním.',
+      sections: [
+        ['Správce údajů', ['Správcem údajů je Camping Clepardia. Úplné údaje je třeba doplnit před zveřejněním.', 'Kontakt pro údaje a dotazy: clepardia@gmail.com.']],
+        ['Rozsah údajů', ['Formulář může sbírat jméno, e-mail, telefon, zemi, jazyk kontaktu, termín, typ pobytu, počet hostů, doplňky a zprávu.', 'Neposílejte citlivé údaje přes formulář.']],
+        ['Účel', ['Údaje používáme k odpovědi na dotaz ohledně dostupnosti, ceny a detailů pobytu.', 'Údaje mohou sloužit k přípravě e-mailové komunikace s recepcí.']],
+        ['Cookies a analytika', ['Pokud bude přidána analytika nebo další cookie nástroje, tato sekce se musí aktualizovat.', 'V této fázi je politika bezpečný informační návrh.']],
+        ['Doba a bezpečnost', ['Údaje uchováváme jen po dobu nutnou pro zpracování dotazu a kontakt s hostem.', 'Údaje hostů se na webu nezveřejňují.']],
+      ],
+    },
+  },
+  sk: {
+    rules: {
+      note: 'Pravidlá na tejto stránke sú informačné; konečné pravidlá potvrdzuje recepcia alebo dokumenty objektu.',
+      sections: [
+        ['Charakter objektu', ['Camping Clepardia nie je párty kemp.', 'Nočný pokoj platí od 22:00 do 07:00.', 'Hostia plánujúci oslavy by mali zvoliť iné miesto.']],
+        ['Príchod a registrácia', ['Po príchode zastavte pri recepcii alebo na parkovisku.', 'Personál ukáže miesto a vysvetlí kemp.', 'Registrácia prebieha po pridelení miesta.', 'Odporúčame Google Maps, pretože prístupová trasa sa v roku 2022 zmenila.']],
+        ['Časy pobytu', ['Camping: 12:00-12:00.', 'Bungalovy: príchod od 16:00.', 'Bungalovy: odchod do 11:00.']],
+        ['Campingové miesta', ['Obytné autá stoja hlavne na betónových platniach.', 'Dodávky, autobusy a ťažké vozidlá dávame na asfalt, aby nezapadli.', 'Prístup k tráve je možný podľa pokynov personálu.']],
+        ['Bungalovy', ['K dispozícii sú iba bungalovy pre 2, 3 a 4 osoby.', 'Ďalšie kategórie neponúkame.', 'Dostupnosť bungalovov potvrdzuje recepcia.']],
+        ['Elektrina', ['Elektrina sa platí podľa cenníka.', 'Prípojka je určená pre obytné autá a karavany.', 'Nabíjanie elektrických alebo hybridných áut nie je povolené.', 'Nepripájajte zariadenia s veľmi vysokým odberom.']],
+        ['Psy', ['Pes má pobyt zdarma.', 'Prosíme, upracte po psovi.', 'Pes musí zostať pod kontrolou majiteľa.']],
+        ['Bezpečnosť a poriadok', ['Rešpektujte pokoj ostatných hostí.', 'Prosíme o starostlivosť o vybavenie a poriadok.', 'Veci v chladničkách a turistickej kuchynke si hosť stráži sám.']],
+        ['Faktúry', ['Faktúry vystavujeme iba firmám registrovaným v Poľsku.', 'Faktúry zahraničným subjektom nevystavujeme.']],
+        ['Rezervácie a dostupnosť', ['Kalkulačka ukazuje orientačnú cenu.', 'Konečnú dostupnosť a cenu potvrdzuje recepcia.', 'V lete môžu byť rezervácie campingových miest obmedzené.']],
+      ],
+    },
+    privacy: {
+      note: 'Údaje správcu treba doplniť pred produkčným zverejnením.',
+      sections: [
+        ['Správca údajov', ['Správcom údajov je Camping Clepardia. Úplné údaje treba doplniť pred zverejnením.', 'Kontakt pre údaje a dopyty: clepardia@gmail.com.']],
+        ['Rozsah údajov', ['Formulár môže zbierať meno, e-mail, telefón, krajinu, jazyk kontaktu, termín, typ pobytu, počet hostí, doplnky a správu.', 'Neposielajte citlivé údaje cez formulár.']],
+        ['Účel', ['Údaje používame na odpoveď na dopyt o dostupnosti, cene a detailoch pobytu.', 'Údaje môžu slúžiť na prípravu e-mailovej komunikácie s recepciou.']],
+        ['Cookies a analytika', ['Ak bude pridaná analytika alebo ďalšie cookie nástroje, táto sekcia sa musí aktualizovať.', 'V tejto fáze je politika bezpečný informačný návrh.']],
+        ['Doba a bezpečnosť', ['Údaje uchovávame iba po dobu nutnú na spracovanie dopytu a kontakt s hosťom.', 'Údaje hostí sa na webe nezverejňujú.']],
+      ],
+    },
+  },
+  sv: {
+    rules: {
+      note: 'Reglerna på denna sida är informativa; slutliga regler bekräftas av receptionen eller anläggningens dokument.',
+      sections: [
+        ['Platsens karaktär', ['Camping Clepardia är ingen festcamping.', 'Nattro gäller 22.00-07.00.', 'Gäster som planerar fester bör välja en annan plats.']],
+        ['Ankomst och registrering', ['Stanna vid receptionen eller parkeringen efter ankomst.', 'Personalen visar platsen och förklarar campingen.', 'Registrering görs efter att platsen har anvisats.', 'Vi rekommenderar Google Maps eftersom infarten ändrades 2022.']],
+        ['Vistelsetider', ['Camping: 12.00-12.00.', 'Bungalower: incheckning från 16.00.', 'Bungalower: utcheckning senast 11.00.']],
+        ['Campingplatser', ['Husbilar placeras främst på betongplattor.', 'Vans, bussar och tunga fordon placeras på asfalt för att undvika att fastna.', 'Tillgång till gräs är möjlig enligt personalens anvisning.']],
+        ['Bungalower', ['Endast bungalower för 2, 3 och 4 personer finns.', 'Inga ytterligare kategorier erbjuds.', 'Receptionen bekräftar tillgänglighet.']],
+        ['El', ['El debiteras enligt prislistan.', 'Anslutningen är avsedd för husbilar och husvagnar.', 'Laddning av el- eller hybridbilar är inte tillåten.', 'Anslut inte utrustning med mycket hög förbrukning.']],
+        ['Hundar', ['Hund bor gratis.', 'Plocka upp efter hunden.', 'Hunden ska hållas under ägarens kontroll.']],
+        ['Säkerhet och ordning', ['Respektera andra gästers lugn.', 'Ta hand om utrustning och ordning.', 'Gäster ansvarar själva för saker i kylskåp och gästkök.']],
+        ['Fakturor', ['Fakturor utfärdas endast till företag registrerade i Polen.', 'Vi utfärdar inte fakturor till utländska enheter.']],
+        ['Bokningar och tillgänglighet', ['Kalkylatorn visar ett ungefärligt pris.', 'Slutlig tillgänglighet och pris bekräftas av receptionen.', 'På sommaren kan bokning av campingplatser vara begränsad.']],
+      ],
+    },
+    privacy: {
+      note: 'Administratörsuppgifter ska kompletteras före publicering i produktion.',
+      sections: [
+        ['Personuppgiftsansvarig', ['Personuppgiftsansvarig är Camping Clepardia. Fullständiga uppgifter ska kompletteras före publicering.', 'Kontakt för uppgifter och förfrågningar: clepardia@gmail.com.']],
+        ['Datatyper', ['Formuläret kan samla namn, e-post, telefon, land, kontaktspråk, vistelsedatum, vistelsetyp, antal gäster, tillval och meddelande.', 'Skicka inte känsliga uppgifter via formuläret.']],
+        ['Syfte', ['Uppgifter används för att svara på frågor om tillgänglighet, pris och vistelse.', 'Uppgifter kan användas för e-postkontakt med receptionen.']],
+        ['Cookies och analys', ['Om analys eller extra cookieverktyg införs ska denna sektion uppdateras.', 'I detta skede är policyn ett säkert informationsutkast.']],
+        ['Lagring och säkerhet', ['Uppgifter sparas endast så länge som behövs för att hantera förfrågan och gästkontakt.', 'Gästuppgifter publiceras inte på webbplatsen.']],
+      ],
+    },
+  },
+};
+
+const active =
+  content[lang as keyof typeof content]
+  ?? coreLegalContent[lang as keyof typeof coreLegalContent]
+  ?? content.en;
 const page = pageSlug === 'regulamin' ? active.rules : active.privacy;
 ---
 

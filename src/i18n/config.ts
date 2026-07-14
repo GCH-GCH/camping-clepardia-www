@@ -27,9 +27,9 @@ const dictionaries: Record<PublicTranslationLanguage, typeof en> = {
   sv: corePublicTranslations.sv as typeof en,
 };
 
-export const resolveContentLanguage = (languageCode?: string): FullTranslationLanguage =>
-  fullTranslationLanguages.includes(languageCode as FullTranslationLanguage)
-    ? (languageCode as FullTranslationLanguage)
+export const resolveContentLanguage = (languageCode?: string): PublicTranslationLanguage =>
+  dictionaries[languageCode as PublicTranslationLanguage]
+    ? (languageCode as PublicTranslationLanguage)
     : 'en';
 
 export const getTranslations = (languageCode?: string) =>
