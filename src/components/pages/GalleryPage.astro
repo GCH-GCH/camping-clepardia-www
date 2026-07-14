@@ -945,9 +945,10 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 
       <figure class="gallery-lightbox__figure">
         <div class="gallery-lightbox__media" data-gallery-media></div>
-        <figcaption>
+        <figcaption class="gallery-lightbox__caption" data-gallery-caption>
           <span data-gallery-lightbox-category>{galleryText.dialog}</span>
           <strong data-gallery-lightbox-title>Camping Clepardia</strong>
+          <small data-gallery-lightbox-description></small>
         </figcaption>
       </figure>
 
@@ -985,8 +986,10 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
     const items = Array.from(galleryRoot.querySelectorAll('[data-gallery-item]')) as HTMLButtonElement[];
     const lightbox = galleryRoot.querySelector('[data-gallery-lightbox]') as HTMLElement | null;
     const media = galleryRoot.querySelector('[data-gallery-media]') as HTMLElement | null;
+    const caption = galleryRoot.querySelector('[data-gallery-caption]') as HTMLElement | null;
     const title = galleryRoot.querySelector('[data-gallery-lightbox-title]') as HTMLElement | null;
     const category = galleryRoot.querySelector('[data-gallery-lightbox-category]') as HTMLElement | null;
+    const description = galleryRoot.querySelector('[data-gallery-lightbox-description]') as HTMLElement | null;
     const closeButtons = Array.from(galleryRoot.querySelectorAll('[data-gallery-close]')) as HTMLElement[];
     const prevButton = galleryRoot.querySelector('[data-gallery-prev]') as HTMLButtonElement | null;
     const nextButton = galleryRoot.querySelector('[data-gallery-next]') as HTMLButtonElement | null;
@@ -998,12 +1001,16 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
     let touchStartX = 0;
     let touchStartY = 0;
     let isLightboxAnimating = false;
+    let isLightboxClosing = false;
     let closeTimer: number | undefined;
     let switchTimer: number | undefined;
+    let captionTimer: number | undefined;
+    let closeToken = 0;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const openCloseDuration = reduceMotion ? 0 : 240;
-    const switchOutDuration = reduceMotion ? 0 : 120;
+    const openCloseDuration = reduceMotion ? 0 : 300;
+    const switchOutDuration = reduceMotion ? 0 : 140;
     const switchInDuration = reduceMotion ? 0 : 230;
+    const captionInDuration = reduceMotion ? 0 : 240;
 
     const getVisibleItems = () => items.filter((item) => !item.hidden);
 
@@ -1031,6 +1038,35 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
       }, 120);
     };
 
+    const clearSwitchTimers = () => {
+      if (switchTimer) window.clearTimeout(switchTimer);
+      if (captionTimer) window.clearTimeout(captionTimer);
+      switchTimer = undefined;
+      captionTimer = undefined;
+    };
+
+    const setCaption = (imageTitle: string, imageCategory: string, imageAlt: string) => {
+      if (title) title.textContent = imageTitle;
+      if (category) category.textContent = imageCategory;
+      if (description) {
+        description.textContent = imageAlt && imageAlt !== imageTitle ? imageAlt : imageCategory;
+      }
+    };
+
+    const resetCaptionMotion = () => {
+      caption?.classList.remove('caption-exit', 'caption-enter', 'caption-active');
+    };
+
+    const playCaptionEnter = () => {
+      if (!caption || reduceMotion) return;
+      resetCaptionMotion();
+      caption.classList.add('caption-enter');
+      window.requestAnimationFrame(() => {
+        caption.classList.add('caption-active');
+        captionTimer = window.setTimeout(() => resetCaptionMotion(), captionInDuration + 70);
+      });
+    };
+
     const renderLightbox = () => {
       const visibleItems = getVisibleItems();
       const item = visibleItems[activeIndex];
@@ -1042,8 +1078,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
       const imageAlt = item.dataset.alt ?? imageTitle;
       const placeholderLabel = item.dataset.placeholderLabel ?? 'Photo coming soon';
 
-      if (title) title.textContent = imageTitle;
-      if (category) category.textContent = imageCategory;
+      setCaption(imageTitle, imageCategory, imageAlt);
 
       media.innerHTML = '';
       if (image) {
@@ -1077,7 +1112,10 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
       if (!lightbox || nextIndex < 0) return;
 
       if (closeTimer) window.clearTimeout(closeTimer);
+      clearSwitchTimers();
+      closeToken += 1;
       isLightboxAnimating = false;
+      isLightboxClosing = false;
       setNavDisabled(false);
       lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       activeIndex = nextIndex;
@@ -1085,53 +1123,85 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
       document.body.style.overflow = 'hidden';
       lightbox.hidden = false;
       lightbox.setAttribute('aria-hidden', 'false');
-      lightbox.classList.remove('is-switching', 'is-slide-next', 'is-slide-prev');
+      lightbox.classList.remove('is-open', 'is-closing', 'is-switching', 'is-slide-next', 'is-slide-prev');
+      lightbox.classList.add('is-opening');
+      media?.classList.remove('is-switching-out', 'is-switching-in');
+      resetCaptionMotion();
       renderLightbox();
       window.requestAnimationFrame(() => {
         lightbox.classList.add('is-open');
-        window.setTimeout(() => (lightbox.querySelector('.gallery-lightbox__close') as HTMLButtonElement | null)?.focus(), reduceMotion ? 0 : 80);
+        playCaptionEnter();
+        window.setTimeout(() => {
+          lightbox.classList.remove('is-opening');
+          (lightbox.querySelector('.gallery-lightbox__close') as HTMLButtonElement | null)?.focus();
+        }, reduceMotion ? 0 : 120);
       });
     };
 
     const closeLightbox = () => {
-      if (!lightbox || lightbox.hidden) return;
+      if (!lightbox || lightbox.hidden || isLightboxClosing) return;
       if (closeTimer) window.clearTimeout(closeTimer);
-      if (switchTimer) window.clearTimeout(switchTimer);
+      clearSwitchTimers();
+      const token = closeToken + 1;
+      closeToken = token;
+      isLightboxClosing = true;
       isLightboxAnimating = false;
-      setNavDisabled(false);
+      setNavDisabled(true);
       media?.classList.remove('is-switching-out', 'is-switching-in');
+      caption?.classList.remove('caption-enter', 'caption-active');
+      caption?.classList.add('caption-exit');
       lightbox.classList.remove('is-open');
-      lightbox.classList.remove('is-switching', 'is-slide-next', 'is-slide-prev');
+      lightbox.classList.remove('is-opening', 'is-switching', 'is-slide-next', 'is-slide-prev');
+      lightbox.classList.add('is-closing');
       lightbox.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = previousBodyOverflow;
-      closeTimer = window.setTimeout(() => {
+
+      const finishClose = () => {
+        if (token !== closeToken) return;
         lightbox.hidden = true;
+        lightbox.classList.remove('is-closing');
+        resetCaptionMotion();
         media?.replaceChildren();
+        setNavDisabled(false);
+        isLightboxClosing = false;
         lastFocused?.focus();
-      }, openCloseDuration);
+      };
+
+      const dialog = lightbox.querySelector('.gallery-lightbox__dialog');
+      dialog?.addEventListener('transitionend', (event) => {
+        if (event.target === dialog && event.propertyName === 'opacity') finishClose();
+      }, { once: true });
+
+      closeTimer = window.setTimeout(finishClose, openCloseDuration + (reduceMotion ? 0 : 90));
     };
 
     const moveLightbox = (direction: 1 | -1) => {
       const visibleItems = getVisibleItems();
-      if (!visibleItems.length || !lightbox || !media || lightbox.hidden || isLightboxAnimating) return;
+      if (!visibleItems.length || !lightbox || !media || lightbox.hidden || isLightboxAnimating || isLightboxClosing) return;
       if (visibleItems.length < 2) return;
 
       const nextIndex = (activeIndex + direction + visibleItems.length) % visibleItems.length;
       const directionClass = direction > 0 ? 'is-slide-next' : 'is-slide-prev';
+      clearSwitchTimers();
       isLightboxAnimating = true;
       setNavDisabled(true);
       media.style.setProperty('--gallery-motion-direction', String(direction));
       lightbox.classList.add('is-switching', directionClass);
       media.classList.add('is-switching-out');
+      caption?.classList.remove('caption-enter', 'caption-active');
+      if (!reduceMotion) caption?.classList.add('caption-exit');
 
       const finishSwitch = () => {
         activeIndex = nextIndex;
         renderLightbox();
         media.classList.remove('is-switching-out');
         media.classList.add('is-switching-in');
+        caption?.classList.remove('caption-exit');
+        playCaptionEnter();
         switchTimer = window.setTimeout(() => {
           media.classList.remove('is-switching-in');
           lightbox.classList.remove('is-switching', directionClass);
+          resetCaptionMotion();
           setNavDisabled(false);
           isLightboxAnimating = false;
         }, switchInDuration);
@@ -1464,6 +1534,8 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 }
 
 .gallery-lightbox {
+  --gallery-lightbox-duration: .30s;
+  --gallery-lightbox-easing: cubic-bezier(.22, 1, .36, 1);
   position: fixed;
   inset: 0;
   z-index: 2600;
@@ -1472,9 +1544,10 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   padding: clamp(18px, 4vw, 42px);
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition:
-    opacity .24s cubic-bezier(.22, 1, .36, 1),
-    visibility 0s linear .24s;
+    opacity var(--gallery-lightbox-duration) var(--gallery-lightbox-easing),
+    visibility 0s linear var(--gallery-lightbox-duration);
   overscroll-behavior: contain;
   overflow-y: auto;
 }
@@ -1482,6 +1555,13 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 .gallery-lightbox.is-open {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+.gallery-lightbox.is-closing {
+  visibility: visible;
+  pointer-events: none;
   transition-delay: 0s;
 }
 
@@ -1489,15 +1569,19 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 72% 18%, rgba(60,179,113,.16), transparent 34%),
-    rgba(4, 11, 8, .88);
-  backdrop-filter: blur(18px);
+    radial-gradient(circle at 72% 18%, rgba(60,179,113,.18), transparent 34%),
+    rgba(3, 9, 7, .90);
+  backdrop-filter: blur(5px);
   opacity: 0;
-  transition: opacity .24s cubic-bezier(.22, 1, .36, 1), backdrop-filter .24s ease;
+  transition:
+    opacity var(--gallery-lightbox-duration) var(--gallery-lightbox-easing),
+    backdrop-filter var(--gallery-lightbox-duration) ease;
+  will-change: opacity, backdrop-filter;
 }
 
 .gallery-lightbox.is-open .gallery-lightbox__backdrop {
   opacity: 1;
+  backdrop-filter: blur(18px);
 }
 
 .gallery-lightbox__dialog {
@@ -1510,12 +1594,12 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   align-items: center;
   max-height: calc(100dvh - 36px);
   opacity: 0;
-  transform: translateY(18px) scale(.96);
-  filter: blur(5px);
+  transform: translateY(22px) scale(.955);
+  filter: blur(7px);
   transition:
-    opacity .24s cubic-bezier(.22, 1, .36, 1),
-    transform .24s cubic-bezier(.22, 1, .36, 1),
-    filter .24s ease;
+    opacity var(--gallery-lightbox-duration) var(--gallery-lightbox-easing),
+    transform var(--gallery-lightbox-duration) var(--gallery-lightbox-easing),
+    filter var(--gallery-lightbox-duration) ease;
   will-change: opacity, transform, filter;
 }
 
@@ -1523,6 +1607,12 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   opacity: 1;
   transform: translateY(0) scale(1);
   filter: blur(0);
+}
+
+.gallery-lightbox.is-closing .gallery-lightbox__dialog {
+  opacity: 0;
+  transform: translateY(12px) scale(.965);
+  filter: blur(6px);
 }
 
 .gallery-lightbox__figure {
@@ -1536,6 +1626,16 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   background: rgba(255,255,255,.08);
   box-shadow: 0 34px 100px rgba(0,0,0,.42);
   transform: translateZ(0);
+  transition: transform var(--gallery-lightbox-duration) var(--gallery-lightbox-easing);
+  will-change: transform;
+}
+
+.gallery-lightbox.is-opening .gallery-lightbox__figure {
+  animation: galleryLightboxFigureIn .32s var(--gallery-lightbox-easing) both;
+}
+
+.gallery-lightbox.is-closing .gallery-lightbox__figure {
+  transform: scale(.985);
 }
 
 .gallery-lightbox__media {
@@ -1556,22 +1656,23 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
     opacity .16s ease,
     transform .22s cubic-bezier(.22, 1, .36, 1),
     filter .22s ease;
-  will-change: opacity, transform;
+  will-change: opacity, transform, filter;
+  backface-visibility: hidden;
+  contain: paint;
+}
+
+.gallery-lightbox.is-opening .gallery-lightbox__media {
+  animation: galleryLightboxMediaOpen .32s var(--gallery-lightbox-easing) both;
 }
 
 .gallery-lightbox__media.is-switching-out {
   opacity: 0;
-  transform: translateX(calc(var(--gallery-motion-direction) * -18px)) scale(.985);
+  transform: translateX(calc(var(--gallery-motion-direction) * -24px)) scale(.982);
   filter: blur(3px);
 }
 
 .gallery-lightbox__media.is-switching-in {
   animation: galleryLightboxMediaIn .23s cubic-bezier(.22, 1, .36, 1) both;
-}
-
-.gallery-lightbox.is-switching figcaption {
-  opacity: .42;
-  transform: translateY(8px);
 }
 
 :global(.gallery-lightbox__media .gallery-lightbox__image) {
@@ -1629,7 +1730,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   line-height: 1.6;
 }
 
-.gallery-lightbox figcaption {
+.gallery-lightbox__caption {
   display: grid;
   gap: 8px;
   padding: 20px clamp(20px, 3vw, 30px);
@@ -1637,10 +1738,28 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   background: rgba(8,18,14,.88);
   opacity: 1;
   transform: translateY(0);
-  transition: opacity .2s ease, transform .22s cubic-bezier(.22, 1, .36, 1);
+  overflow: hidden;
+  transition:
+    opacity .2s ease,
+    transform .24s cubic-bezier(.22, 1, .36, 1),
+    filter .22s ease;
+  will-change: opacity, transform, filter;
 }
 
-.gallery-lightbox figcaption span {
+.gallery-lightbox__caption span,
+.gallery-lightbox__caption strong,
+.gallery-lightbox__caption small {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+  transition:
+    opacity .22s ease,
+    transform .24s cubic-bezier(.22, 1, .36, 1),
+    filter .22s ease;
+  will-change: opacity, transform, filter;
+}
+
+.gallery-lightbox__caption span {
   color: #8fe0b4;
   font-size: .74rem;
   font-weight: 950;
@@ -1648,10 +1767,55 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   text-transform: uppercase;
 }
 
-.gallery-lightbox figcaption strong {
+.gallery-lightbox__caption strong {
   font-size: clamp(1.25rem, 2vw, 1.65rem);
   line-height: 1.16;
   font-weight: 950;
+}
+
+.gallery-lightbox__caption small {
+  max-width: 760px;
+  color: rgba(255,255,255,.70);
+  font-size: .92rem;
+  line-height: 1.55;
+}
+
+.gallery-lightbox__caption.caption-exit span,
+.gallery-lightbox__caption.caption-exit strong,
+.gallery-lightbox__caption.caption-exit small {
+  opacity: 0;
+  transform: translateY(-8px);
+  filter: blur(4px);
+  transition-duration: .14s;
+  transition-delay: 0s;
+}
+
+.gallery-lightbox__caption.caption-enter span,
+.gallery-lightbox__caption.caption-enter strong,
+.gallery-lightbox__caption.caption-enter small {
+  opacity: 0;
+  transform: translateY(12px);
+  filter: blur(5px);
+}
+
+.gallery-lightbox__caption.caption-enter.caption-active span,
+.gallery-lightbox__caption.caption-enter.caption-active strong,
+.gallery-lightbox__caption.caption-enter.caption-active small {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+.gallery-lightbox__caption.caption-enter.caption-active span {
+  transition-delay: .02s;
+}
+
+.gallery-lightbox__caption.caption-enter.caption-active strong {
+  transition-delay: .07s;
+}
+
+.gallery-lightbox__caption.caption-enter.caption-active small {
+  transition-delay: .12s;
 }
 
 .gallery-lightbox__close,
@@ -1707,13 +1871,37 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 @keyframes galleryLightboxMediaIn {
   from {
     opacity: 0;
-    transform: translateX(calc(var(--gallery-motion-direction) * 18px)) scale(.985);
+    transform: translateX(calc(var(--gallery-motion-direction) * 24px)) scale(.982);
     filter: blur(3px);
   }
 
   to {
     opacity: 1;
     transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes galleryLightboxFigureIn {
+  from {
+    transform: translateY(8px) scale(.97);
+  }
+
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes galleryLightboxMediaOpen {
+  from {
+    opacity: 0;
+    transform: scale(.965);
+    filter: blur(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
     filter: blur(0);
   }
 }
@@ -1855,6 +2043,14 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
     max-height: 80dvh;
   }
 
+  .gallery-lightbox__caption {
+    padding: 18px;
+  }
+
+  .gallery-lightbox__caption small {
+    font-size: .86rem;
+  }
+
   :global(.gallery-lightbox__media .gallery-lightbox__image) {
     width: auto;
     height: auto;
@@ -1892,6 +2088,10 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   .gallery-final-cta * {
     transition-duration: .01ms !important;
     animation: none !important;
+  }
+
+  .gallery-lightbox__backdrop {
+    backdrop-filter: none;
   }
 }
 </style>

@@ -61,6 +61,14 @@ const forbiddenReservationPhrases = [
   'Help me choose my stay',
   'Stay mini quiz',
   'Prepare before arrival',
+  'Family mode',
+  'Camper mode',
+];
+
+const forbiddenReservationRawMarkers = [
+  'data-client-guide',
+  'client-guide-tools',
+  'client-guide-tools--reservation',
 ];
 
 const decodeEntities = (value) =>
@@ -88,6 +96,8 @@ const visibleText = (html) =>
 
 const count = (source, pattern) => (source.match(pattern) ?? []).length;
 
+const countLiteral = (source, value) => source.split(value).length - 1;
+
 const routePath = (relative) => `/${relative.replaceAll('\\', '/').replace(/(^|\/)index\.html$/, '').replace(/\/$/, '')}`.replace(/\/$/, '') || '/';
 
 const readHtml = (relative) => {
@@ -98,6 +108,24 @@ const readHtml = (relative) => {
 
 const metricsFor = (html) => {
   const text = visibleText(html);
+  const decodedHtml = decodeEntities(html);
+  const forbiddenReservationHits = [
+    ...forbiddenReservationPhrases
+      .map((phrase) => ({
+        surface: 'visible-text',
+        phrase,
+        count: countLiteral(text, phrase),
+      }))
+      .filter((hit) => hit.count > 0),
+    ...forbiddenReservationRawMarkers
+      .map((phrase) => ({
+        surface: 'raw-html',
+        phrase,
+        count: countLiteral(decodedHtml, phrase),
+      }))
+      .filter((hit) => hit.count > 0),
+  ];
+
   return {
     sections: count(html, /<section\b/gi),
     dataSections: count(html, /\bdata-section=/gi),
@@ -106,7 +134,7 @@ const metricsFor = (html) => {
     galleryCards: count(html, /\bdata-gallery-item\b/gi),
     pricingModes: count(html, /\bdata-pricing-mode\b/gi),
     mainCtas: count(html, /class="[^"]*\bbtn\b/gi),
-    forbiddenReservationPhrases: forbiddenReservationPhrases.filter((phrase) => text.includes(phrase)),
+    forbiddenReservationHits,
   };
 };
 
@@ -128,6 +156,30 @@ for (const page of pages) {
   }
 
   const plMetrics = metricsFor(plHtml);
+
+  if (page.reservation) {
+    const route = routePath(page.routes.pl);
+
+    if (plMetrics.reservationForms < 1) {
+      failures.push({ type: 'RESERVATION_FORM_MISSING', page: page.id, locale: 'pl', route });
+    }
+
+    if (plMetrics.clientGuides > 0) {
+      failures.push({ type: 'RESERVATION_CLIENT_GUIDE_FOUND', page: page.id, locale: 'pl', route, count: plMetrics.clientGuides });
+    }
+
+    for (const hit of plMetrics.forbiddenReservationHits) {
+      failures.push({
+        type: 'RESERVATION_FORBIDDEN_HELPER_TEXT',
+        page: page.id,
+        locale: 'pl',
+        route,
+        surface: hit.surface,
+        phrase: hit.phrase,
+        count: hit.count,
+      });
+    }
+  }
 
   for (const locale of locales) {
     const relative = page.routes[locale];
@@ -172,8 +224,16 @@ for (const page of pages) {
         });
       }
 
-      for (const phrase of metrics.forbiddenReservationPhrases) {
-        failures.push({ type: 'RESERVATION_FORBIDDEN_HELPER_TEXT', page: page.id, locale, route, phrase });
+      for (const hit of metrics.forbiddenReservationHits) {
+        failures.push({
+          type: 'RESERVATION_FORBIDDEN_HELPER_TEXT',
+          page: page.id,
+          locale,
+          route,
+          surface: hit.surface,
+          phrase: hit.phrase,
+          count: hit.count,
+        });
       }
     } else if (metrics.sections !== plMetrics.sections) {
       warnings.push({
@@ -222,4 +282,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Structure audit passed: sprawdzono ${summaries.length} par PL vs języki. Rezerwacja bez Quick helper / quiz.`);
+console.log(`Structure audit passed: sprawdzono ${summaries.length} par PL vs języki. Rezerwacja bez Quick helper / quiz / client-guide markerów.`);
