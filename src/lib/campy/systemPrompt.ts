@@ -1,6 +1,6 @@
 export type CampyLanguage = 'pl' | 'en' | 'de' | 'it' | 'fr' | 'es' | 'nl' | 'cs' | 'sk' | 'sv' | string;
 
-import { currencyEstimateConfig, formatCurrencyEstimates, pricingConfig } from '@/data/pricing';
+import { currencyEstimateConfig, formatCurrencyEstimates, pricingConfig } from '../../data/pricing';
 
 const stayPrice = (id: string) => {
   const item = pricingConfig.stayTypes.find((entry) => entry.id === id);
