@@ -997,8 +997,20 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
     let previousBodyOverflow = '';
     let touchStartX = 0;
     let touchStartY = 0;
+    let isLightboxAnimating = false;
+    let closeTimer: number | undefined;
+    let switchTimer: number | undefined;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const openCloseDuration = reduceMotion ? 0 : 240;
+    const switchOutDuration = reduceMotion ? 0 : 120;
+    const switchInDuration = reduceMotion ? 0 : 230;
 
     const getVisibleItems = () => items.filter((item) => !item.hidden);
+
+    const setNavDisabled = (disabled: boolean) => {
+      if (prevButton) prevButton.disabled = disabled;
+      if (nextButton) nextButton.disabled = disabled;
+    };
 
     const setFilter = (filter: string) => {
       activeFilter = filter;
@@ -1064,35 +1076,69 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
       const nextIndex = visibleItems.indexOf(item);
       if (!lightbox || nextIndex < 0) return;
 
+      if (closeTimer) window.clearTimeout(closeTimer);
+      isLightboxAnimating = false;
+      setNavDisabled(false);
       lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       activeIndex = nextIndex;
       previousBodyOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       lightbox.hidden = false;
       lightbox.setAttribute('aria-hidden', 'false');
-      lightbox.classList.add('is-open');
+      lightbox.classList.remove('is-switching', 'is-slide-next', 'is-slide-prev');
       renderLightbox();
-      window.setTimeout(() => (lightbox.querySelector('.gallery-lightbox__close') as HTMLButtonElement | null)?.focus(), 40);
+      window.requestAnimationFrame(() => {
+        lightbox.classList.add('is-open');
+        window.setTimeout(() => (lightbox.querySelector('.gallery-lightbox__close') as HTMLButtonElement | null)?.focus(), reduceMotion ? 0 : 80);
+      });
     };
 
     const closeLightbox = () => {
       if (!lightbox || lightbox.hidden) return;
+      if (closeTimer) window.clearTimeout(closeTimer);
+      if (switchTimer) window.clearTimeout(switchTimer);
+      isLightboxAnimating = false;
+      setNavDisabled(false);
+      media?.classList.remove('is-switching-out', 'is-switching-in');
       lightbox.classList.remove('is-open');
+      lightbox.classList.remove('is-switching', 'is-slide-next', 'is-slide-prev');
       lightbox.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = previousBodyOverflow;
-      window.setTimeout(() => {
+      closeTimer = window.setTimeout(() => {
         lightbox.hidden = true;
         media?.replaceChildren();
         lastFocused?.focus();
-      }, 220);
+      }, openCloseDuration);
     };
 
     const moveLightbox = (direction: 1 | -1) => {
       const visibleItems = getVisibleItems();
-      if (!visibleItems.length) return;
+      if (!visibleItems.length || !lightbox || !media || lightbox.hidden || isLightboxAnimating) return;
+      if (visibleItems.length < 2) return;
 
-      activeIndex = (activeIndex + direction + visibleItems.length) % visibleItems.length;
-      renderLightbox();
+      const nextIndex = (activeIndex + direction + visibleItems.length) % visibleItems.length;
+      const directionClass = direction > 0 ? 'is-slide-next' : 'is-slide-prev';
+      isLightboxAnimating = true;
+      setNavDisabled(true);
+      media.style.setProperty('--gallery-motion-direction', String(direction));
+      lightbox.classList.add('is-switching', directionClass);
+      media.classList.add('is-switching-out');
+
+      const finishSwitch = () => {
+        activeIndex = nextIndex;
+        renderLightbox();
+        media.classList.remove('is-switching-out');
+        media.classList.add('is-switching-in');
+        switchTimer = window.setTimeout(() => {
+          media.classList.remove('is-switching-in');
+          lightbox.classList.remove('is-switching', directionClass);
+          setNavDisabled(false);
+          isLightboxAnimating = false;
+        }, switchInDuration);
+      };
+
+      if (switchOutDuration === 0) finishSwitch();
+      else switchTimer = window.setTimeout(finishSwitch, switchOutDuration);
     };
 
     filters.forEach((button) => {
@@ -1426,7 +1472,9 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   padding: clamp(18px, 4vw, 42px);
   opacity: 0;
   visibility: hidden;
-  transition: opacity .26s ease, visibility .26s ease;
+  transition:
+    opacity .24s cubic-bezier(.22, 1, .36, 1),
+    visibility 0s linear .24s;
   overscroll-behavior: contain;
   overflow-y: auto;
 }
@@ -1434,6 +1482,7 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
 .gallery-lightbox.is-open {
   opacity: 1;
   visibility: visible;
+  transition-delay: 0s;
 }
 
 .gallery-lightbox__backdrop {
@@ -1443,6 +1492,12 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
     radial-gradient(circle at 72% 18%, rgba(60,179,113,.16), transparent 34%),
     rgba(4, 11, 8, .88);
   backdrop-filter: blur(18px);
+  opacity: 0;
+  transition: opacity .24s cubic-bezier(.22, 1, .36, 1), backdrop-filter .24s ease;
+}
+
+.gallery-lightbox.is-open .gallery-lightbox__backdrop {
+  opacity: 1;
 }
 
 .gallery-lightbox__dialog {
@@ -1454,6 +1509,20 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   gap: clamp(10px, 2vw, 18px);
   align-items: center;
   max-height: calc(100dvh - 36px);
+  opacity: 0;
+  transform: translateY(18px) scale(.96);
+  filter: blur(5px);
+  transition:
+    opacity .24s cubic-bezier(.22, 1, .36, 1),
+    transform .24s cubic-bezier(.22, 1, .36, 1),
+    filter .24s ease;
+  will-change: opacity, transform, filter;
+}
+
+.gallery-lightbox.is-open .gallery-lightbox__dialog {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
 }
 
 .gallery-lightbox__figure {
@@ -1466,9 +1535,11 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   border: 1px solid rgba(255,255,255,.14);
   background: rgba(255,255,255,.08);
   box-shadow: 0 34px 100px rgba(0,0,0,.42);
+  transform: translateZ(0);
 }
 
 .gallery-lightbox__media {
+  --gallery-motion-direction: 1;
   width: 100%;
   min-height: 0;
   height: min(70vh, 680px);
@@ -1479,6 +1550,28 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
     linear-gradient(135deg, rgba(7,22,15,.22), rgba(7,22,15,.72)),
     radial-gradient(circle at 72% 20%, rgba(232,158,84,.22), transparent 36%),
     linear-gradient(135deg, #25412f, #0c1912);
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  transition:
+    opacity .16s ease,
+    transform .22s cubic-bezier(.22, 1, .36, 1),
+    filter .22s ease;
+  will-change: opacity, transform;
+}
+
+.gallery-lightbox__media.is-switching-out {
+  opacity: 0;
+  transform: translateX(calc(var(--gallery-motion-direction) * -18px)) scale(.985);
+  filter: blur(3px);
+}
+
+.gallery-lightbox__media.is-switching-in {
+  animation: galleryLightboxMediaIn .23s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.gallery-lightbox.is-switching figcaption {
+  opacity: .42;
+  transform: translateY(8px);
 }
 
 :global(.gallery-lightbox__media .gallery-lightbox__image) {
@@ -1542,6 +1635,9 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   padding: 20px clamp(20px, 3vw, 30px);
   color: #fff;
   background: rgba(8,18,14,.88);
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity .2s ease, transform .22s cubic-bezier(.22, 1, .36, 1);
 }
 
 .gallery-lightbox figcaption span {
@@ -1570,6 +1666,11 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   background: rgba(8,18,14,.78);
   box-shadow: 0 20px 54px rgba(0,0,0,.30);
   backdrop-filter: blur(16px);
+  transition:
+    transform .2s cubic-bezier(.22, 1, .36, 1),
+    border-color .2s ease,
+    box-shadow .2s ease,
+    opacity .2s ease;
 }
 
 .gallery-lightbox__close {
@@ -1595,6 +1696,26 @@ const resolvedGalleryItems = galleryItems.map((item) => ({
   border-color: rgba(143,224,180,.42);
   box-shadow: 0 24px 64px rgba(0,0,0,.34), 0 0 28px rgba(60,179,113,.22);
   transform: translateY(-1px);
+}
+
+.gallery-lightbox__nav:disabled {
+  cursor: wait;
+  opacity: .46;
+  transform: scale(.96);
+}
+
+@keyframes galleryLightboxMediaIn {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--gallery-motion-direction) * 18px)) scale(.985);
+    filter: blur(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
 }
 
 .gallery-final-cta {
