@@ -3,6 +3,34 @@
 
 create extension if not exists pgcrypto;
 
+create table if not exists public.site_events (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  event_type text not null,
+  page_path text,
+  locale text,
+  country_guess text,
+  referrer text,
+  device_type text,
+  metadata_json jsonb not null default '{}'::jsonb
+);
+
+alter table if exists public.site_events add column if not exists id uuid default gen_random_uuid();
+alter table if exists public.site_events add column if not exists created_at timestamptz not null default now();
+alter table if exists public.site_events add column if not exists event_type text;
+alter table if exists public.site_events add column if not exists page_path text;
+alter table if exists public.site_events add column if not exists locale text;
+alter table if exists public.site_events add column if not exists country_guess text;
+alter table if exists public.site_events add column if not exists referrer text;
+alter table if exists public.site_events add column if not exists device_type text;
+alter table if exists public.site_events add column if not exists metadata_json jsonb not null default '{}'::jsonb;
+
+create unique index if not exists site_events_id_uidx on public.site_events (id);
+create index if not exists site_events_created_at_idx on public.site_events (created_at desc);
+create index if not exists site_events_event_type_idx on public.site_events (event_type);
+create index if not exists site_events_locale_idx on public.site_events (locale);
+create index if not exists site_events_country_guess_idx on public.site_events (country_guess);
+
 create table if not exists public.stay_panels (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
