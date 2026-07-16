@@ -422,7 +422,11 @@ const plannerCoreOverrides = {
 const baseCopy = copyByLang[lang as keyof typeof copyByLang] ?? copyByLang.en;
 const coreOverride = plannerCoreOverrides[requestedLanguage as keyof typeof plannerCoreOverrides];
 const copy = getStayPlannerPremiumCopy(requestedLanguage);
-const plannerConfigEncoded = Buffer.from(JSON.stringify(copy), 'utf8').toString('base64');
+const plannerConfigEncoded = Buffer.from(JSON.stringify({
+  ...copy,
+  language:lang,
+  links:{ booking:bookingHref, transport:transportHref, attractions:attractionsHref, tours:tourBookingHref },
+}), 'utf8').toString('base64');
 const inspirationCopy = {
   pl: {
     kicker: 'Inspiracje do planu',
@@ -489,7 +493,7 @@ const inspirationImages = [
 ];
 ---
 
-<section class="site-section stay-planner reveal-section" data-stay-planner>
+<section class="site-section stay-planner reveal-section" data-stay-planner data-planner-config={plannerConfigEncoded}>
   <div class="stay-planner__ambient" aria-hidden="true"><span></span><span></span><span></span></div>
   <div class="container stay-planner__shell">
     <div class="stay-planner__head">
@@ -673,171 +677,10 @@ const inspirationImages = [
   </div>
 </section>
 
-<script define:vars={{ plannerConfigEncoded }}>
-  (() => {
-    const root = document.querySelector('[data-stay-planner]');
-    if (!(root instanceof HTMLElement)) return;
 
-    const decodeConfig = () => {
-      try {
-        const binary = window.atob(plannerConfigEncoded);
-        const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
-        return JSON.parse(new TextDecoder().decode(bytes));
-      } catch {
-        return null;
-      }
-    };
-
-    const config = decodeConfig();
-    if (!config) return;
-
-    const state = {
-      nights: '2', pace: 'normal', group: 'family', children: 'yes', transport: 'tram',
-      weather: 'flexible', trip: 'none', startDate: '', interests: new Set(['classic', 'history']),
-      weatherStatus: 'neutral', weatherDays: [],
-    };
-    const result = root.querySelector('[data-planner-result]');
-    const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[character]));
-    const track = (eventType, metadata = {}) => window.dispatchEvent(new CustomEvent('cc:analytics', { detail:{ eventType, metadata } }));
-    const nightsNumber = () => state.nights === '5+' ? 5 : Math.max(1, Number(state.nights || 1));
-    const setActive = (selector, value) => root.querySelectorAll(`${selector} button`).forEach((button) => {
-      if (button instanceof HTMLButtonElement) button.classList.toggle('is-active', button.dataset.value === value);
-    });
-    const tripLabel = () => config.tripList.find(([value]) => value === state.trip)?.[1] || '';
-    const routeTransport = (index) => {
-      const defaults = [config.routeTransport.city,config.routeTransport.district,config.routeTransport.trip,config.routeTransport.nature,config.routeTransport.relax];
-      const fallback = defaults[index] || config.routeTransport.city;
-      if (index >= 2 || state.transport === 'tram') return fallback;
-      const distance = String(fallback).includes('·') ? String(fallback).split('·').pop().trim() : '';
-      const mode = state.transport === 'car' ? config.options.car : config.options.mixed;
-      return distance ? `${mode} · ${distance}` : mode;
-    };
-    const weatherText = () => state.weatherStatus === 'ready' ? config.weatherReady : state.weatherStatus === 'later' ? config.weatherLater : state.weatherStatus === 'unavailable' ? config.weatherUnavailable : config.weatherNeutral;
-    const dayWeather = (index) => {
-      const day = state.weatherDays[index];
-      if (!day) return '';
-      const rain = Number.isFinite(Number(day.rainProbability)) ? ` · ${Math.round(day.rainProbability)}% 🌧️` : '';
-      return `<span class="stay-planner__day-weather">🌤️ ${Math.round(day.temperatureMinC)}–${Math.round(day.temperatureMaxC)}°C${rain}</span>`;
-    };
-    const renderDay = (route, index) => {
-      const routeIndex = route.routeIndex ?? index;
-      const selectedTrip = routeIndex === 2 && state.trip !== 'none' ? ` — ${tripLabel()}` : '';
-      const transportIcon = routeIndex >= 2 || state.transport === 'car' ? '🚗' : '🚋';
-      return `<article class="stay-planner__day-card ${state.weather === 'indoor' ? 'is-rain-first' : ''}">
-        <header><span>${index + 1}</span><div><small>${esc(config.dayPlan)}</small><h3>${esc(route.title)}${esc(selectedTrip)}</h3></div><em>${esc(config.intensity[state.pace] || config.intensity.normal)}</em></header>
-        ${dayWeather(index)}
-        <div class="stay-planner__day-flow">
-          <p><b>🌅 ${esc(config.labels.morning)}</b>${esc(route.morning)}</p>
-          <p><b>🏛️ ${esc(config.labels.noon)}</b>${esc(route.noon)}</p>
-          <p><b>🌆 ${esc(config.labels.evening)}</b>${esc(route.evening)}</p>
-        </div>
-        <div class="stay-planner__day-meta"><span>${transportIcon} <b>${esc(config.labels.transport)}</b>${esc(routeTransport(routeIndex))}</span><span>⏱️ <b>${esc(config.labels.duration)}</b>${esc(route.duration)}</span></div>
-        <p class="stay-planner__rain"><b>🌧️ ${esc(config.labels.rain)}</b>${esc(route.rain)}</p>
-      </article>`;
-    };
-    const render = () => {
-      if (!(result instanceof HTMLElement)) return;
-      const preferredIndexes = [];
-      if (state.interests.has('classic')) preferredIndexes.push(0);
-      if (state.interests.has('history') || state.interests.has('food')) preferredIndexes.push(1);
-      if (state.trip !== 'none') preferredIndexes.push(2);
-      if (state.interests.has('nature')) preferredIndexes.push(3);
-      if (state.interests.has('kids') || state.children === 'yes') preferredIndexes.push(4);
-      [0,1,2,3,4].forEach((index) => preferredIndexes.push(index));
-      const routes = [...new Set(preferredIndexes)].slice(0, nightsNumber()).map((index) => ({ ...config.routes[index], routeIndex:index }));
-      result.innerHTML = `
-        <span class="stay-planner__result-badge">${esc(config.resultTitle)}</span>
-        <h2>${esc(config.summaryTitle)}</h2>
-        <div class="stay-planner__context"><p>${esc(config.paceNotes[state.pace])}</p><p>${esc(config.groupNotes[state.children === 'yes' ? 'family' : state.group])}</p><p>${esc(config.options[state.weather])} · ${esc(weatherText())}</p></div>
-        <div class="stay-planner__plan"><strong>${esc(config.dayPlan)}</strong>${routes.map(renderDay).join('')}</div>
-        <section class="stay-planner__upsell"><span>🌿</span><div><h3>${esc(config.upsell.title)}</h3><p>${esc(state.nights === '5+' ? config.upsell.max : config.upsell.copy)}</p></div>${state.nights === '5+' ? '' : `<button type="button" data-planner-add-night>${esc(config.upsell.add)}</button>`}</section>`;
-      result.querySelector('[data-planner-add-night]')?.addEventListener('click', () => {
-        const current = nightsNumber();
-        state.nights = current >= 4 ? '5+' : String(current + 1);
-        setActive('[data-planner-nights]', state.nights);
-        track('planner_add_night', { nights:state.nights });
-        track('planner_change_nights', { nights:state.nights, source:'upsell' });
-        if (state.startDate) loadWeather(); else render();
-      });
-    };
-    const bindSegment = (selector, key) => {
-      const buttons = Array.from(root.querySelectorAll(`${selector} button`));
-      buttons.forEach((button) => {
-        if (!(button instanceof HTMLButtonElement)) return;
-        button.addEventListener('click', () => {
-          buttons.forEach((item) => item.classList.toggle('is-active', item === button));
-          state[key] = button.dataset.value || state[key];
-          if (key === 'nights') {
-            track('planner_change_nights', { nights:state.nights, source:'controls' });
-            if (state.startDate) { loadWeather(); return; }
-          }
-          render();
-        });
-      });
-    };
-    bindSegment('[data-planner-nights]', 'nights');
-    bindSegment('[data-planner-pace]', 'pace');
-    bindSegment('[data-planner-group]', 'group');
-    bindSegment('[data-planner-children]', 'children');
-    bindSegment('[data-planner-transport]', 'transport');
-    bindSegment('[data-planner-weather]', 'weather');
-
-    const interestButtons = Array.from(root.querySelectorAll('[data-planner-interests] button'));
-    interestButtons.forEach((button) => button.addEventListener('click', () => {
-      const value = button.dataset.value || '';
-      button.classList.toggle('is-active');
-      if (button.classList.contains('is-active')) state.interests.add(value); else state.interests.delete(value);
-      render();
-    }));
-    const tripButtons = Array.from(root.querySelectorAll('[data-planner-trips] button'));
-    tripButtons.forEach((button) => button.addEventListener('click', () => {
-      tripButtons.forEach((item) => item.classList.toggle('is-active', item === button));
-      state.trip = button.dataset.value || 'none';
-      render();
-    }));
-
-    const addDays = (iso, days) => { const date = new Date(`${iso}T12:00:00`); date.setDate(date.getDate() + days); return date.toISOString().slice(0,10); };
-    const loadWeather = async () => {
-      state.weatherDays = [];
-      if (!state.startDate) { state.weatherStatus = 'neutral'; render(); return; }
-      state.weatherStatus = 'loading'; render();
-      try {
-        const end = addDays(state.startDate, nightsNumber());
-        const response = await fetch(`/api/weather?start=${encodeURIComponent(state.startDate)}&end=${encodeURIComponent(end)}`, { headers:{accept:'application/json'} });
-        const payload = await response.json();
-        if (!payload?.ok) throw new Error('unavailable');
-        state.weatherDays = Array.isArray(payload.daily) ? payload.daily : [];
-        state.weatherStatus = payload.forecastInRange && state.weatherDays.length ? 'ready' : 'later';
-      } catch { state.weatherStatus = 'unavailable'; }
-      render();
-    };
-    const dateInput = root.querySelector('[data-planner-date]');
-    if (dateInput instanceof HTMLInputElement) {
-      dateInput.min = new Date().toISOString().slice(0,10);
-      dateInput.addEventListener('change', () => { state.startDate = dateInput.value; loadWeather(); });
-    }
-    root.querySelectorAll('[data-planner-scenario]').forEach((button) => {
-      if (!(button instanceof HTMLButtonElement)) return;
-      button.addEventListener('click', () => {
-        state.nights = button.dataset.nights || '2'; state.pace = button.dataset.pace || 'normal'; state.group = button.dataset.group || 'family'; state.transport = button.dataset.transport || 'tram'; state.children = state.group === 'family' ? 'yes' : 'no';
-        state.interests = new Set((button.dataset.interests || 'classic').split(',').filter(Boolean));
-        setActive('[data-planner-nights]', state.nights); setActive('[data-planner-pace]', state.pace); setActive('[data-planner-group]', state.group); setActive('[data-planner-children]', state.children); setActive('[data-planner-transport]', state.transport);
-        interestButtons.forEach((item) => item.classList.toggle('is-active', state.interests.has(item.dataset.value || '')));
-        track('planner_generate', { source:'scenario', nights:state.nights, pace:state.pace, group:state.group });
-        root.querySelector('.stay-planner__layout')?.scrollIntoView({ behavior:'smooth', block:'start' });
-        if (state.startDate) loadWeather(); else render();
-      });
-    });
-    root.querySelector('[data-planner-generate]')?.addEventListener('click', () => {
-      track('planner_generate', { source:'button', nights:state.nights, pace:state.pace, group:state.group, transport:state.transport, weather:state.weather, trip:state.trip });
-      render(); result?.scrollIntoView({ behavior:'smooth', block:'start' });
-    });
-    root.querySelector('[data-ask-campy-planner]')?.addEventListener('click', () => {
-      const prompt = `${config.campyPlannerPrompt} ${config.nights}: ${state.nights}; ${config.pace}: ${config.options[state.pace]}; ${config.group}: ${config.options[state.group]}; ${config.transport}: ${config.options[state.transport]}; ${config.trips}: ${tripLabel()}.`;
-      window.dispatchEvent(new CustomEvent('campy:prompt', { detail:{ prompt, actionKey:'stayLength' } }));
-    });
-    render();
-  })();
+<script>
+  import { initStayPlanner } from '@/scripts/stayPlannerClient.js';
+  initStayPlanner();
 </script>
 
 <style>
@@ -1474,5 +1317,970 @@ html[data-theme="light"] .stay-planner__arrival li {
 @keyframes plannerFloat {
   0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
   50% { transform: translate3d(22px, -18px, 0) scale(1.06); }
+}
+
+/* Planner Premium 3.0 */
+.stay-planner__layout > *,
+.planner-result-shell,
+.stay-planner__day-list,
+.planner-day-card,
+.planner-day-card__heading {
+  min-width: 0;
+}
+
+.stay-planner__panel {
+  align-content: start;
+}
+
+.stay-planner__segments button.is-selecting,
+.stay-planner__attractions button.is-selecting,
+.stay-planner__scenario-grid button.is-selecting {
+  animation: plannerSelectionPulse .36s cubic-bezier(.22,1,.36,1);
+}
+
+.stay-planner__result {
+  overflow: clip;
+  transition:
+    height .52s cubic-bezier(.22,1,.36,1),
+    opacity .17s ease,
+    transform .17s cubic-bezier(.22,1,.36,1),
+    filter .17s ease;
+  will-change: height, opacity, transform, filter;
+}
+
+.stay-planner__result.is-exiting {
+  opacity: 0;
+  transform: translateY(12px);
+  filter: blur(4px);
+}
+
+.planner-result-shell {
+  display: grid;
+  gap: 22px;
+}
+
+.planner-result-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  gap: 13px;
+  padding: clamp(20px,3vw,30px);
+  border: 1px solid rgba(143,224,180,.22);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 92% 10%,rgba(242,192,120,.18),transparent 30%),
+    linear-gradient(135deg,rgba(60,179,113,.16),rgba(7,28,19,.72));
+  box-shadow: inset 0 1px rgba(255,255,255,.08), 0 24px 60px rgba(2,18,11,.18);
+}
+
+.planner-result-hero__glow {
+  position: absolute;
+  z-index: -1;
+  width: 220px;
+  height: 220px;
+  top: -130px;
+  right: 8%;
+  border-radius: 50%;
+  background: rgba(143,224,180,.24);
+  filter: blur(26px);
+  transform: translate3d(0,0,0);
+}
+
+.planner-result-hero h2 {
+  max-width: 19ch;
+  margin: 0;
+  font-size: clamp(1.75rem,3.5vw,2.85rem);
+  letter-spacing: -.035em;
+}
+
+.planner-result-hero__subtitle,
+.planner-result-hero__summary {
+  max-width: 72ch;
+  margin: 0;
+}
+
+.planner-result-hero__subtitle {
+  color: #bff7d7 !important;
+  font-size: 1rem;
+  font-weight: 850;
+}
+
+.planner-result-hero__summary {
+  padding-top: 4px;
+  font-size: .95rem;
+}
+
+.planner-result-hero__chips,
+.planner-result-hero__signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.planner-result-hero__chips > span,
+.planner-result-hero__signals > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  border: 1px solid rgba(143,224,180,.2);
+  border-radius: 999px;
+  color: #eafff1;
+  background: rgba(3,21,13,.4);
+  font-size: .76rem;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.planner-result-hero__chips > span {
+  min-height: 35px;
+  padding: 7px 11px;
+}
+
+.planner-result-hero__signals > span {
+  padding: 8px 11px;
+  border-radius: 12px;
+  color: rgba(245,255,248,.75);
+}
+
+.stay-planner__plan {
+  gap: 14px;
+  margin-top: 0;
+}
+
+.stay-planner__plan-heading {
+  display: grid;
+  grid-template-columns: 42px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 2px;
+}
+
+.stay-planner__plan-heading > span,
+.stay-planner__plan-heading > strong {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  color: #082016;
+  background: linear-gradient(135deg,#bff7d7,#3cb371);
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.stay-planner__plan-heading small {
+  color: #8fe0b4;
+  font-size: .68rem;
+  font-weight: 950;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.stay-planner__plan-heading h3 {
+  margin: 3px 0 0;
+  color: #fff;
+  font-size: clamp(1.08rem,2vw,1.35rem);
+}
+
+.stay-planner__day-list {
+  display: grid;
+  gap: 16px;
+}
+
+.planner-day-card.stay-planner__day-card {
+  position: relative;
+  gap: 18px;
+  padding: clamp(17px,2.5vw,24px);
+  border-color: rgba(143,224,180,.18);
+  border-radius: 25px;
+  background:
+    linear-gradient(90deg,var(--planner-accent,rgba(60,179,113,.7)) 0 4px,transparent 4px),
+    linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.025));
+  box-shadow: inset 0 1px rgba(255,255,255,.055), 0 18px 42px rgba(0,0,0,.11);
+  transition: transform .3s cubic-bezier(.22,1,.36,1), border-color .3s ease, box-shadow .3s ease;
+}
+
+.planner-day-card--emerald { --planner-accent:#3cb371; }
+.planner-day-card--amber { --planner-accent:#f2c078; }
+.planner-day-card--blue { --planner-accent:#65b7e6; }
+.planner-day-card--forest { --planner-accent:#65c98f; }
+.planner-day-card--mint { --planner-accent:#9ce8bd; }
+
+.planner-day-card.stay-planner__day-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(143,224,180,.34);
+  box-shadow: inset 0 1px rgba(255,255,255,.08), 0 24px 52px rgba(0,0,0,.18);
+}
+
+.planner-day-card__header {
+  display: grid !important;
+  grid-template-columns: 42px 42px minmax(0,1fr) auto !important;
+  align-items: center;
+  gap: 11px;
+}
+
+.planner-day-card__number,
+.planner-day-card__icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+}
+
+.planner-day-card__number {
+  color: #082016;
+  background: linear-gradient(135deg,#d0f9e1,#55cf89);
+  font-weight: 950;
+  box-shadow: 0 9px 22px rgba(60,179,113,.2);
+}
+
+.planner-day-card__icon {
+  border: 1px solid rgba(143,224,180,.18);
+  background: rgba(255,255,255,.06);
+  font-size: 1.18rem;
+}
+
+.planner-day-card__eyebrow {
+  display: block;
+  color: #8fe0b4;
+  font-size: .67rem;
+  font-weight: 950;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.planner-day-card__heading h3 {
+  margin: 3px 0 4px;
+  overflow-wrap: anywhere;
+  color: #fff;
+  font-size: clamp(1.08rem,2vw,1.32rem);
+  line-height: 1.18;
+}
+
+.planner-day-card__heading p {
+  margin: 0;
+  color: rgba(245,255,248,.66);
+  font-size: .82rem;
+  line-height: 1.48;
+}
+
+.planner-day-card__intensity,
+.planner-day-card__weather {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: .7rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.planner-day-card__intensity {
+  color: #bff7d7;
+  border: 1px solid rgba(143,224,180,.18);
+  background: rgba(60,179,113,.12);
+}
+
+.planner-day-card__weather {
+  color: #dff6ff;
+  border: 1px solid rgba(101,183,230,.2);
+  background: rgba(43,118,160,.12);
+}
+
+.planner-timeline,
+.planner-practical {
+  display: grid;
+  gap: 10px;
+}
+
+.planner-timeline > h4,
+.planner-practical > h4 {
+  margin: 0;
+  color: #bff7d7;
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.planner-timeline__rail {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 10px;
+}
+
+.planner-timeline__rail::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg,transparent,rgba(143,224,180,.25),transparent);
+}
+
+.planner-timeline__item {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr);
+  gap: 9px;
+  align-items: start;
+  min-height: 128px;
+  padding: 12px;
+  border: 1px solid rgba(143,224,180,.13);
+  border-radius: 16px;
+  background: rgba(1,16,10,.28);
+}
+
+.planner-timeline__icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: rgba(143,224,180,.1);
+}
+
+.planner-timeline__label,
+.planner-practical__label {
+  display: block;
+  margin-bottom: 6px;
+  color: #8fe0b4;
+  font-size: .68rem;
+  font-weight: 950;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+.planner-timeline__value {
+  margin: 0 !important;
+  color: rgba(245,255,248,.78) !important;
+  font-size: .82rem;
+  line-height: 1.5 !important;
+}
+
+.planner-practical__grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr .8fr;
+  gap: 9px;
+}
+
+.planner-practical__item {
+  display: grid;
+  grid-template-columns: 30px minmax(0,1fr);
+  gap: 8px;
+  align-items: start;
+  padding: 11px;
+  border: 1px solid rgba(143,224,180,.12);
+  border-radius: 14px;
+  background: rgba(255,255,255,.035);
+}
+
+.planner-practical__item > span {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: rgba(143,224,180,.08);
+}
+
+.planner-practical__value {
+  display: block;
+  overflow-wrap: anywhere;
+  color: #f5fff8;
+  font-size: .78rem;
+  line-height: 1.4;
+}
+
+.planner-day-card__notes {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 9px;
+}
+
+.planner-note {
+  display: grid;
+  grid-template-columns: 32px minmax(0,1fr);
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid rgba(143,224,180,.12);
+  border-radius: 15px;
+  background: rgba(60,179,113,.06);
+}
+
+.planner-note--tips {
+  grid-column: 1/-1;
+  background: rgba(242,192,120,.06);
+  border-color: rgba(242,192,120,.14);
+}
+
+.planner-note > span {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.055);
+}
+
+.planner-note strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #bff7d7;
+  font-size: .72rem;
+}
+
+.planner-note p,
+.planner-note ul {
+  margin: 0;
+  color: rgba(245,255,248,.7);
+  font-size: .78rem;
+  line-height: 1.5;
+}
+
+.planner-note ul {
+  display: grid;
+  gap: 4px;
+  padding-left: 17px;
+}
+
+.planner-day-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+.planner-day-card__actions a,
+.planner-day-card__actions button {
+  min-height: 39px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 11px;
+  border: 1px solid rgba(143,224,180,.18);
+  border-radius: 12px;
+  color: #dff9e9;
+  background: rgba(255,255,255,.045);
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .22s cubic-bezier(.22,1,.36,1), background .22s ease, border-color .22s ease;
+}
+
+.planner-day-card__actions a:hover,
+.planner-day-card__actions button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(143,224,180,.42);
+  background: rgba(60,179,113,.14);
+}
+
+.planner-rain-plan {
+  display: grid;
+  gap: 14px;
+  padding: clamp(17px,2.5vw,23px);
+  border: 1px solid rgba(101,183,230,.2);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 94% 6%,rgba(101,183,230,.15),transparent 34%),
+    rgba(30,82,110,.08);
+}
+
+.planner-rain-plan > header {
+  display: grid;
+  grid-template-columns: 42px minmax(0,1fr);
+  gap: 11px;
+  align-items: start;
+}
+
+.planner-rain-plan > header > span {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(101,183,230,.14);
+}
+
+.planner-rain-plan h3 {
+  margin: 0 0 4px;
+  color: #eaf9ff;
+  font-size: 1.05rem;
+}
+
+.planner-rain-plan header p {
+  margin: 0;
+  font-size: .82rem;
+}
+
+.planner-rain-plan__grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 9px;
+}
+
+.planner-rain-plan__grid article {
+  padding: 12px;
+  border: 1px solid rgba(101,183,230,.15);
+  border-radius: 14px;
+  background: rgba(3,20,29,.22);
+}
+
+.planner-rain-plan__grid span,
+.planner-rain-plan__grid strong {
+  display: block;
+}
+
+.planner-rain-plan__grid span {
+  color: #a9daf2;
+  font-size: .65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.planner-rain-plan__grid strong {
+  margin: 4px 0;
+  color: #f2fbff;
+  font-size: .8rem;
+}
+
+.planner-rain-plan__grid p {
+  margin: 0;
+  font-size: .76rem;
+  line-height: 1.45;
+}
+
+.stay-planner__upsell {
+  grid-template-columns: 48px minmax(0,1fr) !important;
+  gap: 15px !important;
+  padding: clamp(18px,3vw,26px) !important;
+  border-radius: 25px !important;
+}
+
+.stay-planner__upsell-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: linear-gradient(135deg,rgba(242,192,120,.28),rgba(60,179,113,.2));
+}
+
+.stay-planner__upsell-head h3 {
+  margin: 0 0 6px;
+  font-size: 1.08rem;
+}
+
+.stay-planner__upsell-head p {
+  margin: 0;
+  font-size: .84rem;
+}
+
+.stay-planner__upsell-compare,
+.stay-planner__upsell-actions {
+  grid-column: 1/-1;
+}
+
+.stay-planner__upsell-compare {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.stay-planner__upsell-compare > article {
+  padding: 14px;
+  border: 1px solid rgba(242,192,120,.16);
+  border-radius: 16px;
+  background: rgba(0,0,0,.11);
+}
+
+.stay-planner__upsell-compare > article.is-better {
+  border-color: rgba(143,224,180,.32);
+  background: rgba(60,179,113,.11);
+  box-shadow: inset 0 1px rgba(255,255,255,.06);
+}
+
+.stay-planner__upsell-compare > span {
+  align-self: center;
+  color: #f2c078;
+  font-weight: 950;
+}
+
+.stay-planner__upsell-compare small,
+.stay-planner__upsell-compare strong {
+  display: block;
+}
+
+.stay-planner__upsell-compare small {
+  color: #e9c995;
+  font-size: .67rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.stay-planner__upsell-compare strong {
+  margin: 4px 0 6px;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.stay-planner__upsell-compare p,
+.stay-planner__upsell-compare ul {
+  margin: 0;
+  color: rgba(245,255,248,.72);
+  font-size: .78rem;
+  line-height: 1.45;
+}
+
+.stay-planner__upsell-compare ul {
+  display: grid;
+  gap: 4px;
+  padding-left: 17px;
+}
+
+.stay-planner__upsell-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stay-planner__upsell-actions button,
+.stay-planner__upsell-actions a {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 13px;
+  border: 1px solid rgba(242,192,120,.24);
+  border-radius: 13px;
+  color: #102018;
+  background: linear-gradient(135deg,#f7d49e,#f2c078);
+  font: inherit;
+  font-size: .76rem;
+  font-weight: 950;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.stay-planner__upsell-actions button:last-child,
+.stay-planner__upsell-actions a {
+  color: #eafff1;
+  border-color: rgba(143,224,180,.18);
+  background: rgba(255,255,255,.05);
+}
+
+.planner-skeleton {
+  display: grid;
+  gap: 16px;
+}
+
+.planner-skeleton__status {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #bff7d7;
+  font-size: .85rem;
+}
+
+.planner-skeleton__status span {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #55cf89;
+  box-shadow: 0 0 0 0 rgba(85,207,137,.35);
+  animation: plannerLoadingPulse 1.2s ease-out infinite;
+}
+
+.planner-skeleton__hero,
+.planner-skeleton__card {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid rgba(143,224,180,.12);
+  border-radius: 23px;
+  background: rgba(255,255,255,.035);
+}
+
+.planner-skeleton__hero::after,
+.planner-skeleton__card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-110%);
+  background: linear-gradient(90deg,transparent,rgba(255,255,255,.075),transparent);
+  animation: plannerShimmer 1.25s linear infinite;
+}
+
+.planner-skeleton i {
+  display: block;
+  height: 13px;
+  border-radius: 999px;
+  background: rgba(143,224,180,.1);
+}
+
+.planner-skeleton__hero i:nth-child(1) { width:28%; }
+.planner-skeleton__hero i:nth-child(2) { width:72%; height:28px; }
+.planner-skeleton__hero i:nth-child(3) { width:88%; }
+.planner-skeleton__card { min-height:260px; }
+.planner-skeleton__card > div { display:grid; grid-template-columns:42px 1fr; gap:10px; }
+.planner-skeleton__card > div:last-child { grid-template-columns:repeat(3,1fr); }
+
+.stay-planner__result.is-entering .planner-result-hero {
+  animation: plannerResultIn .52s cubic-bezier(.22,1,.36,1) both;
+}
+
+.stay-planner__result.is-entering [data-planner-day-card] {
+  animation: plannerCardIn .56s cubic-bezier(.22,1,.36,1) both;
+  animation-delay: calc(var(--planner-card-index) * 80ms + 70ms);
+}
+
+.stay-planner__result.is-entering .planner-rain-plan,
+.stay-planner__result.is-entering .stay-planner__upsell {
+  animation: plannerCardIn .58s cubic-bezier(.22,1,.36,1) both;
+  animation-delay: 210ms;
+}
+
+html[data-theme="light"] .planner-result-hero {
+  border-color: #cfe5d6;
+  background: radial-gradient(circle at 92% 10%,rgba(242,192,120,.22),transparent 32%),linear-gradient(135deg,#f3fbf6,#fff);
+  box-shadow: 0 20px 50px rgba(34,82,54,.1);
+}
+
+html[data-theme="light"] .planner-result-hero__subtitle,
+html[data-theme="light"] .stay-planner__plan-heading small,
+html[data-theme="light"] .planner-day-card__eyebrow,
+html[data-theme="light"] .planner-timeline__label,
+html[data-theme="light"] .planner-practical__label,
+html[data-theme="light"] .planner-note strong {
+  color: #147245 !important;
+}
+
+html[data-theme="light"] .planner-result-hero__chips > span,
+html[data-theme="light"] .planner-result-hero__signals > span {
+  color: #173126;
+  border-color: #cfe3d6;
+  background: rgba(255,255,255,.72);
+}
+
+html[data-theme="light"] .stay-planner__plan-heading h3,
+html[data-theme="light"] .planner-day-card__heading h3,
+html[data-theme="light"] .planner-practical__value,
+html[data-theme="light"] .planner-rain-plan h3,
+html[data-theme="light"] .planner-rain-plan__grid strong,
+html[data-theme="light"] .stay-planner__upsell-compare strong {
+  color: #102018;
+}
+
+html[data-theme="light"] .planner-day-card.stay-planner__day-card {
+  border-color: #cfe3d6;
+  background: linear-gradient(90deg,var(--planner-accent) 0 4px,transparent 4px),linear-gradient(145deg,#fff,#f6fbf7);
+  box-shadow: 0 16px 38px rgba(34,82,54,.08);
+}
+
+html[data-theme="light"] .planner-day-card__heading p,
+html[data-theme="light"] .planner-timeline__value,
+html[data-theme="light"] .planner-note p,
+html[data-theme="light"] .planner-note ul,
+html[data-theme="light"] .planner-rain-plan p,
+html[data-theme="light"] .stay-planner__upsell-compare p,
+html[data-theme="light"] .stay-planner__upsell-compare ul {
+  color: #536359 !important;
+}
+
+html[data-theme="light"] .planner-timeline__item,
+html[data-theme="light"] .planner-practical__item,
+html[data-theme="light"] .planner-note,
+html[data-theme="light"] .planner-rain-plan__grid article,
+html[data-theme="light"] .stay-planner__upsell-compare > article {
+  border-color: #d8e8dd;
+  background: #f4faf6;
+}
+
+html[data-theme="light"] .planner-rain-plan {
+  border-color: #cee3ed;
+  background: #f3faff;
+}
+
+html[data-theme="light"] .planner-day-card__actions a,
+html[data-theme="light"] .planner-day-card__actions button {
+  color: #17442d;
+  border-color: #cfe3d6;
+  background: #fff;
+}
+
+@media (min-width:980px) {
+  .stay-planner__layout {
+    grid-template-columns: minmax(330px,390px) minmax(0,1fr);
+    gap: clamp(20px,2.5vw,34px);
+  }
+
+  .stay-planner__panel {
+    position: sticky;
+    top: 104px;
+    grid-template-columns: 1fr;
+    max-height: calc(100vh - 122px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(143,224,180,.35) transparent;
+  }
+
+  .stay-planner__control--wide {
+    grid-column: auto;
+  }
+
+  .stay-planner__result {
+    padding: clamp(18px,2vw,28px);
+  }
+}
+
+@media (min-width:1320px) {
+  .stay-planner__layout {
+    grid-template-columns: 410px minmax(0,1fr);
+  }
+}
+
+@media (max-width:979px) {
+  .stay-planner__layout {
+    grid-template-columns: minmax(0,1fr);
+  }
+
+  .stay-planner__panel {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+@media (max-width:720px) {
+  .stay-planner__result {
+    padding: 14px;
+  }
+
+  .planner-result-hero,
+  .planner-day-card.stay-planner__day-card,
+  .planner-rain-plan,
+  .stay-planner__upsell {
+    border-radius: 20px !important;
+  }
+
+  .planner-day-card__header {
+    grid-template-columns: 38px 38px minmax(0,1fr) !important;
+  }
+
+  .planner-day-card__number,
+  .planner-day-card__icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .planner-day-card__intensity {
+    grid-column: 1/-1;
+  }
+
+  .planner-timeline__rail,
+  .planner-practical__grid,
+  .planner-day-card__notes,
+  .planner-rain-plan__grid,
+  .stay-planner__upsell-compare {
+    grid-template-columns: 1fr;
+  }
+
+  .planner-timeline__rail::before {
+    top: 12%;
+    bottom: 12%;
+    left: 28px;
+    right: auto;
+    width: 1px;
+    height: auto;
+    background: linear-gradient(180deg,transparent,rgba(143,224,180,.25),transparent);
+  }
+
+  .planner-timeline__item {
+    min-height: 0;
+  }
+
+  .planner-note--tips {
+    grid-column: auto;
+  }
+
+  .planner-day-card__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .planner-day-card__actions a,
+  .planner-day-card__actions button,
+  .stay-planner__upsell-actions > * {
+    width: 100%;
+  }
+
+  .stay-planner__upsell-compare > span {
+    justify-self: center;
+    transform: rotate(90deg);
+  }
+
+  .stay-planner__upsell-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .planner-result-hero__chips,
+  .planner-result-hero__signals {
+    align-items: stretch;
+  }
+
+  .planner-result-hero__chips > span,
+  .planner-result-hero__signals > span {
+    width: 100%;
+    border-radius: 12px;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .stay-planner__result,
+  .stay-planner__result *,
+  .stay-planner__segments button,
+  .stay-planner__attractions button,
+  .stay-planner__scenario-grid button {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+@keyframes plannerSelectionPulse {
+  0%,100% { transform:translateY(-2px) scale(1); }
+  50% { transform:translateY(-2px) scale(1.045); }
+}
+
+@keyframes plannerResultIn {
+  from { opacity:0; transform:translateY(12px); filter:blur(4px); }
+  to { opacity:1; transform:translateY(0); filter:blur(0); }
+}
+
+@keyframes plannerCardIn {
+  from { opacity:0; transform:translateY(18px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+@keyframes plannerShimmer {
+  to { transform:translateX(110%); }
+}
+
+@keyframes plannerLoadingPulse {
+  70% { box-shadow:0 0 0 10px rgba(85,207,137,0); }
+  100% { box-shadow:0 0 0 0 rgba(85,207,137,0); }
 }
 </style>
