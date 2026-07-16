@@ -6,6 +6,10 @@ import {
   updateReservationMailStatus,
 } from './_lib/inbox.js';
 import { createStayPanelForInquiry } from './_lib/stay.js';
+import analyticsEventHandler from './_handlers/analytics/event.js';
+import analyticsStatusHandler from './_handlers/analytics/status.js';
+import stayAdminHandler from './_handlers/stay/admin.js';
+import stayPanelHandler from './_handlers/stay/panel.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 const MAX_BODY = 32_000;
@@ -1725,6 +1729,14 @@ const acceptedReservationResponse = (req, inquiry, reception = {}, mail = {}, in
 };
 
 export default async function handler(req, res) {
+  const routedHandler = new Map([
+    ['analytics-event', analyticsEventHandler],
+    ['analytics-status', analyticsStatusHandler],
+    ['stay-admin', stayAdminHandler],
+    ['stay-panel', stayPanelHandler],
+  ]).get(String(req.query?.ccRoute || ''));
+  if (routedHandler) return routedHandler(req, res);
+
   try {
     if (req.method === 'OPTIONS') {
       res.setHeader('allow', 'POST, OPTIONS');

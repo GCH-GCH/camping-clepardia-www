@@ -1,6 +1,22 @@
 {
   "rewrites": [
     {
+      "source": "/api/stay/panel",
+      "destination": "/api/reservation?ccRoute=stay-panel"
+    },
+    {
+      "source": "/api/stay/admin",
+      "destination": "/api/reservation?ccRoute=stay-admin"
+    },
+    {
+      "source": "/api/analytics/event",
+      "destination": "/api/reservation?ccRoute=analytics-event"
+    },
+    {
+      "source": "/api/analytics/status",
+      "destination": "/api/reservation?ccRoute=analytics-status"
+    },
+    {
       "source": "/stay/:token",
       "destination": "/stay/?token=:token"
     }
