@@ -4,6 +4,7 @@ import {
   supabaseRequest,
   updateReservationInquiry,
 } from './inbox.js';
+import { summerCampingFullText } from '../../shared/summerCamping.js';
 
 const MAIL_THREADS_TABLE = 'mail_threads';
 const MAIL_MESSAGES_TABLE = 'mail_messages';
@@ -118,6 +119,10 @@ copy.NL = { ...copy.EN, subject: 'Camping Clepardia — antwoord op uw aanvraag'
 copy.CS = { ...copy.EN, subject: 'Camping Clepardia — odpověď na váš dotaz', hello: 'Dobrý den' };
 copy.SK = { ...copy.EN, subject: 'Camping Clepardia — odpoveď na vašu požiadavku', hello: 'Dobrý deň' };
 copy.SV = { ...copy.EN, subject: 'Camping Clepardia — svar på din förfrågan', hello: 'Hej' };
+
+for (const language of LANGUAGES) {
+  copy[language].campingSummer = summerCampingFullText(language.toLowerCase());
+}
 
 const envValue = (name) => String(process.env[name] || '').trim();
 const configured = (...values) => values.find((value) => String(value || '').trim()) || '';

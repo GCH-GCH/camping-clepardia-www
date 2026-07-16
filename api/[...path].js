@@ -11,6 +11,7 @@ import inboxThreadHandler from './_handlers/inbox/thread.js';
 import reservationInquiryHandler from './_handlers/reservation-inquiry.js';
 import stayAdminHandler from './_handlers/stay/admin.js';
 import stayPanelHandler from './_handlers/stay/panel.js';
+import weatherHandler from './_handlers/weather.js';
 
 const handlers = new Map([
   ['analytics/event', analyticsEventHandler],
@@ -26,6 +27,7 @@ const handlers = new Map([
   ['reservation-inquiry', reservationInquiryHandler],
   ['stay/admin', stayAdminHandler],
   ['stay/panel', stayPanelHandler],
+  ['weather', weatherHandler],
 ]);
 
 const routeFromRequest = (req) => {

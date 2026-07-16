@@ -5,6 +5,7 @@ import { BUNGALOW_DEPOSIT_RATE, currencyEstimateConfig, pricingConfig } from '@/
 import { resolveContentLanguage } from '@/i18n/config';
 import { getCoreUi, tourBookingHref } from '@/i18n/coreUi';
 import { getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { getSummerCampingCopy } from '../../../shared/summerCamping.js';
 
 interface Props {
   languageCode?: string;
@@ -20,6 +21,7 @@ const uiLang = (publicReservationLanguages.includes(requestedLanguage as Support
   ? requestedLanguage
   : resolveContentLanguage(requestedLanguage)) as SupportedLang;
 const lang = uiLang;
+const centralSummerCamping = getSummerCampingCopy(uiLang);
 const tourUi = getCoreUi(requestedLanguage).tour;
 const attractionsPath = getLocalizedPath(pathContext.explicitLanguage, 'atrakcje');
 const plannerPath = getLocalizedPath(pathContext.explicitLanguage, 'planer-pobytu');
@@ -1563,7 +1565,11 @@ const config = {
     icon: renderLucideIcon('CheckCircle2'),
   },
   clientSuccess: clientSuccessCopy[uiLang as keyof typeof clientSuccessCopy] ?? clientSuccessCopy.en,
-  summerBlock: summerCampingBlockCopy[uiLang as keyof typeof summerCampingBlockCopy] ?? summerCampingBlockCopy.en,
+  summerBlock: {
+    ...(summerCampingBlockCopy[uiLang as keyof typeof summerCampingBlockCopy] ?? summerCampingBlockCopy.en),
+    ...centralSummerCamping,
+    message: `${centralSummerCamping.message} ${centralSummerCamping.noon} ${centralSummerCamping.evening} ${centralSummerCamping.disclaimer}`,
+  },
   feedback: feedbackCopy[uiLang as keyof typeof feedbackCopy] ?? feedbackCopy.en,
   ux,
   icons: iconHtml,

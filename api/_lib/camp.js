@@ -309,6 +309,14 @@ export const allowedSiteEventTypes = new Set([
   'tour_cta_click',
   'maps_cta_click',
   'tram_info_click',
+  'open_weather',
+  'weather_cta_click',
+  'planner_generate',
+  'planner_add_night',
+  'planner_change_nights',
+  'open_summer_notice',
+  'my_stay_checklist_click',
+  'smart_concierge_action',
 ]);
 
 export const saveSiteEvent = async (payload = {}) => {

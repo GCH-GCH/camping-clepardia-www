@@ -1,3 +1,5 @@
+import { summerCampingCopy } from '../../shared/summerCamping.js';
+
 export type SiteNoticeType = 'event' | 'offer' | 'alert' | 'info';
 export type SiteNoticePriority = 'low' | 'medium' | 'high';
 export type SiteNoticeLanguage = 'pl' | 'en' | 'de' | 'it' | 'fr' | 'es' | 'nl' | 'cs' | 'sk' | 'sv';
@@ -190,10 +192,9 @@ export const siteNotices: SiteNotice[] = [
     id: 'summer-camping-first-come',
     type: 'info',
     category: 'camping',
-    title: 'Lipiec i sierpień — miejsca campingowe według kolejności przyjazdu',
-    shortDescription: 'W wysokim sezonie najlepiej przyjechać krótko po 12:00.',
-    description:
-      'W wysokim sezonie najlepiej przyjechać krótko po 12:00. Domki można rezerwować, a miejsca campingowe działają zwykle według kolejności przyjazdu.',
+    title: summerCampingCopy.pl.title,
+    shortDescription: summerCampingCopy.pl.short,
+    description: `${summerCampingCopy.pl.message} ${summerCampingCopy.pl.noon} ${summerCampingCopy.pl.evening} ${summerCampingCopy.pl.disclaimer}`,
     image: '/images/sections/camping-pitches.webp',
     imageAlt: 'Miejsca campingowe na Camping Clepardia w Krakowie',
     startDate: '2026-06-01',
@@ -340,15 +341,10 @@ const noticeCopyOverrides: Record<string, Partial<Record<SiteNoticeLanguage, Sit
     sv: { title: 'Använd Google Maps för ankomst', shortDescription: 'Infarten till campingen ändrades 2022.', description: 'Infarten till campingen ändrades 2022. Äldre navigation kan visa fel, därför rekommenderar vi Google Maps.', ctaLabel: 'Se vägbeskrivning', badge: 'Google Maps 2022', imageAlt: 'Området vid infarten till Camping Clepardia' },
   },
   'summer-camping-first-come': {
-    en: { title: 'July and August — pitches by arrival order', shortDescription: 'In high season it is best to arrive shortly after 12:00.', description: 'In high season it is best to arrive shortly after 12:00. Bungalows can be booked, while camping pitches usually work by arrival order.', ctaLabel: 'Check the rules', badge: 'Summer', imageAlt: 'Camping pitches at Camping Clepardia in Krakow' },
-    de: { title: 'Juli und August — Stellplätze nach Ankunft', shortDescription: 'In der Hochsaison am besten kurz nach 12:00 ankommen.', description: 'In der Hochsaison ist es am besten, kurz nach 12:00 anzukommen. Bungalows können reserviert werden, Campingplätze meist nach Reihenfolge der Ankunft.', ctaLabel: 'Regeln prüfen', badge: 'Sommer', imageAlt: 'Campingplätze bei Camping Clepardia in Krakau' },
-    it: { title: 'Luglio e agosto — piazzole in ordine di arrivo', shortDescription: 'In alta stagione conviene arrivare poco dopo le 12:00.', description: 'In alta stagione conviene arrivare poco dopo le 12:00. I bungalow si possono prenotare, mentre le piazzole camping sono di solito in ordine di arrivo.', ctaLabel: 'Controlla le regole', badge: 'Estate', imageAlt: 'Piazzole camping a Camping Clepardia Cracovia' },
-    fr: { title: 'Juillet et août — emplacements par ordre d’arrivée', shortDescription: 'En haute saison, il vaut mieux arriver peu après 12h00.', description: 'En haute saison, il vaut mieux arriver peu après 12h00. Les bungalows peuvent être réservés ; les emplacements de camping fonctionnent généralement par ordre d’arrivée.', ctaLabel: 'Voir les règles', badge: 'Été', imageAlt: 'Emplacements de camping à Camping Clepardia Cracovie' },
-    es: { title: 'Julio y agosto — parcelas por orden de llegada', shortDescription: 'En temporada alta conviene llegar poco después de las 12:00.', description: 'En temporada alta conviene llegar poco después de las 12:00. Los bungalows se pueden reservar; las parcelas suelen asignarse por orden de llegada.', ctaLabel: 'Ver normas', badge: 'Verano', imageAlt: 'Parcelas de Camping Clepardia en Cracovia' },
-    nl: { title: 'Juli en augustus — plaatsen op volgorde van aankomst', shortDescription: 'In het hoogseizoen is aankomen kort na 12.00 uur het beste.', description: 'In het hoogseizoen is aankomen kort na 12.00 uur het beste. Bungalows kunnen worden geboekt; kampeerplaatsen gaan meestal op volgorde van aankomst.', ctaLabel: 'Bekijk regels', badge: 'Zomer', imageAlt: 'Kampeerplaatsen op Camping Clepardia in Krakau' },
-    cs: { title: 'Červenec a srpen — místa podle pořadí příjezdu', shortDescription: 'V hlavní sezóně je nejlepší přijet krátce po 12:00.', description: 'V hlavní sezóně je nejlepší přijet krátce po 12:00. Bungalovy lze rezervovat, místa v kempu jsou obvykle podle pořadí příjezdu.', ctaLabel: 'Zkontrolovat pravidla', badge: 'Léto', imageAlt: 'Místa v kempu Camping Clepardia v Krakově' },
-    sk: { title: 'Júl a august — miesta podľa poradia príchodu', shortDescription: 'V hlavnej sezóne je najlepšie prísť krátko po 12:00.', description: 'V hlavnej sezóne je najlepšie prísť krátko po 12:00. Bungalovy sa dajú rezervovať, miesta v kempe sú zvyčajne podľa poradia príchodu.', ctaLabel: 'Skontrolovať pravidlá', badge: 'Leto', imageAlt: 'Miesta v kempe Camping Clepardia v Krakove' },
-    sv: { title: 'Juli och augusti — platser i ankomstordning', shortDescription: 'Under högsäsong är det bäst att anlända strax efter 12.00.', description: 'Under högsäsong är det bäst att anlända strax efter 12.00. Bungalower kan bokas; campingplatser fungerar oftast i ankomstordning.', ctaLabel: 'Kontrollera regler', badge: 'Sommar', imageAlt: 'Campingplatser på Camping Clepardia i Kraków' },
+    ...Object.fromEntries((['en','de','it','fr','es','nl','cs','sk','sv'] as const).map((language) => {
+      const copy = summerCampingCopy[language];
+      return [language, { title: copy.title, shortDescription: copy.short, description: `${copy.message} ${copy.noon} ${copy.evening} ${copy.disclaimer}`, ctaLabel: copy.rules, badge: copy.badge, imageAlt: 'Camping Clepardia Kraków' }];
+    })),
   },
   'arrival-registration-documents': {
     en: { title: 'What to prepare for check-in?', shortDescription: 'ID and vehicle registration number make registration faster.', description: 'At registration we ask for one identity document and the vehicle registration number if you arrive by car, camper, van or caravan. For a caravan, enter the caravan registration number.', ctaLabel: 'Before arrival', badge: 'Reception', imageAlt: 'Green camping area in Krakow' },

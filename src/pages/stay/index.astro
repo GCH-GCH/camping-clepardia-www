@@ -1,5 +1,8 @@
 ---
 import { myStayCopy } from '@/i18n/myStay';
+import { myStaySmartCopy } from '@/i18n/myStaySmart';
+import { weatherCopy } from '@/i18n/weather';
+import { summerCampingCopy } from '../../../shared/summerCamping.js';
 ---
 
 <!doctype html>
@@ -25,12 +28,18 @@ import { myStayCopy } from '@/i18n/myStay';
       </section>
     </main>
 
-    <script is:inline define:vars={{ myStayCopy }}>
+    <script is:inline define:vars={{ myStayCopy, myStaySmartCopy, weatherCopy, summerCampingCopy }}>
       window.__MY_STAY_COPY__ = myStayCopy;
+      window.__MY_STAY_SMART_COPY__ = myStaySmartCopy;
+      window.__WEATHER_COPY__ = weatherCopy;
+      window.__SUMMER_CAMPING_COPY__ = summerCampingCopy;
     </script>
     <script>
       const app = document.querySelector('[data-stay-app]');
       const copySet = window.__MY_STAY_COPY__ || {};
+      const smartCopySet = window.__MY_STAY_SMART_COPY__ || {};
+      const weatherCopySet = window.__WEATHER_COPY__ || {};
+      const summerCopySet = window.__SUMMER_CAMPING_COPY__ || {};
       const supported = ['pl', 'en', 'de', 'it', 'fr', 'es', 'nl', 'cs', 'sk', 'sv'];
       const params = new URLSearchParams(location.search);
       const pathToken = decodeURIComponent(location.pathname.replace(/^\/stay\/?/i, '').split('/')[0] || '');
@@ -42,6 +51,8 @@ import { myStayCopy } from '@/i18n/myStay';
       let feedbackRating = 0;
       let feedbackHelpful = null;
       let campyHistory = [];
+      let stayWeather = { key:'', status:'idle', days:[] };
+      let summerNoticeTracked = false;
       const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
       const toursUrl = 'https://qr.codes/vksKBT';
 
@@ -75,8 +86,71 @@ import { myStayCopy } from '@/i18n/myStay';
         }).catch(() => {});
       };
       const icon = (name) => ({
-        calendar:'📅', people:'👥', stay:'🏕️', service:'🧰', price:'💚', arrival:'🕘', directions:'🗺️', rules:'✓', tours:'🚌', campy:'✨', feedback:'★', after:'🌿', contact:'☎', link:'🔗'
+        calendar:'📅', people:'👥', stay:'🏕️', service:'🧰', price:'💚', arrival:'🕘', directions:'🗺️', rules:'✓', tours:'🚌', campy:'✨', feedback:'★', after:'🌿', contact:'☎', link:'🔗', weather:'🌤️', checklist:'✓', concierge:'✦'
       })[name] || '•';
+      const smartCopy = () => smartCopySet[lang] || smartCopySet.pl;
+      const localWeatherCopy = () => weatherCopySet[lang] || weatherCopySet.pl;
+      const summerCopy = () => summerCopySet[lang] || summerCopySet.pl;
+      const plannerPath = () => ({ pl:'/planer-pobytu',en:'/en/stay-planner',de:'/de/aufenthaltsplaner',it:'/it/pianificatore-soggiorno',fr:'/fr/planificateur-sejour',es:'/es/planificador-estancia',nl:'/nl/verblijfsplanner',cs:'/cs/planovac-pobytu',sk:'/sk/planovac-pobytu',sv:'/sv/vistelseplanerare' })[lang] || '/planer-pobytu';
+      const todayIso = () => new Intl.DateTimeFormat('en-CA', { timeZone:'Europe/Warsaw', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+      const daysBetween = (from, to) => Math.max(0, Math.ceil((new Date(`${to}T12:00:00Z`) - new Date(`${from}T12:00:00Z`)) / 86400000));
+      const stayStage = (data) => {
+        const today = todayIso();
+        if (today < data.arrivalDate) return ['before', smartCopy().stage.before.replace('{days}', daysBetween(today, data.arrivalDate))];
+        if (today === data.arrivalDate) return ['arrival', smartCopy().stage.arrival];
+        if (today <= data.departureDate) return ['during', smartCopy().stage.during];
+        return ['after', smartCopy().stage.after];
+      };
+      const weatherGroup = (code) => {
+        if (code === 0) return ['clear','☀️']; if ([1,2].includes(code)) return ['mostlyClear','🌤️']; if (code === 3) return ['cloudy','☁️'];
+        if ([45,48].includes(code)) return ['fog','🌫️']; if ([51,53,55,56,57].includes(code)) return ['drizzle','🌦️'];
+        if ([61,63,65,66,67,80,81,82].includes(code)) return ['rain','🌧️']; if ([71,73,75,77,85,86].includes(code)) return ['snow','🌨️'];
+        if ([95,96,99].includes(code)) return ['storm','⛈️']; return ['cloudy','☁️'];
+      };
+      const checklistFor = (data) => {
+        const items = smartCopy().items;
+        const result = [['document',items.document],['maps',items.maps]];
+        if (data.isCamper) result.push(['vehiclePlate',items.vehiclePlate],['electricity',items.electricity],['noon',items.noon]);
+        if (data.isCaravan) result.push(['vehiclePlate',items.vehiclePlate],['trailerPlate',items.trailerPlate],['electricity',items.electricity],['noon',items.noon]);
+        if (data.isTent) result.push(['noon',items.noon]);
+        if (data.isBungalow) result.push(['towels',items.towels],['toiletries',items.toiletries],['checkin',items.checkin]);
+        if (data.hasDog) result.push(['leash',items.leash],['dogWaste',items.dogWaste]);
+        if (data.isLateArrival) result.push(['late',items.late]);
+        return [...new Map(result).entries()];
+      };
+      const isSummerCamping = (data) => {
+        if (data.isBungalow) return false;
+        return [data.arrivalDate,data.departureDate].some((value) => /^\d{4}-(07|08)-/.test(String(value || '')));
+      };
+      const renderWeather = (data) => {
+        const smart = smartCopy(); const weather = localWeatherCopy();
+        let body = `<p>${esc(smart.forecastLoading)}</p>`;
+        if (stayWeather.status === 'later') body = `<p>${esc(smart.forecastLater)}</p>`;
+        if (stayWeather.status === 'unavailable') body = `<p>${esc(smart.forecastUnavailable)}</p>`;
+        if (stayWeather.status === 'ready') {
+          body = `<div class="stay-forecast">${stayWeather.days.map((day) => { const [group,emoji] = weatherGroup(Number(day.weatherCode)); const label = weather.conditions[group] || weather.conditions.cloudy; return `<article><span>${emoji}</span><strong>${esc(new Intl.DateTimeFormat(localeTag(),{weekday:'short',day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(new Date(`${day.date}T12:00:00Z`)))}</strong><p>${Math.round(day.temperatureMinC)}–${Math.round(day.temperatureMaxC)}°C · ${esc(label)}</p><small>${weather.rain}: ${day.rainProbability == null ? '—' : `${Math.round(day.rainProbability)}%`}</small></article>`; }).join('')}</div>`;
+          const maxTemp = Math.max(...stayWeather.days.map((day) => Number(day.temperatureMaxC || -99)));
+          const maxUv = Math.max(...stayWeather.days.map((day) => Number(day.uvIndex || 0)));
+          const maxWind = Math.max(...stayWeather.days.map((day) => Number(day.windGustKmh || day.windKmh || 0)));
+          const rainy = stayWeather.days.some((day) => Number(day.rainProbability || 0) >= 45 || Number(day.precipitationMm || 0) >= 1);
+          const tips = [data.isTent && rainy ? weather.tips.tentRain : '',maxTemp >= 28 ? weather.tips.heat : '',maxUv >= 6 ? weather.tips.uv : '',data.isCamper && maxWind < 45 ? weather.tips.camper : '',maxWind >= 45 ? weather.tips.wind : ''].filter(Boolean);
+          if (tips.length) body += `<div class="stay-weather-tips">${tips.map((tip) => `<span>${esc(tip)}</span>`).join('')}</div>`;
+        }
+        return `<section class="stay-card stay-card--weather" id="stay-weather"><div class="stay-card__head"><span>${icon('weather')}</span><div><h2>${esc(smart.sections.weather)}</h2><p>${esc(weather.title)}</p></div></div>${body}</section>`;
+      };
+      const loadStayWeather = async (data) => {
+        const key = `${data.arrivalDate}:${data.departureDate}`;
+        if (!data.arrivalDate || !data.departureDate || stayWeather.key === key) return;
+        stayWeather = { key, status:'loading', days:[] };
+        try {
+          const response = await fetch(`/api/weather?start=${encodeURIComponent(data.arrivalDate)}&end=${encodeURIComponent(data.departureDate)}&locale=${encodeURIComponent(lang)}`, { headers:{accept:'application/json'} });
+          const payload = await response.json();
+          if (!payload?.ok) throw new Error('unavailable');
+          stayWeather = { key, status:payload.forecastInRange && payload.daily?.length ? 'ready' : 'later', days:Array.isArray(payload.daily) ? payload.daily : [] };
+          track('open_weather', { source:'my_stay', forecast:stayWeather.status });
+        } catch { stayWeather = { key, status:'unavailable', days:[] }; }
+        render();
+      };
       const list = (items) => `<ul class="stay-list">${items.map((item) => `<li><span aria-hidden="true">✓</span>${esc(item)}</li>`).join('')}</ul>`;
       const services = (items) => items?.length
         ? `<div class="stay-chips">${items.map((item) => `<span>${esc(item.label)}${Number(item.qty || 1) > 1 ? ` × ${esc(item.qty)}` : ''}</span>`).join('')}</div>`
@@ -107,6 +181,10 @@ import { myStayCopy } from '@/i18n/myStay';
         const feedbackDone = Boolean(data.panel?.feedbackSubmitted);
         const serviceContext = (data.services || []).map((item) => `${item.label} × ${item.qty}`).join(', ');
         const tourContext = (data.tours || []).join(', ');
+        const smart = smartCopy();
+        const [stageKey, stageText] = stayStage(data);
+        const checklist = checklistFor(data);
+        const summer = summerCopy();
         app.innerHTML = `
           <header class="stay-header">
             <div class="stay-brand"><img src="/brand/logo/clepardia-logo-main.svg" width="58" height="58" alt="" /><span><strong>Camping Clepardia</strong><small>${esc(c.privateLabel)}</small></span></div>
@@ -134,6 +212,22 @@ import { myStayCopy } from '@/i18n/myStay';
                 <div class="stay-summary-row stay-summary-row--stack"><span>${esc(c.labels.services)}</span>${services(data.services)}</div>
               </section>
 
+              <section class="stay-card stay-card--concierge" data-concierge-stage="${esc(stageKey)}">
+                <div class="stay-card__head"><span>${icon('concierge')}</span><div><h2>${esc(smart.sections.concierge)}</h2><p>${esc(stageText)}</p></div></div>
+                <div class="stay-concierge-actions">
+                  <a href="#stay-weather" data-concierge-action="weather">${icon('weather')} ${esc(smart.actions.weather)}</a>
+                  <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" data-concierge-action="maps">${icon('directions')} ${esc(smart.actions.maps)}</a>
+                  <a href="${plannerPath()}" data-concierge-action="planner">${icon('calendar')} ${esc(smart.actions.planner)}</a>
+                  <a href="tel:+48795294486" data-concierge-action="contact">${icon('contact')} ${esc(smart.actions.contact)}</a>
+                </div>
+              </section>
+
+              ${renderWeather(data)}
+
+              <section class="stay-card stay-card--checklist"><div class="stay-card__head"><span>${icon('checklist')}</span><h2>${esc(smart.sections.checklist)}</h2></div><div class="stay-checklist">${checklist.map(([id,label]) => `<button type="button" data-checklist-id="${esc(id)}"><i>✓</i><span>${esc(label)}</span></button>`).join('')}</div></section>
+
+              ${isSummerCamping(data) ? `<section class="stay-card stay-card--summer"><div class="stay-card__head"><span>🏕️</span><div><small>${esc(summer.badge)}</small><h2>${esc(summer.title)}</h2></div></div><p>${esc(summer.message)}</p><div class="stay-summer-points"><span>🕛 ${esc(summer.noon)}</span><span>🌙 ${esc(summer.evening)}</span><strong>ℹ️ ${esc(summer.disclaimer)}</strong></div></section>` : ''}
+
               <div class="stay-grid">
                 <section class="stay-card"><div class="stay-card__head"><span>${icon('arrival')}</span><h2>${esc(c.sections.arrival)}</h2></div>${list(c.arrival)}</section>
                 <section class="stay-card"><div class="stay-card__head"><span>${icon('directions')}</span><h2>${esc(c.sections.directions)}</h2></div>${list(c.directions)}<div class="stay-actions"><a class="stay-button" href="${mapsUrl}" target="_blank" rel="noopener noreferrer" data-maps>${esc(c.mapsCta)}</a><button class="stay-button stay-button--ghost" type="button" data-tram>${esc(c.tramCta)}</button></div></section>
@@ -146,7 +240,7 @@ import { myStayCopy } from '@/i18n/myStay';
               <section class="stay-card stay-card--campy">
                 <div class="stay-card__head"><span>${icon('campy')}</span><div><h2>${esc(c.sections.campy)}</h2><p>${esc(c.campyLead)}</p></div></div>
                 <div class="stay-campy-messages" data-campy-messages><p class="is-campy">${esc(c.campyWelcome)}</p></div>
-                <div class="stay-quick">${c.quick.map((question) => `<button type="button" data-campy-quick="${esc(question)}">${esc(question)}</button>`).join('')}</div>
+                <div class="stay-quick">${[smart.actions.weather,...c.quick].map((question) => `<button type="button" data-campy-quick="${esc(question)}">${esc(question)}</button>`).join('')}</div>
                 <form class="stay-campy-form" data-campy-form><input type="text" maxlength="600" autocomplete="off" placeholder="${esc(c.campyPlaceholder)}" aria-label="${esc(c.campyPlaceholder)}" /><button type="submit">${esc(c.campySend)}</button></form>
               </section>
 
@@ -167,6 +261,20 @@ import { myStayCopy } from '@/i18n/myStay';
               <section class="stay-panel-meta"><span>${esc(c.received)}</span><strong>${esc(status)}</strong><small>${esc(c.labels.dates)}: ${esc(formatDate(data.arrivalDate))}</small><small>${esc(c.sections.stay)} · ${esc(data.panel?.openCount || 1)}</small></section>
             </aside>
           </div>`;
+
+        app.querySelectorAll('[data-checklist-id]').forEach((button) => button.addEventListener('click', () => {
+          button.classList.toggle('is-done');
+          track('my_stay_checklist_click', { item:button.dataset.checklistId || 'item', done:button.classList.contains('is-done') });
+        }));
+        app.querySelectorAll('[data-concierge-action]').forEach((action) => action.addEventListener('click', () => {
+          track('smart_concierge_action', { action:action.dataset.conciergeAction || 'action', stage:stageKey });
+          if (action.dataset.conciergeAction === 'weather') track('weather_cta_click', { source:'my_stay_concierge' });
+        }));
+        if (isSummerCamping(data) && !summerNoticeTracked) {
+          summerNoticeTracked = true;
+          track('open_summer_notice', { source:'my_stay' });
+        }
+        loadStayWeather(data);
 
         app.querySelector('[data-language]')?.addEventListener('change', (event) => {
           const next = event.target.value;
@@ -204,6 +312,10 @@ import { myStayCopy } from '@/i18n/myStay';
             `Stay type: ${data.stayType}. Guests: ${guestText}. Services: ${serviceContext || 'none'}.`,
             `Country: ${data.country || 'unknown'}. Tours selected: ${tourContext || 'none'}. Arrival time: ${data.arrivalTime || 'unknown'}.`,
             `Electricity selected: ${data.hasElectricity ? 'yes' : 'no'}. Dog selected: ${data.hasDog ? 'yes' : 'no'}.`,
+            stayWeather.status === 'ready'
+              ? `Verified Open-Meteo forecast for the stay: ${stayWeather.days.map((day) => `${day.date}: ${day.temperatureMinC}-${day.temperatureMaxC} C, WMO ${day.weatherCode}, rain probability ${day.rainProbability ?? 'unknown'}%`).join('; ')}.`
+              : 'No verified forecast is available for the stay yet. Say that the exact forecast will appear closer to arrival; never invent weather.',
+            `A day-by-day stay planner is available at ${plannerPath()}. Adapt suggestions to ${data.nights || 1} nights.`,
             'Use this context only to personalize practical information. Never confirm availability or invent booking status.',
           ].join(' ');
           try {
@@ -308,6 +420,17 @@ import { myStayCopy } from '@/i18n/myStay';
   .stay-list li>span { display:grid; width:22px; height:22px; place-items:center; border-radius:50%; color:#07160f; background:#72eba6; font-size:.72rem; font-weight:950; }
   .stay-chips { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:7px; }
   .stay-chips span { display:inline-flex; min-height:30px; align-items:center; padding:0 10px; border:1px solid rgba(114,235,166,.18); border-radius:999px; color:#c7f9dc; background:rgba(114,235,166,.07); font-size:.78rem; font-weight:750; }
+  .stay-card--concierge { border-color:rgba(114,235,166,.25); background:radial-gradient(circle at 90% 0%,rgba(114,235,166,.14),transparent 35%),linear-gradient(145deg,rgba(20,64,41,.9),rgba(8,30,20,.92)); }
+  .stay-concierge-actions { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; }
+  .stay-concierge-actions a { min-height:48px; display:flex; align-items:center; justify-content:center; gap:7px; padding:8px 10px; border:1px solid rgba(114,235,166,.17); border-radius:14px; color:#def9e9; background:rgba(255,255,255,.045); text-decoration:none; text-align:center; font-size:.8rem; font-weight:850; }
+  .stay-forecast { display:grid; grid-template-columns:repeat(auto-fit,minmax(138px,1fr)); gap:9px; }
+  .stay-forecast article { min-width:0; display:grid; gap:5px; padding:14px; border:1px solid rgba(114,235,166,.12); border-radius:16px; background:rgba(255,255,255,.04); }
+  .stay-forecast article>span { font-size:1.45rem; }.stay-forecast article p,.stay-forecast article small { margin:0; }.stay-forecast article small { color:rgba(231,248,237,.55); }
+  .stay-weather-tips { display:grid; gap:8px; margin-top:12px; }.stay-weather-tips span { padding:10px 12px; border-radius:13px; color:#c9f8dc; background:rgba(114,235,166,.08); line-height:1.45; }
+  .stay-checklist { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+  .stay-checklist button { min-height:50px; display:grid; grid-template-columns:28px minmax(0,1fr); align-items:center; gap:9px; padding:9px 12px; border:1px solid rgba(114,235,166,.15); border-radius:14px; color:#eafaf0; background:rgba(255,255,255,.04); text-align:left; cursor:pointer; }
+  .stay-checklist button i { width:25px;height:25px;display:grid;place-items:center;border:1px solid rgba(114,235,166,.28);border-radius:8px;color:transparent;font-style:normal; }.stay-checklist button.is-done { opacity:.7;background:rgba(114,235,166,.09); }.stay-checklist button.is-done i { color:#07160f;background:#72eba6; }.stay-checklist button.is-done span { text-decoration:line-through; }
+  .stay-card--summer { border-color:rgba(242,192,120,.25); background:radial-gradient(circle at 10% 0%,rgba(242,192,120,.12),transparent 34%),linear-gradient(145deg,rgba(48,42,25,.9),rgba(24,31,21,.92)); }.stay-card--summer .stay-card__head small { color:#f2c078; }.stay-summer-points { display:grid; gap:9px; margin-top:14px; }.stay-summer-points span,.stay-summer-points strong { padding:11px 13px;border:1px solid rgba(242,192,120,.12);border-radius:13px;background:rgba(255,255,255,.04);line-height:1.5; }.stay-summer-points strong { color:#f6dcae; }
   .stay-card--tours { background:linear-gradient(135deg,rgba(21,72,46,.92),rgba(22,48,31,.9)); }
   .stay-card--tours>.stay-button { margin-top:18px; }
   .stay-card--campy { border-color:rgba(114,235,166,.25); }
@@ -362,6 +485,8 @@ import { myStayCopy } from '@/i18n/myStay';
     .stay-campy-form button { min-height:46px; }
     .stay-actions { display:grid; grid-template-columns:1fr; }
     .stay-actions>* { width:100%; }
+    .stay-concierge-actions,.stay-checklist { grid-template-columns:1fr; }
+    .stay-forecast { grid-template-columns:repeat(2,minmax(0,1fr)); }
   }
   @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
 </style>

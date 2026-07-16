@@ -1,0 +1,31 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { getBookingLocalizedPath } from '@/utils/localizedLinks';
+import { getSummerCampingCopy } from '../../shared/summerCamping.js';
+
+interface Props { languageCode?: string; compact?: boolean; }
+const { languageCode = 'pl', compact = false } = Astro.props as Props;
+const copy = getSummerCampingCopy(languageCode);
+const bookingHref = getBookingLocalizedPath(languageCode);
+---
+
+<aside class:list={['summer-notice', compact && 'summer-notice--compact']} data-summer-notice>
+  <header><span><Icon name="Tent" size={22} strokeWidth={2} /></span><div><small>{copy.badge}</small><h2>{copy.title}</h2></div></header>
+  <p>{copy.message}</p>
+  <div class="summer-notice__points"><span>🕛 {copy.noon}</span><span>🌙 {copy.evening}</span><strong>ℹ️ {copy.disclaimer}</strong></div>
+  <a href={bookingHref} data-summer-notice-cta>{copy.cta}<Icon name="ArrowUpRight" size={17} strokeWidth={2} /></a>
+</aside>
+
+<script>
+  document.querySelectorAll('[data-summer-notice]').forEach((notice) => {
+    if (!(notice instanceof HTMLElement) || notice.dataset.tracked) return;
+    notice.dataset.tracked = 'true';
+    window.dispatchEvent(new CustomEvent('cc:analytics', { detail:{ eventType:'open_summer_notice', metadata:{ source:'summer_notice' } } }));
+  });
+</script>
+
+<style>
+.summer-notice{width:min(1180px,calc(100% - 32px));margin:clamp(22px,4vw,46px) auto;padding:clamp(20px,3vw,30px);border:1px solid rgba(242,192,120,.28);border-radius:26px;color:var(--color-text-primary,#f7fff9);background:radial-gradient(circle at 10% 0%,rgba(242,192,120,.14),transparent 32%),linear-gradient(145deg,rgba(28,48,34,.96),rgba(8,27,18,.94));box-shadow:0 24px 64px rgba(4,23,14,.16)}.summer-notice header{display:flex;align-items:center;gap:13px}.summer-notice header>span{width:46px;height:46px;display:grid;place-items:center;border-radius:15px;color:#f5cc8d;background:rgba(242,192,120,.12)}.summer-notice small{color:#f2c078;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.summer-notice h2{margin:3px 0 0;font-size:clamp(1.3rem,3vw,2rem)}.summer-notice>p{margin:18px 0;color:var(--color-text-muted,rgba(245,255,248,.72));line-height:1.65}.summer-notice__points{display:grid;gap:10px}.summer-notice__points span,.summer-notice__points strong{padding:12px 14px;border:1px solid rgba(242,192,120,.12);border-radius:14px;background:rgba(255,255,255,.04);line-height:1.55}.summer-notice__points strong{color:#f6dcae}.summer-notice>a{width:fit-content;min-height:44px;display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:0 15px;border-radius:14px;color:#102018;background:#f2c078;text-decoration:none;font-weight:900}.summer-notice--compact .summer-notice__points span{font-size:.9rem}
+html[data-theme="light"] .summer-notice{border-color:#ead6b7;color:#152019;background:radial-gradient(circle at 10% 0%,rgba(242,192,120,.24),transparent 34%),#fff;box-shadow:0 20px 55px rgba(85,64,28,.08)}html[data-theme="light"] .summer-notice>p{color:#566158}html[data-theme="light"] .summer-notice__points span,html[data-theme="light"] .summer-notice__points strong{background:#fffaf2;color:#554326;border-color:#efdfc5}
+@media(max-width:680px){.summer-notice{width:min(100% - 18px,1180px);border-radius:21px}.summer-notice>a{width:100%;justify-content:center}}
+</style>

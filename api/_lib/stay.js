@@ -63,6 +63,7 @@ const publicPanel = (panel, inquiry, localeOverride = '') => {
   const tours = safeArray(inquiry.trips_interest_json).map((item) => oneLine(item, 120)).filter(Boolean).slice(0, 12);
   const locale = normalizeStayLocale(localeOverride || panel.locale || inquiry.language || payload.locale);
   const serviceText = services.map((item) => `${item.id} ${item.label}`.toLowerCase()).join(' ');
+  const stayContext = `${inquiry.stay_type || ''} ${serviceText}`.toLowerCase();
   return {
     locale,
     status: oneLine(inquiry.status || 'new', 40),
@@ -79,7 +80,11 @@ const publicPanel = (panel, inquiry, localeOverride = '') => {
     arrivalTime: oneLine(payload.arrivalTime, 120),
     hasElectricity: /electric|prąd|prad|10a/.test(serviceText),
     hasDog: /\bdog\b|\bpies\b|\bhund\b|\bchien\b|\bperro\b|\bcane\b/.test(serviceText),
-    isBungalow: /bungalow|domek|domki/.test(`${inquiry.stay_type} ${serviceText}`.toLowerCase()),
+    isBungalow: /bungalow|domek|domki|cabin/.test(stayContext),
+    isCamper: /camper|kamper|motorhome|wohnmobil|husbil|autocaravan/.test(stayContext),
+    isCaravan: /caravan|przyczep|wohnwagen|roulotte|caravana|karavan|husvagn/.test(stayContext),
+    isTent: /\btent\b|namiot|zelt|tenda|tente|tienda|stan|tält/.test(stayContext),
+    isLateArrival: /after.?21|po 21|nach 21|après 21|después de 21|dopo le 21|na 21|efter 21/.test(oneLine(payload.arrivalTime, 120).toLowerCase()),
     panel: {
       createdAt: panel.created_at,
       openCount: Math.max(0, Number(panel.open_count || 0)),
@@ -174,6 +179,20 @@ export const listStayPanelsForInquiries = async (inquiryIds = []) => {
       at: row.feedback_at,
     } : null,
   }]));
+};
+
+export const getStayPanelsStatus = async () => {
+  const { body, status } = await supabaseRequest(`${TABLE}?select=id,status,token_hash,open_count,feedback_at,created_at&limit=1000`, { method: 'GET' });
+  const rows = Array.isArray(body) ? body : [];
+  return {
+    ok: true,
+    table: TABLE,
+    tableStatus: status,
+    panelCount: rows.length,
+    activeTokens: rows.filter((row) => row.status === 'active' && Boolean(row.token_hash)).length,
+    feedbackCount: rows.filter((row) => Boolean(row.feedback_at)).length,
+    totalOpens: rows.reduce((sum, row) => sum + Math.max(0, Number(row.open_count || 0)), 0),
+  };
 };
 
 export const getStayPanelByToken = async (token, localeOverride = '') => {

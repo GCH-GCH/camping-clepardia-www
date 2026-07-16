@@ -7,6 +7,7 @@ import { campyIcon, publicAssetExists } from '@/data/assets';
 import { currencyEstimateConfig, formatCurrencyEstimates, pricingConfig } from '@/data/pricing';
 import { getHomepageSiteNotices, getNoticeCopy } from '@/data/siteNotices';
 import { getSearchIndex } from '@/data/searchIndex';
+import { summerCampingFullText } from '../../../shared/summerCamping.js';
 
 const pathContext = getPathContext(Astro.url.pathname);
 const campySupportedLanguages = ['pl', 'en', 'de', 'it', 'fr', 'es', 'nl', 'cs', 'sk', 'sv'] as const;
@@ -897,6 +898,7 @@ const enhancedChatTexts = {
     ...campyEnhancement.answers,
     ...finalCampy.answers,
     ...(campyShell.answers ?? {}),
+    summerCamping: summerCampingFullText(campyLanguage),
   },
   links: {
     booking: bookingHref,

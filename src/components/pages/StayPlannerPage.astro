@@ -5,12 +5,15 @@ import { attractionImages } from '@/data/attractionsImageRegistry';
 import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import { resolveContentLanguage } from '@/i18n/config';
 import { getCoreUi, tourBookingHref } from '@/i18n/coreUi';
+import { getStayPlannerPremiumCopy } from '@/i18n/stayPlannerPremium';
+import WeatherCard from '@/components/WeatherCard.astro';
+import SummerCampingNotice from '@/components/SummerCampingNotice.astro';
 
 interface Props {
   languageCode?: string;
 }
 
-type SupportedLang = 'pl' | 'en' | 'de' | 'it';
+type SupportedLang = 'pl' | 'en' | 'de' | 'it' | 'fr' | 'es' | 'nl' | 'cs' | 'sk' | 'sv';
 
 const { languageCode } = Astro.props as Props;
 const pathContext = getPathContext(Astro.url.pathname);
@@ -418,7 +421,7 @@ const plannerCoreOverrides = {
 };
 const baseCopy = copyByLang[lang as keyof typeof copyByLang] ?? copyByLang.en;
 const coreOverride = plannerCoreOverrides[requestedLanguage as keyof typeof plannerCoreOverrides];
-const copy = coreOverride ? { ...baseCopy, ...coreOverride } : baseCopy;
+const copy = getStayPlannerPremiumCopy(requestedLanguage);
 const plannerConfigEncoded = Buffer.from(JSON.stringify(copy), 'utf8').toString('base64');
 const inspirationCopy = {
   pl: {
@@ -529,7 +532,7 @@ const inspirationImages = [
         {inspirationImages.map((image, index) => (
           <ImageFrame
             src={image.src}
-            alt={image.altPl}
+            alt={inspirationCopy.items[index]}
             label={inspirationCopy.items[index]}
             className="stay-planner__inspiration-image"
             width={image.width}
@@ -539,6 +542,9 @@ const inspirationImages = [
         ))}
       </div>
     </section>
+
+    <WeatherCard languageCode={requestedLanguage} compact />
+    <SummerCampingNotice languageCode={requestedLanguage} compact />
 
     <div class="stay-planner__layout">
       <div class="premium-card stay-planner__panel">
@@ -550,6 +556,11 @@ const inspirationImages = [
             ))}
           </div>
         </div>
+
+        <label class="stay-planner__control stay-planner__date">
+          <h2><Icon name="CalendarClock" size={21} strokeWidth={2} /> {copy.date}</h2>
+          <input type="date" data-planner-date />
+        </label>
 
         <div class="stay-planner__control">
           <h2><Icon name="Gauge" size={21} strokeWidth={2} /> {copy.pace}</h2>
@@ -579,6 +590,14 @@ const inspirationImages = [
         </div>
 
         <div class="stay-planner__control">
+          <h2><Icon name="Baby" size={21} strokeWidth={2} /> {copy.children}</h2>
+          <div class="stay-planner__segments" data-planner-children>
+            <button type="button" class="is-active" data-value="yes">{copy.options.yes}</button>
+            <button type="button" data-value="no">{copy.options.no}</button>
+          </div>
+        </div>
+
+        <div class="stay-planner__control">
           <h2><Icon name="TramFront" size={21} strokeWidth={2} /> {copy.transport}</h2>
           <div class="stay-planner__segments" data-planner-transport>
             {[
@@ -602,6 +621,24 @@ const inspirationImages = [
             ))}
           </div>
         </div>
+
+        <div class="stay-planner__control stay-planner__control--wide">
+          <h2><Icon name="MapPinned" size={21} strokeWidth={2} /> {copy.trips}</h2>
+          <div class="stay-planner__attractions" data-planner-trips>
+            {copy.tripList.map(([value, label], index) => <button type="button" data-value={value} class:list={[index === 0 && 'is-active']}><Icon name={value === 'none' ? 'Minus' : 'Route'} size={17} /><span>{label}</span></button>)}
+          </div>
+        </div>
+
+        <div class="stay-planner__control stay-planner__control--wide">
+          <h2><Icon name="CloudSun" size={21} strokeWidth={2} /> {copy.weatherPreference}</h2>
+          <div class="stay-planner__segments" data-planner-weather>
+            <button type="button" class="is-active" data-value="flexible">{copy.options.flexible}</button>
+            <button type="button" data-value="sun">{copy.options.sun}</button>
+            <button type="button" data-value="indoor">{copy.options.indoor}</button>
+          </div>
+        </div>
+
+        <button class="stay-planner__generate" type="button" data-planner-generate><Icon name="Sparkles" size={18} /> {copy.generate}</button>
       </div>
 
       <aside class="premium-card stay-planner__result" data-planner-result aria-live="polite"></aside>
@@ -655,72 +692,74 @@ const inspirationImages = [
     if (!config) return;
 
     const state = {
-      nights: '2',
-      pace: 'normal',
-      group: 'family',
-      transport: 'tram',
-      interests: new Set(['classic', 'history']),
+      nights: '2', pace: 'normal', group: 'family', children: 'yes', transport: 'tram',
+      weather: 'flexible', trip: 'none', startDate: '', interests: new Set(['classic', 'history']),
+      weatherStatus: 'neutral', weatherDays: [],
     };
-
     const result = root.querySelector('[data-planner-result]');
-    const setActive = (selector, value) => {
-      root.querySelectorAll(`${selector} button`).forEach((button) => {
-        if (button instanceof HTMLButtonElement) {
-          button.classList.toggle('is-active', button.dataset.value === value);
-        }
-      });
+    const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[character]));
+    const track = (eventType, metadata = {}) => window.dispatchEvent(new CustomEvent('cc:analytics', { detail:{ eventType, metadata } }));
+    const nightsNumber = () => state.nights === '5+' ? 5 : Math.max(1, Number(state.nights || 1));
+    const setActive = (selector, value) => root.querySelectorAll(`${selector} button`).forEach((button) => {
+      if (button instanceof HTMLButtonElement) button.classList.toggle('is-active', button.dataset.value === value);
+    });
+    const tripLabel = () => config.tripList.find(([value]) => value === state.trip)?.[1] || '';
+    const routeTransport = (index) => {
+      const defaults = [config.routeTransport.city,config.routeTransport.district,config.routeTransport.trip,config.routeTransport.nature,config.routeTransport.relax];
+      const fallback = defaults[index] || config.routeTransport.city;
+      if (index >= 2 || state.transport === 'tram') return fallback;
+      const distance = String(fallback).includes('·') ? String(fallback).split('·').pop().trim() : '';
+      const mode = state.transport === 'car' ? config.options.car : config.options.mixed;
+      return distance ? `${mode} · ${distance}` : mode;
     };
-
-    const paceNote = () => {
-      if (state.pace === 'calm') return 'Tempo spokojne: lepiej zostawić bufor na kawę, obiad i powrót na camping.';
-      if (state.pace === 'intensive') return 'Tempo intensywne: plan da się zagęścić, ale większe wycieczki traktuj jako osobny dzień.';
-      return 'Tempo normalne: dobry balans między zwiedzaniem i odpoczynkiem.';
+    const weatherText = () => state.weatherStatus === 'ready' ? config.weatherReady : state.weatherStatus === 'later' ? config.weatherLater : state.weatherStatus === 'unavailable' ? config.weatherUnavailable : config.weatherNeutral;
+    const dayWeather = (index) => {
+      const day = state.weatherDays[index];
+      if (!day) return '';
+      const rain = Number.isFinite(Number(day.rainProbability)) ? ` · ${Math.round(day.rainProbability)}% 🌧️` : '';
+      return `<span class="stay-planner__day-weather">🌤️ ${Math.round(day.temperatureMinC)}–${Math.round(day.temperatureMaxC)}°C${rain}</span>`;
     };
-
-    const transportNote = () => {
-      if (state.transport === 'tram') return 'Najprościej: tramwaj z Górnickiego do Starego Kleparza, potem spacer.';
-      if (state.transport === 'car') return 'Auto zostaw raczej na dalsze wycieczki. Do ścisłego centrum wygodniejszy jest tramwaj.';
-      return 'Spacer + tramwaj to najlepszy miks na centrum, Kazimierz i Wawel.';
+    const renderDay = (route, index) => {
+      const routeIndex = route.routeIndex ?? index;
+      const selectedTrip = routeIndex === 2 && state.trip !== 'none' ? ` — ${tripLabel()}` : '';
+      const transportIcon = routeIndex >= 2 || state.transport === 'car' ? '🚗' : '🚋';
+      return `<article class="stay-planner__day-card ${state.weather === 'indoor' ? 'is-rain-first' : ''}">
+        <header><span>${index + 1}</span><div><small>${esc(config.dayPlan)}</small><h3>${esc(route.title)}${esc(selectedTrip)}</h3></div><em>${esc(config.intensity[state.pace] || config.intensity.normal)}</em></header>
+        ${dayWeather(index)}
+        <div class="stay-planner__day-flow">
+          <p><b>🌅 ${esc(config.labels.morning)}</b>${esc(route.morning)}</p>
+          <p><b>🏛️ ${esc(config.labels.noon)}</b>${esc(route.noon)}</p>
+          <p><b>🌆 ${esc(config.labels.evening)}</b>${esc(route.evening)}</p>
+        </div>
+        <div class="stay-planner__day-meta"><span>${transportIcon} <b>${esc(config.labels.transport)}</b>${esc(routeTransport(routeIndex))}</span><span>⏱️ <b>${esc(config.labels.duration)}</b>${esc(route.duration)}</span></div>
+        <p class="stay-planner__rain"><b>🌧️ ${esc(config.labels.rain)}</b>${esc(route.rain)}</p>
+      </article>`;
     };
-
-    const groupNote = () => {
-      if (state.group === 'family') return 'Dla rodzin najlepiej działa jeden mocniejszy punkt dziennie i przerwa po południu.';
-      if (state.group === 'solo') return 'Solo łatwo zmienić plan w biegu: zacznij od centrum i dopiero potem dobieraj muzea.';
-      if (state.group === 'group') return 'Dla grupy zaplanuj mniej punktów, ale z większym marginesem na logistykę.';
-      return 'Dla pary dobrze sprawdza się centrum + Kazimierz i jeden spokojny wieczór.';
-    };
-
-    const renderList = (items = []) => items.map((item) => `<li>${item}</li>`).join('');
-
     const render = () => {
       if (!(result instanceof HTMLElement)) return;
-      const plan = config.recommendations[state.nights] || config.recommendations['5+'];
+      const preferredIndexes = [];
+      if (state.interests.has('classic')) preferredIndexes.push(0);
+      if (state.interests.has('history') || state.interests.has('food')) preferredIndexes.push(1);
+      if (state.trip !== 'none') preferredIndexes.push(2);
+      if (state.interests.has('nature')) preferredIndexes.push(3);
+      if (state.interests.has('kids') || state.children === 'yes') preferredIndexes.push(4);
+      [0,1,2,3,4].forEach((index) => preferredIndexes.push(index));
+      const routes = [...new Set(preferredIndexes)].slice(0, nightsNumber()).map((index) => ({ ...config.routes[index], routeIndex:index }));
       result.innerHTML = `
-        <span class="stay-planner__result-badge">${config.resultTitle}</span>
-        <h2>${config.recommendation}</h2>
-        <p>${plan.recommendation}</p>
-        <div class="stay-planner__result-grid">
-          <section>
-            <strong>${config.comfortable}</strong>
-            <ul>${renderList(plan.comfortable)}</ul>
-          </section>
-          <section>
-            <strong>${config.tooMuch}</strong>
-            <ul>${renderList(plan.tooMuch)}</ul>
-          </section>
-        </div>
-        <div class="stay-planner__context">
-          <p>${paceNote()}</p>
-          <p>${transportNote()}</p>
-          <p>${groupNote()}</p>
-        </div>
-        <div class="stay-planner__plan">
-          <strong>${config.dayPlan}</strong>
-          ${plan.days.map((day, index) => `<div><span>${index + 1}</span><p>${day}</p></div>`).join('')}
-        </div>
-      `;
+        <span class="stay-planner__result-badge">${esc(config.resultTitle)}</span>
+        <h2>${esc(config.summaryTitle)}</h2>
+        <div class="stay-planner__context"><p>${esc(config.paceNotes[state.pace])}</p><p>${esc(config.groupNotes[state.children === 'yes' ? 'family' : state.group])}</p><p>${esc(config.options[state.weather])} · ${esc(weatherText())}</p></div>
+        <div class="stay-planner__plan"><strong>${esc(config.dayPlan)}</strong>${routes.map(renderDay).join('')}</div>
+        <section class="stay-planner__upsell"><span>🌿</span><div><h3>${esc(config.upsell.title)}</h3><p>${esc(state.nights === '5+' ? config.upsell.max : config.upsell.copy)}</p></div>${state.nights === '5+' ? '' : `<button type="button" data-planner-add-night>${esc(config.upsell.add)}</button>`}</section>`;
+      result.querySelector('[data-planner-add-night]')?.addEventListener('click', () => {
+        const current = nightsNumber();
+        state.nights = current >= 4 ? '5+' : String(current + 1);
+        setActive('[data-planner-nights]', state.nights);
+        track('planner_add_night', { nights:state.nights });
+        track('planner_change_nights', { nights:state.nights, source:'upsell' });
+        if (state.startDate) loadWeather(); else render();
+      });
     };
-
     const bindSegment = (selector, key) => {
       const buttons = Array.from(root.querySelectorAll(`${selector} button`));
       buttons.forEach((button) => {
@@ -728,54 +767,75 @@ const inspirationImages = [
         button.addEventListener('click', () => {
           buttons.forEach((item) => item.classList.toggle('is-active', item === button));
           state[key] = button.dataset.value || state[key];
+          if (key === 'nights') {
+            track('planner_change_nights', { nights:state.nights, source:'controls' });
+            if (state.startDate) { loadWeather(); return; }
+          }
           render();
         });
       });
     };
-
     bindSegment('[data-planner-nights]', 'nights');
     bindSegment('[data-planner-pace]', 'pace');
     bindSegment('[data-planner-group]', 'group');
+    bindSegment('[data-planner-children]', 'children');
     bindSegment('[data-planner-transport]', 'transport');
+    bindSegment('[data-planner-weather]', 'weather');
 
     const interestButtons = Array.from(root.querySelectorAll('[data-planner-interests] button'));
-    interestButtons.forEach((button) => {
-      if (!(button instanceof HTMLButtonElement)) return;
-      button.addEventListener('click', () => {
-        const value = button.dataset.value || '';
-        button.classList.toggle('is-active');
-        if (button.classList.contains('is-active')) state.interests.add(value);
-        else state.interests.delete(value);
-        render();
-      });
-    });
+    interestButtons.forEach((button) => button.addEventListener('click', () => {
+      const value = button.dataset.value || '';
+      button.classList.toggle('is-active');
+      if (button.classList.contains('is-active')) state.interests.add(value); else state.interests.delete(value);
+      render();
+    }));
+    const tripButtons = Array.from(root.querySelectorAll('[data-planner-trips] button'));
+    tripButtons.forEach((button) => button.addEventListener('click', () => {
+      tripButtons.forEach((item) => item.classList.toggle('is-active', item === button));
+      state.trip = button.dataset.value || 'none';
+      render();
+    }));
 
+    const addDays = (iso, days) => { const date = new Date(`${iso}T12:00:00`); date.setDate(date.getDate() + days); return date.toISOString().slice(0,10); };
+    const loadWeather = async () => {
+      state.weatherDays = [];
+      if (!state.startDate) { state.weatherStatus = 'neutral'; render(); return; }
+      state.weatherStatus = 'loading'; render();
+      try {
+        const end = addDays(state.startDate, nightsNumber());
+        const response = await fetch(`/api/weather?start=${encodeURIComponent(state.startDate)}&end=${encodeURIComponent(end)}`, { headers:{accept:'application/json'} });
+        const payload = await response.json();
+        if (!payload?.ok) throw new Error('unavailable');
+        state.weatherDays = Array.isArray(payload.daily) ? payload.daily : [];
+        state.weatherStatus = payload.forecastInRange && state.weatherDays.length ? 'ready' : 'later';
+      } catch { state.weatherStatus = 'unavailable'; }
+      render();
+    };
+    const dateInput = root.querySelector('[data-planner-date]');
+    if (dateInput instanceof HTMLInputElement) {
+      dateInput.min = new Date().toISOString().slice(0,10);
+      dateInput.addEventListener('change', () => { state.startDate = dateInput.value; loadWeather(); });
+    }
     root.querySelectorAll('[data-planner-scenario]').forEach((button) => {
       if (!(button instanceof HTMLButtonElement)) return;
       button.addEventListener('click', () => {
-        state.nights = button.dataset.nights || '2';
-        state.pace = button.dataset.pace || 'normal';
-        state.group = button.dataset.group || 'family';
-        state.transport = button.dataset.transport || 'tram';
+        state.nights = button.dataset.nights || '2'; state.pace = button.dataset.pace || 'normal'; state.group = button.dataset.group || 'family'; state.transport = button.dataset.transport || 'tram'; state.children = state.group === 'family' ? 'yes' : 'no';
         state.interests = new Set((button.dataset.interests || 'classic').split(',').filter(Boolean));
-        setActive('[data-planner-nights]', state.nights);
-        setActive('[data-planner-pace]', state.pace);
-        setActive('[data-planner-group]', state.group);
-        setActive('[data-planner-transport]', state.transport);
-        interestButtons.forEach((item) => {
-          if (item instanceof HTMLButtonElement) item.classList.toggle('is-active', state.interests.has(item.dataset.value || ''));
-        });
-        root.querySelector('.stay-planner__layout')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        render();
+        setActive('[data-planner-nights]', state.nights); setActive('[data-planner-pace]', state.pace); setActive('[data-planner-group]', state.group); setActive('[data-planner-children]', state.children); setActive('[data-planner-transport]', state.transport);
+        interestButtons.forEach((item) => item.classList.toggle('is-active', state.interests.has(item.dataset.value || '')));
+        track('planner_generate', { source:'scenario', nights:state.nights, pace:state.pace, group:state.group });
+        root.querySelector('.stay-planner__layout')?.scrollIntoView({ behavior:'smooth', block:'start' });
+        if (state.startDate) loadWeather(); else render();
       });
     });
-
-    root.querySelector('[data-ask-campy-planner]')?.addEventListener('click', () => {
-      window.dispatchEvent(new CustomEvent('campy:prompt', {
-        detail: { prompt: config.ctaCampy, actionKey: 'stayLength' },
-      }));
+    root.querySelector('[data-planner-generate]')?.addEventListener('click', () => {
+      track('planner_generate', { source:'button', nights:state.nights, pace:state.pace, group:state.group, transport:state.transport, weather:state.weather, trip:state.trip });
+      render(); result?.scrollIntoView({ behavior:'smooth', block:'start' });
     });
-
+    root.querySelector('[data-ask-campy-planner]')?.addEventListener('click', () => {
+      const prompt = `${config.campyPlannerPrompt} ${config.nights}: ${state.nights}; ${config.pace}: ${config.options[state.pace]}; ${config.group}: ${config.options[state.group]}; ${config.transport}: ${config.options[state.transport]}; ${config.trips}: ${tripLabel()}.`;
+      window.dispatchEvent(new CustomEvent('campy:prompt', { detail:{ prompt, actionKey:'stayLength' } }));
+    });
     render();
   })();
 </script>
@@ -1030,8 +1090,7 @@ const inspirationImages = [
 }
 
 .stay-planner__result {
-  position: sticky;
-  top: 110px;
+  position: static;
   padding: clamp(22px, 4vw, 32px);
   color: rgba(245,255,248,.84);
 }
@@ -1156,6 +1215,73 @@ const inspirationImages = [
   margin: 0;
 }
 
+.stay-planner__date input {
+  min-height: 48px;
+  width: 100%;
+  padding: 0 14px;
+  border: 1px solid rgba(143,224,180,.20);
+  border-radius: 15px;
+  color: #f7fff9;
+  color-scheme: dark;
+  background: rgba(255,255,255,.07);
+  font: inherit;
+  font-weight: 800;
+}
+
+.stay-planner__generate {
+  grid-column: 1 / -1;
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 17px;
+  color: #082016;
+  background: linear-gradient(135deg,#a7f2c7,#3cb371);
+  box-shadow: 0 16px 34px rgba(60,179,113,.2);
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.stay-planner__day-card {
+  display: grid;
+  gap: 14px;
+  padding: 17px;
+  border: 1px solid rgba(143,224,180,.15);
+  border-radius: 21px;
+  background: linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.035));
+}
+
+.stay-planner__day-card header {
+  display: grid;
+  grid-template-columns: 42px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 11px;
+}
+
+.stay-planner__day-card header>span {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+}
+
+.stay-planner__day-card header small { color:#8fe0b4; font-size:.68rem; font-weight:900; text-transform:uppercase; letter-spacing:.1em; }
+.stay-planner__day-card h3 { margin:2px 0 0; color:#fff; font-size:1.08rem; line-height:1.22; }
+.stay-planner__day-card header em { padding:6px 9px; border-radius:999px; color:#bff7d7; background:rgba(60,179,113,.12); font-size:.7rem; font-style:normal; font-weight:850; }
+.stay-planner__day-weather { width:fit-content!important; height:auto!important; display:inline-flex!important; padding:6px 10px; border-radius:999px!important; color:#dff9e9!important; background:rgba(75,172,223,.13)!important; font-size:.76rem; }
+.stay-planner__day-flow { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+.stay-planner__day-flow p,.stay-planner__day-meta span,.stay-planner__rain { display:grid; gap:5px; padding:11px; border-radius:14px; color:rgba(245,255,248,.75); background:rgba(0,0,0,.12); line-height:1.45; font-size:.82rem; }
+.stay-planner__day-flow b,.stay-planner__day-meta b,.stay-planner__rain b { color:#bff7d7; font-size:.7rem; letter-spacing:.03em; }
+.stay-planner__day-meta { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+.stay-planner__rain { margin:0!important; border:1px solid rgba(91,174,218,.16); background:rgba(45,112,153,.09); }
+.stay-planner__day-card.is-rain-first .stay-planner__rain { order:-1; border-color:rgba(143,224,180,.3); }
+.stay-planner__upsell { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:14px; margin-top:18px; padding:18px; border:1px solid rgba(242,192,120,.24); border-radius:21px; background:linear-gradient(135deg,rgba(242,192,120,.12),rgba(60,179,113,.08)); }
+.stay-planner__upsell>span { font-size:1.7rem; }
+.stay-planner__upsell h3 { margin:0 0 5px; color:#fff; font-size:1rem; }
+.stay-planner__upsell p { margin:0; font-size:.86rem; }
+.stay-planner__upsell button { min-height:42px; padding:0 13px; border:0; border-radius:13px; color:#102018; background:#f2c078; font-weight:900; cursor:pointer; }
+
 .stay-planner__extras {
   display: grid;
   gap: 16px;
@@ -1243,6 +1369,12 @@ html[data-theme="light"] .stay-planner__plan > div {
   border-color: rgba(29,83,52,.14);
 }
 
+html[data-theme="light"] .stay-planner__date input { color:#173126; color-scheme:light; background:#fff; border-color:#cfe3d6; }
+html[data-theme="light"] .stay-planner__day-card { border-color:#d3e6da; background:#f8fcf9; }
+html[data-theme="light"] .stay-planner__day-card h3,html[data-theme="light"] .stay-planner__upsell h3 { color:#102018; }
+html[data-theme="light"] .stay-planner__day-flow p,html[data-theme="light"] .stay-planner__day-meta span,html[data-theme="light"] .stay-planner__rain { color:#536359; background:#eef7f1; }
+html[data-theme="light"] .stay-planner__upsell { background:linear-gradient(135deg,#fff8ed,#f1fbf5); }
+
 html[data-theme="light"] .stay-planner__scenario-grid span,
 html[data-theme="light"] .stay-planner__result p,
 html[data-theme="light"] .stay-planner__result-grid li,
@@ -1263,7 +1395,7 @@ html[data-theme="light"] .stay-planner__arrival li {
 
 @media (min-width: 980px) {
   .stay-planner__layout {
-    grid-template-columns: minmax(0, 1fr) 400px;
+    grid-template-columns: minmax(310px,.72fr) minmax(0,1.28fr);
   }
 
   .stay-planner__panel {
@@ -1297,6 +1429,12 @@ html[data-theme="light"] .stay-planner__arrival li {
   .stay-planner__result {
     position: static;
   }
+
+  .stay-planner__day-flow,.stay-planner__day-meta { grid-template-columns:1fr; }
+  .stay-planner__day-card header { grid-template-columns:38px minmax(0,1fr); }
+  .stay-planner__day-card header em { grid-column:2; width:fit-content; }
+  .stay-planner__upsell { grid-template-columns:auto minmax(0,1fr); }
+  .stay-planner__upsell button { grid-column:1/-1; width:100%; }
 
   .stay-planner__inspiration-grid {
     grid-template-columns: 1fr;

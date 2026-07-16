@@ -1,6 +1,7 @@
 export type CampyLanguage = 'pl' | 'en' | 'de' | 'it' | 'fr' | 'es' | 'nl' | 'cs' | 'sk' | 'sv' | string;
 
 import { currencyEstimateConfig, formatCurrencyEstimates, pricingConfig } from '../../data/pricing.js';
+import { summerCampingFullText } from '../../../shared/summerCamping.js';
 
 const stayPrice = (id: string) => {
   const item = pricingConfig.stayTypes.find((entry) => entry.id === id);
@@ -53,7 +54,7 @@ export const campyKnowledge = {
     bungalowCheckIn: 'od 16:00',
     bungalowCheckOut: 'do 11:00',
     campingCheckOut: 'do 12:00',
-    highSeason: 'W lipcu i sierpniu rezerwacje z wyprzedzeniem dotyczą tylko domków/bungalowów. Nie przyjmujemy zapytań rezerwacyjnych na miejsca campingowe w tym okresie. Camping dla kamperów, vanów, przyczep i namiotów działa według kolejności przyjazdu; najlepiej przyjechać około 12:00.',
+    highSeason: summerCampingFullText('pl'),
     camperPitches: 'Miejsca dla kamperów są głównie na płytach betonowych.',
     heavyVehicles: 'Busy, trucki, autobusy i ciężkie pojazdy ustawiamy na asfalcie, aby uniknąć zakopania się pojazdu.',
   },
@@ -205,6 +206,7 @@ export const getCampyFallbackResponse = (language: CampyLanguage = 'pl', message
       fallback: 'CAMPY körs nu i informationsläge. Bokningar och tillgänglighet bekräftas av receptionen: +48 795 294 486 eller clepardia@gmail.com.',
     },
   }[lang];
+  copy.summer = summerCampingFullText(lang);
 
   if (normalized.includes('plan')) return copy.plan;
   if ((normalized.includes('july') || normalized.includes('august') || normalized.includes('lip') || normalized.includes('sier') || normalized.includes('juli') || normalized.includes('agosto') || normalized.includes('julio') || normalized.includes('srpen') || normalized.includes('augusti'))

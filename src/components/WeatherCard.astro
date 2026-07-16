@@ -1,0 +1,80 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { getWeatherCopy } from '@/i18n/weather';
+import { getPlannerLocalizedPath } from '@/utils/localizedLinks';
+
+interface Props { languageCode?: string; compact?: boolean; }
+const { languageCode = 'pl', compact = false } = Astro.props as Props;
+const copy = getWeatherCopy(languageCode);
+const plannerHref = getPlannerLocalizedPath(languageCode);
+const config = JSON.stringify({ copy, languageCode });
+---
+
+<section class:list={['weather-card', compact && 'weather-card--compact']} data-weather-card data-weather-config={config} aria-label={copy.title}>
+  <div class="weather-card__icon" data-weather-icon><Icon name="CloudSun" size={27} strokeWidth={1.9} /></div>
+  <div class="weather-card__main">
+    <span>{copy.live}</span>
+    <h2>{copy.title}</h2>
+    <p data-weather-status>{copy.loading}</p>
+    <div class="weather-card__facts" data-weather-facts hidden>
+      <strong data-weather-temperature>—</strong>
+      <span data-weather-condition>—</span>
+      <small data-weather-rain>—</small>
+      <small data-weather-wind>—</small>
+    </div>
+  </div>
+  <a href={plannerHref} class="weather-card__cta" data-weather-cta data-analytics-cta>
+    <span>{copy.details}</span><Icon name="ArrowUpRight" size={17} strokeWidth={2} />
+  </a>
+</section>
+
+<script>
+  const weatherGroup = (code) => {
+    if (code === 0) return ['clear', '☀️'];
+    if ([1,2].includes(code)) return ['mostlyClear', '🌤️'];
+    if (code === 3) return ['cloudy', '☁️'];
+    if ([45,48].includes(code)) return ['fog', '🌫️'];
+    if ([51,53,55,56,57].includes(code)) return ['drizzle', '🌦️'];
+    if ([61,63,65,66,67,80,81,82].includes(code)) return ['rain', '🌧️'];
+    if ([71,73,75,77,85,86].includes(code)) return ['snow', '🌨️'];
+    if ([95,96,99].includes(code)) return ['storm', '⛈️'];
+    return ['cloudy', '☁️'];
+  };
+  const trackWeather = (eventType, metadata = {}) => window.dispatchEvent(new CustomEvent('cc:analytics', { detail:{ eventType, metadata } }));
+  document.querySelectorAll('[data-weather-card]').forEach(async (root) => {
+    if (!(root instanceof HTMLElement) || root.dataset.weatherReady === 'true') return;
+    root.dataset.weatherReady = 'true';
+    let config;
+    try { config = JSON.parse(root.dataset.weatherConfig || '{}'); } catch { return; }
+    const copy = config.copy;
+    const status = root.querySelector('[data-weather-status]');
+    const facts = root.querySelector('[data-weather-facts]');
+    try {
+      const response = await fetch(`/api/weather?locale=${encodeURIComponent(config.languageCode || 'pl')}`, { headers:{ accept:'application/json' } });
+      const result = await response.json();
+      if (!result?.ok || !result.current) throw new Error('unavailable');
+      const current = result.current;
+      const [group, emoji] = weatherGroup(Number(current.weatherCode));
+      const condition = copy.conditions[group] || copy.conditions.cloudy;
+      root.querySelector('[data-weather-icon]').textContent = emoji;
+      root.querySelector('[data-weather-temperature]').textContent = `${Math.round(current.temperatureC)}°C`;
+      root.querySelector('[data-weather-condition]').textContent = `${condition} · ${copy.feels} ${Math.round(current.apparentTemperatureC)}°C`;
+      root.querySelector('[data-weather-rain]').textContent = `${copy.rain}: ${Number(current.precipitationMm || 0).toFixed(1)} mm`;
+      root.querySelector('[data-weather-wind]').textContent = `${copy.wind}: ${Math.round(current.windKmh || 0)} km/h`;
+      if (status instanceof HTMLElement) status.hidden = true;
+      if (facts instanceof HTMLElement) facts.hidden = false;
+      trackWeather('open_weather', { source:'public_weather_card', condition:group });
+    } catch {
+      if (status instanceof HTMLElement) status.textContent = copy.unavailable;
+      root.classList.add('is-fallback');
+    }
+    root.querySelector('[data-weather-cta]')?.addEventListener('click', () => trackWeather('weather_cta_click', { source:'public_weather_card' }));
+  });
+</script>
+
+<style>
+.weather-card{width:min(1180px,calc(100% - 32px));margin:clamp(20px,4vw,42px) auto;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:18px;padding:18px 20px;border:1px solid color-mix(in srgb,var(--color-primary,#3cb371) 26%,transparent);border-radius:24px;background:linear-gradient(135deg,color-mix(in srgb,var(--color-primary,#3cb371) 13%,var(--color-bg-secondary,#10251a)),color-mix(in srgb,var(--color-bg-secondary,#10251a) 94%,transparent));box-shadow:0 20px 55px rgba(4,23,14,.14);color:var(--color-text-primary,#effbf3)}
+.weather-card__icon{width:58px;height:58px;display:grid;place-items:center;border-radius:18px;background:rgba(87,220,147,.14);font-size:1.75rem;color:#8fe0b4}.weather-card__main{min-width:0}.weather-card__main>span{display:block;color:#69d99b;font-size:.7rem;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.weather-card h2{margin:3px 0 2px;font-size:1.2rem}.weather-card p{margin:0;color:var(--color-text-muted,rgba(239,251,243,.65));font-size:.9rem}.weather-card__facts{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px 13px}.weather-card__facts strong{font-size:1.7rem}.weather-card__facts span{font-weight:800}.weather-card__facts small{color:var(--color-text-muted,rgba(239,251,243,.65));font-weight:700}.weather-card__cta{min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 14px;border:1px solid rgba(114,235,166,.25);border-radius:14px;color:inherit;text-decoration:none;font-weight:850;background:rgba(255,255,255,.055)}.weather-card__cta:hover{border-color:#72eba6;transform:translateY(-1px)}.weather-card--compact{margin-top:18px;margin-bottom:18px}.weather-card.is-fallback .weather-card__icon{filter:saturate(.5)}
+html[data-theme="light"] .weather-card{border-color:#cce6d6;background:linear-gradient(135deg,#f2fbf5,#fff);color:#102018;box-shadow:0 18px 46px rgba(25,80,50,.09)}html[data-theme="light"] .weather-card p,html[data-theme="light"] .weather-card__facts small{color:#536359}html[data-theme="light"] .weather-card__cta{background:#edf8f1;border-color:#c6e5d1}
+@media(max-width:720px){.weather-card{width:min(100% - 18px,1180px);grid-template-columns:auto 1fr;gap:13px;padding:15px;border-radius:20px}.weather-card__icon{width:48px;height:48px;border-radius:15px}.weather-card__cta{grid-column:1/-1;width:100%;justify-content:center}.weather-card__facts strong{font-size:1.45rem}.weather-card__facts{gap:4px 10px}}
+</style>

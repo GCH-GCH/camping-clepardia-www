@@ -362,6 +362,7 @@ const title = 'CC SYSTEM';
         let campValidationErrors = [];
         let lastCampSave = null;
         let analyticsStorageStatus = { ok: false, loaded: false, migrationRequired: false, error: '', eventCount: 0, recentEvents: [], summary: {} };
+        let myStayStorageStatus = { ok:false, loaded:false, status:'checking', migrationRequired:false, error:'', panelCount:0, activeTokens:0, feedbackCount:0, totalOpens:0 };
         const campMigrationRequiredMessage = 'CAMP wymaga uruchomienia migracji Supabase przed zapisem pobytów.';
         let autoRefreshTimer = 0;
         let autoRefreshPaused = false;
@@ -2546,6 +2547,12 @@ const title = 'CC SYSTEM';
             : analyticsStorageStatus.migrationRequired
               ? 'Endpoint analityki przyjmuje eventy w trybie fallback, ale site_events wymaga migracji.'
               : 'Status analityki wymaga sprawdzenia w Supabase.';
+          const myStayStatusLabel = myStayStorageStatus.loaded
+            ? myStayStorageStatus.ok ? 'Aktywne' : myStayStorageStatus.migrationRequired ? 'Wymaga migracji' : 'Błąd'
+            : 'Sprawdzanie';
+          const myStayStatusHint = myStayStorageStatus.ok
+            ? `stay_panels: ${myStayStorageStatus.panelCount} · tokeny: ${myStayStorageStatus.activeTokens} · feedback: ${myStayStorageStatus.feedbackCount} · otwarcia: ${myStayStorageStatus.totalOpens}`
+            : (myStayStorageStatus.error || 'Uruchom bezpieczną migrację My Stay.');
           const tableRows = roadmapRows.map((row)=>`
             <tr>
               <td><strong>${esc(row.offline)}</strong></td>
@@ -2592,6 +2599,7 @@ const title = 'CC SYSTEM';
             <div class="module-metrics">
               ${moduleMetric('CP','CAMP baza',campStatusLabel,campStatusHint)}
               ${moduleMetric('AN','Analityka',analyticsStatusLabel,analyticsStatusHint)}
+              ${moduleMetric('MS','My Stay',myStayStatusLabel,myStayStatusHint)}
               ${moduleMetric('SQL','Migracja','20260705121500','camp_stays + site_events')}
               ${moduleMetric('ZIP','ZIP offline','przeanalizowany','Electron + SQLite + moduły recepcji')}
             </div>
@@ -2601,6 +2609,7 @@ const title = 'CC SYSTEM';
               <div class="crm-tags">
                 <span>CAMP baza: ${esc(campStatusLabel)}</span>
                 <span>Analityka: ${esc(analyticsStatusLabel)}</span>
+                <span>My Stay: ${esc(myStayStatusLabel)}</span>
                 <span>Bez DROP / DELETE / TRUNCATE</span>
               </div>
             </section>
@@ -2701,6 +2710,7 @@ const title = 'CC SYSTEM';
           const bookingEvents = eventSummary.booking || {};
           const campyEvents = eventSummary.campy || {};
           const myStayEvents = eventSummary.myStay || {};
+          const myStayDatabaseLabel = myStayStorageStatus.ok ? 'aktywne' : myStayStorageStatus.migrationRequired ? 'wymaga migracji' : 'błąd';
           const unfinishedBookings = Math.max(0, Number(bookingEvents.started || 0) - Number(bookingEvents.submitted || 0));
           const totalDevices = [...eventDevices.values()].reduce((sum,value)=>sum+value,0);
           const mobileShare = totalDevices ? Math.round(((eventDevices.get('mobile') || 0) / totalDevices) * 100) : 0;
@@ -2725,6 +2735,7 @@ const title = 'CC SYSTEM';
               ${moduleMetric('FO','Formularz',`${bookingEvents.started || 0} → ${bookingEvents.submitted || 0}`,'start → submit')}
               ${moduleMetric('CP','CAMPY',campyEvents.questions || 0,`${campyEvents.opened || 0} otwarć`)}
               ${moduleMetric('MS','My Stay',myStayEvents.opened || 0,`${myStayEvents.feedback || 0} feedbacków`)}
+              ${moduleMetric('DB','stay_panels',myStayDatabaseLabel,`tokeny ${myStayStorageStatus.activeTokens} · otwarcia ${myStayStorageStatus.totalOpens}`)}
               ${moduleMetric('MB','Mobile',`${mobileShare}%`,'udział urządzeń')}
             </div>
             <div class="module-grid module-grid--two">
@@ -2738,8 +2749,8 @@ const title = 'CC SYSTEM';
               <section class="module-card"><h3>Tematy pytań CAMPY</h3><ul class="analytics-list">${topList(campyTopics)}</ul></section>
               <section class="module-card"><h3>Urządzenia</h3><ul class="analytics-list">${topList(eventDevices)}</ul></section>
               <section class="module-card"><h3>Lejek formularza</h3><ul class="analytics-list"><li><strong>Rozpoczęcia</strong><span>${esc(bookingEvents.started || 0)}</span></li><li><strong>Wysłania</strong><span>${esc(bookingEvents.submitted || 0)}</span></li><li><strong>Feedback</strong><span>${esc(bookingEvents.feedback || 0)}</span></li></ul></section>
-              <section class="module-card"><h3>Wycieczki i My Stay</h3><ul class="analytics-list"><li><strong>Kliknięcia wycieczek</strong><span>${esc(eventSummary.tours || 0)}</span></li><li><strong>Otwarcia My Stay</strong><span>${esc(myStayEvents.opened || 0)}</span></li><li><strong>Feedback My Stay</strong><span>${esc(myStayEvents.feedback || 0)}</span></li></ul></section>
-              <section class="module-card module-card--wide"><h3>Obsługiwane eventy</h3><div class="crm-tags">${['page_view','language_change','click_cta','open_campy','campy_question','start_booking_form','submit_booking_form','feedback_submit','filter_used','category_click','open_gallery','open_my_stay','my_stay_feedback','tour_cta_click','maps_cta_click','tram_info_click'].map((event)=>`<span>${esc(event)}</span>`).join('')}</div></section>
+              <section class="module-card"><h3>Wycieczki i My Stay</h3><ul class="analytics-list"><li><strong>Status stay_panels</strong><span>${esc(myStayDatabaseLabel)}</span></li><li><strong>Aktywne tokeny</strong><span>${esc(myStayStorageStatus.activeTokens)}</span></li><li><strong>Otwarcia paneli</strong><span>${esc(myStayStorageStatus.totalOpens)}</span></li><li><strong>Feedback My Stay</strong><span>${esc(myStayStorageStatus.feedbackCount)}</span></li></ul></section>
+              <section class="module-card module-card--wide"><h3>Obsługiwane eventy</h3><div class="crm-tags">${['page_view','language_change','click_cta','open_campy','campy_question','start_booking_form','submit_booking_form','feedback_submit','filter_used','category_click','open_gallery','open_my_stay','my_stay_feedback','tour_cta_click','maps_cta_click','tram_info_click','open_weather','weather_cta_click','planner_generate','planner_add_night','planner_change_nights','open_summer_notice','my_stay_checklist_click','smart_concierge_action'].map((event)=>`<span>${esc(event)}</span>`).join('')}</div></section>
               <section class="module-card module-card--wide important-card"><h3>Co poprawić na stronie</h3><div class="feedback-insights-grid">${insightHtml}</div></section>
               <section class="module-card module-card--wide"><h3>Sugestie tekstowe z feedbacków</h3>${improveTexts.length ? `<ul class="module-rule-list">${improveTexts.map((text)=>`<li>${esc(text)}</li>`).join('')}</ul>` : '<p class="module-empty">Brak tekstowych sugestii od klientów.</p>'}</section>
             </div>
@@ -3023,6 +3034,13 @@ const title = 'CC SYSTEM';
               eventCount:Number(analyticsResult?.eventCount || 0),
               recentEvents:Array.isArray(analyticsResult?.recentEvents) ? analyticsResult.recentEvents : [],
               summary:analyticsResult?.summary || {},
+            };
+            const myStayStatus = analyticsResult?.myStay || {};
+            myStayStorageStatus = {
+              ok:Boolean(myStayStatus.ok), loaded:true, status:myStayStatus.status || (myStayStatus.ok ? 'active' : 'error'),
+              migrationRequired:Boolean(myStayStatus.migrationRequired), error:myStayStatus.reason || '',
+              panelCount:Number(myStayStatus.panelCount || 0), activeTokens:Number(myStayStatus.activeTokens || 0),
+              feedbackCount:Number(myStayStatus.feedbackCount || 0), totalOpens:Number(myStayStatus.totalOpens || 0),
             };
             setOptions('status',Object.keys(statusLabels),(value)=>statusLabels[value] || value);
             setOptions('category',Object.keys(categoryLabels),(value)=>categoryLabels[value] || value);
