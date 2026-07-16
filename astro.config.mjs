@@ -286,6 +286,7 @@ export default defineConfig({
           '/cc-gate-a8f3k9r2p6',
           '/cc-system-qa-preview-a7k9x2',
           '/cc-system-audit-report-a7k9x2',
+          '/stay',
         ];
         return !hiddenRoutes.some((route) => pathname.includes(route)) && !/^\/pl(?:\/|$)/.test(pathname);
       },

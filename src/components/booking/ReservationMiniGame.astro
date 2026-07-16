@@ -730,6 +730,10 @@ const clientSuccessCopy = {
     directions: 'Zobacz dojazd',
     campy: 'Zapytaj CAMPY',
     attractions: 'Sprawdź atrakcje',
+    openStay: 'Otwórz panel pobytu',
+    saveStay: 'Zapisz link',
+    staySaved: 'Link zapisany',
+    contact: 'Skontaktuj się z recepcją',
   },
   en: {
     badge: 'Enquiry sent',
@@ -741,6 +745,10 @@ const clientSuccessCopy = {
     directions: 'See directions',
     campy: 'Ask CAMPY',
     attractions: 'See attractions',
+    openStay: 'Open your stay panel',
+    saveStay: 'Save link',
+    staySaved: 'Link saved',
+    contact: 'Contact reception',
   },
   de: {
     badge: 'Anfrage gesendet',
@@ -752,6 +760,10 @@ const clientSuccessCopy = {
     directions: 'Anreise ansehen',
     campy: 'CAMPY fragen',
     attractions: 'Attraktionen ansehen',
+    openStay: 'Aufenthaltsbereich öffnen',
+    saveStay: 'Link speichern',
+    staySaved: 'Link gespeichert',
+    contact: 'Rezeption kontaktieren',
   },
   it: {
     badge: 'Richiesta inviata',
@@ -763,6 +775,10 @@ const clientSuccessCopy = {
     directions: 'Vedi indicazioni',
     campy: 'Chiedi a CAMPY',
     attractions: 'Vedi attrazioni',
+    openStay: 'Apri il pannello soggiorno',
+    saveStay: 'Salva link',
+    staySaved: 'Link salvato',
+    contact: 'Contatta la reception',
   },
   fr: {
     badge: 'Demande envoyée',
@@ -774,6 +790,10 @@ const clientSuccessCopy = {
     directions: 'Voir l’accès',
     campy: 'Demander à CAMPY',
     attractions: 'Voir les attractions',
+    openStay: 'Ouvrir votre espace séjour',
+    saveStay: 'Enregistrer le lien',
+    staySaved: 'Lien enregistré',
+    contact: 'Contacter la réception',
   },
   es: {
     badge: 'Consulta enviada',
@@ -785,6 +805,10 @@ const clientSuccessCopy = {
     directions: 'Ver cómo llegar',
     campy: 'Preguntar a CAMPY',
     attractions: 'Ver atracciones',
+    openStay: 'Abrir panel de estancia',
+    saveStay: 'Guardar enlace',
+    staySaved: 'Enlace guardado',
+    contact: 'Contactar recepción',
   },
   nl: {
     badge: 'Aanvraag verzonden',
@@ -796,6 +820,10 @@ const clientSuccessCopy = {
     directions: 'Route bekijken',
     campy: 'Vraag CAMPY',
     attractions: 'Attracties bekijken',
+    openStay: 'Open je verblijfspaneel',
+    saveStay: 'Link bewaren',
+    staySaved: 'Link bewaard',
+    contact: 'Contact receptie',
   },
   cs: {
     badge: 'Dotaz odeslán',
@@ -807,6 +835,10 @@ const clientSuccessCopy = {
     directions: 'Zobrazit dopravu',
     campy: 'Zeptat se CAMPY',
     attractions: 'Zobrazit atrakce',
+    openStay: 'Otevřít panel pobytu',
+    saveStay: 'Uložit odkaz',
+    staySaved: 'Odkaz uložen',
+    contact: 'Kontaktovat recepci',
   },
   sk: {
     badge: 'Dopyt odoslaný',
@@ -818,6 +850,10 @@ const clientSuccessCopy = {
     directions: 'Zobraziť dopravu',
     campy: 'Opýtať sa CAMPY',
     attractions: 'Zobraziť atrakcie',
+    openStay: 'Otvoriť panel pobytu',
+    saveStay: 'Uložiť odkaz',
+    staySaved: 'Odkaz uložený',
+    contact: 'Kontaktovať recepciu',
   },
   sv: {
     badge: 'Förfrågan skickad',
@@ -829,6 +865,10 @@ const clientSuccessCopy = {
     directions: 'Se vägbeskrivning',
     campy: 'Fråga CAMPY',
     attractions: 'Se sevärdheter',
+    openStay: 'Öppna din vistelsepanel',
+    saveStay: 'Spara länken',
+    staySaved: 'Länken sparad',
+    contact: 'Kontakta receptionen',
   },
 } as const;
 
@@ -1688,6 +1728,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       submitError: '',
       inquiryId: '',
       inquirySaved: false,
+      stayUrl: '',
     };
     let suppressCalendarClick = false;
     let viewportToastTimer = 0;
@@ -3715,6 +3756,10 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       const copy = config.clientSuccess;
       const isSaved = Boolean(state.inquirySaved);
       const modalTitle = isSaved ? copy.title : copy.errorTitle;
+      const stayActions = isSaved && state.stayUrl ? `
+        <a class="reservation-btn reservation-btn--primary" href="${esc(state.stayUrl)}" target="_blank" rel="noopener noreferrer" data-success-stay>${esc(copy.openStay)}</a>
+        <button class="reservation-btn reservation-btn--ghost" type="button" data-save-stay-link>${esc(copy.saveStay)}</button>
+      ` : '';
       return `
         <div class="reservation-success-modal" role="dialog" aria-modal="true" aria-label="${esc(modalTitle)}" data-submit-mode="${isSaved ? 'success' : 'error'}">
           <div class="reservation-success-modal__card">
@@ -3724,10 +3769,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             <h2>${esc(modalTitle)}</h2>
             <p>${esc(isSaved ? copy.text : copy.errorText)}</p>
             <div class="reservation-success-modal__actions">
+              ${stayActions}
               <a class="reservation-btn reservation-btn--ghost" href="/">${esc(copy.home)}</a>
               <a class="reservation-btn reservation-btn--ghost" href="${esc(config.links.directions)}">${esc(copy.directions)}</a>
               <button class="reservation-btn reservation-btn--primary" type="button" data-success-campy>${esc(copy.campy)}</button>
               <a class="reservation-btn reservation-btn--ghost" href="${esc(config.links.attractions)}">${esc(copy.attractions)}</a>
+              <a class="reservation-btn reservation-btn--ghost" href="tel:+48795294486">${esc(copy.contact)}</a>
             </div>
           </div>
         </div>
@@ -4054,6 +4101,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.success = false;
       state.submitError = '';
       state.inquirySaved = false;
+      state.stayUrl = '';
       state.submitAttempted = false;
       const url = new URL(window.location.href);
       url.searchParams.set('stay', mode);
@@ -4071,6 +4119,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.success = false;
       state.submitError = '';
       state.inquirySaved = false;
+      state.stayUrl = '';
       const url = new URL(window.location.href);
       url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
@@ -4088,6 +4137,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       state.submitAttempted = false;
       state.submitError = '';
       state.inquirySaved = false;
+      state.stayUrl = '';
       const url = new URL(window.location.href);
       url.searchParams.delete('stay');
       window.history.replaceState({}, '', url);
@@ -4268,6 +4318,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           return;
         }
         state.inquirySaved = Boolean(result?.inquirySaved);
+        state.stayUrl = String(result?.stayUrl || '');
         if (!response.ok || !result?.ok) {
           const errors = result?.errors ? Object.values(result.errors).join(' ') : '';
           if (state.inquirySaved) {
@@ -4286,7 +4337,17 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           return;
         }
         state.inquiryId = result.inquiryId || '';
+        state.stayUrl = String(result?.stayUrl || '');
         state.success = true;
+        window.dispatchEvent(new CustomEvent('cc:analytics', {
+          detail: {
+            eventType: 'submit_booking_form',
+            metadata: { source: 'reservation_form', stayCategory: state.mode || 'unknown', country: state.details.countryCode || '', hasFeedback: Boolean(state.feedback?.rating), toursCount: state.tours.length },
+          },
+        }));
+        if (state.feedback?.rating) {
+          window.dispatchEvent(new CustomEvent('cc:analytics', { detail: { eventType: 'feedback_submit', metadata: { source: 'reservation_form', rating: state.feedback.rating } } }));
+        }
         showViewportToast(state.inquirySaved ? config.clientSuccess.badge : config.clientSuccess.errorText, state.inquirySaved ? 'success' : 'error');
       } catch {
         state.submitError = config.clientSuccess.errorText;
@@ -4323,7 +4384,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       updateValidationDom();
     };
 
-    mount.addEventListener('click', (event) => {
+    mount.addEventListener('click', async (event) => {
       const target = event.target;
       if (!(target instanceof Element)) return;
 
@@ -4404,6 +4465,25 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           if (currentStep instanceof HTMLElement) scrollToReservationSection(currentStep);
           else window.scrollTo({ top: modalReturnScrollY, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
         });
+        return;
+      }
+
+      const saveStayLink = target.closest('[data-save-stay-link]');
+      if (saveStayLink instanceof HTMLButtonElement && state.stayUrl) {
+        event.preventDefault();
+        try {
+          await navigator.clipboard.writeText(state.stayUrl);
+        } catch {
+          const textarea = document.createElement('textarea');
+          textarea.value = state.stayUrl;
+          textarea.style.position = 'fixed';
+          textarea.style.left = '-9999px';
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          textarea.remove();
+        }
+        saveStayLink.textContent = config.clientSuccess.staySaved;
         return;
       }
 

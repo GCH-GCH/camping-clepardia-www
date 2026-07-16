@@ -1,0 +1,366 @@
+---
+import { myStayCopy } from '@/i18n/myStay';
+---
+
+<!doctype html>
+<html lang="pl" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0a2017" />
+    <title>Twój pobyt — Camping Clepardia</title>
+    <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
+    <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+  </head>
+  <body>
+    <main class="stay-shell" data-stay-app aria-live="polite">
+      <section class="stay-loading">
+        <img src="/brand/logo/clepardia-logo-main.svg" width="72" height="72" alt="Camping Clepardia" />
+        <span class="stay-spinner" aria-hidden="true"></span>
+        <p>Bezpiecznie otwieramy Twój panel pobytu…</p>
+      </section>
+    </main>
+
+    <script is:inline define:vars={{ myStayCopy }}>
+      window.__MY_STAY_COPY__ = myStayCopy;
+    </script>
+    <script>
+      const app = document.querySelector('[data-stay-app]');
+      const copySet = window.__MY_STAY_COPY__ || {};
+      const supported = ['pl', 'en', 'de', 'it', 'fr', 'es', 'nl', 'cs', 'sk', 'sv'];
+      const params = new URLSearchParams(location.search);
+      const pathToken = decodeURIComponent(location.pathname.replace(/^\/stay\/?/i, '').split('/')[0] || '');
+      const token = params.get('token') || pathToken;
+      const requestedLanguage = (params.get('lang') || '').toLowerCase();
+      let langOverride = supported.includes(requestedLanguage) ? requestedLanguage : '';
+      let lang = langOverride || 'pl';
+      let panelData = null;
+      let feedbackRating = 0;
+      let feedbackHelpful = null;
+      let campyHistory = [];
+      const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Henryka+Pacho%C5%84skiego+28A+Krak%C3%B3w';
+      const toursUrl = 'https://qr.codes/vksKBT';
+
+      const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' })[char]);
+      const copy = () => copySet[lang] || copySet.pl;
+      const setLanguage = (next) => {
+        lang = supported.includes(next) ? next : 'pl';
+        document.documentElement.lang = lang;
+        document.title = `${copy().title} — Camping Clepardia`;
+      };
+      const localeTag = () => ({ pl:'pl-PL', en:'en-GB', de:'de-DE', it:'it-IT', fr:'fr-FR', es:'es-ES', nl:'nl-NL', cs:'cs-CZ', sk:'sk-SK', sv:'sv-SE' })[lang] || 'pl-PL';
+      const formatDate = (value) => {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return value || '—';
+        const date = new Date(`${value}T12:00:00Z`);
+        return new Intl.DateTimeFormat(localeTag(), { day:'2-digit', month:'long', year:'numeric', timeZone:'UTC' }).format(date);
+      };
+      const formatDateTime = (value) => value ? new Intl.DateTimeFormat(localeTag(), { dateStyle:'medium', timeStyle:'short' }).format(new Date(value)) : '—';
+      const topicFor = (value) => {
+        const text = String(value || '').toLowerCase();
+        if (/prąd|prad|electric|strom|10a|ev/.test(text)) return 'prąd_10a_ev';
+        if (/dojazd|maps|tram|center|centre|centrum|route/.test(text)) return 'dojazd';
+        if (/wyciecz|tour|wielicz|auschwitz|zakop|energy/.test(text)) return 'wycieczki';
+        if (/domek|bungalow|cabin/.test(text)) return 'domki';
+        if (/pies|dog|hund|chien|perro|cane/.test(text)) return 'pies';
+        return 'inne';
+      };
+      const track = (eventType, metadata = {}) => {
+        fetch('/api/analytics/event', {
+          method:'POST', headers:{ 'content-type':'application/json' }, keepalive:true,
+          body:JSON.stringify({ eventType, pagePath:'/stay/:token', locale:lang, deviceType:matchMedia('(max-width:767px)').matches ? 'mobile' : 'desktop', metadata }),
+        }).catch(() => {});
+      };
+      const icon = (name) => ({
+        calendar:'📅', people:'👥', stay:'🏕️', service:'🧰', price:'💚', arrival:'🕘', directions:'🗺️', rules:'✓', tours:'🚌', campy:'✨', feedback:'★', after:'🌿', contact:'☎', link:'🔗'
+      })[name] || '•';
+      const list = (items) => `<ul class="stay-list">${items.map((item) => `<li><span aria-hidden="true">✓</span>${esc(item)}</li>`).join('')}</ul>`;
+      const services = (items) => items?.length
+        ? `<div class="stay-chips">${items.map((item) => `<span>${esc(item.label)}${Number(item.qty || 1) > 1 ? ` × ${esc(item.qty)}` : ''}</span>`).join('')}</div>`
+        : '<span class="stay-muted">—</span>';
+      const statusLabel = (status) => copy().statuses[status] || copy().received;
+
+      const renderError = () => {
+        const c = copy();
+        app.innerHTML = `<section class="stay-error-card">
+          <img src="/brand/logo/clepardia-logo-main.svg" width="72" height="72" alt="Camping Clepardia" />
+          <span class="stay-kicker">Camping Clepardia</span><h1>${esc(c.title)}</h1><p>${esc(c.invalid)}</p>
+          <div class="stay-actions"><button type="button" data-retry>${esc(c.retry)}</button><a href="tel:+48795294486">${esc(c.contact)}</a></div>
+        </section>`;
+        app.querySelector('[data-retry]')?.addEventListener('click', loadPanel);
+      };
+
+      const render = () => {
+        const c = copy();
+        const data = panelData;
+        if (!data) return renderError();
+        const people = data.people || {};
+        const guestText = [
+          people.adults ? `${people.adults} ${c.labels.adults}` : '',
+          people.children ? `${people.children} ${c.labels.children}` : '',
+          people.toddlers ? `${people.toddlers} ${c.labels.toddlers}` : '',
+        ].filter(Boolean).join(' · ') || '—';
+        const status = statusLabel(data.status);
+        const feedbackDone = Boolean(data.panel?.feedbackSubmitted);
+        const serviceContext = (data.services || []).map((item) => `${item.label} × ${item.qty}`).join(', ');
+        const tourContext = (data.tours || []).join(', ');
+        app.innerHTML = `
+          <header class="stay-header">
+            <div class="stay-brand"><img src="/brand/logo/clepardia-logo-main.svg" width="58" height="58" alt="" /><span><strong>Camping Clepardia</strong><small>${esc(c.privateLabel)}</small></span></div>
+            <div class="stay-header__actions">
+              <label class="stay-language"><span class="sr-only">Language</span><select data-language>${supported.map((code) => `<option value="${code}" ${code === lang ? 'selected' : ''}>${esc(copySet[code].languageName)}</option>`).join('')}</select></label>
+              <button type="button" class="stay-button stay-button--ghost" data-copy-link>${icon('link')} ${esc(c.saveLink)}</button>
+              <a class="stay-button stay-button--ghost stay-button--contact" href="tel:+48795294486">${esc(c.contact)}</a>
+            </div>
+          </header>
+          <section class="stay-hero">
+            <div><span class="stay-kicker">${esc(c.title)}</span><h1>${esc(data.customerFirstName ? `${c.hello}, ${data.customerFirstName}` : c.title)}</h1><p>${esc(c.finalPrice)}</p></div>
+            <span class="stay-status" data-status="${esc(data.status)}"><i></i>${esc(status)}</span>
+          </section>
+          <div class="stay-layout">
+            <div class="stay-main">
+              <section class="stay-card stay-card--summary">
+                <div class="stay-card__head"><span>${icon('stay')}</span><div><small>${esc(c.sections.stay)}</small><h2>${esc(data.stayType || c.title)}</h2></div></div>
+                <div class="stay-facts">
+                  <article><span>${icon('calendar')}</span><small>${esc(c.labels.dates)}</small><strong>${esc(formatDate(data.arrivalDate))} — ${esc(formatDate(data.departureDate))}</strong></article>
+                  <article><span>${icon('calendar')}</span><small>${esc(c.labels.nights)}</small><strong>${esc(data.nights || '—')}</strong></article>
+                  <article><span>${icon('people')}</span><small>${esc(c.labels.people)}</small><strong>${esc(guestText)}</strong></article>
+                  <article><span>${icon('price')}</span><small>${esc(c.labels.price)}</small><strong>${data.estimatedTotalPln == null ? '—' : `${esc(data.estimatedTotalPln)} PLN`}</strong></article>
+                </div>
+                <div class="stay-summary-row"><span>${esc(c.labels.country)}</span><strong>${esc(data.country || '—')} · ${esc(lang.toUpperCase())}</strong></div>
+                <div class="stay-summary-row stay-summary-row--stack"><span>${esc(c.labels.services)}</span>${services(data.services)}</div>
+              </section>
+
+              <div class="stay-grid">
+                <section class="stay-card"><div class="stay-card__head"><span>${icon('arrival')}</span><h2>${esc(c.sections.arrival)}</h2></div>${list(c.arrival)}</section>
+                <section class="stay-card"><div class="stay-card__head"><span>${icon('directions')}</span><h2>${esc(c.sections.directions)}</h2></div>${list(c.directions)}<div class="stay-actions"><a class="stay-button" href="${mapsUrl}" target="_blank" rel="noopener noreferrer" data-maps>${esc(c.mapsCta)}</a><button class="stay-button stay-button--ghost" type="button" data-tram>${esc(c.tramCta)}</button></div></section>
+              </div>
+
+              <section class="stay-card"><div class="stay-card__head"><span>${icon('rules')}</span><h2>${esc(c.sections.rules)}</h2></div>${list(c.rules)}</section>
+
+              <section class="stay-card stay-card--tours"><div class="stay-card__head"><span>${icon('tours')}</span><div><h2>${esc(c.sections.tours)}</h2><p>${esc(c.toursLead)}</p></div></div>${data.tours?.length ? `<div class="stay-chips">${data.tours.map((tour) => `<span>${esc(tour)}</span>`).join('')}</div>` : ''}<a class="stay-button" href="${toursUrl}" target="_blank" rel="noopener noreferrer" data-tours>${esc(c.toursCta)}</a></section>
+
+              <section class="stay-card stay-card--campy">
+                <div class="stay-card__head"><span>${icon('campy')}</span><div><h2>${esc(c.sections.campy)}</h2><p>${esc(c.campyLead)}</p></div></div>
+                <div class="stay-campy-messages" data-campy-messages><p class="is-campy">${esc(c.campyWelcome)}</p></div>
+                <div class="stay-quick">${c.quick.map((question) => `<button type="button" data-campy-quick="${esc(question)}">${esc(question)}</button>`).join('')}</div>
+                <form class="stay-campy-form" data-campy-form><input type="text" maxlength="600" autocomplete="off" placeholder="${esc(c.campyPlaceholder)}" aria-label="${esc(c.campyPlaceholder)}" /><button type="submit">${esc(c.campySend)}</button></form>
+              </section>
+
+              <section class="stay-card stay-card--feedback">
+                <div class="stay-card__head"><span>${icon('feedback')}</span><div><h2>${esc(c.sections.feedback)}</h2><p>${esc(c.feedbackLead)}</p></div></div>
+                ${feedbackDone ? `<p class="stay-feedback-success">${esc(c.feedbackThanks)}</p>` : `<form data-feedback-form>
+                  <div class="stay-rating" role="radiogroup" aria-label="1-5">${[1,2,3,4,5].map((rating) => `<button type="button" role="radio" aria-checked="false" data-rating="${rating}" aria-label="${rating}/5">★</button>`).join('')}</div>
+                  <fieldset><legend>${esc(c.helpful)}</legend><div class="stay-choice"><button type="button" data-helpful="true">${esc(c.yes)}</button><button type="button" data-helpful="false">${esc(c.no)}</button></div></fieldset>
+                  <label><span>${esc(c.improve)}</span><textarea maxlength="700" rows="3" placeholder="${esc(c.improvePlaceholder)}"></textarea></label>
+                  <p class="stay-form-status" data-feedback-status aria-live="polite"></p><button class="stay-button" type="submit">${esc(c.sendFeedback)}</button>
+                </form>`}
+              </section>
+
+              <section class="stay-card stay-card--after"><div class="stay-card__head"><span>${icon('after')}</span><div><h2>${esc(c.sections.after)}</h2><p>${esc(c.afterText)}</p></div></div></section>
+            </div>
+            <aside class="stay-side">
+              <section class="stay-contact-card"><span>${icon('contact')}</span><h2>Camping Clepardia</h2><p>Henryka Pachońskiego 28A<br />31-322 Kraków</p><a href="tel:+48795294486">+48 795 294 486</a><a href="mailto:clepardia@gmail.com">clepardia@gmail.com</a><a class="stay-button" href="tel:+48795294486">${esc(c.contact)}</a></section>
+              <section class="stay-panel-meta"><span>${esc(c.received)}</span><strong>${esc(status)}</strong><small>${esc(c.labels.dates)}: ${esc(formatDate(data.arrivalDate))}</small><small>${esc(c.sections.stay)} · ${esc(data.panel?.openCount || 1)}</small></section>
+            </aside>
+          </div>`;
+
+        app.querySelector('[data-language]')?.addEventListener('change', (event) => {
+          const next = event.target.value;
+          langOverride = next;
+          setLanguage(next);
+          const url = new URL(location.href);
+          url.searchParams.set('lang', next);
+          if (url.searchParams.has('token') && pathToken) url.searchParams.delete('token');
+          history.replaceState({}, '', url);
+          track('language_change', { label: next.toUpperCase(), source:'my_stay' });
+          render();
+        });
+        app.querySelector('[data-copy-link]')?.addEventListener('click', async (event) => {
+          try { await navigator.clipboard.writeText(location.href); } catch {}
+          event.currentTarget.textContent = `${icon('link')} ${copy().linkSaved}`;
+        });
+        app.querySelector('[data-maps]')?.addEventListener('click', () => track('maps_cta_click', { label:'my_stay_maps' }));
+        app.querySelector('[data-tours]')?.addEventListener('click', () => track('tour_cta_click', { label:'my_stay_tours' }));
+        app.querySelector('[data-tram]')?.addEventListener('click', (event) => {
+          track('tram_info_click', { label:'my_stay_tram' });
+          event.currentTarget.textContent = c.directions[2];
+        });
+
+        const messages = app.querySelector('[data-campy-messages]');
+        const appendCampy = (text, role) => {
+          const p = document.createElement('p'); p.className = role === 'assistant' ? 'is-campy' : 'is-user'; p.textContent = text; messages.appendChild(p); messages.scrollTop = messages.scrollHeight;
+        };
+        const askCampy = async (question) => {
+          if (!question) return;
+          appendCampy(question, 'user');
+          const pending = document.createElement('p'); pending.className = 'is-campy is-pending'; pending.textContent = '…'; messages.appendChild(pending);
+          track('campy_question', { topic:topicFor(question), source:'my_stay' });
+          const pageContext = [
+            `Private stay context. Dates: ${data.arrivalDate} to ${data.departureDate}; nights: ${data.nights}.`,
+            `Stay type: ${data.stayType}. Guests: ${guestText}. Services: ${serviceContext || 'none'}.`,
+            `Country: ${data.country || 'unknown'}. Tours selected: ${tourContext || 'none'}. Arrival time: ${data.arrivalTime || 'unknown'}.`,
+            `Electricity selected: ${data.hasElectricity ? 'yes' : 'no'}. Dog selected: ${data.hasDog ? 'yes' : 'no'}.`,
+            'Use this context only to personalize practical information. Never confirm availability or invent booking status.',
+          ].join(' ');
+          try {
+            const response = await fetch('/api/campy', { method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify({ message:question, language:lang, pageContext, conversationHistory:campyHistory.slice(-8) }) });
+            const result = await response.json();
+            const answer = result?.answer || c.campyError;
+            pending.remove(); appendCampy(answer, 'assistant');
+            campyHistory.push({ role:'user', content:question }, { role:'assistant', content:answer });
+          } catch { pending.remove(); appendCampy(c.campyError, 'assistant'); }
+        };
+        app.querySelectorAll('[data-campy-quick]').forEach((button) => button.addEventListener('click', () => askCampy(button.dataset.campyQuick || '')));
+        app.querySelector('[data-campy-form]')?.addEventListener('submit', (event) => { event.preventDefault(); const input = event.currentTarget.querySelector('input'); const question = input.value.trim(); input.value = ''; askCampy(question); });
+
+        app.querySelectorAll('[data-rating]').forEach((button) => button.addEventListener('click', () => {
+          feedbackRating = Number(button.dataset.rating || 0);
+          app.querySelectorAll('[data-rating]').forEach((item) => { const active = Number(item.dataset.rating) <= feedbackRating; item.classList.toggle('is-active', active); item.setAttribute('aria-checked', String(Number(item.dataset.rating) === feedbackRating)); });
+        }));
+        app.querySelectorAll('[data-helpful]').forEach((button) => button.addEventListener('click', () => {
+          feedbackHelpful = button.dataset.helpful === 'true';
+          app.querySelectorAll('[data-helpful]').forEach((item) => item.classList.toggle('is-active', item === button));
+        }));
+        app.querySelector('[data-feedback-form]')?.addEventListener('submit', async (event) => {
+          event.preventDefault(); const statusNode = event.currentTarget.querySelector('[data-feedback-status]');
+          if (!feedbackRating) { statusNode.textContent = c.feedbackRequired; return; }
+          const improve = event.currentTarget.querySelector('textarea').value.trim();
+          try {
+            const response = await fetch('/api/stay/panel', { method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify({ action:'feedback', token, lang, rating:feedbackRating, helpful:feedbackHelpful, improve }) });
+            const result = await response.json(); if (!response.ok || !result.ok) throw new Error();
+            panelData.panel.feedbackSubmitted = true; render();
+          } catch { statusNode.textContent = c.invalid; }
+        });
+      };
+
+      async function loadPanel() {
+        setLanguage(lang);
+        if (!token) return renderError();
+        app.innerHTML = `<section class="stay-loading"><img src="/brand/logo/clepardia-logo-main.svg" width="72" height="72" alt="Camping Clepardia" /><span class="stay-spinner" aria-hidden="true"></span><p>${esc(copy().loading)}</p></section>`;
+        try {
+          const query = new URLSearchParams({ token });
+          if (langOverride) query.set('lang', langOverride);
+          const response = await fetch(`/api/stay/panel?${query.toString()}`, { headers:{ accept:'application/json' }, cache:'no-store' });
+          const result = await response.json();
+          if (!response.ok || !result.ok || !result.panel) throw new Error('STAY_PANEL_NOT_FOUND');
+          panelData = result.panel;
+          if (!langOverride && supported.includes(panelData.locale)) setLanguage(panelData.locale);
+          render();
+        } catch { renderError(); }
+      }
+
+      loadPanel();
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:#06130e; color:#effbf3; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-width:320px; min-height:100vh; overflow-x:hidden; background:radial-gradient(circle at 15% -10%,rgba(64,211,137,.2),transparent 32rem),radial-gradient(circle at 90% 20%,rgba(37,110,76,.2),transparent 28rem),#06130e; }
+  button,input,textarea,select { font:inherit; }
+  button,a { -webkit-tap-highlight-color:transparent; }
+  a { color:inherit; }
+  .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+  .stay-shell { width:min(1240px,calc(100% - 32px)); margin:0 auto; padding:24px 0 64px; }
+  .stay-header { min-height:76px; display:flex; align-items:center; justify-content:space-between; gap:20px; padding:10px 2px 22px; border-bottom:1px solid rgba(150,232,187,.13); }
+  .stay-brand,.stay-card__head { display:flex; align-items:center; gap:13px; }
+  .stay-brand img { filter:drop-shadow(0 10px 20px rgba(0,0,0,.25)); }
+  .stay-brand span { display:grid; gap:3px; }
+  .stay-brand strong { font-size:1.02rem; }
+  .stay-brand small,.stay-muted { color:rgba(229,247,236,.6); }
+  .stay-header__actions,.stay-actions { display:flex; flex-wrap:wrap; align-items:center; gap:9px; }
+  .stay-language select { min-height:43px; padding:0 35px 0 13px; border:1px solid rgba(150,232,187,.2); border-radius:13px; color:#effbf3; background:#0d2419; }
+  .stay-button,.stay-actions button,.stay-actions a { min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:0 16px; border:1px solid rgba(114,235,166,.35); border-radius:14px; color:#06130e; background:#72eba6; text-decoration:none; font-weight:850; cursor:pointer; }
+  .stay-button--ghost { color:#dff9e9; background:rgba(255,255,255,.05); }
+  .stay-hero { display:flex; align-items:end; justify-content:space-between; gap:28px; padding:clamp(38px,7vw,82px) 0 30px; }
+  .stay-kicker { color:#78e9aa; font-size:.76rem; font-weight:900; letter-spacing:.13em; text-transform:uppercase; }
+  .stay-hero h1,.stay-error-card h1 { margin:9px 0 10px; font-size:clamp(2.2rem,7vw,5rem); line-height:.94; letter-spacing:-.055em; }
+  .stay-hero p,.stay-card p,.stay-error-card p { margin:0; color:rgba(231,248,237,.67); line-height:1.6; }
+  .stay-status { display:inline-flex; align-items:center; gap:9px; min-height:42px; padding:0 15px; border:1px solid rgba(114,235,166,.25); border-radius:999px; color:#b9f9d4; background:rgba(30,112,68,.25); font-weight:850; white-space:nowrap; }
+  .stay-status i { width:9px; height:9px; border-radius:50%; background:#5ced9a; box-shadow:0 0 0 5px rgba(92,237,154,.12); }
+  .stay-status[data-status="unavailable"],.stay-status[data-status="rejected"],.stay-status[data-status="cancelled"] { color:#ffd0c8; border-color:rgba(255,112,92,.25); background:rgba(120,34,25,.25); }
+  .stay-status[data-status="unavailable"] i,.stay-status[data-status="rejected"] i,.stay-status[data-status="cancelled"] i { background:#ff705c; box-shadow:0 0 0 5px rgba(255,112,92,.12); }
+  .stay-layout { display:grid; grid-template-columns:minmax(0,1fr) 290px; gap:18px; align-items:start; }
+  .stay-main { display:grid; gap:18px; }
+  .stay-side { position:sticky; top:18px; display:grid; gap:14px; }
+  .stay-card,.stay-contact-card,.stay-panel-meta,.stay-error-card,.stay-loading { border:1px solid rgba(145,225,181,.14); border-radius:26px; background:linear-gradient(145deg,rgba(20,56,38,.86),rgba(8,30,20,.9)); box-shadow:0 24px 70px rgba(0,0,0,.18); }
+  .stay-card { padding:clamp(20px,3vw,30px); }
+  .stay-card__head { align-items:flex-start; margin-bottom:20px; }
+  .stay-card__head>span { flex:0 0 auto; display:grid; width:43px; height:43px; place-items:center; border-radius:14px; color:#bffbd8; background:rgba(79,214,137,.13); }
+  .stay-card__head h2 { margin:0; font-size:clamp(1.08rem,2.4vw,1.42rem); letter-spacing:-.02em; }
+  .stay-card__head small { display:block; margin-bottom:4px; color:#72eba6; font-weight:850; text-transform:uppercase; letter-spacing:.08em; }
+  .stay-facts { display:grid; grid-template-columns:2fr .7fr 1.4fr 1fr; gap:10px; }
+  .stay-facts article { min-width:0; display:grid; grid-template-columns:auto 1fr; gap:5px 9px; padding:15px; border:1px solid rgba(255,255,255,.07); border-radius:17px; background:rgba(255,255,255,.04); }
+  .stay-facts article>span { grid-row:1/3; }
+  .stay-facts small,.stay-summary-row>span { color:rgba(231,248,237,.52); font-size:.73rem; font-weight:800; }
+  .stay-facts strong { overflow-wrap:anywhere; }
+  .stay-summary-row { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:13px; padding-top:13px; border-top:1px solid rgba(255,255,255,.07); }
+  .stay-summary-row--stack { align-items:flex-start; }
+  .stay-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .stay-list { display:grid; gap:11px; margin:0; padding:0; list-style:none; }
+  .stay-list li { display:grid; grid-template-columns:24px 1fr; gap:9px; color:rgba(239,251,243,.82); line-height:1.48; }
+  .stay-list li>span { display:grid; width:22px; height:22px; place-items:center; border-radius:50%; color:#07160f; background:#72eba6; font-size:.72rem; font-weight:950; }
+  .stay-chips { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:7px; }
+  .stay-chips span { display:inline-flex; min-height:30px; align-items:center; padding:0 10px; border:1px solid rgba(114,235,166,.18); border-radius:999px; color:#c7f9dc; background:rgba(114,235,166,.07); font-size:.78rem; font-weight:750; }
+  .stay-card--tours { background:linear-gradient(135deg,rgba(21,72,46,.92),rgba(22,48,31,.9)); }
+  .stay-card--tours>.stay-button { margin-top:18px; }
+  .stay-card--campy { border-color:rgba(114,235,166,.25); }
+  .stay-campy-messages { max-height:280px; min-height:90px; display:grid; align-content:start; gap:8px; overflow:auto; padding:14px; border-radius:18px; background:rgba(0,0,0,.14); }
+  .stay-campy-messages p { width:fit-content; max-width:min(90%,680px); margin:0; padding:10px 13px; border-radius:14px; color:#eafaf0; background:rgba(255,255,255,.07); }
+  .stay-campy-messages .is-user { justify-self:end; color:#07160f; background:#72eba6; }
+  .stay-campy-messages .is-pending { min-width:48px; text-align:center; }
+  .stay-quick { display:flex; gap:7px; overflow-x:auto; padding:12px 0 4px; scrollbar-width:thin; }
+  .stay-quick button,.stay-choice button { flex:0 0 auto; min-height:38px; padding:0 12px; border:1px solid rgba(114,235,166,.17); border-radius:12px; color:#dff9e9; background:rgba(255,255,255,.05); cursor:pointer; }
+  .stay-campy-form { display:grid; grid-template-columns:1fr auto; gap:8px; margin-top:11px; }
+  .stay-campy-form input,.stay-card textarea { width:100%; border:1px solid rgba(145,225,181,.16); border-radius:14px; color:#effbf3; background:#0a2117; outline:none; }
+  .stay-campy-form input { min-height:46px; padding:0 14px; }
+  .stay-campy-form button { min-width:105px; border:0; border-radius:14px; color:#07160f; background:#72eba6; font-weight:900; cursor:pointer; }
+  .stay-rating { display:flex; gap:8px; margin:4px 0 17px; }
+  .stay-rating button { border:0; padding:0; color:rgba(255,255,255,.22); background:transparent; font-size:2rem; cursor:pointer; }
+  .stay-rating button.is-active { color:#ffd66b; filter:drop-shadow(0 4px 10px rgba(255,214,107,.2)); }
+  .stay-card fieldset { margin:0 0 16px; padding:0; border:0; }
+  .stay-card legend,.stay-card label>span { display:block; margin-bottom:8px; color:rgba(231,248,237,.72); font-size:.82rem; font-weight:800; }
+  .stay-choice { display:flex; gap:8px; }
+  .stay-choice button.is-active { color:#07160f; background:#72eba6; }
+  .stay-card textarea { padding:12px; resize:vertical; }
+  .stay-form-status { min-height:22px; margin:9px 0!important; color:#ffcf91!important; font-weight:750; }
+  .stay-feedback-success { padding:15px; border-radius:15px; color:#c9f8dc!important; background:rgba(114,235,166,.09); }
+  .stay-contact-card,.stay-panel-meta { padding:22px; }
+  .stay-contact-card>span { display:grid; width:48px; height:48px; place-items:center; border-radius:16px; background:rgba(114,235,166,.12); }
+  .stay-contact-card h2 { margin:17px 0 8px; }
+  .stay-contact-card p { color:rgba(231,248,237,.6); line-height:1.55; }
+  .stay-contact-card>a:not(.stay-button) { display:block; margin:8px 0; color:#c9f8dc; overflow-wrap:anywhere; }
+  .stay-contact-card>.stay-button { width:100%; margin-top:16px; }
+  .stay-panel-meta { display:grid; gap:7px; }
+  .stay-panel-meta span { color:#72eba6; font-size:.72rem; font-weight:900; text-transform:uppercase; }
+  .stay-panel-meta small { color:rgba(231,248,237,.55); }
+  .stay-loading,.stay-error-card { width:min(560px,100%); min-height:360px; margin:10vh auto 0; display:grid; place-items:center; align-content:center; gap:18px; padding:35px; text-align:center; }
+  .stay-loading p { color:rgba(231,248,237,.68); }
+  .stay-spinner { width:36px; height:36px; border:3px solid rgba(114,235,166,.18); border-top-color:#72eba6; border-radius:50%; animation:staySpin .8s linear infinite; }
+  .stay-error-card .stay-actions { justify-content:center; }
+  @keyframes staySpin { to { transform:rotate(360deg); } }
+  @media(max-width:900px) { .stay-layout { grid-template-columns:1fr; } .stay-side { position:static; grid-template-columns:1fr 1fr; } .stay-facts { grid-template-columns:1fr 1fr; } }
+  @media(max-width:680px) {
+    .stay-shell { width:min(100% - 18px,1240px); padding-top:10px; }
+    .stay-header,.stay-hero { align-items:stretch; flex-direction:column; }
+    .stay-header__actions { display:grid; grid-template-columns:1fr 1fr; }
+    .stay-language select,.stay-header__actions .stay-button { width:100%; }
+    .stay-header__actions .stay-button--contact { grid-column:1 / -1; }
+    .stay-hero { gap:18px; padding:34px 4px 22px; }
+    .stay-status { align-self:flex-start; }
+    .stay-grid,.stay-side { grid-template-columns:1fr; }
+    .stay-facts { grid-template-columns:1fr; }
+    .stay-summary-row { align-items:flex-start; flex-direction:column; }
+    .stay-chips { justify-content:flex-start; }
+    .stay-campy-form { grid-template-columns:1fr; }
+    .stay-campy-form button { min-height:46px; }
+    .stay-actions { display:grid; grid-template-columns:1fr; }
+    .stay-actions>* { width:100%; }
+  }
+  @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
+</style>

@@ -4,6 +4,7 @@ import {
   logInboxError,
   serializeInboxError,
 } from '../_lib/inbox.js';
+import { listStayPanelsForInquiries } from '../_lib/stay.js';
 
 const sendJson = (res, status, payload) => {
   res.status(status);
@@ -22,7 +23,18 @@ export default async function handler(req, res) {
       return sendJson(res, 401, { ok: false, code: 'UNAUTHORIZED' });
     }
     const inquiries = await listReservationInquiries();
-    return sendJson(res, 200, { ok: true, inquiries });
+    let myStayAvailable = true;
+    try {
+      const panels = await listStayPanelsForInquiries(inquiries.map((item) => item.id));
+      inquiries.forEach((item) => {
+        item.my_stay = panels.get(String(item.id)) || null;
+      });
+    } catch (error) {
+      myStayAvailable = false;
+      logInboxError('inbox-list-my-stay', error, { inquiryCount: inquiries.length });
+      inquiries.forEach((item) => { item.my_stay = null; });
+    }
+    return sendJson(res, 200, { ok: true, inquiries, myStayAvailable });
   } catch (error) {
     logInboxError('inbox-list', error, { method: req.method || '' });
     const diagnostic = serializeInboxError(error);

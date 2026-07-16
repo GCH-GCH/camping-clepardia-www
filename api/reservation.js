@@ -5,6 +5,7 @@ import {
   serializeInboxError,
   updateReservationMailStatus,
 } from './_lib/inbox.js';
+import { createStayPanelForInquiry } from './_lib/stay.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 const MAX_BODY = 32_000;
@@ -1705,6 +1706,7 @@ const acceptedReservationResponse = (req, inquiry, reception = {}, mail = {}, in
     inquiryId: inquiry.inquiryId,
     mode: 'accepted',
     message: 'Dziękujemy. Zapytanie zostało przyjęte przez recepcję Camping Clepardia.',
+    ...(inquiry.myStay?.url ? { stayUrl: inquiry.myStay.url } : {}),
   };
   if (!authorizeInboxRequest(req)) return publicPayload;
   return {
@@ -1812,6 +1814,15 @@ export default async function handler(req, res) {
         ...(diagnostic.payload.valuePreview ? { valuePreview: diagnostic.payload.valuePreview } : {}),
         ...(diagnostic.payload.supabaseStatus ? { supabaseStatus: diagnostic.payload.supabaseStatus } : {}),
       });
+    }
+
+    if (!inquiry.website) {
+      try {
+        inquiry.myStay = await createStayPanelForInquiry(inquiry.inquiryId, inquiry.contactLanguage);
+      } catch (error) {
+        logInboxError('reservation-my-stay-create', error, { inquiryId: inquiry.inquiryId });
+        inquiry.myStay = null;
+      }
     }
 
     if (inquiry.website) {

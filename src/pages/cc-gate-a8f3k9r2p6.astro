@@ -361,7 +361,7 @@ const title = 'CC SYSTEM';
         let clientSearchTimer = 0;
         let campValidationErrors = [];
         let lastCampSave = null;
-        let analyticsStorageStatus = { ok: false, loaded: false, migrationRequired: false, error: '', eventCount: 0, recentEvents: [] };
+        let analyticsStorageStatus = { ok: false, loaded: false, migrationRequired: false, error: '', eventCount: 0, recentEvents: [], summary: {} };
         const campMigrationRequiredMessage = 'CAMP wymaga uruchomienia migracji Supabase przed zapisem pobytów.';
         let autoRefreshTimer = 0;
         let autoRefreshPaused = false;
@@ -2668,7 +2668,12 @@ const title = 'CC SYSTEM';
           const topList = (map, empty = 'Brak danych') => [...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8).map(([label,value])=>`<li><strong>${esc(label)}</strong><span>${esc(value)}</span></li>`).join('') || `<li><strong>${esc(empty)}</strong><span>0</span></li>`;
           const feedbackItems = real.filter((item)=>categoryKeys(item).includes('feedback'));
           const lowRatings = feedbackItems.filter((item)=>Number(feedback(item).rating || 0) > 0 && Number(feedback(item).rating || 0) <= 3);
-          const improveTexts = feedbackItems.map((item)=>feedback(item).improve).filter(Boolean).slice(0,6);
+          const myStayFeedbackItems = real.map((item)=>item.my_stay?.feedback).filter(Boolean);
+          const lowMyStayRatings = myStayFeedbackItems.filter((item)=>Number(item.rating || 0) > 0 && Number(item.rating || 0) <= 3);
+          const improveTexts = [
+            ...feedbackItems.map((item)=>feedback(item).improve),
+            ...myStayFeedbackItems.map((item)=>item.text),
+          ].filter(Boolean).slice(0,8);
           const evCount = real.filter((item)=>categoryKeys(item).includes('ev')).length;
           const summerCamping = real.filter((item)=>categoryKeys(item).includes('camping') && isSummer(item)).length;
           const german = byLanguage.get('DE') || 0;
@@ -2683,31 +2688,59 @@ const title = 'CC SYSTEM';
           const eventStatusHint = analyticsStorageStatus.ok
             ? `ostatnie eventy: ${analyticsStorageStatus.eventCount || 0}`
             : (analyticsStorageStatus.error || 'site_events zostanie sprawdzone po odświeżeniu');
-          const insights = [
-            evCount >= 2 ? `Dużo pytań o prąd 10A / EV (${evCount}) — warto pokazać informację wyżej na stronie.` : '',
-            german >= 2 ? `Często wybierany język DE (${german}) — sprawdź niemieckie treści i odpowiedzi CAMPY.` : '',
-            priorityLanguages.length ? `Dużo zapytań w językach ${priorityLanguages.map(([lang,count])=>`${lang}: ${count}`).join(', ')} — sprawdzić konkretne tłumaczenia i szablony.` : '',
-            lowRatings.length ? `Niska ocena formularza (${lowRatings.length}) — sprawdź długość formularza i widoczność komunikatów.` : '',
-            summerCamping >= 2 ? `Dużo pytań o lipiec/sierpień (${summerCamping}) — dodaj mocniejsze info o braku rezerwacji campingu.` : '',
-            tripsCount >= 2 ? `Wycieczki pojawiają się w zapytaniach (${tripsCount}) — warto rozwijać sekcję atrakcji i gotowe odpowiedzi.` : '',
-            directionsCount >= 2 ? `Dużo pytań o dojazd / Google Maps / tramwaj (${directionsCount}) — mocniej pokazać dojazd i zmianę wjazdu z 2022 roku.` : '',
+          const eventSummary = analyticsStorageStatus.summary || {};
+          const eventMap = (value) => new Map(Object.entries(value || {}).map(([key,count])=>[key,Number(count || 0)]));
+          const eventTypes = eventSummary.byType || {};
+          const eventLocales = eventMap(eventSummary.byLocale);
+          const eventCountries = eventMap(eventSummary.byCountry);
+          const eventDevices = eventMap(eventSummary.byDevice);
+          const eventPages = eventMap(eventSummary.byPage);
+          const eventFeedbackPages = eventMap(eventSummary.byFeedbackPage);
+          const eventCtas = eventMap(eventSummary.byCta);
+          const campyTopics = eventMap(eventSummary.campyTopics);
+          const bookingEvents = eventSummary.booking || {};
+          const campyEvents = eventSummary.campy || {};
+          const myStayEvents = eventSummary.myStay || {};
+          const unfinishedBookings = Math.max(0, Number(bookingEvents.started || 0) - Number(bookingEvents.submitted || 0));
+          const totalDevices = [...eventDevices.values()].reduce((sum,value)=>sum+value,0);
+          const mobileShare = totalDevices ? Math.round(((eventDevices.get('mobile') || 0) / totalDevices) * 100) : 0;
+          const germanTraffic = Number(eventSummary.byLocale?.de || 0) + german;
+          const insightCards = [
+            (campyTopics.get('prąd_10a_ev') || evCount) >= 2 ? { title:'Prąd 10A i EV', reason:`Pytania / sygnały: ${campyTopics.get('prąd_10a_ev') || evCount}.`, priority:'wysoki', action:'Pokaż zasadę 10A wyżej na stronie i przy wyborze usługi.', href:'/cennik/' } : null,
+            (campyTopics.get('lipiec_sierpień') || summerCamping) >= 2 ? { title:'Camping w lipcu i sierpniu', reason:`Sygnały sezonowe: ${campyTopics.get('lipiec_sierpień') || summerCamping}.`, priority:'wysoki', action:'Wzmocnij komunikat o kolejności przyjazdu.', href:'/rezerwacja/' } : null,
+            ((eventTypes.maps_cta_click || 0) + (eventTypes.tram_info_click || 0) + directionsCount) >= 3 ? { title:'Dojazd jest ważnym tematem', reason:`Kliknięcia i pytania: ${(eventTypes.maps_cta_click || 0) + (eventTypes.tram_info_click || 0) + directionsCount}.`, priority:'średni', action:'Utrzymaj CTA Google Maps i tramwaj wysoko.', href:'/dojazd/' } : null,
+            (lowRatings.length + lowMyStayRatings.length) ? { title:'Doświadczenie klienta wymaga sprawdzenia', reason:`Niskie oceny: formularz ${lowRatings.length}, My Stay ${lowMyStayRatings.length}.`, priority:'wysoki', action:'Sprawdź długość formularza, komunikaty mobile i czytelność panelu pobytu.', href:'/rezerwacja/' } : null,
+            unfinishedBookings >= 3 ? { title:'Niedokończone formularze', reason:`Różnica start → wysłanie: ${unfinishedBookings}.`, priority:'wysoki', action:'Sprawdź, na którym kroku klienci rezygnują i uprość najbardziej obciążające pola.', href:'/rezerwacja/' } : null,
+            germanTraffic >= 2 ? { title:'Ruch niemieckojęzyczny', reason:`Sygnały DE: ${germanTraffic}.`, priority:'średni', action:'Sprawdź treści DE i odpowiedzi CAMPY.', href:'/de/' } : null,
+            (Number(eventSummary.tours || 0) + tripsCount) >= 2 ? { title:'Rosnące zainteresowanie wycieczkami', reason:`Kliknięcia / zapytania: ${Number(eventSummary.tours || 0) + tripsCount}.`, priority:'średni', action:'Mocniej pokaż wycieczki i gotowe odpowiedzi.', href:'/atrakcje/' } : null,
+            (campyTopics.get('domki') || 0) >= 2 ? { title:'Pytania o domki', reason:`CAMPY — temat domków: ${campyTopics.get('domki')}.`, priority:'średni', action:'Doprecyzuj wyposażenie, godziny i ceny domków.', href:'/domki/' } : null,
+            mobileShare >= 55 ? { title:'Dominują urządzenia mobilne', reason:`Mobile: ${mobileShare}% z zapisanych eventów.`, priority:'średni', action:'Regularnie testuj formularz, CAMPY i CTA na 360–430 px.', href:'/rezerwacja/' } : null,
           ].filter(Boolean);
+          const insightHtml = insightCards.length ? insightCards.map((insight)=>`<article class="feedback-insight"><span>${esc(insight.priority)}</span><h4>${esc(insight.title)}</h4><p>${esc(insight.reason)}</p><strong>${esc(insight.action)}</strong><a href="${esc(insight.href)}" target="_blank" rel="noopener">Otwórz miejsce na stronie</a></article>`).join('') : '<p class="module-empty">Za mało danych na regułowe rekomendacje. Moduł uzupełni się wraz z eventami i feedbackiem.</p>';
           return `<section class="dashboard-panel module-view analytics-view">
-            <header class="module-head"><span class="eyebrow">Analityka strony</span><h2>Fundament analityki i Feedback Insights</h2><p>Moduł w przygotowaniu: zbiera bezosobowe eventy przez <strong>/api/analytics/event</strong> oraz pokazuje proste wnioski z zapytań i feedbacków. Bez cookies, bez IP, bez danych osobowych w eventach.</p></header>
+            <header class="module-head"><span class="eyebrow">Analityka strony</span><h2>Ruch, formularz, CAMPY i Feedback Insights</h2><p>Bezosobowe eventy z publicznej strony, formularza i My Stay. Bez cookies, bez IP, bez emaili, telefonów i nazwisk.</p></header>
             <div class="module-metrics">
               ${moduleMetric('AN','Event tracking',eventStatusLabel,eventStatusHint)}
               ${moduleMetric('EV','Liczba eventów', analyticsStorageStatus.ok ? analyticsStorageStatus.eventCount : '—', 'site_events')}
-              ${moduleMetric('KR','Kraje', byCountry.size, 'z zapytań')}
-              ${moduleMetric('JG','Języki', byLanguage.size, 'formularze i wiadomości')}
-              ${moduleMetric('FB','Feedback', feedbackItems.length, lowRatings.length ? `${lowRatings.length} niskich ocen` : 'brak alarmu')}
-              ${moduleMetric('CP','CAMPY / CTA','hooki gotowe','open_campy, campy_question')}
+              ${moduleMetric('FO','Formularz',`${bookingEvents.started || 0} → ${bookingEvents.submitted || 0}`,'start → submit')}
+              ${moduleMetric('CP','CAMPY',campyEvents.questions || 0,`${campyEvents.opened || 0} otwarć`)}
+              ${moduleMetric('MS','My Stay',myStayEvents.opened || 0,`${myStayEvents.feedback || 0} feedbacków`)}
+              ${moduleMetric('MB','Mobile',`${mobileShare}%`,'udział urządzeń')}
             </div>
             <div class="module-grid module-grid--two">
               <section class="module-card"><h3>Kraje z zapytań</h3><ul class="analytics-list">${topList(byCountry)}</ul></section>
               <section class="module-card"><h3>Języki formularzy</h3><ul class="analytics-list">${topList(byLanguage)}</ul></section>
-              <section class="module-card"><h3>Najczęstsze typy pobytu</h3><ul class="analytics-list">${topList(byStay)}</ul></section>
-              <section class="module-card"><h3>Eventy obsługiwane</h3><div class="crm-tags">${['page_view','language_change','click_cta','open_campy','campy_question','start_booking_form','submit_booking_form','feedback_submit','filter_used','category_click'].map((event)=>`<span>${esc(event)}</span>`).join('')}</div></section>
-              <section class="module-card module-card--wide important-card"><h3>Co poprawić na stronie</h3>${insights.length ? `<ul class="module-rule-list">${insights.map((insight)=>`<li>${esc(insight)}</li>`).join('')}</ul>` : '<p class="module-empty">Brak wystarczającej liczby feedbacków. System zacznie podpowiadać po zebraniu większej liczby opinii.</p>'}</section>
+              <section class="module-card"><h3>Języki strony</h3><ul class="analytics-list">${topList(eventLocales)}</ul></section>
+              <section class="module-card"><h3>Kraje / region języka</h3><ul class="analytics-list">${topList(eventCountries)}</ul></section>
+              <section class="module-card"><h3>Najczęściej odwiedzane podstrony</h3><ul class="analytics-list">${topList(eventPages)}</ul></section>
+              <section class="module-card"><h3>Podstrony z feedbackiem</h3><ul class="analytics-list">${topList(eventFeedbackPages)}</ul></section>
+              <section class="module-card"><h3>Najczęściej klikane CTA</h3><ul class="analytics-list">${topList(eventCtas)}</ul></section>
+              <section class="module-card"><h3>Tematy pytań CAMPY</h3><ul class="analytics-list">${topList(campyTopics)}</ul></section>
+              <section class="module-card"><h3>Urządzenia</h3><ul class="analytics-list">${topList(eventDevices)}</ul></section>
+              <section class="module-card"><h3>Lejek formularza</h3><ul class="analytics-list"><li><strong>Rozpoczęcia</strong><span>${esc(bookingEvents.started || 0)}</span></li><li><strong>Wysłania</strong><span>${esc(bookingEvents.submitted || 0)}</span></li><li><strong>Feedback</strong><span>${esc(bookingEvents.feedback || 0)}</span></li></ul></section>
+              <section class="module-card"><h3>Wycieczki i My Stay</h3><ul class="analytics-list"><li><strong>Kliknięcia wycieczek</strong><span>${esc(eventSummary.tours || 0)}</span></li><li><strong>Otwarcia My Stay</strong><span>${esc(myStayEvents.opened || 0)}</span></li><li><strong>Feedback My Stay</strong><span>${esc(myStayEvents.feedback || 0)}</span></li></ul></section>
+              <section class="module-card module-card--wide"><h3>Obsługiwane eventy</h3><div class="crm-tags">${['page_view','language_change','click_cta','open_campy','campy_question','start_booking_form','submit_booking_form','feedback_submit','filter_used','category_click','open_gallery','open_my_stay','my_stay_feedback','tour_cta_click','maps_cta_click','tram_info_click'].map((event)=>`<span>${esc(event)}</span>`).join('')}</div></section>
+              <section class="module-card module-card--wide important-card"><h3>Co poprawić na stronie</h3><div class="feedback-insights-grid">${insightHtml}</div></section>
               <section class="module-card module-card--wide"><h3>Sugestie tekstowe z feedbacków</h3>${improveTexts.length ? `<ul class="module-rule-list">${improveTexts.map((text)=>`<li>${esc(text)}</li>`).join('')}</ul>` : '<p class="module-empty">Brak tekstowych sugestii od klientów.</p>'}</section>
             </div>
           </section>`;
@@ -2810,6 +2843,8 @@ const title = 'CC SYSTEM';
           const warnings = warningsFor(item, categories);
           const suggestions = suggestBestReplies(item).map(([title,copy])=>`<li><strong>${esc(title)}</strong><small>${esc(copy)}</small></li>`).join('');
           const bestSuggestion = suggestBestReply(item);
+          const myStay = item.my_stay && typeof item.my_stay === 'object' ? item.my_stay : null;
+          const myStayFeedback = myStay?.feedback || null;
           const threadKey = `${String(item.email || item.phone || 'no-contact').toLowerCase()}::${item.arrival_date || '-'}|${item.departure_date || '-'}`;
           const conversationTitle = [item.full_name || 'Klient', item.stay_type, `${item.arrival_date || '-'} — ${item.departure_date || '-'}`].filter(Boolean).join(' · ');
           const timeline = [
@@ -2826,6 +2861,7 @@ const title = 'CC SYSTEM';
               <section class="detail-card"><h3>🌍 Kraj i język</h3><p><strong>${esc(country.flag)} ${esc(country.label)}</strong><br>Kod kraju: ${esc(country.code || '-')}<br>Język: ${esc(country.language)}</p><small>${esc(country.risk || 'Brak widocznego ryzyka tłumaczeniowego.')}</small></section>
               <section class="detail-card"><h3>📅 Pobyt</h3><p><strong>${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')}</strong><br>${esc(item.nights || 0)} nocy</p><small>Przyjazd: ${esc(payload.arrivalTime || 'jeszcze nie wiem')}</small></section>
               <section class="detail-card"><h3>💰 Cena</h3><p><strong>${esc(item.estimated_total_pln ?? '-')} PLN</strong></p><small>Kwota orientacyjna</small></section>
+              <section class="detail-card detail-card--wide my-stay-admin-card"><h3>🌿 My Stay Panel</h3>${myStay ? `<p><strong>${myStay.openCount ? 'Otwarty przez klienta' : 'Jeszcze nieotwarty'}</strong> · ${esc(myStay.openCount || 0)} otwarć</p><small>Ostatnio otwarty: ${esc(myStay.lastOpenedAt ? formatDate(myStay.lastOpenedAt,true) : '—')} · token: ${esc(myStay.status || 'active')}</small>${myStayFeedback ? `<small>Feedback: ${esc(myStayFeedback.rating || '—')}/5 · przydatny: ${myStayFeedback.helpful === true ? 'tak' : myStayFeedback.helpful === false ? 'nie' : '—'}${myStayFeedback.text ? ` · ${esc(myStayFeedback.text)}` : ''}</small>` : '<small>Feedback: brak</small>'}<div class="inline-actions"><button type="button" data-copy-stay>Kopiuj link</button><a href="${esc(myStay.url)}" target="_blank" rel="noopener noreferrer">Otwórz podgląd</a><button type="button" data-my-stay-action="regenerate">Regeneruj link</button></div>` : `<p>Link nie został jeszcze utworzony albo migracja My Stay nie jest aktywna.</p><div class="inline-actions"><button type="button" data-my-stay-action="create">Utwórz My Stay link</button></div>`}</section>
               <section class="detail-card"><h3>👥 Osoby</h3><dl class="plain-list"><div><dt>Dorośli</dt><dd>${esc(guests.adults)}</dd></div><div><dt>Dzieci 4–14</dt><dd>${esc(guests.children)}</dd></div><div><dt>Dzieci 0–4</dt><dd>${esc(guests.toddlers)}</dd></div><div><dt>Razem</dt><dd>${esc(guests.total || '-')}</dd></div><div><dt>Domek</dt><dd>${esc(guests.bungalowGuests || '-')}</dd></div><div><dt>Camping</dt><dd>${esc(guests.campingGuests || '-')}</dd></div></dl></section>
               <section class="detail-card"><h3>🗺️ Wycieczki</h3><p>${esc(trips(item).join(', ') || 'Brak')}</p></section>
               <section class="detail-card"><h3>🎟️ Wydarzenie</h3><p>${esc(eventInterest(item) || 'Brak')}</p></section>
@@ -2858,9 +2894,11 @@ const title = 'CC SYSTEM';
           const priority = categories.includes('urgent') || categories.includes('mailFailed') || categories.includes('group') ? 'Pilne' : 'Normalne';
           const recommendedId = recommendedTemplateId(item);
           const bestSuggestion = suggestBestReply(item);
+          const myStay = item.my_stay && typeof item.my_stay === 'object' ? item.my_stay : null;
+          const myStayBadge = myStay ? `<span class="category-badge category-my-stay">My Stay · ${myStay.feedback ? 'feedback' : myStay.openCount ? 'otwarty' : 'nieotwarty'}</span>` : '';
           return `<article class="inquiry-card" data-id="${esc(item.id)}">
             <header>
-              <div><div class="card-badges"><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span>${categoryBadges}${highSeason ? '<span class="season-badge">Lipiec/sierpień — camping bez rezerwacji</span>':''}</div><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.nights || 0)} nocy</p></div>
+              <div><div class="card-badges"><span class="status-badge status-${esc(item.status)}">${esc(statusLabels[item.status] || item.status)}</span>${categoryBadges}${myStayBadge}${highSeason ? '<span class="season-badge">Lipiec/sierpień — camping bez rezerwacji</span>':''}</div><h2>${esc(item.full_name || 'Bez nazwy')}</h2><p>${esc(item.stay_type || '-')} · ${esc(item.arrival_date || '-')} — ${esc(item.departure_date || '-')} · ${esc(item.nights || 0)} nocy</p></div>
               <div class="card-date"><small>Dodano</small><strong>${esc(formatDate(item.created_at,true))}</strong><code>${esc(item.id)}</code></div>
             </header>
             <div class="inquiry-card__summary">
@@ -2984,6 +3022,7 @@ const title = 'CC SYSTEM';
               error:analyticsResult?.error || analyticsResult?.reason || analyticsResult?.code || '',
               eventCount:Number(analyticsResult?.eventCount || 0),
               recentEvents:Array.isArray(analyticsResult?.recentEvents) ? analyticsResult.recentEvents : [],
+              summary:analyticsResult?.summary || {},
             };
             setOptions('status',Object.keys(statusLabels),(value)=>statusLabels[value] || value);
             setOptions('category',Object.keys(categoryLabels),(value)=>categoryLabels[value] || value);
@@ -3458,7 +3497,7 @@ const title = 'CC SYSTEM';
             hydrateDebug(target);
           }
         }, true);
-        list?.addEventListener('click',(event)=>{
+        list?.addEventListener('click',async(event)=>{
           const target = event.target;
           if (!(target instanceof Element)) return;
           const campCountryButton = target.closest('[data-camp-country-code]');
@@ -3683,6 +3722,24 @@ const title = 'CC SYSTEM';
             openReplyModal(item, template, node, 'replied');
             return;
           }
+          const myStayAction = target.closest('[data-my-stay-action]');
+          if (myStayAction instanceof HTMLButtonElement) {
+            const action = myStayAction.dataset.myStayAction || 'create';
+            if (action === 'regenerate' && !window.confirm('Poprzedni link przestanie działać. Regenerować My Stay link?')) return;
+            myStayAction.disabled = true;
+            myStayAction.textContent = action === 'create' ? 'Tworzenie…' : 'Regenerowanie…';
+            try {
+              const result = await request('/api/stay/admin', { method:'POST', body:JSON.stringify({ action, inquiryId:item.id, locale:item.language || 'pl' }) });
+              item.my_stay = result.myStay;
+              showToast(action === 'create' ? 'My Stay link utworzony.' : 'My Stay link zregenerowany.', 'success');
+              render();
+            } catch (error) {
+              myStayAction.disabled = false;
+              myStayAction.textContent = action === 'create' ? 'Utwórz My Stay link' : 'Regeneruj link';
+              showToast(error.message || 'Nie udało się zmienić My Stay linka.', 'error');
+            }
+            return;
+          }
           if (target.closest('[data-save]')) void save(node);
           const quick = target.closest('[data-quick-status]');
           if (quick instanceof HTMLElement) void save(node,quick.dataset.quickStatus);
@@ -3711,7 +3768,7 @@ const title = 'CC SYSTEM';
           }
           const actions = [
             ['[data-copy-summary]',summaryText(item)],['[data-copy-email]',item.email],['[data-copy-phone]',item.phone],
-            ['[data-copy-client-safe]',clientSafeSummaryText(item)],['[data-copy-mail]',mailText(item)],['[data-copy-id]',`${location.origin}/cc-gate-a8f3k9r2p6#${item.id}\nID: ${item.id}`],
+            ['[data-copy-client-safe]',clientSafeSummaryText(item)],['[data-copy-mail]',mailText(item)],['[data-copy-stay]',item.my_stay?.url],['[data-copy-id]',`${location.origin}/cc-gate-a8f3k9r2p6#${item.id}\nID: ${item.id}`],
           ];
           actions.forEach(([selector,text])=>{const button=target.closest(selector);if(button instanceof HTMLButtonElement && text) void copy(text,button);});
         });
@@ -3727,6 +3784,47 @@ const title = 'CC SYSTEM';
   :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#07140f;color:#effbf3}*{box-sizing:border-box}body{margin:0;min-width:320px;min-height:100vh;background:radial-gradient(circle at 15% 0%,rgba(60,179,113,.22),transparent 30%),linear-gradient(145deg,#07140f,#102b1d)}button,input,select,textarea{font:inherit}button,.card-actions a,.inline-actions a{border:0;cursor:pointer}[hidden]{display:none!important}.inbox-shell{width:min(1500px,calc(100% - 28px));margin:auto;padding:clamp(28px,5vw,64px) 0}.login-card{width:min(540px,100%);margin:8vh auto 0;padding:clamp(24px,5vw,42px);border:1px solid rgba(143,224,180,.2);border-radius:30px;background:rgba(15,42,28,.88);box-shadow:0 30px 100px rgba(0,0,0,.32)}.eyebrow{color:#8fe0b4;font-size:.76rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}h1{margin:10px 0;font-size:clamp(2rem,5vw,4rem);line-height:1}p{color:rgba(239,251,243,.72);line-height:1.55}label{display:grid;gap:7px;color:rgba(239,251,243,.76);font-size:.82rem;font-weight:800}input,select,textarea{width:100%;border:1px solid rgba(255,255,255,.13);border-radius:14px;color:#effbf3;background:rgba(255,255,255,.07);outline:0}input,select{min-height:46px;padding:0 12px}textarea{padding:12px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:rgba(143,224,180,.55);box-shadow:0 0 0 4px rgba(60,179,113,.12)}button,.card-actions a,.inline-actions a{min-height:42px;display:inline-flex;align-items:center;justify-content:center;padding:0 15px;border-radius:13px;color:#07140f;background:#8fe0b4;font-weight:900;text-decoration:none}button.ghost,.card-actions button,.card-actions a,.inline-actions button,.inline-actions a{color:#e7fff0;border:1px solid rgba(143,224,180,.18);background:rgba(255,255,255,.07)}button:disabled{opacity:.45;cursor:not-allowed}.login-card form{display:grid;gap:14px;margin-top:24px}.status,.app-status{min-height:22px;margin:0;color:#ffcf91;font-weight:800}.app-header{display:flex;gap:20px;align-items:end;justify-content:space-between;margin-bottom:24px}.app-header p{margin:0}.header-actions{display:flex;gap:9px}.stats-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:0 0 14px}.stats-grid article{display:grid;gap:4px;padding:16px;border:1px solid rgba(143,224,180,.15);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.035))}.stats-grid strong{color:#8fe0b4;font-size:1.75rem}.stats-grid span{color:rgba(239,251,243,.66);font-size:.76rem;font-weight:850}.filters{display:grid;grid-template-columns:2fr repeat(7,minmax(130px,1fr));gap:10px;padding:16px;border:1px solid rgba(143,224,180,.17);border-radius:24px;background:rgba(8,28,18,.72)}.filters .check{display:flex;align-items:center;gap:8px;min-height:42px;padding:8px 10px;border-radius:13px;background:rgba(255,255,255,.05)}.filters .check input{width:18px;min-height:18px;accent-color:#3CB371}.inquiry-list{display:grid;gap:20px;margin-top:16px}.inquiry-card{padding:clamp(18px,3vw,28px);border:1px solid rgba(255,255,255,.12);border-radius:28px;background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.045));box-shadow:0 20px 60px rgba(0,0,0,.18)}.inquiry-card>header{display:flex;justify-content:space-between;gap:20px;align-items:start}.inquiry-card h2{margin:12px 0 5px;font-size:clamp(1.45rem,3vw,2.1rem)}.inquiry-card header p{margin:0}.card-badges{display:flex;flex-wrap:wrap;gap:7px}.status-badge,.mail-badge,.season-badge,.category-badge{display:inline-flex;min-height:28px;align-items:center;padding:0 10px;border-radius:999px;color:#07140f;background:#8fe0b4;font-size:.7rem;font-weight:950;text-transform:uppercase}.category-badge{color:#dffff0;border:1px solid rgba(143,224,180,.2);background:rgba(255,255,255,.08)}.category-urgent,.category-mailFailed{color:#3d2600;background:#ffd08a}.category-group,.category-scouts{color:#101d35;background:#a9c8ff}.category-feedback{color:#372b00;background:#ffe492}.status-spam,.status-rejected,.mail-badge.is-failed{background:#f2c078}.status-archived{color:#effbf3;background:#53665b}.mail-badge.is-ok{background:#7be3a8}.season-badge{color:#4a2b00;background:#ffd696}.crm-warnings{display:grid;gap:7px;margin-top:16px}.crm-warnings p{margin:0;padding:10px 13px;border:1px solid rgba(255,208,138,.22);border-radius:13px;color:#ffe4b8;background:rgba(255,208,138,.08);font-weight:800}.card-date{display:grid;gap:5px;min-width:190px;text-align:right}.card-date small{color:rgba(239,251,243,.52)}.card-date code{color:#8fe0b4;font-size:.72rem}.details-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:20px 0}.detail-card{min-width:0;padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.055)}.detail-card--wide{grid-column:span 2}.detail-card h3{margin:0 0 12px;color:#9ee8bd;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase}.detail-card p{margin:0;color:#effbf3;overflow-wrap:anywhere}.detail-card a{color:#dffff0}.detail-card small{display:block;margin-top:8px;color:rgba(239,251,243,.58);line-height:1.5}.feedback-card{border-color:rgba(255,228,146,.2);background:rgba(255,228,146,.06)}.service-list,.consent-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}.service-list li{display:grid;grid-template-columns:38px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px;border-radius:14px;background:rgba(255,255,255,.055)}.service-list li>span{display:grid;width:38px;height:38px;place-items:center;border-radius:12px;background:rgba(60,179,113,.13);font-size:1.2rem}.service-list strong,.service-list small{display:block;margin:0}.service-list small{color:rgba(239,251,243,.5)}.service-list b{color:#8fe0b4}.service-list em{color:#fff;font-style:normal;font-weight:850}.plain-list{display:grid;gap:6px;margin:0}.plain-list div{display:grid;grid-template-columns:1fr 1.2fr;gap:8px}.plain-list dt{color:rgba(239,251,243,.5);font-size:.72rem}.plain-list dd{margin:0;text-align:right;overflow-wrap:anywhere}.consent-list b{color:#8fe0b4}.message-copy{white-space:pre-wrap}.mail-status-card.is-failed{border-color:rgba(242,192,120,.28);background:rgba(242,192,120,.08)}.mail-status-card.is-ok{border-color:rgba(123,227,168,.24)}.inline-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.technical-data{grid-column:1/-1;padding:12px 15px;border:1px dashed rgba(143,224,180,.2);border-radius:16px}.technical-data summary{cursor:pointer;color:rgba(239,251,243,.65);font-weight:850}.technical-data pre{max-height:320px;overflow:auto;white-space:pre-wrap;color:#bde8cd}.edit-row{display:grid;grid-template-columns:190px minmax(260px,1fr) auto;gap:10px;align-items:end;padding-top:16px;border-top:1px solid rgba(255,255,255,.09)}.card-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.empty{padding:40px;border:1px dashed rgba(143,224,180,.22);border-radius:22px;text-align:center;color:rgba(239,251,243,.65)}
   @media(max-width:1180px){.stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.filters{grid-template-columns:repeat(3,minmax(0,1fr))}.filters .search{grid-column:1/-1}.details-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:720px){.inbox-shell{width:min(100% - 16px,1500px);padding-top:18px}.app-header,.inquiry-card>header{align-items:stretch;flex-direction:column}.header-actions,.header-actions button{width:100%}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.filters,.details-grid,.edit-row{grid-template-columns:1fr}.filters .search,.detail-card--wide{grid-column:auto}.card-date{text-align:left}.card-actions>*{width:100%}.service-list li{grid-template-columns:38px 1fr}.service-list b,.service-list em{grid-column:2}.inline-actions{display:grid}.inline-actions>*{width:100%}}
+</style>
+
+<style is:global>
+  .cc-system-app .category-my-stay {
+    color: #082015;
+    background: #9af0bd;
+  }
+  .cc-system-app .my-stay-admin-card {
+    border-color: rgba(114,235,166,.25);
+    background: linear-gradient(145deg,rgba(52,153,96,.13),rgba(255,255,255,.04));
+  }
+  .cc-system-app .feedback-insights-grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 10px;
+  }
+  .cc-system-app .feedback-insight {
+    display: grid;
+    gap: 7px;
+    padding: 15px;
+    border: 1px solid rgba(255,214,107,.16);
+    border-radius: 16px;
+    background: rgba(255,214,107,.055);
+  }
+  .cc-system-app .feedback-insight span {
+    width: fit-content;
+    padding: 3px 8px;
+    border-radius: 999px;
+    color: #241b00;
+    background: #ffd66b;
+    font-size: .66rem;
+    font-weight: 950;
+    text-transform: uppercase;
+  }
+  .cc-system-app .feedback-insight h4,
+  .cc-system-app .feedback-insight p,
+  .cc-system-app .feedback-insight strong { margin: 0; }
+  .cc-system-app .feedback-insight a { color: #9af0bd; font-weight: 850; }
+  @media(max-width:720px) {
+    .cc-system-app .feedback-insights-grid { grid-template-columns: 1fr; }
+  }
 </style>
 
 <style is:global>

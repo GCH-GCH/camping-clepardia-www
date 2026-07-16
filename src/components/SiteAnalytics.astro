@@ -1,0 +1,122 @@
+<script>
+  const supportedEvents = new Set([
+    'page_view', 'language_change', 'click_cta', 'open_campy', 'campy_question',
+    'start_booking_form', 'submit_booking_form', 'feedback_submit', 'filter_used',
+    'category_click', 'open_gallery', 'tour_cta_click', 'maps_cta_click', 'tram_info_click',
+  ]);
+
+  const cleanPath = (value = location.pathname) => {
+    const path = String(value || '/').split(/[?#]/)[0].replace(/^\/stay\/[^/]+/i, '/stay/:token');
+    return path.slice(0, 240) || '/';
+  };
+  const locale = () => {
+    const candidate = document.documentElement.lang.toLowerCase().split('-')[0];
+    return ['pl', 'en', 'de', 'it', 'fr', 'es', 'nl', 'cs', 'sk', 'sv'].includes(candidate) ? candidate : 'pl';
+  };
+  const countryGuess = () => {
+    const parts = String(navigator.language || '').split(/[-_]/);
+    return parts[1]?.toUpperCase().slice(0, 3) || '';
+  };
+  const deviceType = () => window.matchMedia('(max-width: 767px)').matches ? 'mobile' : window.matchMedia('(max-width: 1100px)').matches ? 'tablet' : 'desktop';
+  const referrer = () => {
+    if (!document.referrer) return '';
+    try {
+      const url = new URL(document.referrer);
+      return `${url.origin}${cleanPath(url.pathname)}`;
+    } catch { return ''; }
+  };
+  const safeLabel = (value) => String(value || '')
+    .replace(/[^\s@]+@[^\s@]+\.[^\s@]+/g, '')
+    .replace(/(?:\+?\d[\s().-]*){7,}/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 100);
+  const safeMetadata = (value = {}) => Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => !/(email|phone|name|message|token|address|plate|client)/i.test(key))
+      .slice(0, 16)
+      .map(([key, entry]) => [key.slice(0, 60), typeof entry === 'string' ? safeLabel(entry) : entry]),
+  );
+  const track = (eventType, metadata = {}) => {
+    if (!supportedEvents.has(eventType)) return;
+    const body = JSON.stringify({
+      eventType,
+      pagePath: cleanPath(),
+      locale: locale(),
+      countryGuess: countryGuess(),
+      referrer: referrer(),
+      deviceType: deviceType(),
+      metadata: safeMetadata(metadata),
+    });
+    fetch('/api/analytics/event', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body,
+      keepalive: true,
+    }).catch(() => {});
+  };
+  const topicFor = (value) => {
+    const text = String(value || '').toLowerCase();
+    if (/prąd|prad|electric|strom|10a|ev/.test(text)) return 'prąd_10a_ev';
+    if (/lip|sier|july|august|juli|agosto|summer/.test(text)) return 'lipiec_sierpień';
+    if (/dojazd|maps|tram|center|centre|centrum|route/.test(text)) return 'dojazd';
+    if (/wyciecz|tour|wielicz|auschwitz|zakop|energy/.test(text)) return 'wycieczki';
+    if (/domek|bungalow|cabin/.test(text)) return 'domki';
+    if (/pies|dog|hund|chien|perro|cane/.test(text)) return 'pies';
+    if (/cena|price|cost|preis|tarif/.test(text)) return 'cennik';
+    return 'inne';
+  };
+
+  window.addEventListener('cc:analytics', (event) => {
+    const detail = event instanceof CustomEvent && event.detail && typeof event.detail === 'object' ? event.detail : {};
+    track(detail.eventType, detail.metadata || {});
+  });
+
+  let bookingStarted = false;
+  const recordBookingStart = (event) => {
+    if (!bookingStarted && event.target instanceof Element && event.target.closest('[data-reservation-mini-game]')) {
+      bookingStarted = true;
+      track('start_booking_form', { source: 'booking_interaction' });
+    }
+  };
+  document.addEventListener('pointerdown', recordBookingStart, { passive: true });
+  document.addEventListener('focusin', recordBookingStart);
+
+  document.addEventListener('submit', (event) => {
+    if (!(event.target instanceof Element) || !event.target.matches('[data-chat-form]')) return;
+    const input = event.target.querySelector('[data-chat-input]');
+    track('campy_question', { topic: topicFor(input instanceof HTMLInputElement ? input.value : ''), source: 'campy_form' });
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!(event.target instanceof Element)) return;
+    const target = event.target.closest('a, button');
+    if (!(target instanceof HTMLElement)) return;
+    const label = safeLabel(target.dataset.analyticsLabel || target.getAttribute('aria-label') || target.textContent);
+
+    if (target.matches('[data-chat-toggle]')) track('open_campy', { source: 'floating_button' });
+    if (target.matches('[data-gallery-item]')) track('open_gallery', { category: target.dataset.category || 'all' });
+    if (target.matches('[data-gallery-filter]')) track('filter_used', { category: target.dataset.galleryFilter || 'all', source: 'gallery' });
+    if (target.matches('[data-category], [data-gallery-item]')) track('category_click', { category: target.dataset.category || 'all' });
+
+    const languageLink = target.closest('.main-navbar-lang__item, .main-navbar-mobile__language');
+    if (languageLink) {
+      const code = languageLink.querySelector('[data-code]')?.getAttribute('data-code') || '';
+      track('language_change', { label: code, source: 'navbar' });
+    }
+
+    if (target instanceof HTMLAnchorElement) {
+      const href = target.href || '';
+      if (/qr\.codes\/vksKBT/i.test(href)) track('tour_cta_click', { label: label || 'tour_cta', source: cleanPath() });
+      if (/google\.[^/]+\/maps|maps\.app\.goo\.gl/i.test(href)) track('maps_cta_click', { label: label || 'google_maps', source: cleanPath() });
+      if (/tram|dojazd|transport/i.test(`${href} ${target.dataset.analyticsTarget || ''}`)) track('tram_info_click', { label: label || 'tram_info', source: cleanPath() });
+    }
+
+    if (target.matches('.btn, .reservation-btn, .main-navbar__cta, [data-analytics-cta]')) {
+      const href = target instanceof HTMLAnchorElement ? cleanPath(target.pathname) : '';
+      track('click_cta', { label, eventTarget: target.dataset.analyticsTarget || href || target.dataset.action || 'button' });
+    }
+  });
+
+  track('page_view', { source: 'public_site' });
+</script>

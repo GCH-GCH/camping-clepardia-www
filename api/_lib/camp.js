@@ -53,6 +53,33 @@ const safeArray = (value) => Array.isArray(value) ? value : [];
 const safeObject = (value) => value && typeof value === 'object' && !Array.isArray(value) ? value : {};
 const analyticsPrivateKeyPattern = /(email|e-mail|mail|phone|telefon|tel|name|nazw|client|klient|message|wiadom|document|passport|dowod|dowód|plate|registration|rejestr|vehicle|pojazd|token|secret|cookie|ip|address|adres)/i;
 
+const analyticsText = (value, max = 240) => {
+  const text = oneLine(value, max);
+  if (/[^\s@]+@[^\s@]+\.[^\s@]+/.test(text)) return '[redacted]';
+  if (/(?:\+?\d[\s().-]*){7,}/.test(text)) return '[redacted]';
+  return text;
+};
+
+const analyticsPath = (value) => {
+  let path = oneLine(value, 300).split(/[?#]/)[0] || '/';
+  try {
+    if (/^https?:\/\//i.test(path)) path = new URL(path).pathname;
+  } catch {}
+  path = path.replace(/^\/stay\/[^/]+/i, '/stay/:token');
+  return path.slice(0, 240) || '/';
+};
+
+const analyticsReferrer = (value) => {
+  const text = oneLine(value, 300);
+  if (!text) return '';
+  try {
+    const url = new URL(text);
+    return `${url.origin}${analyticsPath(url.pathname)}`.slice(0, 300);
+  } catch {
+    return analyticsPath(text);
+  }
+};
+
 const sanitizeAnalyticsMetadata = (value, depth = 0) => {
   if (depth > 2) return {};
   if (Array.isArray(value)) {
@@ -60,7 +87,7 @@ const sanitizeAnalyticsMetadata = (value, depth = 0) => {
       .slice(0, 20)
       .map((entry) => (entry && typeof entry === 'object'
         ? sanitizeAnalyticsMetadata(entry, depth + 1)
-        : oneLine(entry, 160)))
+        : analyticsText(entry, 160)))
       .filter((entry) => !(entry && typeof entry === 'object' && Object.keys(entry).length === 0));
   }
   if (!safeObject(value)) return {};
@@ -75,7 +102,7 @@ const sanitizeAnalyticsMetadata = (value, depth = 0) => {
         if (Array.isArray(entry) || typeof entry === 'object') {
           return [oneLine(key, 80), sanitizeAnalyticsMetadata(entry, depth + 1)];
         }
-        return [oneLine(key, 80), oneLine(entry, 240)];
+        return [oneLine(key, 80), analyticsText(entry, 240)];
       }),
   );
 };
@@ -181,16 +208,62 @@ export const listCampStays = async () => {
 
 export const getSiteEventsStatus = async () => {
   const { body, status } = await supabaseRequest(
-    `${SITE_EVENTS_TABLE}?select=id,event_type,locale,country_guess,created_at&order=created_at.desc&limit=200`,
+    `${SITE_EVENTS_TABLE}?select=id,event_type,page_path,locale,country_guess,device_type,metadata_json,created_at&order=created_at.desc&limit=1000`,
     { method: 'GET' },
   );
   const events = Array.isArray(body) ? body : [];
+  const countBy = (read) => events.reduce((map, event) => {
+    const key = oneLine(read(event), 160) || 'unknown';
+    map[key] = (map[key] || 0) + 1;
+    return map;
+  }, {});
+  const eventsOf = (type) => events.filter((event) => event.event_type === type);
+  const ctaEvents = events.filter((event) => ['click_cta', 'tour_cta_click', 'maps_cta_click', 'tram_info_click'].includes(event.event_type));
+  const feedbackEvents = events.filter((event) => ['feedback_submit', 'my_stay_feedback'].includes(event.event_type));
+  const summary = {
+    byType: countBy((event) => event.event_type),
+    byLocale: countBy((event) => event.locale),
+    byCountry: countBy((event) => event.country_guess),
+    byDevice: countBy((event) => event.device_type),
+    byPage: countBy((event) => event.page_path),
+    byFeedbackPage: feedbackEvents.reduce((map, event) => {
+      const key = oneLine(event.page_path, 160) || 'unknown';
+      map[key] = (map[key] || 0) + 1;
+      return map;
+    }, {}),
+    byCta: ctaEvents.reduce((map, event) => {
+      const metadata = safeObject(event.metadata_json);
+      const key = oneLine(metadata.label || metadata.eventTarget || event.event_type, 120) || event.event_type;
+      map[key] = (map[key] || 0) + 1;
+      return map;
+    }, {}),
+    campyTopics: eventsOf('campy_question').reduce((map, event) => {
+      const topic = oneLine(safeObject(event.metadata_json).topic, 80) || 'inne';
+      map[topic] = (map[topic] || 0) + 1;
+      return map;
+    }, {}),
+    booking: {
+      started: eventsOf('start_booking_form').length,
+      submitted: eventsOf('submit_booking_form').length,
+      feedback: eventsOf('feedback_submit').length,
+    },
+    campy: {
+      opened: eventsOf('open_campy').length,
+      questions: eventsOf('campy_question').length,
+    },
+    tours: eventsOf('tour_cta_click').length,
+    myStay: {
+      opened: eventsOf('open_my_stay').length,
+      feedback: eventsOf('my_stay_feedback').length,
+    },
+  };
   return {
     ok: true,
     status,
     table: SITE_EVENTS_TABLE,
     eventCount: events.length,
-    recentEvents: events.slice(0, 20),
+    recentEvents: events.slice(0, 100),
+    summary,
   };
 };
 
@@ -230,6 +303,12 @@ export const allowedSiteEventTypes = new Set([
   'feedback_submit',
   'filter_used',
   'category_click',
+  'open_gallery',
+  'open_my_stay',
+  'my_stay_feedback',
+  'tour_cta_click',
+  'maps_cta_click',
+  'tram_info_click',
 ]);
 
 export const saveSiteEvent = async (payload = {}) => {
@@ -245,10 +324,10 @@ export const saveSiteEvent = async (payload = {}) => {
   const metadataText = JSON.stringify(metadata).slice(0, 5000);
   const record = {
     event_type: eventType,
-    page_path: oneLine(payload.pagePath || payload.page_path, 240),
+    page_path: analyticsPath(payload.pagePath || payload.page_path),
     locale: oneLine(payload.locale, 16).toLowerCase(),
     country_guess: oneLine(payload.countryGuess || payload.country_guess, 80),
-    referrer: oneLine(payload.referrer, 300),
+    referrer: analyticsReferrer(payload.referrer),
     device_type: oneLine(payload.deviceType || payload.device_type, 40),
     metadata_json: JSON.parse(metadataText || '{}'),
   };

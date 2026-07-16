@@ -20,7 +20,7 @@ const sanitize = (value: unknown) =>
 
 const normalizeLanguage = (value: unknown) => {
   const language = String(value ?? 'pl').toLowerCase();
-  return ['pl', 'en', 'de', 'it'].includes(language) ? language : 'en';
+  return ['pl', 'en', 'de', 'it', 'fr', 'es', 'nl', 'cs', 'sk', 'sv'].includes(language) ? language : 'en';
 };
 
 const normalizeHistory = (value: unknown) => {
