@@ -37,6 +37,7 @@ export default async function handler(req, res) {
     const body = req.method === 'POST' ? await readJsonBody(req) : {};
     const token = String(body.token || req.query?.token || '').trim();
     const locale = String(body.lang || req.query?.lang || '').trim();
+    const isAdminPreview = req.method === 'GET' && String(req.query?.preview || '') === '1';
     const result = await getStayPanelByToken(token, locale);
     if (!result) return genericError(res, 404);
 
@@ -45,12 +46,14 @@ export default async function handler(req, res) {
         openCount: Number(result.panel.open_count || 0),
         lastOpenedAt: result.panel.last_opened_at || null,
       };
-      try {
-        openState = await recordStayPanelOpen(result.panel);
-      } catch (error) {
-        logInboxError('stay-open-count', error);
+      if (!isAdminPreview) {
+        try {
+          openState = await recordStayPanelOpen(result.panel);
+        } catch (error) {
+          logInboxError('stay-open-count', error);
+        }
+        await track('open_my_stay', result, { source: 'magic_link' });
       }
-      await track('open_my_stay', result, { source: 'magic_link' });
       return sendJson(res, 200, {
         ok: true,
         panel: { ...result.publicData, panel: { ...result.publicData.panel, ...openState } },

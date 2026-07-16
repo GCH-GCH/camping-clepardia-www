@@ -244,6 +244,7 @@ import { myStayCopy } from '@/i18n/myStay';
         try {
           const query = new URLSearchParams({ token });
           if (langOverride) query.set('lang', langOverride);
+          if (params.get('preview') === '1') query.set('preview', '1');
           const response = await fetch(`/api/stay/panel?${query.toString()}`, { headers:{ accept:'application/json' }, cache:'no-store' });
           const result = await response.json();
           if (!response.ok || !result.ok || !result.panel) throw new Error('STAY_PANEL_NOT_FOUND');
