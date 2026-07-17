@@ -406,31 +406,51 @@ const interestIcons: Record<string, string> = { classic:'Landmark', history:'Mus
 .planner-skeleton__card { height:248px; }
 .planner-skeleton__hero::after,.planner-skeleton__weather::after,.planner-skeleton__card::after { content:""; position:absolute; inset:0; background:linear-gradient(100deg,transparent 20%,rgba(159,255,199,.1) 45%,transparent 70%); transform:translateX(-100%); animation:plannerShimmer 1.1s infinite; }
 
-.planner-dialog { width:min(920px,calc(100% - 28px)); max-height:min(86vh,780px); padding:0; overflow:hidden; border:1px solid rgba(103,233,159,.31); border-radius:24px; color:#f2fff7; background:#06271b; box-shadow:0 35px 110px rgba(0,0,0,.66); opacity:0; transform:scale(.96) translateY(10px); transition:opacity .2s ease,transform .28s cubic-bezier(.22,1,.36,1); }
-.planner-dialog[open].is-visible { opacity:1; transform:none; }
-.planner-dialog.is-closing { opacity:0; transform:scale(.97) translateY(8px); }
-.planner-dialog::backdrop { background:rgba(0,12,8,.72); backdrop-filter:blur(8px); }
-.planner-dialog__inner { position:relative; max-height:min(86vh,780px); overflow:auto; }
-.planner-dialog__hero { position:relative; min-height:210px; overflow:hidden; padding:28px; display:flex; align-items:flex-end; }
-.planner-dialog__hero img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.62; }
-.planner-dialog__hero::after { content:""; position:absolute; inset:0; background:linear-gradient(0deg,#06271b 0%,rgba(6,39,27,.42) 80%); }
-.planner-dialog__hero>div { position:relative; z-index:1; }
-.planner-dialog__hero span { color:#8ff1b6; font-size:.7rem; font-weight:900; text-transform:uppercase; }
-.planner-dialog__hero h2 { margin:5px 0 0; color:#fff; font-size:clamp(1.5rem,3vw,2.4rem); }
-.planner-dialog__close { position:absolute; z-index:4; top:14px; right:14px; display:grid; width:40px; height:40px; place-items:center; border:1px solid rgba(255,255,255,.2); border-radius:12px; color:#fff; background:rgba(3,25,17,.72); font-size:1.25rem; cursor:pointer; }
-.planner-dialog__body { display:grid; grid-template-columns:1.2fr .8fr; gap:14px; padding:0 22px 22px; }
-.planner-dialog__section { padding:15px; border:1px solid rgba(91,216,144,.16); border-radius:15px; background:rgba(12,53,37,.7); }
-.planner-dialog__section h3 { margin:0 0 10px; color:#a2f4c1; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; }
-.planner-dialog__timeline { display:grid; gap:8px; }
-.planner-dialog__timeline article { display:grid; grid-template-columns:28px minmax(0,1fr); gap:8px; }
-.planner-dialog__timeline b { color:#fff; font-size:.7rem; }
-.planner-dialog__timeline p,.planner-dialog__section p,.planner-dialog__section li { margin:3px 0 0; color:rgba(237,255,244,.7); font-size:.69rem; line-height:1.48; }
-.planner-dialog__section ul { display:grid; gap:5px; margin:0; padding-left:17px; }
-.planner-dialog__facts { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
-.planner-dialog__facts span { padding:9px; border-radius:10px; color:rgba(237,255,244,.72); background:rgba(4,31,22,.58); font-size:.65rem; }
-.planner-dialog__links { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
-.planner-dialog__links a { padding:8px 10px; border:1px solid rgba(86,224,146,.28); border-radius:9px; color:#adf5c8; font-size:.62rem; font-weight:800; text-decoration:none; }
-.planner-dialog__links a:hover { color:#fff; border-color:#55df90; }
+.planner-dialog { inset:0; width:94vw; height:92dvh; max-width:1580px; max-height:1000px; margin:auto!important; padding:0; overflow:hidden; border:1px solid rgba(103,233,159,.31); border-radius:28px; color:#f2fff7; background:#06271b; box-shadow:0 42px 130px rgba(0,0,0,.72); opacity:0; filter:blur(6px); transform:scale(.955) translateY(18px); transition:opacity .22s ease,transform .34s cubic-bezier(.22,1,.36,1),filter .3s ease; }
+.planner-dialog[open].is-visible { opacity:1; filter:none; transform:none; }
+.planner-dialog.is-closing { opacity:0; filter:blur(4px); transform:scale(.975) translateY(10px); }
+.planner-dialog::backdrop { background:rgba(0,12,8,.78); backdrop-filter:blur(10px); }
+.planner-dialog>[data-planner-modal-content] { height:100%; }
+.planner-dialog__inner { position:relative; height:100%; display:grid; grid-template-rows:auto minmax(0,1fr) auto; overflow:hidden; }
+.planner-dialog__topbar { z-index:5; min-height:70px; display:flex; align-items:center; gap:16px; padding:10px 18px 10px 22px; border-bottom:1px solid rgba(101,222,153,.16); background:rgba(5,37,26,.96); backdrop-filter:blur(18px); }
+.planner-dialog__topbar>strong { color:#9cf2bd; font-size:.88rem; letter-spacing:.025em; }
+.planner-dialog__topbar label { display:flex; align-items:center; gap:9px; margin-left:auto; color:rgba(236,255,243,.66); font-size:.74rem; font-weight:800; }
+.planner-dialog__topbar select { min-height:44px; padding:0 34px 0 12px; border:1px solid rgba(98,226,153,.25); border-radius:12px; color:#f1fff6; background:#0b432e; font:inherit; font-weight:850; cursor:pointer; }
+.planner-dialog__scroll { min-height:0; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; }
+.planner-dialog__hero { position:relative; min-height:clamp(270px,34vh,370px); overflow:hidden; padding:clamp(25px,4vw,54px); display:flex; align-items:flex-end; }
+.planner-dialog__hero img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.68; animation:plannerDialogHero .72s both cubic-bezier(.22,1,.36,1); }
+.planner-dialog__hero::after { content:""; position:absolute; inset:0; background:linear-gradient(0deg,#06271b 0%,rgba(6,39,27,.48) 58%,rgba(3,25,17,.14) 100%); }
+.planner-dialog__hero>div { position:relative; z-index:1; max-width:980px; }
+.planner-dialog__hero>div>span { color:#8ff1b6; font-size:.82rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+.planner-dialog__hero h2 { max-width:900px; margin:7px 0 0; color:#fff; font-size:clamp(2.15rem,4.1vw,4.3rem); line-height:1.02; letter-spacing:-.035em; }
+.planner-dialog__hero-meta { display:flex; flex-wrap:wrap; gap:9px; margin-top:18px; }
+.planner-dialog__hero-meta b { min-height:40px; display:inline-flex; align-items:center; padding:0 13px; border:1px solid rgba(126,239,175,.24); border-radius:12px; color:#effff5; background:rgba(4,31,22,.64); backdrop-filter:blur(12px); font-size:.8rem; }
+.planner-dialog__close { display:grid; flex:0 0 auto; width:48px; height:48px; place-items:center; border:1px solid rgba(255,255,255,.2); border-radius:14px; color:#fff; background:rgba(3,25,17,.72); font-size:1.45rem; cursor:pointer; }
+.planner-dialog__body { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(370px,.85fr); gap:17px; padding:18px 22px 28px; }
+.planner-dialog__aside { display:grid; align-content:start; gap:14px; }
+.planner-dialog__section { padding:clamp(17px,2vw,24px); border:1px solid rgba(91,216,144,.16); border-radius:18px; background:rgba(12,53,37,.72); animation:plannerDialogSection .5s both cubic-bezier(.22,1,.36,1); }
+.planner-dialog__aside .planner-dialog__section:nth-child(2){animation-delay:.05s}.planner-dialog__aside .planner-dialog__section:nth-child(3){animation-delay:.1s}.planner-dialog__aside .planner-dialog__section:nth-child(4){animation-delay:.15s}
+.planner-dialog__section--schedule { min-height:100%; background:linear-gradient(150deg,rgba(13,62,43,.9),rgba(8,43,31,.82)); }
+.planner-dialog__section--planb { border-color:rgba(237,195,77,.22); background:linear-gradient(140deg,rgba(86,65,10,.24),rgba(12,53,37,.72)); }
+.planner-dialog__section h3 { margin:0 0 16px; color:#a2f4c1; font-size:.82rem; text-transform:uppercase; letter-spacing:.07em; }
+.planner-dialog__timeline { display:grid; gap:12px; }
+.planner-dialog__timeline article { display:grid; grid-template-columns:48px minmax(0,1fr); gap:14px; min-height:112px; padding:17px; border:1px solid rgba(104,222,154,.13); border-radius:16px; background:rgba(4,31,22,.46); }
+.planner-dialog__timeline article>span { display:grid; width:48px; height:48px; place-items:center; border-radius:14px; background:rgba(50,185,107,.17); font-size:1.55rem; }
+.planner-dialog__timeline b { color:#fff; font-size:.9rem; }
+.planner-dialog__timeline p,.planner-dialog__section p,.planner-dialog__section li { margin:5px 0 0; color:rgba(237,255,244,.76); font-size:.88rem; line-height:1.58; }
+.planner-dialog__section ul { display:grid; gap:8px; margin:0; padding-left:19px; }
+.planner-dialog__facts { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.planner-dialog__facts span { min-height:54px; display:flex; align-items:center; padding:11px; border-radius:12px; color:rgba(237,255,244,.78); background:rgba(4,31,22,.58); font-size:.78rem; }
+.planner-dialog__links { display:flex; flex-wrap:wrap; gap:8px; margin-top:11px; }
+.planner-dialog__links a { min-height:44px; display:inline-flex; align-items:center; padding:0 13px; border:1px solid rgba(86,224,146,.28); border-radius:11px; color:#adf5c8; font-size:.74rem; font-weight:850; text-decoration:none; }
+.planner-dialog__links a:hover,.planner-dialog__links a:focus-visible { color:#fff; border-color:#55df90; outline:none; box-shadow:0 0 20px rgba(69,216,132,.13); }
+.planner-dialog__footer { z-index:5; min-height:76px; display:flex; align-items:center; justify-content:flex-end; gap:9px; padding:12px 18px; border-top:1px solid rgba(101,222,153,.16); background:rgba(5,37,26,.97); backdrop-filter:blur(18px); }
+.planner-dialog__footer button,.planner-dialog__footer a { min-height:46px; display:inline-flex; align-items:center; justify-content:center; padding:0 15px; border:1px solid rgba(98,226,153,.25); border-radius:13px; color:#effff5; background:rgba(17,80,53,.5); font:inherit; font-size:.78rem; font-weight:850; text-decoration:none; cursor:pointer; transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease; }
+.planner-dialog__footer a { background:linear-gradient(135deg,#39bf73,#16854c); }
+.planner-dialog__footer button:disabled { opacity:.38; cursor:default; }
+.planner-dialog__footer button:not(:disabled):hover,.planner-dialog__footer a:hover,.planner-dialog__footer button:focus-visible,.planner-dialog__footer a:focus-visible,.planner-dialog__close:focus-visible,.planner-dialog__topbar select:focus-visible { outline:none; border-color:#72eba6; box-shadow:0 0 22px rgba(64,218,130,.16); transform:translateY(-1px); }
+.planner-dialog__inner.is-entering-next { animation:plannerDialogNext .36s both cubic-bezier(.22,1,.36,1); }
+.planner-dialog__inner.is-entering-prev { animation:plannerDialogPrev .36s both cubic-bezier(.22,1,.36,1); }
 body.planner-modal-open { overflow:hidden; }
 
 .stay-planner__toast { position:fixed; z-index:10020; right:18px; bottom:18px; max-width:min(390px,calc(100% - 32px)); padding:13px 16px; border:1px solid rgba(105,239,163,.38); border-radius:14px; color:#ecfff4; background:rgba(7,52,34,.96); box-shadow:0 18px 55px rgba(0,0,0,.38); font-size:.76rem; font-weight:800; opacity:0; pointer-events:none; transform:translateY(14px); transition:opacity .25s ease,transform .35s cubic-bezier(.22,1,.36,1); }
@@ -447,6 +467,10 @@ body.planner-modal-open { overflow:hidden; }
 @keyframes plannerValueHighlight { 0%{color:#fff;transform:translateY(4px)} 45%{color:#7ff4ad;text-shadow:0 0 18px rgba(85,227,146,.55)} 100%{color:#f7fff9;transform:none;text-shadow:none} }
 @keyframes plannerIntroImage { from{opacity:.2;transform:scale(1.035)} to{opacity:.82;transform:none} }
 @keyframes plannerIntroContent { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+@keyframes plannerDialogHero { from{opacity:.2;transform:scale(1.045);filter:blur(5px)} to{opacity:.68;transform:none;filter:none} }
+@keyframes plannerDialogSection { from{opacity:0;transform:translateY(15px)} to{opacity:1;transform:none} }
+@keyframes plannerDialogNext { from{opacity:.35;transform:translateX(34px)} to{opacity:1;transform:none} }
+@keyframes plannerDialogPrev { from{opacity:.35;transform:translateX(-34px)} to{opacity:1;transform:none} }
 
 @media (max-width:1250px) {
   .stay-planner__dashboard { grid-template-columns:330px minmax(0,1fr); gap:16px; }
@@ -518,10 +542,24 @@ body.planner-modal-open { overflow:hidden; }
   .planner-upsell__benefits { grid-template-columns:1fr; gap:4px; }
   .planner-upsell__benefits span { grid-template-columns:20px 1fr; text-align:left; align-items:center; }
   .planner-summer { padding:16px; }
-  .planner-dialog { width:100%; max-width:none; height:100dvh; max-height:none; margin:0; border:0; border-radius:0; }
-  .planner-dialog__inner { max-height:100dvh; }
-  .planner-dialog__hero { min-height:220px; padding:22px 18px; }
-  .planner-dialog__body { grid-template-columns:1fr; padding:0 12px 18px; }
+  .planner-dialog { inset:0; width:100%; max-width:none; height:100dvh; max-height:none; margin:0!important; border:0; border-radius:0; }
+  .planner-dialog__inner { width:100%; height:100dvh; }
+  .planner-dialog__topbar { min-height:66px; padding:9px 10px 9px 13px; }
+  .planner-dialog__topbar label>span { display:none; }
+  .planner-dialog__topbar select { max-width:130px; }
+  .planner-dialog__hero { min-height:260px; padding:25px 16px; }
+  .planner-dialog__hero h2 { font-size:clamp(2rem,10vw,3rem); }
+  .planner-dialog__hero-meta { gap:6px; margin-top:13px; }
+  .planner-dialog__hero-meta b { min-height:38px; padding:0 9px; font-size:.7rem; }
+  .planner-dialog__body { grid-template-columns:1fr; gap:10px; padding:10px 10px 18px; }
+  .planner-dialog__aside { gap:10px; }
+  .planner-dialog__section { padding:16px; border-radius:16px; }
+  .planner-dialog__timeline article { grid-template-columns:42px minmax(0,1fr); min-height:104px; padding:13px; }
+  .planner-dialog__timeline article>span { width:42px; height:42px; font-size:1.3rem; }
+  .planner-dialog__timeline p,.planner-dialog__section p,.planner-dialog__section li { font-size:.84rem; }
+  .planner-dialog__footer { min-height:70px; justify-content:flex-start; overflow-x:auto; padding:9px; scrollbar-width:none; }
+  .planner-dialog__footer::-webkit-scrollbar { display:none; }
+  .planner-dialog__footer button,.planner-dialog__footer a { flex:0 0 auto; min-height:48px; padding:0 12px; }
   .planner-skeleton__cards { grid-template-columns:1fr; }
   .planner-skeleton__card:not(:first-child) { display:none; }
   .stay-planner__toast { right:8px; bottom:8px; max-width:calc(100% - 16px); }

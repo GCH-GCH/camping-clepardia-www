@@ -10,10 +10,20 @@ const queryValue = (value) => String(value ?? '').trim();
 
 const storageKey = (url) => `${WEATHER_STORAGE_PREFIX}${url}`;
 
+export const normalizeWeatherPayload = (payload = {}) => ({
+  ...payload,
+  current:payload?.current || null,
+  hourly:Array.isArray(payload?.hourly) ? payload.hourly : [],
+  daily:Array.isArray(payload?.daily) ? payload.daily : [],
+  updatedAt:payload?.updatedAt || payload?.generatedAt || null,
+  sourceStatus:payload?.sourceStatus || (payload?.ok && payload?.available ? 'ready' : 'unavailable'),
+  fallbackReason:payload?.fallbackReason || null,
+});
+
 const readStoredWeather = (url) => {
   try {
     const cached = JSON.parse(window.sessionStorage.getItem(storageKey(url)) || 'null');
-    if (cached?.expiresAt > Date.now() && cached?.payload?.ok && cached.payload.available) return cached.payload;
+    if (cached?.expiresAt > Date.now() && cached?.payload?.ok && cached.payload.available) return normalizeWeatherPayload(cached.payload);
     window.sessionStorage.removeItem(storageKey(url));
   } catch {}
   return null;
@@ -70,8 +80,9 @@ export const getPublicWeather = (options = {}) => {
       if (!response.ok) throw new Error(`WEATHER_HTTP_${response.status}`);
       const payload = await response.json();
       if (!payload?.ok || !payload.available) throw new Error(payload?.code || 'WEATHER_UNAVAILABLE');
-      storeWeather(url,payload);
-      return payload;
+      const normalized = normalizeWeatherPayload(payload);
+      storeWeather(url,normalized);
+      return normalized;
     } catch (error) {
       requests.delete(url);
       if (error?.name === 'AbortError') throw new Error('WEATHER_CLIENT_TIMEOUT');

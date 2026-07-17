@@ -176,6 +176,62 @@ test('aktualizacja zachowuje focus, datę i stan akordeonu',async ({ page }) => 
   noConsoleErrors();
 });
 
+test('fullscreen modal Planera: rozmiar, nawigacja dni, focus i ESC',async ({ page }) => {
+  const noConsoleErrors = assertNoConsoleErrors(page);
+  await page.setViewportSize({ width:1366,height:768 });
+  const trigger = page.locator('[data-planner-day-details="1"]');
+  await trigger.click();
+  const dialog = page.locator('[data-planner-modal]');
+  await expect(dialog).toHaveAttribute('open','');
+  await expect(dialog).toHaveAttribute('role','dialog');
+  await expect(dialog).toHaveAttribute('aria-labelledby','planner-dialog-title');
+  await expect.poll(() => dialog.evaluate((element) => getComputedStyle(element).transform)).toBe('none');
+  const dimensions = await dialog.evaluate((element) => ({ width:element.getBoundingClientRect().width,height:element.getBoundingClientRect().height,vw:innerWidth,vh:innerHeight,locked:document.body.classList.contains('planner-modal-open') }));
+  expect(dimensions.width / dimensions.vw).toBeGreaterThanOrEqual(.91);
+  expect(dimensions.height / dimensions.vh).toBeGreaterThanOrEqual(.89);
+  expect(dimensions.locked).toBe(true);
+  await page.screenshot({ path:'test-results/task146-planner-modal-desktop.png' });
+  await expect(page.locator('[data-planner-modal-progress]')).toContainText('Dzień 1 z 2');
+  await page.locator('[data-planner-modal-next]').click();
+  await expect(dialog).toHaveAttribute('open','');
+  await expect(page.locator('[data-planner-modal-progress]')).toContainText('Dzień 2 z 2');
+  await expect(page.locator('[data-planner-modal-day]')).toHaveAttribute('data-planner-modal-day','2');
+  await page.locator('[data-planner-modal-day-select]').selectOption('1');
+  await expect(page.locator('[data-planner-modal-progress]')).toContainText('Dzień 1 z 2');
+  await page.locator('.planner-dialog__close').focus();
+  await page.keyboard.press('Shift+Tab');
+  expect(await dialog.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+  await page.keyboard.press('Escape');
+  await expect(dialog).not.toHaveAttribute('open','');
+  expect(await trigger.evaluate((element) => document.activeElement === element)).toBe(true);
+  noConsoleErrors();
+});
+
+test('modal Planera ma lokalny runtime w 10 językach',async ({ page }) => {
+  const cases = [
+    ['/planer-pobytu','Poprzedni dzień','Następny dzień'],
+    ['/en/stay-planner','Previous day','Next day'],
+    ['/de/aufenthaltsplaner','Vorheriger Tag','Nächster Tag'],
+    ['/it/pianificatore-soggiorno','Giorno precedente','Giorno successivo'],
+    ['/fr/planificateur-sejour','Jour précédent','Jour suivant'],
+    ['/es/planificador-estancia','Día anterior','Día siguiente'],
+    ['/nl/verblijfsplanner','Vorige dag','Volgende dag'],
+    ['/cs/planovac-pobytu','Předchozí den','Další den'],
+    ['/sk/planovac-pobytu','Predchádzajúci deň','Nasledujúci deň'],
+    ['/sv/vistelseplanerare','Föregående dag','Nästa dag'],
+  ];
+  for (const [route,previous,next] of cases) {
+    await page.goto(route,{ waitUntil:'networkidle' });
+    await page.locator('[data-planner-day-details="1"]').click();
+    await expect.poll(() => page.locator('[data-planner-modal]').evaluate((element) => getComputedStyle(element).transform)).toBe('none');
+    const dialog = page.locator('[data-planner-modal]');
+    await expect(dialog).toContainText(previous);
+    await expect(dialog).toContainText(next);
+    if (!route.startsWith('/planer')) await expect(dialog).not.toContainText(/Dokładna kolejność|Informacje praktyczne|Przydatne linki|Poprzedni dzień|Następny dzień/);
+    await page.keyboard.press('Escape');
+  }
+});
+
 for (const width of [360,390,430]) {
   test(`mobile ${width}px: brak overflow i dotykowe kontrolki`,async ({ page }) => {
     const noConsoleErrors = assertNoConsoleErrors(page);
@@ -192,6 +248,16 @@ for (const width of [360,390,430]) {
     expect(metrics.panelOverflow).not.toMatch(/auto|scroll/);
     expect(metrics.smallestButton).toBeGreaterThanOrEqual(44);
     await expect(page.locator('[data-planner-day-card]')).toHaveCount(2);
+    await page.locator('[data-planner-day-details="1"]').click();
+    await expect.poll(() => page.locator('[data-planner-modal]').evaluate((element) => getComputedStyle(element).transform)).toBe('none');
+    const modalMetrics = await page.locator('[data-planner-modal]').evaluate((element) => ({ width:element.getBoundingClientRect().width,height:element.getBoundingClientRect().height,vw:innerWidth,vh:innerHeight,smallest:Math.min(...[...element.querySelectorAll('button,a,select')].filter((node) => node.offsetParent).map((node) => node.getBoundingClientRect().height)) }));
+    expect(modalMetrics.width).toBeGreaterThanOrEqual(modalMetrics.vw - 1);
+    expect(modalMetrics.height).toBeGreaterThanOrEqual(modalMetrics.vh - 1);
+    expect(modalMetrics.smallest).toBeGreaterThanOrEqual(44);
+    if (width === 390) await page.screenshot({ path:'test-results/task146-planner-modal-mobile-390.png' });
+    await page.locator('[data-planner-modal-next]').click();
+    await expect(page.locator('[data-planner-modal-progress]')).toContainText('Dzień 2 z 2');
+    await page.keyboard.press('Escape');
     noConsoleErrors();
   });
 }

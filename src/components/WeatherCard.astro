@@ -7,31 +7,110 @@ interface Props { languageCode?: string; compact?: boolean; hero?: boolean; }
 const { languageCode = 'pl', compact = false, hero = false } = Astro.props as Props;
 const copy = getWeatherCopy(languageCode);
 const plannerHref = getPlannerLocalizedPath(languageCode);
-const config = JSON.stringify({ copy, languageCode });
+const dialogId = `weather-forecast-${languageCode}`;
+const config = JSON.stringify({ copy,languageCode,plannerHref });
 ---
 
-<section class:list={['weather-card', compact && 'weather-card--compact', hero && 'weather-card--hero']} data-weather-card data-weather-variant={hero ? 'hero' : 'card'} data-weather-config={config} aria-label={copy.title}>
-  <div class="weather-card__icon" data-weather-icon><Icon name="CloudSun" size={27} strokeWidth={1.9} /></div>
-  <div class="weather-card__main">
-    <span>{hero ? copy.heroLocation : copy.live}</span>
-    <h2>{hero ? copy.heroLocation : copy.title}</h2>
-    <p data-weather-status>{copy.loading}</p>
-    <div class="weather-card__facts" data-weather-facts hidden>
-      <strong data-weather-temperature>—</strong>
-      <span data-weather-condition>—</span>
-      <small data-weather-rain>—</small>
-      <small data-weather-wind>—</small>
-    </div>
-  </div>
-  {!hero && <a href={plannerHref} class="weather-card__cta" data-weather-cta data-analytics-cta>
-      <span>{copy.details}</span><Icon name="ArrowUpRight" size={17} strokeWidth={2} />
-    </a>}
+<section class:list={['weather-card',compact && 'weather-card--compact',hero && 'weather-card--hero']} data-weather-card data-weather-variant={hero ? 'hero' : 'card'} data-weather-config={config} aria-label={copy.title}>
+  {hero ? (
+    <>
+      <button class="weather-card__trigger" type="button" data-weather-open aria-haspopup="dialog" aria-controls={dialogId} aria-label={copy.drawerAria}>
+        <span class="weather-card__icon" data-weather-icon aria-hidden="true"><Icon name="CloudSun" size={27} strokeWidth={1.9} /></span>
+        <span class="weather-card__main">
+          <span>{copy.heroLocation}</span>
+          <span class="weather-card__loading" data-weather-status>{copy.loading}</span>
+          <span class="weather-card__facts" data-weather-facts hidden>
+            <strong data-weather-temperature>—</strong>
+            <span data-weather-condition>—</span>
+            <small data-weather-rain>—</small>
+          </span>
+        </span>
+        <span class="weather-card__open-label">{copy.viewForecast}<Icon name="ArrowUpRight" size={16} strokeWidth={2} /></span>
+      </button>
+
+      <dialog class="weather-dialog" id={dialogId} data-weather-dialog role="dialog" aria-modal="true" aria-labelledby={`${dialogId}-title`}>
+        <div class="weather-dialog__shell">
+          <header class="weather-dialog__header">
+            <div>
+              <span>{copy.forecast}</span>
+              <h2 id={`${dialogId}-title`}>{copy.title}</h2>
+            </div>
+            <button type="button" class="weather-dialog__close weather-dialog__close--icon" data-weather-close aria-label={copy.close}>×</button>
+          </header>
+          <div class="weather-dialog__scroll">
+            <div class="weather-dialog__loading" data-weather-dialog-status role="status">{copy.loading}</div>
+            <div class="weather-dialog__content" data-weather-dialog-content hidden>
+              <section class="weather-dialog__current" aria-labelledby={`${dialogId}-current`}>
+                <div class="weather-dialog__current-main">
+                  <span class="weather-dialog__current-icon" data-weather-dialog-icon aria-hidden="true">☁️</span>
+                  <div>
+                    <span>{copy.currentWeather}</span>
+                    <strong data-weather-dialog-temperature>—</strong>
+                    <p data-weather-dialog-condition>—</p>
+                  </div>
+                </div>
+                <div class="weather-dialog__current-facts">
+                  <span><b>◉</b><small>{copy.feels}</small><strong data-weather-dialog-feels>—</strong></span>
+                  <span><b>⌁</b><small>{copy.wind}</small><strong data-weather-dialog-wind>—</strong></span>
+                  <span><b>⌄</b><small>{copy.rain}</small><strong data-weather-dialog-rain>—</strong></span>
+                  <span><b>◌</b><small>{copy.humidity}</small><strong data-weather-dialog-humidity>—</strong></span>
+                </div>
+                <small class="weather-dialog__updated" data-weather-updated></small>
+              </section>
+
+              <section class="weather-dialog__section" aria-labelledby={`${dialogId}-hourly`}>
+                <div class="weather-dialog__section-head"><span>◷</span><h3 id={`${dialogId}-hourly`}>{copy.hourlyForecast}</h3></div>
+                <div class="weather-dialog__hourly" data-weather-hourly></div>
+              </section>
+
+              <section class="weather-dialog__section" aria-labelledby={`${dialogId}-daily`}>
+                <div class="weather-dialog__section-head"><span>▦</span><h3 id={`${dialogId}-daily`}>{copy.weekForecast}</h3></div>
+                <div class="weather-dialog__daily" data-weather-daily></div>
+              </section>
+
+              <aside class="weather-dialog__recommendation">
+                <span aria-hidden="true">✦</span>
+                <div><h3>{copy.recommendationTitle}</h3><p data-weather-recommendation>{copy.recommendations.neutral}</p></div>
+              </aside>
+            </div>
+          </div>
+          <footer class="weather-dialog__footer">
+            <a href={plannerHref} data-analytics-cta><Icon name="CalendarDays" size={18} strokeWidth={2} />{copy.openPlanner}</a>
+            <button type="button" data-weather-campy><Icon name="TentTree" size={18} strokeWidth={2} />{copy.askCampy}</button>
+            <button type="button" data-weather-close>{copy.close}</button>
+          </footer>
+        </div>
+      </dialog>
+    </>
+  ) : (
+    <>
+      <div class="weather-card__icon" data-weather-icon><Icon name="CloudSun" size={27} strokeWidth={1.9} /></div>
+      <div class="weather-card__main">
+        <span>{copy.live}</span>
+        <h2>{copy.title}</h2>
+        <p data-weather-status>{copy.loading}</p>
+        <div class="weather-card__facts" data-weather-facts hidden>
+          <strong data-weather-temperature>—</strong>
+          <span data-weather-condition>—</span>
+          <small data-weather-rain>—</small>
+          <small data-weather-wind>—</small>
+        </div>
+      </div>
+      <a href={plannerHref} class="weather-card__cta" data-weather-cta data-analytics-cta>
+        <span>{copy.details}</span><Icon name="ArrowUpRight" size={17} strokeWidth={2} />
+      </a>
+    </>
+  )}
 </section>
 
 <script>
-  import { getPublicWeather,weatherCodeGroup,weatherEmoji } from '@/lib/weatherClient.js';
-  const trackWeather = (eventType, metadata = {}) => window.dispatchEvent(new CustomEvent('cc:analytics', { detail:{ eventType, metadata } }));
-  document.querySelectorAll('[data-weather-card]').forEach(async (root) => {
+  import { clearWeatherRequestCache,getPublicWeather,weatherCodeGroup,weatherEmoji } from '@/lib/weatherClient.js';
+
+  const trackWeather = (eventType,metadata = {}) => window.dispatchEvent(new CustomEvent('cc:analytics',{ detail:{ eventType,metadata } }));
+  const safeNumber = (value,fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
+  const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g,(character) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[character]);
+
+  document.querySelectorAll('[data-weather-card]').forEach((root) => {
     if (!(root instanceof HTMLElement) || root.dataset.weatherReady === 'true') return;
     root.dataset.weatherReady = 'true';
     let config;
@@ -40,38 +119,186 @@ const config = JSON.stringify({ copy, languageCode });
     const hero = root.dataset.weatherVariant === 'hero';
     const status = root.querySelector('[data-weather-status]');
     const facts = root.querySelector('[data-weather-facts]');
-    try {
-      const result = await getPublicWeather({ locale:config.languageCode || 'pl' });
-      if (!result.current) throw new Error('WEATHER_CURRENT_MISSING');
+    const dialog = root.querySelector('[data-weather-dialog]');
+    const dialogStatus = root.querySelector('[data-weather-dialog-status]');
+    const dialogContent = root.querySelector('[data-weather-dialog-content]');
+    let lastTrigger = null;
+    let payload = null;
+
+    const dateLocale = config.languageCode === 'en' ? 'en-GB' : config.languageCode || 'pl';
+    const conditionFor = (code) => {
+      const group = weatherCodeGroup(code);
+      return { group,emoji:weatherEmoji(group),label:copy.conditions[group] || copy.conditions.cloudy };
+    };
+    const recommendationFor = (result) => {
+      const current = result?.current || {};
+      const rainy = safeNumber(current.precipitationMm) > 0 || (result?.daily || []).slice(0,2).some((day) => safeNumber(day.rainProbability) >= 55);
+      if (rainy) return copy.recommendations.rain;
+      if (safeNumber(current.temperatureC) >= 29) return copy.recommendations.heat;
+      if (safeNumber(current.windKmh) >= 28) return copy.recommendations.wind;
+      if (['clear','mostlyClear'].includes(conditionFor(current.weatherCode).group)) return copy.recommendations.clear;
+      return copy.recommendations.neutral;
+    };
+    const renderDialog = (result) => {
+      if (!(dialogContent instanceof HTMLElement)) return;
       const current = result.current;
-      const group = weatherCodeGroup(current.weatherCode);
-      const emoji = weatherEmoji(group);
-      const condition = copy.conditions[group] || copy.conditions.cloudy;
+      const condition = conditionFor(current.weatherCode);
+      root.querySelector('[data-weather-dialog-icon]').textContent = condition.emoji;
+      root.querySelector('[data-weather-dialog-temperature]').textContent = `${Math.round(safeNumber(current.temperatureC))}°C`;
+      root.querySelector('[data-weather-dialog-condition]').textContent = condition.label;
+      root.querySelector('[data-weather-dialog-feels]').textContent = `${Math.round(safeNumber(current.apparentTemperatureC,current.temperatureC))}°C`;
+      root.querySelector('[data-weather-dialog-wind]').textContent = `${Math.round(safeNumber(current.windKmh))} km/h`;
+      root.querySelector('[data-weather-dialog-rain]').textContent = `${safeNumber(current.precipitationMm).toFixed(1)} mm`;
+      root.querySelector('[data-weather-dialog-humidity]').textContent = Number.isFinite(Number(current.humidityPercent)) ? `${Math.round(Number(current.humidityPercent))}%` : '—';
+      const updated = root.querySelector('[data-weather-updated]');
+      if (updated) {
+        const date = result.updatedAt ? new Date(result.updatedAt) : null;
+        updated.textContent = date && !Number.isNaN(date.getTime()) ? `${copy.updated}: ${new Intl.DateTimeFormat(dateLocale,{ hour:'2-digit',minute:'2-digit' }).format(date)}` : '';
+      }
+
+      const hourly = root.querySelector('[data-weather-hourly]');
+      const hours = Array.isArray(result.hourly) ? result.hourly.slice(0,12) : [];
+      if (hourly) hourly.innerHTML = hours.length ? hours.map((hour) => {
+        const weather = conditionFor(hour.weatherCode);
+        const date = new Date(hour.time);
+        const time = Number.isNaN(date.getTime()) ? String(hour.time || '').slice(11,16) : new Intl.DateTimeFormat(dateLocale,{ hour:'2-digit',minute:'2-digit' }).format(date);
+        return `<article><time>${escapeHtml(time)}</time><span aria-hidden="true">${weather.emoji}</span><strong>${Math.round(safeNumber(hour.temperatureC))}°</strong><small>⌄ ${Number.isFinite(Number(hour.rainProbability)) ? Math.round(Number(hour.rainProbability)) : 0}%</small></article>`;
+      }).join('') : `<p class="weather-dialog__empty">${escapeHtml(copy.hourlyEmpty)}</p>`;
+
+      const daily = root.querySelector('[data-weather-daily]');
+      const days = Array.isArray(result.daily) ? result.daily.slice(0,7) : [];
+      const today = new Date(); today.setHours(0,0,0,0);
+      if (daily) daily.innerHTML = days.length ? days.map((day,index) => {
+        const weather = conditionFor(day.weatherCode);
+        const date = new Date(`${day.date}T12:00:00`);
+        const dayLabel = index === 0 ? copy.today : index === 1 ? copy.tomorrow : new Intl.DateTimeFormat(dateLocale,{ weekday:'short',day:'2-digit',month:'2-digit' }).format(date);
+        return `<article><div><span aria-hidden="true">${weather.emoji}</span><strong>${escapeHtml(dayLabel)}</strong><small>${escapeHtml(weather.label)}</small></div><b>${Math.round(safeNumber(day.temperatureMinC))}° / ${Math.round(safeNumber(day.temperatureMaxC))}°</b><span>⌄ ${Math.round(safeNumber(day.rainProbability))}%</span><span>⌁ ${Math.round(safeNumber(day.windMaxKmh))} km/h</span></article>`;
+      }).join('') : `<p class="weather-dialog__empty">${escapeHtml(copy.dailyEmpty)}</p>`;
+      const recommendation = root.querySelector('[data-weather-recommendation]');
+      if (recommendation) recommendation.textContent = recommendationFor(result);
+      if (dialogStatus instanceof HTMLElement) dialogStatus.hidden = true;
+      dialogContent.hidden = false;
+    };
+
+    const renderCard = (result) => {
+      const current = result.current;
+      const condition = conditionFor(current.weatherCode);
       const icon = root.querySelector('[data-weather-icon]');
       const temperature = root.querySelector('[data-weather-temperature]');
       const conditionNode = root.querySelector('[data-weather-condition]');
       const rain = root.querySelector('[data-weather-rain]');
       const wind = root.querySelector('[data-weather-wind]');
-      if (icon) icon.textContent = emoji;
-      if (temperature) temperature.textContent = `${Math.round(current.temperatureC)}°C`;
-      if (conditionNode) conditionNode.textContent = hero ? condition : `${condition} · ${copy.feels} ${Math.round(current.apparentTemperatureC)}°C`;
-      if (rain) rain.textContent = `${copy.rain}: ${Number(current.precipitationMm || 0).toFixed(1)} mm`;
-      if (wind) wind.textContent = `${copy.wind}: ${Math.round(current.windKmh || 0)} km/h`;
+      if (icon) icon.textContent = condition.emoji;
+      if (temperature) temperature.textContent = `${Math.round(safeNumber(current.temperatureC))}°C`;
+      if (conditionNode) conditionNode.textContent = hero ? condition.label : `${condition.label} · ${copy.feels} ${Math.round(safeNumber(current.apparentTemperatureC,current.temperatureC))}°C`;
+      if (rain) {
+        const probability = result.daily?.[0]?.rainProbability;
+        rain.textContent = Number.isFinite(Number(probability)) ? `${copy.rain}: ${Math.round(Number(probability))}%` : `${copy.rain}: ${safeNumber(current.precipitationMm).toFixed(1)} mm`;
+      }
+      if (wind) wind.textContent = `${copy.wind}: ${Math.round(safeNumber(current.windKmh))} km/h`;
       if (status instanceof HTMLElement) status.hidden = true;
       if (facts instanceof HTMLElement) facts.hidden = false;
-      trackWeather('open_weather', { source:'public_weather_card', condition:group });
-    } catch {
-      if (status instanceof HTMLElement) status.textContent = hero ? copy.heroUnavailable : copy.unavailable;
+      root.classList.remove('is-fallback');
+      renderDialog(result);
+    };
+
+    const renderFallback = () => {
       root.classList.add('is-fallback');
+      if (status instanceof HTMLElement) {
+        status.hidden = false;
+        status.textContent = hero ? copy.heroUnavailable : copy.unavailable;
+      }
+      if (facts instanceof HTMLElement) facts.hidden = true;
+      if (dialogStatus instanceof HTMLElement) {
+        dialogStatus.hidden = false;
+        dialogStatus.innerHTML = `<span>☁️</span><strong>${escapeHtml(copy.unavailable)}</strong><button type="button" data-weather-retry>${escapeHtml(copy.retry)}</button>`;
+      }
+      if (dialogContent instanceof HTMLElement) dialogContent.hidden = true;
+    };
+
+    const load = async (force = false) => {
+      if (force) clearWeatherRequestCache();
+      if (dialogStatus instanceof HTMLElement) { dialogStatus.hidden = false; dialogStatus.textContent = copy.loading; }
+      try {
+        const result = await getPublicWeather({ locale:config.languageCode || 'pl' });
+        if (!result.current) throw new Error('WEATHER_CURRENT_MISSING');
+        payload = result;
+        renderCard(result);
+      } catch {
+        payload = null;
+        renderFallback();
+      }
+    };
+
+    const closeDialog = () => {
+      if (!(dialog instanceof HTMLDialogElement) || !dialog.open) return;
+      dialog.classList.remove('is-visible');
+      dialog.classList.add('is-closing');
+      window.setTimeout(() => {
+        dialog.close();
+        dialog.classList.remove('is-closing');
+        document.body.classList.remove('weather-modal-open');
+        if (lastTrigger instanceof HTMLElement) lastTrigger.focus();
+      },window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180);
+    };
+    const openDialog = (trigger) => {
+      if (!(dialog instanceof HTMLDialogElement)) return;
+      lastTrigger = trigger instanceof HTMLElement ? trigger : root.querySelector('[data-weather-open]');
+      if (!dialog.open) dialog.showModal();
+      document.body.classList.add('weather-modal-open');
+      requestAnimationFrame(() => {
+        dialog.classList.add('is-visible');
+        dialog.querySelector('[data-weather-close]')?.focus();
+      });
+      if (payload) renderDialog(payload);
+      trackWeather('open_weather',{ source:'hero_weather_drawer' });
+    };
+
+    root.addEventListener('click',(event) => {
+      const element = event.target instanceof Element ? event.target : null;
+      if (!element) return;
+      if (element.closest('[data-weather-open]')) { openDialog(element.closest('[data-weather-open]')); return; }
+      if (element.closest('[data-weather-close]')) { closeDialog(); return; }
+      if (element.closest('[data-weather-retry]')) { load(true); return; }
+      if (element.closest('[data-weather-campy]')) {
+        window.dispatchEvent(new CustomEvent('campy:prompt',{ detail:{ prompt:copy.campyPrompt,actionKey:'weatherPlanner' } }));
+        closeDialog();
+      }
+    });
+    if (dialog instanceof HTMLDialogElement) {
+      dialog.addEventListener('cancel',(event) => { event.preventDefault(); closeDialog(); });
+      dialog.addEventListener('click',(event) => { if (event.target === dialog) closeDialog(); });
+      dialog.addEventListener('keydown',(event) => {
+        if (event.key === 'Escape') { event.preventDefault(); closeDialog(); return; }
+        if (event.key !== 'Tab') return;
+        const focusable = [...dialog.querySelectorAll('a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter((node) => node instanceof HTMLElement && !node.hidden);
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      });
+      dialog.addEventListener('close',() => document.body.classList.remove('weather-modal-open'));
     }
-    root.querySelector('[data-weather-cta]')?.addEventListener('click', () => trackWeather('weather_cta_click', { source:'public_weather_card' }));
+    if (hero) window.addEventListener('weather:open',(event) => openDialog(event.detail?.trigger));
+    root.querySelector('[data-weather-cta]')?.addEventListener('click',() => trackWeather('weather_cta_click',{ source:'public_weather_card' }));
+    load();
   });
 </script>
 
 <style>
 .weather-card{width:min(1180px,calc(100% - 32px));margin:clamp(20px,4vw,42px) auto;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:18px;padding:18px 20px;border:1px solid color-mix(in srgb,var(--color-primary,#3cb371) 26%,transparent);border-radius:24px;background:linear-gradient(135deg,color-mix(in srgb,var(--color-primary,#3cb371) 13%,var(--color-bg-secondary,#10251a)),color-mix(in srgb,var(--color-bg-secondary,#10251a) 94%,transparent));box-shadow:0 20px 55px rgba(4,23,14,.14);color:var(--color-text-primary,#effbf3)}
-.weather-card__icon{width:58px;height:58px;display:grid;place-items:center;border-radius:18px;background:rgba(87,220,147,.14);font-size:1.75rem;color:#8fe0b4}.weather-card__main{min-width:0}.weather-card__main>span{display:block;color:#69d99b;font-size:.7rem;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.weather-card h2{margin:3px 0 2px;font-size:1.2rem}.weather-card p{margin:0;color:var(--color-text-muted,rgba(239,251,243,.65));font-size:.9rem}.weather-card__facts{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px 13px}.weather-card__facts strong{font-size:1.7rem}.weather-card__facts span{font-weight:800}.weather-card__facts small{color:var(--color-text-muted,rgba(239,251,243,.65));font-weight:700}.weather-card__cta{min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 14px;border:1px solid rgba(114,235,166,.25);border-radius:14px;color:inherit;text-decoration:none;font-weight:850;background:rgba(255,255,255,.055)}.weather-card__cta:hover{border-color:#72eba6;transform:translateY(-1px)}.weather-card--compact{margin-top:18px;margin-bottom:18px}.weather-card.is-fallback .weather-card__icon{filter:saturate(.5)}
-.weather-card--hero{width:fit-content;max-width:min(100%,430px);margin:0 0 22px;padding:9px 12px;grid-template-columns:auto minmax(0,1fr);gap:10px;border-radius:16px;border-color:rgba(143,224,180,.28);background:rgba(5,20,14,.48);box-shadow:0 14px 38px rgba(0,0,0,.18);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);color:#fff}.weather-card--hero .weather-card__icon{width:38px;height:38px;border-radius:12px;font-size:1.2rem}.weather-card--hero .weather-card__main>span{font-size:.61rem;letter-spacing:.1em}.weather-card--hero h2{display:none}.weather-card--hero p{font-size:.74rem;color:rgba(255,255,255,.72)}.weather-card--hero .weather-card__facts{gap:4px 9px}.weather-card--hero .weather-card__facts strong{font-size:1rem}.weather-card--hero .weather-card__facts span{font-size:.76rem}.weather-card--hero .weather-card__facts small{display:none}
-html[data-theme="light"] .weather-card{border-color:#cce6d6;background:linear-gradient(135deg,#f2fbf5,#fff);color:#102018;box-shadow:0 18px 46px rgba(25,80,50,.09)}html[data-theme="light"] .weather-card p,html[data-theme="light"] .weather-card__facts small{color:#536359}html[data-theme="light"] .weather-card__cta{background:#edf8f1;border-color:#c6e5d1}
-@media(max-width:720px){.weather-card{width:min(100% - 18px,1180px);grid-template-columns:auto 1fr;gap:13px;padding:15px;border-radius:20px}.weather-card__icon{width:48px;height:48px;border-radius:15px}.weather-card__cta{grid-column:1/-1;width:100%;justify-content:center}.weather-card__facts strong{font-size:1.45rem}.weather-card__facts{gap:4px 10px}.weather-card--hero{width:fit-content;max-width:100%;margin:0 0 20px;padding:8px 10px;gap:9px;border-radius:15px}.weather-card--hero .weather-card__icon{width:36px;height:36px}.weather-card--hero .weather-card__facts strong{font-size:.96rem}.weather-card--hero .weather-card__facts span{font-size:.72rem}}
+.weather-card__icon{width:58px;height:58px;display:grid;place-items:center;border-radius:18px;background:rgba(87,220,147,.14);font-size:1.75rem;color:#8fe0b4}.weather-card__main{min-width:0}.weather-card__main>span:first-child{display:block;color:#69d99b;font-size:.7rem;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.weather-card h2{margin:3px 0 2px;font-size:1.2rem}.weather-card p{margin:0;color:var(--color-text-muted,rgba(239,251,243,.65));font-size:.9rem}.weather-card__facts{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px 13px}.weather-card__facts strong{font-size:1.7rem}.weather-card__facts span{font-weight:800}.weather-card__facts small{color:var(--color-text-muted,rgba(239,251,243,.65));font-weight:700}.weather-card__cta{min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 14px;border:1px solid rgba(114,235,166,.25);border-radius:14px;color:inherit;text-decoration:none;font-weight:850;background:rgba(255,255,255,.055)}.weather-card__cta:hover{border-color:#72eba6;transform:translateY(-1px)}.weather-card--compact{margin-top:18px;margin-bottom:18px}.weather-card.is-fallback .weather-card__icon{filter:saturate(.5)}
+.weather-card--hero{position:absolute;z-index:7;right:14px;bottom:52px;width:238px;max-width:none;margin:0;padding:0;display:block;border:0;background:transparent;box-shadow:none;color:#fff}.weather-card__trigger{width:100%;min-height:74px;display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:10px;padding:10px 12px;border:1px solid rgba(143,224,180,.3);border-radius:18px;color:inherit;background:linear-gradient(135deg,rgba(6,39,27,.91),rgba(10,67,43,.82));box-shadow:0 18px 46px rgba(0,0,0,.3);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);font:inherit;text-align:left;cursor:pointer;transform:translateX(34px);transition:transform .35s cubic-bezier(.22,1,.36,1),border-color .25s ease,box-shadow .25s ease}.weather-card__trigger:hover,.weather-card__trigger:focus-visible{transform:translateX(0);border-color:rgba(126,242,177,.68);box-shadow:0 20px 52px rgba(0,0,0,.38),0 0 26px rgba(52,210,119,.14);outline:none}.weather-card--hero .weather-card__icon{width:42px;height:42px;border-radius:13px;font-size:1.35rem}.weather-card--hero .weather-card__main>span:first-child{font-size:.62rem}.weather-card__loading{display:block;margin-top:4px;color:rgba(255,255,255,.72);font-size:.72rem}.weather-card--hero .weather-card__facts{gap:3px 7px}.weather-card--hero .weather-card__facts strong{font-size:1.1rem}.weather-card--hero .weather-card__facts span{max-width:115px;overflow:hidden;font-size:.72rem;text-overflow:ellipsis;white-space:nowrap}.weather-card--hero .weather-card__facts small{flex-basis:100%;font-size:.64rem}.weather-card__open-label{grid-column:1/-1;display:flex;align-items:center;justify-content:flex-end;gap:4px;color:#9cf2be;font-size:.68rem;font-weight:850}
+.weather-dialog{width:88vw;height:88dvh;max-width:1480px;max-height:940px;margin:auto!important;padding:0;overflow:hidden;border:1px solid rgba(101,235,158,.34);border-radius:26px;color:#f1fff6;background:#06261b;box-shadow:0 42px 130px rgba(0,0,0,.72);opacity:0;transform:translateY(18px) scale(.96);filter:blur(5px);transition:opacity .22s ease,transform .34s cubic-bezier(.22,1,.36,1),filter .3s ease}.weather-dialog[open].is-visible{opacity:1;transform:none;filter:none}.weather-dialog.is-closing{opacity:0;transform:translateY(10px) scale(.98);filter:blur(3px)}.weather-dialog::backdrop{background:rgba(0,12,8,.76);backdrop-filter:blur(10px)}.weather-dialog__shell{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto}.weather-dialog__header{z-index:3;display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:88px;padding:16px 24px;border-bottom:1px solid rgba(104,221,154,.15);background:rgba(5,37,26,.94);backdrop-filter:blur(18px)}.weather-dialog__header span{display:block;color:#72eaa6;font-size:.68rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.weather-dialog__header h2{margin:3px 0 0;font-size:clamp(1.45rem,2.4vw,2.25rem)}.weather-dialog__close--icon{width:48px;height:48px;padding:0!important;display:grid!important;place-items:center;border-radius:15px!important;font-size:1.55rem!important}.weather-dialog__scroll{min-height:0;overflow:auto;overscroll-behavior:contain;padding:24px}.weather-dialog__loading{min-height:100%;display:grid;place-content:center;gap:14px;padding:32px;color:rgba(237,255,244,.76);text-align:center}.weather-dialog__loading span{font-size:3rem}.weather-dialog__loading strong{max-width:640px;font-size:1rem;line-height:1.55}.weather-dialog__loading button{min-height:44px;margin:0 auto;padding:0 16px;border:1px solid rgba(107,236,162,.36);border-radius:12px;color:#eafff1;background:#167a48;font:inherit;font-weight:850;cursor:pointer}.weather-dialog__content{display:grid;gap:18px;animation:weatherContentIn .48s both cubic-bezier(.22,1,.36,1)}.weather-dialog__current{position:relative;padding:24px;border:1px solid rgba(103,226,155,.2);border-radius:22px;background:radial-gradient(circle at 10% 0,rgba(71,218,132,.18),transparent 45%),linear-gradient(145deg,rgba(12,60,41,.94),rgba(6,38,27,.97));overflow:hidden}.weather-dialog__current-main{display:flex;align-items:center;gap:18px}.weather-dialog__current-icon{font-size:4.2rem;filter:drop-shadow(0 8px 18px rgba(60,210,124,.22));animation:weatherFloat 4s ease-in-out infinite}.weather-dialog__current-main>div>span{color:#83edb0;font-size:.72rem;font-weight:900;text-transform:uppercase}.weather-dialog__current-main strong{display:block;margin-top:2px;color:#fff;font-size:clamp(2.7rem,5vw,4.8rem);line-height:1}.weather-dialog__current-main p{margin:5px 0 0;color:rgba(240,255,246,.75);font-size:1rem}.weather-dialog__current-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}.weather-dialog__current-facts>span{display:grid;grid-template-columns:30px 1fr;align-items:center;padding:12px;border:1px solid rgba(102,221,153,.14);border-radius:14px;background:rgba(3,29,20,.45)}.weather-dialog__current-facts b{grid-row:1/3;color:#79eaaa;font-size:1.2rem}.weather-dialog__current-facts small{color:rgba(232,255,241,.56);font-size:.68rem}.weather-dialog__current-facts strong{font-size:.92rem}.weather-dialog__updated{display:block;margin-top:13px;color:rgba(229,252,238,.48);font-size:.68rem}.weather-dialog__section{padding:20px;border:1px solid rgba(100,222,153,.16);border-radius:20px;background:rgba(9,48,34,.76)}.weather-dialog__section-head{display:flex;align-items:center;gap:9px;margin-bottom:15px}.weather-dialog__section-head>span{color:#7aeba9;font-size:1.25rem}.weather-dialog__section h3{margin:0;font-size:1.05rem}.weather-dialog__hourly{display:flex;gap:9px;overflow:auto;padding-bottom:5px;scrollbar-width:thin}.weather-dialog__hourly article{flex:0 0 102px;display:grid;place-items:center;gap:7px;min-height:142px;padding:11px;border:1px solid rgba(101,226,155,.13);border-radius:15px;background:rgba(4,31,22,.58)}.weather-dialog__hourly time,.weather-dialog__hourly small{color:rgba(229,253,238,.62);font-size:.7rem}.weather-dialog__hourly article>span{font-size:1.7rem}.weather-dialog__hourly strong{font-size:1rem}.weather-dialog__daily{display:grid;gap:7px}.weather-dialog__daily article{display:grid;grid-template-columns:minmax(190px,1.4fr) repeat(3,minmax(95px,.5fr));align-items:center;gap:10px;min-height:64px;padding:9px 13px;border:1px solid rgba(102,223,154,.12);border-radius:13px;background:rgba(4,31,22,.5)}.weather-dialog__daily article>div{display:grid;grid-template-columns:36px 1fr;align-items:center}.weather-dialog__daily article>div>span{grid-row:1/3;font-size:1.5rem}.weather-dialog__daily article strong,.weather-dialog__daily article small{display:block}.weather-dialog__daily article small,.weather-dialog__daily article>span{color:rgba(230,253,239,.62);font-size:.72rem}.weather-dialog__recommendation{display:flex;align-items:center;gap:15px;padding:20px;border:1px solid rgba(235,196,83,.28);border-radius:20px;background:linear-gradient(135deg,rgba(96,73,12,.24),rgba(10,51,35,.72))}.weather-dialog__recommendation>span{font-size:2rem;color:#f4ce62}.weather-dialog__recommendation h3{margin:0;color:#ffe8a2;font-size:1rem}.weather-dialog__recommendation p{margin:5px 0 0;color:rgba(248,255,250,.72);font-size:.86rem}.weather-dialog__footer{z-index:3;display:flex;align-items:center;justify-content:flex-end;gap:9px;min-height:78px;padding:13px 22px;border-top:1px solid rgba(104,221,154,.15);background:rgba(5,37,26,.96);backdrop-filter:blur(18px)}.weather-dialog__footer a,.weather-dialog__footer button{min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 16px;border:1px solid rgba(103,230,158,.26);border-radius:13px;color:#effff5;background:rgba(20,91,59,.5);font:inherit;font-size:.82rem;font-weight:850;text-decoration:none;cursor:pointer;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}.weather-dialog__footer a{background:linear-gradient(135deg,#39bf73,#15804a)}.weather-dialog__footer a:hover,.weather-dialog__footer button:hover,.weather-dialog__footer a:focus-visible,.weather-dialog__footer button:focus-visible{outline:none;border-color:#72eba6;box-shadow:0 0 22px rgba(63,211,126,.15);transform:translateY(-1px)}.weather-dialog__empty{margin:0;color:rgba(232,255,241,.66);font-size:.82rem}body.weather-modal-open{overflow:hidden}
+html[data-theme="light"] .weather-card:not(.weather-card--hero){border-color:#cce6d6;background:linear-gradient(135deg,#f2fbf5,#fff);color:#102018;box-shadow:0 18px 46px rgba(25,80,50,.09)}html[data-theme="light"] .weather-card p,html[data-theme="light"] .weather-card__facts small{color:#536359}html[data-theme="light"] .weather-card__cta{background:#edf8f1;border-color:#c6e5d1}
+@keyframes weatherContentIn{from{opacity:0;transform:translateY(14px);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}@keyframes weatherFloat{50%{transform:translateY(-4px) rotate(2deg)}}
+.weather-dialog__current-facts>span{min-width:0;grid-template-columns:30px minmax(0,1fr)}
+.weather-dialog__current-facts strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.weather-dialog__daily article strong,.weather-dialog__daily article small{grid-column:2}.weather-dialog__daily article small{margin-top:3px}
+.weather-dialog__content,.weather-dialog__section,.weather-dialog__hourly,.weather-dialog__daily{min-width:0}
+@media(max-width:1120px){.weather-card--hero{position:relative;right:auto;bottom:auto;width:min(100%,360px);margin:0 0 20px}.weather-card__trigger{transform:none}.weather-card__open-label{display:none}}
+@media(max-width:720px){.weather-card{width:min(100% - 18px,1180px);grid-template-columns:auto 1fr;gap:13px;padding:15px;border-radius:20px}.weather-card__icon{width:48px;height:48px;border-radius:15px}.weather-card__cta{grid-column:1/-1;width:100%;justify-content:center}.weather-card__facts strong{font-size:1.45rem}.weather-card__facts{gap:4px 10px}.weather-card--hero{width:min(100%,290px);margin-bottom:18px;padding:0}.weather-card__trigger{min-height:54px;grid-template-columns:38px minmax(0,1fr);padding:7px 9px;border-radius:15px}.weather-card--hero .weather-card__icon{width:38px;height:38px}.weather-card--hero .weather-card__main>span:first-child{font-size:.58rem}.weather-card--hero .weather-card__facts strong{font-size:.98rem}.weather-card--hero .weather-card__facts span{font-size:.68rem}.weather-card--hero .weather-card__facts small{display:none}.weather-dialog{width:100%;height:100dvh;max-width:none;max-height:none;margin:0!important;border:0;border-radius:0}.weather-dialog__header{min-height:76px;padding:12px 14px}.weather-dialog__header h2{font-size:1.35rem}.weather-dialog__scroll{padding:12px}.weather-dialog__current{padding:17px;border-radius:18px}.weather-dialog__current-icon{font-size:3.2rem}.weather-dialog__current-facts{grid-template-columns:1fr 1fr;gap:7px}.weather-dialog__current-facts>span{padding:9px}.weather-dialog__section{padding:14px;border-radius:17px}.weather-dialog__daily article{grid-template-columns:1fr auto;gap:6px}.weather-dialog__daily article>span{grid-column:2}.weather-dialog__daily article>span:last-child{display:none}.weather-dialog__footer{min-height:70px;display:grid;grid-template-columns:1fr 1fr;padding:9px}.weather-dialog__footer a,.weather-dialog__footer button{min-height:48px;padding:0 8px;font-size:.74rem}.weather-dialog__footer button:last-child{display:none}}
+@media(max-width:720px){.weather-dialog__current-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.weather-dialog__current-facts>span{grid-template-columns:22px minmax(0,1fr);padding:8px}.weather-dialog__current-facts b{font-size:1rem}.weather-dialog__current-facts small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.weather-dialog__daily article{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;gap:7px 10px}.weather-dialog__daily article>div{min-width:0;grid-column:1;grid-row:1;grid-template-columns:32px minmax(0,1fr);grid-template-rows:auto auto}.weather-dialog__daily article>div>span{grid-column:1;grid-row:1/3}.weather-dialog__daily article strong{grid-column:2!important;grid-row:1!important}.weather-dialog__daily article small{grid-column:2!important;grid-row:2!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.weather-dialog__daily article>b{grid-column:2;grid-row:1/3;align-self:center}.weather-dialog__daily article>span:nth-of-type(1){grid-column:1;grid-row:2}.weather-dialog__daily article>span:nth-of-type(2){display:none}}
+@media(prefers-reduced-motion:reduce){.weather-card__trigger,.weather-dialog,.weather-dialog *{animation:none!important;transition-duration:.01ms!important}.weather-card__trigger{transform:none}}
 </style>

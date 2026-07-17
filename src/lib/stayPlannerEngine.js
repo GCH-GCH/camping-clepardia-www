@@ -295,6 +295,12 @@ export function buildPlannerModel(config, rawState = {}) {
       modalPlanB:d.modalPlanB,
       modalTips:d.modalTips,
       modalLinks:d.modalLinks,
+      modalPreviousDay:d.modalPreviousDay,
+      modalNextDay:d.modalNextDay,
+      modalChooseDay:d.modalChooseDay,
+      modalDayProgress:d.modalDayProgress,
+      modalAskCampy:d.modalAskCampy,
+      modalWeather:d.modalWeather,
       openMaps:p.openMaps,
       tramRoute:p.tramRoute,
       attraction:p.seeAttraction,
@@ -398,28 +404,49 @@ export function renderPlannerHtml(model) {
       </article>
       <article class="planner-summer"><h3>☀ ${escapePlannerHtml(summer.title)}</h3><ul>${summer.bullets.map((item) => `<li>${escapePlannerHtml(item)}</li>`).join('')}</ul><small>${escapePlannerHtml(summer.disclaimer)}</small></article>
     </section>
-    <dialog class="planner-dialog" data-planner-modal aria-modal="true"><div data-planner-modal-content></div></dialog>
+    <dialog class="planner-dialog" data-planner-modal role="dialog" aria-modal="true" aria-labelledby="planner-dialog-title"><div data-planner-modal-content></div></dialog>
   </div>`;
 }
 
-export function renderPlannerDayModal(day, labels) {
+export function renderPlannerDayModal(day, labels, options = {}) {
   if (!day) return '';
-  return `<div class="planner-dialog__inner">
-    <button class="planner-dialog__close" type="button" data-planner-modal-close aria-label="${escapePlannerHtml(labels.modalClose)}">×</button>
-    <header class="planner-dialog__hero"><img src="${escapePlannerHtml(day.image)}" alt="" width="1280" height="853"><div><span>${escapePlannerHtml(labels.day)} ${day.dayNumber} · ${escapePlannerHtml(day.intensity)}</span><h2>${escapePlannerHtml(day.title)}</h2></div></header>
-    <div class="planner-dialog__body">
-      <section class="planner-dialog__section"><h3>${escapePlannerHtml(labels.modalSchedule)}</h3><div class="planner-dialog__timeline">
+  const days = Array.isArray(options.days) && options.days.length ? options.days : [day];
+  const currentIndex = Math.max(0,days.findIndex((item) => item.dayNumber === day.dayNumber));
+  const progress = String(labels.modalDayProgress || `${labels.day} {current} / {total}`)
+    .replace('{current}',String(currentIndex + 1))
+    .replace('{total}',String(days.length));
+  const weather = day.weather
+    ? `${day.weather.temperatureMaxC ?? '—'}°C · ${day.weather.rainProbability ?? '—'}%`
+    : labels.modalWeather;
+  return `<div class="planner-dialog__inner" data-planner-modal-day="${day.dayNumber}">
+    <div class="planner-dialog__topbar">
+      <strong data-planner-modal-progress>${escapePlannerHtml(progress)}</strong>
+      <label><span>${escapePlannerHtml(labels.modalChooseDay)}</span><select data-planner-modal-day-select aria-label="${escapePlannerHtml(labels.modalChooseDay)}">${days.map((item,index) => `<option value="${item.dayNumber}" ${item.dayNumber === day.dayNumber ? 'selected' : ''}>${escapePlannerHtml(labels.day)} ${index + 1}</option>`).join('')}</select></label>
+      <button class="planner-dialog__close" type="button" data-planner-modal-close aria-label="${escapePlannerHtml(labels.modalClose)}">×</button>
+    </div>
+    <div class="planner-dialog__scroll">
+      <header class="planner-dialog__hero"><img src="${escapePlannerHtml(day.image)}" alt="" width="1280" height="853"><div><span>${escapePlannerHtml(labels.day)} ${day.dayNumber}</span><h2 id="planner-dialog-title">${escapePlannerHtml(day.title)}</h2><div class="planner-dialog__hero-meta"><b>◷ ${escapePlannerHtml(day.intensity)}</b><b>${day.transportIcon} ${escapePlannerHtml(day.transport)}</b><b>☀ ${escapePlannerHtml(weather)}</b></div></div></header>
+      <div class="planner-dialog__body">
+        <section class="planner-dialog__section planner-dialog__section--schedule"><h3>${escapePlannerHtml(labels.modalSchedule)}</h3><div class="planner-dialog__timeline">
         <article><span>🌅</span><div><b>${escapePlannerHtml(labels.morning)}</b><p>${escapePlannerHtml(day.morning)}</p></div></article>
         <article><span>☀️</span><div><b>${escapePlannerHtml(labels.midday)}</b><p>${escapePlannerHtml(day.midday)}</p></div></article>
         <article><span>🌙</span><div><b>${escapePlannerHtml(labels.evening)}</b><p>${escapePlannerHtml(day.evening)}</p></div></article>
-      </div></section>
-      <div>
-        <section class="planner-dialog__section"><h3>${escapePlannerHtml(labels.modalPractical)}</h3><div class="planner-dialog__facts"><span>${day.transportIcon} ${escapePlannerHtml(day.transport)}</span><span>◷ ${escapePlannerHtml(day.duration)}</span><span>⌖ ${escapePlannerHtml(day.distance)}</span><span>⌁ ${escapePlannerHtml(day.restNote)}</span></div></section>
-        <section class="planner-dialog__section"><h3>${escapePlannerHtml(labels.modalPlanB)}</h3><p>${escapePlannerHtml(day.weatherAlternative)}</p></section>
+        </div></section>
+        <div class="planner-dialog__aside">
+          <section class="planner-dialog__section"><h3>${escapePlannerHtml(labels.modalPractical)}</h3><div class="planner-dialog__facts"><span>${day.transportIcon} ${escapePlannerHtml(day.transport)}</span><span>◷ ${escapePlannerHtml(day.duration)}</span><span>⌖ ${escapePlannerHtml(day.distance)}</span><span>⌁ ${escapePlannerHtml(day.restNote)}</span></div></section>
+          <section class="planner-dialog__section planner-dialog__section--planb"><h3>${escapePlannerHtml(labels.modalPlanB)}</h3><p>${escapePlannerHtml(day.weatherAlternative)}</p></section>
+          <section class="planner-dialog__section"><h3>${escapePlannerHtml(labels.modalTips)}</h3><ul>${day.practicalTips.map((tip) => `<li>${escapePlannerHtml(tip)}</li>`).join('')}</ul></section>
+          <section class="planner-dialog__section"><h3>${escapePlannerHtml(labels.modalLinks)}</h3><div class="planner-dialog__links"><a href="${escapePlannerHtml(day.mapLinks.maps)}" target="_blank" rel="noopener noreferrer">⌖ ${escapePlannerHtml(labels.openMaps)}</a><a href="${escapePlannerHtml(day.mapLinks.transport)}">🚋 ${escapePlannerHtml(labels.tramRoute)}</a><a href="${escapePlannerHtml(day.isTrip ? day.mapLinks.trip : day.mapLinks.attraction)}" ${day.isTrip ? 'target="_blank" rel="noopener noreferrer"' : ''}>✦ ${escapePlannerHtml(day.isTrip ? labels.trip : labels.attraction)}</a></div></section>
+        </div>
       </div>
-      <section class="planner-dialog__section"><h3>${escapePlannerHtml(labels.modalTips)}</h3><ul>${day.practicalTips.map((tip) => `<li>${escapePlannerHtml(tip)}</li>`).join('')}</ul></section>
-      <section class="planner-dialog__section"><h3>${escapePlannerHtml(labels.modalLinks)}</h3><div class="planner-dialog__links"><a href="${escapePlannerHtml(day.mapLinks.maps)}" target="_blank" rel="noopener noreferrer">⌖ ${escapePlannerHtml(labels.openMaps)}</a><a href="${escapePlannerHtml(day.mapLinks.transport)}">🚋 ${escapePlannerHtml(labels.tramRoute)}</a><a href="${escapePlannerHtml(day.isTrip ? day.mapLinks.trip : day.mapLinks.attraction)}" ${day.isTrip ? 'target="_blank" rel="noopener noreferrer"' : ''}>✦ ${escapePlannerHtml(day.isTrip ? labels.trip : labels.attraction)}</a></div></section>
     </div>
+    <footer class="planner-dialog__footer">
+      <button type="button" data-planner-modal-prev ${currentIndex === 0 ? 'disabled' : ''}>← ${escapePlannerHtml(labels.modalPreviousDay)}</button>
+      <a href="${escapePlannerHtml(day.mapLinks.maps)}" target="_blank" rel="noopener noreferrer">⌖ ${escapePlannerHtml(labels.openMaps)}</a>
+      <button type="button" data-planner-modal-campy>✦ ${escapePlannerHtml(labels.modalAskCampy)}</button>
+      <button type="button" data-planner-modal-next ${currentIndex >= days.length - 1 ? 'disabled' : ''}>${escapePlannerHtml(labels.modalNextDay)} →</button>
+      <button type="button" data-planner-modal-close>${escapePlannerHtml(labels.modalClose)}</button>
+    </footer>
   </div>`;
 }
 

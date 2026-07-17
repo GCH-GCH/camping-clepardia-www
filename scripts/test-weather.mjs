@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import weatherHandler from '../api/_handlers/weather.js';
-import { weatherCopy,weatherLanguages } from '../src/i18n/weather.ts';
+import { getWeatherCopy,weatherCopy,weatherLanguages } from '../src/i18n/weather.ts';
 
 const originalFetch = globalThis.fetch;
 
@@ -16,12 +16,15 @@ try {
   globalThis.fetch = async (input) => {
     const url = new URL(String(input));
     const daily = url.searchParams.has('daily');
+    const hourly = url.searchParams.has('hourly');
     return {
       ok:true,status:200,
       json:async () => daily ? {
         daily:{ time:['2026-07-18','2026-07-19'],weather_code:[1,63],temperature_2m_max:[25,21],temperature_2m_min:[15,14],precipitation_sum:[0,4],rain_sum:[0,3],precipitation_probability_max:[10,80],wind_speed_10m_max:[12,17],wind_gusts_10m_max:[22,31],uv_index_max:[6,3] },
+      } : hourly ? {
+        hourly:{ time:['2026-07-17T12:00','2026-07-17T13:00'],temperature_2m:[24,25],apparent_temperature:[25,26],relative_humidity_2m:[58,55],precipitation_probability:[10,15],precipitation:[0,0],weather_code:[1,1],wind_speed_10m:[9,10] },
       } : {
-        current:{ time:'2026-07-17T12:00',temperature_2m:24,apparent_temperature:25,precipitation:0,rain:0,weather_code:1,wind_speed_10m:9,wind_gusts_10m:15 },
+        current:{ time:'2026-07-17T12:00',temperature_2m:24,apparent_temperature:25,relative_humidity_2m:58,precipitation:0,rain:0,weather_code:1,wind_speed_10m:9,wind_gusts_10m:15 },
       },
     };
   };
@@ -33,9 +36,13 @@ try {
   assert.equal(successRes.body.available,true);
   assert.equal(successRes.body.source,'open-meteo');
   assert.equal(successRes.body.current.temperatureC,24);
+  assert.equal(successRes.body.current.humidityPercent,58);
+  assert.equal(successRes.body.hourly.length,2);
+  assert.equal(successRes.body.hourly[1].rainProbability,15);
   assert.equal(successRes.body.daily.length,2);
   assert.equal(successRes.body.daily[1].rainProbability,80);
   assert.equal(successRes.body.cache.currentTtlMinutes,20);
+  assert.equal(successRes.body.cache.hourlyTtlMinutes,20);
   assert.equal(successRes.body.cache.dailyTtlMinutes,180);
   assert.match(successRes.headers['cache-control'],/s-maxage=1200/);
 
@@ -58,6 +65,8 @@ try {
     assert.ok(weatherCopy[language].unavailable.length > 55,`${language}: fallback pogodowy jest zbyt krótki.`);
     assert.ok(weatherCopy[language].heroUnavailable,`${language}: brak fallbacku pogody w hero.`);
     assert.equal(Object.keys(weatherCopy[language].conditions).length,8,`${language}: niepełne opisy warunków.`);
+    const drawer = getWeatherCopy(language);
+    ['viewForecast','currentWeather','hourlyForecast','weekForecast','retry','openPlanner','askCampy','close'].forEach((key) => assert.ok(drawer[key],`${language}: brak weather drawer ${key}.`));
   }
 
   const client = fs.readFileSync('src/lib/weatherClient.js','utf8');
@@ -76,6 +85,9 @@ try {
   assert.doesNotMatch(planner,/fetch\(`?\/api\/weather/);
   assert.doesNotMatch(myStay,/fetch\(`?\/api\/weather/);
   assert.equal((slider.match(/seasonal:true/g) || []).length,1);
+  assert.match(slider,/kind:'welcome'[\s\S]*kind:'summer'[\s\S]*kind:'weather'[\s\S]*kind:'directions'[\s\S]*kind:'trips'/);
+  assert.match(card,/data-weather-dialog/);
+  assert.match(card,/data-weather-hourly/);
   for (const language of weatherLanguages) assert.match(slider,new RegExp(`\\n  ${language}: \\{`));
   assert.doesNotMatch(plannerCopy,/2\.0/);
   assert.match(plannerCopy,/3\.0/);

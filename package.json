@@ -12,7 +12,9 @@
     "audit:structure": "node scripts/audit-public-structure.mjs",
     "test:planner": "node scripts/test-planner.mjs",
     "test:planner-runtime": "playwright test --config=playwright.config.mjs",
+    "test:planner-modal": "playwright test --config=playwright.config.mjs tests/planner-runtime.spec.mjs --grep \"fullscreen modal\"",
     "test:weather": "node scripts/test-weather.mjs && playwright test --config=playwright.config.mjs tests/weather-runtime.spec.mjs",
+    "test:weather-drawer": "playwright test --config=playwright.config.mjs tests/weather-runtime.spec.mjs --grep \"weather drawer\"",
     "preview": "astro preview",
     "astro": "astro",
     "images:webp": "node scripts/convert-raw-to-webp.mjs"

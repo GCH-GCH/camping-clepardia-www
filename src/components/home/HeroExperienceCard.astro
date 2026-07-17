@@ -274,10 +274,32 @@ const summerSlides = {
   sk: { icon:'sun',kicker:'Pokojný letný príchod',title:'Júl a august — miesta v kempe',detail:'V tomto období neprijímame rezervácie kempingových miest vopred. Miesta sú dostupné podľa poradia príchodu. Najlepšie je prísť okolo 12:00, keď sa končí kempingový deň — zvyčajne nájdeme dobré riešenie. Bungalovy je možné naďalej rezervovať.',cta:'Pozrieť pravidlá',campyCta:'Opýtať sa CAMPY',campyPrompt:'Vysvetli pokojne pravidlá príchodu do kempu v júli a auguste.' },
   sv: { icon:'sun',kicker:'En lugn sommarankomst',title:'Juli och augusti — campingplatser',detail:'Under denna period tar vi inte emot förhandsbokningar av campingplatser. Platserna erbjuds i ankomstordning. Det är bäst att komma omkring kl. 12.00, när campingdygnet slutar — vanligtvis hittar vi en bra lösning. Bungalower kan fortfarande bokas.',cta:'Se reglerna',campyCta:'Fråga CAMPY',campyPrompt:'Förklara lugnt reglerna för ankomst till campingen i juli och augusti.' },
 } as const;
+const featuredSlides = {
+  pl: { welcome:{ icon:'TentTree',kicker:'Witaj w Clepardii',title:'Kraków blisko, natura jeszcze bliżej',detail:'Zielony camping z domkami, 9 przystanków tramwajem od centrum.' },weather:{ icon:'CloudSun',kicker:'Pogoda w Krakowie',title:'Sprawdź warunki przed wyjściem',detail:'Aktualna pogoda, prognoza godzinowa i kolejne dni w jednym miejscu.',weatherCta:'Zobacz prognozę' },trip:{ icon:'MapPinned',kicker:'Pomysł na dzień',title:'Kraków, Wieliczka, Ojców i więcej',detail:'Wybierz atrakcje lub ułóż własny rytm zwiedzania w Planerze.',cta:'Zobacz atrakcje' } },
+  en: { welcome:{ icon:'TentTree',kicker:'Welcome to Clepardia',title:'Krakow close by, nature even closer',detail:'A green campsite with bungalows, only 9 tram stops from the centre.' },weather:{ icon:'CloudSun',kicker:'Weather in Krakow',title:'Check conditions before you head out',detail:'Current weather, hourly forecast and the next days in one place.',weatherCta:'View forecast' },trip:{ icon:'MapPinned',kicker:'A day out',title:'Krakow, Wieliczka, Ojców and more',detail:'Choose attractions or create your own sightseeing rhythm in the Planner.',cta:'See attractions' } },
+  de: { welcome:{ icon:'TentTree',kicker:'Willkommen in Clepardia',title:'Krakau ganz nah, Natur noch näher',detail:'Ein grüner Campingplatz mit Bungalows, nur 9 Straßenbahnhaltestellen vom Zentrum.' },weather:{ icon:'CloudSun',kicker:'Wetter in Krakau',title:'Wetter vor dem Aufbruch prüfen',detail:'Aktuelles Wetter, stündliche Vorhersage und weitere Tage an einem Ort.',weatherCta:'Vorhersage ansehen' },trip:{ icon:'MapPinned',kicker:'Idee für den Tag',title:'Krakau, Wieliczka, Ojców und mehr',detail:'Sehenswürdigkeiten wählen oder im Planer den eigenen Rhythmus erstellen.',cta:'Attraktionen ansehen' } },
+  it: { welcome:{ icon:'TentTree',kicker:'Benvenuti a Clepardia',title:'Cracovia vicina, la natura ancora di più',detail:'Camping verde con bungalow, a sole 9 fermate di tram dal centro.' },weather:{ icon:'CloudSun',kicker:'Meteo a Cracovia',title:'Controlla il tempo prima di uscire',detail:'Meteo attuale, previsioni orarie e prossimi giorni in un solo posto.',weatherCta:'Vedi previsioni' },trip:{ icon:'MapPinned',kicker:'Idea per la giornata',title:'Cracovia, Wieliczka, Ojców e altro',detail:'Scegli le attrazioni o crea il tuo ritmo nel Planner.',cta:'Vedi attrazioni' } },
+  fr: { welcome:{ icon:'TentTree',kicker:'Bienvenue à Clepardia',title:'Cracovie tout près, la nature encore plus',detail:'Un camping verdoyant avec bungalows, à 9 arrêts de tram du centre.' },weather:{ icon:'CloudSun',kicker:'Météo à Cracovie',title:'Consultez la météo avant de partir',detail:'Météo actuelle, prévisions horaires et prochains jours au même endroit.',weatherCta:'Voir les prévisions' },trip:{ icon:'MapPinned',kicker:'Idée de sortie',title:'Cracovie, Wieliczka, Ojców et plus',detail:'Choisissez vos visites ou créez votre rythme dans le Planificateur.',cta:'Voir les attractions' } },
+  es: { welcome:{ icon:'TentTree',kicker:'Bienvenidos a Clepardia',title:'Cracovia cerca, la naturaleza aún más',detail:'Un camping verde con bungalows, a solo 9 paradas de tranvía del centro.' },weather:{ icon:'CloudSun',kicker:'Tiempo en Cracovia',title:'Consulta el tiempo antes de salir',detail:'Tiempo actual, previsión por horas y próximos días en un solo lugar.',weatherCta:'Ver previsión' },trip:{ icon:'MapPinned',kicker:'Idea para el día',title:'Cracovia, Wieliczka, Ojców y más',detail:'Elige atracciones o crea tu propio ritmo en el Planificador.',cta:'Ver atracciones' } },
+  nl: { welcome:{ icon:'TentTree',kicker:'Welkom bij Clepardia',title:'Krakau dichtbij, de natuur nog dichterbij',detail:'Een groene camping met bungalows, op 9 tramhaltes van het centrum.' },weather:{ icon:'CloudSun',kicker:'Weer in Krakau',title:'Bekijk het weer voordat je vertrekt',detail:'Actueel weer, uurverwachting en de komende dagen op één plek.',weatherCta:'Bekijk verwachting' },trip:{ icon:'MapPinned',kicker:'Idee voor een dag',title:'Krakau, Wieliczka, Ojców en meer',detail:'Kies attracties of maak je eigen ritme in de Planner.',cta:'Bekijk attracties' } },
+  cs: { welcome:{ icon:'TentTree',kicker:'Vítejte v Clepardii',title:'Krakov blízko, příroda ještě blíž',detail:'Zelený kemp s bungalovy, jen 9 zastávek tramvají od centra.' },weather:{ icon:'CloudSun',kicker:'Počasí v Krakově',title:'Před cestou zkontrolujte počasí',detail:'Aktuální počasí, hodinová předpověď a další dny na jednom místě.',weatherCta:'Zobrazit předpověď' },trip:{ icon:'MapPinned',kicker:'Nápad na den',title:'Krakov, Wieliczka, Ojców a další',detail:'Vyberte atrakce nebo si v Plánovači vytvořte vlastní rytmus.',cta:'Zobrazit atrakce' } },
+  sk: { welcome:{ icon:'TentTree',kicker:'Vitajte v Clepardii',title:'Krakov blízko, príroda ešte bližšie',detail:'Zelený kemp s bungalovmi, len 9 zastávok električkou od centra.' },weather:{ icon:'CloudSun',kicker:'Počasie v Krakove',title:'Pred cestou skontrolujte počasie',detail:'Aktuálne počasie, hodinová predpoveď a ďalšie dni na jednom mieste.',weatherCta:'Zobraziť predpoveď' },trip:{ icon:'MapPinned',kicker:'Nápad na deň',title:'Krakov, Wieliczka, Ojców a ďalšie',detail:'Vyberte atrakcie alebo si v Plánovači vytvorte vlastný rytmus.',cta:'Zobraziť atrakcie' } },
+  sv: { welcome:{ icon:'TentTree',kicker:'Välkommen till Clepardia',title:'Kraków nära, naturen ännu närmare',detail:'En grön camping med bungalower, bara 9 spårvagnshållplatser från centrum.' },weather:{ icon:'CloudSun',kicker:'Väder i Kraków',title:'Kontrollera vädret innan du går ut',detail:'Aktuellt väder, timprognos och kommande dagar på samma plats.',weatherCta:'Visa prognos' },trip:{ icon:'MapPinned',kicker:'Dagens idé',title:'Kraków, Wieliczka, Ojców och mer',detail:'Välj sevärdheter eller skapa din egen rytm i Planeraren.',cta:'Se sevärdheter' } },
+} as const;
 const sourceCopy = compactCopy[requestedLang as keyof typeof compactCopy] ?? baseCopy;
 const summerSlide = summerSlides[lang as keyof typeof summerSlides] ?? summerSlides.en;
+const featured = featuredSlides[lang as keyof typeof featuredSlides] ?? featuredSlides.en;
 const rulesHref = getLocalizedPath(lang === 'pl' ? undefined : lang,'camping');
-const copy = { ...sourceCopy,slides:[...sourceCopy.slides,{ ...summerSlide,href:rulesHref,seasonal:true }] };
+const attractionsHref = getLocalizedPath(lang === 'pl' ? undefined : lang,'atrakcje');
+const copy = { ...sourceCopy,slides:[
+  { ...featured.welcome,kind:'welcome' },
+  { ...summerSlide,href:rulesHref,seasonal:true,kind:'summer' },
+  { ...featured.weather,weather:true,kind:'weather' },
+  { ...sourceCopy.slides[0],kind:'directions' },
+  { ...featured.trip,href:attractionsHref,kind:'trips' },
+  ...sourceCopy.slides.slice(1).map((slide) => ({ ...slide,kind:'other' })),
+] };
+const isExternalHref = (href: unknown) => /^https?:\/\//i.test(String(href ?? ''));
 ---
 
 <aside class="hero-experience-slider" data-hero-experience-slider aria-label={copy.aria}>
@@ -295,7 +317,7 @@ const copy = { ...sourceCopy,slides:[...sourceCopy.slides,{ ...summerSlide,href:
 
   <div class="hero-experience-slider__slides">
     {copy.slides.map((slide, index) => (
-      <article class:list={['hero-experience-slider__slide', 'seasonal' in slide && slide.seasonal && 'is-seasonal', index === 0 && 'is-active']} data-hero-slide>
+      <article class:list={['hero-experience-slider__slide', 'seasonal' in slide && slide.seasonal && 'is-seasonal', index === 0 && 'is-active']} data-hero-slide data-hero-slide-kind={slide.kind}>
         <span class="hero-experience-slider__icon" aria-hidden="true">
           <Icon name={slide.icon} size={30} strokeWidth={1.8} />
         </span>
@@ -304,13 +326,18 @@ const copy = { ...sourceCopy,slides:[...sourceCopy.slides,{ ...summerSlide,href:
         <small>{slide.detail}</small>
         <div class="hero-experience-slider__actions">
           {'href' in slide && slide.href && (
-            <a class="hero-experience-slider__link" href={slide.href} target={'seasonal' in slide && slide.seasonal ? undefined : '_blank'} rel={'seasonal' in slide && slide.seasonal ? undefined : 'noopener noreferrer'}>
+            <a class="hero-experience-slider__link" href={slide.href} target={isExternalHref(slide.href) ? '_blank' : undefined} rel={isExternalHref(slide.href) ? 'noopener noreferrer' : undefined}>
               {slide.cta}
             </a>
           )}
           {'campyCta' in slide && slide.campyCta && (
             <button class="hero-experience-slider__link" type="button" data-hero-slide-campy data-campy-prompt={slide.campyPrompt} aria-label={slide.campyCta}>
               {slide.campyCta}
+            </button>
+          )}
+          {'weatherCta' in slide && slide.weatherCta && (
+            <button class="hero-experience-slider__link" type="button" data-hero-slide-weather aria-label={slide.weatherCta}>
+              {slide.weatherCta}
             </button>
           )}
         </div>
@@ -395,6 +422,9 @@ const copy = { ...sourceCopy,slides:[...sourceCopy.slides,{ ...summerSlide,href:
       slider.querySelectorAll('[data-hero-slide-campy]').forEach((button) => button.addEventListener('click',() => {
         const prompt = button instanceof HTMLElement ? String(button.dataset.campyPrompt || '').trim() : '';
         window.dispatchEvent(new CustomEvent('campy:prompt',{ detail:{ prompt,actionKey:'summerCamping' } }));
+      }));
+      slider.querySelectorAll('[data-hero-slide-weather]').forEach((button) => button.addEventListener('click',() => {
+        window.dispatchEvent(new CustomEvent('weather:open',{ detail:{ trigger:button } }));
       }));
 
       slider.addEventListener('mouseenter', stop);

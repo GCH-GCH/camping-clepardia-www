@@ -45,7 +45,7 @@ const dashboardKeys = [
   'panelTitle','panelSubtitle','filtersOpen','filtersClose','active','calm','veryCalm','walkBike','tripYes','tripNo','childrenHint',
   'weatherTitle','weatherDetails','weatherLess','weatherEmpty','weatherLater','weatherUnavailable','weatherRain','dayDetails','previousDays','nextDays',
   'quickMaps','quickTram','quickTickets','quickCampy','quickSave','quickMail','saved','saveError','mailSubject','mailIntro',
-  'modalClose','modalSchedule','modalPractical','modalPlanB','modalTips','modalLinks','upsellTitle','upsellCopy','upsellAdd','upsellMax',
+  'modalClose','modalSchedule','modalPractical','modalPlanB','modalTips','modalLinks','modalPreviousDay','modalNextDay','modalChooseDay','modalDayProgress','modalAskCampy','modalWeather','upsellTitle','upsellCopy','upsellAdd','upsellMax',
   'summerTitle','summerDisclaimer','chooseDate','planSavedAt','nightsDates','groupTile','transportTile','paceTile',
 ];
 for (const [language,config] of configsByLanguage) {
@@ -149,10 +149,13 @@ assert.equal(laterModel.weather.message,config.dashboard.weatherLater);
 const emptyModel = buildPlannerModel(config,scenarios.family);
 assert.equal(emptyModel.weather.message,config.dashboard.weatherEmpty);
 
-const modalHtml = renderPlannerDayModal(models.family.days[0],models.family.labels);
+const modalHtml = renderPlannerDayModal(models.family.days[0],models.family.labels,{ days:models.family.days });
 assert.match(modalHtml,/planner-dialog__timeline/);
 assert.match(modalHtml,/planner-dialog__facts/);
 assert.match(modalHtml,/planner-dialog__links/);
+assert.match(modalHtml,/data-planner-modal-next/);
+assert.match(modalHtml,/data-planner-modal-day-select/);
+assert.match(modalHtml,/data-planner-modal-progress/);
 assert.match(modalHtml,/google\.com\/maps/);
 assert.doesNotMatch(modalHtml,/undefined|null/);
 

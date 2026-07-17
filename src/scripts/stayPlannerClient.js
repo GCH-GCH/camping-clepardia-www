@@ -42,6 +42,7 @@ export function initStayPlanner() {
   let carouselStart = 0;
   let carouselRefresh = () => {};
   let lastModalTrigger = null;
+  let activeModalDay = 1;
 
   const track = (eventType,metadata = {}) => window.dispatchEvent(new CustomEvent('cc:analytics',{ detail:{ eventType,metadata } }));
 
@@ -475,12 +476,26 @@ export function initStayPlanner() {
     if (lastModalTrigger instanceof HTMLElement) lastModalTrigger.focus();
   };
 
-  const openDay = (dayNumber,trigger) => {
+  const renderModalDay = (dayNumber,direction = 'current',focusSelector = '') => {
     const day = currentModel?.days?.find((item) => item.dayNumber === dayNumber);
     const dialog = result.querySelector('[data-planner-modal]');
     const content = dialog?.querySelector('[data-planner-modal-content]');
-    if (!day || !(dialog instanceof HTMLDialogElement) || !(content instanceof HTMLElement)) return;
-    content.innerHTML = renderPlannerDayModal(day,currentModel.labels);
+    if (!day || !(dialog instanceof HTMLDialogElement) || !(content instanceof HTMLElement)) return false;
+    activeModalDay = day.dayNumber;
+    content.dataset.modalDirection = direction;
+    content.innerHTML = renderPlannerDayModal(day,currentModel.labels,{ days:currentModel.days,index:day.dayNumber - 1 });
+    const inner = content.firstElementChild;
+    if (inner instanceof HTMLElement && direction !== 'current' && !reducedMotion.matches) {
+      inner.classList.add(direction === 'next' ? 'is-entering-next' : 'is-entering-prev');
+      window.setTimeout(() => inner.classList.remove('is-entering-next','is-entering-prev'),380);
+    }
+    if (focusSelector) requestAnimationFrame(() => dialog.querySelector(focusSelector)?.focus());
+    return true;
+  };
+
+  const openDay = (dayNumber,trigger) => {
+    const dialog = result.querySelector('[data-planner-modal]');
+    if (!(dialog instanceof HTMLDialogElement) || !renderModalDay(dayNumber)) return;
     lastModalTrigger = trigger instanceof HTMLElement ? trigger : null;
     if (dialog.dataset.modalBound !== 'true') {
       dialog.dataset.modalBound = 'true';
@@ -496,7 +511,17 @@ export function initStayPlanner() {
       dialog.classList.add('is-visible');
       dialog.querySelector('[data-planner-modal-close]')?.focus();
     });
-    track('planner_day_details',{ day:dayNumber,route:day.routeIndex });
+    const openedDay = currentModel?.days?.find((item) => item.dayNumber === dayNumber);
+    track('planner_day_details',{ day:dayNumber,route:openedDay?.routeIndex ?? 0 });
+  };
+
+  const moveModalDay = (direction) => {
+    const days = currentModel?.days || [];
+    const index = days.findIndex((day) => day.dayNumber === activeModalDay);
+    const nextIndex = direction === 'next' ? index + 1 : index - 1;
+    if (index < 0 || nextIndex < 0 || nextIndex >= days.length) return;
+    renderModalDay(days[nextIndex].dayNumber,direction,direction === 'next' ? '[data-planner-modal-next]' : '[data-planner-modal-prev]');
+    track('planner_modal_day_change',{ from:index + 1,to:nextIndex + 1 });
   };
 
   result.addEventListener('click',(event) => {
@@ -506,6 +531,13 @@ export function initStayPlanner() {
     if (dialog instanceof HTMLDialogElement && element === dialog) { closeModal(dialog); return; }
     const close = element.closest('[data-planner-modal-close]');
     if (close) { closeModal(close.closest('dialog')); return; }
+    if (element.closest('[data-planner-modal-prev]')) { moveModalDay('prev'); return; }
+    if (element.closest('[data-planner-modal-next]')) { moveModalDay('next'); return; }
+    if (element.closest('[data-planner-modal-campy]')) {
+      const day = currentModel?.days?.find((item) => item.dayNumber === activeModalDay);
+      askCampy(day ? ` ${day.title}` : '');
+      return;
+    }
     const details = element.closest('[data-planner-day-details]');
     if (details instanceof HTMLElement) { openDay(Number(details.dataset.plannerDayDetails || 0),details); return; }
     const card = element.closest('[data-planner-day-card]');
@@ -522,6 +554,16 @@ export function initStayPlanner() {
       const label = weatherButton.querySelector('span');
       if (label) label.textContent = expanded ? config.dashboard.weatherLess : config.dashboard.weatherDetails;
     }
+  });
+
+  result.addEventListener('change',(event) => {
+    const select = event.target instanceof HTMLSelectElement ? event.target.closest('[data-planner-modal-day-select]') : null;
+    if (!(select instanceof HTMLSelectElement)) return;
+    const nextDay = Number(select.value || 0);
+    const previousDay = activeModalDay;
+    const direction = nextDay >= activeModalDay ? 'next' : 'prev';
+    renderModalDay(nextDay,direction,'[data-planner-modal-day-select]');
+    track('planner_modal_day_change',{ from:previousDay,to:nextDay,source:'select' });
   });
 
   result.addEventListener('keydown',(event) => {

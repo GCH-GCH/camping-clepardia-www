@@ -62,6 +62,15 @@ const polishLeakPhrases = [
   'Deszcz',
   'Dzisiaj',
   'Jutro',
+  'Dokładna kolejność',
+  'Informacje praktyczne',
+  'Przydatne linki',
+  'Otwórz Google Maps',
+  'Poprzedni dzień',
+  'Następny dzień',
+  'Prognoza godzinowa',
+  'Opady',
+  'Wiatr',
 ];
 
 const englishFallbackPhrases = [

@@ -1,10 +1,13 @@
 import { expect,test } from '@playwright/test';
 
 const weatherPayload = {
-  ok:true,available:true,source:'open-meteo',forecastInRange:true,
-  current:{ temperatureC:24.4,apparentTemperatureC:25.1,precipitationMm:0,weatherCode:1,windKmh:9 },
-  daily:Array.from({ length:5 },(_,index) => ({ date:`2026-07-${String(18 + index).padStart(2,'0')}`,weatherCode:index === 1 ? 63 : 1,temperatureMinC:15,temperatureMaxC:25 - index,rainProbability:index === 1 ? 80 : 10 })),
+  ok:true,available:true,source:'open-meteo',sourceStatus:'ready',fallbackReason:null,forecastInRange:true,generatedAt:'2026-07-17T10:00:00.000Z',
+  current:{ temperatureC:24.4,apparentTemperatureC:25.1,humidityPercent:58,precipitationMm:0,weatherCode:1,windKmh:9 },
+  hourly:Array.from({ length:12 },(_,index) => ({ time:`2026-07-17T${String(12 + index).padStart(2,'0')}:00`,temperatureC:24 + (index % 3),apparentTemperatureC:25,rainProbability:index === 4 ? 60 : 10,precipitationMm:0,weatherCode:index === 4 ? 63 : 1,windKmh:9 })),
+  daily:Array.from({ length:7 },(_,index) => ({ date:`2026-07-${String(18 + index).padStart(2,'0')}`,weatherCode:index === 1 ? 63 : 1,temperatureMinC:15,temperatureMaxC:25 - index,rainProbability:index === 1 ? 80 : 10,windMaxKmh:12 + index })),
 };
+
+const drawerHeadings = { pl:'Prognoza godzinowa',en:'Hourly forecast',de:'Stündliche Vorhersage',it:'Previsioni orarie',fr:'Prévisions horaires',es:'Previsión por horas',nl:'Verwachting per uur',cs:'Hodinová předpověď',sk:'Hodinová predpoveď',sv:'Timprognos' };
 
 const localeCases = [
   ['pl','/','/planer-pobytu','Lipiec i sierpień','Nie udało się teraz pobrać pogody'],
@@ -34,6 +37,7 @@ test('homepage: hero i karta współdzielą pogodę, a slajd sezonowy ma dwa CTA
   await expect(page.locator('.weather-card--hero [data-weather-temperature]')).toHaveText('24°C');
   await expect(page.locator('.weather-card--compact [data-weather-temperature]')).toHaveText('24°C');
   expect(requests).toBe(1);
+  expect(await page.locator('[data-hero-slide]').evaluateAll((slides) => slides.slice(0,5).map((slide) => slide.dataset.heroSlideKind))).toEqual(['welcome','summer','weather','directions','trips']);
 
   const seasonal = page.locator('[data-hero-slide].is-seasonal');
   await expect(seasonal).toContainText('Lipiec i sierpień — miejsca campingowe');
@@ -71,6 +75,11 @@ test('fallback, hero i slajd sezonowy są lokalizowane w 10 językach',async ({ 
     await expect(page.locator('html')).toHaveAttribute('lang',language);
     await expect(page.locator('.weather-card--hero [data-weather-temperature]')).toHaveText('24°C');
     await expect(page.locator('[data-hero-slide].is-seasonal')).toContainText(summer);
+    await page.locator('[data-weather-open]').click();
+    await expect(page.locator('[data-weather-dialog]')).toHaveAttribute('open','');
+    await expect(page.locator('[data-weather-dialog]')).toContainText(drawerHeadings[language]);
+    if (language !== 'pl') await expect(page.locator('[data-weather-dialog]')).not.toContainText(/Prognoza godzinowa|Aktualna pogoda|Spróbuj ponownie|Otwórz Planer/);
+    await page.keyboard.press('Escape');
 
     await page.unroute('**/api/weather?*');
     await page.route('**/api/weather?*',(route) => route.fulfill({ status:200,contentType:'application/json',body:'{"ok":false,"available":false,"fallback":true}' }));
@@ -81,16 +90,72 @@ test('fallback, hero i slajd sezonowy są lokalizowane w 10 językach',async ({ 
   }
 });
 
+test('weather drawer desktop: pełna prognoza, dostępność i powrót focusu',async ({ page }) => {
+  await page.setViewportSize({ width:1366,height:768 });
+  await page.route('**/api/weather?*',(route) => route.fulfill({ status:200,contentType:'application/json',body:JSON.stringify(weatherPayload) }));
+  await page.goto('/',{ waitUntil:'networkidle' });
+  await expect(page.locator('.page-loader')).toBeHidden({ timeout:10_000 });
+  const trigger = page.locator('[data-weather-open]');
+  await page.screenshot({ path:'test-results/task146-home-desktop.png' });
+  await trigger.click();
+  const dialog = page.locator('[data-weather-dialog]');
+  await expect(dialog).toHaveAttribute('open','');
+  await expect(dialog).toHaveAttribute('role','dialog');
+  await expect(dialog).toHaveAttribute('aria-modal','true');
+  await expect.poll(() => dialog.evaluate((element) => getComputedStyle(element).filter)).toBe('none');
+  await expect(page.locator('[data-weather-hourly] article')).toHaveCount(12);
+  await expect(page.locator('[data-weather-daily] article')).toHaveCount(7);
+  await expect(dialog).toContainText('Wilgotność');
+  const size = await dialog.evaluate((element) => ({ width:element.getBoundingClientRect().width,height:element.getBoundingClientRect().height,vw:innerWidth,vh:innerHeight,bodyLocked:document.body.classList.contains('weather-modal-open') }));
+  expect(size.width / size.vw).toBeGreaterThanOrEqual(.8);
+  expect(size.width / size.vw).toBeLessThanOrEqual(.91);
+  expect(size.height / size.vh).toBeGreaterThanOrEqual(.8);
+  expect(size.bodyLocked).toBe(true);
+  await page.screenshot({ path:'test-results/task146-weather-modal-desktop.png' });
+  await page.keyboard.press('Shift+Tab');
+  expect(await dialog.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+  await page.keyboard.press('Escape');
+  await expect(dialog).not.toHaveAttribute('open','');
+  expect(await trigger.evaluate((element) => document.activeElement === element)).toBe(true);
+});
+
+test('weather drawer fallback: bez nieskończonego loadingu i z działającym CTA Planera',async ({ page }) => {
+  await page.route('**/api/weather?*',(route) => route.fulfill({ status:200,contentType:'application/json',body:'{"ok":false,"available":false,"fallback":true,"fallbackReason":"provider"}' }));
+  await page.goto('/',{ waitUntil:'domcontentloaded' });
+  await expect(page.locator('.weather-card--hero [data-weather-status]')).toContainText('Prognoza chwilowo niedostępna');
+  await page.locator('[data-weather-open]').click();
+  await expect(page.locator('[data-weather-dialog-status]')).toContainText('Nie udało się teraz pobrać pogody');
+  await expect(page.locator('[data-weather-dialog-status] [data-weather-retry]')).toBeVisible();
+  await expect(page.locator('.weather-dialog__footer a')).toHaveAttribute('href','/planer-pobytu');
+});
+
 for (const width of [360,390,430]) {
   test(`homepage ${width}px: pogoda i slider bez overflow`,async ({ page }) => {
     await page.setViewportSize({ width,height:width === 430 ? 932 : width === 390 ? 844 : 800 });
     await page.route('**/api/weather?*',(route) => route.fulfill({ status:200,contentType:'application/json',body:JSON.stringify(weatherPayload) }));
     await page.goto('/',{ waitUntil:'networkidle' });
+    await expect(page.locator('.page-loader')).toBeHidden({ timeout:10_000 });
     await expect(page.locator('.weather-card--hero')).toBeVisible();
     await expect(page.locator('.weather-card--hero [data-weather-temperature]')).toHaveText('24°C');
     const metrics = await page.evaluate(() => ({ viewport:document.documentElement.clientWidth,page:document.documentElement.scrollWidth,heroWidth:document.querySelector('.weather-card--hero')?.getBoundingClientRect().width || 0 }));
     expect(metrics.page).toBeLessThanOrEqual(metrics.viewport + 1);
     expect(metrics.heroWidth).toBeLessThanOrEqual(metrics.viewport - 16);
+    if (width === 390) await page.screenshot({ path:'test-results/task146-home-mobile-390.png' });
+    await page.locator('[data-weather-open]').click();
+    await expect.poll(() => page.locator('[data-weather-dialog]').evaluate((element) => getComputedStyle(element).transform)).toBe('none');
+    const modalMetrics = await page.locator('[data-weather-dialog]').evaluate((element) => {
+      const current = element.querySelector('.weather-dialog__current');
+      const scroll = element.querySelector('.weather-dialog__scroll');
+      return { width:element.getBoundingClientRect().width,height:element.getBoundingClientRect().height,vw:innerWidth,vh:innerHeight,bodyLocked:document.body.classList.contains('weather-modal-open'),smallest:Math.min(...[...element.querySelectorAll('button,a')].filter((node) => node.offsetParent).map((node) => node.getBoundingClientRect().height)),currentOverflow:(current?.scrollWidth || 0) - (current?.clientWidth || 0),dialogOverflow:(scroll?.scrollWidth || 0) - (scroll?.clientWidth || 0) };
+    });
+    expect(modalMetrics.width).toBeGreaterThanOrEqual(modalMetrics.vw - 1);
+    expect(modalMetrics.height).toBeGreaterThanOrEqual(modalMetrics.vh - 1);
+    expect(modalMetrics.bodyLocked).toBe(true);
+    expect(modalMetrics.smallest).toBeGreaterThanOrEqual(44);
+    expect(modalMetrics.currentOverflow).toBeLessThanOrEqual(1);
+    expect(modalMetrics.dialogOverflow).toBeLessThanOrEqual(1);
+    if (width === 390) await page.screenshot({ path:'test-results/task146-weather-modal-mobile-390.png' });
+    await page.keyboard.press('Escape');
   });
 }
 

@@ -100,7 +100,6 @@ const heroStyle = [
       <p class="hero__description">
         {heroClient.copy}
       </p>
-      <WeatherCard languageCode={activeLanguage} hero />
       <div class="hero__cta">
         <a href={bookingHref} class="btn btn-primary btn-large hero__button hero__button--primary">{heroClient.primary}</a>
         <a href={pricingHref} class="btn btn-glass btn-large hero__button hero__button--secondary">{heroClient.secondary}</a>
@@ -121,6 +120,7 @@ const heroStyle = [
       </div>
     </div>
 
+    <WeatherCard languageCode={activeLanguage} hero />
     <HeroExperienceCard languageCode={activeLanguage} />
   </div>
 

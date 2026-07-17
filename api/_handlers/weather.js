@@ -1,9 +1,11 @@
 const CAMPING_LOCATION = { latitude: 50.1047, longitude: 19.9318 };
 const CURRENT_TTL_MS = 20 * 60 * 1000;
+const HOURLY_TTL_MS = 20 * 60 * 1000;
 const DAILY_TTL_MS = 3 * 60 * 60 * 1000;
 const UPSTREAM_TIMEOUT_MS = 6_500;
 const MAX_FORECAST_DAYS = 16;
 const currentCache = new Map();
+const hourlyCache = new Map();
 const dailyCache = new Map();
 
 const sendJson = (res, status, body) => {
@@ -72,13 +74,14 @@ const currentWeather = async (latitude, longitude) => {
   if (cached) return { value: cached, cached: true };
   const body = await fetchOpenMeteo({
     latitude, longitude, timezone: 'Europe/Warsaw',
-    current: 'temperature_2m,apparent_temperature,precipitation,rain,weather_code,wind_speed_10m,wind_gusts_10m',
+    current: 'temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,rain,weather_code,wind_speed_10m,wind_gusts_10m',
   });
   const current = body.current || {};
   const value = {
     time: current.time || null,
     temperatureC: finiteNumber(current.temperature_2m, null),
     apparentTemperatureC: finiteNumber(current.apparent_temperature, null),
+    humidityPercent: finiteNumber(current.relative_humidity_2m, null),
     precipitationMm: finiteNumber(current.precipitation, 0),
     rainMm: finiteNumber(current.rain, 0),
     weatherCode: finiteNumber(current.weather_code, null),
@@ -86,6 +89,28 @@ const currentWeather = async (latitude, longitude) => {
     windGustKmh: finiteNumber(current.wind_gusts_10m, null),
   };
   return { value: setCached(currentCache, key, value, CURRENT_TTL_MS), cached: false };
+};
+
+const hourlyWeather = async (latitude, longitude) => {
+  const key = `${latitude}:${longitude}`;
+  const cached = getCached(hourlyCache, key);
+  if (cached) return { value: cached, cached: true };
+  const body = await fetchOpenMeteo({
+    latitude, longitude, timezone: 'Europe/Warsaw', forecast_hours: 24,
+    hourly: 'temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m',
+  });
+  const hourly = body.hourly || {};
+  const value = (hourly.time || []).map((time, index) => ({
+    time,
+    temperatureC: finiteNumber(hourly.temperature_2m?.[index], null),
+    apparentTemperatureC: finiteNumber(hourly.apparent_temperature?.[index], null),
+    humidityPercent: finiteNumber(hourly.relative_humidity_2m?.[index], null),
+    rainProbability: finiteNumber(hourly.precipitation_probability?.[index], null),
+    precipitationMm: finiteNumber(hourly.precipitation?.[index], 0),
+    weatherCode: finiteNumber(hourly.weather_code?.[index], null),
+    windKmh: finiteNumber(hourly.wind_speed_10m?.[index], null),
+  }));
+  return { value: setCached(hourlyCache, key, value, HOURLY_TTL_MS), cached: false };
 };
 
 const dailyWeather = async (latitude, longitude, start, end) => {
@@ -129,8 +154,9 @@ export default async function handler(req, res) {
   const start = dateOnly(req.query?.start ?? req.query?.startDate);
   const end = dateOnly(req.query?.end ?? req.query?.endDate);
   try {
-    const [current, daily] = await Promise.all([
+    const [current, hourly, daily] = await Promise.all([
       currentWeather(latitude, longitude),
+      hourlyWeather(latitude, longitude),
       dailyWeather(latitude, longitude, start, end),
     ]);
     return sendJson(res, 200, {
@@ -139,9 +165,12 @@ export default async function handler(req, res) {
       source: 'open-meteo',
       location: { latitude, longitude, name: 'Camping Clepardia · Kraków', timezone: 'Europe/Warsaw' },
       current: current.value,
+      hourly: hourly.value,
       daily: daily.value,
       forecastInRange: daily.inRange,
-      cache: { current: current.cached ? 'hit' : 'miss', daily: daily.cached ? 'hit' : 'miss', currentTtlMinutes: 20, dailyTtlMinutes: 180 },
+      sourceStatus: 'ready',
+      fallbackReason: null,
+      cache: { current: current.cached ? 'hit' : 'miss', hourly: hourly.cached ? 'hit' : 'miss', daily: daily.cached ? 'hit' : 'miss', currentTtlMinutes: 20, hourlyTtlMinutes: 20, dailyTtlMinutes: 180 },
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
@@ -153,8 +182,11 @@ export default async function handler(req, res) {
       code: error?.name === 'AbortError' ? 'WEATHER_UPSTREAM_TIMEOUT' : 'WEATHER_PROVIDER_UNAVAILABLE',
       location: { latitude, longitude, name: 'Camping Clepardia · Kraków' },
       current: null,
+      hourly: [],
       daily: [],
       forecastInRange: false,
+      sourceStatus: 'unavailable',
+      fallbackReason: error?.name === 'AbortError' ? 'timeout' : 'provider',
     });
   }
 }
