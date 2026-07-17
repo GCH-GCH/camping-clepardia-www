@@ -1730,7 +1730,6 @@ const quickActionGroups = preferredQuickKeys
     window.addEventListener('scroll', updateMobileAvailability, { passive: true });
     window.addEventListener('resize', () => {
       updateStickyOffset();
-      updateQuickScrollbar();
       if (panelHydrated) syncPanelTitle();
     }, { passive: true });
     document.addEventListener('click', (event) => {

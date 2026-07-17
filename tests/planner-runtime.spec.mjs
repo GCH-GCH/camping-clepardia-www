@@ -144,6 +144,7 @@ test('scenariusze A, B i C realnie generują różne plany',async ({ page }) => 
 
 for (const width of [360,390,430]) {
   test(`mobile ${width}px: brak overflow i dotykowe kontrolki`,async ({ page }) => {
+    const noConsoleErrors = assertNoConsoleErrors(page);
     await page.setViewportSize({ width,height:844 });
     await page.reload({ waitUntil:'networkidle' });
     await page.locator('[data-planner-filter-toggle]').click();
@@ -157,6 +158,7 @@ for (const width of [360,390,430]) {
     expect(metrics.panelOverflow).not.toMatch(/auto|scroll/);
     expect(metrics.smallestButton).toBeGreaterThanOrEqual(44);
     await expect(page.locator('[data-planner-day-card]')).toHaveCount(2);
+    noConsoleErrors();
   });
 }
 
