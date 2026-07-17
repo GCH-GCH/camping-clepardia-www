@@ -6,7 +6,14 @@ const ROUTE_META = [
   { id:'relax', icon:'♧', accent:'mint', tags:['kids','relax'], mapQuery:'Park Wodny Kraków' },
 ];
 
-const INTEREST_TO_ROUTE = { classic:0, history:1, food:1, tours:2, nature:3, kids:4 };
+const INTEREST_ROUTE_ORDER = {
+  classic:[0,1],
+  history:[1,0],
+  kids:[4,0],
+  nature:[3,0],
+  food:[1,4],
+  tours:[2,0],
+};
 const GROUP_ROUTE_ORDER = {
   pair:[1,3,4,2],
   family:[4,3,1,2],
@@ -31,9 +38,11 @@ export const nextPlannerNights = (value) => {
 export const previousPlannerNights = (value) => String(Math.max(1, plannerNightsNumber(value) - 1));
 
 const selectRouteIndexes = (state, nights) => {
-  const selected = [0];
-  asArray(state.interests).forEach((interest) => selected.push(INTEREST_TO_ROUTE[interest]));
-  if (state.children === 'yes' || state.group === 'family') selected.push(4);
+  const interests = asArray(state.interests);
+  const selected = interests.length ? [] : [0];
+  interests.forEach((interest) => selected.push(...(INTEREST_ROUTE_ORDER[interest] || [])));
+  if (state.children === 'yes' && state.group !== 'family') selected.unshift(4);
+  else if (state.children === 'yes' || state.group === 'family') selected.push(4);
   if (state.trip && state.trip !== 'none') selected.push(2);
   selected.push(...(GROUP_ROUTE_ORDER[state.group] || GROUP_ROUTE_ORDER.pair),0,1,2,3,4);
   const ordered = unique(selected);

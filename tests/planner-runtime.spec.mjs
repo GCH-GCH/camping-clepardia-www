@@ -142,6 +142,24 @@ test('scenariusze A, B i C realnie generują różne plany',async ({ page }) => 
   noConsoleErrors();
 });
 
+test('każde zainteresowanie realnie zmienia dwudniowy plan',async ({ page }) => {
+  const noConsoleErrors = assertNoConsoleErrors(page);
+  const interests = page.locator('[data-planner-interests]');
+  const details = interests.locator('xpath=ancestor::details[1]');
+  if (await details.getAttribute('open') === null) await details.locator('summary').click();
+  const values = await interests.locator('button[data-value]').evaluateAll((buttons) => buttons.map((button) => button.dataset.value));
+  const signatures = [];
+
+  for (const value of values) {
+    while (await interests.locator('button.is-active').count()) await interests.locator('button.is-active').first().click();
+    await interests.locator(`button[data-value="${value}"]`).click();
+    signatures.push((await page.locator('[data-planner-day-card]').allTextContents()).join('|'));
+  }
+
+  expect(new Set(signatures).size).toBe(values.length);
+  noConsoleErrors();
+});
+
 test('aktualizacja zachowuje focus, datę i stan akordeonu',async ({ page }) => {
   const noConsoleErrors = assertNoConsoleErrors(page);
   const accordion = page.locator('[data-planner-interests]').locator('xpath=ancestor::details[1]');

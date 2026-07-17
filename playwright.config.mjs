@@ -14,7 +14,7 @@ export default defineConfig({
     trace:'retain-on-failure',
   },
   webServer:{
-    command:'npm run dev -- --host 127.0.0.1',
+    command:'npm run dev -- --host 127.0.0.1 --force',
     url:'http://127.0.0.1:4321/planer-pobytu',
     reuseExistingServer:true,
     timeout:120_000,
