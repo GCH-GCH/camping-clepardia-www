@@ -1,18 +1,13 @@
 ---
-import ImageFrame from '@/components/ImageFrame.astro';
 import Icon from '@/components/ui/Icon.astro';
-import { attractionImages } from '@/data/attractionsImageRegistry';
-import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { siteAssets } from '@/data/assets';
 import { resolveContentLanguage } from '@/i18n/config';
-import { getCoreUi, tourBookingHref } from '@/i18n/coreUi';
 import { getStayPlannerPremiumCopy } from '@/i18n/stayPlannerPremium';
-import WeatherCard from '@/components/WeatherCard.astro';
-import SummerCampingNotice from '@/components/SummerCampingNotice.astro';
+import { getWeatherCopy } from '@/i18n/weather';
+import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+import { tourBookingHref } from '@/i18n/coreUi';
 
-interface Props {
-  languageCode?: string;
-}
-
+interface Props { languageCode?: string; }
 type SupportedLang = 'pl' | 'en' | 'de' | 'it' | 'fr' | 'es' | 'nl' | 'cs' | 'sk' | 'sv';
 
 const { languageCode } = Astro.props as Props;
@@ -20,2267 +15,468 @@ const pathContext = getPathContext(Astro.url.pathname);
 const requestedLanguage = languageCode ?? pathContext.languageCode;
 const lang = resolveContentLanguage(requestedLanguage) as SupportedLang;
 const explicitLanguage = pathContext.explicitLanguage;
+const copy = getStayPlannerPremiumCopy(lang);
+const dashboard = copy.dashboard;
+const weatherCopy = getWeatherCopy(lang);
 const bookingHref = getBookingLocalizedPath(requestedLanguage);
 const transportHref = getLocalizedPath(explicitLanguage, 'dojazd');
 const attractionsHref = getLocalizedPath(explicitLanguage, 'atrakcje');
-const tourUi = getCoreUi(languageCode ?? pathContext.languageCode).tour;
 
-const copyByLang = {
-  pl: {
-    kicker: 'Planer pobytu',
-    title: 'Zaplanuj swój pobyt w Krakowie',
-    lead:
-      'Wybierz liczbę nocy, tempo zwiedzania i atrakcje — podpowiemy, co realnie ma sens, co warto odpuścić i jak połączyć zwiedzanie z odpoczynkiem na campingu.',
-    micro: 'To nie jest sztywny program. To szybka podpowiedź, żeby pobyt był przyjemny, a nie goniony.',
-    nights: 'Liczba nocy',
-    pace: 'Tempo zwiedzania',
-    group: 'Z kim jedziesz?',
-    transport: 'Jak chcecie się poruszać?',
-    interests: 'Co Was najbardziej interesuje?',
-    resultTitle: 'Rekomendacja pobytu',
-    comfortable: 'Co spokojnie zobaczysz',
-    tooMuch: 'Co może być za dużo',
-    recommendation: 'Nasza rekomendacja',
-    dayPlan: 'Plan dnia',
-    quizTitle: 'Nie wiesz, co wybrać?',
-    quizCopy: 'Kliknij najbliższy scenariusz, a planer ustawi dobry punkt startu.',
-    todayTitle: 'Plan na dziś',
-    todayCopy: 'Najbezpieczniejszy pierwszy dzień: tramwaj do Starego Kleparza, spacer przez Stare Miasto, Wawel albo Kazimierz i spokojny powrót na camping.',
-    arrivalTitle: 'Pakiet pierwszego przyjazdu',
-    arrivalItems: [
-      'Przy rejestracji przygotuj jeden dokument tożsamości.',
-      'Jeśli przyjeżdżasz pojazdem, recepcja poprosi o numer rejestracyjny.',
-      'Przy przyczepie kempingowej wpisz numer rejestracyjny przyczepy.',
-      'Do nawigacji użyj Google Maps, bo dojazd zmienił się w 2022 roku.',
-      'Cisza nocna obowiązuje 22:00-07:00.',
-    ],
-    ctaBooking: 'Zarezerwuj pobyt',
-    ctaCampy: 'Zapytaj CAMPY',
-    ctaTours: 'Wycieczki z Krakowa',
-    ctaTram: 'Dojazd tramwajem',
-    ctaAttractions: 'Zobacz atrakcje',
-    options: {
-      calm: 'Spokojnie',
-      normal: 'Normalnie',
-      intensive: 'Intensywnie',
-      pair: 'Para',
-      family: 'Rodzina',
-      solo: 'Solo',
-      group: 'Grupa',
-      tram: 'Tramwaj',
-      car: 'Auto',
-      mixed: 'Spacer + tramwaj',
-    },
-    interestsList: [
-      ['classic', 'Stare Miasto + Wawel'],
-      ['history', 'Historia i muzea'],
-      ['kids', 'Dzieci i energia'],
-      ['nature', 'Natura poza miastem'],
-      ['tours', 'Gotowe wycieczki'],
-    ],
-    scenarios: [
-      { id: 'camper', icon: 'Caravan', title: 'Przyjeżdżam kamperem', copy: 'Zacznij od spokojnego Krakowa i tramwaju.', nights: '2', pace: 'normal', group: 'pair', transport: 'tram', interests: ['classic'] },
-      { id: 'family', icon: 'UsersRound', title: 'Rodzina z dziećmi', copy: 'Dodaj oddech, Wieliczkę albo Energylandię jako osobny dzień.', nights: '3', pace: 'calm', group: 'family', transport: 'mixed', interests: ['classic', 'kids'] },
-      { id: 'krakow', icon: 'Landmark', title: 'Chcę zobaczyć Kraków', copy: 'Stare Miasto, Wawel, Kazimierz i muzea bez auta.', nights: '2', pace: 'normal', group: 'pair', transport: 'tram', interests: ['classic', 'history'] },
-      { id: 'cabin', icon: 'House', title: 'Domki i spokojny pobyt', copy: 'Lepszy rytm: miasto + jeden dzień poza Krakowem.', nights: '4', pace: 'calm', group: 'family', transport: 'mixed', interests: ['classic', 'nature'] },
-    ],
-    recommendations: {
-      '1': {
-        comfortable: ['Stare Miasto, Rynek i Sukiennice', 'Wawel albo Kazimierz, ale nie wszystko naraz', 'Tramwaj z Górnickiego do Starego Kleparza i spacer do centrum'],
-        tooMuch: ['Wieliczka i Auschwitz w tym samym pobycie', 'Zakopane lub Energylandia jako dodatek do jednego dnia', 'Zwiedzanie autem po ścisłym centrum'],
-        recommendation: 'Przy 1 nocy zrób city break: Stare Miasto + Wawel, ewentualnie Kazimierz wieczorem. Wieliczkę, Auschwitz i dalsze wycieczki zostaw na dłuższy pobyt.',
-        days: ['Przyjazd, tramwaj do centrum, Stare Miasto, Wawel lub Kazimierz, powrót na spokojny wieczór.'],
-      },
-      '2': {
-        comfortable: ['Stare Miasto, Wawel i Kazimierz', 'Fabryka Schindlera albo spokojny wieczór na Kazimierzu', 'Wieliczka jest możliwa, ale zrobi się intensywnie'],
-        tooMuch: ['Wieliczka + Auschwitz + pełny Kraków w 2 noce', 'Dalekie trasy typu Zakopane bez poświęcenia całego dnia', 'Zbyt późny start w centrum'],
-        recommendation: 'Przy 2 nocach najlepiej połączyć centrum z Kazimierzem. Wieliczka jest możliwa, ale warto wtedy odpuścić część miasta albo dodać jeden dzień.',
-        days: ['Dzień 1: Stare Miasto + Wawel + powrót tramwajem.', 'Dzień 2: Kazimierz albo Wieliczka, zależnie od energii ekipy.'],
-      },
-      '3': {
-        comfortable: ['Kraków klasycznie: Stare Miasto, Wawel, Kazimierz', 'Wieliczka albo Auschwitz jako osobny dzień', 'Rodzinny dzień z wolniejszym tempem'],
-        tooMuch: ['Wieliczka i Auschwitz dzień po dniu przy małych dzieciach', 'Zakopane jako dodatek bez bardzo wczesnego startu', 'Brak dnia zapasowego na pogodę'],
-        recommendation: '3 noce to dobry rytm: dwa dni Krakowa i jeden większy wyjazd. Dla rodzin najczęściej wygrywa Wieliczka albo Energylandia jako osobny dzień.',
-        days: ['Dzień 1: Stare Miasto + Wawel.', 'Dzień 2: Kazimierz + Fabryka Schindlera albo luźny spacer.', 'Dzień 3: Wieliczka albo Auschwitz / Energylandia.'],
-      },
-      '4': {
-        comfortable: ['Kraków bez pośpiechu', 'Kazimierz i muzea', 'Wieliczka jako oddzielna wycieczka', 'Dzień wolniejszy na odpoczynek lub Ojców'],
-        tooMuch: ['Codziennie daleka wycieczka poza miasto', 'Zakopane i Energylandia bez dnia regeneracji', 'Plan bez przerwy przy upale'],
-        recommendation: '4 noce pozwalają zwiedzać spokojniej: Kraków + Kazimierz + Wieliczka + wolniejszy dzień. To bardzo dobry wariant dla domków i rodzin.',
-        days: ['Dzień 1: centrum i Wawel.', 'Dzień 2: Kazimierz + Schindler.', 'Dzień 3: Wieliczka.', 'Dzień 4: Ojców, luźny Kraków albo odpoczynek na campingu.'],
-      },
-      '5+': {
-        comfortable: ['Kraków i Małopolska bez gonienia', 'Wieliczka, Auschwitz albo Ojców', 'Energylandia lub Zakopane jako pełny dzień', 'Dni spokojniejsze między większymi trasami'],
-        tooMuch: ['Wszystkie dalekie atrakcje jedna po drugiej', 'Brak dnia buforowego na pogodę', 'Traktowanie campingu tylko jako parkingu'],
-        recommendation: '5+ nocy to już pobyt regionalny. Camping Clepardia może być bazą na Kraków, Małopolskę, Energylandię, Ojców lub Zakopane.',
-        days: ['Dzień 1: Stare Miasto + Wawel.', 'Dzień 2: Kazimierz + muzea.', 'Dzień 3: Wieliczka albo Auschwitz.', 'Dzień 4: odpoczynek / Ojców.', 'Dzień 5: Energylandia, Zakopane albo własny rytm.'],
-      },
-    },
-  },
-  en: {
-    kicker: 'Stay planner',
-    title: 'Plan Krakow without packing too much into one stay',
-    lead:
-      'Choose nights, pace, group and transport. The planner suggests what fits from Camping Clepardia, what may be too much and how to shape the day.',
-    micro: 'This is a friendly guide, not a fixed programme.',
-    nights: 'Nights',
-    pace: 'Pace',
-    group: 'Travel group',
-    transport: 'Transport',
-    interests: 'Interests',
-    resultTitle: 'Stay recommendation',
-    comfortable: 'Comfortably doable',
-    tooMuch: 'May be too much',
-    recommendation: 'Our recommendation',
-    dayPlan: 'Day plan',
-    quizTitle: 'Not sure what to choose?',
-    quizCopy: 'Pick the closest scenario and the planner will set a good starting point.',
-    todayTitle: 'Plan for today',
-    todayCopy: 'A safe first day: tram to Stary Kleparz, Old Town walk, Wawel or Kazimierz, then a calm return to the campsite.',
-    arrivalTitle: 'First arrival package',
-    arrivalItems: [
-      'Prepare one identity document for reception registration.',
-      'If you arrive with a vehicle, reception will ask for the registration plate.',
-      'With a camping trailer, enter the trailer registration plate.',
-      'Use Google Maps because access changed in 2022.',
-      'Quiet hours: 22:00-07:00.',
-    ],
-    ctaBooking: 'Book your stay',
-    ctaCampy: 'Ask CAMPY',
-    ctaTours: 'Tours from Krakow',
-    ctaTram: 'Tram directions',
-    ctaAttractions: 'See attractions',
-    options: {
-      calm: 'Calm',
-      normal: 'Normal',
-      intensive: 'Intensive',
-      pair: 'Couple',
-      family: 'Family',
-      solo: 'Solo',
-      group: 'Group',
-      tram: 'Tram',
-      car: 'Car',
-      mixed: 'Walk + tram',
-    },
-    interestsList: [
-      ['classic', 'Old Town + Wawel'],
-      ['history', 'History and museums'],
-      ['kids', 'Kids and energy'],
-      ['nature', 'Nature outside the city'],
-      ['tours', 'Organised tours'],
-    ],
-    scenarios: [
-      { id: 'camper', icon: 'Caravan', title: 'Arriving by camper', copy: 'Start with calm Krakow and the tram.', nights: '2', pace: 'normal', group: 'pair', transport: 'tram', interests: ['classic'] },
-      { id: 'family', icon: 'UsersRound', title: 'Family with kids', copy: 'Add breathing space and one bigger attraction.', nights: '3', pace: 'calm', group: 'family', transport: 'mixed', interests: ['classic', 'kids'] },
-      { id: 'krakow', icon: 'Landmark', title: 'I want Krakow', copy: 'Old Town, Wawel, Kazimierz and museums without the car.', nights: '2', pace: 'normal', group: 'pair', transport: 'tram', interests: ['classic', 'history'] },
-      { id: 'cabin', icon: 'House', title: 'Bungalow and slow stay', copy: 'City + one trip outside Krakow.', nights: '4', pace: 'calm', group: 'family', transport: 'mixed', interests: ['classic', 'nature'] },
-    ],
-    recommendations: {
-      '1': { comfortable: ['Old Town and Wawel', 'Kazimierz only if you still have energy', 'Tram route to Stary Kleparz'], tooMuch: ['Wieliczka and Auschwitz', 'Zakopane or Energylandia', 'Driving into the strict centre'], recommendation: 'With 1 night, keep it a city break: Old Town + Wawel. Leave bigger trips for a longer stay.', days: ['Arrival, tram to the centre, Old Town, Wawel or Kazimierz, calm evening.'] },
-      '2': { comfortable: ['Old Town, Wawel and Kazimierz', 'Schindler Factory or a calm Kazimierz evening', 'Wieliczka is possible but intense'], tooMuch: ['Wieliczka + Auschwitz + full Krakow', 'Far trips without a full day', 'Late start every day'], recommendation: 'With 2 nights, combine the centre with Kazimierz. Wieliczka is possible if you skip part of the city or add one day.', days: ['Day 1: Old Town + Wawel.', 'Day 2: Kazimierz or Wieliczka.'] },
-      '3': { comfortable: ['Classic Krakow', 'Wieliczka or Auschwitz as a separate day', 'A family-friendly slower day'], tooMuch: ['Wieliczka and Auschwitz back to back with small kids', 'Zakopane without an early start', 'No weather buffer'], recommendation: '3 nights gives a good rhythm: two Krakow days and one bigger trip.', days: ['Day 1: Old Town + Wawel.', 'Day 2: Kazimierz + museums.', 'Day 3: Wieliczka / Auschwitz / Energylandia.'] },
-      '4': { comfortable: ['Krakow without rush', 'Kazimierz and museums', 'Wieliczka as a separate trip', 'A slower day for Ojców or rest'], tooMuch: ['A long trip every day', 'Zakopane and Energylandia without rest', 'No break in hot weather'], recommendation: '4 nights lets you do Krakow + Kazimierz + Wieliczka + a slower day.', days: ['Day 1: centre and Wawel.', 'Day 2: Kazimierz + Schindler.', 'Day 3: Wieliczka.', 'Day 4: Ojców, slow Krakow or campsite rest.'] },
-      '5+': { comfortable: ['Krakow and Lesser Poland', 'Wieliczka, Auschwitz or Ojców', 'Energylandia or Zakopane as a full day', 'Slower days between bigger trips'], tooMuch: ['All long trips one after another', 'No weather buffer', 'Treating the campsite only as parking'], recommendation: '5+ nights makes Clepardia a regional base for Krakow and Lesser Poland.', days: ['Day 1: Old Town + Wawel.', 'Day 2: Kazimierz + museums.', 'Day 3: Wieliczka or Auschwitz.', 'Day 4: rest / Ojców.', 'Day 5: Energylandia, Zakopane or your own rhythm.'] },
-    },
-  },
-};
-
-const plannerCoreOverrides = {
-  de: {
-    kicker: 'Aufenthaltsplaner',
-    title: 'Krakau planen, ohne den Aufenthalt zu überladen',
-    lead: 'Wählen Sie Nächte, Tempo, Gruppe und Verkehrsmittel. Der Planer zeigt, was von Camping Clepardia realistisch ist.',
-    micro: 'Das ist eine praktische Hilfe, kein festes Programm.',
-    nights: 'Nächte',
-    pace: 'Tempo',
-    group: 'Reisegruppe',
-    transport: 'Transport',
-    interests: 'Interessen',
-    resultTitle: 'Empfehlung für Ihren Aufenthalt',
-    comfortable: 'Gut machbar',
-    tooMuch: 'Kann zu viel sein',
-    recommendation: 'Unsere Empfehlung',
-    dayPlan: 'Tagesplan',
-    quizTitle: 'Nicht sicher, was wählen?',
-    quizCopy: 'Wählen Sie das passende Szenario, und der Planer setzt einen guten Startpunkt.',
-    todayTitle: 'Plan für heute',
-    todayCopy: 'Sicherer erster Tag: Straßenbahn zum Stary Kleparz, Altstadt, Wawel oder Kazimierz und ruhige Rückkehr zum Camping.',
-    arrivalTitle: 'Vor der Ankunft vorbereiten',
-    arrivalItems: ['Ausweisdokument für die Rezeption.', 'Kennzeichen des Fahrzeugs.', 'Bei Wohnwagen: Kennzeichen des Anhängers.', 'Google Maps nutzen: Die Zufahrt wurde 2022 geändert.', 'Nachtruhe 22:00-07:00.'],
-    ctaBooking: 'Aufenthalt anfragen',
-    ctaCampy: 'CAMPY fragen',
-    ctaTours: 'Ausflüge ab Krakau',
-    ctaTram: 'Anfahrt mit der Straßenbahn',
-    ctaAttractions: 'Attraktionen ansehen',
-    options: { calm: 'Ruhig', normal: 'Normal', intensive: 'Intensiv', pair: 'Paar', family: 'Familie', solo: 'Allein', group: 'Gruppe', tram: 'Straßenbahn', car: 'Auto', mixed: 'Zu Fuß + Straßenbahn' },
-    interestsList: [['classic', 'Altstadt + Wawel'], ['history', 'Geschichte und Museen'], ['kids', 'Familie und Kinder'], ['nature', 'Natur außerhalb der Stadt'], ['tours', 'Organisierte Ausflüge']],
-  },
-  it: {
-    kicker: 'Pianificatore del soggiorno',
-    title: 'Pianifica Cracovia senza riempire troppo il programma',
-    lead: 'Scegli notti, ritmo, gruppo e trasporto. Il pianificatore indica cosa è realistico da Camping Clepardia.',
-    micro: 'È una guida pratica, non un programma fisso.',
-    nights: 'Notti',
-    pace: 'Ritmo',
-    group: 'Gruppo',
-    transport: 'Trasporto',
-    interests: 'Interessi',
-    resultTitle: 'Consiglio per il soggiorno',
-    comfortable: 'Comodo da fare',
-    tooMuch: 'Può essere troppo',
-    recommendation: 'La nostra raccomandazione',
-    dayPlan: 'Piano della giornata',
-    quizTitle: 'Non sai cosa scegliere?',
-    quizCopy: 'Scegli lo scenario più vicino e il pianificatore prepara un buon punto di partenza.',
-    todayTitle: 'Piano per oggi',
-    todayCopy: 'Primo giorno sicuro: tram per Stary Kleparz, Città Vecchia, Wawel o Kazimierz e ritorno tranquillo al camping.',
-    arrivalTitle: 'Prima dell’arrivo',
-    arrivalItems: ['Documento d’identità per la reception.', 'Targa del veicolo.', 'Con roulotte: targa della roulotte.', 'Usa Google Maps: l’accesso è cambiato nel 2022.', 'Silenzio notturno 22:00-07:00.'],
-    ctaBooking: 'Invia richiesta',
-    ctaCampy: 'Chiedi a CAMPY',
-    ctaTours: 'Tour da Cracovia',
-    ctaTram: 'Percorso in tram',
-    ctaAttractions: 'Vedi attrazioni',
-    options: { calm: 'Calmo', normal: 'Normale', intensive: 'Intenso', pair: 'Coppia', family: 'Famiglia', solo: 'Solo', group: 'Gruppo', tram: 'Tram', car: 'Auto', mixed: 'A piedi + tram' },
-    interestsList: [['classic', 'Città Vecchia + Wawel'], ['history', 'Storia e musei'], ['kids', 'Famiglia e bambini'], ['nature', 'Natura fuori città'], ['tours', 'Tour organizzati']],
-  },
-  fr: {
-    kicker: 'Planificateur de séjour',
-    title: 'Planifiez Cracovie sans trop charger le programme',
-    lead: 'Choisissez les nuits, le rythme, le groupe et le transport. Le planificateur indique ce qui est réaliste depuis Camping Clepardia.',
-    micro: 'C’est une aide pratique, pas un programme obligatoire.',
-    nights: 'Nuits',
-    pace: 'Rythme',
-    group: 'Groupe',
-    transport: 'Transport',
-    interests: 'Centres d’intérêt',
-    resultTitle: 'Recommandation de séjour',
-    comfortable: 'À faire tranquillement',
-    tooMuch: 'Peut être trop chargé',
-    recommendation: 'Notre recommandation',
-    dayPlan: 'Plan par jour',
-    quizTitle: 'Vous ne savez pas quoi choisir ?',
-    quizCopy: 'Choisissez le scénario le plus proche et le planificateur préparera un bon point de départ.',
-    todayTitle: 'Plan pour aujourd’hui',
-    todayCopy: 'Premier jour sûr : tram jusqu’à Stary Kleparz, Vieille Ville, Wawel ou Kazimierz, puis retour calme au camping.',
-    arrivalTitle: 'À préparer avant l’arrivée',
-    arrivalItems: ['Pièce d’identité pour la réception.', 'Numéro d’immatriculation du véhicule.', 'Pour une caravane : immatriculation de la caravane.', 'Utilisez Google Maps : l’accès a changé en 2022.', 'Calme de 22h00 à 07h00.'],
-    ctaBooking: 'Envoyer une demande',
-    ctaCampy: 'Demander à CAMPY',
-    ctaTours: 'Excursions depuis Cracovie',
-    ctaTram: 'Accès en tramway',
-    ctaAttractions: 'Voir les attractions',
-    options: { calm: 'Calme', normal: 'Normal', intensive: 'Intensif', pair: 'Couple', family: 'Famille', solo: 'Solo', group: 'Groupe', tram: 'Tramway', car: 'Voiture', mixed: 'Marche + tram' },
-    interestsList: [['classic', 'Vieille Ville + Wawel'], ['history', 'Histoire et musées'], ['kids', 'Famille et enfants'], ['nature', 'Nature hors ville'], ['tours', 'Excursions organisées']],
-  },
-  es: {
-    kicker: 'Planificador de estancia',
-    title: 'Planifica Cracovia sin cargar demasiado la estancia',
-    lead: 'Elige noches, ritmo, grupo y transporte. El planificador sugiere qué tiene sentido desde Camping Clepardia.',
-    micro: 'Es una guía útil, no un programa fijo.',
-    nights: 'Noches',
-    pace: 'Ritmo',
-    group: 'Grupo',
-    transport: 'Transporte',
-    interests: 'Intereses',
-    resultTitle: 'Recomendación de estancia',
-    comfortable: 'Cómodo de hacer',
-    tooMuch: 'Puede ser demasiado',
-    recommendation: 'Nuestra recomendación',
-    dayPlan: 'Plan diario',
-    quizTitle: '¿No sabes qué elegir?',
-    quizCopy: 'Elige el escenario más cercano y el planificador preparará un buen punto de partida.',
-    todayTitle: 'Plan para hoy',
-    todayCopy: 'Primer día seguro: tranvía a Stary Kleparz, Ciudad Vieja, Wawel o Kazimierz y vuelta tranquila al camping.',
-    arrivalTitle: 'Antes de llegar',
-    arrivalItems: ['Documento de identidad para recepción.', 'Matrícula del vehículo.', 'Con caravana: matrícula de la caravana.', 'Usa Google Maps: el acceso cambió en 2022.', 'Silencio de 22:00 a 07:00.'],
-    ctaBooking: 'Enviar consulta',
-    ctaCampy: 'Preguntar a CAMPY',
-    ctaTours: 'Excursiones desde Cracovia',
-    ctaTram: 'Llegar en tranvía',
-    ctaAttractions: 'Ver atracciones',
-    options: { calm: 'Tranquilo', normal: 'Normal', intensive: 'Intenso', pair: 'Pareja', family: 'Familia', solo: 'Solo', group: 'Grupo', tram: 'Tranvía', car: 'Coche', mixed: 'Paseo + tranvía' },
-    interestsList: [['classic', 'Ciudad Vieja + Wawel'], ['history', 'Historia y museos'], ['kids', 'Niños y familia'], ['nature', 'Naturaleza fuera de la ciudad'], ['tours', 'Excursiones organizadas']],
-  },
-  nl: {
-    kicker: 'Verblijfsplanner',
-    title: 'Plan Krakau zonder je verblijf te vol te maken',
-    lead: 'Kies nachten, tempo, reisgroep en vervoer. De planner laat zien wat realistisch is vanaf Camping Clepardia.',
-    micro: 'Dit is een praktische gids, geen vast programma.',
-    nights: 'Nachten',
-    pace: 'Tempo',
-    group: 'Reisgroep',
-    transport: 'Vervoer',
-    interests: 'Interesses',
-    resultTitle: 'Aanbeveling voor je verblijf',
-    comfortable: 'Goed haalbaar',
-    tooMuch: 'Kan te veel zijn',
-    recommendation: 'Onze aanbeveling',
-    dayPlan: 'Dagplanning',
-    quizTitle: 'Weet je niet wat te kiezen?',
-    quizCopy: 'Kies het scenario dat het meest past en de planner zet een startpunt klaar.',
-    todayTitle: 'Plan voor vandaag',
-    todayCopy: 'Veilige eerste dag: tram naar Stary Kleparz, Oude Stad, Wawel of Kazimierz en rustig terug naar de camping.',
-    arrivalTitle: 'Voor aankomst',
-    arrivalItems: ['Identiteitsbewijs voor de receptie.', 'Kenteken van het voertuig.', 'Met caravan: kenteken van de caravan.', 'Gebruik Google Maps: de toegang veranderde in 2022.', 'Nachtrust 22.00–07.00 uur.'],
-    ctaBooking: 'Stuur aanvraag',
-    ctaCampy: 'Vraag CAMPY',
-    ctaTours: 'Tours vanuit Krakau',
-    ctaTram: 'Route met tram',
-    ctaAttractions: 'Bekijk attracties',
-    options: { calm: 'Rustig', normal: 'Normaal', intensive: 'Intensief', pair: 'Stel', family: 'Familie', solo: 'Solo', group: 'Groep', tram: 'Tram', car: 'Auto', mixed: 'Wandelen + tram' },
-    interestsList: [['classic', 'Oude Stad + Wawel'], ['history', 'Geschiedenis en musea'], ['kids', 'Kinderen en familie'], ['nature', 'Natuur buiten de stad'], ['tours', 'Georganiseerde tours']],
-  },
-  cs: {
-    kicker: 'Plánovač pobytu',
-    title: 'Naplánujte Krakov bez přeplněného programu',
-    lead: 'Vyberte noci, tempo, skupinu a dopravu. Plánovač poradí, co dává smysl z Camping Clepardia.',
-    micro: 'Je to praktická pomůcka, ne pevný program.',
-    nights: 'Noci',
-    pace: 'Tempo',
-    group: 'Skupina',
-    transport: 'Doprava',
-    interests: 'Zájmy',
-    resultTitle: 'Doporučení pobytu',
-    comfortable: 'Pohodlně zvládnete',
-    tooMuch: 'Může být příliš',
-    recommendation: 'Naše doporučení',
-    dayPlan: 'Plán dne',
-    quizTitle: 'Nevíte, co vybrat?',
-    quizCopy: 'Vyberte nejbližší scénář a plánovač nastaví dobrý začátek.',
-    todayTitle: 'Plán na dnes',
-    todayCopy: 'Bezpečný první den: tramvaj na Stary Kleparz, Staré Město, Wawel nebo Kazimierz a klidný návrat do kempu.',
-    arrivalTitle: 'Před příjezdem',
-    arrivalItems: ['Doklad totožnosti pro recepci.', 'Registrační značka vozidla.', 'U karavanu: registrační značka karavanu.', 'Použijte Google Maps: vjezd se změnil v roce 2022.', 'Noční klid 22:00–07:00.'],
-    ctaBooking: 'Odeslat dotaz',
-    ctaCampy: 'Zeptat se CAMPY',
-    ctaTours: 'Výlety z Krakova',
-    ctaTram: 'Doprava tramvají',
-    ctaAttractions: 'Zobrazit atrakce',
-    options: { calm: 'Klidně', normal: 'Normálně', intensive: 'Intenzivně', pair: 'Pár', family: 'Rodina', solo: 'Solo', group: 'Skupina', tram: 'Tramvaj', car: 'Auto', mixed: 'Pěšky + tramvaj' },
-    interestsList: [['classic', 'Staré Město + Wawel'], ['history', 'Historie a muzea'], ['kids', 'Děti a rodina'], ['nature', 'Příroda mimo město'], ['tours', 'Organizované výlety']],
-  },
-  sk: {
-    kicker: 'Plánovač pobytu',
-    title: 'Naplánujte Krakov bez preplneného programu',
-    lead: 'Vyberte noci, tempo, skupinu a dopravu. Plánovač poradí, čo dáva zmysel z Camping Clepardia.',
-    micro: 'Je to praktická pomôcka, nie pevný program.',
-    nights: 'Noci',
-    pace: 'Tempo',
-    group: 'Skupina',
-    transport: 'Doprava',
-    interests: 'Záujmy',
-    resultTitle: 'Odporúčanie pobytu',
-    comfortable: 'Pohodlne zvládnete',
-    tooMuch: 'Môže byť priveľa',
-    recommendation: 'Naše odporúčanie',
-    dayPlan: 'Plán dňa',
-    quizTitle: 'Neviete, čo vybrať?',
-    quizCopy: 'Vyberte najbližší scenár a plánovač nastaví dobrý začiatok.',
-    todayTitle: 'Plán na dnes',
-    todayCopy: 'Bezpečný prvý deň: električka na Stary Kleparz, Staré Mesto, Wawel alebo Kazimierz a pokojný návrat do kempu.',
-    arrivalTitle: 'Pred príchodom',
-    arrivalItems: ['Doklad totožnosti pre recepciu.', 'Evidenčné číslo vozidla.', 'Pri karavane: evidenčné číslo karavanu.', 'Použite Google Maps: vjazd sa zmenil v roku 2022.', 'Nočný pokoj 22:00–07:00.'],
-    ctaBooking: 'Odoslať dopyt',
-    ctaCampy: 'Opýtať sa CAMPY',
-    ctaTours: 'Výlety z Krakova',
-    ctaTram: 'Doprava električkou',
-    ctaAttractions: 'Zobraziť atrakcie',
-    options: { calm: 'Pokojne', normal: 'Normálne', intensive: 'Intenzívne', pair: 'Pár', family: 'Rodina', solo: 'Solo', group: 'Skupina', tram: 'Električka', car: 'Auto', mixed: 'Pešo + električka' },
-    interestsList: [['classic', 'Staré Mesto + Wawel'], ['history', 'História a múzeá'], ['kids', 'Deti a rodina'], ['nature', 'Príroda mimo mesta'], ['tours', 'Organizované výlety']],
-  },
-  sv: {
-    kicker: 'Vistelseplanerare',
-    title: 'Planera Kraków utan att packa schemat för fullt',
-    lead: 'Välj nätter, tempo, grupp och transport. Planeraren visar vad som är realistiskt från Camping Clepardia.',
-    micro: 'Det här är en praktisk guide, inte ett fast program.',
-    nights: 'Nätter',
-    pace: 'Tempo',
-    group: 'Resesällskap',
-    transport: 'Transport',
-    interests: 'Intressen',
-    resultTitle: 'Rekommendation för vistelsen',
-    comfortable: 'Rimligt att göra',
-    tooMuch: 'Kan bli för mycket',
-    recommendation: 'Vår rekommendation',
-    dayPlan: 'Dagsplan',
-    quizTitle: 'Osäker på vad du ska välja?',
-    quizCopy: 'Välj närmaste scenario så sätter planeraren en bra startpunkt.',
-    todayTitle: 'Plan för idag',
-    todayCopy: 'Säker första dag: spårvagn till Stary Kleparz, Gamla stan, Wawel eller Kazimierz och lugn återkomst till campingen.',
-    arrivalTitle: 'Inför ankomst',
-    arrivalItems: ['ID-handling till receptionen.', 'Fordonets registreringsnummer.', 'Med husvagn: husvagnens registreringsnummer.', 'Använd Google Maps: infarten ändrades 2022.', 'Nattro 22.00–07.00.'],
-    ctaBooking: 'Skicka förfrågan',
-    ctaCampy: 'Fråga CAMPY',
-    ctaTours: 'Utflykter från Kraków',
-    ctaTram: 'Spårvagnsväg',
-    ctaAttractions: 'Se sevärdheter',
-    options: { calm: 'Lugnt', normal: 'Normalt', intensive: 'Intensivt', pair: 'Par', family: 'Familj', solo: 'Solo', group: 'Grupp', tram: 'Spårvagn', car: 'Bil', mixed: 'Promenad + spårvagn' },
-    interestsList: [['classic', 'Gamla stan + Wawel'], ['history', 'Historia och museer'], ['kids', 'Barn och familj'], ['nature', 'Natur utanför staden'], ['tours', 'Organiserade utflykter']],
-  },
-};
-const baseCopy = copyByLang[lang as keyof typeof copyByLang] ?? copyByLang.en;
-const coreOverride = plannerCoreOverrides[requestedLanguage as keyof typeof plannerCoreOverrides];
-const copy = getStayPlannerPremiumCopy(requestedLanguage);
 const plannerConfigEncoded = Buffer.from(JSON.stringify({
   ...copy,
-  language:lang,
-  links:{ booking:bookingHref, transport:transportHref, attractions:attractionsHref, tours:tourBookingHref },
+  language: lang,
+  locale: lang === 'en' ? 'en-GB' : lang === 'cs' ? 'cs-CZ' : lang === 'sv' ? 'sv-SE' : `${lang}-${lang.toUpperCase()}`,
+  weatherConditions: weatherCopy.conditions,
+  links: {
+    booking: bookingHref,
+    transport: transportHref,
+    attractions: attractionsHref,
+    tours: tourBookingHref,
+    maps: 'https://www.google.com/maps/search/?api=1&query=Camping+Clepardia+Krak%C3%B3w',
+  },
+  assets: {
+    hero: siteAssets.attractions.wawel,
+    camp: siteAssets.hero.desktop,
+    brand: siteAssets.logo.icon,
+    campy: siteAssets.ui.campy.icon,
+    days: [
+      siteAssets.attractions.wawel,
+      siteAssets.attractions.kazimierz,
+      siteAssets.attractions.wieliczka,
+      siteAssets.attractions.ojcow,
+      siteAssets.attractions.waterPark,
+    ],
+  },
 }), 'utf8').toString('base64');
-const inspirationCopy = {
-  pl: {
-    kicker: 'Inspiracje do planu',
-    title: 'Zobacz kierunki, zanim ułożysz tempo pobytu',
-    items: ['Kraków i Wawel', 'Wieliczka', 'Rodzinny dzień', 'Park Wodny', 'Bagry', 'Kryspinów'],
-  },
-  en: {
-    kicker: 'Stay inspiration',
-    title: 'See the directions before choosing your pace',
-    items: ['Krakow and Wawel', 'Wieliczka', 'Family day', 'Water Park', 'Bagry', 'Kryspinow'],
-  },
-  de: {
-    kicker: 'Inspiration',
-    title: 'Ziele ansehen, bevor Sie das Tempo wählen',
-    items: ['Krakau und Wawel', 'Wieliczka', 'Familientag', 'Wasserpark', 'Bagry', 'Kryspinów'],
-  },
-  it: {
-    kicker: 'Ispirazioni',
-    title: 'Guarda le mete prima di scegliere il ritmo',
-    items: ['Cracovia e Wawel', 'Wieliczka', 'Giornata in famiglia', 'Parco Acquatico', 'Bagry', 'Kryspinów'],
-  },
-  fr: {
-    kicker: 'Inspirations de séjour',
-    title: 'Regardez les directions avant de choisir le rythme',
-    items: ['Cracovie et Wawel', 'Wieliczka', 'Journée en famille', 'Parc aquatique', 'Bagry', 'Kryspinów'],
-  },
-  es: {
-    kicker: 'Inspiración para la estancia',
-    title: 'Mira las opciones antes de elegir el ritmo',
-    items: ['Cracovia y Wawel', 'Wieliczka', 'Día familiar', 'Parque acuático', 'Bagry', 'Kryspinów'],
-  },
-  nl: {
-    kicker: 'Inspiratie voor je verblijf',
-    title: 'Bekijk de richtingen voordat je je tempo kiest',
-    items: ['Krakau en Wawel', 'Wieliczka', 'Familiedag', 'Waterpark', 'Bagry', 'Kryspinów'],
-  },
-  cs: {
-    kicker: 'Inspirace pro pobyt',
-    title: 'Podívejte se na možnosti před výběrem tempa',
-    items: ['Krakov a Wawel', 'Wieliczka', 'Rodinný den', 'Aquapark', 'Bagry', 'Kryspinów'],
-  },
-  sk: {
-    kicker: 'Inšpirácie na pobyt',
-    title: 'Pozrite si možnosti pred výberom tempa',
-    items: ['Krakov a Wawel', 'Wieliczka', 'Rodinný deň', 'Aquapark', 'Bagry', 'Kryspinów'],
-  },
-  sv: {
-    kicker: 'Inspiration för vistelsen',
-    title: 'Se alternativen innan du väljer tempo',
-    items: ['Kraków och Wawel', 'Wieliczka', 'Familjedag', 'Vattenpark', 'Bagry', 'Kryspinów'],
-  },
-}[requestedLanguage as 'pl' | 'en' | 'de' | 'it' | 'fr' | 'es' | 'nl' | 'cs' | 'sk' | 'sv'] ?? {
-  kicker: 'Stay inspiration',
-  title: 'See the directions before choosing your pace',
-  items: ['Krakow and Wawel', 'Wieliczka', 'Family day', 'Water Park', 'Bagry', 'Kryspinow'],
-};
-const inspirationImages = [
-  attractionImages.wawel,
-  attractionImages.wieliczka,
-  attractionImages.energylandia,
-  attractionImages.waterPark,
-  attractionImages.bagry,
-  attractionImages.kryspinow,
+
+const paceOptions = [
+  ['intensive', dashboard.active, 'Gauge'],
+  ['normal', dashboard.calm, 'Leaf'],
+  ['calm', dashboard.veryCalm, 'Coffee'],
 ];
+const groupOptions = [
+  ['pair', copy.options.pair, 'Heart'],
+  ['family', copy.options.family, 'UsersRound'],
+  ['group', copy.options.group, 'Users'],
+  ['solo', copy.options.solo, 'UserRound'],
+];
+const transportOptions = [
+  ['car', copy.options.car, 'CarFront'],
+  ['tram', copy.options.tram, 'TramFront'],
+  ['mixed', dashboard.walkBike, 'Bike'],
+];
+const interestIcons: Record<string, string> = { classic:'Landmark', history:'Museum', nature:'Trees', kids:'Sparkles', food:'Utensils' };
 ---
 
-<section class="site-section stay-planner reveal-section" data-stay-planner data-planner-config={plannerConfigEncoded}>
-  <div class="stay-planner__ambient" aria-hidden="true"><span></span><span></span><span></span></div>
-  <div class="container stay-planner__shell">
-    <div class="stay-planner__head">
-      <span class="section-kicker">{copy.kicker}</span>
-      <h1>{copy.title}</h1>
-      <p>{copy.lead}</p>
-      <small>{copy.micro}</small>
-    </div>
-
-    <div class="premium-card stay-planner__quiz">
-      <div>
-        <h2>{copy.quizTitle}</h2>
-        <p>{copy.quizCopy}</p>
-      </div>
-      <div class="stay-planner__scenario-grid">
-        {copy.scenarios.map((scenario) => (
-          <button
-            type="button"
-            data-planner-scenario={scenario.id}
-            data-nights={scenario.nights}
-            data-pace={scenario.pace}
-            data-group={scenario.group}
-            data-transport={scenario.transport}
-            data-interests={scenario.interests.join(',')}
-          >
-            <Icon name={scenario.icon} size={22} strokeWidth={2} />
-            <strong>{scenario.title}</strong>
-            <span>{scenario.copy}</span>
+<section class="stay-planner" data-stay-planner data-planner-config={plannerConfigEncoded}>
+  <h1 class="stay-planner__sr-only">{copy.title}</h1>
+  <div class="stay-planner__ambient" aria-hidden="true"></div>
+  <div class="stay-planner__shell">
+    <div class="stay-planner__dashboard">
+      <aside class="stay-planner__panel" data-planner-panel>
+        <header class="stay-planner__panel-head">
+          <div>
+            <span><Icon name="SlidersHorizontal" size={16} /> {copy.kicker}</span>
+            <h2>{dashboard.panelTitle}</h2>
+            <p>{dashboard.panelSubtitle}</p>
+          </div>
+          <button type="button" data-planner-filter-toggle aria-expanded="false" aria-controls="plannerFilters">
+            <Icon name="SlidersHorizontal" size={18} />
+            <span data-planner-filter-label>{dashboard.filtersOpen}</span>
+            <Icon name="ChevronDown" size={17} class="stay-planner__filter-chevron" />
           </button>
-        ))}
-      </div>
-    </div>
+        </header>
 
-    <section class="stay-planner__inspiration" aria-labelledby="stayPlannerInspirationTitle">
-      <div class="stay-planner__inspiration-copy">
-        <span class="section-kicker">{inspirationCopy.kicker}</span>
-        <h2 id="stayPlannerInspirationTitle">{inspirationCopy.title}</h2>
-      </div>
-      <div class="stay-planner__inspiration-grid">
-        {inspirationImages.map((image, index) => (
-          <ImageFrame
-            src={image.src}
-            alt={inspirationCopy.items[index]}
-            label={inspirationCopy.items[index]}
-            className="stay-planner__inspiration-image"
-            width={image.width}
-            height={image.height}
-            sizes={image.sizes}
-          />
-        ))}
-      </div>
-    </section>
-
-    <WeatherCard languageCode={requestedLanguage} compact />
-    <SummerCampingNotice languageCode={requestedLanguage} compact />
-
-    <div class="stay-planner__layout">
-      <div class="premium-card stay-planner__panel">
-        <div class="stay-planner__control">
-          <h2><Icon name="CalendarDays" size={21} strokeWidth={2} /> {copy.nights}</h2>
-          <div class="stay-planner__segments" data-planner-nights>
-            {['1', '2', '3', '4', '5+'].map((value, index) => (
-              <button type="button" class:list={[index === 1 && 'is-active']} data-value={value}>{value}</button>
-            ))}
+        <div class="stay-planner__filters" id="plannerFilters" data-planner-filters>
+          <div class="stay-planner__control">
+            <h3><Icon name="MoonStar" size={17} /> {copy.nights}</h3>
+            <div class="stay-planner__stepper" data-planner-nights>
+              <button type="button" data-planner-night-step="-1" aria-label="−"><Icon name="Minus" size={17} /></button>
+              <strong data-planner-night-value>2 <span>{copy.premium.nightUnits[1]}</span></strong>
+              <button type="button" data-planner-night-step="1" aria-label="+"><Icon name="Plus" size={17} /></button>
+            </div>
           </div>
-        </div>
 
-        <label class="stay-planner__control stay-planner__date">
-          <h2><Icon name="CalendarClock" size={21} strokeWidth={2} /> {copy.date}</h2>
-          <input type="date" data-planner-date />
-        </label>
+          <label class="stay-planner__control stay-planner__date">
+            <h3><Icon name="CalendarDays" size={17} /> {copy.date}</h3>
+            <span><input type="date" data-planner-date /><Icon name="ChevronDown" size={16} /></span>
+          </label>
 
-        <div class="stay-planner__control">
-          <h2><Icon name="Gauge" size={21} strokeWidth={2} /> {copy.pace}</h2>
-          <div class="stay-planner__segments" data-planner-pace>
-            {[
-              ['calm', copy.options.calm],
-              ['normal', copy.options.normal],
-              ['intensive', copy.options.intensive],
-            ].map(([value, label], index) => (
-              <button type="button" class:list={[index === 1 && 'is-active']} data-value={value}>{label}</button>
-            ))}
+          <div class="stay-planner__control">
+            <h3><Icon name="Gauge" size={17} /> {copy.pace}</h3>
+            <div class="stay-planner__chips stay-planner__chips--three" data-planner-pace>
+              {paceOptions.map(([value, label, icon]) => (
+                <button type="button" data-value={value} class:list={[value === 'normal' && 'is-active']} aria-pressed={value === 'normal'}>
+                  <Icon name={icon} size={15} /> <span>{label}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div class="stay-planner__control">
-          <h2><Icon name="UsersRound" size={21} strokeWidth={2} /> {copy.group}</h2>
-          <div class="stay-planner__segments" data-planner-group>
-            {[
-              ['pair', copy.options.pair],
-              ['family', copy.options.family],
-              ['solo', copy.options.solo],
-              ['group', copy.options.group],
-            ].map(([value, label], index) => (
-              <button type="button" class:list={[index === 1 && 'is-active']} data-value={value}>{label}</button>
-            ))}
+          <div class="stay-planner__control">
+            <h3><Icon name="UsersRound" size={17} /> {copy.group}</h3>
+            <div class="stay-planner__chips stay-planner__chips--four" data-planner-group>
+              {groupOptions.map(([value, label, icon]) => (
+                <button type="button" data-value={value} class:list={[value === 'family' && 'is-active']} aria-pressed={value === 'family'}>
+                  <Icon name={icon} size={15} /> <span>{label}</span>
+                </button>
+              ))}
+            </div>
+            <div class="stay-planner__children" data-planner-children-wrap>
+              <span>{dashboard.childrenHint}</span>
+              <div data-planner-children>
+                <button type="button" class="is-active" data-value="yes" aria-pressed="true">{copy.options.yes}</button>
+                <button type="button" data-value="no" aria-pressed="false">{copy.options.no}</button>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="stay-planner__control">
-          <h2><Icon name="Baby" size={21} strokeWidth={2} /> {copy.children}</h2>
-          <div class="stay-planner__segments" data-planner-children>
-            <button type="button" class="is-active" data-value="yes">{copy.options.yes}</button>
-            <button type="button" data-value="no">{copy.options.no}</button>
+          <div class="stay-planner__control">
+            <h3><Icon name="TramFront" size={17} /> {copy.transport}</h3>
+            <div class="stay-planner__chips stay-planner__chips--three" data-planner-transport>
+              {transportOptions.map(([value, label, icon]) => (
+                <button type="button" data-value={value} class:list={[value === 'tram' && 'is-active']} aria-pressed={value === 'tram'}>
+                  <Icon name={icon} size={15} /> <span>{label}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div class="stay-planner__control">
-          <h2><Icon name="TramFront" size={21} strokeWidth={2} /> {copy.transport}</h2>
-          <div class="stay-planner__segments" data-planner-transport>
-            {[
-              ['tram', copy.options.tram],
-              ['car', copy.options.car],
-              ['mixed', copy.options.mixed],
-            ].map(([value, label], index) => (
-              <button type="button" class:list={[index === 0 && 'is-active']} data-value={value}>{label}</button>
-            ))}
+          <div class="stay-planner__control">
+            <h3><Icon name="Heart" size={17} /> {copy.interests}</h3>
+            <div class="stay-planner__chips stay-planner__chips--wrap" data-planner-interests>
+              {copy.interestsList.map(([value, label], index) => (
+                <button type="button" data-value={value} class:list={[index < 2 && 'is-active']} aria-pressed={index < 2}>
+                  <Icon name={interestIcons[value] ?? 'Map'} size={15} /> <span>{label}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div class="stay-planner__control stay-planner__control--wide">
-          <h2><Icon name="Sparkles" size={21} strokeWidth={2} /> {copy.interests}</h2>
-          <div class="stay-planner__attractions" data-planner-interests>
-            {copy.interestsList.map(([value, label], index) => (
-              <button type="button" data-value={value} class:list={[index < 2 && 'is-active']}>
-                <Icon name={value === 'kids' ? 'HeartHandshake' : value === 'nature' ? 'Leaf' : value === 'tours' ? 'Ticket' : value === 'history' ? 'Landmark' : 'Map'} size={18} strokeWidth={2} />
-                <span>{label}</span>
-              </button>
-            ))}
+          <div class="stay-planner__control stay-planner__trip">
+            <h3><Icon name="MountainSnow" size={17} /> {copy.trips}</h3>
+            <div class="stay-planner__binary" data-planner-trip-choice>
+              <button type="button" data-value="yes" aria-pressed="false">{dashboard.tripYes}</button>
+              <button type="button" data-value="no" class="is-active" aria-pressed="true">{dashboard.tripNo}</button>
+            </div>
+            <div class="stay-planner__chips stay-planner__chips--wrap stay-planner__destinations" data-planner-trips hidden>
+              {copy.tripList.filter(([value]) => value !== 'none').map(([value, label], index) => (
+                <button type="button" data-value={value} class:list={[index === 0 && 'is-active']} aria-pressed={index === 0}>{label}</button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div class="stay-planner__control stay-planner__control--wide">
-          <h2><Icon name="MapPinned" size={21} strokeWidth={2} /> {copy.trips}</h2>
-          <div class="stay-planner__attractions" data-planner-trips>
-            {copy.tripList.map(([value, label], index) => <button type="button" data-value={value} class:list={[index === 0 && 'is-active']}><Icon name={value === 'none' ? 'Minus' : 'Route'} size={17} /><span>{label}</span></button>)}
+          <div class="stay-planner__control">
+            <h3><Icon name="CloudSun" size={17} /> {copy.weatherPreference}</h3>
+            <div class="stay-planner__chips stay-planner__chips--weather" data-planner-weather>
+              <button type="button" class="is-active" data-value="flexible" aria-pressed="true"><Icon name="Clock3" size={15} /> {copy.options.flexible}</button>
+              <button type="button" data-value="sun" aria-pressed="false"><Icon name="Sun" size={15} /> {copy.options.sun}</button>
+              <button type="button" data-value="indoor" aria-pressed="false"><Icon name="Umbrella" size={15} /> {copy.options.indoor}</button>
+            </div>
           </div>
+
+          <button class="stay-planner__generate" type="button" data-planner-generate>
+            <Icon name="WandSparkles" size={18} /> <span>{copy.generate}</span><Icon name="ArrowRight" size={17} />
+          </button>
+          <small class="stay-planner__updated"><span></span>{dashboard.planSavedAt}: <time data-planner-updated-time>—</time></small>
         </div>
+      </aside>
 
-        <div class="stay-planner__control stay-planner__control--wide">
-          <h2><Icon name="CloudSun" size={21} strokeWidth={2} /> {copy.weatherPreference}</h2>
-          <div class="stay-planner__segments" data-planner-weather>
-            <button type="button" class="is-active" data-value="flexible">{copy.options.flexible}</button>
-            <button type="button" data-value="sun">{copy.options.sun}</button>
-            <button type="button" data-value="indoor">{copy.options.indoor}</button>
-          </div>
-        </div>
-
-        <button class="stay-planner__generate" type="button" data-planner-generate><Icon name="Sparkles" size={18} /> {copy.generate}</button>
-      </div>
-
-      <aside class="premium-card stay-planner__result" data-planner-result aria-live="polite"></aside>
-    </div>
-
-    <div class="stay-planner__extras">
-      <article class="premium-card stay-planner__today">
-        <Icon name="SunMedium" size={24} strokeWidth={2} />
-        <div>
-          <h2>{copy.todayTitle}</h2>
-          <p>{copy.todayCopy}</p>
-        </div>
-      </article>
-      <article class="premium-card stay-planner__arrival">
-        <Icon name="BadgeCheck" size={24} strokeWidth={2} />
-        <div>
-          <h2>{copy.arrivalTitle}</h2>
-          <ul>
-            {copy.arrivalItems.map((item) => <li>{item}</li>)}
-          </ul>
-        </div>
-      </article>
-    </div>
-
-    <div class="stay-planner__actions">
-      <a class="btn btn-primary premium-button" href={bookingHref}><Icon name="CalendarCheck" size={18} strokeWidth={2} /> {copy.ctaBooking}</a>
-      <button class="btn btn-glass" type="button" data-ask-campy-planner><Icon name="BotMessageSquare" size={18} strokeWidth={2} /> {copy.ctaCampy}</button>
-      <a class="btn btn-glass" href={transportHref}><Icon name="TramFront" size={18} strokeWidth={2} /> {copy.ctaTram}</a>
-      <a class="btn btn-glass" href={attractionsHref}><Icon name="Map" size={18} strokeWidth={2} /> {copy.ctaAttractions}</a>
-      <a class="btn btn-glass" href={tourBookingHref} target="_blank" rel="noopener noreferrer"><Icon name="Ticket" size={18} strokeWidth={2} /> {tourUi[0]}</a>
+      <main class="stay-planner__result" data-planner-result aria-live="polite"></main>
     </div>
   </div>
+  <div class="stay-planner__toast" data-planner-toast role="status" aria-live="polite"></div>
 </section>
-
 
 <script>
   import { initStayPlanner } from '@/scripts/stayPlannerClient.js';
   initStayPlanner();
 </script>
 
-<style>
+<style is:global>
 .stay-planner {
-  position: relative;
-  overflow: hidden;
-  padding-top: clamp(130px, 16vw, 190px);
+  --planner-green:#55e392;
+  --planner-green-2:#20b96a;
+  --planner-ink:#041810;
+  --planner-card:rgba(8,37,27,.92);
+  --planner-line:rgba(102,225,157,.2);
+  position:relative;
+  isolation:isolate;
+  min-height:100vh;
+  padding:clamp(82px,8vw,112px) 0 42px;
+  color:#f3fff7;
   background:
-    radial-gradient(circle at 14% 12%, rgba(60,179,113,.16), transparent 32%),
-    radial-gradient(circle at 86% 8%, rgba(242,192,120,.15), transparent 34%),
-    linear-gradient(180deg, rgba(8,25,16,.95), rgba(239,247,240,.08));
+    radial-gradient(circle at 76% 5%,rgba(36,186,110,.14),transparent 32%),
+    radial-gradient(circle at 0 45%,rgba(29,145,108,.11),transparent 28%),
+    linear-gradient(180deg,#03150f 0%,#041b14 48%,#03130e 100%);
+  overflow:clip;
+}
+.stay-planner__ambient { position:absolute; inset:0; z-index:-1; opacity:.36; background-image:radial-gradient(circle,rgba(119,245,171,.5) 0 1px,transparent 1.5px); background-size:58px 58px; mask-image:linear-gradient(to bottom,#000,transparent 74%); }
+.stay-planner__sr-only { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important; }
+.stay-planner__shell { width:min(1840px,calc(100% - 32px)); margin:0 auto; }
+.stay-planner__dashboard { display:grid; grid-template-columns:minmax(310px,372px) minmax(0,1fr); align-items:start; gap:20px; }
+.stay-planner__panel { position:sticky; top:88px; z-index:5; max-height:calc(100vh - 106px); overflow:auto; padding:20px; border:1px solid var(--planner-line); border-radius:24px; background:linear-gradient(145deg,rgba(13,48,36,.96),rgba(6,31,23,.96)); box-shadow:0 24px 70px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.04); scrollbar-width:thin; scrollbar-color:rgba(85,227,146,.35) transparent; }
+.stay-planner__panel-head { margin-bottom:18px; }
+.stay-planner__panel-head>div>span { display:flex; align-items:center; gap:7px; margin-bottom:7px; color:#82eeae; font-size:.67rem; font-weight:900; letter-spacing:.1em; text-transform:uppercase; }
+.stay-planner__panel-head h2 { margin:0; color:#fff; font-size:clamp(1.25rem,1.65vw,1.65rem); line-height:1.1; letter-spacing:-.035em; }
+.stay-planner__panel-head p { margin:7px 0 0; color:rgba(230,249,237,.65); font-size:.82rem; line-height:1.45; }
+.stay-planner__panel-head>button { display:none; }
+.stay-planner__filters { display:grid; gap:17px; }
+.stay-planner__control { display:grid; gap:8px; min-width:0; }
+.stay-planner__control h3 { display:flex; align-items:center; gap:7px; margin:0; color:#eafff1; font-size:.77rem; font-weight:850; }
+.stay-planner__control h3 svg { color:#83eeb0; }
+.stay-planner__stepper { display:grid; grid-template-columns:42px 1fr 42px; align-items:center; min-height:44px; border:1px solid rgba(77,218,139,.25); border-radius:14px; overflow:hidden; background:rgba(22,91,60,.34); }
+.stay-planner__stepper button { display:grid; place-items:center; align-self:stretch; border:0; color:#c9ffe0; background:rgba(55,201,121,.13); cursor:pointer; transition:background .22s ease,transform .22s ease; }
+.stay-planner__stepper button:hover { background:rgba(55,201,121,.28); }
+.stay-planner__stepper button:active { transform:scale(.92); }
+.stay-planner__stepper strong { display:flex; justify-content:center; gap:5px; font-size:.88rem; }
+.stay-planner__stepper strong.is-changing { animation:plannerNumber .34s cubic-bezier(.22,1,.36,1); }
+.stay-planner__stepper strong span { color:rgba(235,255,242,.7); font-weight:700; }
+.stay-planner__date>span { position:relative; display:block; }
+.stay-planner__date input { width:100%; min-height:44px; padding:0 38px 0 13px; border:1px solid rgba(77,218,139,.25); border-radius:14px; color:#f4fff8; color-scheme:dark; background:rgba(5,30,22,.68); font:inherit; font-size:.82rem; font-weight:750; outline:0; transition:border-color .22s ease,box-shadow .22s ease; }
+.stay-planner__date input:focus { border-color:#58df91; box-shadow:0 0 0 3px rgba(67,214,132,.13); }
+.stay-planner__date>span>svg { position:absolute; top:50%; right:13px; pointer-events:none; color:#73dca0; transform:translateY(-50%); }
+.stay-planner__chips { display:grid; gap:7px; }
+.stay-planner__chips--three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.stay-planner__chips--four { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.stay-planner__chips--wrap { display:flex; flex-wrap:wrap; }
+.stay-planner__chips--weather { grid-template-columns:1fr 1fr; }
+.stay-planner__chips--weather button:first-child { grid-column:1/-1; }
+.stay-planner__chips button,.stay-planner__binary button,.stay-planner__children button { display:inline-flex; min-width:0; min-height:36px; align-items:center; justify-content:center; gap:5px; padding:7px 9px; border:1px solid rgba(129,217,166,.17); border-radius:11px; color:rgba(239,255,245,.76); background:rgba(5,29,21,.58); font:inherit; font-size:.68rem; font-weight:780; line-height:1.15; cursor:pointer; transition:transform .25s cubic-bezier(.22,1,.36,1),border-color .25s ease,color .25s ease,background .25s ease,box-shadow .25s ease; }
+.stay-planner__chips--wrap button { flex:1 1 auto; }
+.stay-planner__chips button:hover,.stay-planner__binary button:hover,.stay-planner__children button:hover { color:#fff; border-color:rgba(89,227,149,.42); transform:translateY(-1px); }
+.stay-planner__chips button.is-active,.stay-planner__binary button.is-active,.stay-planner__children button.is-active { color:#eafff1; border-color:rgba(81,232,148,.68); background:linear-gradient(145deg,rgba(42,185,105,.36),rgba(29,126,78,.28)); box-shadow:0 0 0 1px rgba(73,229,141,.11),0 7px 22px rgba(23,178,92,.13); }
+.stay-planner__chips button.is-selecting,.stay-planner__binary button.is-selecting,.stay-planner__children button.is-selecting { animation:plannerChip .36s cubic-bezier(.22,1,.36,1); }
+.stay-planner__children { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 9px; border:1px dashed rgba(95,213,145,.2); border-radius:11px; color:rgba(235,255,242,.67); font-size:.67rem; }
+.stay-planner__children>div { display:flex; gap:5px; }
+.stay-planner__children button { min-height:27px; padding:4px 10px; }
+.stay-planner__binary { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.stay-planner__destinations[hidden] { display:none; }
+.stay-planner__generate { display:flex; min-height:48px; align-items:center; justify-content:center; gap:8px; margin-top:2px; border:1px solid rgba(107,244,167,.48); border-radius:14px; color:#eafff1; background:linear-gradient(135deg,#168d50,#2dba70); box-shadow:0 14px 28px rgba(18,148,80,.22),inset 0 1px rgba(255,255,255,.16); font:inherit; font-size:.84rem; font-weight:900; cursor:pointer; transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease; }
+.stay-planner__generate:hover { transform:translateY(-2px); box-shadow:0 18px 34px rgba(18,170,88,.3),inset 0 1px rgba(255,255,255,.18); }
+.stay-planner__generate svg:last-child { transition:transform .25s ease; }
+.stay-planner__generate:hover svg:last-child { transform:translateX(3px); }
+.stay-planner__updated { display:flex; align-items:center; justify-content:center; gap:5px; color:rgba(222,247,231,.47); font-size:.62rem; }
+.stay-planner__updated>span { width:5px; height:5px; border-radius:50%; background:#50df8c; box-shadow:0 0 9px #50df8c; }
+
+.stay-planner__result { min-width:0; transition:height .65s cubic-bezier(.22,1,.36,1),opacity .18s ease,filter .18s ease,transform .18s ease; }
+.stay-planner__result.is-exiting { opacity:0; filter:blur(8px); transform:translateY(8px) scale(.992); }
+.stay-planner__result.is-loading { overflow:hidden; }
+.planner-result-shell { display:grid; gap:12px; min-width:0; }
+.planner-hero { position:relative; display:flex; min-height:218px; align-items:flex-end; overflow:hidden; padding:22px 24px; border:1px solid rgba(97,233,158,.27); border-radius:24px; background:#06271b; box-shadow:0 20px 60px rgba(0,0,0,.23); }
+.planner-hero__image { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 55%; opacity:.7; filter:saturate(.92) contrast(1.05); }
+.planner-hero::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(2,20,14,.88) 0%,rgba(4,27,19,.7) 48%,rgba(3,42,25,.83) 77%,rgba(2,34,22,.95) 100%),linear-gradient(0deg,rgba(2,17,12,.82),transparent 62%); }
+.planner-hero__content { position:relative; z-index:2; width:min(810px,78%); }
+.planner-hero__badge { display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border:1px solid rgba(255,222,141,.3); border-radius:10px; color:#ffe6a7; background:rgba(18,42,31,.58); backdrop-filter:blur(10px); font-size:.65rem; font-weight:900; text-transform:uppercase; letter-spacing:.06em; }
+.planner-hero h2 { max-width:750px; margin:10px 0 5px; color:#fff; font-size:clamp(1.65rem,2.55vw,2.75rem); line-height:1.03; letter-spacing:-.045em; text-wrap:balance; }
+.planner-hero__subtitle { max-width:720px; margin:0; color:rgba(241,255,246,.77); font-size:.86rem; line-height:1.45; }
+.planner-hero__stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-top:15px; }
+.planner-hero__stat { display:grid; grid-template-columns:32px minmax(0,1fr); gap:8px; align-items:center; min-height:48px; padding:7px 9px; border:1px solid rgba(112,230,162,.2); border-radius:12px; background:rgba(5,35,24,.64); backdrop-filter:blur(12px); }
+.planner-hero__stat>span { display:grid; width:32px; height:32px; place-items:center; border-radius:9px; color:#8df1b6; background:rgba(52,191,112,.17); font-size:1rem; }
+.planner-hero__stat small,.planner-hero__stat strong { display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.planner-hero__stat small { color:rgba(224,249,233,.55); font-size:.54rem; text-transform:uppercase; letter-spacing:.05em; }
+.planner-hero__stat strong { margin-top:2px; color:#f7fff9; font-size:.7rem; }
+.planner-hero__brand { position:absolute; z-index:2; top:20px; right:22px; display:grid; width:112px; height:112px; place-items:center; color:#85f6b5; filter:drop-shadow(0 0 25px rgba(75,239,145,.34)); opacity:.58; }
+.planner-hero__brand img { position:absolute; width:68px; height:68px; opacity:.28; }
+.planner-hero__brand span { margin-top:52px; font-size:3.1rem; }
+
+.planner-weather { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:14px; min-height:82px; padding:10px 13px 10px 17px; border:1px solid var(--planner-line); border-radius:18px; background:linear-gradient(135deg,rgba(9,45,32,.94),rgba(5,31,23,.94)); }
+.planner-weather>h3 { margin:0; color:#f1fff6; font-size:.78rem; white-space:nowrap; }
+.planner-weather__days { display:flex; min-width:0; gap:8px; overflow-x:auto; scrollbar-width:none; }
+.planner-weather__days::-webkit-scrollbar { display:none; }
+.planner-weather__day { display:grid; grid-template-columns:auto auto minmax(74px,1fr); align-items:center; flex:1 0 150px; gap:7px; min-height:57px; padding:7px 10px; border:1px solid rgba(96,220,150,.14); border-radius:12px; background:rgba(18,68,47,.42); }
+.planner-weather__day>span { font-size:1.45rem; }
+.planner-weather__day strong { color:#fff; font-size:.75rem; white-space:nowrap; }
+.planner-weather__day small { display:block; color:rgba(233,252,240,.58); font-size:.58rem; white-space:nowrap; }
+.planner-weather__day p { margin:0; overflow:hidden; color:rgba(235,255,242,.72); font-size:.62rem; text-overflow:ellipsis; white-space:nowrap; }
+.planner-weather__day em { display:none; color:#8ee7b2; font-size:.56rem; font-style:normal; }
+.planner-weather.is-expanded .planner-weather__day em { display:block; }
+.planner-weather__empty { margin:0; color:rgba(232,254,240,.65); font-size:.72rem; }
+.planner-weather__toggle { display:inline-flex; min-height:36px; align-items:center; gap:7px; padding:0 12px; border:1px solid rgba(88,224,146,.32); border-radius:12px; color:#dfffea; background:rgba(19,84,55,.35); font:inherit; font-size:.66rem; font-weight:800; cursor:pointer; white-space:nowrap; }
+
+.planner-days { position:relative; min-width:0; }
+.planner-days__toolbar { display:flex; align-items:center; justify-content:flex-end; gap:7px; min-height:28px; margin-bottom:5px; }
+.planner-days__toolbar[hidden] { display:none; }
+.planner-days__toolbar button { display:grid; width:30px; height:28px; place-items:center; border:1px solid rgba(90,218,145,.22); border-radius:9px; color:#dfffea; background:rgba(10,47,34,.8); cursor:pointer; }
+.planner-days__toolbar button:disabled { opacity:.35; cursor:default; }
+.planner-days__indicator { min-width:68px; color:rgba(231,253,239,.65); font-size:.62rem; text-align:center; }
+.planner-days__viewport { min-width:0; overflow:hidden; }
+.planner-days__track { display:grid; grid-auto-flow:column; grid-auto-columns:calc((100% - (var(--planner-visible,3) - 1)*12px)/var(--planner-visible,3)); gap:12px; transition:transform .5s cubic-bezier(.22,1,.36,1); will-change:transform; }
+.planner-day-card { display:flex; min-width:0; min-height:248px; flex-direction:column; padding:14px; overflow:hidden; border:1px solid rgba(89,226,148,.21); border-radius:19px; background:linear-gradient(155deg,rgba(11,53,37,.96),rgba(5,31,23,.98)); box-shadow:0 14px 35px rgba(0,0,0,.16); transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .3s ease,box-shadow .3s ease; }
+.planner-day-card:hover { z-index:2; border-color:rgba(91,235,154,.46); box-shadow:0 18px 42px rgba(0,0,0,.23),0 0 24px rgba(50,201,116,.08); transform:translateY(-3px); }
+.planner-day-card__head { display:grid; grid-template-columns:42px minmax(0,1fr) 32px; align-items:center; gap:10px; margin-bottom:10px; }
+.planner-day-card__number { display:grid; width:42px; height:42px; place-items:center; border:1px solid rgba(127,246,177,.46); border-radius:12px; color:#eafff1; background:linear-gradient(145deg,#40c778,#1c864d); box-shadow:0 7px 18px rgba(35,180,97,.21); font-size:1.12rem; font-weight:900; }
+.planner-day-card__head small { display:block; color:#84e9ad; font-size:.57rem; font-weight:900; text-transform:uppercase; letter-spacing:.06em; }
+.planner-day-card__head h3 { display:-webkit-box; margin:2px 0 0; overflow:hidden; color:#fff; font-size:.94rem; line-height:1.16; letter-spacing:-.02em; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.planner-day-card__icon { color:#7cecaa; font-size:1.65rem; opacity:.78; text-align:center; }
+.planner-day-card__times { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
+.planner-day-card__time { min-width:0; min-height:84px; padding:9px; border:1px solid rgba(97,213,145,.12); border-radius:11px; background:rgba(15,66,45,.45); }
+.planner-day-card__time span { display:flex; align-items:center; gap:4px; color:#a6f2c3; font-size:.55rem; font-weight:900; text-transform:uppercase; letter-spacing:.04em; }
+.planner-day-card__time p { display:-webkit-box; margin:6px 0 0; overflow:hidden; color:rgba(242,255,247,.77); font-size:.65rem; line-height:1.38; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
+.planner-day-card__practical { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin-top:8px; }
+.planner-day-card__practical>div { display:grid; grid-template-columns:20px minmax(0,1fr); align-items:center; gap:5px; min-width:0; min-height:40px; padding:6px; border:1px solid rgba(87,211,140,.14); border-radius:9px; background:rgba(3,28,20,.5); }
+.planner-day-card__practical>div>span { font-size:.85rem; }
+.planner-day-card__practical small,.planner-day-card__practical strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.planner-day-card__practical small { color:rgba(221,248,231,.48); font-size:.48rem; }
+.planner-day-card__practical strong { margin-top:2px; color:#eafff1; font-size:.56rem; }
+.planner-day-card__details { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; min-height:31px; margin-top:auto; padding-top:8px; border:0; color:#9df2bd; background:transparent; font:inherit; font-size:.61rem; font-weight:850; cursor:pointer; }
+.planner-day-card__details:hover { color:#fff; }
+
+.planner-quick { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:9px; }
+.planner-quick__item { display:grid; grid-template-columns:34px minmax(0,1fr); align-items:center; gap:8px; min-width:0; min-height:62px; padding:9px; border:1px solid rgba(92,218,146,.19); border-radius:14px; color:inherit; background:linear-gradient(145deg,rgba(13,55,39,.91),rgba(6,35,25,.94)); text-decoration:none; font:inherit; text-align:left; cursor:pointer; transition:transform .28s cubic-bezier(.22,1,.36,1),border-color .28s ease,background .28s ease; }
+.planner-quick__item:hover { border-color:rgba(89,232,151,.44); background:linear-gradient(145deg,rgba(20,78,51,.94),rgba(7,42,29,.96)); transform:translateY(-2px); }
+.planner-quick__icon { display:grid; width:34px; height:34px; place-items:center; border-radius:10px; color:#baffd2; background:linear-gradient(145deg,rgba(56,195,116,.35),rgba(24,126,75,.24)); font-size:1rem; }
+.planner-quick__icon img { width:23px; height:23px; object-fit:contain; }
+.planner-quick strong,.planner-quick small { display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.planner-quick strong { color:#f4fff8; font-size:.67rem; }
+.planner-quick small { margin-top:2px; color:rgba(224,249,233,.5); font-size:.52rem; }
+
+.planner-bottom { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.planner-upsell,.planner-summer { position:relative; min-height:164px; overflow:hidden; border:1px solid rgba(93,224,149,.23); border-radius:19px; }
+.planner-upsell { display:flex; align-items:center; padding:18px 19px 18px 42%; background:#08281c; }
+.planner-upsell__image { position:absolute; inset:0 58% 0 0; width:42%; height:100%; object-fit:cover; opacity:.75; }
+.planner-upsell::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(5,30,21,.08) 0%,rgba(5,30,21,.95) 43%,rgba(5,30,21,.99) 100%); }
+.planner-upsell__content { position:relative; z-index:1; width:100%; }
+.planner-upsell h3,.planner-summer h3 { margin:0; color:#fff; font-size:1rem; letter-spacing:-.02em; }
+.planner-upsell p { margin:5px 0 10px; color:rgba(237,255,244,.65); font-size:.66rem; line-height:1.4; }
+.planner-upsell__benefits { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+.planner-upsell__benefits span { display:grid; gap:3px; padding:7px; border-radius:9px; color:rgba(240,255,246,.72); background:rgba(31,106,69,.35); font-size:.54rem; line-height:1.25; text-align:center; }
+.planner-upsell__benefits b { font-size:.86rem; }
+.planner-upsell button { display:inline-flex; min-height:36px; align-items:center; gap:6px; margin-top:10px; padding:0 13px; border:1px solid rgba(129,248,180,.43); border-radius:10px; color:#effff5; background:linear-gradient(135deg,#39bf73,#16854c); font:inherit; font-size:.61rem; font-weight:900; cursor:pointer; }
+.planner-upsell.is-max button { display:none; }
+.planner-summer { padding:18px 22px; background:radial-gradient(circle at 100% 0,rgba(102,222,89,.16),transparent 45%),linear-gradient(145deg,rgba(10,55,37,.96),rgba(5,32,23,.98)); }
+.planner-summer h3 { color:#d8ffba; }
+.planner-summer ul { display:grid; gap:7px; margin:11px 0 7px; padding:0; list-style:none; }
+.planner-summer li { position:relative; padding-left:15px; color:rgba(238,255,244,.72); font-size:.62rem; line-height:1.35; }
+.planner-summer li::before { content:"✦"; position:absolute; left:0; color:#a9ee7d; }
+.planner-summer small { color:rgba(226,249,235,.43); font-size:.53rem; line-height:1.35; }
+
+.planner-skeleton { display:grid; gap:12px; }
+.planner-skeleton__status { display:flex; align-items:center; gap:10px; min-height:42px; color:#bff7d4; font-size:.75rem; }
+.planner-skeleton__status span { width:16px; height:16px; border:2px solid rgba(103,226,156,.25); border-top-color:#62df98; border-radius:50%; animation:plannerSpin .7s linear infinite; }
+.planner-skeleton__hero,.planner-skeleton__weather,.planner-skeleton__card { position:relative; overflow:hidden; border:1px solid rgba(92,211,143,.12); border-radius:19px; background:#0a3022; }
+.planner-skeleton__hero { height:218px; }
+.planner-skeleton__weather { height:82px; }
+.planner-skeleton__cards { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.planner-skeleton__card { height:248px; }
+.planner-skeleton__hero::after,.planner-skeleton__weather::after,.planner-skeleton__card::after { content:""; position:absolute; inset:0; background:linear-gradient(100deg,transparent 20%,rgba(159,255,199,.1) 45%,transparent 70%); transform:translateX(-100%); animation:plannerShimmer 1.1s infinite; }
+
+.planner-dialog { width:min(920px,calc(100% - 28px)); max-height:min(86vh,780px); padding:0; overflow:hidden; border:1px solid rgba(103,233,159,.31); border-radius:24px; color:#f2fff7; background:#06271b; box-shadow:0 35px 110px rgba(0,0,0,.66); opacity:0; transform:scale(.96) translateY(10px); transition:opacity .2s ease,transform .28s cubic-bezier(.22,1,.36,1); }
+.planner-dialog[open].is-visible { opacity:1; transform:none; }
+.planner-dialog.is-closing { opacity:0; transform:scale(.97) translateY(8px); }
+.planner-dialog::backdrop { background:rgba(0,12,8,.72); backdrop-filter:blur(8px); }
+.planner-dialog__inner { position:relative; max-height:min(86vh,780px); overflow:auto; }
+.planner-dialog__hero { position:relative; min-height:210px; overflow:hidden; padding:28px; display:flex; align-items:flex-end; }
+.planner-dialog__hero img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.62; }
+.planner-dialog__hero::after { content:""; position:absolute; inset:0; background:linear-gradient(0deg,#06271b 0%,rgba(6,39,27,.42) 80%); }
+.planner-dialog__hero>div { position:relative; z-index:1; }
+.planner-dialog__hero span { color:#8ff1b6; font-size:.7rem; font-weight:900; text-transform:uppercase; }
+.planner-dialog__hero h2 { margin:5px 0 0; color:#fff; font-size:clamp(1.5rem,3vw,2.4rem); }
+.planner-dialog__close { position:absolute; z-index:4; top:14px; right:14px; display:grid; width:40px; height:40px; place-items:center; border:1px solid rgba(255,255,255,.2); border-radius:12px; color:#fff; background:rgba(3,25,17,.72); font-size:1.25rem; cursor:pointer; }
+.planner-dialog__body { display:grid; grid-template-columns:1.2fr .8fr; gap:14px; padding:0 22px 22px; }
+.planner-dialog__section { padding:15px; border:1px solid rgba(91,216,144,.16); border-radius:15px; background:rgba(12,53,37,.7); }
+.planner-dialog__section h3 { margin:0 0 10px; color:#a2f4c1; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; }
+.planner-dialog__timeline { display:grid; gap:8px; }
+.planner-dialog__timeline article { display:grid; grid-template-columns:28px minmax(0,1fr); gap:8px; }
+.planner-dialog__timeline b { color:#fff; font-size:.7rem; }
+.planner-dialog__timeline p,.planner-dialog__section p,.planner-dialog__section li { margin:3px 0 0; color:rgba(237,255,244,.7); font-size:.69rem; line-height:1.48; }
+.planner-dialog__section ul { display:grid; gap:5px; margin:0; padding-left:17px; }
+.planner-dialog__facts { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.planner-dialog__facts span { padding:9px; border-radius:10px; color:rgba(237,255,244,.72); background:rgba(4,31,22,.58); font-size:.65rem; }
+.planner-dialog__links { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
+.planner-dialog__links a { padding:8px 10px; border:1px solid rgba(86,224,146,.28); border-radius:9px; color:#adf5c8; font-size:.62rem; font-weight:800; text-decoration:none; }
+.planner-dialog__links a:hover { color:#fff; border-color:#55df90; }
+body.planner-modal-open { overflow:hidden; }
+
+.stay-planner__toast { position:fixed; z-index:10020; right:18px; bottom:18px; max-width:min(390px,calc(100% - 32px)); padding:13px 16px; border:1px solid rgba(105,239,163,.38); border-radius:14px; color:#ecfff4; background:rgba(7,52,34,.96); box-shadow:0 18px 55px rgba(0,0,0,.38); font-size:.76rem; font-weight:800; opacity:0; pointer-events:none; transform:translateY(14px); transition:opacity .25s ease,transform .35s cubic-bezier(.22,1,.36,1); }
+.stay-planner__toast.is-visible { opacity:1; transform:none; }
+.stay-planner__toast.is-error { border-color:rgba(255,124,124,.48); background:rgba(87,23,23,.96); }
+
+.stay-planner__result.is-entering .planner-hero { animation:plannerReveal .58s both cubic-bezier(.22,1,.36,1); }
+.stay-planner__result.is-entering .planner-weather { animation:plannerReveal .55s .08s both cubic-bezier(.22,1,.36,1); }
+.stay-planner__result.is-entering .planner-day-card { animation:plannerCardIn .6s calc(.15s + var(--planner-card-index,0)*.08s) both cubic-bezier(.22,1,.36,1); }
+.stay-planner__result.is-entering .planner-quick { animation:plannerReveal .52s .45s both cubic-bezier(.22,1,.36,1); }
+.stay-planner__result.is-entering .planner-bottom { animation:plannerReveal .52s .52s both cubic-bezier(.22,1,.36,1); }
+@keyframes plannerReveal { from{opacity:0;transform:translateY(16px);filter:blur(5px)} to{opacity:1;transform:none;filter:none} }
+@keyframes plannerCardIn { from{opacity:0;transform:translateX(24px) scale(.98)} to{opacity:1;transform:none} }
+@keyframes plannerChip { 0%{transform:scale(1)} 45%{transform:scale(1.045);box-shadow:0 0 22px rgba(65,226,137,.34)} 100%{transform:scale(1)} }
+@keyframes plannerNumber { 0%{opacity:.3;transform:translateY(7px) scale(.92)} 100%{opacity:1;transform:none} }
+@keyframes plannerSpin { to{transform:rotate(360deg)} }
+@keyframes plannerShimmer { to{transform:translateX(100%)} }
+
+@media (max-width:1250px) {
+  .stay-planner__dashboard { grid-template-columns:300px minmax(0,1fr); gap:14px; }
+  .planner-hero__content { width:88%; }
+  .planner-quick { grid-template-columns:repeat(3,1fr); }
+}
+@media (max-width:960px) {
+  .stay-planner { padding-top:82px; }
+  .stay-planner__shell { width:min(100% - 22px,900px); }
+  .stay-planner__dashboard { display:block; }
+  .stay-planner__panel { position:relative; top:auto; max-height:none; margin-bottom:14px; padding:15px; overflow:visible; }
+  .stay-planner__panel-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0; }
+  .stay-planner__panel-head>div>span,.stay-planner__panel-head p { display:none; }
+  .stay-planner__panel-head h2 { font-size:1rem; }
+  .stay-planner__panel-head>button { display:flex; min-height:38px; align-items:center; gap:6px; padding:0 10px; border:1px solid rgba(85,223,145,.27); border-radius:11px; color:#dffff0; background:rgba(18,75,51,.42); font:inherit; font-size:.65rem; font-weight:800; cursor:pointer; }
+  .stay-planner__filter-chevron { transition:transform .25s ease; }
+  .stay-planner__panel.is-open .stay-planner__filter-chevron { transform:rotate(180deg); }
+  .stay-planner__filters { display:none; padding-top:17px; }
+  .stay-planner__panel.is-open .stay-planner__filters { display:grid; animation:plannerReveal .35s both; }
+  .planner-hero__stats { grid-template-columns:repeat(2,1fr); }
+  .planner-bottom { grid-template-columns:1fr; }
+}
+@media (max-width:700px) {
+  .stay-planner { padding-top:74px; padding-bottom:22px; }
+  .stay-planner__shell { width:calc(100% - 16px); }
+  .stay-planner__panel { border-radius:18px; }
+  .stay-planner__panel-head>button span { display:none; }
+  .planner-result-shell { gap:9px; }
+  .planner-hero { min-height:285px; align-items:flex-end; padding:16px; border-radius:19px; }
+  .planner-hero__content { width:100%; }
+  .planner-hero h2 { max-width:90%; font-size:1.65rem; }
+  .planner-hero__subtitle { display:-webkit-box; overflow:hidden; font-size:.73rem; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .planner-hero__stats { gap:6px; margin-top:11px; }
+  .planner-hero__stat { min-height:46px; grid-template-columns:27px minmax(0,1fr); padding:6px; }
+  .planner-hero__stat>span { width:27px; height:27px; }
+  .planner-hero__brand { top:13px; right:10px; width:76px; height:76px; }
+  .planner-hero__brand span { font-size:2.2rem; }
+  .planner-weather { grid-template-columns:1fr auto; gap:8px; padding:10px; border-radius:15px; }
+  .planner-weather>h3 { grid-column:1; font-size:.7rem; }
+  .planner-weather__days,.planner-weather__empty { grid-column:1/-1; grid-row:2; }
+  .planner-weather__toggle { grid-column:2; grid-row:1; min-height:31px; padding:0 9px; }
+  .planner-weather__toggle span { display:none; }
+  .planner-weather__day { flex-basis:145px; }
+  .planner-days__track { --planner-visible:1!important; }
+  .planner-days__toolbar { justify-content:center; margin:2px 0 6px; }
+  .planner-day-card { min-height:270px; }
+  .planner-day-card__time { min-height:96px; padding:8px; }
+  .planner-day-card__time p { font-size:.62rem; -webkit-line-clamp:4; }
+  .planner-quick { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+  .planner-quick__item { min-height:58px; }
+  .planner-bottom { gap:9px; }
+  .planner-upsell,.planner-summer { min-height:180px; border-radius:16px; }
+  .planner-upsell { padding:15px 14px 15px 31%; }
+  .planner-upsell__image { width:34%; }
+  .planner-upsell__benefits { grid-template-columns:1fr; gap:4px; }
+  .planner-upsell__benefits span { grid-template-columns:20px 1fr; text-align:left; align-items:center; }
+  .planner-summer { padding:16px; }
+  .planner-dialog { width:100%; max-width:none; height:100dvh; max-height:none; margin:0; border:0; border-radius:0; }
+  .planner-dialog__inner { max-height:100dvh; }
+  .planner-dialog__hero { min-height:220px; padding:22px 18px; }
+  .planner-dialog__body { grid-template-columns:1fr; padding:0 12px 18px; }
+  .planner-skeleton__cards { grid-template-columns:1fr; }
+  .planner-skeleton__card:not(:first-child) { display:none; }
+  .stay-planner__toast { right:8px; bottom:8px; max-width:calc(100% - 16px); }
+}
+@media (max-width:390px) {
+  .stay-planner__chips--three { grid-template-columns:1fr; }
+  .stay-planner__chips--four { grid-template-columns:repeat(2,1fr); }
+  .planner-day-card { padding:11px; }
+  .planner-day-card__times { gap:5px; }
+  .planner-day-card__practical { gap:4px; }
+  .planner-quick strong { font-size:.62rem; }
 }
-
-.stay-planner__ambient span {
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(22px);
-  pointer-events: none;
-  animation: plannerFloat 20s ease-in-out infinite;
-}
-
-.stay-planner__ambient span:nth-child(1) {
-  width: 360px;
-  height: 360px;
-  left: -120px;
-  top: 14%;
-  background: rgba(60,179,113,.18);
-}
-
-.stay-planner__ambient span:nth-child(2) {
-  width: 300px;
-  height: 300px;
-  right: -90px;
-  top: 20%;
-  background: rgba(242,192,120,.15);
-  animation-delay: -8s;
-}
-
-.stay-planner__ambient span:nth-child(3) {
-  width: 260px;
-  height: 260px;
-  right: 28%;
-  bottom: 8%;
-  background: rgba(143,224,180,.12);
-  animation-delay: -13s;
-}
-
-.stay-planner__shell {
-  position: relative;
-  z-index: 1;
-}
-
-.stay-planner__head {
-  max-width: 980px;
-  margin-bottom: clamp(28px, 5vw, 54px);
-}
-
-.stay-planner__head h1 {
-  max-width: 940px;
-  margin: 0 0 18px;
-  color: #f7fff9;
-  font-size: clamp(2.5rem, 6.6vw, 5.6rem);
-  line-height: .94;
-  letter-spacing: 0;
-}
-
-.stay-planner__head p {
-  max-width: 820px;
-  margin: 0;
-  color: rgba(245,255,248,.76);
-  font-size: clamp(1rem, 2vw, 1.18rem);
-  line-height: 1.75;
-  font-weight: 680;
-}
-
-.stay-planner__head small {
-  display: inline-flex;
-  max-width: 720px;
-  margin-top: 18px;
-  padding: 10px 14px;
-  border: 1px solid rgba(143,224,180,.20);
-  border-radius: 999px;
-  color: #bff7d7;
-  background: rgba(143,224,180,.09);
-  font-weight: 850;
-}
-
-.stay-planner__quiz,
-.stay-planner__panel,
-.stay-planner__result,
-.stay-planner__today,
-.stay-planner__arrival {
-  border-radius: 30px;
-  border-color: rgba(143,224,180,.18);
-  background:
-    radial-gradient(circle at 14% 0%, rgba(60,179,113,.18), transparent 38%),
-    rgba(9, 28, 19, .74);
-  backdrop-filter: blur(22px);
-}
-
-.stay-planner__quiz {
-  display: grid;
-  gap: 22px;
-  margin-bottom: 24px;
-  padding: clamp(22px, 4vw, 34px);
-  color: #fff;
-}
-
-.stay-planner__inspiration {
-  display: grid;
-  gap: 18px;
-  margin: 0 0 24px;
-}
-
-.stay-planner__inspiration-copy h2 {
-  max-width: 760px;
-  margin: 8px 0 0;
-  color: #f7fff9;
-  font-size: clamp(1.45rem, 3vw, 2.4rem);
-  line-height: 1.08;
-}
-
-.stay-planner__inspiration-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-
-:global(.stay-planner__inspiration-image.photo-frame) {
-  min-height: 190px;
-  border-radius: 24px;
-}
-
-.stay-planner__quiz h2,
-.stay-planner__today h2,
-.stay-planner__arrival h2 {
-  margin: 0 0 8px;
-  color: #fff;
-  font-size: clamp(1.4rem, 3vw, 2.1rem);
-}
-
-.stay-planner__quiz p,
-.stay-planner__today p {
-  margin: 0;
-  color: rgba(245,255,248,.72);
-  line-height: 1.65;
-}
-
-.stay-planner__scenario-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-
-.stay-planner__scenario-grid button {
-  min-height: 126px;
-  display: grid;
-  gap: 9px;
-  justify-items: start;
-  padding: 20px;
-  border: 1px solid rgba(143,224,180,.18);
-  border-radius: 24px;
-  color: #f7fff9;
-  background:
-    radial-gradient(circle at 20% 0%, rgba(255,255,255,.13), transparent 40%),
-    rgba(255,255,255,.07);
-  text-align: left;
-  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
-}
-
-.stay-planner__scenario-grid button:hover {
-  transform: translateY(-3px);
-  border-color: rgba(143,224,180,.42);
-  background: rgba(143,224,180,.12);
-  box-shadow: 0 20px 46px rgba(60,179,113,.18);
-}
-
-.stay-planner__scenario-grid svg {
-  color: #8fe0b4;
-}
-
-.stay-planner__scenario-grid strong {
-  font-size: 1.02rem;
-  font-weight: 950;
-}
-
-.stay-planner__scenario-grid span {
-  color: rgba(245,255,248,.70);
-  line-height: 1.5;
-  font-weight: 760;
-}
-
-.stay-planner__layout {
-  display: grid;
-  gap: 24px;
-  align-items: start;
-}
-
-.stay-planner__panel {
-  display: grid;
-  gap: 18px;
-  padding: clamp(20px, 4vw, 34px);
-}
-
-.stay-planner__control {
-  display: grid;
-  gap: 12px;
-}
-
-.stay-planner__control h2 {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  margin: 0;
-  color: #f7fff9;
-  font-size: 1rem;
-}
-
-.stay-planner__segments,
-.stay-planner__attractions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.stay-planner__segments button,
-.stay-planner__attractions button {
-  min-height: 46px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 15px;
-  border: 1px solid rgba(143,224,180,.20);
-  border-radius: 999px;
-  color: rgba(245,255,248,.84);
-  background: rgba(255,255,255,.07);
-  font-weight: 900;
-  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
-}
-
-.stay-planner__segments button:hover,
-.stay-planner__segments button.is-active,
-.stay-planner__attractions button:hover,
-.stay-planner__attractions button.is-active {
-  transform: translateY(-2px);
-  color: #082016;
-  border-color: rgba(143,224,180,.58);
-  background: linear-gradient(135deg, #a7f2c7, #3CB371);
-  box-shadow: 0 16px 34px rgba(60,179,113,.22);
-}
-
-.stay-planner__result {
-  position: static;
-  padding: clamp(22px, 4vw, 32px);
-  color: rgba(245,255,248,.84);
-}
-
-.stay-planner__result h2 {
-  margin: 12px 0;
-  color: #fff;
-  font-size: clamp(1.45rem, 3vw, 2.2rem);
-  line-height: 1.08;
-}
-
-.stay-planner__result p {
-  color: rgba(245,255,248,.76);
-  line-height: 1.65;
-}
-
-.stay-planner__result-badge {
-  display: inline-flex;
-  width: fit-content;
-  padding: 7px 11px;
-  border-radius: 999px;
-  color: #8fe0b4;
-  background: rgba(60,179,113,.12);
-  font-size: .72rem;
-  font-weight: 950;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-}
-
-.stay-planner__result-grid {
-  display: grid;
-  gap: 12px;
-  margin: 20px 0;
-}
-
-.stay-planner__result-grid section,
-.stay-planner__context,
-.stay-planner__plan > div {
-  border: 1px solid rgba(143,224,180,.14);
-  border-radius: 18px;
-  background: rgba(255,255,255,.06);
-}
-
-.stay-planner__result-grid section {
-  padding: 16px;
-}
-
-.stay-planner__result-grid strong,
-.stay-planner__plan > strong {
-  display: block;
-  color: #8fe0b4;
-  margin-bottom: 12px;
-  font-weight: 950;
-}
-
-.stay-planner__result-grid ul,
-.stay-planner__arrival ul {
-  display: grid;
-  gap: 9px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.stay-planner__result-grid li,
-.stay-planner__arrival li {
-  position: relative;
-  padding-left: 22px;
-  color: rgba(245,255,248,.78);
-  line-height: 1.5;
-}
-
-.stay-planner__result-grid li::before,
-.stay-planner__arrival li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: .58em;
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: #3CB371;
-  box-shadow: 0 0 0 5px rgba(60,179,113,.14);
-}
-
-.stay-planner__context {
-  display: grid;
-  gap: 8px;
-  padding: 14px;
-}
-
-.stay-planner__context p {
-  margin: 0;
-}
-
-.stay-planner__plan {
-  display: grid;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.stay-planner__plan > div {
-  display: grid;
-  grid-template-columns: 34px 1fr;
-  gap: 10px;
-  align-items: start;
-  padding: 12px;
-}
-
-.stay-planner__plan span {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  color: #082016;
-  background: #8fe0b4;
-  font-weight: 950;
-}
-
-.stay-planner__plan p {
-  margin: 0;
-}
-
-.stay-planner__date input {
-  min-height: 48px;
-  width: 100%;
-  padding: 0 14px;
-  border: 1px solid rgba(143,224,180,.20);
-  border-radius: 15px;
-  color: #f7fff9;
-  color-scheme: dark;
-  background: rgba(255,255,255,.07);
-  font: inherit;
-  font-weight: 800;
-}
-
-.stay-planner__generate {
-  grid-column: 1 / -1;
-  min-height: 52px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  border: 0;
-  border-radius: 17px;
-  color: #082016;
-  background: linear-gradient(135deg,#a7f2c7,#3cb371);
-  box-shadow: 0 16px 34px rgba(60,179,113,.2);
-  font-weight: 950;
-  cursor: pointer;
-}
-
-.stay-planner__day-card {
-  display: grid;
-  gap: 14px;
-  padding: 17px;
-  border: 1px solid rgba(143,224,180,.15);
-  border-radius: 21px;
-  background: linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.035));
-}
-
-.stay-planner__day-card header {
-  display: grid;
-  grid-template-columns: 42px minmax(0,1fr) auto;
-  align-items: center;
-  gap: 11px;
-}
-
-.stay-planner__day-card header>span {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-}
-
-.stay-planner__day-card header small { color:#8fe0b4; font-size:.68rem; font-weight:900; text-transform:uppercase; letter-spacing:.1em; }
-.stay-planner__day-card h3 { margin:2px 0 0; color:#fff; font-size:1.08rem; line-height:1.22; }
-.stay-planner__day-card header em { padding:6px 9px; border-radius:999px; color:#bff7d7; background:rgba(60,179,113,.12); font-size:.7rem; font-style:normal; font-weight:850; }
-.stay-planner__day-weather { width:fit-content!important; height:auto!important; display:inline-flex!important; padding:6px 10px; border-radius:999px!important; color:#dff9e9!important; background:rgba(75,172,223,.13)!important; font-size:.76rem; }
-.stay-planner__day-flow { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
-.stay-planner__day-flow p,.stay-planner__day-meta span,.stay-planner__rain { display:grid; gap:5px; padding:11px; border-radius:14px; color:rgba(245,255,248,.75); background:rgba(0,0,0,.12); line-height:1.45; font-size:.82rem; }
-.stay-planner__day-flow b,.stay-planner__day-meta b,.stay-planner__rain b { color:#bff7d7; font-size:.7rem; letter-spacing:.03em; }
-.stay-planner__day-meta { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
-.stay-planner__rain { margin:0!important; border:1px solid rgba(91,174,218,.16); background:rgba(45,112,153,.09); }
-.stay-planner__day-card.is-rain-first .stay-planner__rain { order:-1; border-color:rgba(143,224,180,.3); }
-.stay-planner__upsell { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:14px; margin-top:18px; padding:18px; border:1px solid rgba(242,192,120,.24); border-radius:21px; background:linear-gradient(135deg,rgba(242,192,120,.12),rgba(60,179,113,.08)); }
-.stay-planner__upsell>span { font-size:1.7rem; }
-.stay-planner__upsell h3 { margin:0 0 5px; color:#fff; font-size:1rem; }
-.stay-planner__upsell p { margin:0; font-size:.86rem; }
-.stay-planner__upsell button { min-height:42px; padding:0 13px; border:0; border-radius:13px; color:#102018; background:#f2c078; font-weight:900; cursor:pointer; }
-
-.stay-planner__extras {
-  display: grid;
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.stay-planner__today,
-.stay-planner__arrival {
-  display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
-  gap: 16px;
-  padding: clamp(22px, 3vw, 30px);
-  color: #fff;
-}
-
-.stay-planner__today > svg,
-.stay-planner__arrival > svg {
-  width: 42px;
-  height: 42px;
-  padding: 9px;
-  border-radius: 16px;
-  color: #082016;
-  background: linear-gradient(135deg, #a7f2c7, #3CB371);
-}
-
-.stay-planner__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 26px;
-}
-
-.stay-planner__actions .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-}
-
-html[data-theme="light"] .stay-planner {
-  background:
-    radial-gradient(circle at 14% 12%, rgba(60,179,113,.18), transparent 32%),
-    radial-gradient(circle at 86% 8%, rgba(242,192,120,.16), transparent 34%),
-    linear-gradient(180deg, #f7fbf5, #edf6ef);
-}
-
-html[data-theme="light"] .stay-planner__head h1,
-html[data-theme="light"] .stay-planner__inspiration-copy h2,
-html[data-theme="light"] .stay-planner__control h2,
-html[data-theme="light"] .stay-planner__result h2,
-html[data-theme="light"] .stay-planner__quiz h2,
-html[data-theme="light"] .stay-planner__today h2,
-html[data-theme="light"] .stay-planner__arrival h2 {
-  color: #102018;
-}
-
-html[data-theme="light"] .stay-planner__head p,
-html[data-theme="light"] .stay-planner__result,
-html[data-theme="light"] .stay-planner__quiz p,
-html[data-theme="light"] .stay-planner__today p {
-  color: #52655a;
-}
-
-html[data-theme="light"] .stay-planner__head small {
-  color: #0f6b3f;
-  background: rgba(60,179,113,.10);
-}
-
-html[data-theme="light"] .stay-planner__quiz,
-html[data-theme="light"] .stay-planner__panel,
-html[data-theme="light"] .stay-planner__result,
-html[data-theme="light"] .stay-planner__today,
-html[data-theme="light"] .stay-planner__arrival {
-  background: rgba(255,255,255,.80);
-  border-color: rgba(60,179,113,.18);
-}
-
-html[data-theme="light"] .stay-planner__scenario-grid button,
-html[data-theme="light"] .stay-planner__segments button,
-html[data-theme="light"] .stay-planner__attractions button,
-html[data-theme="light"] .stay-planner__result-grid section,
-html[data-theme="light"] .stay-planner__context,
-html[data-theme="light"] .stay-planner__plan > div {
-  color: #263a2f;
-  background: rgba(255,255,255,.76);
-  border-color: rgba(29,83,52,.14);
-}
-
-html[data-theme="light"] .stay-planner__date input { color:#173126; color-scheme:light; background:#fff; border-color:#cfe3d6; }
-html[data-theme="light"] .stay-planner__day-card { border-color:#d3e6da; background:#f8fcf9; }
-html[data-theme="light"] .stay-planner__day-card h3,html[data-theme="light"] .stay-planner__upsell h3 { color:#102018; }
-html[data-theme="light"] .stay-planner__day-flow p,html[data-theme="light"] .stay-planner__day-meta span,html[data-theme="light"] .stay-planner__rain { color:#536359; background:#eef7f1; }
-html[data-theme="light"] .stay-planner__upsell { background:linear-gradient(135deg,#fff8ed,#f1fbf5); }
-
-html[data-theme="light"] .stay-planner__scenario-grid span,
-html[data-theme="light"] .stay-planner__result p,
-html[data-theme="light"] .stay-planner__result-grid li,
-html[data-theme="light"] .stay-planner__arrival li {
-  color: #536359;
-}
-
-@media (min-width: 760px) {
-  .stay-planner__scenario-grid,
-  .stay-planner__extras {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .stay-planner__result-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 980px) {
-  .stay-planner__layout {
-    grid-template-columns: minmax(310px,.72fr) minmax(0,1.28fr);
-  }
-
-  .stay-planner__panel {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .stay-planner__control--wide {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (min-width: 1180px) {
-  .stay-planner__scenario-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 720px) {
-  .stay-planner {
-    padding-top: 116px;
-  }
-
-  .stay-planner__head h1 {
-    font-size: clamp(2.25rem, 13vw, 3.5rem);
-  }
-
-  .stay-planner__head small {
-    border-radius: 18px;
-  }
-
-  .stay-planner__result {
-    position: static;
-  }
-
-  .stay-planner__day-flow,.stay-planner__day-meta { grid-template-columns:1fr; }
-  .stay-planner__day-card header { grid-template-columns:38px minmax(0,1fr); }
-  .stay-planner__day-card header em { grid-column:2; width:fit-content; }
-  .stay-planner__upsell { grid-template-columns:auto minmax(0,1fr); }
-  .stay-planner__upsell button { grid-column:1/-1; width:100%; }
-
-  .stay-planner__inspiration-grid {
-    grid-template-columns: 1fr;
-  }
-
-  :global(.stay-planner__inspiration-image.photo-frame) {
-    min-height: 210px;
-  }
-
-  .stay-planner__ambient span {
-    animation: none;
-    filter: blur(14px);
-    opacity: .55;
-  }
-
-  .stay-planner__today,
-  .stay-planner__arrival {
-    grid-template-columns: 1fr;
-  }
-
-  .stay-planner__actions .btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .stay-planner__ambient span,
-  .stay-planner__segments button,
-  .stay-planner__attractions button,
-  .stay-planner__scenario-grid button {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
-@keyframes plannerFloat {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(22px, -18px, 0) scale(1.06); }
-}
-
-/* Planner Premium 3.0 */
-.stay-planner__layout > *,
-.planner-result-shell,
-.stay-planner__day-list,
-.planner-day-card,
-.planner-day-card__heading {
-  min-width: 0;
-}
-
-.stay-planner__panel {
-  align-content: start;
-}
-
-.stay-planner__segments button.is-selecting,
-.stay-planner__attractions button.is-selecting,
-.stay-planner__scenario-grid button.is-selecting {
-  animation: plannerSelectionPulse .36s cubic-bezier(.22,1,.36,1);
-}
-
-.stay-planner__result {
-  overflow: clip;
-  transition:
-    height .52s cubic-bezier(.22,1,.36,1),
-    opacity .17s ease,
-    transform .17s cubic-bezier(.22,1,.36,1),
-    filter .17s ease;
-  will-change: height, opacity, transform, filter;
-}
-
-.stay-planner__result.is-exiting {
-  opacity: 0;
-  transform: translateY(12px);
-  filter: blur(4px);
-}
-
-.planner-result-shell {
-  display: grid;
-  gap: 22px;
-}
-
-.planner-result-hero {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  display: grid;
-  gap: 13px;
-  padding: clamp(20px,3vw,30px);
-  border: 1px solid rgba(143,224,180,.22);
-  border-radius: 26px;
-  background:
-    radial-gradient(circle at 92% 10%,rgba(242,192,120,.18),transparent 30%),
-    linear-gradient(135deg,rgba(60,179,113,.16),rgba(7,28,19,.72));
-  box-shadow: inset 0 1px rgba(255,255,255,.08), 0 24px 60px rgba(2,18,11,.18);
-}
-
-.planner-result-hero__glow {
-  position: absolute;
-  z-index: -1;
-  width: 220px;
-  height: 220px;
-  top: -130px;
-  right: 8%;
-  border-radius: 50%;
-  background: rgba(143,224,180,.24);
-  filter: blur(26px);
-  transform: translate3d(0,0,0);
-}
-
-.planner-result-hero h2 {
-  max-width: 19ch;
-  margin: 0;
-  font-size: clamp(1.75rem,3.5vw,2.85rem);
-  letter-spacing: -.035em;
-}
-
-.planner-result-hero__subtitle,
-.planner-result-hero__summary {
-  max-width: 72ch;
-  margin: 0;
-}
-
-.planner-result-hero__subtitle {
-  color: #bff7d7 !important;
-  font-size: 1rem;
-  font-weight: 850;
-}
-
-.planner-result-hero__summary {
-  padding-top: 4px;
-  font-size: .95rem;
-}
-
-.planner-result-hero__chips,
-.planner-result-hero__signals {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.planner-result-hero__chips > span,
-.planner-result-hero__signals > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  max-width: 100%;
-  border: 1px solid rgba(143,224,180,.2);
-  border-radius: 999px;
-  color: #eafff1;
-  background: rgba(3,21,13,.4);
-  font-size: .76rem;
-  font-weight: 850;
-  line-height: 1.25;
-}
-
-.planner-result-hero__chips > span {
-  min-height: 35px;
-  padding: 7px 11px;
-}
-
-.planner-result-hero__signals > span {
-  padding: 8px 11px;
-  border-radius: 12px;
-  color: rgba(245,255,248,.75);
-}
-
-.stay-planner__plan {
-  gap: 14px;
-  margin-top: 0;
-}
-
-.stay-planner__plan-heading {
-  display: grid;
-  grid-template-columns: 42px minmax(0,1fr) auto;
-  align-items: center;
-  gap: 12px;
-  padding: 4px 2px;
-}
-
-.stay-planner__plan-heading > span,
-.stay-planner__plan-heading > strong {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  color: #082016;
-  background: linear-gradient(135deg,#bff7d7,#3cb371);
-  font-size: 1rem;
-  font-weight: 950;
-}
-
-.stay-planner__plan-heading small {
-  color: #8fe0b4;
-  font-size: .68rem;
-  font-weight: 950;
-  letter-spacing: .11em;
-  text-transform: uppercase;
-}
-
-.stay-planner__plan-heading h3 {
-  margin: 3px 0 0;
-  color: #fff;
-  font-size: clamp(1.08rem,2vw,1.35rem);
-}
-
-.stay-planner__day-list {
-  display: grid;
-  gap: 16px;
-}
-
-.planner-day-card.stay-planner__day-card {
-  position: relative;
-  gap: 18px;
-  padding: clamp(17px,2.5vw,24px);
-  border-color: rgba(143,224,180,.18);
-  border-radius: 25px;
-  background:
-    linear-gradient(90deg,var(--planner-accent,rgba(60,179,113,.7)) 0 4px,transparent 4px),
-    linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.025));
-  box-shadow: inset 0 1px rgba(255,255,255,.055), 0 18px 42px rgba(0,0,0,.11);
-  transition: transform .3s cubic-bezier(.22,1,.36,1), border-color .3s ease, box-shadow .3s ease;
-}
-
-.planner-day-card--emerald { --planner-accent:#3cb371; }
-.planner-day-card--amber { --planner-accent:#f2c078; }
-.planner-day-card--blue { --planner-accent:#65b7e6; }
-.planner-day-card--forest { --planner-accent:#65c98f; }
-.planner-day-card--mint { --planner-accent:#9ce8bd; }
-
-.planner-day-card.stay-planner__day-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(143,224,180,.34);
-  box-shadow: inset 0 1px rgba(255,255,255,.08), 0 24px 52px rgba(0,0,0,.18);
-}
-
-.planner-day-card__header {
-  display: grid !important;
-  grid-template-columns: 42px 42px minmax(0,1fr) auto !important;
-  align-items: center;
-  gap: 11px;
-}
-
-.planner-day-card__number,
-.planner-day-card__icon {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-}
-
-.planner-day-card__number {
-  color: #082016;
-  background: linear-gradient(135deg,#d0f9e1,#55cf89);
-  font-weight: 950;
-  box-shadow: 0 9px 22px rgba(60,179,113,.2);
-}
-
-.planner-day-card__icon {
-  border: 1px solid rgba(143,224,180,.18);
-  background: rgba(255,255,255,.06);
-  font-size: 1.18rem;
-}
-
-.planner-day-card__eyebrow {
-  display: block;
-  color: #8fe0b4;
-  font-size: .67rem;
-  font-weight: 950;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-}
-
-.planner-day-card__heading h3 {
-  margin: 3px 0 4px;
-  overflow-wrap: anywhere;
-  color: #fff;
-  font-size: clamp(1.08rem,2vw,1.32rem);
-  line-height: 1.18;
-}
-
-.planner-day-card__heading p {
-  margin: 0;
-  color: rgba(245,255,248,.66);
-  font-size: .82rem;
-  line-height: 1.48;
-}
-
-.planner-day-card__intensity,
-.planner-day-card__weather {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  padding: 7px 10px;
-  border-radius: 999px;
-  font-size: .7rem;
-  font-weight: 900;
-  line-height: 1.2;
-}
-
-.planner-day-card__intensity {
-  color: #bff7d7;
-  border: 1px solid rgba(143,224,180,.18);
-  background: rgba(60,179,113,.12);
-}
-
-.planner-day-card__weather {
-  color: #dff6ff;
-  border: 1px solid rgba(101,183,230,.2);
-  background: rgba(43,118,160,.12);
-}
-
-.planner-timeline,
-.planner-practical {
-  display: grid;
-  gap: 10px;
-}
-
-.planner-timeline > h4,
-.planner-practical > h4 {
-  margin: 0;
-  color: #bff7d7;
-  font-size: .72rem;
-  font-weight: 950;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-
-.planner-timeline__rail {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(3,minmax(0,1fr));
-  gap: 10px;
-}
-
-.planner-timeline__rail::before {
-  content: '';
-  position: absolute;
-  top: 20px;
-  left: 12%;
-  right: 12%;
-  height: 1px;
-  background: linear-gradient(90deg,transparent,rgba(143,224,180,.25),transparent);
-}
-
-.planner-timeline__item {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: 34px minmax(0,1fr);
-  gap: 9px;
-  align-items: start;
-  min-height: 128px;
-  padding: 12px;
-  border: 1px solid rgba(143,224,180,.13);
-  border-radius: 16px;
-  background: rgba(1,16,10,.28);
-}
-
-.planner-timeline__icon {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 11px;
-  background: rgba(143,224,180,.1);
-}
-
-.planner-timeline__label,
-.planner-practical__label {
-  display: block;
-  margin-bottom: 6px;
-  color: #8fe0b4;
-  font-size: .68rem;
-  font-weight: 950;
-  letter-spacing: .055em;
-  text-transform: uppercase;
-}
-
-.planner-timeline__value {
-  margin: 0 !important;
-  color: rgba(245,255,248,.78) !important;
-  font-size: .82rem;
-  line-height: 1.5 !important;
-}
-
-.planner-practical__grid {
-  display: grid;
-  grid-template-columns: 1.35fr 1fr .8fr;
-  gap: 9px;
-}
-
-.planner-practical__item {
-  display: grid;
-  grid-template-columns: 30px minmax(0,1fr);
-  gap: 8px;
-  align-items: start;
-  padding: 11px;
-  border: 1px solid rgba(143,224,180,.12);
-  border-radius: 14px;
-  background: rgba(255,255,255,.035);
-}
-
-.planner-practical__item > span {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 10px;
-  background: rgba(143,224,180,.08);
-}
-
-.planner-practical__value {
-  display: block;
-  overflow-wrap: anywhere;
-  color: #f5fff8;
-  font-size: .78rem;
-  line-height: 1.4;
-}
-
-.planner-day-card__notes {
-  display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
-  gap: 9px;
-}
-
-.planner-note {
-  display: grid;
-  grid-template-columns: 32px minmax(0,1fr);
-  gap: 9px;
-  padding: 12px;
-  border: 1px solid rgba(143,224,180,.12);
-  border-radius: 15px;
-  background: rgba(60,179,113,.06);
-}
-
-.planner-note--tips {
-  grid-column: 1/-1;
-  background: rgba(242,192,120,.06);
-  border-color: rgba(242,192,120,.14);
-}
-
-.planner-note > span {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: rgba(255,255,255,.055);
-}
-
-.planner-note strong {
-  display: block;
-  margin-bottom: 5px;
-  color: #bff7d7;
-  font-size: .72rem;
-}
-
-.planner-note p,
-.planner-note ul {
-  margin: 0;
-  color: rgba(245,255,248,.7);
-  font-size: .78rem;
-  line-height: 1.5;
-}
-
-.planner-note ul {
-  display: grid;
-  gap: 4px;
-  padding-left: 17px;
-}
-
-.planner-day-card__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding-top: 2px;
-}
-
-.planner-day-card__actions a,
-.planner-day-card__actions button {
-  min-height: 39px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 11px;
-  border: 1px solid rgba(143,224,180,.18);
-  border-radius: 12px;
-  color: #dff9e9;
-  background: rgba(255,255,255,.045);
-  font: inherit;
-  font-size: .72rem;
-  font-weight: 900;
-  text-decoration: none;
-  cursor: pointer;
-  transition: transform .22s cubic-bezier(.22,1,.36,1), background .22s ease, border-color .22s ease;
-}
-
-.planner-day-card__actions a:hover,
-.planner-day-card__actions button:hover {
-  transform: translateY(-2px);
-  border-color: rgba(143,224,180,.42);
-  background: rgba(60,179,113,.14);
-}
-
-.planner-rain-plan {
-  display: grid;
-  gap: 14px;
-  padding: clamp(17px,2.5vw,23px);
-  border: 1px solid rgba(101,183,230,.2);
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at 94% 6%,rgba(101,183,230,.15),transparent 34%),
-    rgba(30,82,110,.08);
-}
-
-.planner-rain-plan > header {
-  display: grid;
-  grid-template-columns: 42px minmax(0,1fr);
-  gap: 11px;
-  align-items: start;
-}
-
-.planner-rain-plan > header > span {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  background: rgba(101,183,230,.14);
-}
-
-.planner-rain-plan h3 {
-  margin: 0 0 4px;
-  color: #eaf9ff;
-  font-size: 1.05rem;
-}
-
-.planner-rain-plan header p {
-  margin: 0;
-  font-size: .82rem;
-}
-
-.planner-rain-plan__grid {
-  display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
-  gap: 9px;
-}
-
-.planner-rain-plan__grid article {
-  padding: 12px;
-  border: 1px solid rgba(101,183,230,.15);
-  border-radius: 14px;
-  background: rgba(3,20,29,.22);
-}
-
-.planner-rain-plan__grid span,
-.planner-rain-plan__grid strong {
-  display: block;
-}
-
-.planner-rain-plan__grid span {
-  color: #a9daf2;
-  font-size: .65rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.planner-rain-plan__grid strong {
-  margin: 4px 0;
-  color: #f2fbff;
-  font-size: .8rem;
-}
-
-.planner-rain-plan__grid p {
-  margin: 0;
-  font-size: .76rem;
-  line-height: 1.45;
-}
-
-.stay-planner__upsell {
-  grid-template-columns: 48px minmax(0,1fr) !important;
-  gap: 15px !important;
-  padding: clamp(18px,3vw,26px) !important;
-  border-radius: 25px !important;
-}
-
-.stay-planner__upsell-icon {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
-  background: linear-gradient(135deg,rgba(242,192,120,.28),rgba(60,179,113,.2));
-}
-
-.stay-planner__upsell-head h3 {
-  margin: 0 0 6px;
-  font-size: 1.08rem;
-}
-
-.stay-planner__upsell-head p {
-  margin: 0;
-  font-size: .84rem;
-}
-
-.stay-planner__upsell-compare,
-.stay-planner__upsell-actions {
-  grid-column: 1/-1;
-}
-
-.stay-planner__upsell-compare {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 10px;
-  align-items: stretch;
-}
-
-.stay-planner__upsell-compare > article {
-  padding: 14px;
-  border: 1px solid rgba(242,192,120,.16);
-  border-radius: 16px;
-  background: rgba(0,0,0,.11);
-}
-
-.stay-planner__upsell-compare > article.is-better {
-  border-color: rgba(143,224,180,.32);
-  background: rgba(60,179,113,.11);
-  box-shadow: inset 0 1px rgba(255,255,255,.06);
-}
-
-.stay-planner__upsell-compare > span {
-  align-self: center;
-  color: #f2c078;
-  font-weight: 950;
-}
-
-.stay-planner__upsell-compare small,
-.stay-planner__upsell-compare strong {
-  display: block;
-}
-
-.stay-planner__upsell-compare small {
-  color: #e9c995;
-  font-size: .67rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.stay-planner__upsell-compare strong {
-  margin: 4px 0 6px;
-  color: #fff;
-  font-size: 1rem;
-}
-
-.stay-planner__upsell-compare p,
-.stay-planner__upsell-compare ul {
-  margin: 0;
-  color: rgba(245,255,248,.72);
-  font-size: .78rem;
-  line-height: 1.45;
-}
-
-.stay-planner__upsell-compare ul {
-  display: grid;
-  gap: 4px;
-  padding-left: 17px;
-}
-
-.stay-planner__upsell-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.stay-planner__upsell-actions button,
-.stay-planner__upsell-actions a {
-  min-height: 42px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 13px;
-  border: 1px solid rgba(242,192,120,.24);
-  border-radius: 13px;
-  color: #102018;
-  background: linear-gradient(135deg,#f7d49e,#f2c078);
-  font: inherit;
-  font-size: .76rem;
-  font-weight: 950;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.stay-planner__upsell-actions button:last-child,
-.stay-planner__upsell-actions a {
-  color: #eafff1;
-  border-color: rgba(143,224,180,.18);
-  background: rgba(255,255,255,.05);
-}
-
-.planner-skeleton {
-  display: grid;
-  gap: 16px;
-}
-
-.planner-skeleton__status {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  color: #bff7d7;
-  font-size: .85rem;
-}
-
-.planner-skeleton__status span {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: #55cf89;
-  box-shadow: 0 0 0 0 rgba(85,207,137,.35);
-  animation: plannerLoadingPulse 1.2s ease-out infinite;
-}
-
-.planner-skeleton__hero,
-.planner-skeleton__card {
-  position: relative;
-  overflow: hidden;
-  display: grid;
-  gap: 12px;
-  padding: 20px;
-  border: 1px solid rgba(143,224,180,.12);
-  border-radius: 23px;
-  background: rgba(255,255,255,.035);
-}
-
-.planner-skeleton__hero::after,
-.planner-skeleton__card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  transform: translateX(-110%);
-  background: linear-gradient(90deg,transparent,rgba(255,255,255,.075),transparent);
-  animation: plannerShimmer 1.25s linear infinite;
-}
-
-.planner-skeleton i {
-  display: block;
-  height: 13px;
-  border-radius: 999px;
-  background: rgba(143,224,180,.1);
-}
-
-.planner-skeleton__hero i:nth-child(1) { width:28%; }
-.planner-skeleton__hero i:nth-child(2) { width:72%; height:28px; }
-.planner-skeleton__hero i:nth-child(3) { width:88%; }
-.planner-skeleton__card { min-height:260px; }
-.planner-skeleton__card > div { display:grid; grid-template-columns:42px 1fr; gap:10px; }
-.planner-skeleton__card > div:last-child { grid-template-columns:repeat(3,1fr); }
-
-.stay-planner__result.is-entering .planner-result-hero {
-  animation: plannerResultIn .52s cubic-bezier(.22,1,.36,1) both;
-}
-
-.stay-planner__result.is-entering [data-planner-day-card] {
-  animation: plannerCardIn .56s cubic-bezier(.22,1,.36,1) both;
-  animation-delay: calc(var(--planner-card-index) * 80ms + 70ms);
-}
-
-.stay-planner__result.is-entering .planner-rain-plan,
-.stay-planner__result.is-entering .stay-planner__upsell {
-  animation: plannerCardIn .58s cubic-bezier(.22,1,.36,1) both;
-  animation-delay: 210ms;
-}
-
-html[data-theme="light"] .planner-result-hero {
-  border-color: #cfe5d6;
-  background: radial-gradient(circle at 92% 10%,rgba(242,192,120,.22),transparent 32%),linear-gradient(135deg,#f3fbf6,#fff);
-  box-shadow: 0 20px 50px rgba(34,82,54,.1);
-}
-
-html[data-theme="light"] .planner-result-hero__subtitle,
-html[data-theme="light"] .stay-planner__plan-heading small,
-html[data-theme="light"] .planner-day-card__eyebrow,
-html[data-theme="light"] .planner-timeline__label,
-html[data-theme="light"] .planner-practical__label,
-html[data-theme="light"] .planner-note strong {
-  color: #147245 !important;
-}
-
-html[data-theme="light"] .planner-result-hero__chips > span,
-html[data-theme="light"] .planner-result-hero__signals > span {
-  color: #173126;
-  border-color: #cfe3d6;
-  background: rgba(255,255,255,.72);
-}
-
-html[data-theme="light"] .stay-planner__plan-heading h3,
-html[data-theme="light"] .planner-day-card__heading h3,
-html[data-theme="light"] .planner-practical__value,
-html[data-theme="light"] .planner-rain-plan h3,
-html[data-theme="light"] .planner-rain-plan__grid strong,
-html[data-theme="light"] .stay-planner__upsell-compare strong {
-  color: #102018;
-}
-
-html[data-theme="light"] .planner-day-card.stay-planner__day-card {
-  border-color: #cfe3d6;
-  background: linear-gradient(90deg,var(--planner-accent) 0 4px,transparent 4px),linear-gradient(145deg,#fff,#f6fbf7);
-  box-shadow: 0 16px 38px rgba(34,82,54,.08);
-}
-
-html[data-theme="light"] .planner-day-card__heading p,
-html[data-theme="light"] .planner-timeline__value,
-html[data-theme="light"] .planner-note p,
-html[data-theme="light"] .planner-note ul,
-html[data-theme="light"] .planner-rain-plan p,
-html[data-theme="light"] .stay-planner__upsell-compare p,
-html[data-theme="light"] .stay-planner__upsell-compare ul {
-  color: #536359 !important;
-}
-
-html[data-theme="light"] .planner-timeline__item,
-html[data-theme="light"] .planner-practical__item,
-html[data-theme="light"] .planner-note,
-html[data-theme="light"] .planner-rain-plan__grid article,
-html[data-theme="light"] .stay-planner__upsell-compare > article {
-  border-color: #d8e8dd;
-  background: #f4faf6;
-}
-
-html[data-theme="light"] .planner-rain-plan {
-  border-color: #cee3ed;
-  background: #f3faff;
-}
-
-html[data-theme="light"] .planner-day-card__actions a,
-html[data-theme="light"] .planner-day-card__actions button {
-  color: #17442d;
-  border-color: #cfe3d6;
-  background: #fff;
-}
-
-@media (min-width:980px) {
-  .stay-planner__layout {
-    grid-template-columns: minmax(330px,390px) minmax(0,1fr);
-    gap: clamp(20px,2.5vw,34px);
-  }
-
-  .stay-planner__panel {
-    position: sticky;
-    top: 104px;
-    grid-template-columns: 1fr;
-    max-height: calc(100vh - 122px);
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(143,224,180,.35) transparent;
-  }
-
-  .stay-planner__control--wide {
-    grid-column: auto;
-  }
-
-  .stay-planner__result {
-    padding: clamp(18px,2vw,28px);
-  }
-}
-
-@media (min-width:1320px) {
-  .stay-planner__layout {
-    grid-template-columns: 410px minmax(0,1fr);
-  }
-}
-
-@media (max-width:979px) {
-  .stay-planner__layout {
-    grid-template-columns: minmax(0,1fr);
-  }
-
-  .stay-planner__panel {
-    position: static;
-    max-height: none;
-    overflow: visible;
-  }
-}
-
-@media (max-width:720px) {
-  .stay-planner__result {
-    padding: 14px;
-  }
-
-  .planner-result-hero,
-  .planner-day-card.stay-planner__day-card,
-  .planner-rain-plan,
-  .stay-planner__upsell {
-    border-radius: 20px !important;
-  }
-
-  .planner-day-card__header {
-    grid-template-columns: 38px 38px minmax(0,1fr) !important;
-  }
-
-  .planner-day-card__number,
-  .planner-day-card__icon {
-    width: 38px;
-    height: 38px;
-  }
-
-  .planner-day-card__intensity {
-    grid-column: 1/-1;
-  }
-
-  .planner-timeline__rail,
-  .planner-practical__grid,
-  .planner-day-card__notes,
-  .planner-rain-plan__grid,
-  .stay-planner__upsell-compare {
-    grid-template-columns: 1fr;
-  }
-
-  .planner-timeline__rail::before {
-    top: 12%;
-    bottom: 12%;
-    left: 28px;
-    right: auto;
-    width: 1px;
-    height: auto;
-    background: linear-gradient(180deg,transparent,rgba(143,224,180,.25),transparent);
-  }
-
-  .planner-timeline__item {
-    min-height: 0;
-  }
-
-  .planner-note--tips {
-    grid-column: auto;
-  }
-
-  .planner-day-card__actions {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .planner-day-card__actions a,
-  .planner-day-card__actions button,
-  .stay-planner__upsell-actions > * {
-    width: 100%;
-  }
-
-  .stay-planner__upsell-compare > span {
-    justify-self: center;
-    transform: rotate(90deg);
-  }
-
-  .stay-planner__upsell-actions {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .planner-result-hero__chips,
-  .planner-result-hero__signals {
-    align-items: stretch;
-  }
-
-  .planner-result-hero__chips > span,
-  .planner-result-hero__signals > span {
-    width: 100%;
-    border-radius: 12px;
-  }
-}
-
 @media (prefers-reduced-motion:reduce) {
-  .stay-planner__result,
-  .stay-planner__result *,
-  .stay-planner__segments button,
-  .stay-planner__attractions button,
-  .stay-planner__scenario-grid button {
-    scroll-behavior: auto !important;
-    animation: none !important;
-    transition-duration: .01ms !important;
-  }
-}
-
-@keyframes plannerSelectionPulse {
-  0%,100% { transform:translateY(-2px) scale(1); }
-  50% { transform:translateY(-2px) scale(1.045); }
-}
-
-@keyframes plannerResultIn {
-  from { opacity:0; transform:translateY(12px); filter:blur(4px); }
-  to { opacity:1; transform:translateY(0); filter:blur(0); }
-}
-
-@keyframes plannerCardIn {
-  from { opacity:0; transform:translateY(18px); }
-  to { opacity:1; transform:translateY(0); }
-}
-
-@keyframes plannerShimmer {
-  to { transform:translateX(110%); }
-}
-
-@keyframes plannerLoadingPulse {
-  70% { box-shadow:0 0 0 10px rgba(85,207,137,0); }
-  100% { box-shadow:0 0 0 0 rgba(85,207,137,0); }
+  .stay-planner *,.stay-planner *::before,.stay-planner *::after,.planner-dialog,.planner-dialog * { scroll-behavior:auto!important; animation:none!important; transition-duration:.01ms!important; transition-delay:0ms!important; }
 }
 </style>

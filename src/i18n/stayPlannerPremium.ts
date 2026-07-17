@@ -1,3 +1,5 @@
+import { getStayPlannerDashboardCopy } from './stayPlannerDashboard';
+
 type PlannerLanguage = 'pl' | 'en' | 'de' | 'it' | 'fr' | 'es' | 'nl' | 'cs' | 'sk' | 'sv';
 
 const languages: PlannerLanguage[] = ['pl','en','de','it','fr','es','nl','cs','sk','sv'];
@@ -72,6 +74,7 @@ const makeCopy = (languageOrValue: PlannerLanguage | any, optionalValue?: any) =
     scenarios: value.scenarioText.map((entry: string[], index: number) => ({ ...scenarioSettings[index], title:entry[0], copy:entry[1] })),
     interestsList: value.interestsList,
     tripList: value.tripList,
+    dashboard: getStayPlannerDashboardCopy(language),
     premium: {
       ...premium,
       distances:['≈ 5 km','≈ 6 km','—','≈ 25 km','0–5 km'],
