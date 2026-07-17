@@ -247,6 +247,11 @@ export function buildPlannerModel(config, rawState = {}) {
       title:d.quickTitle,
       maps:{ label:d.quickMaps, hint:d.quickMapsHint, href:safeLink(config.links?.maps) },
       tram:{ label:d.quickTram, hint:d.quickTramHint, href:safeLink(config.links?.transport) },
+      transport:state.transport === 'tram'
+        ? { icon:'tram', label:d.quickTram, hint:d.quickTramHint, href:safeLink(config.links?.transport) }
+        : state.transport === 'car'
+          ? { icon:'car', label:config.options.car, hint:d.quickMapsHint, href:safeLink(config.links?.maps) }
+          : { icon:'bike', label:d.walkBike, hint:d.quickMapsHint, href:safeLink(config.links?.maps) },
       tickets:{ label:d.quickTickets, hint:d.quickTicketsHint, href:safeLink(config.links?.attractions) },
       campy:{ label:d.quickCampy, hint:d.quickCampyHint, icon:safeLink(config.assets?.campy) },
       save:{ label:d.quickSave, hint:d.quickSaveHint },
@@ -289,7 +294,7 @@ export function buildPlannerModel(config, rawState = {}) {
   };
 }
 
-const renderHero = (hero) => `<header class="planner-hero" data-planner-hero>
+export const renderPlannerHero = (hero) => `<header class="planner-hero" data-planner-hero>
   <img class="planner-hero__image" src="${escapePlannerHtml(hero.image)}" alt="" width="1280" height="853" loading="eager" decoding="async">
   <div class="planner-hero__content">
     <span class="planner-hero__badge">★ ${escapePlannerHtml(hero.eyebrow)}</span>
@@ -300,7 +305,7 @@ const renderHero = (hero) => `<header class="planner-hero" data-planner-hero>
   <div class="planner-hero__brand" aria-hidden="true"><img src="${escapePlannerHtml(hero.brand)}" alt=""><span>⛺</span></div>
 </header>`;
 
-const renderWeather = (weather) => `<section class="planner-weather" data-planner-weather-strip>
+export const renderPlannerWeather = (weather) => `<section class="planner-weather" data-planner-weather-strip>
   <h3>${escapePlannerHtml(weather.title)}</h3>
   ${weather.days.length ? `<div class="planner-weather__days">${weather.days.map((day) => `<article class="planner-weather__day"><span aria-hidden="true">${day.icon}</span><div><strong>${escapePlannerHtml(day.date)}</strong><small>${escapePlannerHtml(day.temperature)}</small></div><div><p>${escapePlannerHtml(day.description)}</p><em>${escapePlannerHtml(weather.rainLabel)}: ${escapePlannerHtml(day.rain)}</em></div></article>`).join('')}</div>` : `<p class="planner-weather__empty">${escapePlannerHtml(weather.message)}</p>`}
   <button class="planner-weather__toggle" type="button" data-planner-weather-details aria-expanded="false"><span>${escapePlannerHtml(weather.details)}</span><b aria-hidden="true">→</b></button>
@@ -323,12 +328,44 @@ const renderDayCard = (day, labels, index) => `<article class="planner-day-card 
 
 const quickItem = (icon, action, attributes = '') => `<${action.href ? 'a' : 'button'} class="planner-quick__item" ${action.href ? `href="${escapePlannerHtml(action.href)}" ${action.href.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : ''}` : 'type="button"'} ${attributes}><span class="planner-quick__icon">${icon}</span><span><strong>${escapePlannerHtml(action.label)}</strong><small>${escapePlannerHtml(action.hint)}</small></span></${action.href ? 'a' : 'button'}>`;
 
+export function renderPlannerDayCards(model) {
+  const { days,labels } = model;
+  const visible = Math.min(3,days.length);
+  return `<section class="planner-days" data-planner-days data-planner-total-days="${days.length}" style="--planner-visible:${visible}">
+    <div class="planner-days__toolbar">
+      <button type="button" data-planner-days-prev aria-label="${escapePlannerHtml(labels.previousDays)}">&larr;</button>
+      <span class="planner-days__indicator" data-planner-days-indicator aria-label="${escapePlannerHtml(labels.daysRange)}"></span>
+      <button type="button" data-planner-days-next aria-label="${escapePlannerHtml(labels.nextDays)}">&rarr;</button>
+    </div>
+    <div class="planner-days__viewport" data-planner-days-viewport><div class="planner-days__track" data-planner-days-track>${days.map((day,index) => renderDayCard(day,labels,index)).join('')}</div></div>
+  </section>`;
+}
+
+export const renderPlannerQuickActions = (quickActions) => {
+  const transportIcons = { tram:'&#128651;', car:'&#128663;', bike:'&#128690;' };
+  return `<section class="planner-quick" aria-label="${escapePlannerHtml(quickActions.title)}">
+    ${quickItem('&#8982;',quickActions.maps)}
+    ${quickItem(transportIcons[quickActions.transport.icon] || transportIcons.tram,quickActions.transport)}
+    ${quickItem('&#127915;',quickActions.tickets)}
+    ${quickItem(`<img src="${escapePlannerHtml(quickActions.campy.icon)}" alt="">`,quickActions.campy,'data-planner-campy')}
+    ${quickItem('&#9635;',quickActions.save,'data-planner-save')}
+    ${quickItem('&#9993;',quickActions.mail,'data-planner-mail')}
+  </section>`;
+};
+
+export const renderPlannerUpsell = (upsell) => `<article class="planner-upsell ${upsell.visible ? '' : 'is-max'}">
+  <img class="planner-upsell__image" src="${escapePlannerHtml(upsell.image)}" alt="" width="1280" height="720" loading="lazy" decoding="async">
+  <div class="planner-upsell__content"><h3>${escapePlannerHtml(upsell.title)}</h3><p>${escapePlannerHtml(upsell.copy)}</p><div class="planner-upsell__benefits">${upsell.benefits.map((benefit,index) => `<span><b aria-hidden="true">${['&#10087;','&#10022;','&#9728;'][index]}</b>${escapePlannerHtml(benefit)}</span>`).join('')}</div><button type="button" data-planner-add-night>&#65291; ${escapePlannerHtml(upsell.addLabel)} &rarr;</button></div>
+</article>`;
+
+export const renderPlannerSummer = (summer) => `<article class="planner-summer"><h3>&#9728; ${escapePlannerHtml(summer.title)}</h3><ul>${summer.bullets.map((item) => `<li>${escapePlannerHtml(item)}</li>`).join('')}</ul><small>${escapePlannerHtml(summer.disclaimer)}</small></article>`;
+
 export function renderPlannerHtml(model) {
   const { hero,weather,days,labels,quickActions,upsell,summer } = model;
   const visible = Math.min(3,days.length);
   return `<div class="planner-result-shell" data-planner-result-shell>
-    ${renderHero(hero)}
-    ${renderWeather(weather)}
+    ${renderPlannerHero(hero)}
+    ${renderPlannerWeather(weather)}
     <section class="planner-days" data-planner-days data-planner-total-days="${days.length}" style="--planner-visible:${visible}">
       <div class="planner-days__toolbar">
         <button type="button" data-planner-days-prev aria-label="${escapePlannerHtml(labels.previousDays)}">←</button>

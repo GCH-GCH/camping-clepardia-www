@@ -4,6 +4,7 @@ export const plannerDashboardLanguages: PlannerDashboardLanguage[] = ['pl', 'en'
 
 export const stayPlannerDashboardCopy = {
   pl: {
+    introTitle: 'Zaplanuj swój pobyt w Krakowie', introCopy: 'Kilka wyborów wystarczy, aby przygotować spersonalizowany plan zwiedzania, transportu, odpoczynku i pogody na Twój termin.', introStart: 'Rozpocznij planowanie', introCampy: 'Zapytaj CAMPY',
     panelTitle: 'Twój plan w kilku krokach', panelSubtitle: 'Ustaw preferencje, a my zajmiemy się resztą.', filtersOpen: 'Pokaż ustawienia planu', filtersClose: 'Ukryj ustawienia planu',
     active: 'Aktywnie', calm: 'Spokojnie', veryCalm: 'Bardzo spokojnie', walkBike: 'Pieszo / rower', tripYes: 'Tak', tripNo: 'Nie', childrenHint: 'Podróżujecie z dziećmi?',
     weatherTitle: 'Pogoda w Krakowie', weatherDetails: 'Szczegóły pogody', weatherLess: 'Mniej szczegółów', weatherEmpty: 'Wybierz datę, aby dodać prognozę do planu.', weatherLater: 'Dokładna prognoza pojawi się bliżej przyjazdu.', weatherUnavailable: 'Prognoza jest chwilowo niedostępna.', weatherRain: 'Opady',
@@ -16,6 +17,7 @@ export const stayPlannerDashboardCopy = {
     chooseDate: 'Wybierz datę', planSavedAt: 'Plan aktualny', nightsDates: 'Noce i termin', groupTile: 'Skład', transportTile: 'Transport', paceTile: 'Tempo',
   },
   en: {
+    introTitle: 'Plan your stay in Krakow', introCopy: 'A few choices are enough to create a personal plan for sightseeing, transport, rest and weather on your dates.', introStart: 'Start planning', introCampy: 'Ask CAMPY',
     panelTitle: 'Your plan in a few steps', panelSubtitle: 'Set your preferences and we will handle the rest.', filtersOpen: 'Show plan settings', filtersClose: 'Hide plan settings',
     active: 'Active', calm: 'Calm', veryCalm: 'Very calm', walkBike: 'Walk / bike', tripYes: 'Yes', tripNo: 'No', childrenHint: 'Travelling with children?',
     weatherTitle: 'Weather in Krakow', weatherDetails: 'Weather details', weatherLess: 'Fewer details', weatherEmpty: 'Choose a date to add the forecast to your plan.', weatherLater: 'The detailed forecast will appear closer to arrival.', weatherUnavailable: 'The forecast is temporarily unavailable.', weatherRain: 'Rain',
@@ -28,6 +30,7 @@ export const stayPlannerDashboardCopy = {
     chooseDate: 'Choose a date', planSavedAt: 'Plan updated', nightsDates: 'Nights and dates', groupTile: 'Group', transportTile: 'Transport', paceTile: 'Pace',
   },
   de: {
+    introTitle: 'Planen Sie Ihren Aufenthalt in Krakau', introCopy: 'Wenige Angaben genügen für einen persönlichen Plan mit Besichtigungen, Verkehr, Erholung und Wetter für Ihren Termin.', introStart: 'Planung starten', introCampy: 'CAMPY fragen',
     panelTitle: 'Ihr Plan in wenigen Schritten', panelSubtitle: 'Präferenzen einstellen, den Rest übernehmen wir.', filtersOpen: 'Planeinstellungen zeigen', filtersClose: 'Planeinstellungen ausblenden',
     active: 'Aktiv', calm: 'Ruhig', veryCalm: 'Sehr ruhig', walkBike: 'Zu Fuß / Fahrrad', tripYes: 'Ja', tripNo: 'Nein', childrenHint: 'Reisen Kinder mit?',
     weatherTitle: 'Wetter in Krakau', weatherDetails: 'Wetterdetails', weatherLess: 'Weniger Details', weatherEmpty: 'Datum wählen, um die Vorhersage zum Plan hinzuzufügen.', weatherLater: 'Die genaue Vorhersage erscheint näher an der Anreise.', weatherUnavailable: 'Die Vorhersage ist vorübergehend nicht verfügbar.', weatherRain: 'Regen',
@@ -40,6 +43,7 @@ export const stayPlannerDashboardCopy = {
     chooseDate: 'Datum wählen', planSavedAt: 'Plan aktualisiert', nightsDates: 'Nächte und Termin', groupTile: 'Gruppe', transportTile: 'Verkehr', paceTile: 'Tempo',
   },
   it: {
+    introTitle: 'Pianifica il tuo soggiorno a Cracovia', introCopy: 'Bastano poche scelte per creare un piano personale con visite, trasporti, riposo e meteo per le tue date.', introStart: 'Inizia a pianificare', introCampy: 'Chiedi a CAMPY',
     panelTitle: 'Il tuo piano in pochi passi', panelSubtitle: 'Imposta le preferenze, al resto pensiamo noi.', filtersOpen: 'Mostra impostazioni', filtersClose: 'Nascondi impostazioni',
     active: 'Attivo', calm: 'Tranquillo', veryCalm: 'Molto tranquillo', walkBike: 'A piedi / bici', tripYes: 'Sì', tripNo: 'No', childrenHint: 'Viaggiate con bambini?',
     weatherTitle: 'Meteo a Cracovia', weatherDetails: 'Dettagli meteo', weatherLess: 'Meno dettagli', weatherEmpty: 'Scegli una data per aggiungere le previsioni al piano.', weatherLater: 'Le previsioni precise appariranno più vicino all’arrivo.', weatherUnavailable: 'Le previsioni non sono momentaneamente disponibili.', weatherRain: 'Pioggia',
@@ -52,6 +56,7 @@ export const stayPlannerDashboardCopy = {
     chooseDate: 'Scegli una data', planSavedAt: 'Piano aggiornato', nightsDates: 'Notti e date', groupTile: 'Gruppo', transportTile: 'Trasporto', paceTile: 'Ritmo',
   },
   fr: {
+    introTitle: 'Planifiez votre séjour à Cracovie', introCopy: 'Quelques choix suffisent pour créer un programme personnalisé de visites, transports, repos et météo selon vos dates.', introStart: 'Commencer à planifier', introCampy: 'Demander à CAMPY',
     panelTitle: 'Votre programme en quelques étapes', panelSubtitle: 'Réglez vos préférences, nous nous occupons du reste.', filtersOpen: 'Afficher les réglages', filtersClose: 'Masquer les réglages',
     active: 'Actif', calm: 'Calme', veryCalm: 'Très calme', walkBike: 'À pied / vélo', tripYes: 'Oui', tripNo: 'Non', childrenHint: 'Vous voyagez avec des enfants ?',
     weatherTitle: 'Météo à Cracovie', weatherDetails: 'Détails météo', weatherLess: 'Moins de détails', weatherEmpty: 'Choisissez une date pour ajouter les prévisions.', weatherLater: 'Les prévisions précises apparaîtront à l’approche de l’arrivée.', weatherUnavailable: 'Les prévisions sont temporairement indisponibles.', weatherRain: 'Pluie',
@@ -64,6 +69,7 @@ export const stayPlannerDashboardCopy = {
     chooseDate: 'Choisir une date', planSavedAt: 'Programme actualisé', nightsDates: 'Nuits et dates', groupTile: 'Groupe', transportTile: 'Transport', paceTile: 'Rythme',
   },
   es: {
+    introTitle: 'Planifica tu estancia en Cracovia', introCopy: 'Unas pocas elecciones bastan para crear un plan personal de visitas, transporte, descanso y tiempo para tus fechas.', introStart: 'Empezar a planificar', introCampy: 'Preguntar a CAMPY',
     panelTitle: 'Tu plan en pocos pasos', panelSubtitle: 'Configura tus preferencias y nosotros hacemos el resto.', filtersOpen: 'Mostrar ajustes', filtersClose: 'Ocultar ajustes',
     active: 'Activo', calm: 'Tranquilo', veryCalm: 'Muy tranquilo', walkBike: 'A pie / bici', tripYes: 'Sí', tripNo: 'No', childrenHint: '¿Viajáis con niños?',
     weatherTitle: 'Tiempo en Cracovia', weatherDetails: 'Detalles del tiempo', weatherLess: 'Menos detalles', weatherEmpty: 'Elige una fecha para añadir la previsión al plan.', weatherLater: 'La previsión detallada aparecerá más cerca de la llegada.', weatherUnavailable: 'La previsión no está disponible temporalmente.', weatherRain: 'Lluvia',
@@ -76,6 +82,7 @@ export const stayPlannerDashboardCopy = {
     chooseDate: 'Elegir fecha', planSavedAt: 'Plan actualizado', nightsDates: 'Noches y fechas', groupTile: 'Grupo', transportTile: 'Transporte', paceTile: 'Ritmo',
   },
   nl: {
+    introTitle: 'Plan je verblijf in Krakau', introCopy: 'Een paar keuzes zijn genoeg voor een persoonlijk plan met bezienswaardigheden, vervoer, rust en weer voor jouw data.', introStart: 'Begin met plannen', introCampy: 'Vraag CAMPY',
     panelTitle: 'Jouw plan in een paar stappen', panelSubtitle: 'Stel je voorkeuren in, wij doen de rest.', filtersOpen: 'Planinstellingen tonen', filtersClose: 'Planinstellingen verbergen',
     active: 'Actief', calm: 'Rustig', veryCalm: 'Heel rustig', walkBike: 'Lopen / fietsen', tripYes: 'Ja', tripNo: 'Nee', childrenHint: 'Reizen er kinderen mee?',
     weatherTitle: 'Weer in Krakau', weatherDetails: 'Weerdetails', weatherLess: 'Minder details', weatherEmpty: 'Kies een datum om de verwachting toe te voegen.', weatherLater: 'De nauwkeurige verwachting verschijnt dichter bij aankomst.', weatherUnavailable: 'De verwachting is tijdelijk niet beschikbaar.', weatherRain: 'Regen',
@@ -88,6 +95,7 @@ export const stayPlannerDashboardCopy = {
     chooseDate: 'Kies een datum', planSavedAt: 'Plan bijgewerkt', nightsDates: 'Nachten en data', groupTile: 'Gezelschap', transportTile: 'Vervoer', paceTile: 'Tempo',
   },
   cs: {
+    introTitle: 'Naplánujte si pobyt v Krakově', introCopy: 'Několik voleb stačí k osobnímu plánu návštěv, dopravy, odpočinku a počasí pro váš termín.', introStart: 'Začít plánovat', introCampy: 'Zeptat se CAMPY',
     panelTitle: 'Váš plán v několika krocích', panelSubtitle: 'Nastavte preference, o zbytek se postaráme.', filtersOpen: 'Zobrazit nastavení', filtersClose: 'Skrýt nastavení',
     active: 'Aktivně', calm: 'Klidně', veryCalm: 'Velmi klidně', walkBike: 'Pěšky / kolo', tripYes: 'Ano', tripNo: 'Ne', childrenHint: 'Cestujete s dětmi?',
     weatherTitle: 'Počasí v Krakově', weatherDetails: 'Podrobnosti počasí', weatherLess: 'Méně podrobností', weatherEmpty: 'Vyberte datum a přidejte předpověď do plánu.', weatherLater: 'Přesná předpověď se zobrazí blíže k příjezdu.', weatherUnavailable: 'Předpověď je dočasně nedostupná.', weatherRain: 'Déšť',
@@ -100,6 +108,7 @@ export const stayPlannerDashboardCopy = {
     chooseDate: 'Vyberte datum', planSavedAt: 'Plán aktualizován', nightsDates: 'Noci a termín', groupTile: 'Skupina', transportTile: 'Doprava', paceTile: 'Tempo',
   },
   sk: {
+    introTitle: 'Naplánujte si pobyt v Krakove', introCopy: 'Niekoľko volieb stačí na osobný plán návštev, dopravy, oddychu a počasia pre váš termín.', introStart: 'Začať plánovať', introCampy: 'Opýtať sa CAMPY',
     panelTitle: 'Váš plán v niekoľkých krokoch', panelSubtitle: 'Nastavte preferencie, o zvyšok sa postaráme.', filtersOpen: 'Zobraziť nastavenia', filtersClose: 'Skryť nastavenia',
     active: 'Aktívne', calm: 'Pokojne', veryCalm: 'Veľmi pokojne', walkBike: 'Pešo / bicykel', tripYes: 'Áno', tripNo: 'Nie', childrenHint: 'Cestujete s deťmi?',
     weatherTitle: 'Počasie v Krakove', weatherDetails: 'Podrobnosti počasia', weatherLess: 'Menej podrobností', weatherEmpty: 'Vyberte dátum a pridajte predpoveď do plánu.', weatherLater: 'Presná predpoveď sa zobrazí bližšie k príchodu.', weatherUnavailable: 'Predpoveď je dočasne nedostupná.', weatherRain: 'Dážď',
@@ -112,6 +121,7 @@ export const stayPlannerDashboardCopy = {
     chooseDate: 'Vyberte dátum', planSavedAt: 'Plán aktualizovaný', nightsDates: 'Noci a termín', groupTile: 'Skupina', transportTile: 'Doprava', paceTile: 'Tempo',
   },
   sv: {
+    introTitle: 'Planera din vistelse i Kraków', introCopy: 'Några få val räcker för en personlig plan med sevärdheter, transport, vila och väder för dina datum.', introStart: 'Börja planera', introCampy: 'Fråga CAMPY',
     panelTitle: 'Din plan i några steg', panelSubtitle: 'Ställ in dina önskemål så sköter vi resten.', filtersOpen: 'Visa planinställningar', filtersClose: 'Dölj planinställningar',
     active: 'Aktivt', calm: 'Lugnt', veryCalm: 'Mycket lugnt', walkBike: 'Till fots / cykel', tripYes: 'Ja', tripNo: 'Nej', childrenHint: 'Reser ni med barn?',
     weatherTitle: 'Väder i Kraków', weatherDetails: 'Väderdetaljer', weatherLess: 'Färre detaljer', weatherEmpty: 'Välj datum för att lägga till prognosen i planen.', weatherLater: 'Den exakta prognosen visas närmare ankomsten.', weatherUnavailable: 'Prognosen är tillfälligt otillgänglig.', weatherRain: 'Regn',

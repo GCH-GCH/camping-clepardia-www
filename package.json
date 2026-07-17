@@ -11,6 +11,7 @@
     "audit:i18n": "node scripts/audit-public-i18n.mjs",
     "audit:structure": "node scripts/audit-public-structure.mjs",
     "test:planner": "node scripts/test-planner.mjs",
+    "test:planner-runtime": "playwright test --config=playwright.config.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "images:webp": "node scripts/convert-raw-to-webp.mjs"
@@ -25,6 +26,7 @@
     "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "sharp": "^0.34.5",
     "typescript": "^6.0.3"
   }

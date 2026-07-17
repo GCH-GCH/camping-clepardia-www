@@ -6,9 +6,14 @@ import {
   buildPlannerModel,
   nextPlannerNights,
   previousPlannerNights,
+  renderPlannerDayCards,
   renderPlannerDayModal,
   renderPlannerHtml,
+  renderPlannerQuickActions,
   renderPlannerSkeleton,
+  renderPlannerSummer,
+  renderPlannerUpsell,
+  renderPlannerWeather,
 } from '../src/lib/stayPlannerEngine.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -36,6 +41,7 @@ const configsByLanguage = new Map(plannerPages.map((page) => [page.config.langua
 assert.deepEqual([...configsByLanguage.keys()].sort(),['cs','de','en','es','fr','it','nl','pl','sk','sv']);
 
 const dashboardKeys = [
+  'introTitle','introCopy','introStart','introCampy',
   'panelTitle','panelSubtitle','filtersOpen','filtersClose','active','calm','veryCalm','walkBike','tripYes','tripNo','childrenHint',
   'weatherTitle','weatherDetails','weatherLess','weatherEmpty','weatherLater','weatherUnavailable','weatherRain','dayDetails','previousDays','nextDays',
   'quickMaps','quickTram','quickTickets','quickCampy','quickSave','quickMail','saved','saveError','mailSubject','mailIntro',
@@ -91,6 +97,11 @@ for (const [scenario,model] of Object.entries(models)) {
   assert.match(html,/data-planner-save/);
   assert.match(html,/data-planner-mail/);
   assert.match(html,/google\.com\/maps/);
+  assert.equal((renderPlannerDayCards(model).match(/data-planner-day-card/g) || []).length,model.days.length,`${scenario}: selektywny renderer dni zgubił kartę.`);
+  assert.match(renderPlannerWeather(model.weather),/data-planner-weather-strip/);
+  assert.equal((renderPlannerQuickActions(model.quickActions).match(/planner-quick__item/g) || []).length,6);
+  assert.match(renderPlannerUpsell(model.upsell),/data-planner-add-night/);
+  assert.match(renderPlannerSummer(model.summer),/planner-summer/);
   assert.doesNotMatch(html,/planner-timeline__|planner-practical__|planner-rain-plan|stay-planner__plan-heading|stay-planner__upsell-compare/,'Stary długi render nadal istnieje.');
 }
 
@@ -161,7 +172,21 @@ assert.match(clientSource,/event\.key === 'Escape'/,'Brak zamykania ESC.');
 assert.match(clientSource,/localStorage\.setItem\('cc-stay-planner-v3'/,'Zapis planu nie działa w localStorage.');
 assert.match(clientSource,/mailto:/,'Akcja e-mail nie jest zaimplementowana.');
 assert.match(clientSource,/planner_add_night/,'Brak eventu planner_add_night.');
-assert.match(componentSource,/grid-template-columns:minmax\(310px,372px\) minmax\(0,1fr\)/,'Brak układu panel + wynik.');
+assert.match(clientSource,/const updateHeroSummary =/,'Brak selektywnego updateHeroSummary.');
+assert.match(clientSource,/const updateWeather =/,'Brak selektywnego updateWeather.');
+assert.match(clientSource,/const updateDayCards =/,'Brak selektywnego updateDayCards.');
+assert.match(clientSource,/const updateQuickActions =/,'Brak selektywnego updateQuickActions.');
+assert.match(clientSource,/const updateUpsell =/,'Brak selektywnego updateUpsell.');
+assert.match(clientSource,/const updateSummerCard =/,'Brak selektywnego updateSummerCard.');
+assert.match(clientSource,/const updatePlannerMeta =/,'Brak selektywnego updatePlannerMeta.');
+assert.equal((clientSource.match(/result\.innerHTML\s*=\s*renderPlannerHtml/g) || []).length,1,'Pełny dashboard jest przepisywany więcej niż raz.');
+assert.doesNotMatch(clientSource,/transitionPlan|result\.classList\.add\('is-exiting'\)/,'Pozostał globalny transition/rerender dashboardu.');
+assert.match(componentSource,/grid-template-columns:minmax\(340px,390px\) minmax\(0,1fr\)/,'Brak czytelnego układu panel + wynik.');
+assert.match(componentSource,/data-planner-start/,'Brak CTA hero do planera.');
+assert.match(componentSource,/data-planner-intro-campy/,'Brak CTA hero do CAMPY.');
+assert.match(componentSource,/data-planner-accordion/,'Brak accordionów panelu.');
+assert.match(componentSource,/\.stay-planner__panel\.can-stick/,'Brak warunkowego sticky panelu.');
+assert.doesNotMatch(componentSource,/\.stay-planner__panel\s*\{[^}]*overflow\s*:\s*(auto|scroll)/s,'Panel nadal ma wewnętrzny scroll.');
 assert.match(componentSource,/@media \(max-width:700px\)/);
 assert.match(componentSource,/@media \(max-width:390px\)/);
 assert.match(componentSource,/@media \(prefers-reduced-motion:reduce\)/);
@@ -173,6 +198,7 @@ for (const page of plannerPages) {
   assert.match(page.html,/data-planner-panel/);
   assert.match(page.html,/data-planner-night-step="-1"/);
   assert.match(page.html,/data-planner-trip-choice/);
+  assert.doesNotMatch(page.html,/data-planner-debug/,'Diagnostyka DEV trafiła do buildu produkcyjnego.');
   assert.doesNotMatch(page.html,/stay-planner__quiz|stay-planner__inspiration|stay-planner__extras/);
 }
 
