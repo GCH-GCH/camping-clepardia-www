@@ -2,6 +2,7 @@
 import { publicAssetExists, siteAssets } from '@/data/assets';
 import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import HeroExperienceCard from '@/components/home/HeroExperienceCard.astro';
+import WeatherCard from '@/components/WeatherCard.astro';
 import { getCurrentYear } from '@/utils/currentYear';
 
 interface Props {
@@ -99,6 +100,7 @@ const heroStyle = [
       <p class="hero__description">
         {heroClient.copy}
       </p>
+      <WeatherCard languageCode={activeLanguage} hero />
       <div class="hero__cta">
         <a href={bookingHref} class="btn btn-primary btn-large hero__button hero__button--primary">{heroClient.primary}</a>
         <a href={pricingHref} class="btn btn-glass btn-large hero__button hero__button--secondary">{heroClient.secondary}</a>

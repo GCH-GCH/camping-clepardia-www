@@ -35,6 +35,7 @@ import { summerCampingCopy } from '../../../shared/summerCamping.js';
       window.__SUMMER_CAMPING_COPY__ = summerCampingCopy;
     </script>
     <script>
+      import { getPublicWeather } from '@/lib/weatherClient.js';
       const app = document.querySelector('[data-stay-app]');
       const copySet = window.__MY_STAY_COPY__ || {};
       const smartCopySet = window.__MY_STAY_SMART_COPY__ || {};
@@ -143,9 +144,7 @@ import { summerCampingCopy } from '../../../shared/summerCamping.js';
         if (!data.arrivalDate || !data.departureDate || stayWeather.key === key) return;
         stayWeather = { key, status:'loading', days:[] };
         try {
-          const response = await fetch(`/api/weather?start=${encodeURIComponent(data.arrivalDate)}&end=${encodeURIComponent(data.departureDate)}&locale=${encodeURIComponent(lang)}`, { headers:{accept:'application/json'} });
-          const payload = await response.json();
-          if (!payload?.ok) throw new Error('unavailable');
+          const payload = await getPublicWeather({ start:data.arrivalDate,end:data.departureDate,locale:lang });
           stayWeather = { key, status:payload.forecastInRange && payload.daily?.length ? 'ready' : 'later', days:Array.isArray(payload.daily) ? payload.daily : [] };
           track('open_weather', { source:'my_stay', forecast:stayWeather.status });
         } catch { stayWeather = { key, status:'unavailable', days:[] }; }

@@ -16,14 +16,15 @@ const requestedLanguage = languageCode ?? pathContext.languageCode;
 const lang = resolveContentLanguage(requestedLanguage) as SupportedLang;
 const explicitLanguage = pathContext.explicitLanguage;
 const copy = getStayPlannerPremiumCopy(lang);
-const dashboard = copy.dashboard;
 const weatherCopy = getWeatherCopy(lang);
+const dashboard = { ...copy.dashboard, weatherUnavailable: weatherCopy.unavailable };
 const bookingHref = getBookingLocalizedPath(requestedLanguage);
 const transportHref = getLocalizedPath(explicitLanguage, 'dojazd');
 const attractionsHref = getLocalizedPath(explicitLanguage, 'atrakcje');
 
 const plannerConfigEncoded = Buffer.from(JSON.stringify({
   ...copy,
+  dashboard,
   dev: import.meta.env.DEV,
   language: lang,
   locale: lang === 'en' ? 'en-GB' : lang === 'cs' ? 'cs-CZ' : lang === 'sv' ? 'sv-SE' : `${lang}-${lang.toUpperCase()}`,

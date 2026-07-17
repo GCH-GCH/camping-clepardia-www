@@ -1,6 +1,7 @@
 const CAMPING_LOCATION = { latitude: 50.1047, longitude: 19.9318 };
 const CURRENT_TTL_MS = 20 * 60 * 1000;
 const DAILY_TTL_MS = 3 * 60 * 60 * 1000;
+const UPSTREAM_TIMEOUT_MS = 6_500;
 const MAX_FORECAST_DAYS = 16;
 const currentCache = new Map();
 const dailyCache = new Map();
@@ -9,6 +10,7 @@ const sendJson = (res, status, body) => {
   res.status(status);
   res.setHeader('content-type', 'application/json; charset=utf-8');
   res.setHeader('cache-control', 'public, max-age=0, s-maxage=1200, stale-while-revalidate=10800');
+  res.setHeader('vercel-cdn-cache-control', 'public, s-maxage=1200, stale-while-revalidate=10800');
   return res.json(body);
 };
 
@@ -50,13 +52,15 @@ const setCached = (cache, key, value, ttl) => {
 
 const fetchOpenMeteo = async (params) => {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 7000);
+  const timeout = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
   try {
     const url = new URL('https://api.open-meteo.com/v1/forecast');
     Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, String(value)));
     const response = await fetch(url, { headers: { accept: 'application/json' }, signal: controller.signal });
     if (!response.ok) throw new Error(`OPEN_METEO_HTTP_${response.status}`);
-    return await response.json();
+    const payload = await response.json();
+    if (!payload || typeof payload !== 'object') throw new Error('OPEN_METEO_INVALID_PAYLOAD');
+    return payload;
   } finally {
     clearTimeout(timeout);
   }
@@ -146,6 +150,7 @@ export default async function handler(req, res) {
       ok: false,
       available: false,
       fallback: true,
+      code: error?.name === 'AbortError' ? 'WEATHER_UPSTREAM_TIMEOUT' : 'WEATHER_PROVIDER_UNAVAILABLE',
       location: { latitude, longitude, name: 'Camping Clepardia · Kraków' },
       current: null,
       daily: [],

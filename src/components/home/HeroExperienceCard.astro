@@ -1,6 +1,7 @@
 ---
 import Icon from '@/components/ui/Icon.astro';
 import { resolveContentLanguage } from '@/i18n/config';
+import { getLocalizedPath } from '@/utils/localizedLinks';
 
 interface Props {
   languageCode?: string;
@@ -261,7 +262,22 @@ const compactCopy = {
     ],
   },
 } as const;
-const copy = compactCopy[requestedLang as keyof typeof compactCopy] ?? baseCopy;
+const summerSlides = {
+  pl: { icon:'sun',kicker:'Spokojny przyjazd w sezonie',title:'Lipiec i sierpień — miejsca campingowe',detail:'W tym okresie nie prowadzimy rezerwacji miejsc campingowych z wyprzedzeniem. Miejsca są dostępne według kolejności przyjazdu. Najlepiej przyjechać około 12:00, kiedy kończy się doba campingowa — zwykle udaje się znaleźć dobre rozwiązanie. Domki nadal można rezerwować.',cta:'Sprawdź zasady',campyCta:'Zapytaj CAMPY',campyPrompt:'Wyjaśnij spokojnie zasady przyjazdu na camping w lipcu i sierpniu.' },
+  en: { icon:'sun',kicker:'A calm summer arrival',title:'July and August — camping pitches',detail:'During this period we do not take advance reservations for camping pitches. Pitches are available in order of arrival. It is best to arrive around 12:00, when the camping day ends — we can usually find a good solution. Bungalows can still be booked.',cta:'Check the rules',campyCta:'Ask CAMPY',campyPrompt:'Please explain the July and August camping arrival rules in a reassuring way.' },
+  de: { icon:'sun',kicker:'Entspannte Anreise im Sommer',title:'Juli und August — Campingplätze',detail:'In diesem Zeitraum reservieren wir Campingplätze nicht im Voraus. Die Plätze werden nach Ankunftsreihenfolge vergeben. Am besten kommen Sie gegen 12:00 Uhr, wenn der Campingtageszeitraum endet — meistens finden wir eine gute Lösung. Bungalows können weiterhin reserviert werden.',cta:'Regeln ansehen',campyCta:'CAMPY fragen',campyPrompt:'Erkläre bitte freundlich die Regeln für die Camping-Anreise im Juli und August.' },
+  it: { icon:'sun',kicker:'Arrivo estivo senza stress',title:'Luglio e agosto — piazzole camping',detail:'In questo periodo non accettiamo prenotazioni anticipate per le piazzole. I posti sono disponibili in ordine di arrivo. È meglio arrivare verso le 12:00, quando termina la giornata di camping — di solito riusciamo a trovare una buona soluzione. I bungalow restano prenotabili.',cta:'Vedi le regole',campyCta:'Chiedi a CAMPY',campyPrompt:'Spiega con calma le regole di arrivo al camping in luglio e agosto.' },
+  fr: { icon:'sun',kicker:'Une arrivée estivale sereine',title:'Juillet et août — emplacements camping',detail:'Pendant cette période, nous ne réservons pas les emplacements à l’avance. Ils sont attribués selon l’ordre d’arrivée. Il est préférable d’arriver vers 12h00, à la fin de la journée de camping — nous trouvons généralement une bonne solution. Les bungalows restent réservables.',cta:'Voir les règles',campyCta:'Demander à CAMPY',campyPrompt:'Explique calmement les règles d’arrivée au camping en juillet et août.' },
+  es: { icon:'sun',kicker:'Una llegada tranquila en verano',title:'Julio y agosto — parcelas de camping',detail:'Durante este periodo no reservamos parcelas con antelación. Las plazas se asignan por orden de llegada. Lo mejor es llegar sobre las 12:00, cuando termina la jornada de camping — normalmente encontramos una buena solución. Los bungalows se pueden seguir reservando.',cta:'Consultar normas',campyCta:'Preguntar a CAMPY',campyPrompt:'Explica de forma tranquila las normas de llegada al camping en julio y agosto.' },
+  nl: { icon:'sun',kicker:'Rustig aankomen in de zomer',title:'Juli en augustus — kampeerplaatsen',detail:'In deze periode reserveren we kampeerplaatsen niet vooraf. Plaatsen zijn beschikbaar op volgorde van aankomst. Kom bij voorkeur rond 12.00 uur, wanneer de campingdag eindigt — meestal vinden we een goede oplossing. Bungalows kunnen wel vooraf worden geboekt.',cta:'Bekijk de regels',campyCta:'Vraag CAMPY',campyPrompt:'Leg de aankomstregels voor de camping in juli en augustus geruststellend uit.' },
+  cs: { icon:'sun',kicker:'Klidný letní příjezd',title:'Červenec a srpen — místa v kempu',detail:'V tomto období nepřijímáme rezervace kempovacích míst předem. Místa jsou dostupná podle pořadí příjezdu. Nejlepší je přijet kolem 12:00, kdy končí kempovací den — obvykle najdeme dobré řešení. Bungalovy lze nadále rezervovat.',cta:'Zobrazit pravidla',campyCta:'Zeptat se CAMPY',campyPrompt:'Vysvětli klidně pravidla příjezdu do kempu v červenci a srpnu.' },
+  sk: { icon:'sun',kicker:'Pokojný letný príchod',title:'Júl a august — miesta v kempe',detail:'V tomto období neprijímame rezervácie kempingových miest vopred. Miesta sú dostupné podľa poradia príchodu. Najlepšie je prísť okolo 12:00, keď sa končí kempingový deň — zvyčajne nájdeme dobré riešenie. Bungalovy je možné naďalej rezervovať.',cta:'Pozrieť pravidlá',campyCta:'Opýtať sa CAMPY',campyPrompt:'Vysvetli pokojne pravidlá príchodu do kempu v júli a auguste.' },
+  sv: { icon:'sun',kicker:'En lugn sommarankomst',title:'Juli och augusti — campingplatser',detail:'Under denna period tar vi inte emot förhandsbokningar av campingplatser. Platserna erbjuds i ankomstordning. Det är bäst att komma omkring kl. 12.00, när campingdygnet slutar — vanligtvis hittar vi en bra lösning. Bungalower kan fortfarande bokas.',cta:'Se reglerna',campyCta:'Fråga CAMPY',campyPrompt:'Förklara lugnt reglerna för ankomst till campingen i juli och augusti.' },
+} as const;
+const sourceCopy = compactCopy[requestedLang as keyof typeof compactCopy] ?? baseCopy;
+const summerSlide = summerSlides[lang as keyof typeof summerSlides] ?? summerSlides.en;
+const rulesHref = getLocalizedPath(lang === 'pl' ? undefined : lang,'camping');
+const copy = { ...sourceCopy,slides:[...sourceCopy.slides,{ ...summerSlide,href:rulesHref,seasonal:true }] };
 ---
 
 <aside class="hero-experience-slider" data-hero-experience-slider aria-label={copy.aria}>
@@ -279,18 +295,25 @@ const copy = compactCopy[requestedLang as keyof typeof compactCopy] ?? baseCopy;
 
   <div class="hero-experience-slider__slides">
     {copy.slides.map((slide, index) => (
-      <article class:list={['hero-experience-slider__slide', index === 0 && 'is-active']} data-hero-slide>
+      <article class:list={['hero-experience-slider__slide', 'seasonal' in slide && slide.seasonal && 'is-seasonal', index === 0 && 'is-active']} data-hero-slide>
         <span class="hero-experience-slider__icon" aria-hidden="true">
           <Icon name={slide.icon} size={30} strokeWidth={1.8} />
         </span>
         <p>{slide.kicker}</p>
         <h2>{slide.title}</h2>
         <small>{slide.detail}</small>
-        {'href' in slide && slide.href && (
-          <a class="hero-experience-slider__link" href={slide.href} target="_blank" rel="noopener noreferrer">
-            {slide.cta}
-          </a>
-        )}
+        <div class="hero-experience-slider__actions">
+          {'href' in slide && slide.href && (
+            <a class="hero-experience-slider__link" href={slide.href} target={'seasonal' in slide && slide.seasonal ? undefined : '_blank'} rel={'seasonal' in slide && slide.seasonal ? undefined : 'noopener noreferrer'}>
+              {slide.cta}
+            </a>
+          )}
+          {'campyCta' in slide && slide.campyCta && (
+            <button class="hero-experience-slider__link" type="button" data-hero-slide-campy data-campy-prompt={slide.campyPrompt} aria-label={slide.campyCta}>
+              {slide.campyCta}
+            </button>
+          )}
+        </div>
       </article>
     ))}
   </div>
@@ -346,7 +369,7 @@ const copy = compactCopy[requestedLang as keyof typeof compactCopy] ?? baseCopy;
 
       const start = () => {
         if (reducedMotion.matches || slides.length < 2 || timer) return;
-        timer = window.setInterval(() => setActive(active + 1), 3600);
+        timer = window.setInterval(() => setActive(active + 1), 7200);
       };
 
       prev?.addEventListener('click', () => {
@@ -368,6 +391,11 @@ const copy = compactCopy[requestedLang as keyof typeof compactCopy] ?? baseCopy;
           start();
         });
       });
+
+      slider.querySelectorAll('[data-hero-slide-campy]').forEach((button) => button.addEventListener('click',() => {
+        const prompt = button instanceof HTMLElement ? String(button.dataset.campyPrompt || '').trim() : '';
+        window.dispatchEvent(new CustomEvent('campy:prompt',{ detail:{ prompt,actionKey:'summerCamping' } }));
+      }));
 
       slider.addEventListener('mouseenter', stop);
       slider.addEventListener('mouseleave', start);
@@ -512,7 +540,7 @@ const copy = compactCopy[requestedLang as keyof typeof compactCopy] ?? baseCopy;
   transform-origin: left center;
   background: linear-gradient(90deg, rgba(143,224,180,.86), #3CB371, rgba(242,192,120,.72));
   box-shadow: 0 0 20px rgba(60,179,113,.42);
-  animation: heroSlideProgress 3.6s linear infinite;
+  animation: heroSlideProgress 7.2s linear infinite;
 }
 
 .hero-experience-slider:hover .hero-experience-slider__progress i {
@@ -525,7 +553,7 @@ const copy = compactCopy[requestedLang as keyof typeof compactCopy] ?? baseCopy;
 
 .hero-experience-slider__slides {
   position: relative;
-  min-height: 300px;
+  min-height: 350px;
 }
 
 .hero-experience-slider__slide {
@@ -596,6 +624,33 @@ const copy = compactCopy[requestedLang as keyof typeof compactCopy] ?? baseCopy;
   line-height: 1.6;
 }
 
+.hero-experience-slider__slide.is-seasonal {
+  gap: 9px;
+}
+
+.hero-experience-slider__slide.is-seasonal .hero-experience-slider__icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+}
+
+.hero-experience-slider__slide.is-seasonal h2 {
+  font-size: clamp(1.35rem, 2.35vw, 1.7rem);
+  line-height: 1.08;
+}
+
+.hero-experience-slider__slide.is-seasonal small {
+  max-width: 370px;
+  font-size: .82rem;
+  line-height: 1.48;
+}
+
+.hero-experience-slider__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .hero-experience-slider__link {
   width: fit-content;
   display: inline-flex;
@@ -615,6 +670,8 @@ const copy = compactCopy[requestedLang as keyof typeof compactCopy] ?? baseCopy;
   letter-spacing: .06em;
   text-decoration: none;
   text-transform: uppercase;
+  font-family: inherit;
+  cursor: pointer;
   transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
 }
 
@@ -717,7 +774,7 @@ const copy = compactCopy[requestedLang as keyof typeof compactCopy] ?? baseCopy;
   }
 
   .hero-experience-slider__slides {
-    min-height: 270px;
+    min-height: 365px;
   }
 
   .hero-experience-slider__slide h2 {
@@ -726,6 +783,11 @@ const copy = compactCopy[requestedLang as keyof typeof compactCopy] ?? baseCopy;
 
   .hero-experience-slider__slide small {
     font-size: .94rem;
+  }
+
+  .hero-experience-slider__slide.is-seasonal small {
+    font-size: .8rem;
+    line-height: 1.43;
   }
 }
 

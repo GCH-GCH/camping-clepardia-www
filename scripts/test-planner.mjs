@@ -163,7 +163,8 @@ assert.match(skeleton,new RegExp(config.premium.loading.replace(/[.*+?^${}()|[\]
 const clientSource = await readFile(path.join(root,'src/scripts/stayPlannerClient.js'),'utf8');
 const componentSource = await readFile(path.join(root,'src/components/pages/StayPlannerPage.astro'),'utf8');
 const engineSource = await readFile(path.join(root,'src/lib/stayPlannerEngine.js'),'utf8');
-assert.ok(clientSource.indexOf("if (!state.startDate)") < clientSource.indexOf('fetch(`/api/weather'),'Pogoda może być pobierana bez daty.');
+assert.ok(clientSource.indexOf("if (!state.startDate)") < clientSource.indexOf('getPublicWeather({ start:state.startDate,end })'),'Pogoda może być pobierana bez daty.');
+assert.match(clientSource,/from '@\/lib\/weatherClient\.js'/,'Planer nie używa wspólnego klienta pogody.');
 assert.match(clientSource,/Math\.min\(3,cards\.length\)/,'Desktop nie ogranicza widoku do 3 dni.');
 assert.match(clientSource,/pointerdown/,'Brak gestu swipe.');
 assert.match(clientSource,/showModal\(\)/,'Modal nie jest otwierany natywnie.');

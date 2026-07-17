@@ -23,7 +23,7 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/api/weather?*',(route) => route.fulfill({
     status:200,
     contentType:'application/json',
-    body:JSON.stringify({ ok:true,forecastInRange:true,daily:Array.from({ length:5 },(_,index) => ({
+    body:JSON.stringify({ ok:true,available:true,forecastInRange:true,daily:Array.from({ length:5 },(_,index) => ({
       date:`2030-07-${String(20 + index).padStart(2,'0')}`,weatherCode:index === 1 ? 63 : 1,temperatureMinC:16,temperatureMaxC:24 - index,rainProbability:index === 1 ? 70 : 15,
     })) }),
   }));
@@ -139,6 +139,22 @@ test('scenariusze A, B i C realnie generują różne plany',async ({ page }) => 
 
   await clickChoice(page,'trip-choice','yes');
   await expect(page.locator('[data-planner-day-card]').filter({ hasText:'Wieliczka' })).toHaveCount(1);
+  noConsoleErrors();
+});
+
+test('aktualizacja zachowuje focus, datę i stan akordeonu',async ({ page }) => {
+  const noConsoleErrors = assertNoConsoleErrors(page);
+  const accordion = page.locator('[data-planner-interests]').locator('xpath=ancestor::details[1]');
+  await accordion.locator('summary').click();
+  await page.locator('[data-planner-date]').fill('2030-07-20');
+  await expect(page.locator('[data-planner-weather-strip]')).toContainText('24°C');
+  const paceButton = page.locator('[data-planner-pace] button[data-value="intensive"]');
+  await paceButton.focus();
+  await paceButton.press('Enter');
+  await expect(accordion).toHaveAttribute('open','');
+  await expect(page.locator('[data-planner-date]')).toHaveValue('2030-07-20');
+  expect(await paceButton.evaluate((button) => document.activeElement === button)).toBe(true);
+  await expect(page.locator('[data-planner-result-shell]')).toHaveAttribute('data-planner-state','pace');
   noConsoleErrors();
 });
 

@@ -11,6 +11,7 @@ import {
   renderPlannerUpsell,
   renderPlannerWeather,
 } from '@/lib/stayPlannerEngine.js';
+import { getPublicWeather } from '@/lib/weatherClient.js';
 
 const wait = (milliseconds) => new Promise((resolve) => window.setTimeout(resolve,milliseconds));
 
@@ -375,8 +376,7 @@ export function initStayPlanner() {
     applyPlannerUpdates(dateChanged ? 'date' : 'weatherData');
     try {
       const end = addDays(state.startDate,plannerNightsNumber(state.nights) - 1);
-      const response = await fetch(`/api/weather?start=${encodeURIComponent(state.startDate)}&end=${encodeURIComponent(end)}`,{ headers:{ accept:'application/json' } });
-      const payload = await response.json();
+      const payload = await getPublicWeather({ start:state.startDate,end });
       if (sequence !== weatherSequence) return;
       if (!payload?.ok) throw new Error('WEATHER_UNAVAILABLE');
       state.weatherDays = Array.isArray(payload.daily) ? payload.daily : [];

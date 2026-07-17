@@ -48,6 +48,20 @@ const polishLeakPhrases = [
   'Pralnia dla gości',
   'Rodzinna część campingu',
   'Camping z lotu ptaka',
+  'Sprawdzamy aktualną pogodę',
+  'Nie udało się teraz pobrać pogody',
+  'Liczba nocy',
+  'Data przyjazdu',
+  'Rozpocznij planowanie',
+  'Zapytaj CAMPY',
+  'Plan przygotowany',
+  'Pogoda',
+  'Wybierz datę',
+  'Przewiń',
+  'Słonecznie',
+  'Deszcz',
+  'Dzisiaj',
+  'Jutro',
 ];
 
 const englishFallbackPhrases = [
@@ -96,6 +110,8 @@ const englishFallbackPhrases = [
 ];
 
 const ambiguousPolishWatch = [
+  'Transport',
+  'Tempo',
   'Zarezerwuj',
   'Dorośli',
   'Dzieci',
