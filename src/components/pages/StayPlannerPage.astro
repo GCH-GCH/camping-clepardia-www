@@ -457,6 +457,101 @@ body.planner-modal-open { overflow:hidden; }
 .stay-planner__toast.is-visible { opacity:1; transform:none; }
 .stay-planner__toast.is-error { border-color:rgba(255,124,124,.48); background:rgba(87,23,23,.96); }
 
+html[data-theme="light"] .stay-planner {
+  --planner-line:rgba(27,126,77,.2);
+  color:#173b2b;
+  background:
+    radial-gradient(circle at 76% 5%,rgba(58,183,111,.12),transparent 32%),
+    radial-gradient(circle at 0 45%,rgba(58,145,111,.08),transparent 28%),
+    linear-gradient(180deg,#f4faf6 0%,#edf7f1 48%,#f8fbf9 100%);
+}
+html[data-theme="light"] .stay-planner__ambient { opacity:.17; }
+html[data-theme="light"] .stay-planner__panel {
+  border-color:#bcdcca;
+  background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(239,249,243,.98));
+  box-shadow:0 22px 54px rgba(29,91,57,.12),inset 0 1px #fff;
+}
+html[data-theme="light"] .stay-planner__panel-head h2,
+html[data-theme="light"] .stay-planner__control h3,
+html[data-theme="light"] .stay-planner__accordion summary { color:#123c29; }
+html[data-theme="light"] .stay-planner__panel-head p,
+html[data-theme="light"] .stay-planner__updated,
+html[data-theme="light"] .stay-planner__children { color:#526b5d; }
+html[data-theme="light"] .stay-planner__panel-head>div>span,
+html[data-theme="light"] .stay-planner__control h3 svg,
+html[data-theme="light"] .stay-planner__accordion summary>span svg { color:#167b47; }
+html[data-theme="light"] .stay-planner__stepper,
+html[data-theme="light"] .stay-planner__children,
+html[data-theme="light"] .stay-planner__accordion { border-color:#b8dcca; background:#f4faf6; }
+html[data-theme="light"] .stay-planner__stepper button { color:#135d39; background:#e4f5ea; }
+html[data-theme="light"] .stay-planner__stepper strong { color:#173b2b; }
+html[data-theme="light"] .stay-planner__stepper strong span { color:#5a7164; }
+html[data-theme="light"] .stay-planner__date input {
+  border-color:#b8dcca;
+  color:#173b2b;
+  color-scheme:light;
+  background:#fff;
+}
+html[data-theme="light"] .stay-planner__chips button,
+html[data-theme="light"] .stay-planner__binary button,
+html[data-theme="light"] .stay-planner__children button { border-color:#c7ded1; color:#315543; background:#fff; }
+html[data-theme="light"] .stay-planner__chips button:hover,
+html[data-theme="light"] .stay-planner__binary button:hover,
+html[data-theme="light"] .stay-planner__children button:hover { color:#123c29; border-color:#56b780; }
+html[data-theme="light"] .stay-planner__chips button.is-active,
+html[data-theme="light"] .stay-planner__binary button.is-active,
+html[data-theme="light"] .stay-planner__children button.is-active { color:#0b482b; border-color:#42ad72; background:linear-gradient(145deg,#ddf5e6,#edf9f1); }
+html[data-theme="light"] .planner-weather { border-color:#bedfcb; background:linear-gradient(135deg,#fff,#edf8f1); box-shadow:0 12px 30px rgba(29,91,57,.08); }
+html[data-theme="light"] .planner-weather>h3 { color:#143d2b; }
+html[data-theme="light"] .planner-weather__day { border-color:#c8e1d2; background:#f6fbf8; }
+html[data-theme="light"] .planner-weather__day strong { color:#173b2b; }
+html[data-theme="light"] .planner-weather__day small,
+html[data-theme="light"] .planner-weather__day p,
+html[data-theme="light"] .planner-weather__empty { color:#536d5e; }
+html[data-theme="light"] .planner-weather__toggle,
+html[data-theme="light"] .planner-days__toolbar button { border-color:#b7dac6; color:#174a30; background:#e9f6ee; }
+html[data-theme="light"] .planner-days__indicator { color:#526b5d; }
+html[data-theme="light"] .planner-day-card { border-color:#c2dfcf; background:linear-gradient(155deg,#fff,#edf8f2); box-shadow:0 13px 32px rgba(27,88,55,.1); }
+html[data-theme="light"] .planner-day-card__head h3,
+html[data-theme="light"] .planner-day-card__time p,
+html[data-theme="light"] .planner-day-card__practical strong { color:#173b2b; }
+html[data-theme="light"] .planner-day-card__time,
+html[data-theme="light"] .planner-day-card__practical>div { border-color:#d0e5d8; background:rgba(255,255,255,.82); }
+html[data-theme="light"] .planner-day-card__practical small { color:#5a7164; }
+html[data-theme="light"] .planner-day-card__details { color:#126c40; }
+html[data-theme="light"] .planner-quick__item { border-color:#c4dfcf; color:#173b2b; background:linear-gradient(145deg,#fff,#edf8f2); }
+html[data-theme="light"] .planner-quick__item:hover { border-color:#58b982; background:#fff; }
+html[data-theme="light"] .planner-quick strong { color:#173b2b; }
+html[data-theme="light"] .planner-quick small { color:#5a7164; }
+html[data-theme="light"] .planner-summer { border-color:#bfddca; background:radial-gradient(circle at 100% 0,rgba(120,211,89,.14),transparent 45%),linear-gradient(145deg,#fff,#edf8f1); }
+html[data-theme="light"] .planner-summer h3 { color:#255626; }
+html[data-theme="light"] .planner-summer li { color:#385a45; }
+html[data-theme="light"] .planner-summer small { color:#63766a; }
+html[data-theme="light"] .planner-skeleton__status { color:#246443; }
+html[data-theme="light"] .planner-skeleton__hero,
+html[data-theme="light"] .planner-skeleton__weather,
+html[data-theme="light"] .planner-skeleton__card { border-color:#c6dfd0; background:#e5f3ea; }
+html[data-theme="light"] .planner-dialog { border-color:#acd5bd; color:#173b2b; background:#f4faf6; }
+html[data-theme="light"] .planner-dialog__topbar,
+html[data-theme="light"] .planner-dialog__footer { border-color:#c4dfcf; background:rgba(247,252,249,.97); }
+html[data-theme="light"] .planner-dialog__topbar>strong { color:#166c40; }
+html[data-theme="light"] .planner-dialog__topbar label { color:#536d5e; }
+html[data-theme="light"] .planner-dialog__topbar select { border-color:#b9d9c6; color:#173b2b; background:#fff; color-scheme:light; }
+html[data-theme="light"] .planner-dialog__close { border-color:#b7d7c4; color:#173b2b; background:#fff; }
+html[data-theme="light"] .planner-dialog__hero::after { background:linear-gradient(0deg,#f4faf6 0%,rgba(6,39,27,.48) 58%,rgba(3,25,17,.14) 100%); }
+html[data-theme="light"] .planner-dialog__section,
+html[data-theme="light"] .planner-dialog__section--schedule { border-color:#c9e1d3; background:#fff; }
+html[data-theme="light"] .planner-dialog__section--planb { border-color:#e4d297; background:#fff9e8; }
+html[data-theme="light"] .planner-dialog__section h3 { color:#176d41; }
+html[data-theme="light"] .planner-dialog__timeline article,
+html[data-theme="light"] .planner-dialog__facts span { border-color:#d1e4d8; color:#355845; background:#f2f8f4; }
+html[data-theme="light"] .planner-dialog__timeline b { color:#173b2b; }
+html[data-theme="light"] .planner-dialog__timeline p,
+html[data-theme="light"] .planner-dialog__section p,
+html[data-theme="light"] .planner-dialog__section li { color:#4d6758; }
+html[data-theme="light"] .planner-dialog__links a { color:#176d41; }
+html[data-theme="light"] .planner-dialog__footer button { border-color:#b9d9c6; color:#174a30; background:#edf7f1; }
+
 @keyframes plannerReveal { from{opacity:0;transform:translateY(16px);filter:blur(5px)} to{opacity:1;transform:none;filter:none} }
 @keyframes plannerCardIn { from{opacity:0;transform:translateX(24px) scale(.98)} to{opacity:1;transform:none} }
 @keyframes plannerChip { 0%{transform:scale(1)} 45%{transform:scale(1.045);box-shadow:0 0 22px rgba(65,226,137,.34)} 100%{transform:scale(1)} }
@@ -500,9 +595,9 @@ body.planner-modal-open { overflow:hidden; }
   .stay-planner__intro { width:calc(100% - 16px); min-height:440px; margin:74px auto 14px; border-radius:20px; }
   .stay-planner__intro>img { object-position:62% center; }
   .stay-planner__intro-shade { background:linear-gradient(0deg,rgba(2,20,14,.96) 0%,rgba(3,27,18,.73) 64%,rgba(3,27,18,.25) 100%); }
-  .stay-planner__intro-content { width:100%; padding:24px 20px; }
+  .stay-planner__intro-content { width:100%; min-width:0; padding:24px 18px; }
   .stay-planner__intro-content>span { margin-bottom:11px; font-size:.76rem; }
-  .stay-planner__intro h1 { font-size:clamp(2rem,10vw,2.65rem); }
+  .stay-planner__intro h1 { max-width:100%; font-size:clamp(1.82rem,8.5vw,2.35rem); line-height:1.07; letter-spacing:-.035em; overflow-wrap:anywhere; }
   .stay-planner__intro p { margin-top:13px; font-size:.94rem; line-height:1.52; }
   .stay-planner__intro-actions { display:grid; grid-template-columns:1fr; gap:9px; margin-top:19px; }
   .stay-planner__intro-actions a,.stay-planner__intro-actions button { width:100%; min-height:48px; font-size:.9rem; }
@@ -511,17 +606,18 @@ body.planner-modal-open { overflow:hidden; }
   .stay-planner__panel button { min-height:44px; }
   .stay-planner__panel-head>button span { display:none; }
   .planner-result-shell { gap:9px; }
-  .planner-hero { min-height:360px; align-items:flex-end; padding:20px; border-radius:19px; }
+  .planner-hero { min-height:370px; align-items:flex-end; padding:19px 16px; border-radius:19px; }
   .planner-hero__content { width:100%; }
-  .planner-hero h2 { max-width:92%; font-size:2rem; }
-  .planner-hero__subtitle { display:-webkit-box; overflow:hidden; font-size:.9rem; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
+  .planner-hero h2 { max-width:100%; font-size:clamp(1.65rem,7.7vw,2.02rem); line-height:1.08; letter-spacing:-.032em; overflow-wrap:anywhere; }
+  .planner-hero__subtitle { display:block; overflow:visible; font-size:.87rem; line-height:1.45; }
   .planner-hero__stats { gap:7px; margin-top:14px; }
   .planner-hero__stat { min-height:58px; grid-template-columns:34px minmax(0,1fr); padding:8px; }
   .planner-hero__stat>span { width:34px; height:34px; font-size:1.1rem; }
   .planner-hero__stat small { font-size:.66rem; }
   .planner-hero__stat strong { font-size:.82rem; }
-  .planner-hero__brand { top:13px; right:10px; width:76px; height:76px; }
-  .planner-hero__brand span { font-size:2.2rem; }
+  .planner-hero__brand { top:11px; right:8px; width:64px; height:64px; opacity:.36; }
+  .planner-hero__brand img { width:48px; height:48px; }
+  .planner-hero__brand span { margin-top:36px; font-size:1.8rem; }
   .planner-weather { grid-template-columns:1fr auto; gap:8px; padding:10px; border-radius:15px; }
   .planner-weather>h3 { grid-column:1; font-size:.88rem; }
   .planner-weather__days,.planner-weather__empty { grid-column:1/-1; grid-row:2; }
@@ -565,6 +661,8 @@ body.planner-modal-open { overflow:hidden; }
   .stay-planner__toast { right:8px; bottom:8px; max-width:calc(100% - 16px); }
 }
 @media (max-width:390px) {
+  .stay-planner__intro h1 { font-size:clamp(1.72rem,8.2vw,2rem); }
+  .planner-hero h2 { font-size:clamp(1.55rem,7.3vw,1.8rem); }
   .stay-planner__chips--three { grid-template-columns:1fr; }
   .stay-planner__chips--four { grid-template-columns:repeat(2,1fr); }
   .planner-day-card { padding:15px; }

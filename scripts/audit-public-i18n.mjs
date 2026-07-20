@@ -69,6 +69,12 @@ const polishLeakPhrases = [
   'Poprzedni dzień',
   'Następny dzień',
   'Prognoza godzinowa',
+  'Planer Premium',
+  'Premium Planner',
+  'Sprawdź prognozę',
+  'Kraków · teraz',
+  'Dopasuj plan do pogody',
+  'Warunki przy campingu',
   'Opady',
   'Wiatr',
 ];

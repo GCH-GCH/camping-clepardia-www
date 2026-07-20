@@ -617,7 +617,7 @@ export const it = {
   home: {
     ...en.home,
     hero: {
-      badge: 'Camping premium a Cracovia',
+      badge: 'Cracovia · camping e bungalow',
       title: 'Camping Clepardia',
       subtitle: 'Camping a Cracovia vicino al centro città',
       copy:

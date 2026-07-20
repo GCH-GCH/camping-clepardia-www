@@ -20,7 +20,7 @@ try {
     return {
       ok:true,status:200,
       json:async () => daily ? {
-        daily:{ time:['2026-07-18','2026-07-19'],weather_code:[1,63],temperature_2m_max:[25,21],temperature_2m_min:[15,14],precipitation_sum:[0,4],rain_sum:[0,3],precipitation_probability_max:[10,80],wind_speed_10m_max:[12,17],wind_gusts_10m_max:[22,31],uv_index_max:[6,3] },
+        daily:{ time:['2026-07-28','2026-07-29'],weather_code:[1,63],temperature_2m_max:[25,21],temperature_2m_min:[15,14],precipitation_sum:[0,4],rain_sum:[0,3],precipitation_probability_max:[10,80],wind_speed_10m_max:[12,17],wind_gusts_10m_max:[22,31],uv_index_max:[6,3] },
       } : hourly ? {
         hourly:{ time:['2026-07-17T12:00','2026-07-17T13:00'],temperature_2m:[24,25],apparent_temperature:[25,26],relative_humidity_2m:[58,55],precipitation_probability:[10,15],precipitation:[0,0],weather_code:[1,1],wind_speed_10m:[9,10] },
       } : {
@@ -30,7 +30,7 @@ try {
   };
 
   const successRes = responseMock();
-  await weatherHandler({ method:'GET',query:{ latitude:'50.1111',longitude:'19.9222',start:'2026-07-18',end:'2026-07-19' } },successRes);
+  await weatherHandler({ method:'GET',query:{ latitude:'50.1111',longitude:'19.9222',start:'2026-07-28',end:'2026-07-29' } },successRes);
   assert.equal(successRes.statusCode,200);
   assert.equal(successRes.body.ok,true);
   assert.equal(successRes.body.available,true);
@@ -89,8 +89,7 @@ try {
   assert.match(card,/data-weather-dialog/);
   assert.match(card,/data-weather-hourly/);
   for (const language of weatherLanguages) assert.match(slider,new RegExp(`\\n  ${language}: \\{`));
-  assert.doesNotMatch(plannerCopy,/2\.0/);
-  assert.match(plannerCopy,/3\.0/);
+  assert.doesNotMatch(plannerCopy,/Planer Premium 3\.0|Premium Planner 3\.0|Premium-Planer 3\.0|Planner Premium 3\.0|Planificateur Premium 3\.0|Planificador Premium 3\.0|Premiumplanerare 3\.0/i);
 
   console.log('Weather test passed: endpoint success/fallback, cache, shared client, timeout, hero, slider and 10 languages.');
 } finally {

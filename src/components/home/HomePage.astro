@@ -13,7 +13,6 @@ import QuickInquiryCTA from '@/components/home/QuickInquiryCTA.astro';
 import HomeFinalCTA from '@/components/home/HomeFinalCTA.astro';
 import ArrivalFlowSection from '@/components/home/ArrivalFlowSection.astro';
 import SiteNoticesSection from '@/components/home/SiteNoticesSection.astro';
-import WeatherCard from '@/components/WeatherCard.astro';
 
 interface Props {
   languageCode?: string;
@@ -24,7 +23,6 @@ const { languageCode } = Astro.props as Props;
 
 <Hero languageCode={languageCode} />
 <SiteNoticesSection languageCode={languageCode} />
-<WeatherCard languageCode={languageCode} compact />
 <HomeStorySection languageCode={languageCode} />
 <WhyClepardia languageCode={languageCode} />
 <CampingSection languageCode={languageCode} />

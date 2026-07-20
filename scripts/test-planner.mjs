@@ -49,7 +49,8 @@ const dashboardKeys = [
   'summerTitle','summerDisclaimer','chooseDate','planSavedAt','nightsDates','groupTile','transportTile','paceTile',
 ];
 for (const [language,config] of configsByLanguage) {
-  assert.equal(config.kicker.includes('3.0'),true,`${language}: brak oznaczenia Premium 3.0.`);
+  assert.ok(config.kicker,`${language}: brak etykiety Planera.`);
+  assert.doesNotMatch(config.kicker,/premium|\b(?:2|3)\.0\b/i,`${language}: techniczne oznaczenie w etykiecie Planera.`);
   dashboardKeys.forEach((key) => assert.ok(config.dashboard[key],`${language}: brak dashboard.${key}.`));
   assert.equal(config.dashboard.upsellBenefits.length,3,`${language}: upsell nie ma 3 korzyści.`);
   assert.equal(config.dashboard.summerBullets.length,3,`${language}: komunikat letni nie ma 3 punktów.`);

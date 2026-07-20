@@ -15,6 +15,7 @@
     "test:planner-modal": "playwright test --config=playwright.config.mjs tests/planner-runtime.spec.mjs --grep \"fullscreen modal\"",
     "test:weather": "node scripts/test-weather.mjs && playwright test --config=playwright.config.mjs tests/weather-runtime.spec.mjs",
     "test:weather-drawer": "playwright test --config=playwright.config.mjs tests/weather-runtime.spec.mjs --grep \"weather drawer\"",
+    "test:themes": "playwright test --config=playwright.config.mjs tests/themes-runtime.spec.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "images:webp": "node scripts/convert-raw-to-webp.mjs"

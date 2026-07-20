@@ -565,7 +565,7 @@ export const en = {
   },
   home: {
     hero: {
-      badge: 'Premium camping in Krakow',
+      badge: 'Krakow · camping & bungalows',
       title: 'Camping Clepardia',
       subtitle: 'Camping in Krakow close to the city centre',
       copy:

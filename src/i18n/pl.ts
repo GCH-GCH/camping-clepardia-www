@@ -341,7 +341,7 @@ export const pl = {
   pages: sitePages,
   home: {
     hero: {
-      badge: 'Premium camping w Krakowie',
+      badge: 'Kraków · camping i domki',
       title: 'Camping Clepardia',
       subtitle: 'Camping w Krakowie blisko centrum miasta',
       copy:

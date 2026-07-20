@@ -3,7 +3,6 @@ import { publicAssetExists, siteAssets } from '@/data/assets';
 import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
 import HeroExperienceCard from '@/components/home/HeroExperienceCard.astro';
 import WeatherCard from '@/components/WeatherCard.astro';
-import { getCurrentYear } from '@/utils/currentYear';
 
 interface Props {
   languageCode?: string;
@@ -16,18 +15,17 @@ const explicitLanguage = pathContext.explicitLanguage ?? (languageCode && langua
 const bookingHref = getBookingLocalizedPath(activeLanguage);
 const pricingHref = getLocalizedPath(explicitLanguage, 'cennik');
 const directionsHref = getLocalizedPath(explicitLanguage, 'dojazd');
-const currentYear = getCurrentYear();
 const heroClientCopy = {
-  pl: { badge: `Premium camping ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Zielony camping i domki w Krakowie', copy: 'Spokojna baza blisko tramwaju, centrum i najważniejszych atrakcji.', primary: 'Wyślij zapytanie', secondary: 'Sprawdź ceny' },
-  en: { badge: `Premium camping ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Green camping and bungalows in Krakow', copy: 'A calm base close to the tram, city centre and major attractions.', primary: 'Send an enquiry', secondary: 'Check prices' },
-  de: { badge: `Premium-Camping ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Grüner Campingplatz und Bungalows in Krakau', copy: 'Eine ruhige Basis nahe Straßenbahn, Zentrum und wichtigen Sehenswürdigkeiten.', primary: 'Anfrage senden', secondary: 'Preise prüfen' },
-  it: { badge: `Camping premium ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Camping verde e bungalow a Cracovia', copy: 'Una base tranquilla vicino al tram, al centro e alle principali attrazioni.', primary: 'Invia una richiesta', secondary: 'Controlla i prezzi' },
-  fr: { badge: `Camping premium ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Camping verdoyant et bungalows à Cracovie', copy: 'Une base calme près du tramway, du centre et des principales attractions.', primary: 'Envoyer une demande', secondary: 'Voir les tarifs' },
-  es: { badge: `Camping premium ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Camping verde y bungalows en Cracovia', copy: 'Una base tranquila cerca del tranvía, el centro y las principales atracciones.', primary: 'Enviar una consulta', secondary: 'Ver precios' },
-  nl: { badge: `Premium camping ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Groene camping en bungalows in Krakau', copy: 'Een rustige uitvalsbasis dicht bij tram, centrum en belangrijke bezienswaardigheden.', primary: 'Stuur een aanvraag', secondary: 'Bekijk prijzen' },
-  cs: { badge: `Prémiový kemp ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Zelený kemp a bungalovy v Krakově', copy: 'Klidná základna blízko tramvaje, centra a hlavních atrakcí.', primary: 'Odeslat dotaz', secondary: 'Zobrazit ceny' },
-  sk: { badge: `Prémiový kemp ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Zelený kemp a bungalovy v Krakove', copy: 'Pokojná základňa blízko električky, centra a hlavných atrakcií.', primary: 'Odoslať dopyt', secondary: 'Zobraziť ceny' },
-  sv: { badge: `Premiumcamping ${currentYear}`, title: 'Camping Clepardia', subtitle: 'Grön camping och bungalower i Kraków', copy: 'En lugn bas nära spårvagn, centrum och de viktigaste sevärdheterna.', primary: 'Skicka en förfrågan', secondary: 'Se priser' },
+  pl: { badge: 'Kraków · camping i domki', title: 'Camping Clepardia', subtitle: 'Zielony camping i domki w Krakowie', copy: 'Spokojna baza blisko tramwaju, centrum i najważniejszych atrakcji.', primary: 'Wyślij zapytanie', secondary: 'Sprawdź ceny' },
+  en: { badge: 'Krakow · camping & bungalows', title: 'Camping Clepardia', subtitle: 'Green camping and bungalows in Krakow', copy: 'A calm base close to the tram, city centre and major attractions.', primary: 'Send an enquiry', secondary: 'Check prices' },
+  de: { badge: 'Krakau · Camping & Bungalows', title: 'Camping Clepardia', subtitle: 'Grüner Campingplatz und Bungalows in Krakau', copy: 'Eine ruhige Basis nahe Straßenbahn, Zentrum und wichtigen Sehenswürdigkeiten.', primary: 'Anfrage senden', secondary: 'Preise prüfen' },
+  it: { badge: 'Cracovia · camping e bungalow', title: 'Camping Clepardia', subtitle: 'Camping verde e bungalow a Cracovia', copy: 'Una base tranquilla vicino al tram, al centro e alle principali attrazioni.', primary: 'Invia una richiesta', secondary: 'Controlla i prezzi' },
+  fr: { badge: 'Cracovie · camping et bungalows', title: 'Camping Clepardia', subtitle: 'Camping verdoyant et bungalows à Cracovie', copy: 'Une base calme près du tramway, du centre et des principales attractions.', primary: 'Envoyer une demande', secondary: 'Voir les tarifs' },
+  es: { badge: 'Cracovia · camping y bungalows', title: 'Camping Clepardia', subtitle: 'Camping verde y bungalows en Cracovia', copy: 'Una base tranquila cerca del tranvía, el centro y las principales atracciones.', primary: 'Enviar una consulta', secondary: 'Ver precios' },
+  nl: { badge: 'Krakau · camping en bungalows', title: 'Camping Clepardia', subtitle: 'Groene camping en bungalows in Krakau', copy: 'Een rustige uitvalsbasis dicht bij tram, centrum en belangrijke bezienswaardigheden.', primary: 'Stuur een aanvraag', secondary: 'Bekijk prijzen' },
+  cs: { badge: 'Krakov · kemp a bungalovy', title: 'Camping Clepardia', subtitle: 'Zelený kemp a bungalovy v Krakově', copy: 'Klidná základna blízko tramvaje, centra a hlavních atrakcí.', primary: 'Odeslat dotaz', secondary: 'Zobrazit ceny' },
+  sk: { badge: 'Krakov · kemp a bungalovy', title: 'Camping Clepardia', subtitle: 'Zelený kemp a bungalovy v Krakove', copy: 'Pokojná základňa blízko električky, centra a hlavných atrakcií.', primary: 'Odoslať dopyt', secondary: 'Zobraziť ceny' },
+  sv: { badge: 'Kraków · camping och bungalower', title: 'Camping Clepardia', subtitle: 'Grön camping och bungalower i Kraków', copy: 'En lugn bas nära spårvagn, centrum och de viktigaste sevärdheterna.', primary: 'Skicka en förfrågan', secondary: 'Se priser' },
 } as const;
 const heroClient = heroClientCopy[activeLanguage as keyof typeof heroClientCopy] ?? heroClientCopy.en;
 const heroBadges = {
@@ -43,12 +41,6 @@ const heroBadges = {
   sv: ['Spårvagn 40 m', 'Centrum ca 14 min', 'Hund 0 PLN', '10A el'],
 } as const;
 const localizedHeroBadges = heroBadges[activeLanguage as keyof typeof heroBadges] ?? heroBadges.en;
-const heroYearBadge = {
-  pl: `Premium camping ${currentYear}`,
-  en: `Premium camping ${currentYear}`,
-  de: `Premium-Camping ${currentYear}`,
-  it: `Camping premium ${currentYear}`,
-}[activeLanguage as 'pl' | 'en' | 'de' | 'it'] ?? heroClient.badge;
 
 const heroDesktopExists = publicAssetExists(siteAssets.hero.desktop);
 const heroMobileExists = publicAssetExists(siteAssets.hero.mobile);
@@ -89,7 +81,7 @@ const heroStyle = [
 
   <div class="hero__wrapper">
     <div class="hero__content">
-      <span class="hero__badge">{heroYearBadge}</span>
+      <span class="hero__badge">{heroClient.badge}</span>
       <h1 class="hero__headline" aria-label="Camping Clepardia">
         <span class="hero__headline-line">{heroClient.title.split(' ')[0] ?? 'Camping'}</span>
         <span class="hero__headline-line">{heroClient.title.split(' ').slice(1).join(' ') || 'Clepardia'}</span>

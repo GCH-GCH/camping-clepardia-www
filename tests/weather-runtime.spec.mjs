@@ -26,16 +26,15 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/api/analytics/event',(route) => route.fulfill({ status:200,contentType:'application/json',body:'{"ok":true}' }));
 });
 
-test('homepage: hero i karta współdzielą pogodę, a slajd sezonowy ma dwa CTA',async ({ page }) => {
+test('homepage: tylko hero korzysta z pogody, a slajd sezonowy ma dwa CTA',async ({ page }) => {
   const errors=[]; let requests=0;
   await page.emulateMedia({ reducedMotion:'reduce' });
   page.on('console',(message) => { if (message.type() === 'error') errors.push(message.text()); });
   page.on('pageerror',(error) => errors.push(error.message));
   await page.route('**/api/weather?*',(route) => { requests += 1; return route.fulfill({ status:200,contentType:'application/json',body:JSON.stringify(weatherPayload) }); });
   await page.goto('/',{ waitUntil:'networkidle' });
-  await expect(page.locator('[data-weather-card]')).toHaveCount(2);
+  await expect(page.locator('[data-weather-card]')).toHaveCount(1);
   await expect(page.locator('.weather-card--hero [data-weather-temperature]')).toHaveText('24°C');
-  await expect(page.locator('.weather-card--compact [data-weather-temperature]')).toHaveText('24°C');
   expect(requests).toBe(1);
   expect(await page.locator('[data-hero-slide]').evaluateAll((slides) => slides.slice(0,5).map((slide) => slide.dataset.heroSlideKind))).toEqual(['welcome','summer','weather','directions','trips']);
 
@@ -56,8 +55,7 @@ test('zawieszony request kończy loading fallbackiem na homepage i w Planerze',a
   test.setTimeout(35_000);
   await page.route('**/api/weather?*',async () => new Promise(() => {}));
   await page.goto('/',{ waitUntil:'domcontentloaded' });
-  await expect(page.locator('.weather-card--compact [data-weather-status]')).toContainText('Nie udało się teraz pobrać pogody',{ timeout:11_000 });
-  await expect(page.locator('.weather-card--hero [data-weather-status]')).toContainText('Prognoza chwilowo niedostępna');
+  await expect(page.locator('.weather-card--hero [data-weather-status]')).toContainText('Prognoza chwilowo niedostępna',{ timeout:11_000 });
   await expect(page.locator('[data-weather-facts]:visible')).toHaveCount(0);
 
   await page.goto('/planer-pobytu',{ waitUntil:'domcontentloaded' });

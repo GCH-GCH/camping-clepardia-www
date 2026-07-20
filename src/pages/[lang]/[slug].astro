@@ -32,47 +32,47 @@ export function getStaticPaths() {
 const { language, page, isPlanner } = Astro.props;
 const plannerSeo = {
   pl: {
-    title: 'Planer Premium 3.0 - Camping Clepardia Kraków',
+    title: 'Planer pobytu - Camping Clepardia Kraków',
     description: 'Mini planer pobytu Camping Clepardia: wybierz tempo, liczbę nocy i atrakcje, a strona podpowie realny plan zwiedzania Krakowa i Małopolski.',
   },
   en: {
-    title: 'Premium Stay Planner 3.0 - Camping Clepardia Krakow',
+    title: 'Stay planner - Camping Clepardia Krakow',
     description: 'Camping Clepardia mini stay planner: choose pace, nights and attractions to shape a realistic Krakow and Lesser Poland itinerary.',
   },
   de: {
-    title: 'Premium-Aufenthaltsplaner 3.0 - Camping Clepardia Krakau',
+    title: 'Aufenthaltsplaner - Camping Clepardia Krakau',
     description: 'Mini-Aufenthaltsplaner von Camping Clepardia: Tempo, Nächte und Attraktionen wählen und einen realistischen Plan für Krakau erstellen.',
   },
   it: {
-    title: 'Planner soggiorno Premium 3.0 - Camping Clepardia Cracovia',
+    title: 'Pianificatore di soggiorno - Camping Clepardia Cracovia',
     description: 'Mini planner di Camping Clepardia: scegli ritmo, notti e attrazioni per preparare un programma realistico a Cracovia.',
   },
   fr: {
-    title: 'Planificateur de séjour Premium 3.0 - Camping Clepardia Cracovie',
+    title: 'Planificateur de séjour - Camping Clepardia Cracovie',
     description: 'Mini planificateur Camping Clepardia : choisissez le rythme, les nuits et les attractions pour organiser Cracovie et la Petite-Pologne.',
   },
   es: {
-    title: 'Planificador de estancia Premium 3.0 - Camping Clepardia Cracovia',
+    title: 'Planificador de estancia - Camping Clepardia Cracovia',
     description: 'Mini planificador de Camping Clepardia: elige ritmo, noches y atracciones para preparar un plan realista en Cracovia.',
   },
   nl: {
-    title: 'Premium verblijfsplanner 3.0 - Camping Clepardia Krakau',
+    title: 'Verblijfsplanner - Camping Clepardia Krakau',
     description: 'Mini verblijfsplanner van Camping Clepardia: kies tempo, nachten en bezienswaardigheden voor een realistisch plan in Krakau.',
   },
   cs: {
-    title: 'Prémiový plánovač pobytu 3.0 - Camping Clepardia Krakov',
+    title: 'Plánovač pobytu - Camping Clepardia Krakov',
     description: 'Mini plánovač Camping Clepardia: vyberte tempo, počet nocí a atrakce pro reálný plán Krakova a Malopolska.',
   },
   sk: {
-    title: 'Prémiový plánovač pobytu 3.0 - Camping Clepardia Krakov',
+    title: 'Plánovač pobytu - Camping Clepardia Krakov',
     description: 'Mini plánovač Camping Clepardia: vyberte tempo, počet nocí a atrakcie pre reálny plán Krakova a Malopoľska.',
   },
   sv: {
-    title: 'Premiumvistelseplanerare 3.0 - Camping Clepardia Kraków',
+    title: 'Vistelseplanerare - Camping Clepardia Kraków',
     description: 'Mini planerare för Camping Clepardia: välj tempo, nätter och sevärdheter för en realistisk plan i Kraków.',
   },
 }[language.code] ?? {
-  title: 'Premium Stay Planner 3.0 - Camping Clepardia Krakow',
+  title: 'Stay planner - Camping Clepardia Krakow',
   description: 'Camping Clepardia mini stay planner.',
 };
 const compactPage = !isPlanner && page ? getCorePage(language.code, page.slug) : undefined;
