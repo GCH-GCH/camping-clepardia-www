@@ -7,6 +7,10 @@ import {
 } from './_lib/inbox.js';
 import { createStayPanelForInquiry } from './_lib/stay.js';
 import analyticsEventHandler from './_handlers/analytics/event.js';
+import analyticsDashboardHandler from './_handlers/analytics/dashboard.js';
+import analyticsFeedbackHandler from './_handlers/analytics/feedback.js';
+import analyticsRecommendationsHandler from './_handlers/analytics/recommendations.js';
+import analyticsReportHandler from './_handlers/analytics/report.js';
 import analyticsStatusHandler from './_handlers/analytics/status.js';
 import stayAdminHandler from './_handlers/stay/admin.js';
 import stayPanelHandler from './_handlers/stay/panel.js';
@@ -1731,6 +1735,10 @@ const acceptedReservationResponse = (req, inquiry, reception = {}, mail = {}, in
 export default async function handler(req, res) {
   const routedHandler = new Map([
     ['analytics-event', analyticsEventHandler],
+    ['analytics-dashboard', analyticsDashboardHandler],
+    ['analytics-feedback', analyticsFeedbackHandler],
+    ['analytics-recommendations', analyticsRecommendationsHandler],
+    ['analytics-report', analyticsReportHandler],
     ['analytics-status', analyticsStatusHandler],
     ['stay-admin', stayAdminHandler],
     ['stay-panel', stayPanelHandler],

@@ -73,16 +73,22 @@ for (const [name,handler] of [['dashboard',dashboardHandler],['feedback',feedbac
   assert.equal(res.payload?.code,'UNAUTHORIZED',`${name} bez kodu zwraca JSON UNAUTHORIZED`);
 }
 
-const [siteAnalytics,router,migration,homepage] = await Promise.all([
+const [siteAnalytics,router,reservationApi,vercelConfig,migration,homepage] = await Promise.all([
   readFile(new URL('../src/components/SiteAnalytics.astro',import.meta.url),'utf8'),
   readFile(new URL('../api/[...path].js',import.meta.url),'utf8'),
+  readFile(new URL('../api/reservation.js',import.meta.url),'utf8'),
+  readFile(new URL('../vercel.json',import.meta.url),'utf8'),
   readFile(new URL('../supabase/migrations/20260720143000_site_analytics_intelligence.sql',import.meta.url),'utf8'),
   readFile(new URL('../src/components/home/HomeAttractionsTours.astro',import.meta.url),'utf8'),
 ]);
 assert.match(siteAnalytics,/fetch\('\/api\/analytics\/event'/,'publiczny tracking używa własnego endpointu');
 assert.match(siteAnalytics,/\.catch\(\(\) => \{\}\)/,'awaria eventu nie blokuje strony');
 assert.doesNotMatch(siteAnalytics,/document\.cookie|localStorage\.setItem\([^,]*analytics/i,'brak marketingowego cookie/localStorage');
-for (const route of ['analytics/dashboard','analytics/feedback','analytics/recommendations','analytics/report']) assert.ok(router.includes(route),`router zawiera ${route}`);
+for (const route of ['dashboard','feedback','recommendations','report']) {
+  assert.ok(router.includes(`analytics/${route}`),`router catch-all zawiera analytics/${route}`);
+  assert.ok(reservationApi.includes(`analytics-${route}`),`API reservation dispatch zawiera analytics-${route}`);
+  assert.ok(vercelConfig.includes(`/api/analytics/${route}`),`Vercel rewrite zawiera /api/analytics/${route}`);
+}
 const migrationSql = migration.split('\n').filter((line)=>!line.trim().startsWith('--')).join('\n');
 assert.doesNotMatch(migrationSql,/\b(drop|delete|truncate)\b/i,'migracja nie zawiera operacji destrukcyjnych');
 for (const column of ['country_code','referrer_domain','session_id','element_id','category']) assert.ok(migration.includes(column),`migracja zawiera ${column}`);

@@ -13,6 +13,22 @@
       "destination": "/api/reservation?ccRoute=analytics-event"
     },
     {
+      "source": "/api/analytics/dashboard",
+      "destination": "/api/reservation?ccRoute=analytics-dashboard"
+    },
+    {
+      "source": "/api/analytics/feedback",
+      "destination": "/api/reservation?ccRoute=analytics-feedback"
+    },
+    {
+      "source": "/api/analytics/recommendations",
+      "destination": "/api/reservation?ccRoute=analytics-recommendations"
+    },
+    {
+      "source": "/api/analytics/report",
+      "destination": "/api/reservation?ccRoute=analytics-report"
+    },
+    {
       "source": "/api/analytics/status",
       "destination": "/api/reservation?ccRoute=analytics-status"
     },
