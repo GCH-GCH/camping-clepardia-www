@@ -1675,8 +1675,15 @@ const quickActionGroups = preferredQuickKeys
         root.classList.remove('has-welcome');
         updateMobileAvailability();
       };
+      const heroSliderBlocksWelcome = () => {
+        if (window.innerWidth <= 640) return false;
+        const heroSlider = document.querySelector('[data-hero-experience-slider]');
+        if (!(heroSlider instanceof HTMLElement)) return false;
+        const sliderRect = heroSlider.getBoundingClientRect();
+        return sliderRect.bottom > 0 && sliderRect.top < window.innerHeight;
+      };
       const showWelcome = () => {
-        if (open) {
+        if (open || heroSliderBlocksWelcome()) {
           welcomeTimer = window.setTimeout(showWelcome, 900);
           return;
         }

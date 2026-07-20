@@ -119,6 +119,35 @@ test('weather drawer desktop: pełna prognoza, dostępność i powrót focusu',a
   expect(await trigger.evaluate((element) => document.activeElement === element)).toBe(true);
 });
 
+test('weather drawer hero: chmurka CAMPY nie zaslania kontrolek slidera na desktopie',async ({ page }) => {
+  await page.setViewportSize({ width:1366,height:768 });
+  await page.route('**/api/weather?*',(route) => route.fulfill({ status:200,contentType:'application/json',body:JSON.stringify(weatherPayload) }));
+  await page.goto('/?campyBubble=1',{ waitUntil:'domcontentloaded' });
+  await expect(page.locator('.page-loader')).toBeHidden({ timeout:10_000 });
+  await page.waitForTimeout(1_700);
+
+  const welcome = page.locator('[data-chat-welcome]');
+  const next = page.locator('[data-hero-slide-next]');
+  await expect(welcome).toBeHidden();
+  const nextBox = await next.boundingBox();
+  expect(nextBox).not.toBeNull();
+  const nextReachable = await next.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return document.elementFromPoint(rect.left + rect.width / 2,rect.top + rect.height / 2)?.closest('[data-hero-slide-next]') === element;
+  });
+  expect(nextReachable).toBe(true);
+  await page.mouse.click(nextBox.x + nextBox.width / 2,nextBox.y + nextBox.height / 2);
+  await expect(page.locator('[data-hero-slide-kind="summer"]')).toHaveClass(/is-active/);
+
+  await page.evaluate(() => {
+    const slider = document.querySelector('[data-hero-experience-slider]');
+    if (!(slider instanceof HTMLElement)) return;
+    const rect = slider.getBoundingClientRect();
+    window.scrollTo({ top:window.scrollY + rect.bottom + 50,behavior:'instant' });
+  });
+  await expect(welcome).toBeVisible({ timeout:3_000 });
+});
+
 test('weather drawer fallback: bez nieskończonego loadingu i z działającym CTA Planera',async ({ page }) => {
   await page.route('**/api/weather?*',(route) => route.fulfill({ status:200,contentType:'application/json',body:'{"ok":false,"available":false,"fallback":true,"fallbackReason":"provider"}' }));
   await page.goto('/',{ waitUntil:'domcontentloaded' });
