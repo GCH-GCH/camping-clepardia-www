@@ -45,6 +45,7 @@ export function initStayPlanner() {
   let activeModalDay = 1;
 
   const track = (eventType,metadata = {}) => window.dispatchEvent(new CustomEvent('cc:analytics',{ detail:{ eventType,metadata } }));
+  track('open_planner',{ source:'stay_planner' });
 
   const setPressed = (buttons,activeButton) => buttons.forEach((button) => {
     const active = button === activeButton;
@@ -304,6 +305,7 @@ export function initStayPlanner() {
       state[key] = button.dataset.value || state[key];
       pulseSelection(button);
       onChange?.(button);
+      track('planner_option_change',{ option:key,value:state[key] });
       applyPlannerUpdates(key);
     }));
   };
@@ -337,14 +339,22 @@ export function initStayPlanner() {
     button.setAttribute('aria-pressed',String(button.classList.contains('is-active')));
     if (button.classList.contains('is-active')) state.interests.add(value); else state.interests.delete(value);
     pulseSelection(button);
+    track('planner_option_change',{ option:'interest',value,selected:button.classList.contains('is-active') });
     applyPlannerUpdates('interests');
   }));
 
   const destinationButtons = [...root.querySelectorAll('[data-planner-trips] button')];
+  const auschwitzNotice = root.querySelector('[data-planner-auschwitz]');
+  const syncAuschwitzNotice = () => {
+    if (auschwitzNotice instanceof HTMLElement) auschwitzNotice.hidden = state.trip !== 'auschwitz';
+  };
   destinationButtons.forEach((button) => button.addEventListener('click',() => {
     setPressed(destinationButtons,button);
     state.trip = button.dataset.value || 'wieliczka';
     pulseSelection(button);
+    syncAuschwitzNotice();
+    track('planner_option_change',{ option:'trip',value:state.trip });
+    track('attraction_click',{ category:state.trip,source:'planner_option' });
     applyPlannerUpdates('trip');
   }));
 
@@ -356,6 +366,8 @@ export function initStayPlanner() {
     if (destinations instanceof HTMLElement) destinations.hidden = !enabled;
     state.trip = enabled ? (destinationButtons.find((item) => item.classList.contains('is-active'))?.dataset.value || 'wieliczka') : 'none';
     pulseSelection(button);
+    syncAuschwitzNotice();
+    track('planner_option_change',{ option:'trip_enabled',value:enabled ? 'yes' : 'no',trip:state.trip });
     applyPlannerUpdates('trip');
   }));
 
@@ -392,7 +404,7 @@ export function initStayPlanner() {
   const dateInput = root.querySelector('[data-planner-date]');
   if (dateInput instanceof HTMLInputElement) {
     dateInput.min = new Date().toISOString().slice(0,10);
-    dateInput.addEventListener('change',() => { state.startDate = dateInput.value; loadWeather(true); });
+    dateInput.addEventListener('change',() => { state.startDate = dateInput.value; track('planner_option_change',{ option:'date',value:state.startDate ? 'selected' : 'empty' }); loadWeather(true); });
   }
 
   const panel = root.querySelector('[data-planner-panel]');

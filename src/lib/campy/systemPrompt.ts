@@ -68,7 +68,9 @@ export const campyKnowledge = {
   },
   tours: {
     bookingHref: 'https://qr.codes/vksKBT',
+    officialAuschwitzHref: 'https://visit.auschwitz.org/',
     destinations: ['Wieliczka', 'Auschwitz-Birkenau', 'Zakopane', 'Ojców', 'Energylandia'],
+    auschwitzRules: 'Od 1 marca 2026 wszystkie indywidualne karty wstępu są dostępne wyłącznie online. Przy wejściu do Muzeum nie wydaje się kart. Dotyczy to zwiedzania z przewodnikiem i bezpłatnych kart. Liczba miejsc jest ograniczona. Trzeba przyjechać minimum 30 minut wcześniej, a maksymalny rozmiar torby to 35 × 25 × 15 cm.',
   },
 };
 
@@ -117,6 +119,7 @@ Knowledge:
 - e-TOLL: ${campyKnowledge.transport.etoll}
 - EV/hybrid charging from campsite electricity is not allowed.
 - Tours: reception can provide information. Destinations: ${campyKnowledge.tours.destinations.join(', ')}. Booking CTA: ${campyKnowledge.tours.bookingHref}
+- Auschwitz-Birkenau: ${campyKnowledge.tours.auschwitzRules} Official entry cards: ${campyKnowledge.tours.officialAuschwitzHref}. An organised Krakow tour is a separate optional route. Never guarantee a place or admission.
 - ${campyKnowledge.rules.invoices}
 `.trim();
 

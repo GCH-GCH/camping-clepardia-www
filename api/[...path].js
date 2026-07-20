@@ -1,4 +1,8 @@
 import analyticsEventHandler from './_handlers/analytics/event.js';
+import analyticsDashboardHandler from './_handlers/analytics/dashboard.js';
+import analyticsFeedbackHandler from './_handlers/analytics/feedback.js';
+import analyticsRecommendationsHandler from './_handlers/analytics/recommendations.js';
+import analyticsReportHandler from './_handlers/analytics/report.js';
 import analyticsStatusHandler from './_handlers/analytics/status.js';
 import campStaysHandler from './_handlers/camp/stays.js';
 import clientsDetailHandler from './_handlers/clients/detail.js';
@@ -15,6 +19,10 @@ import weatherHandler from './_handlers/weather.js';
 
 const handlers = new Map([
   ['analytics/event', analyticsEventHandler],
+  ['analytics/dashboard', analyticsDashboardHandler],
+  ['analytics/feedback', analyticsFeedbackHandler],
+  ['analytics/recommendations', analyticsRecommendationsHandler],
+  ['analytics/report', analyticsReportHandler],
   ['analytics/status', analyticsStatusHandler],
   ['camp/stays', campStaysHandler],
   ['clients/detail', clientsDetailHandler],

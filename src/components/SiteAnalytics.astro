@@ -1,11 +1,22 @@
 <script>
   const supportedEvents = new Set([
-    'page_view', 'language_change', 'click_cta', 'open_campy', 'campy_question',
-    'start_booking_form', 'submit_booking_form', 'feedback_submit', 'filter_used',
-    'category_click', 'open_gallery', 'tour_cta_click', 'maps_cta_click', 'tram_info_click',
-    'open_weather', 'weather_cta_click', 'planner_generate', 'planner_add_night',
-    'planner_change_nights', 'open_summer_notice', 'my_stay_checklist_click', 'smart_concierge_action',
+    'page_view','language_change','click_cta','click_nav','open_campy','campy_question','campy_question_category',
+    'start_booking_form','booking_step_view','booking_field_error','booking_abandon','submit_booking_form','feedback_submit',
+    'filter_used','category_click','open_gallery','attraction_click','tour_click','tour_cta_click','maps_cta_click','tram_info_click',
+    'open_weather','weather_cta_click','open_planner','planner_option_change','planner_generate','planner_add_night',
+    'planner_change_nights','open_summer_notice','my_stay_checklist_click','smart_concierge_action','slider_click',
   ]);
+
+  const sessionId = (() => {
+    const key = 'cc-anonymous-session';
+    try {
+      const current = sessionStorage.getItem(key);
+      if (current && /^[a-z0-9-]{16,80}$/i.test(current)) return current;
+      const next = globalThis.crypto?.randomUUID?.() || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,14)}`;
+      sessionStorage.setItem(key,next);
+      return next;
+    } catch { return ''; }
+  })();
 
   const cleanPath = (value = location.pathname) => {
     const path = String(value || '/').split(/[?#]/)[0].replace(/^\/stay\/[^/]+/i, '/stay/:token');
@@ -24,7 +35,7 @@
     if (!document.referrer) return '';
     try {
       const url = new URL(document.referrer);
-      return `${url.origin}${cleanPath(url.pathname)}`;
+      return url.hostname.replace(/^www\./,'').slice(0,160);
     } catch { return ''; }
   };
   const safeLabel = (value) => String(value || '')
@@ -48,6 +59,7 @@
       countryGuess: countryGuess(),
       referrer: referrer(),
       deviceType: deviceType(),
+      sessionId,
       metadata: safeMetadata(metadata),
     });
     fetch('/api/analytics/event', {
@@ -59,22 +71,26 @@
   };
   const topicFor = (value) => {
     const text = String(value || '').toLowerCase();
+    if (/auschwitz|birkenau|oswiec/.test(text)) return 'Auschwitz';
     if (/prąd|prad|electric|strom|10a|ev/.test(text)) return 'prąd_10a_ev';
     if (/lip|sier|july|august|juli|agosto|summer/.test(text)) return 'lipiec_sierpień';
     if (/dojazd|maps|tram|center|centre|centrum|route/.test(text)) return 'dojazd';
-    if (/wyciecz|tour|wielicz|auschwitz|zakop|energy/.test(text)) return 'wycieczki';
+    if (/wyciecz|tour|wielicz|zakop|energy/.test(text)) return 'wycieczki';
     if (/domek|bungalow|cabin/.test(text)) return 'domki';
-    if (/pies|dog|hund|chien|perro|cane/.test(text)) return 'pies';
+    if (/pies|dog|hund|chien|perro|cane/.test(text)) return 'zwierzęta';
     if (/cena|price|cost|preis|tarif/.test(text)) return 'cennik';
     return 'inne';
   };
 
   window.addEventListener('cc:analytics', (event) => {
     const detail = event instanceof CustomEvent && event.detail && typeof event.detail === 'object' ? event.detail : {};
+    if (detail.eventType === 'submit_booking_form') bookingSubmitted = true;
     track(detail.eventType, detail.metadata || {});
   });
 
   let bookingStarted = false;
+  let bookingSubmitted = false;
+  let bookingAbandonSent = false;
   const recordBookingStart = (event) => {
     if (!bookingStarted && event.target instanceof Element && event.target.closest('[data-reservation-mini-game]')) {
       bookingStarted = true;
@@ -87,7 +103,7 @@
   document.addEventListener('submit', (event) => {
     if (!(event.target instanceof Element) || !event.target.matches('[data-chat-form]')) return;
     const input = event.target.querySelector('[data-chat-input]');
-    track('campy_question', { topic: topicFor(input instanceof HTMLInputElement ? input.value : ''), source: 'campy_form' });
+    track('campy_question_category', { topic: topicFor(input instanceof HTMLInputElement ? input.value : ''), source: 'campy_form' });
   });
 
   document.addEventListener('click', (event) => {
@@ -107,6 +123,22 @@
       track('language_change', { label: code, source: 'navbar' });
     }
 
+    const explicitEvent = target.dataset.analyticsEvent;
+    if (explicitEvent && supportedEvents.has(explicitEvent)) {
+      track(explicitEvent, {
+        category: target.dataset.analyticsCategory || '',
+        elementId: target.dataset.analyticsElement || target.id || '',
+        label,
+      });
+    }
+
+    if (target.closest('.main-navbar, .main-navbar-mobile') && target instanceof HTMLAnchorElement) {
+      track('click_nav',{ elementId:target.dataset.analyticsElement || cleanPath(target.pathname),label });
+    }
+    if (target.matches('[data-slider-next], [data-slider-prev], [data-hero-dot], [data-hero-slide]')) {
+      track('slider_click',{ elementId:target.dataset.action || target.getAttribute('aria-label') || 'hero_slider' });
+    }
+
     if (target instanceof HTMLAnchorElement) {
       const href = target.href || '';
       if (/qr\.codes\/vksKBT/i.test(href)) track('tour_cta_click', { label: label || 'tour_cta', source: cleanPath() });
@@ -119,6 +151,14 @@
       track('click_cta', { label, eventTarget: target.dataset.analyticsTarget || href || target.dataset.action || 'button' });
     }
   });
+
+  const recordAbandon = () => {
+    if (!bookingStarted || bookingSubmitted || bookingAbandonSent) return;
+    bookingAbandonSent = true;
+    track('booking_abandon',{ source:'page_hidden' });
+  };
+  document.addEventListener('visibilitychange',()=>{ if (document.visibilityState === 'hidden') recordAbandon(); });
+  window.addEventListener('pagehide',recordAbandon);
 
   track('page_view', { source: 'public_site' });
 </script>

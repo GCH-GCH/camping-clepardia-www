@@ -18,7 +18,10 @@ export default async function handler(req, res) {
     }
 
     const payload = await readJsonBody(req);
-    const event = await saveSiteEvent(payload);
+    const countryHeader = Array.isArray(req.headers?.['x-vercel-ip-country'])
+      ? req.headers['x-vercel-ip-country'][0]
+      : req.headers?.['x-vercel-ip-country'];
+    const event = await saveSiteEvent(payload, { countryCode: String(countryHeader || '').slice(0, 2) });
     return sendJson(res, 200, {
       ok: true,
       stored: true,

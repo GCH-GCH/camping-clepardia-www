@@ -6,8 +6,7 @@ import CampingSection from '@/components/home/CampingSection.astro';
 import BungalowsSection from '@/components/home/BungalowsSection.astro';
 import PricingPreview from '@/components/PricingPreview.astro';
 import TramCenterGuide from '@/components/TramCenterGuide.astro';
-import AttractionsPreview from '@/components/AttractionsPreview.astro';
-import ToursSection from '@/components/home/ToursSection.astro';
+import HomeAttractionsTours from '@/components/home/HomeAttractionsTours.astro';
 import TrustSection from '@/components/TrustSection.astro';
 import QuickInquiryCTA from '@/components/home/QuickInquiryCTA.astro';
 import HomeFinalCTA from '@/components/home/HomeFinalCTA.astro';
@@ -30,8 +29,7 @@ const { languageCode } = Astro.props as Props;
 <PricingPreview languageCode={languageCode} />
 <TramCenterGuide languageCode={languageCode} variant="home" />
 <ArrivalFlowSection languageCode={languageCode} />
-<AttractionsPreview languageCode={languageCode} />
-<ToursSection languageCode={languageCode} />
+<HomeAttractionsTours languageCode={languageCode} />
 <TrustSection languageCode={languageCode} />
 <QuickInquiryCTA languageCode={languageCode} />
 <HomeFinalCTA languageCode={languageCode} />

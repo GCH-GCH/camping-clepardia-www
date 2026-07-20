@@ -551,10 +551,37 @@ const normalize = (value: string) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
 
+const auschwitzSearchCopy = {
+  pl:{ category:'Auschwitz-Birkenau',badge:'Tylko online',officialTitle:'Oficjalne karty wstępu Auschwitz',officialDescription:'Od 1 marca karty wstępu są dostępne wyłącznie online w oficjalnym systemie. Nie można otrzymać karty przy wejściu.',placeDescription:'Całodniowa wizyta wymagająca wcześniejszej rezerwacji online. Dostępne są oficjalne karty wstępu i wycieczki z Krakowa.',keywords:['auschwitz','birkenau','oświęcim','bilety auschwitz','karta wstępu','karty wstępu','bezpłatna karta','visit auschwitz','rezerwacja online']},
+  en:{ category:'Auschwitz-Birkenau',badge:'Online only',officialTitle:'Official Auschwitz entry cards',officialDescription:'From 1 March, entry cards are available only through the official online system and not at the Museum entrance.',placeDescription:'A full-day visit requiring advance online reservation. Official entry cards and tours from Krakow are separate options.',keywords:['auschwitz','birkenau','entry card','tickets','free entry card','official booking','online reservation','visit auschwitz']},
+  de:{ category:'Auschwitz-Birkenau',badge:'Nur online',officialTitle:'Offizielle Auschwitz-Eintrittskarten',officialDescription:'Seit 1. März gibt es Eintrittskarten nur im offiziellen Online-System, nicht am Museumseingang.',placeDescription:'Ganztagesbesuch mit vorheriger Online-Reservierung. Offizielle Eintrittskarten und Ausflüge ab Krakau sind getrennte Optionen.',keywords:['auschwitz','birkenau','eintrittskarte','tickets','kostenlose karte','offizielle reservierung','online buchen']},
+  it:{ category:'Auschwitz-Birkenau',badge:'Solo online',officialTitle:'Carte d’ingresso ufficiali Auschwitz',officialDescription:'Dal 1° marzo le carte sono disponibili solo nel sistema online ufficiale, non all’ingresso.',placeDescription:'Visita di un giorno con prenotazione online anticipata. Carte ufficiali e tour da Cracovia sono opzioni separate.',keywords:['auschwitz','birkenau','biglietti','carta ingresso','ingresso gratuito','prenotazione ufficiale','online']},
+  fr:{ category:'Auschwitz-Birkenau',badge:'En ligne uniquement',officialTitle:'Cartes d’entrée officielles Auschwitz',officialDescription:'Depuis le 1er mars, les cartes sont disponibles uniquement dans le système officiel en ligne, pas à l’entrée.',placeDescription:'Visite d’une journée avec réservation en ligne préalable. Cartes officielles et excursions depuis Cracovie sont deux options.',keywords:['auschwitz','birkenau','billets','carte entrée','carte gratuite','réservation officielle','en ligne']},
+  es:{ category:'Auschwitz-Birkenau',badge:'Solo online',officialTitle:'Entradas oficiales Auschwitz',officialDescription:'Desde el 1 de marzo las entradas solo están en el sistema oficial online, no en la entrada del Museo.',placeDescription:'Visita de día completo con reserva online previa. Entradas oficiales y excursiones desde Cracovia son opciones distintas.',keywords:['auschwitz','birkenau','entradas','tarjeta entrada','entrada gratuita','reserva oficial','online']},
+  nl:{ category:'Auschwitz-Birkenau',badge:'Alleen online',officialTitle:'Officiële toegangsbewijzen Auschwitz',officialDescription:'Vanaf 1 maart zijn kaarten alleen beschikbaar via het officiële online systeem, niet bij de ingang.',placeDescription:'Een dagbezoek met online reservering vooraf. Officiële kaarten en tours vanuit Krakau zijn aparte opties.',keywords:['auschwitz','birkenau','toegangsbewijs','tickets','gratis kaart','officieel reserveren','online']},
+  cs:{ category:'Auschwitz-Birkenau',badge:'Pouze online',officialTitle:'Oficiální vstupní karty Auschwitz',officialDescription:'Od 1. března jsou karty jen v oficiálním online systému, ne u vstupu do Muzea.',placeDescription:'Celodenní návštěva s předchozí online rezervací. Oficiální karty a výlety z Krakova jsou samostatné možnosti.',keywords:['auschwitz','birkenau','vstupní karta','vstupenky','bezplatná karta','oficiální rezervace','online']},
+  sk:{ category:'Auschwitz-Birkenau',badge:'Iba online',officialTitle:'Oficiálne vstupné karty Auschwitz',officialDescription:'Od 1. marca sú karty iba v oficiálnom online systéme, nie pri vstupe do Múzea.',placeDescription:'Celodenná návšteva s predchádzajúcou online rezerváciou. Oficiálne karty a výlety z Krakova sú samostatné možnosti.',keywords:['auschwitz','birkenau','vstupná karta','vstupenky','bezplatná karta','oficiálna rezervácia','online']},
+  sv:{ category:'Auschwitz-Birkenau',badge:'Endast online',officialTitle:'Officiella inträdeskort Auschwitz',officialDescription:'Från 1 mars finns kort endast i det officiella onlinesystemet, inte vid museets entré.',placeDescription:'Ett heldagsbesök med onlinebokning i förväg. Officiella kort och turer från Kraków är separata alternativ.',keywords:['auschwitz','birkenau','inträdeskort','biljetter','gratis kort','officiell bokning','online']},
+} as const;
+
 export const getSearchIndex = (language = 'pl'): SearchIndexEntry[] => {
-  const coreEntries = language in localizedSearchSeeds
+  const sourceEntries = language in localizedSearchSeeds
     ? makeLocalizedEntries(language as keyof typeof localizedSearchSeeds)
     : baseSearchIndex;
+  const auschwitzCopy = auschwitzSearchCopy[language as keyof typeof auschwitzSearchCopy] ?? auschwitzSearchCopy.en;
+  const attractionHref = getLocalizedPath(language === 'pl' ? undefined : language,'atrakcje');
+  const coreEntries = [
+    ...sourceEntries.filter((entry)=>entry.id !== 'auschwitz'),
+    {
+      id:'auschwitz',title:'Auschwitz-Birkenau',description:auschwitzCopy.placeDescription,href:attractionHref,
+      category:auschwitzCopy.category,badge:language === 'pl' ? 'Cały dzień' : auschwitzCopy.badge,icon:'Shield',image:attractionImages.auschwitz.src,
+      keywords:[...auschwitzCopy.keywords,'tour','wycieczki','excursion','ausflug'],
+    },
+    {
+      id:'auschwitz-official-entry',title:auschwitzCopy.officialTitle,description:auschwitzCopy.officialDescription,href:'https://visit.auschwitz.org/',
+      category:auschwitzCopy.category,badge:auschwitzCopy.badge,icon:'TicketCheck',image:attractionImages.auschwitz.src,keywords:[...auschwitzCopy.keywords,'visit.auschwitz.org'],
+    },
+  ];
   const noticeEntries = getActiveSiteNotices().map((notice) => {
     const copy = getNoticeCopy(notice, language);
     return {

@@ -362,6 +362,9 @@ const title = 'CC SYSTEM';
         let campValidationErrors = [];
         let lastCampSave = null;
         let analyticsStorageStatus = { ok: false, loaded: false, migrationRequired: false, error: '', eventCount: 0, recentEvents: [], summary: {} };
+        let analyticsIntelligence = { loaded:false, loading:false, error:'', dashboard:null, feedback:null, recommendations:[], report:'' };
+        let analyticsTab = 'overview';
+        let analyticsFilters = { range:'30d', from:'', to:'', country:'', locale:'', device:'', page:'', eventType:'', attraction:'', referrer:'' };
         let myStayStorageStatus = { ok:false, loaded:false, status:'checking', migrationRequired:false, error:'', panelCount:0, activeTokens:0, feedbackCount:0, totalOpens:0 };
         const campMigrationRequiredMessage = 'CAMP wymaga uruchomienia migracji Supabase przed zapisem pobytów.';
         let autoRefreshTimer = 0;
@@ -940,6 +943,35 @@ const title = 'CC SYSTEM';
             }
           }
           throw lastError || new Error('Endpoint CC SYSTEM jest niedostępny.');
+        };
+        const analyticsQuery = () => {
+          const params = new URLSearchParams();
+          Object.entries(analyticsFilters).forEach(([key,value]) => { if (value) params.set(key,String(value)); });
+          return params.toString();
+        };
+        const loadAnalyticsIntelligence = async ({ announce = false } = {}) => {
+          if (analyticsIntelligence.loading) return;
+          analyticsIntelligence.loading = true;
+          if (activeView === 'analytics') render();
+          const query = analyticsQuery();
+          const suffix = query ? `?${query}` : '';
+          const [dashboardResult, feedbackResult, recommendationsResult, reportResult] = await Promise.all([
+            request(`/api/analytics/dashboard${suffix}`).catch((error)=>({ ok:false, error:error.message })),
+            request(`/api/analytics/feedback${suffix}`).catch((error)=>({ ok:false, error:error.message })),
+            request(`/api/analytics/recommendations${suffix}`).catch((error)=>({ ok:false, error:error.message })),
+            request(`/api/analytics/report${suffix}`).catch((error)=>({ ok:false, error:error.message })),
+          ]);
+          analyticsIntelligence = {
+            loaded:true,
+            loading:false,
+            error:dashboardResult.ok ? '' : (dashboardResult.error || 'Nie udało się pobrać agregatów site_events.'),
+            dashboard:dashboardResult.dashboard || null,
+            feedback:feedbackResult.feedback || null,
+            recommendations:Array.isArray(recommendationsResult.recommendations) ? recommendationsResult.recommendations : [],
+            report:reportResult.report || '',
+          };
+          if (activeView === 'analytics') render();
+          if (announce) showToast(analyticsIntelligence.error || 'Analityka odświeżona bez przeładowania strony.', analyticsIntelligence.error ? 'error' : 'success');
         };
         const summaryText = (item) => {
           const v = vehicle(item);
@@ -2498,7 +2530,11 @@ const title = 'CC SYSTEM';
           </section>`;
         };
         const roadmapRows = [
-          { offline:'CAMP', online:'CAMP / Nowe przyjęcie', status:'Aktywne', priority:1, notes:'Kalkulator recepcji, BAJT, karta pobytu i zapis do camp_stays po migracji.' },
+          { offline:'Mail Center', online:'Mail Center / Inbox', status:'Produkcyjny', priority:1, notes:'Realne wątki, odpowiedzi, szkice i diagnostyka dostarczenia.', nextStep:'Test regresji odpowiedzi po każdym deployu.', migration:'Mail Center tables', lastTest:'Live API + Resend', known:'Fallback wymaga kontroli przy awarii Resend.' },
+          { offline:'Inbox', online:'Skrzynka zapytań', status:'Produkcyjny', priority:1, notes:'Realne reservation_inquiries, filtry, statusy i historia.', nextStep:'Dalsza automatyzacja bez zmiany danych źródłowych.', migration:'reservation_inquiries aktywne', lastTest:'Live list/health', known:'Brak pełnego modelu rezerwacji zasobów.' },
+          { offline:'CAMP', online:'CAMP / Nowe przyjęcie', status:'Wymaga testu live', priority:1, notes:'Kalkulator recepcji, BAJT, karta pobytu i zapis do camp_stays po migracji.', nextStep:'Potwierdzić zapis pobytu i wydruk na produkcji.', migration:'20260705121500', lastTest:'Build; live do powtórzenia', known:'Brak synchronizacji z bazą offline.' },
+          { offline:'Rezerwacje', online:'Rezerwacje / zapytania', status:'W budowie', priority:2, notes:'Zapytania są produkcyjne; alokacja zasobu i potwierdzenie rezerwacji nie są jeszcze pełnym modułem.', nextStep:'Dodać tabelę rezerwacji zasobów i konflikty.', migration:'TODO reservations', lastTest:'Formularz i Inbox', known:'Nie udaje potwierdzonej dostępności.' },
+          { offline:'Analityka strony', online:'Analityka i Feedback Intelligence', status:'Wymaga migracji', priority:2, notes:'Dashboard, feedback, rekomendacje i raport Markdown są realnie podłączone do site_events.', nextStep:'Uruchomić migrację TASK 148 i zebrać 30 dni danych.', migration:'20260720143000', lastTest:'test:analytics + live po deployu', known:'Mała próba może nie generować wszystkich reguł.' },
           { offline:'Karty pobytu / drukowanie', online:'Drukowanie / karta pobytu', status:'W budowie', priority:2, notes:'Jest fundament wydruku. Docelowo pełna karta jak offline, ale w czystszym układzie.' },
           { offline:'Klienci', online:'Klienci Online', status:'Aktywne', priority:3, notes:'Aktywny moduł z camp_stays: wyszukiwarka, filtry, karta klienta i historia pobytów. Dedykowane tabele klientów/notatek są kolejnym krokiem.' },
           { offline:'PP / przedłużenia', online:'Przedłuż pobyt', status:'Placeholder', priority:4, notes:'Gotowy schemat procesu bez zapisu. Wymaga tabeli aktywnych pobytów.' },
@@ -2520,7 +2556,7 @@ const title = 'CC SYSTEM';
         ];
         const renderRoadmapView = () => {
           const statusClass = (status) => {
-            if (/aktywne/i.test(status)) return 'active';
+            if (/aktywne|produkcyjny/i.test(status)) return 'active';
             if (/budowie/i.test(status)) return 'build';
             if (/placeholder/i.test(status)) return 'placeholder';
             if (/analizy/i.test(status)) return 'analysis';
@@ -2553,17 +2589,29 @@ const title = 'CC SYSTEM';
           const myStayStatusHint = myStayStorageStatus.ok
             ? `stay_panels: ${myStayStorageStatus.panelCount} · tokeny: ${myStayStorageStatus.activeTokens} · feedback: ${myStayStorageStatus.feedbackCount} · otwarcia: ${myStayStorageStatus.totalOpens}`
             : (myStayStorageStatus.error || 'Uruchom bezpieczną migrację My Stay.');
-          const tableRows = roadmapRows.map((row)=>`
+          const tableRows = roadmapRows.map((row)=>{
+            const rowStatus = row.online === 'Analityka i Feedback Intelligence'
+              ? (analyticsStorageStatus.ok ? 'Produkcyjny' : 'Wymaga migracji')
+              : row.status;
+            const nextStep = row.nextStep || (/placeholder|analizy/i.test(rowStatus) ? 'Zaprojektować dane i bezpieczny zapis.' : /budowie/i.test(rowStatus) ? 'Dokończyć zapis i test live.' : 'Utrzymać test regresji.');
+            const migration = row.migration || (/placeholder|budowie/i.test(rowStatus) ? 'Do ustalenia' : 'Brak nowej migracji');
+            const lastTest = row.lastTest || (/produkcyjny|aktywne/i.test(rowStatus) ? 'Build + bieżący test modułu' : 'Build UI; brak pełnego testu live');
+            const known = row.known || (/placeholder/i.test(rowStatus) ? 'Widok nie zapisuje danych.' : /budowie|testu/i.test(rowStatus) ? 'Zakres funkcji jest niepełny.' : 'Brak znanego krytycznego błędu.');
+            return `
             <tr>
               <td><strong>${esc(row.offline)}</strong></td>
               <td>${esc(row.online)}</td>
-              <td>${statusBadge(row.status)}</td>
+              <td>${statusBadge(rowStatus)}</td>
               <td><span class="roadmap-priority">${esc(row.priority)}</span></td>
               <td>${esc(row.notes)}</td>
+              <td>${esc(nextStep)}</td>
+              <td>${esc(migration)}</td>
+              <td>${esc(lastTest)}</td>
+              <td>${esc(known)}</td>
             </tr>
-          `).join('');
+          `;}).join('');
           const nextSteps = [
-            'Uruchomić migrację CAMP/site_events w Supabase.',
+            'Uruchomić migrację 20260720143000_site_analytics_intelligence.sql w Supabase.',
             'Przetestować zapis CAMP live.',
             'Dopracować finalną kartę pobytu.',
             'Zrobić Klienci Online.',
@@ -2615,7 +2663,7 @@ const title = 'CC SYSTEM';
             </section>
             <div class="roadmap-table-wrap">
               <table class="roadmap-table">
-                <thead><tr><th>OFFLINE MODULE</th><th>ONLINE MODULE</th><th>STATUS</th><th>PRIORYTET</th><th>UWAGI</th></tr></thead>
+                <thead><tr><th>OFFLINE MODULE</th><th>ONLINE MODULE</th><th>STATUS</th><th>PRIORYTET</th><th>UWAGI</th><th>NASTĘPNY KROK</th><th>MIGRACJA</th><th>OSTATNI TEST</th><th>ZNANE PROBLEMY</th></tr></thead>
                 <tbody>${tableRows}</tbody>
               </table>
             </div>
@@ -2624,7 +2672,7 @@ const title = 'CC SYSTEM';
               <section class="module-card"><h3>Najbliższe kroki</h3><ol class="roadmap-steps">${nextSteps.map((step)=>`<li>${esc(step)}</li>`).join('')}</ol></section>
               <section class="module-card"><h3>Co warto przenieść</h3><ul class="module-rule-list">${transfer.map((item)=>`<li>${esc(item)}</li>`).join('')}</ul></section>
               <section class="module-card"><h3>Czego nie kopiować 1:1</h3><ul class="module-rule-list">${doNotCopy.map((item)=>`<li>${esc(item)}</li>`).join('')}</ul></section>
-              <section class="module-card module-card--wide"><h3>Analityka — przyszłe potrzeby</h3><div class="crm-tags">${analyticsNeeds.map((item)=>`<span>${esc(item)}</span>`).join('')}</div></section>
+              <section class="module-card module-card--wide"><h3>Analityka — zakres wdrożony w TASK 148</h3><div class="crm-tags">${analyticsNeeds.map((item)=>`<span>${esc(item)}</span>`).join('')}</div><p class="module-empty">Dane, rekomendacje i raport są produkcyjne po migracji TASK 148; dokładność wniosków rośnie wraz z liczbą anonimowych eventów.</p></section>
             </div>
           </section>`;
         };
@@ -2661,7 +2709,7 @@ const title = 'CC SYSTEM';
             ['Kanały zapasowe', `Web3Forms ${env.web3FormsKeyPresent ? 'ENV' : 'brak'} · FormSubmit ${env.formSubmitToPresent ? 'ENV' : 'brak'}`],
           ].map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('');
         };
-        const renderAnalyticsView = () => {
+        const renderAnalyticsLegacyView = () => {
           const real = realItems();
           const byCountry = new Map();
           const byLanguage = new Map();
@@ -2754,6 +2802,61 @@ const title = 'CC SYSTEM';
               <section class="module-card module-card--wide important-card"><h3>Co poprawić na stronie</h3><div class="feedback-insights-grid">${insightHtml}</div></section>
               <section class="module-card module-card--wide"><h3>Sugestie tekstowe z feedbacków</h3>${improveTexts.length ? `<ul class="module-rule-list">${improveTexts.map((text)=>`<li>${esc(text)}</li>`).join('')}</ul>` : '<p class="module-empty">Brak tekstowych sugestii od klientów.</p>'}</section>
             </div>
+          </section>`;
+        };
+        const renderAnalyticsView = () => {
+          const data = analyticsIntelligence.dashboard;
+          const feedbackData = analyticsIntelligence.feedback || { count:0, average:null, ratings:[], positives:[], problems:[], byLanguage:[], lowByLanguage:[], byDevice:[], recentSuggestions:[] };
+          if (!analyticsIntelligence.loaded || analyticsIntelligence.loading) {
+            return `<section class="dashboard-panel module-view analytics-pro"><header class="module-head"><span class="eyebrow">Analityka i Feedback Intelligence</span><h2>Ładowanie danych produkcyjnych…</h2><p>Agregujemy bezosobowe eventy i feedback. Panel nie pobiera danych kontaktowych.</p></header><div class="analytics-loading"><span></span><strong>site_events / Supabase</strong></div></section>`;
+          }
+          if (!data) {
+            return `<section class="dashboard-panel module-view analytics-pro"><header class="module-head"><span class="eyebrow">Analityka i Feedback Intelligence</span><h2>Moduł wymaga sprawdzenia</h2><p>${esc(analyticsIntelligence.error || 'Brak agregatów.')}</p></header><div class="module-actions"><button type="button" data-analytics-refresh>Spróbuj ponownie</button><button type="button" data-view-shortcut="roadmap">Zobacz migrację i status</button></div></section>`;
+          }
+          const tabs = [
+            ['overview','Przegląd'],['countries','Kraje'],['languages','Języki'],['pages','Strony'],['clicks','Kliknięcia'],['form','Formularz'],
+            ['campy','CAMPY'],['attractions','Atrakcje i wycieczki'],['feedback','Feedback'],['recommendations','Rekomendacje'],['report','Raport'],
+          ];
+          const rows = (items, empty = 'Brak danych') => Array.isArray(items) && items.length
+            ? `<div class="analytics-bars">${items.slice(0,14).map((item,index)=>`<article><span>${index + 1}</span><div><strong>${esc(item.label)}</strong><i style="--bar:${Math.max(4,Number(item.share || 0))}%"></i></div><b>${esc(item.count)}</b>${item.averageSeconds !== undefined ? `<small>${item.averageSeconds === null ? '—' : `${esc(item.averageSeconds)} s`}</small>` : ''}</article>`).join('')}</div>`
+            : `<p class="module-empty">${esc(empty)}</p>`;
+          const options = (name, values, current, allLabel) => `<label><span>${esc(allLabel)}</span><select data-analytics-filter="${esc(name)}"><option value="">Wszystkie</option>${(values || []).map((value)=>`<option value="${esc(value)}" ${String(value) === String(current) ? 'selected':''}>${esc(value)}</option>`).join('')}</select></label>`;
+          const filterBar = `<section class="analytics-filters" aria-label="Globalne filtry analityki">
+            <label><span>Zakres</span><select data-analytics-filter="range"><option value="today" ${analyticsFilters.range === 'today' ? 'selected':''}>Dziś</option><option value="7d" ${analyticsFilters.range === '7d' ? 'selected':''}>7 dni</option><option value="30d" ${analyticsFilters.range === '30d' ? 'selected':''}>30 dni</option><option value="custom" ${analyticsFilters.range === 'custom' ? 'selected':''}>Własny</option></select></label>
+            ${analyticsFilters.range === 'custom' ? `<label><span>Od</span><input type="date" data-analytics-filter="from" value="${esc(analyticsFilters.from)}"></label><label><span>Do</span><input type="date" data-analytics-filter="to" value="${esc(analyticsFilters.to)}"></label>`:''}
+            ${options('country',data.options?.countries,analyticsFilters.country,'Kraj')}
+            ${options('locale',data.options?.locales,analyticsFilters.locale,'Język')}
+            ${options('device',data.options?.devices,analyticsFilters.device,'Urządzenie')}
+            ${options('page',data.options?.pages,analyticsFilters.page,'Podstrona')}
+            ${options('eventType',data.options?.eventTypes,analyticsFilters.eventType,'Typ eventu')}
+            ${options('attraction',data.options?.attractions,analyticsFilters.attraction,'Atrakcja')}
+            ${options('referrer',data.options?.referrers,analyticsFilters.referrer,'Źródło')}
+            <button type="button" data-analytics-clear>Wyczyść filtry</button>
+          </section>`;
+          const overview = `<div class="analytics-content-grid">
+            <section class="module-card"><h3>Najpopularniejsze strony</h3>${rows(data.pages?.top)}</section>
+            <section class="module-card"><h3>Kraje orientacyjne</h3>${rows(data.countries?.rows)}<p class="analytics-note">${esc(data.countries?.notice)}</p></section>
+            <section class="module-card"><h3>Najczęściej klikane CTA</h3>${rows(data.clicks?.top)}</section>
+            <section class="module-card"><h3>Godziny aktywności</h3>${rows(data.pages?.hours)}</section>
+          </div>`;
+          const countryView = `<div class="analytics-content-grid"><section class="module-card module-card--wide"><h3>Kraje użytkowników</h3>${rows(data.countries?.rows)}<p class="analytics-note">${esc(data.countries?.notice)}</p></section><section class="module-card"><h3>Urządzenia</h3>${rows(data.devices)}</section><section class="module-card"><h3>Dni tygodnia</h3>${rows(data.pages?.days)}</section></div>`;
+          const languageView = `<div class="analytics-content-grid"><section class="module-card"><h3>Języki strony</h3>${rows(data.languages)}</section><section class="module-card"><h3>Języki formularza</h3>${rows(data.form?.languages)}</section><section class="module-card"><h3>Języki CAMPY</h3>${rows(data.campy?.languages)}</section><section class="module-card"><h3>Feedback według języka</h3>${rows(feedbackData.byLanguage)}</section></div>`;
+          const pagesView = `<div class="analytics-content-grid"><section class="module-card"><h3>Top podstrony</h3>${rows(data.pages?.top)}</section><section class="module-card"><h3>Najczęstsze ścieżki</h3>${rows(data.pages?.paths,'Potrzeba co najmniej dwóch odsłon w jednej anonimowej sesji.')}</section><section class="module-card"><h3>Godziny</h3>${rows(data.pages?.hours)}</section><section class="module-card"><h3>Dni tygodnia</h3>${rows(data.pages?.days)}</section></div>`;
+          const clicksView = `<div class="analytics-content-grid"><section class="module-card module-card--wide"><h3>CTA i elementy</h3>${rows(data.clicks?.top)}</section><section class="module-card"><h3>Kanały kontaktu</h3><ul class="analytics-kpis"><li><strong>${esc(data.clicks?.phone || 0)}</strong><span>telefon</span></li><li><strong>${esc(data.clicks?.email || 0)}</strong><span>email</span></li><li><strong>${esc(data.clicks?.maps || 0)}</strong><span>Google Maps</span></li><li><strong>${esc(data.clicks?.tours || 0)}</strong><span>wycieczki</span></li></ul></section></div>`;
+          const formView = `<div class="analytics-content-grid"><section class="module-card"><h3>Lejek formularza</h3><ul class="analytics-kpis"><li><strong>${esc(data.form?.started || 0)}</strong><span>start</span></li><li><strong>${esc(data.form?.stepViews || 0)}</strong><span>kroki</span></li><li><strong>${esc(data.form?.submitted || 0)}</strong><span>wysłania</span></li><li><strong>${esc(data.form?.abandoned || 0)}</strong><span>porzucenia</span></li></ul><p class="analytics-rate">Skuteczność: <strong>${esc(data.form?.completionRate || 0)}%</strong></p></section><section class="module-card"><h3>Etapy</h3>${rows(data.form?.steps)}</section><section class="module-card"><h3>Porzucenia na krokach</h3>${rows(data.form?.abandonSteps)}</section><section class="module-card"><h3>Błędy walidacji</h3>${rows(data.form?.errors)}</section><section class="module-card"><h3>Urządzenia formularza</h3>${rows(data.form?.devices)}</section><section class="module-card"><h3>Typ pobytu</h3>${rows(data.form?.stayTypes)}</section></div>`;
+          const campyView = `<div class="analytics-content-grid"><section class="module-card"><h3>Użycie CAMPY</h3><ul class="analytics-kpis"><li><strong>${esc(data.campy?.opened || 0)}</strong><span>otwarcia</span></li><li><strong>${esc(data.campy?.questions || 0)}</strong><span>pytania kategorialne</span></li></ul></section><section class="module-card"><h3>Kategorie pytań</h3>${rows(data.campy?.categories)}</section><section class="module-card"><h3>Przejścia po CAMPY</h3><ul class="analytics-kpis"><li><strong>${esc(data.campy?.conversions?.pricing || 0)}</strong><span>cennik</span></li><li><strong>${esc(data.campy?.conversions?.directions || 0)}</strong><span>dojazd</span></li><li><strong>${esc(data.campy?.conversions?.attractions || 0)}</strong><span>atrakcje</span></li><li><strong>${esc(data.campy?.conversions?.booking || 0)}</strong><span>rezerwacja</span></li></ul></section></div>`;
+          const attractionView = `<div class="analytics-content-grid"><section class="module-card"><h3>Najczęściej klikane atrakcje</h3>${rows(data.attractions?.topAttractions)}</section><section class="module-card"><h3>Najczęściej klikane wycieczki</h3>${rows(data.attractions?.topTours)}</section><section class="module-card module-card--wide"><h3>Auschwitz i Planer</h3><ul class="analytics-kpis"><li><strong>${esc(data.attractions?.auschwitzOfficial || 0)}</strong><span>official entry</span></li><li><strong>${esc(data.attractions?.auschwitzTour || 0)}</strong><span>tour z Krakowa</span></li><li><strong>${esc(data.attractions?.planner || 0)}</strong><span>z Planera</span></li><li><strong>${esc(data.attractions?.bookingTransitions || 0)}</strong><span>do rezerwacji</span></li></ul></section></div>`;
+          const feedbackView = `<div class="analytics-content-grid"><section class="module-card"><h3>Ocena klienta</h3><ul class="analytics-kpis"><li><strong>${esc(feedbackData.average ?? '—')}</strong><span>średnia / 5</span></li><li><strong>${esc(feedbackData.count || 0)}</strong><span>odpowiedzi</span></li></ul>${rows(feedbackData.ratings)}</section><section class="module-card"><h3>Co się podobało</h3>${rows(feedbackData.positives)}</section><section class="module-card"><h3>Najczęstsze problemy</h3>${rows(feedbackData.problems)}</section><section class="module-card"><h3>Niskie oceny według języka</h3>${rows(feedbackData.lowByLanguage)}</section><section class="module-card module-card--wide"><h3>Ostatnie sugestie bez danych kontaktowych</h3>${feedbackData.recentSuggestions?.length ? `<ul class="analytics-suggestions">${feedbackData.recentSuggestions.map((item)=>`<li><p>${esc(item.suggestion)}</p><small>${esc(item.locale || '—')} · ${esc(item.device || 'brak urządzenia')} · ${esc(item.createdAt ? formatDate(item.createdAt,true) : '—')}</small></li>`).join('')}</ul>` : '<p class="module-empty">Brak sugestii tekstowych.</p>'}</section></div>`;
+          const recommendationView = `<div class="analytics-recommendations">${analyticsIntelligence.recommendations.length ? analyticsIntelligence.recommendations.map((item)=>`<article data-recommendation-key="${esc(item.key)}"><header><span data-priority="${esc(item.priority)}">${esc(item.priority)}</span><select data-recommendation-status="${esc(item.key)}" aria-label="Status rekomendacji ${esc(item.title)}">${[['new','Nowe'],['planned','Zaplanowane'],['done','Zrobione'],['rejected','Odrzucone']].map(([value,label])=>`<option value="${value}" ${item.status === value ? 'selected':''}>${label}</option>`).join('')}</select></header><h3>${esc(item.title)}</h3><p>${esc(item.reason)}</p><small>Źródło: ${esc(item.source)}</small><strong>${esc(item.action)}</strong></article>`).join('') : '<p class="module-empty">Brak regułowej rekomendacji dla wybranego zakresu.</p>'}</div>`;
+          const reportView = `<section class="analytics-report"><header><div><h3>Raport Markdown</h3><p>Gotowy do wklejenia do ChatGPT. Nie zawiera danych kontaktowych.</p></div><div><button type="button" data-analytics-refresh>Generuj raport</button><button type="button" data-analytics-copy ${analyticsIntelligence.report ? '':'disabled'}>Kopiuj raport</button></div></header><pre data-analytics-report>${esc(analyticsIntelligence.report || 'Raport nie został wygenerowany. Sprawdź migrację analytics_recommendations i odśwież moduł.')}</pre></section>`;
+          const views = { overview, countries:countryView, languages:languageView, pages:pagesView, clicks:clicksView, form:formView, campy:campyView, attractions:attractionView, feedback:feedbackView, recommendations:recommendationView, report:reportView };
+          return `<section class="dashboard-panel module-view analytics-pro">
+            <header class="module-head module-head--compact"><div><span class="eyebrow">Analityka i Feedback Intelligence</span><h2>Decyzje oparte na realnych eventach</h2><p>First-party Supabase, anonimowa sesja, bez pełnego IP, cookies marketingowych i danych kontaktowych.</p></div><button type="button" data-analytics-refresh>Odśwież dane</button></header>
+            <div class="module-metrics">${moduleMetric('SE','Sesje',data.overview?.sessions || 0,'anonimowe w bieżącej karcie')}${moduleMetric('PV','Odsłony',data.overview?.pageViews || 0,`${data.overview?.events || 0} wszystkich eventów`)}${moduleMetric('CT','CTA',data.overview?.ctaClicks || 0,'kliknięcia')}${moduleMetric('FO','Formularz',`${data.form?.started || 0} → ${data.form?.submitted || 0}`,`${data.form?.completionRate || 0}% skuteczności`)}${moduleMetric('CP','CAMPY',data.campy?.questions || 0,`${data.campy?.opened || 0} otwarć`)}${moduleMetric('FB','Feedback',feedbackData.average ?? '—',`${feedbackData.count || 0} odpowiedzi`)}</div>
+            ${filterBar}
+            <nav class="analytics-tabs" aria-label="Zakładki analityki">${tabs.map(([key,label])=>`<button type="button" data-analytics-tab="${key}" aria-pressed="${analyticsTab === key}">${esc(label)}</button>`).join('')}</nav>
+            <div class="analytics-tab-content">${views[analyticsTab] || overview}</div>
+            <p class="analytics-privacy-note">${esc(data.overview?.sessionScope)}</p>
           </section>`;
         };
         const renderStatsView = () => {
@@ -3412,6 +3515,7 @@ const title = 'CC SYSTEM';
           activeView = button.dataset.view || 'inbox';
           closeMobileSidebar();
           render();
+          if (activeView === 'analytics' && !analyticsIntelligence.loaded) void loadAnalyticsIntelligence();
         }));
         document.querySelectorAll('[data-view-shortcut]').forEach((button)=>button.addEventListener('click',()=>{
           activeView = button.dataset.viewShortcut || 'inbox';
@@ -3475,6 +3579,20 @@ const title = 'CC SYSTEM';
         list?.addEventListener('change',(event)=>{
           const target = event.target;
           if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)) return;
+          const analyticsFilter = target.dataset.analyticsFilter;
+          if (analyticsFilter && analyticsFilter in analyticsFilters) {
+            analyticsFilters[analyticsFilter] = target.value;
+            void loadAnalyticsIntelligence();
+            return;
+          }
+          const recommendationKey = target.dataset.recommendationStatus;
+          if (recommendationKey && target instanceof HTMLSelectElement) {
+            const status = target.value;
+            void request('/api/analytics/recommendations', { method:'PATCH', body:JSON.stringify({ key:recommendationKey, status }) })
+              .then(()=>loadAnalyticsIntelligence({ announce:true }))
+              .catch((error)=>showToast(error.message || 'Nie udało się zapisać statusu rekomendacji.', 'error'));
+            return;
+          }
           const field = target.dataset.campField;
           if (!field) return;
           updateCampField(field, target instanceof HTMLInputElement && target.type === 'checkbox' ? target.checked : target.value, { commit:true });
@@ -3518,6 +3636,26 @@ const title = 'CC SYSTEM';
         list?.addEventListener('click',async(event)=>{
           const target = event.target;
           if (!(target instanceof Element)) return;
+          const analyticsTabButton = target.closest('[data-analytics-tab]');
+          if (analyticsTabButton instanceof HTMLElement) {
+            analyticsTab = analyticsTabButton.dataset.analyticsTab || 'overview';
+            render();
+            return;
+          }
+          if (target.closest('[data-analytics-clear]')) {
+            analyticsFilters = { range:'30d', from:'', to:'', country:'', locale:'', device:'', page:'', eventType:'', attraction:'', referrer:'' };
+            void loadAnalyticsIntelligence({ announce:true });
+            return;
+          }
+          if (target.closest('[data-analytics-refresh]')) {
+            void loadAnalyticsIntelligence({ announce:true });
+            return;
+          }
+          const analyticsCopyButton = target.closest('[data-analytics-copy]');
+          if (analyticsCopyButton instanceof HTMLButtonElement && analyticsIntelligence.report) {
+            void copy(analyticsIntelligence.report, analyticsCopyButton);
+            return;
+          }
           const campCountryButton = target.closest('[data-camp-country-code]');
           if (campCountryButton instanceof HTMLElement) {
             campSetCountry(campCountryButton.dataset.campCountryCode || '', campCountryButton.dataset.campCountryName || '');
@@ -3685,6 +3823,7 @@ const title = 'CC SYSTEM';
             clearFilters();
             closeMobileSidebar();
             render();
+            if (activeView === 'analytics' && !analyticsIntelligence.loaded) void loadAnalyticsIntelligence();
             return;
           }
           const folderButton = target.closest('[data-mail-folder]');
@@ -3802,6 +3941,67 @@ const title = 'CC SYSTEM';
   :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#07140f;color:#effbf3}*{box-sizing:border-box}body{margin:0;min-width:320px;min-height:100vh;background:radial-gradient(circle at 15% 0%,rgba(60,179,113,.22),transparent 30%),linear-gradient(145deg,#07140f,#102b1d)}button,input,select,textarea{font:inherit}button,.card-actions a,.inline-actions a{border:0;cursor:pointer}[hidden]{display:none!important}.inbox-shell{width:min(1500px,calc(100% - 28px));margin:auto;padding:clamp(28px,5vw,64px) 0}.login-card{width:min(540px,100%);margin:8vh auto 0;padding:clamp(24px,5vw,42px);border:1px solid rgba(143,224,180,.2);border-radius:30px;background:rgba(15,42,28,.88);box-shadow:0 30px 100px rgba(0,0,0,.32)}.eyebrow{color:#8fe0b4;font-size:.76rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}h1{margin:10px 0;font-size:clamp(2rem,5vw,4rem);line-height:1}p{color:rgba(239,251,243,.72);line-height:1.55}label{display:grid;gap:7px;color:rgba(239,251,243,.76);font-size:.82rem;font-weight:800}input,select,textarea{width:100%;border:1px solid rgba(255,255,255,.13);border-radius:14px;color:#effbf3;background:rgba(255,255,255,.07);outline:0}input,select{min-height:46px;padding:0 12px}textarea{padding:12px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:rgba(143,224,180,.55);box-shadow:0 0 0 4px rgba(60,179,113,.12)}button,.card-actions a,.inline-actions a{min-height:42px;display:inline-flex;align-items:center;justify-content:center;padding:0 15px;border-radius:13px;color:#07140f;background:#8fe0b4;font-weight:900;text-decoration:none}button.ghost,.card-actions button,.card-actions a,.inline-actions button,.inline-actions a{color:#e7fff0;border:1px solid rgba(143,224,180,.18);background:rgba(255,255,255,.07)}button:disabled{opacity:.45;cursor:not-allowed}.login-card form{display:grid;gap:14px;margin-top:24px}.status,.app-status{min-height:22px;margin:0;color:#ffcf91;font-weight:800}.app-header{display:flex;gap:20px;align-items:end;justify-content:space-between;margin-bottom:24px}.app-header p{margin:0}.header-actions{display:flex;gap:9px}.stats-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:0 0 14px}.stats-grid article{display:grid;gap:4px;padding:16px;border:1px solid rgba(143,224,180,.15);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.035))}.stats-grid strong{color:#8fe0b4;font-size:1.75rem}.stats-grid span{color:rgba(239,251,243,.66);font-size:.76rem;font-weight:850}.filters{display:grid;grid-template-columns:2fr repeat(7,minmax(130px,1fr));gap:10px;padding:16px;border:1px solid rgba(143,224,180,.17);border-radius:24px;background:rgba(8,28,18,.72)}.filters .check{display:flex;align-items:center;gap:8px;min-height:42px;padding:8px 10px;border-radius:13px;background:rgba(255,255,255,.05)}.filters .check input{width:18px;min-height:18px;accent-color:#3CB371}.inquiry-list{display:grid;gap:20px;margin-top:16px}.inquiry-card{padding:clamp(18px,3vw,28px);border:1px solid rgba(255,255,255,.12);border-radius:28px;background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.045));box-shadow:0 20px 60px rgba(0,0,0,.18)}.inquiry-card>header{display:flex;justify-content:space-between;gap:20px;align-items:start}.inquiry-card h2{margin:12px 0 5px;font-size:clamp(1.45rem,3vw,2.1rem)}.inquiry-card header p{margin:0}.card-badges{display:flex;flex-wrap:wrap;gap:7px}.status-badge,.mail-badge,.season-badge,.category-badge{display:inline-flex;min-height:28px;align-items:center;padding:0 10px;border-radius:999px;color:#07140f;background:#8fe0b4;font-size:.7rem;font-weight:950;text-transform:uppercase}.category-badge{color:#dffff0;border:1px solid rgba(143,224,180,.2);background:rgba(255,255,255,.08)}.category-urgent,.category-mailFailed{color:#3d2600;background:#ffd08a}.category-group,.category-scouts{color:#101d35;background:#a9c8ff}.category-feedback{color:#372b00;background:#ffe492}.status-spam,.status-rejected,.mail-badge.is-failed{background:#f2c078}.status-archived{color:#effbf3;background:#53665b}.mail-badge.is-ok{background:#7be3a8}.season-badge{color:#4a2b00;background:#ffd696}.crm-warnings{display:grid;gap:7px;margin-top:16px}.crm-warnings p{margin:0;padding:10px 13px;border:1px solid rgba(255,208,138,.22);border-radius:13px;color:#ffe4b8;background:rgba(255,208,138,.08);font-weight:800}.card-date{display:grid;gap:5px;min-width:190px;text-align:right}.card-date small{color:rgba(239,251,243,.52)}.card-date code{color:#8fe0b4;font-size:.72rem}.details-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:20px 0}.detail-card{min-width:0;padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.055)}.detail-card--wide{grid-column:span 2}.detail-card h3{margin:0 0 12px;color:#9ee8bd;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase}.detail-card p{margin:0;color:#effbf3;overflow-wrap:anywhere}.detail-card a{color:#dffff0}.detail-card small{display:block;margin-top:8px;color:rgba(239,251,243,.58);line-height:1.5}.feedback-card{border-color:rgba(255,228,146,.2);background:rgba(255,228,146,.06)}.service-list,.consent-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}.service-list li{display:grid;grid-template-columns:38px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px;border-radius:14px;background:rgba(255,255,255,.055)}.service-list li>span{display:grid;width:38px;height:38px;place-items:center;border-radius:12px;background:rgba(60,179,113,.13);font-size:1.2rem}.service-list strong,.service-list small{display:block;margin:0}.service-list small{color:rgba(239,251,243,.5)}.service-list b{color:#8fe0b4}.service-list em{color:#fff;font-style:normal;font-weight:850}.plain-list{display:grid;gap:6px;margin:0}.plain-list div{display:grid;grid-template-columns:1fr 1.2fr;gap:8px}.plain-list dt{color:rgba(239,251,243,.5);font-size:.72rem}.plain-list dd{margin:0;text-align:right;overflow-wrap:anywhere}.consent-list b{color:#8fe0b4}.message-copy{white-space:pre-wrap}.mail-status-card.is-failed{border-color:rgba(242,192,120,.28);background:rgba(242,192,120,.08)}.mail-status-card.is-ok{border-color:rgba(123,227,168,.24)}.inline-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.technical-data{grid-column:1/-1;padding:12px 15px;border:1px dashed rgba(143,224,180,.2);border-radius:16px}.technical-data summary{cursor:pointer;color:rgba(239,251,243,.65);font-weight:850}.technical-data pre{max-height:320px;overflow:auto;white-space:pre-wrap;color:#bde8cd}.edit-row{display:grid;grid-template-columns:190px minmax(260px,1fr) auto;gap:10px;align-items:end;padding-top:16px;border-top:1px solid rgba(255,255,255,.09)}.card-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.empty{padding:40px;border:1px dashed rgba(143,224,180,.22);border-radius:22px;text-align:center;color:rgba(239,251,243,.65)}
   @media(max-width:1180px){.stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.filters{grid-template-columns:repeat(3,minmax(0,1fr))}.filters .search{grid-column:1/-1}.details-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:720px){.inbox-shell{width:min(100% - 16px,1500px);padding-top:18px}.app-header,.inquiry-card>header{align-items:stretch;flex-direction:column}.header-actions,.header-actions button{width:100%}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.filters,.details-grid,.edit-row{grid-template-columns:1fr}.filters .search,.detail-card--wide{grid-column:auto}.card-date{text-align:left}.card-actions>*{width:100%}.service-list li{grid-template-columns:38px 1fr}.service-list b,.service-list em{grid-column:2}.inline-actions{display:grid}.inline-actions>*{width:100%}}
+</style>
+
+<style is:global>
+  /* TASK 148: production Analytics + Feedback Intelligence */
+  .cc-system-app .analytics-pro { display:grid; gap:18px; }
+  .cc-system-app .analytics-loading { min-height:260px; display:grid; place-items:center; align-content:center; gap:14px; border:1px solid rgba(91,229,151,.18); border-radius:24px; background:rgba(7,29,21,.72); }
+  .cc-system-app .analytics-loading span { width:42px; height:42px; border:3px solid rgba(126,240,176,.18); border-top-color:#72e9a6; border-radius:50%; animation:analyticsSpin .8s linear infinite; }
+  @keyframes analyticsSpin { to { transform:rotate(360deg); } }
+  .cc-system-app .analytics-filters { display:grid; grid-template-columns:repeat(5,minmax(145px,1fr)); gap:10px; padding:14px; border:1px solid rgba(105,226,157,.16); border-radius:22px; background:linear-gradient(145deg,rgba(15,54,38,.78),rgba(7,28,21,.88)); }
+  .cc-system-app .analytics-filters label { min-width:0; display:grid; gap:5px; }
+  .cc-system-app .analytics-filters label span { color:rgba(225,250,236,.58); font-size:.68rem; font-weight:900; letter-spacing:.04em; text-transform:uppercase; }
+  .cc-system-app .analytics-filters select,.cc-system-app .analytics-filters input { min-width:0; min-height:40px; border-radius:12px; }
+  .cc-system-app .analytics-filters button { align-self:end; min-height:40px; color:#e8fff2; border:1px solid rgba(117,235,168,.22); background:rgba(255,255,255,.055); }
+  .cc-system-app .analytics-tabs { display:flex; gap:7px; padding:7px; overflow-x:auto; scrollbar-width:thin; border:1px solid rgba(107,229,159,.14); border-radius:17px; background:rgba(4,22,16,.72); }
+  .cc-system-app .analytics-tabs button { flex:0 0 auto; min-height:38px; padding-inline:13px; color:rgba(231,252,240,.68); border:1px solid transparent; background:transparent; font-size:.76rem; }
+  .cc-system-app .analytics-tabs button[aria-pressed="true"] { color:#06170f; border-color:#70e6a2; background:linear-gradient(135deg,#95f2ba,#43ce7e); box-shadow:0 10px 28px rgba(59,204,119,.2); }
+  .cc-system-app .analytics-tab-content { min-width:0; }
+  .cc-system-app .analytics-content-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  .cc-system-app .analytics-content-grid .module-card { min-width:0; }
+  .cc-system-app .analytics-bars { display:grid; gap:8px; }
+  .cc-system-app .analytics-bars article { display:grid; grid-template-columns:24px minmax(0,1fr) auto auto; gap:9px; align-items:center; padding:9px 10px; border:1px solid rgba(130,230,173,.1); border-radius:12px; background:rgba(255,255,255,.025); }
+  .cc-system-app .analytics-bars article>span { display:grid; width:22px; height:22px; place-items:center; border-radius:8px; color:#79eaaa; background:rgba(70,211,130,.1); font-size:.66rem; font-weight:950; }
+  .cc-system-app .analytics-bars article>div { min-width:0; display:grid; gap:5px; }
+  .cc-system-app .analytics-bars strong { overflow:hidden; color:#eafff2; font-size:.76rem; text-overflow:ellipsis; white-space:nowrap; }
+  .cc-system-app .analytics-bars i { position:relative; width:100%; height:4px; overflow:hidden; border-radius:999px; background:rgba(255,255,255,.07); }
+  .cc-system-app .analytics-bars i::after { content:""; position:absolute; inset:0 auto 0 0; width:min(100%,var(--bar)); border-radius:inherit; background:linear-gradient(90deg,#36bc70,#89efb3); }
+  .cc-system-app .analytics-bars b { color:#9cf3bd; font-size:.78rem; }
+  .cc-system-app .analytics-bars small { color:rgba(230,252,239,.46); font-size:.66rem; }
+  .cc-system-app .analytics-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:0; padding:0; list-style:none; }
+  .cc-system-app .analytics-kpis li { min-width:0; display:grid; gap:3px; padding:13px; border:1px solid rgba(116,232,166,.11); border-radius:14px; background:rgba(255,255,255,.03); }
+  .cc-system-app .analytics-kpis strong { color:#88efb4; font-size:1.45rem; }
+  .cc-system-app .analytics-kpis span { color:rgba(231,252,240,.54); font-size:.67rem; overflow-wrap:anywhere; }
+  .cc-system-app .analytics-rate { margin:13px 0 0; padding:11px 13px; border-radius:13px; color:#c9efda; background:rgba(56,194,113,.09); }
+  .cc-system-app .analytics-note,.cc-system-app .analytics-privacy-note { margin:12px 0 0; padding:10px 12px; border-left:3px solid #55d88c; color:rgba(225,250,236,.58); background:rgba(57,195,114,.06); font-size:.72rem; }
+  .cc-system-app .analytics-suggestions { display:grid; gap:8px; margin:0; padding:0; list-style:none; }
+  .cc-system-app .analytics-suggestions li { padding:12px; border:1px solid rgba(126,229,170,.1); border-radius:13px; background:rgba(255,255,255,.025); }
+  .cc-system-app .analytics-suggestions p { margin:0; color:#ecfff4; }
+  .cc-system-app .analytics-suggestions small { display:block; margin-top:7px; color:rgba(228,251,238,.48); }
+  .cc-system-app .analytics-recommendations { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  .cc-system-app .analytics-recommendations article { display:grid; gap:10px; padding:18px; border:1px solid rgba(255,208,100,.16); border-radius:19px; background:linear-gradient(145deg,rgba(255,202,78,.07),rgba(12,38,28,.74)); }
+  .cc-system-app .analytics-recommendations article header { display:flex; justify-content:space-between; gap:10px; align-items:center; }
+  .cc-system-app .analytics-recommendations article header span { padding:5px 9px; border-radius:999px; color:#2b1d00; background:#ffd571; font-size:.64rem; font-weight:950; text-transform:uppercase; }
+  .cc-system-app .analytics-recommendations article header span[data-priority="high"] { color:#300b0b; background:#ff9d91; }
+  .cc-system-app .analytics-recommendations article header span[data-priority="low"] { color:#092318; background:#8ae9b2; }
+  .cc-system-app .analytics-recommendations select { width:auto; min-height:36px; padding-inline:10px; }
+  .cc-system-app .analytics-recommendations h3,.cc-system-app .analytics-recommendations p,.cc-system-app .analytics-recommendations strong { margin:0; }
+  .cc-system-app .analytics-recommendations strong { color:#a9f4c8; }
+  .cc-system-app .analytics-report { overflow:hidden; border:1px solid rgba(115,233,166,.17); border-radius:22px; background:#061a12; }
+  .cc-system-app .analytics-report header { display:flex; justify-content:space-between; gap:15px; align-items:center; padding:17px; border-bottom:1px solid rgba(116,233,166,.12); }
+  .cc-system-app .analytics-report header h3,.cc-system-app .analytics-report header p { margin:0; }
+  .cc-system-app .analytics-report header div:last-child { display:flex; flex-wrap:wrap; gap:8px; }
+  .cc-system-app .analytics-report pre { min-height:420px; max-height:64vh; margin:0; padding:20px; overflow:auto; color:#dff9e9; background:radial-gradient(circle at 100% 0,rgba(62,199,121,.08),transparent 30%); font:500 .78rem/1.7 ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre-wrap; }
+  @media(max-width:1180px) { .cc-system-app .analytics-filters { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+  @media(max-width:760px) {
+    .cc-system-app .analytics-filters,.cc-system-app .analytics-content-grid,.cc-system-app .analytics-recommendations { grid-template-columns:1fr; }
+    .cc-system-app .analytics-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .cc-system-app .analytics-report header { align-items:stretch; flex-direction:column; }
+    .cc-system-app .analytics-report header div:last-child,.cc-system-app .analytics-report header button { width:100%; }
+    .cc-system-app .analytics-bars article { grid-template-columns:24px minmax(0,1fr) auto; }
+    .cc-system-app .analytics-bars small { grid-column:2; }
+  }
 </style>
 
 <style is:global>

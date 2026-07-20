@@ -14,7 +14,7 @@ import { getStayPanelsStatus } from '../../_lib/stay.js';
 const isAnalyticsMigrationError = (payload = {}) => {
   const text = `${payload.error || ''} ${payload.details || ''}`.toLowerCase();
   return payload.code === 'SUPABASE_QUERY_FAILED'
-    && (/site_events/.test(text) || /relation .*does not exist/.test(text) || /schema cache/.test(text));
+    && (/site_events|analytics_recommendations/.test(text) || /relation .*does not exist/.test(text) || /schema cache|column .*does not exist/.test(text));
 };
 
 export default async function handler(req, res) {

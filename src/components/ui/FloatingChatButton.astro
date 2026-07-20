@@ -7,6 +7,7 @@ import { campyIcon, publicAssetExists } from '@/data/assets';
 import { currencyEstimateConfig, formatCurrencyEstimates, pricingConfig } from '@/data/pricing';
 import { getHomepageSiteNotices, getNoticeCopy } from '@/data/siteNotices';
 import { getSearchIndex } from '@/data/searchIndex';
+import { getHomeAttractionsToursCopy } from '@/i18n/homeAttractionsTours';
 import { summerCampingFullText } from '../../../shared/summerCamping.js';
 
 const pathContext = getPathContext(Astro.url.pathname);
@@ -18,6 +19,7 @@ const campyLanguage = (campySupportedLanguages.includes(pathContext.languageCode
 const t = getTranslations(campyLanguage);
 const chatTexts = t.chat;
 const coreCopy = getCoreUi(campyLanguage);
+const attractionsToursCopy = getHomeAttractionsToursCopy(campyLanguage);
 const hasCampyIcon = publicAssetExists(campyIcon);
 const campyIconSrc = `${campyIcon}?v=task103`;
 const activeNoticeCopy = getHomepageSiteNotices()
@@ -899,6 +901,7 @@ const enhancedChatTexts = {
     ...finalCampy.answers,
     ...(campyShell.answers ?? {}),
     summerCamping: summerCampingFullText(campyLanguage),
+    auschwitz: `${attractionsToursCopy.auschwitz.title}. ${attractionsToursCopy.auschwitz.body} ${attractionsToursCopy.auschwitz.arrival} ${attractionsToursCopy.auschwitz.luggage} ${attractionsToursCopy.tours.noGuarantee}`,
   },
   links: {
     booking: bookingHref,
@@ -914,9 +917,11 @@ const enhancedChatTexts = {
     sct: sctHref,
     etoll: etollHref,
     tours: tourBookingHref,
+    auschwitzOfficial: 'https://visit.auschwitz.org/',
   },
   searchIndex: getSearchIndex(campyLanguage),
   tourLabels: coreCopy.tour,
+  auschwitzOfficialLabel: attractionsToursCopy.auschwitz.official,
 };
 const chatConfigEncoded = Buffer.from(JSON.stringify(enhancedChatTexts), 'utf8').toString('base64');
 const allQuickActionGroups = [
@@ -1319,6 +1324,7 @@ const quickActionGroups = preferredQuickKeys
         sct: 'SCT Kraków',
         etoll: 'e-TOLL',
         tours: chatTexts.tourLabels?.[0] || 'Sprawdź wycieczki',
+        auschwitzOfficial: chatTexts.auschwitzOfficialLabel || 'Official entry cards',
       };
 
       if (key === 'bookStay') return { text: answers.bookStay, actions: [{ label: actionLabels.booking, href: links.booking }] };
@@ -1345,7 +1351,7 @@ const quickActionGroups = preferredQuickKeys
       if (key === 'familyAttractions') return { text: answers.familyAttractions };
       if (key === 'wawel') return { text: answers.wawel, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
       if (key === 'wieliczka') return { text: answers.wieliczka, actions: [{ label: actionLabels.attractions, href: links.attractions }, { label: actionLabels.tours, href: links.tours, external: true }] };
-      if (key === 'auschwitz') return { text: answers.auschwitz, actions: [{ label: actionLabels.attractions, href: links.attractions }, { label: actionLabels.tours, href: links.tours, external: true }] };
+      if (key === 'auschwitz') return { text: answers.auschwitz, actions: [{ label: actionLabels.auschwitzOfficial, href: links.auschwitzOfficial, external: true }, { label: actionLabels.tours, href: links.tours, external: true }] };
       if (key === 'schindler') return { text: answers.schindler, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
       if (key === 'waterRelax') return { text: answers.waterRelax, actions: [{ label: actionLabels.attractions, href: links.attractions }] };
       if (key === 'dog') return { text: answers.dog };
@@ -1389,6 +1395,10 @@ const quickActionGroups = preferredQuickKeys
       if (keyed) return keyed;
       const prompt = rawPrompt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       const hasAny = (...parts) => parts.some((part) => prompt.includes(part));
+
+      if (hasAny('auschwitz', 'birkenau', 'oswiec')) {
+        return actionResponse('auschwitz') ?? chatTexts.answers.auschwitz ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      }
 
       if (hasAny('godziny recepcji', 'otwarta recepcja', 'czynna recepcja', 'reception hours', 'offnungszeiten rezeption', 'offnungszeiten', 'oeffnungszeiten rezeption', 'rezeption oeffnungszeiten', 'rezeption offnungszeiten', 'orari reception', 'horaires reception', 'horario recepcion', 'openingstijden receptie', 'oteviraci doba recepce', 'hodiny recepce', 'otvaracie hodiny recepcie', 'hodiny recepcie', 'recepcia hodiny', 'receptionens oppettider', 'reception oppettider', 'oppettider')) {
         return {
@@ -1522,7 +1532,7 @@ const quickActionGroups = preferredQuickKeys
       if (rawPrompt === chatTexts.actions.etoll) return chatTexts.answers.etoll ?? chatTexts.answers.sctEtoll ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.energylandia) return chatTexts.answers.energylandia ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.wieliczka) return chatTexts.answers.wieliczka ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
-      if (rawPrompt === chatTexts.actions.auschwitz) return chatTexts.answers.auschwitz ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (rawPrompt === chatTexts.actions.auschwitz) return actionResponse('auschwitz') ?? chatTexts.answers.auschwitz ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.weather) return chatTexts.answers.weather ?? chatTexts.answers.fallback;
       if (rawPrompt === chatTexts.actions.rain) return chatTexts.answers.rain ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
 
@@ -1592,7 +1602,7 @@ const quickActionGroups = preferredQuickKeys
         return actionResponse('waterRelax') ?? chatTexts.answers.waterRelax ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       }
       if (prompt.includes('wielicz')) return chatTexts.answers.wieliczka ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
-      if (prompt.includes('auschwitz') || prompt.includes('birkenau')) return chatTexts.answers.auschwitz ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
+      if (prompt.includes('auschwitz') || prompt.includes('birkenau')) return actionResponse('auschwitz') ?? chatTexts.answers.auschwitz ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (prompt.includes('wawel')) return actionResponse('wawel') ?? chatTexts.answers.wawel ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
       if (prompt.includes('schindler')) return actionResponse('schindler') ?? chatTexts.answers.schindler ?? chatTexts.answers.attractions ?? chatTexts.answers.fallback;
 

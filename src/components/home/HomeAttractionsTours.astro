@@ -1,0 +1,121 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { attractionImages, type AttractionImageKey } from '@/data/attractionsImageRegistry';
+import { getHomeAttractionsToursCopy, type HomeAttractionKey } from '@/i18n/homeAttractionsTours';
+import { tourBookingHref } from '@/i18n/coreUi';
+import { getBookingLocalizedPath, getLocalizedPath, getPathContext } from '@/utils/localizedLinks';
+
+interface Props { languageCode?: string; }
+const { languageCode } = Astro.props as Props;
+const pathContext = getPathContext(Astro.url.pathname);
+const lang = languageCode ?? pathContext.languageCode;
+const explicitLanguage = pathContext.explicitLanguage;
+const copy = getHomeAttractionsToursCopy(lang);
+const detailsHref = getLocalizedPath(explicitLanguage,'atrakcje');
+const bookingHref = getBookingLocalizedPath(lang);
+const officialHref = 'https://visit.auschwitz.org/';
+
+type Definition = {
+  key: HomeAttractionKey; image: AttractionImageKey; featured?: boolean; duration:'city'|'halfDay'|'fullDay'; travel:string;
+  transport:'tramWalk'|'tramBus'|'carBus'|'carTour'; booking:'advance'|'recommended'|'optional'; rain:boolean; family:boolean; tour?:boolean;
+};
+const definitions: Definition[] = [
+  {key:'oldTown',image:'mainSquare',featured:true,duration:'city',travel:'14–25 min',transport:'tramWalk',booking:'optional',rain:false,family:true},
+  {key:'wieliczka',image:'wieliczka',featured:true,duration:'halfDay',travel:'35–50 min',transport:'carTour',booking:'recommended',rain:true,family:true,tour:true},
+  {key:'auschwitz',image:'auschwitz',featured:true,duration:'fullDay',travel:'1,5–2 h',transport:'carTour',booking:'advance',rain:true,family:false,tour:true},
+  {key:'zakopane',image:'zakopane',featured:true,duration:'fullDay',travel:'2–2,5 h',transport:'carTour',booking:'recommended',rain:false,family:true,tour:true},
+  {key:'kazimierz',image:'kazimierz',duration:'city',travel:'25–35 min',transport:'tramWalk',booking:'optional',rain:true,family:true},
+  {key:'wawel',image:'wawel',duration:'city',travel:'20–30 min',transport:'tramWalk',booking:'recommended',rain:true,family:true},
+  {key:'ojcow',image:'ojcow',duration:'halfDay',travel:'35–50 min',transport:'carTour',booking:'recommended',rain:false,family:true,tour:true},
+  {key:'energylandia',image:'energylandia',duration:'fullDay',travel:'1–1,5 h',transport:'carTour',booking:'recommended',rain:false,family:true,tour:true},
+  {key:'schindler',image:'schindler',duration:'city',travel:'25–35 min',transport:'tramWalk',booking:'recommended',rain:true,family:true},
+  {key:'waterPark',image:'waterPark',duration:'halfDay',travel:'15–25 min',transport:'tramBus',booking:'recommended',rain:true,family:true},
+];
+const featured = definitions.filter((item)=>item.featured);
+const compact = definitions.filter((item)=>!item.featured);
+const inquiryHref = `${bookingHref}${bookingHref.includes('?') ? '&' : '?'}tour=proposal#reservation-mini-game`;
+const value = (group:keyof typeof copy.practical,key:string) => copy.practical[key as keyof typeof copy.practical] || key;
+---
+
+<section class="site-section home-explore" id="atrakcje-wycieczki" data-home-attractions-tours>
+  <div class="container">
+    <header class="home-explore__head reveal-section">
+      <span class="section-kicker">{copy.kicker}</span>
+      <h2 class="section-title">{copy.title}</h2>
+      <p>{copy.lead}</p>
+    </header>
+
+    <div class="home-explore__featured">
+      {featured.map((item) => {
+        const image = attractionImages[item.image];
+        const text = copy.items[item.key];
+        return <article class:list={['home-explore-card','home-explore-card--featured',item.key === 'auschwitz' && 'home-explore-card--memorial']} data-attraction-card={item.key}>
+          <div class="home-explore-card__media">
+            <img src={image.src} alt={text.name} width={image.width} height={image.height} sizes={image.sizes} loading="lazy" decoding="async" />
+            <span>{text.name}</span>
+          </div>
+          <div class="home-explore-card__body">
+            <h3>{text.name}</h3><p>{text.description}</p>
+            <dl>
+              <div><dt><Icon name="Clock3" size={16}/>{copy.labels.duration}</dt><dd>{value('city',item.duration)}</dd></div>
+              <div><dt><Icon name="Route" size={16}/>{copy.labels.travel}</dt><dd>{item.travel}</dd></div>
+              <div><dt><Icon name="BusFront" size={16}/>{copy.labels.transport}</dt><dd>{value('tramWalk',item.transport)}</dd></div>
+              <div><dt><Icon name="TicketCheck" size={16}/>{copy.labels.booking}</dt><dd>{value('advance',item.booking)}</dd></div>
+            </dl>
+            <div class="home-explore-card__flags"><span>{copy.labels.rain}: <b>{item.rain ? copy.labels.yes : '—'}</b></span><span>{copy.labels.family}: <b>{item.family ? copy.labels.yes : '—'}</b></span></div>
+            <div class="home-explore-card__actions">
+              <a href={detailsHref} data-analytics-event="attraction_click" data-analytics-category={item.key} data-analytics-element={`${item.key}_details`}>{copy.labels.details}<Icon name="ArrowUpRight" size={17}/></a>
+              {item.tour && <a class="is-tour" href={tourBookingHref} target="_blank" rel="noopener noreferrer" data-analytics-event="tour_click" data-analytics-category={item.key} data-analytics-element={`${item.key}_tour`}>{copy.labels.tour}<Icon name="TicketCheck" size={17}/></a>}
+            </div>
+          </div>
+        </article>;
+      })}
+    </div>
+
+    <aside class="auschwitz-notice reveal-section" data-auschwitz-warning>
+      <div class="auschwitz-notice__icon"><Icon name="ShieldAlert" size={30}/></div>
+      <div><span>{copy.labels.limited}</span><h3>{copy.auschwitz.title}</h3><p>{copy.auschwitz.body}</p><ul><li>{copy.auschwitz.arrival}</li><li>{copy.auschwitz.luggage}</li></ul></div>
+      <div class="auschwitz-notice__actions">
+        <a href={officialHref} target="_blank" rel="noopener noreferrer" data-analytics-event="attraction_click" data-analytics-category="auschwitz_official" data-analytics-element="auschwitz_official_entry">{copy.auschwitz.official}<Icon name="ExternalLink" size={17}/></a>
+        <a href={tourBookingHref} target="_blank" rel="noopener noreferrer" data-analytics-event="tour_click" data-analytics-category="auschwitz" data-analytics-element="auschwitz_tour">{copy.auschwitz.tour}<Icon name="BusFront" size={17}/></a>
+      </div>
+    </aside>
+
+    <div class="home-explore__compact" aria-label={copy.title}>
+      {compact.map((item) => {
+        const image = attractionImages[item.image]; const text = copy.items[item.key];
+        return <article class="home-explore-mini" data-attraction-card={item.key}>
+          <img src={image.src} alt={text.name} width={image.width} height={image.height} sizes={image.sizes} loading="lazy" decoding="async" />
+          <div><span>{value('city',item.duration)} · {item.travel}</span><h3>{text.name}</h3><p>{text.description}</p><div>
+            <a href={detailsHref} data-analytics-event="attraction_click" data-analytics-category={item.key} data-analytics-element={`${item.key}_details`}>{copy.labels.details}</a>
+            {item.tour && <a href={tourBookingHref} target="_blank" rel="noopener noreferrer" data-analytics-event="tour_click" data-analytics-category={item.key} data-analytics-element={`${item.key}_tour`}>{copy.labels.tour}</a>}
+          </div></div>
+        </article>;
+      })}
+    </div>
+
+    <section class="home-tours reveal-section" aria-labelledby="homeToursTitle">
+      <div class="home-tours__copy"><span>{copy.tours.kicker}</span><h3 id="homeToursTitle">{copy.tours.title}</h3><p>{copy.tours.lead}</p>
+        <ul><li>{copy.tours.availability}</li><li>{copy.tours.operator}</li><li>{copy.tours.noGuarantee}</li></ul>
+      </div>
+      <div class="home-tours__destinations">{['Wieliczka','Auschwitz-Birkenau','Zakopane','Ojców','Energylandia'].map((name)=><span>{name}</span>)}</div>
+      <div class="home-tours__actions">
+        <a href={tourBookingHref} target="_blank" rel="noopener noreferrer" data-analytics-event="tour_click" data-analytics-category="all_tours" data-analytics-element="tours_check">{copy.tours.check}<Icon name="ArrowUpRight" size={18}/></a>
+        <a href={inquiryHref} data-analytics-event="click_cta" data-analytics-category="tours" data-analytics-element="tours_inquiry">{copy.tours.inquiry}<Icon name="CalendarCheck" size={18}/></a>
+        <button type="button" data-tour-campy data-analytics-event="open_campy" data-analytics-category="tours" data-analytics-element="tours_campy">{copy.tours.campy}<Icon name="MessageCircleQuestion" size={18}/></button>
+      </div>
+    </section>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll('[data-home-attractions-tours] [data-tour-campy]').forEach((button)=>button.addEventListener('click',()=>{
+    window.dispatchEvent(new CustomEvent('campy:prompt',{detail:{prompt:'Auschwitz-Birkenau, Wieliczka, Zakopane, Ojców i Energylandia — jak zaplanować wycieczkę i rezerwację?',actionKey:'toursFromKrakow'}}));
+  }));
+</script>
+
+<style>
+.home-explore{position:relative;overflow:hidden;background:radial-gradient(circle at 10% 0,rgba(60,179,113,.13),transparent 30%),linear-gradient(180deg,#f6f9f4,#eaf3ec)}.home-explore__head{max-width:900px}.home-explore__head>p{max-width:760px;margin:16px 0 0;color:#53635a;font-size:1.05rem;line-height:1.7}.home-explore__featured{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:44px}.home-explore-card{min-width:0;overflow:hidden;border:1px solid rgba(27,105,63,.14);border-radius:30px;background:rgba(255,255,255,.82);box-shadow:0 24px 70px rgba(17,54,34,.1)}.home-explore-card__media{position:relative;min-height:320px;overflow:hidden}.home-explore-card__media:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 42%,rgba(3,18,10,.68))}.home-explore-card__media img{width:100%;height:100%;min-height:320px;object-fit:cover;transition:transform .55s cubic-bezier(.22,1,.36,1)}.home-explore-card:hover img,.home-explore-mini:hover img{transform:scale(1.045)}.home-explore-card__media>span{position:absolute;z-index:2;left:24px;bottom:20px;color:#fff;font-size:clamp(1.5rem,2.3vw,2.35rem);font-weight:950;text-shadow:0 8px 28px rgba(0,0,0,.45)}.home-explore-card__body{display:grid;gap:17px;padding:24px}.home-explore-card__body h3{margin:0;color:#102319;font-size:1.55rem}.home-explore-card__body>p{min-height:52px;margin:0;color:#58685f;line-height:1.65}.home-explore-card dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:0}.home-explore-card dl>div{min-width:0;padding:12px;border:1px solid #d8e8dd;border-radius:15px;background:#f7fbf8}.home-explore-card dt{display:flex;align-items:center;gap:6px;color:#397054;font-size:.68rem;font-weight:900;text-transform:uppercase}.home-explore-card dd{margin:6px 0 0;color:#15291e;font-size:.84rem;font-weight:850}.home-explore-card__flags{display:flex;flex-wrap:wrap;gap:8px}.home-explore-card__flags span{padding:7px 10px;border-radius:999px;color:#3e5d4b;background:#edf6f0;font-size:.72rem}.home-explore-card__actions,.home-tours__actions{display:flex;flex-wrap:wrap;gap:9px}.home-explore-card__actions a,.auschwitz-notice__actions a,.home-tours__actions a,.home-tours__actions button{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 14px;border:1px solid #bcdcc8;border-radius:13px;color:#185336;background:#eff8f2;font:inherit;font-size:.8rem;font-weight:900;text-decoration:none;cursor:pointer}.home-explore-card__actions a.is-tour,.auschwitz-notice__actions a:last-child,.home-tours__actions a:first-child{border-color:#258853;color:#fff;background:linear-gradient(135deg,#35b66f,#167743)}.auschwitz-notice{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(220px,auto);gap:20px;align-items:start;margin:26px 0;padding:25px;border:1px solid rgba(181,135,42,.32);border-radius:26px;background:linear-gradient(135deg,#fff9e8,#f2f8f2);box-shadow:0 20px 60px rgba(75,58,20,.1)}.auschwitz-notice__icon{width:54px;height:54px;display:grid;place-items:center;border-radius:17px;color:#6d4b08;background:#ffe6a6}.auschwitz-notice h3{margin:5px 0 9px;color:#2b2617;font-size:1.35rem}.auschwitz-notice span{color:#986c11;font-size:.7rem;font-weight:950;text-transform:uppercase}.auschwitz-notice p,.auschwitz-notice li{color:#5e5849;line-height:1.6}.auschwitz-notice p{margin:0}.auschwitz-notice ul{margin:12px 0 0;padding-left:18px}.auschwitz-notice__actions{display:grid;gap:9px}.home-explore__compact{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.home-explore-mini{min-width:0;overflow:hidden;border:1px solid #d5e6da;border-radius:23px;background:rgba(255,255,255,.8)}.home-explore-mini>img{width:100%;aspect-ratio:16/9;object-fit:cover;transition:transform .45s ease}.home-explore-mini>div{padding:18px}.home-explore-mini>div>span{color:#328057;font-size:.67rem;font-weight:900;text-transform:uppercase}.home-explore-mini h3{margin:7px 0;color:#15291e;font-size:1.1rem}.home-explore-mini p{min-height:68px;margin:0;color:#5c6b62;font-size:.85rem;line-height:1.55}.home-explore-mini div>div{display:flex;flex-wrap:wrap;gap:10px;margin-top:13px}.home-explore-mini a{color:#176b42;font-size:.76rem;font-weight:900}.home-tours{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(240px,.8fr);gap:22px;margin-top:30px;padding:clamp(25px,4vw,42px);border:1px solid rgba(110,230,162,.2);border-radius:30px;color:#f4fff8;background:radial-gradient(circle at 90% 0,rgba(73,222,137,.22),transparent 34%),linear-gradient(145deg,#08291c,#0b3e28);box-shadow:0 30px 80px rgba(5,39,24,.24)}.home-tours__copy>span{color:#77eba8;font-size:.7rem;font-weight:950;text-transform:uppercase}.home-tours h3{margin:7px 0 10px;color:#fff;font-size:clamp(1.8rem,3vw,2.65rem)}.home-tours p,.home-tours li{color:rgba(238,255,245,.72);line-height:1.65}.home-tours ul{padding-left:18px}.home-tours__destinations{display:flex;flex-wrap:wrap;align-content:start;gap:8px}.home-tours__destinations span{padding:9px 12px;border:1px solid rgba(119,235,168,.2);border-radius:999px;background:rgba(255,255,255,.06);font-size:.78rem;font-weight:850}.home-tours__actions{grid-column:1/-1}.home-tours__actions a,.home-tours__actions button{border-color:rgba(119,235,168,.25);color:#effff5;background:rgba(255,255,255,.07)}html[data-theme="dark"] .home-explore{background:radial-gradient(circle at 10% 0,rgba(60,179,113,.16),transparent 30%),linear-gradient(180deg,#071a11,#0a2418)}html[data-theme="dark"] .home-explore__head>p{color:rgba(239,255,245,.65)}html[data-theme="dark"] .home-explore-card,html[data-theme="dark"] .home-explore-mini{border-color:rgba(112,226,160,.17);background:rgba(255,255,255,.05);box-shadow:0 25px 70px rgba(0,0,0,.22)}html[data-theme="dark"] .home-explore-card__body h3,html[data-theme="dark"] .home-explore-card dd,html[data-theme="dark"] .home-explore-mini h3{color:#f4fff8}html[data-theme="dark"] .home-explore-card__body>p,html[data-theme="dark"] .home-explore-mini p{color:rgba(235,255,243,.67)}html[data-theme="dark"] .home-explore-card dl>div{border-color:rgba(112,226,160,.13);background:rgba(255,255,255,.045)}html[data-theme="dark"] .home-explore-card dt{color:#74dda2}html[data-theme="dark"] .home-explore-card__flags span{color:#bcebd0;background:rgba(85,208,138,.1)}html[data-theme="dark"] .auschwitz-notice{border-color:rgba(236,193,90,.28);background:linear-gradient(135deg,rgba(88,65,12,.35),rgba(12,46,30,.82))}html[data-theme="dark"] .auschwitz-notice h3{color:#fff3c8}html[data-theme="dark"] .auschwitz-notice p,html[data-theme="dark"] .auschwitz-notice li{color:rgba(255,249,226,.72)}
+@media(max-width:980px){.home-explore__featured{grid-template-columns:1fr}.home-explore__compact{grid-template-columns:repeat(2,minmax(0,1fr))}.auschwitz-notice{grid-template-columns:auto minmax(0,1fr)}.auschwitz-notice__actions{grid-column:1/-1;grid-template-columns:1fr 1fr}.home-tours{grid-template-columns:1fr}}
+@media(max-width:620px){.home-explore__featured{margin-top:30px}.home-explore-card__media,.home-explore-card__media img{min-height:270px}.home-explore-card{border-radius:23px}.home-explore-card__body{padding:18px}.home-explore-card dl{grid-template-columns:1fr 1fr}.home-explore-card__actions a{flex:1}.home-explore__compact{grid-template-columns:1fr}.home-explore-mini p{min-height:auto}.auschwitz-notice{grid-template-columns:1fr;padding:19px}.auschwitz-notice__actions{grid-column:1;grid-template-columns:1fr}.home-tours{padding:22px 18px}.home-tours__actions{display:grid}.home-tours__actions>*{width:100%}}
+</style>

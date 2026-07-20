@@ -80,6 +80,16 @@ const analyticsReferrer = (value) => {
   }
 };
 
+const analyticsReferrerDomain = (value) => {
+  const raw = oneLine(value, 300);
+  if (!raw) return '';
+  try {
+    return new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`).hostname.slice(0, 180);
+  } catch {
+    return raw.split('/')[0].slice(0, 180);
+  }
+};
+
 const sanitizeAnalyticsMetadata = (value, depth = 0) => {
   if (depth > 2) return {};
   if (Array.isArray(value)) {
@@ -207,10 +217,13 @@ export const listCampStays = async () => {
 };
 
 export const getSiteEventsStatus = async () => {
-  const { body, status } = await supabaseRequest(
-    `${SITE_EVENTS_TABLE}?select=id,event_type,page_path,locale,country_guess,device_type,metadata_json,created_at&order=created_at.desc&limit=1000`,
-    { method: 'GET' },
-  );
+  const [{ body, status }, recommendationsResult] = await Promise.all([
+    supabaseRequest(
+      `${SITE_EVENTS_TABLE}?select=id,event_type,page_path,locale,country_guess,country_code,referrer_domain,session_id,element_id,category,device_type,metadata_json,created_at&order=created_at.desc&limit=1000`,
+      { method: 'GET' },
+    ),
+    supabaseRequest('analytics_recommendations?select=recommendation_key,status&limit=1', { method: 'GET' }),
+  ]);
   const events = Array.isArray(body) ? body : [];
   const countBy = (read) => events.reduce((map, event) => {
     const key = oneLine(read(event), 160) || 'unknown';
@@ -237,8 +250,8 @@ export const getSiteEventsStatus = async () => {
       map[key] = (map[key] || 0) + 1;
       return map;
     }, {}),
-    campyTopics: eventsOf('campy_question').reduce((map, event) => {
-      const topic = oneLine(safeObject(event.metadata_json).topic, 80) || 'inne';
+    campyTopics: events.filter((event) => ['campy_question', 'campy_question_category'].includes(event.event_type)).reduce((map, event) => {
+      const topic = oneLine(event.category || safeObject(event.metadata_json).topic, 80) || 'inne';
       map[topic] = (map[topic] || 0) + 1;
       return map;
     }, {}),
@@ -249,7 +262,7 @@ export const getSiteEventsStatus = async () => {
     },
     campy: {
       opened: eventsOf('open_campy').length,
-      questions: eventsOf('campy_question').length,
+      questions: events.filter((event) => ['campy_question', 'campy_question_category'].includes(event.event_type)).length,
     },
     tours: eventsOf('tour_cta_click').length,
     myStay: {
@@ -262,6 +275,7 @@ export const getSiteEventsStatus = async () => {
     status,
     table: SITE_EVENTS_TABLE,
     eventCount: events.length,
+    recommendationsReady: Array.isArray(recommendationsResult.body),
     recentEvents: events.slice(0, 100),
     summary,
   };
@@ -296,9 +310,14 @@ export const allowedSiteEventTypes = new Set([
   'page_view',
   'language_change',
   'click_cta',
+  'click_nav',
   'open_campy',
   'campy_question',
+  'campy_question_category',
   'start_booking_form',
+  'booking_step_view',
+  'booking_field_error',
+  'booking_abandon',
   'submit_booking_form',
   'feedback_submit',
   'filter_used',
@@ -307,19 +326,24 @@ export const allowedSiteEventTypes = new Set([
   'open_my_stay',
   'my_stay_feedback',
   'tour_cta_click',
+  'tour_click',
+  'attraction_click',
   'maps_cta_click',
   'tram_info_click',
   'open_weather',
   'weather_cta_click',
+  'open_planner',
+  'planner_option_change',
   'planner_generate',
   'planner_add_night',
   'planner_change_nights',
   'open_summer_notice',
   'my_stay_checklist_click',
   'smart_concierge_action',
+  'slider_click',
 ]);
 
-export const saveSiteEvent = async (payload = {}) => {
+export const saveSiteEvent = async (payload = {}, context = {}) => {
   const eventType = oneLine(payload.eventType || payload.event_type, 80);
   if (!allowedSiteEventTypes.has(eventType)) {
     throw new InboxApiError('ANALYTICS_EVENT_NOT_ALLOWED', 'Nieobsługiwany typ eventu.', {
@@ -328,22 +352,51 @@ export const saveSiteEvent = async (payload = {}) => {
     });
   }
 
-  const metadata = sanitizeAnalyticsMetadata(payload.metadata || payload.metadata_json);
+  const sessionId = oneLine(payload.sessionId || payload.session_id, 120);
+  const metadata = {
+    ...sanitizeAnalyticsMetadata(payload.metadata || payload.metadata_json),
+    ...(sessionId ? { sessionId } : {}),
+  };
   const metadataText = JSON.stringify(metadata).slice(0, 5000);
   const record = {
     event_type: eventType,
     page_path: analyticsPath(payload.pagePath || payload.page_path),
     locale: oneLine(payload.locale, 16).toLowerCase(),
-    country_guess: oneLine(payload.countryGuess || payload.country_guess, 80),
+    country_guess: oneLine(payload.countryGuess || payload.country_guess || context.countryCode, 80),
+    country_code: oneLine(context.countryCode || payload.countryCode || payload.country_code, 2).toUpperCase(),
     referrer: analyticsReferrer(payload.referrer),
+    referrer_domain: analyticsReferrerDomain(payload.referrerDomain || payload.referrer_domain || payload.referrer),
     device_type: oneLine(payload.deviceType || payload.device_type, 40),
+    session_id: sessionId,
+    element_id: oneLine(payload.elementId || payload.element_id || metadata.elementId || metadata.label, 160),
+    category: oneLine(payload.category || metadata.category || metadata.topic || metadata.attraction || metadata.tour, 120),
     metadata_json: JSON.parse(metadataText || '{}'),
   };
 
-  const { body } = await supabaseRequest(`${SITE_EVENTS_TABLE}?select=id,created_at`, {
-    method: 'POST',
-    headers: { prefer: 'return=representation' },
-    body: JSON.stringify(record),
-  });
-  return Array.isArray(body) ? body[0] : body;
+  try {
+    const { body } = await supabaseRequest(`${SITE_EVENTS_TABLE}?select=id,created_at`, {
+      method: 'POST',
+      headers: { prefer: 'return=representation' },
+      body: JSON.stringify(record),
+    });
+    return Array.isArray(body) ? body[0] : body;
+  } catch (error) {
+    const schemaText = `${error?.message || ''} ${error?.details || ''}`.toLowerCase();
+    if (!/country_code|referrer_domain|session_id|element_id|category|schema cache|column/.test(schemaText)) throw error;
+    const legacyRecord = {
+      event_type: record.event_type,
+      page_path: record.page_path,
+      locale: record.locale,
+      country_guess: record.country_code || record.country_guess,
+      referrer: record.referrer_domain || record.referrer,
+      device_type: record.device_type,
+      metadata_json: record.metadata_json,
+    };
+    const { body } = await supabaseRequest(`${SITE_EVENTS_TABLE}?select=id,created_at`, {
+      method: 'POST',
+      headers: { prefer: 'return=representation' },
+      body: JSON.stringify(legacyRecord),
+    });
+    return Array.isArray(body) ? body[0] : body;
+  }
 };

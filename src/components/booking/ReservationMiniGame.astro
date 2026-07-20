@@ -1741,6 +1741,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     let modalReturnScrollY = 0;
     let modalWasOpen = false;
     let modalScrollLock = null;
+    let lastValidationCategory = '';
 
     const hideViewportToast = () => {
       if (!(viewportToast instanceof HTMLElement)) return;
@@ -2394,6 +2395,9 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       .replace(/[\u0300-\u036f]/g, '');
 
     const currentStepKey = () => steps[state.step - 1] ?? 'start';
+    const trackAnalytics = (eventType, metadata = {}) => window.dispatchEvent(new CustomEvent('cc:analytics', {
+      detail: { eventType, metadata: { source: 'reservation_form', ...metadata } },
+    }));
 
     const countryMatches = () => {
       const query = normalize(state.details.countrySearch);
@@ -4237,12 +4241,15 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 
     const validateBeforeNext = () => {
       state.hint = '';
+      lastValidationCategory = '';
       if (state.step === 1 && (!state.dates.arrival || !state.dates.departure || nights() < 1)) {
         state.hint = formText.validation.dates;
+        lastValidationCategory = 'dates';
         return false;
       }
       if (state.step === 3 && state.mode !== 'simple' && !hasChosenService()) {
         state.hint = formText.validation.service || t.hints.chooseService;
+        lastValidationCategory = 'service';
         return false;
       }
       return true;
@@ -4251,38 +4258,46 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const validateForSubmit = () => {
       state.submitAttempted = true;
       state.hint = '';
+      lastValidationCategory = '';
       if (!state.dates.arrival || !state.dates.departure || nights() < 1) {
         state.hint = formText.validation.dates;
+        lastValidationCategory = 'dates';
         state.step = 1;
         return false;
       }
       if (state.mode !== 'simple' && !hasChosenService()) {
         state.hint = formText.validation.service;
+        lastValidationCategory = 'service';
         state.step = 3;
         return false;
       }
       if (summerCampingBlocked()) {
         state.hint = config.summerBlock?.toast || highSeasonCampingNotice();
+        lastValidationCategory = 'summer_camping';
         state.step = 1;
         return false;
       }
       if (!state.details.name.trim()) {
         state.hint = formText.validation.name;
+        lastValidationCategory = 'name';
         state.step = 4;
         return false;
       }
       if (!state.details.email.trim() && !state.details.phone.trim()) {
         state.hint = formText.validation.contact;
+        lastValidationCategory = 'contact';
         state.step = 4;
         return false;
       }
       if (!state.details.countryCode) {
         state.hint = formText.validation.country;
+        lastValidationCategory = 'country';
         state.step = 4;
         return false;
       }
       if (!state.details.quiet || !state.details.consent || !state.details.privacy) {
         state.hint = formText.validation.consents || t.hints.required;
+        lastValidationCategory = 'consents';
         state.step = 4;
         return false;
       }
@@ -4301,6 +4316,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const submit = async () => {
       if (state.submitting) return;
       if (!validateForSubmit()) {
+        trackAnalytics('booking_field_error', { category: lastValidationCategory || 'unknown', step: currentStepKey() });
         showViewportToast(state.hint, 'error');
         renderStepDom();
         window.setTimeout(scrollFirstIssue, 50);
@@ -4336,6 +4352,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           }
           state.submitError = result?.reason || result?.message || errors || config.clientSuccess.errorText;
           state.hint = state.submitError;
+          trackAnalytics('booking_field_error', { category: result?.code || 'submit_api', step: currentStepKey() });
           showViewportToast(state.submitError, 'error');
           state.step = result?.code === 'SUMMER_CAMPING_BLOCKED' ? 1 : 4;
           state.submitting = false;
@@ -4360,6 +4377,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         state.hint = state.submitError;
         showViewportToast(config.clientSuccess.errorText, 'error');
         state.step = 4;
+        trackAnalytics('booking_field_error', { category: 'submit_network', step: currentStepKey() });
       } finally {
         state.submitting = false;
         render();
@@ -4647,6 +4665,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         event.preventDefault();
         state.step = Math.max(1, state.step - 1);
         state.hint = '';
+        trackAnalytics('booking_step_view', { category: currentStepKey(), direction: 'back' });
         renderStepDom({ motion: 'step' });
         scheduleScrollToTop();
         return;
@@ -4655,6 +4674,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
       if (target.closest('[data-next]')) {
         event.preventDefault();
         if (!validateBeforeNext()) {
+          trackAnalytics('booking_field_error', { category: lastValidationCategory || 'unknown', step: currentStepKey() });
           showViewportToast(state.hint, 'error');
           renderStepDom();
           window.setTimeout(scrollFirstIssue, 90);
@@ -4663,6 +4683,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
         const previousStepKey = currentStepKey();
         const reward = stepRewards[previousStepKey] || '';
         state.step = Math.min(5, state.step + 1);
+        trackAnalytics('booking_step_view', { category: currentStepKey(), direction: 'next', stayType: state.mode || 'unknown' });
         state.toast = reward;
         renderStepDom({ motion: 'step' });
         if (reward) {
@@ -4836,12 +4857,24 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
     const queryParams = new URLSearchParams(window.location.search);
     const queryMode = queryParams.get('stay');
     const queryPreset = queryParams.get('preset');
+    const queryTour = normalize(queryParams.get('tour'));
     if (stayModes.includes(queryMode)) {
       state.mode = queryMode;
       state.step = queryPreset ? 3 : 1;
       render({ motion: 'step' });
       if (queryPreset) applyPreset(queryPreset);
     }
+    if (queryTour) {
+      const selectedTour = queryTour === 'proposal'
+        ? tourOptions[tourOptions.length - 1]
+        : tourOptions.find((option) => normalize(option).includes(queryTour));
+      if (selectedTour && !state.tours.includes(selectedTour)) state.tours.push(selectedTour);
+      if (selectedTour) {
+        root.dataset.preselectedTour = selectedTour;
+        renderStepDom({ motion: 'soft' });
+      }
+    }
+    trackAnalytics('booking_step_view', { category: currentStepKey(), direction: 'entry', stayType: state.mode || 'unknown' });
 
     window.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;

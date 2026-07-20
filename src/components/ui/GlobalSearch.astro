@@ -8,18 +8,18 @@ const pathContext = getPathContext(Astro.url.pathname);
 const entries = getSearchIndex(pathContext.languageCode);
 const [dialog, label, placeholder, close, heading, empty, noResultsHeading, noResults, loading] = getCoreUi(pathContext.languageCode).search;
 const localizedHints = {
-  pl: ['prąd', 'pies', 'tramwaj', 'Google Maps', 'dokument', 'Wieliczka', 'Auschwitz', 'sezon', 'ręczniki', 'po 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Park Wodny'],
-  de: ['Strom', 'Hund', 'Straßenbahn', 'Google Maps', 'Dokument', 'Wieliczka', 'Auschwitz', 'Saison', 'Handtücher', 'nach 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Wasserpark'],
-  it: ['elettricità', 'cane', 'tram', 'Google Maps', 'documento', 'Wieliczka', 'Auschwitz', 'stagione', 'asciugamani', 'dopo le 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Parco acquatico'],
-  fr: ['électricité', 'chien', 'tramway', 'Google Maps', 'document', 'Wieliczka', 'Auschwitz', 'saison', 'serviettes', 'après 21h', 'Kazimierz', 'Bagry', 'Kryspinów', 'Parc aquatique'],
-  es: ['electricidad', 'perro', 'tranvía', 'Google Maps', 'documento', 'Wieliczka', 'Auschwitz', 'temporada', 'toallas', 'después de las 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Parque acuático'],
-  nl: ['stroom', 'hond', 'tram', 'Google Maps', 'document', 'Wieliczka', 'Auschwitz', 'seizoen', 'handdoeken', 'na 21 uur', 'Kazimierz', 'Bagry', 'Kryspinów', 'Waterpark'],
-  cs: ['elektřina', 'pes', 'tramvaj', 'Google Maps', 'doklad', 'Wieliczka', 'Auschwitz', 'sezóna', 'ručníky', 'po 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Vodní park'],
-  sk: ['elektrina', 'pes', 'električka', 'Google Maps', 'doklad', 'Wieliczka', 'Auschwitz', 'sezóna', 'uteráky', 'po 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Vodný park'],
-  sv: ['el', 'hund', 'spårvagn', 'Google Maps', 'dokument', 'Wieliczka', 'Auschwitz', 'säsong', 'handdukar', 'efter 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Vattenpark'],
+  pl: ['prąd', 'pies', 'tramwaj', 'Google Maps', 'bilety Auschwitz', 'karta wstępu', 'wycieczki', 'Wieliczka', 'Zakopane', 'Ojców', 'Energylandia', 'dokument'],
+  de: ['Strom', 'Hund', 'Straßenbahn', 'Google Maps', 'Auschwitz Tickets', 'Eintrittskarte', 'Ausflüge', 'Wieliczka', 'Zakopane', 'Ojców', 'Energylandia', 'Dokument'],
+  it: ['elettricità', 'cane', 'tram', 'Google Maps', 'biglietti Auschwitz', 'carta ingresso', 'tour', 'Wieliczka', 'Zakopane', 'Ojców', 'Energylandia', 'documento'],
+  fr: ['électricité', 'chien', 'tramway', 'Google Maps', 'billets Auschwitz', 'carte d’entrée', 'excursions', 'Wieliczka', 'Zakopane', 'Ojców', 'Energylandia', 'document'],
+  es: ['electricidad', 'perro', 'tranvía', 'Google Maps', 'entradas Auschwitz', 'tarjeta de entrada', 'excursiones', 'Wieliczka', 'Zakopane', 'Ojców', 'Energylandia', 'documento'],
+  nl: ['stroom', 'hond', 'tram', 'Google Maps', 'tickets Auschwitz', 'toegangsbewijs', 'tours', 'Wieliczka', 'Zakopane', 'Ojców', 'Energylandia', 'document'],
+  cs: ['elektřina', 'pes', 'tramvaj', 'Google Maps', 'vstupenky Auschwitz', 'vstupní karta', 'výlety', 'Wieliczka', 'Zakopane', 'Ojców', 'Energylandia', 'doklad'],
+  sk: ['elektrina', 'pes', 'električka', 'Google Maps', 'vstupenky Auschwitz', 'vstupná karta', 'výlety', 'Wieliczka', 'Zakopane', 'Ojców', 'Energylandia', 'doklad'],
+  sv: ['el', 'hund', 'spårvagn', 'Google Maps', 'Auschwitz biljetter', 'inträdeskort', 'turer', 'Wieliczka', 'Zakopane', 'Ojców', 'Energylandia', 'dokument'],
 } as const;
 const hints = localizedHints[pathContext.languageCode as keyof typeof localizedHints]
-  ?? ['electricity', 'dog', 'tram', 'Google Maps', 'document', 'Wieliczka', 'Auschwitz', 'season', 'towels', 'after 21', 'Kazimierz', 'Bagry', 'Kryspinów', 'Water Park'];
+  ?? ['electricity', 'dog', 'tram', 'Google Maps', 'Auschwitz tickets', 'entry card', 'tours', 'Wieliczka', 'Zakopane', 'Ojców', 'Energylandia', 'document'];
 const searchCopy = { dialog, label, placeholder, close, heading, empty, noResultsHeading, noResults, loading, hints };
 const searchConfig = {
   entries,
