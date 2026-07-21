@@ -66,11 +66,13 @@ try {
     assert.ok(weatherCopy[language].heroUnavailable,`${language}: brak fallbacku pogody w hero.`);
     assert.equal(Object.keys(weatherCopy[language].conditions).length,8,`${language}: niepełne opisy warunków.`);
     const drawer = getWeatherCopy(language);
-    ['viewForecast','currentWeather','hourlyForecast','weekForecast','retry','openPlanner','askCampy','close'].forEach((key) => assert.ok(drawer[key],`${language}: brak weather drawer ${key}.`));
+    ['weatherLabel','viewForecast','currentWeather','hourlyForecast','weekForecast','retry','openPlanner','askCampy','close'].forEach((key) => assert.ok(drawer[key],`${language}: brak weather drawer ${key}.`));
+    assert.deepEqual(Object.keys(drawer.dayStatuses),['rain','heat','clear','wind','neutral'],`${language}: niepełne statusy kart dziennych.`);
   }
 
   const client = fs.readFileSync('src/lib/weatherClient.js','utf8');
   const card = fs.readFileSync('src/components/WeatherCard.astro','utf8');
+  const hero = fs.readFileSync('src/components/Hero.astro','utf8');
   const planner = fs.readFileSync('src/scripts/stayPlannerClient.js','utf8');
   const myStay = fs.readFileSync('src/pages/stay/index.astro','utf8');
   const slider = fs.readFileSync('src/components/home/HeroExperienceCard.astro','utf8');
@@ -88,6 +90,10 @@ try {
   assert.match(slider,/kind:'welcome'[\s\S]*kind:'summer'[\s\S]*kind:'weather'[\s\S]*kind:'directions'[\s\S]*kind:'trips'/);
   assert.match(card,/data-weather-dialog/);
   assert.match(card,/data-weather-hourly/);
+  assert.match(card,/data-weather-hour-card/);
+  assert.match(card,/data-weather-day-card/);
+  assert.match(hero,/new Date\(\)\.getFullYear\(\)/);
+  assert.doesNotMatch(hero,/2026/);
   for (const language of weatherLanguages) assert.match(slider,new RegExp(`\\n  ${language}: \\{`));
   assert.doesNotMatch(plannerCopy,/Planer Premium 3\.0|Premium Planner 3\.0|Premium-Planer 3\.0|Planner Premium 3\.0|Planificateur Premium 3\.0|Planificador Premium 3\.0|Premiumplanerare 3\.0/i);
 

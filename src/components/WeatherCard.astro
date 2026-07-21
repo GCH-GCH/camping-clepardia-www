@@ -14,24 +14,31 @@ const config = JSON.stringify({ copy,languageCode,plannerHref });
 <section class:list={['weather-card',compact && 'weather-card--compact',hero && 'weather-card--hero']} data-weather-card data-weather-variant={hero ? 'hero' : 'card'} data-weather-config={config} aria-label={copy.title}>
   {hero ? (
     <>
-      <button class="weather-card__trigger" type="button" data-weather-open aria-haspopup="dialog" aria-controls={dialogId} aria-label={copy.drawerAria}>
-        <span class="weather-card__edge-summary" aria-hidden="true">
-          <span class="weather-card__icon" data-weather-icon><Icon name="CloudSun" size={30} strokeWidth={1.9} /></span>
-          <strong data-weather-temperature>—</strong>
-        </span>
-        <span class="weather-card__main">
-          <span class="weather-card__eyebrow"><i aria-hidden="true"></i>{copy.heroLocation}</span>
-          <span class="weather-card__loading" data-weather-status>{copy.loading}</span>
-          <span class="weather-card__facts" data-weather-facts hidden>
-            <span data-weather-condition>—</span>
-            <span class="weather-card__metrics">
-              <small data-weather-rain>—</small>
-              <small data-weather-wind>—</small>
+      <button class="weather-card__trigger" type="button" data-weather-open aria-haspopup="dialog" aria-controls={dialogId} aria-expanded="false" aria-label={copy.drawerAria}>
+        <span class="weather-card__panel">
+          <span class="weather-card__main">
+            <span class="weather-card__eyebrow"><i aria-hidden="true"></i>{copy.heroLocation}</span>
+            <span class="weather-card__loading" data-weather-status>{copy.loading}</span>
+            <span class="weather-card__facts" data-weather-facts hidden>
+              <span data-weather-condition>—</span>
+              <small class="weather-card__feels" data-weather-feels>—</small>
+              <span class="weather-card__metrics">
+                <small data-weather-rain>—</small>
+                <small data-weather-wind>—</small>
+              </span>
+              <small class="weather-card__updated" data-weather-card-updated></small>
             </span>
-            <small class="weather-card__updated" data-weather-card-updated></small>
           </span>
+          <span class="weather-card__open-label">{copy.viewForecast}<Icon name="ArrowUpRight" size={16} strokeWidth={2} /></span>
         </span>
-        <span class="weather-card__open-label">{copy.viewForecast}<Icon name="ArrowUpRight" size={16} strokeWidth={2} /></span>
+        <span class="weather-card__edge-summary" aria-hidden="true">
+          <small>{copy.weatherLabel}</small>
+          <span class="weather-card__edge-row">
+            <span class="weather-card__icon" data-weather-icon><Icon name="CloudSun" size={30} strokeWidth={1.9} /></span>
+            <strong data-weather-temperature>—</strong>
+          </span>
+          <span class="weather-card__edge-meta"><i data-weather-tab-rain>—</i><b>‹</b></span>
+        </span>
       </button>
 
       <dialog class="weather-dialog" id={dialogId} data-weather-dialog role="dialog" aria-modal="true" aria-labelledby={`${dialogId}-title`}>
@@ -168,7 +175,7 @@ const config = JSON.stringify({ copy,languageCode,plannerHref });
         const weather = conditionFor(hour.weatherCode);
         const date = new Date(hour.time);
         const time = Number.isNaN(date.getTime()) ? String(hour.time || '').slice(11,16) : new Intl.DateTimeFormat(dateLocale,{ hour:'2-digit',minute:'2-digit' }).format(date);
-        return `<article><time>${escapeHtml(time)}</time><span aria-hidden="true">${weather.emoji}</span><strong>${Math.round(safeNumber(hour.temperatureC))}°</strong><small>⌄ ${Number.isFinite(Number(hour.rainProbability)) ? Math.round(Number(hour.rainProbability)) : 0}%</small></article>`;
+        return `<article class="weather-hour-card" data-weather-hour-card><time>${escapeHtml(time)}</time><span class="weather-hour-card__icon" aria-hidden="true">${weather.emoji}</span><strong>${Math.round(safeNumber(hour.temperatureC))}°</strong><small>⌄ ${Number.isFinite(Number(hour.rainProbability)) ? Math.round(Number(hour.rainProbability)) : 0}%</small><small>⌁ ${Math.round(safeNumber(hour.windKmh))} km/h</small></article>`;
       }).join('') : `<p class="weather-dialog__empty">${escapeHtml(copy.hourlyEmpty)}</p>`;
 
       const daily = root.querySelector('[data-weather-daily]');
@@ -178,7 +185,15 @@ const config = JSON.stringify({ copy,languageCode,plannerHref });
         const weather = conditionFor(day.weatherCode);
         const date = new Date(`${day.date}T12:00:00`);
         const dayLabel = index === 0 ? copy.today : index === 1 ? copy.tomorrow : new Intl.DateTimeFormat(dateLocale,{ weekday:'short',day:'2-digit',month:'2-digit' }).format(date);
-        return `<article><div><span aria-hidden="true">${weather.emoji}</span><strong>${escapeHtml(dayLabel)}</strong><small>${escapeHtml(weather.label)}</small></div><b>${Math.round(safeNumber(day.temperatureMinC))}° / ${Math.round(safeNumber(day.temperatureMaxC))}°</b><span>⌄ ${Math.round(safeNumber(day.rainProbability))}%</span><span>⌁ ${Math.round(safeNumber(day.windMaxKmh))} km/h</span></article>`;
+        const windKmh = safeNumber(day.windKmh,day.windMaxKmh);
+        const key = safeNumber(day.rainProbability) >= 55 || ['rain','drizzle','storm'].includes(weather.group)
+          ? 'rain'
+          : safeNumber(day.temperatureMaxC) >= 29
+            ? 'heat'
+            : windKmh >= 28
+              ? 'wind'
+              : ['clear','mostlyClear'].includes(weather.group) ? 'clear' : 'neutral';
+        return `<article class="weather-day-card" data-weather-day-card><header><span class="weather-day-card__icon" aria-hidden="true">${weather.emoji}</span><div><strong>${escapeHtml(dayLabel)}</strong><small>${escapeHtml(weather.label)}</small></div></header><div class="weather-day-card__temperature"><b>${Math.round(safeNumber(day.temperatureMaxC))}°</b><span>${Math.round(safeNumber(day.temperatureMinC))}°</span></div><div class="weather-day-card__facts"><span>⌄ ${Math.round(safeNumber(day.rainProbability))}%</span><span>⌁ ${Math.round(windKmh)} km/h</span></div><p>${escapeHtml(copy.dayStatuses[key])}</p></article>`;
       }).join('') : `<p class="weather-dialog__empty">${escapeHtml(copy.dailyEmpty)}</p>`;
       const recommendation = root.querySelector('[data-weather-recommendation]');
       if (recommendation) recommendation.textContent = recommendationFor(result);
@@ -192,15 +207,19 @@ const config = JSON.stringify({ copy,languageCode,plannerHref });
       const icon = root.querySelector('[data-weather-icon]');
       const temperature = root.querySelector('[data-weather-temperature]');
       const conditionNode = root.querySelector('[data-weather-condition]');
+      const feels = root.querySelector('[data-weather-feels]');
       const rain = root.querySelector('[data-weather-rain]');
       const wind = root.querySelector('[data-weather-wind]');
+      const tabRain = root.querySelector('[data-weather-tab-rain]');
       const cardUpdated = root.querySelector('[data-weather-card-updated]');
       if (icon) icon.textContent = condition.emoji;
       if (temperature) temperature.textContent = `${Math.round(safeNumber(current.temperatureC))}°C`;
       if (conditionNode) conditionNode.textContent = hero ? condition.label : `${condition.label} · ${copy.feels} ${Math.round(safeNumber(current.apparentTemperatureC,current.temperatureC))}°C`;
+      if (feels) feels.textContent = `${copy.feels}: ${Math.round(safeNumber(current.apparentTemperatureC,current.temperatureC))}°C`;
       if (rain) {
         const probability = result.daily?.[0]?.rainProbability;
         rain.textContent = Number.isFinite(Number(probability)) ? `${copy.rain}: ${Math.round(Number(probability))}%` : `${copy.rain}: ${safeNumber(current.precipitationMm).toFixed(1)} mm`;
+        if (tabRain) tabRain.textContent = Number.isFinite(Number(probability)) ? `⌄ ${Math.round(Number(probability))}%` : `⌄ ${safeNumber(current.precipitationMm).toFixed(1)} mm`;
       }
       if (wind) wind.textContent = `${copy.wind}: ${Math.round(safeNumber(current.windKmh))} km/h`;
       if (cardUpdated) {
@@ -247,6 +266,7 @@ const config = JSON.stringify({ copy,languageCode,plannerHref });
       if (!(dialog instanceof HTMLDialogElement) || !dialog.open) return;
       dialog.classList.remove('is-visible');
       dialog.classList.add('is-closing');
+      root.querySelector('[data-weather-open]')?.setAttribute('aria-expanded','false');
       window.setTimeout(() => {
         dialog.close();
         dialog.classList.remove('is-closing');
@@ -258,6 +278,7 @@ const config = JSON.stringify({ copy,languageCode,plannerHref });
       if (!(dialog instanceof HTMLDialogElement)) return;
       lastTrigger = trigger instanceof HTMLElement ? trigger : root.querySelector('[data-weather-open]');
       if (!dialog.open) dialog.showModal();
+      root.querySelector('[data-weather-open]')?.setAttribute('aria-expanded','true');
       document.body.classList.add('weather-modal-open');
       requestAnimationFrame(() => {
         dialog.classList.add('is-visible');
@@ -336,4 +357,277 @@ html[data-theme="light"] .weather-dialog__footer button{border-color:#b9d9c6;col
 @media(max-width:720px){.weather-dialog__current-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.weather-dialog__current-facts>span{grid-template-columns:22px minmax(0,1fr);padding:8px}.weather-dialog__current-facts b{font-size:1rem}.weather-dialog__current-facts small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.weather-dialog__daily article{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;gap:7px 10px}.weather-dialog__daily article>div{min-width:0;grid-column:1;grid-row:1;grid-template-columns:32px minmax(0,1fr);grid-template-rows:auto auto}.weather-dialog__daily article>div>span{grid-column:1;grid-row:1/3}.weather-dialog__daily article strong{grid-column:2!important;grid-row:1!important}.weather-dialog__daily article small{grid-column:2!important;grid-row:2!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.weather-dialog__daily article>b{grid-column:2;grid-row:1/3;align-self:center}.weather-dialog__daily article>span:nth-of-type(1){grid-column:1;grid-row:2}.weather-dialog__daily article>span:nth-of-type(2){display:none}}
 @media(prefers-reduced-motion:reduce){.weather-card__trigger,.weather-dialog,.weather-dialog *{animation:none!important;transition-duration:.01ms!important}.weather-card--hero .weather-card__trigger{transform:translateX(176px)}.weather-card--hero:hover .weather-card__trigger,.weather-card--hero .weather-card__trigger:focus-visible{transform:none}}
 @media(prefers-reduced-motion:reduce) and (max-width:1120px){.weather-card--hero .weather-card__trigger{transform:none}}
+</style>
+
+<style is:global>
+/* TASK 149: jawne stany drawera — żadna treść nie jest ukrywana przez przesunięcie poza viewport. */
+.weather-card--hero {
+  position:absolute;
+  z-index:7;
+  top:47%;
+  right:0;
+  bottom:auto;
+  width:112px!important;
+  max-width:none;
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  box-shadow:none;
+  color:#fff;
+  transform:translateY(-50%)!important;
+  transition:width .48s cubic-bezier(.22,1,.36,1);
+}
+.weather-card--hero:hover,
+.weather-card--hero:focus-within { width:344px!important; }
+.weather-card--hero .weather-card__trigger {
+  position:relative;
+  width:100%!important;
+  min-height:150px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 112px;
+  grid-template-rows:1fr;
+  align-items:stretch;
+  gap:0;
+  padding:0;
+  overflow:hidden;
+  border:1px solid rgba(142,247,187,.68);
+  border-right:0;
+  border-radius:24px 0 0 24px;
+  color:inherit;
+  background:radial-gradient(circle at 92% 8%,rgba(116,244,172,.32),transparent 38%),linear-gradient(145deg,rgba(4,31,22,.96),rgba(7,81,48,.94));
+  box-shadow:0 24px 62px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.2),0 0 36px rgba(62,225,132,.2);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+  transform:none!important;
+  transition:border-color .25s ease,box-shadow .25s ease,background .25s ease;
+}
+.weather-card--hero .weather-card__trigger::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:linear-gradient(115deg,rgba(255,255,255,.14),transparent 28% 70%,rgba(124,248,180,.1));
+}
+.weather-card--hero:hover .weather-card__trigger,
+.weather-card--hero .weather-card__trigger:focus-visible {
+  transform:none;
+  border-color:rgba(160,255,202,.92);
+  outline:none;
+  box-shadow:0 28px 72px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.23),0 0 42px rgba(62,225,132,.27);
+}
+.weather-card--hero .weather-card__panel {
+  position:relative;
+  z-index:1;
+  min-width:0;
+  display:grid;
+  grid-template-rows:1fr auto;
+  gap:10px;
+  padding:20px 8px 17px 20px;
+  opacity:0;
+  visibility:hidden;
+  transform:translateX(18px);
+  pointer-events:none;
+  transition:opacity .24s ease .06s,transform .42s cubic-bezier(.22,1,.36,1),visibility 0s linear .28s;
+}
+.weather-card--hero:hover .weather-card__panel,
+.weather-card--hero:focus-within .weather-card__panel {
+  opacity:1;
+  visibility:visible;
+  transform:none;
+  transition-delay:.08s,.02s,0s;
+}
+.weather-card--hero .weather-card__main { min-width:0;align-self:center; }
+.weather-card--hero .weather-card__eyebrow {
+  display:flex!important;
+  align-items:center;
+  gap:7px;
+  color:#a6f6c7!important;
+  font-size:.64rem!important;
+  font-weight:900;
+  letter-spacing:.1em!important;
+  text-transform:uppercase;
+}
+.weather-card__eyebrow i { width:6px;height:6px;flex:0 0 auto;border-radius:50%;background:#6df0a5;box-shadow:0 0 0 4px rgba(109,240,165,.12),0 0 14px rgba(109,240,165,.7); }
+.weather-card--hero .weather-card__loading { display:block;margin-top:10px;color:rgba(255,255,255,.8);font-size:.73rem;line-height:1.35; }
+.weather-card--hero .weather-card__facts { display:grid;gap:4px;margin-top:8px; }
+.weather-card--hero .weather-card__facts>span:first-child { max-width:190px;overflow:hidden;color:#f6fff9;font-size:.92rem;font-weight:900;text-overflow:ellipsis;white-space:nowrap; }
+.weather-card--hero .weather-card__feels { color:rgba(235,255,243,.76);font-size:.67rem;font-weight:750; }
+.weather-card--hero .weather-card__metrics { display:flex;flex-wrap:wrap;gap:4px 11px; }
+.weather-card--hero .weather-card__facts small { color:rgba(235,255,243,.69);font-size:.63rem;font-weight:750; }
+.weather-card--hero .weather-card__updated { color:rgba(226,255,237,.49)!important;font-size:.57rem!important; }
+.weather-card--hero .weather-card__open-label { display:flex;align-items:center;gap:6px;color:#b2f8ce;font-size:.7rem;font-weight:900; }
+.weather-card--hero .weather-card__edge-summary {
+  position:relative;
+  z-index:1;
+  grid-column:2;
+  grid-row:1;
+  min-width:0;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  justify-items:center;
+  align-items:center;
+  gap:5px;
+  padding:15px 10px 12px;
+  border-left:1px solid rgba(151,248,193,.12);
+  background:linear-gradient(180deg,rgba(54,184,111,.09),rgba(2,32,21,.12));
+}
+.weather-card--hero .weather-card__edge-summary>small { color:#a9f4c7;font-size:.59rem;font-weight:950;letter-spacing:.13em;text-transform:uppercase; }
+.weather-card__edge-row { display:grid;justify-items:center;gap:5px; }
+.weather-card--hero .weather-card__edge-summary strong { color:#fff;font-size:1.72rem;line-height:1;letter-spacing:-.055em;text-shadow:0 5px 16px rgba(0,0,0,.38); }
+.weather-card--hero .weather-card__icon { width:49px;height:49px;display:grid;place-items:center;border:1px solid rgba(153,252,196,.2);border-radius:16px;background:rgba(81,222,142,.15);font-size:1.55rem;filter:drop-shadow(0 8px 17px rgba(49,209,118,.23));animation:weatherTabFloat 4s ease-in-out infinite; }
+.weather-card__edge-meta { width:100%;display:flex;align-items:center;justify-content:center;gap:8px;color:rgba(235,255,243,.64); }
+.weather-card__edge-meta i { max-width:58px;overflow:hidden;font-size:.58rem;font-style:normal;font-weight:800;text-overflow:ellipsis;white-space:nowrap; }
+.weather-card__edge-meta b { color:#b8f8d0;font-size:1.05rem;line-height:1;transition:transform .3s ease; }
+.weather-card--hero:hover .weather-card__edge-meta b,
+.weather-card--hero:focus-within .weather-card__edge-meta b { transform:translateX(-3px); }
+
+.weather-dialog {
+  width:88vw;
+  height:88dvh;
+  max-width:1480px;
+  max-height:940px;
+  margin:auto!important;
+  padding:0;
+  overflow:hidden;
+  border:1px solid rgba(104,235,160,.38);
+  border-radius:28px;
+  color:#effff5;
+  background:linear-gradient(155deg,#082a1e,#041b13 68%);
+  box-shadow:0 44px 140px rgba(0,0,0,.74),0 0 48px rgba(47,204,116,.12);
+  opacity:0;
+  transform:translateY(22px) scale(.965);
+  filter:blur(5px);
+  transition:opacity .24s ease,transform .4s cubic-bezier(.22,1,.36,1),filter .32s ease;
+}
+.weather-dialog[open].is-visible { opacity:1;transform:none;filter:none; }
+.weather-dialog.is-closing { opacity:0;transform:translateY(12px) scale(.98);filter:blur(3px); }
+.weather-dialog::backdrop { background:rgba(0,12,8,.78);backdrop-filter:blur(11px); }
+.weather-dialog__shell { height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto; }
+.weather-dialog__header { position:sticky;top:0;z-index:4;min-height:84px;padding:15px 24px;border-bottom:1px solid rgba(107,226,157,.17);background:rgba(5,35,25,.93);backdrop-filter:blur(20px); }
+.weather-dialog__scroll { min-height:0;overflow:auto;overscroll-behavior:contain;padding:22px;scrollbar-gutter:stable; }
+.weather-dialog__content { display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:18px;min-width:0; }
+.weather-dialog__current { grid-column:1/-1;display:grid;grid-template-columns:minmax(260px,.8fr) minmax(420px,1.2fr);align-items:center;gap:18px;padding:22px 24px;border:1px solid rgba(104,228,157,.23);border-radius:22px;background:radial-gradient(circle at 8% 0,rgba(75,224,139,.22),transparent 43%),linear-gradient(145deg,rgba(12,65,43,.97),rgba(5,36,25,.98)); }
+.weather-dialog__current-main { display:flex;align-items:center;gap:18px; }
+.weather-dialog__current-icon { font-size:4.4rem; }
+.weather-dialog__current-main strong { font-size:clamp(3rem,5vw,4.7rem); }
+.weather-dialog__current-facts { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:0; }
+.weather-dialog__current-facts>span { min-height:76px;padding:11px;border-color:rgba(111,227,160,.16);background:rgba(2,27,18,.44); }
+.weather-dialog__updated { position:absolute;right:24px;bottom:10px; }
+.weather-dialog__section { min-width:0;padding:19px;border:1px solid rgba(104,225,157,.17);border-radius:21px;background:linear-gradient(145deg,rgba(11,52,37,.82),rgba(5,35,25,.86)); }
+.weather-dialog__section:has(.weather-dialog__daily) { grid-column:1/-1; }
+.weather-dialog__section-head { margin-bottom:14px; }
+.weather-dialog__hourly { display:flex;gap:11px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 10px;scroll-snap-type:x mandatory;scroll-padding-inline:2px;scrollbar-width:thin;scrollbar-color:#45c77d rgba(255,255,255,.06); }
+.weather-dialog__hourly::-webkit-scrollbar { height:8px; }
+.weather-dialog__hourly::-webkit-scrollbar-thumb { border-radius:99px;background:#45c77d; }
+.weather-hour-card { flex:0 0 126px;min-height:170px;display:grid;place-items:center;align-content:center;gap:7px;padding:13px 10px;border:1px solid rgba(108,229,160,.15);border-radius:17px;background:linear-gradient(160deg,rgba(23,79,53,.72),rgba(3,30,20,.77));scroll-snap-align:start;box-shadow:inset 0 1px rgba(255,255,255,.04);animation:weatherCardIn .45s both cubic-bezier(.22,1,.36,1); }
+.weather-hour-card time { color:#9ff0c0;font-size:.7rem;font-weight:850; }
+.weather-hour-card__icon { font-size:2.15rem;filter:drop-shadow(0 7px 14px rgba(70,214,132,.18)); }
+.weather-hour-card strong { color:#fff;font-size:1.22rem; }
+.weather-hour-card small { color:rgba(231,253,239,.64);font-size:.67rem; }
+.weather-hour-card:nth-child(2),.weather-day-card:nth-child(2) { animation-delay:.035s; }
+.weather-hour-card:nth-child(3),.weather-day-card:nth-child(3) { animation-delay:.07s; }
+.weather-hour-card:nth-child(4),.weather-day-card:nth-child(4) { animation-delay:.105s; }
+.weather-hour-card:nth-child(5),.weather-day-card:nth-child(5) { animation-delay:.14s; }
+.weather-hour-card:nth-child(6),.weather-day-card:nth-child(6) { animation-delay:.175s; }
+.weather-hour-card:nth-child(7),.weather-day-card:nth-child(7) { animation-delay:.21s; }
+.weather-dialog__daily { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px; }
+.weather-day-card { min-width:0;min-height:194px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto 1fr;gap:11px;padding:15px;border:1px solid rgba(106,226,158,.16);border-radius:18px;background:linear-gradient(155deg,rgba(20,72,49,.76),rgba(3,29,20,.8));box-shadow:inset 0 1px rgba(255,255,255,.05),0 12px 28px rgba(0,0,0,.08);animation:weatherCardIn .45s both cubic-bezier(.22,1,.36,1); }
+.weather-day-card header { min-width:0;display:flex;align-items:center;gap:10px; }
+.weather-day-card__icon { flex:0 0 auto;font-size:2.1rem;filter:drop-shadow(0 7px 14px rgba(70,214,132,.18)); }
+.weather-day-card header div { min-width:0; }
+.weather-day-card header strong,.weather-day-card header small { display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.weather-day-card header strong { color:#f5fff8;font-size:.85rem; }
+.weather-day-card header small { margin-top:2px;color:rgba(229,252,237,.62);font-size:.65rem; }
+.weather-day-card__temperature { display:flex;align-items:baseline;gap:4px; }
+.weather-day-card__temperature b { color:#fff;font-size:1.35rem; }
+.weather-day-card__temperature span { color:rgba(232,255,241,.56);font-size:.8rem; }
+.weather-day-card__facts { grid-column:1/-1;display:flex;gap:12px;padding-top:9px;border-top:1px solid rgba(111,228,161,.1);color:rgba(232,255,241,.7);font-size:.68rem;font-weight:750; }
+.weather-day-card p { grid-column:1/-1;align-self:end;margin:0;padding:8px 9px;border-radius:10px;color:#b6f5cf;background:rgba(62,195,119,.1);font-size:.65rem;font-weight:800;line-height:1.3; }
+.weather-dialog__recommendation { grid-column:2;grid-row:2;align-self:stretch; }
+.weather-dialog__footer { position:sticky;bottom:0;z-index:4;min-height:76px;padding:12px 22px;border-top:1px solid rgba(107,226,157,.17);background:rgba(5,35,25,.95);backdrop-filter:blur(20px); }
+body.weather-modal-open { overflow:hidden;touch-action:none; }
+
+html[data-theme="light"] .weather-dialog { border-color:#b7dbc5;color:#173b2b;background:linear-gradient(155deg,#f7fcf9,#edf7f1);box-shadow:0 42px 120px rgba(14,54,34,.34); }
+html[data-theme="light"] .weather-dialog__header,
+html[data-theme="light"] .weather-dialog__footer { border-color:#c7e0d1;background:rgba(248,252,249,.96); }
+html[data-theme="light"] .weather-dialog__current { border-color:#bfdfcc;background:radial-gradient(circle at 8% 0,rgba(71,218,132,.15),transparent 43%),linear-gradient(145deg,#fff,#e8f6ed); }
+html[data-theme="light"] .weather-dialog__section { border-color:#c7e1d2;background:linear-gradient(145deg,#fff,#f2f9f5); }
+html[data-theme="light"] .weather-hour-card,
+html[data-theme="light"] .weather-day-card { border-color:#cae3d4;background:linear-gradient(155deg,#fff,#eef8f2);box-shadow:0 10px 26px rgba(32,92,57,.07); }
+html[data-theme="light"] .weather-hour-card strong,
+html[data-theme="light"] .weather-day-card header strong,
+html[data-theme="light"] .weather-day-card__temperature b { color:#173b2b; }
+html[data-theme="light"] .weather-hour-card time { color:#176d41; }
+html[data-theme="light"] .weather-hour-card small,
+html[data-theme="light"] .weather-day-card header small,
+html[data-theme="light"] .weather-day-card__temperature span,
+html[data-theme="light"] .weather-day-card__facts { color:#5a7063; }
+html[data-theme="light"] .weather-day-card p { color:#17663e;background:#e2f4e9; }
+html[data-theme="light"] .weather-dialog__current-facts>span { border-color:#d0e5d8;background:#f7fbf8; }
+
+@media (max-width:1180px) and (min-width:721px) {
+  .weather-dialog__daily { grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+@media (max-width:1120px) {
+  .weather-card--hero,
+  .weather-card--hero:hover,
+  .weather-card--hero:focus-within { position:relative!important;top:auto!important;right:auto!important;bottom:auto!important;width:148px!important;margin:0 -32px 18px auto!important;transform:none!important;transition:none; }
+  .weather-card--hero .weather-card__trigger { min-height:82px;display:block;border-radius:19px 0 0 19px; }
+  .weather-card--hero .weather-card__panel { display:none!important; }
+  .weather-card--hero .weather-card__edge-summary { width:100%;height:100%;min-height:82px;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;align-content:center;gap:2px 8px;padding:9px 12px;border:0; }
+  .weather-card--hero .weather-card__edge-summary>small { grid-column:2;grid-row:1;justify-self:start; }
+  .weather-card--hero .weather-card__edge-row { grid-column:1/3;grid-row:2;display:grid;grid-template-columns:42px auto;justify-self:start;align-items:center;gap:8px; }
+  .weather-card--hero .weather-card__icon { width:42px;height:42px;border-radius:13px;font-size:1.25rem; }
+  .weather-card--hero .weather-card__edge-summary strong { font-size:1.45rem; }
+  .weather-card__edge-meta { position:absolute;right:8px;bottom:8px;width:auto; }
+  .weather-card__edge-meta i { display:none; }
+}
+@media (max-width:860px) {
+  .weather-card--hero,
+  .weather-card--hero:hover,
+  .weather-card--hero:focus-within { margin-right:-20px!important; }
+  .weather-dialog__content { grid-template-columns:1fr; }
+  .weather-dialog__recommendation { grid-column:1;grid-row:auto; }
+  .weather-dialog__daily { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:720px) {
+  .weather-card--hero,
+  .weather-card--hero:hover,
+  .weather-card--hero:focus-within { width:146px!important;margin-right:-16px!important;margin-bottom:16px!important;padding:0!important; }
+  .weather-dialog { width:100%;height:100dvh;max-width:none;max-height:none;margin:0!important;border:0;border-radius:0; }
+  .weather-dialog__header { min-height:74px;padding:11px 13px; }
+  .weather-dialog__header h2 { max-width:260px;font-size:1.24rem;line-height:1.1; }
+  .weather-dialog__close--icon { width:48px;height:48px; }
+  .weather-dialog__scroll { padding:11px;scrollbar-gutter:auto; }
+  .weather-dialog__content { gap:12px; }
+  .weather-dialog__current { grid-template-columns:1fr;gap:14px;padding:16px;border-radius:18px; }
+  .weather-dialog__current-main { gap:13px; }
+  .weather-dialog__current-icon { font-size:3.15rem; }
+  .weather-dialog__current-main strong { font-size:2.9rem; }
+  .weather-dialog__current-facts { grid-template-columns:repeat(2,minmax(0,1fr));gap:7px; }
+  .weather-dialog__current-facts>span { min-height:66px;padding:8px; }
+  .weather-dialog__updated { position:static;grid-column:1/-1;margin:0; }
+  .weather-dialog__section { padding:13px;border-radius:17px; }
+  .weather-dialog__hourly { margin-right:-13px;padding-right:13px; }
+  .weather-hour-card { flex-basis:112px;min-height:158px; }
+  .weather-dialog__daily { grid-template-columns:1fr;gap:9px; }
+  .weather-day-card { min-height:160px; }
+  .weather-dialog__footer { min-height:68px;display:grid;grid-template-columns:1fr 1fr;padding:8px; }
+  .weather-dialog__footer a,.weather-dialog__footer button { min-height:48px;padding:0 8px;font-size:.72rem; }
+  .weather-dialog__footer button:last-child { display:none; }
+}
+@keyframes weatherTabFloat { 50% { transform:translateY(-3px) rotate(2deg); } }
+@keyframes weatherCardIn { from { opacity:0;transform:translateY(10px); } to { opacity:1;transform:none; } }
+@media (prefers-reduced-motion:reduce) {
+  .weather-card--hero,
+  .weather-card--hero *,
+  .weather-dialog,
+  .weather-dialog * { animation:none!important;transition-duration:.01ms!important;scroll-behavior:auto!important; }
+  .weather-card--hero .weather-card__trigger { transform:none!important; }
+}
 </style>

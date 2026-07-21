@@ -28,6 +28,13 @@ const heroClientCopy = {
   sv: { badge: 'Kraków · camping och bungalower', title: 'Camping Clepardia', subtitle: 'Grön camping och bungalower i Kraków', copy: 'En lugn bas nära spårvagn, centrum och de viktigaste sevärdheterna.', primary: 'Skicka en förfrågan', secondary: 'Se priser' },
 } as const;
 const heroClient = heroClientCopy[activeLanguage as keyof typeof heroClientCopy] ?? heroClientCopy.en;
+const currentYear = new Date().getFullYear();
+const seasonLabels = {
+  pl: 'sezon', en: 'season', de: 'Saison', it: 'stagione', fr: 'saison',
+  es: 'temporada', nl: 'seizoen', cs: 'sezóna', sk: 'sezóna', sv: 'säsong',
+} as const;
+const seasonLabel = seasonLabels[activeLanguage as keyof typeof seasonLabels] ?? seasonLabels.en;
+const heroBadge = `${heroClient.badge} · ${seasonLabel} ${currentYear}`;
 const heroBadges = {
   pl: ['Tramwaj 40 m', 'Centrum ok. 14 min', 'Pies 0 PLN', 'Prąd 10A'],
   en: ['Tram 40 m', 'Centre about 14 min', 'Dog 0 PLN', '10A power'],
@@ -81,7 +88,7 @@ const heroStyle = [
 
   <div class="hero__wrapper">
     <div class="hero__content">
-      <span class="hero__badge">{heroClient.badge}</span>
+      <span class="hero__badge" data-hero-year={currentYear} aria-label={heroBadge}>{heroBadge}</span>
       <h1 class="hero__headline" aria-label="Camping Clepardia">
         <span class="hero__headline-line">{heroClient.title.split(' ')[0] ?? 'Camping'}</span>
         <span class="hero__headline-line">{heroClient.title.split(' ').slice(1).join(' ') || 'Clepardia'}</span>
