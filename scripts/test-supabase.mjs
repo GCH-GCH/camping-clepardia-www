@@ -132,6 +132,15 @@ try {
   assert.equal(unauthorizedHealth.statusCode, 401);
   assert.deepEqual(unauthorizedHealth.payload, { ok: false, code: 'UNAUTHORIZED' });
 
+  const routedUnauthorizedHealth = responseMock();
+  await reservationHandler({ ...requestMock(), query: { ccRoute: 'system-health' } }, routedUnauthorizedHealth);
+  assert.equal(routedUnauthorizedHealth.statusCode, 401);
+  assert.deepEqual(routedUnauthorizedHealth.payload, { ok: false, code: 'UNAUTHORIZED' });
+
+  const routedUnauthorizedCamp = responseMock();
+  await reservationHandler({ ...requestMock(), query: { ccRoute: 'camp-stays' } }, routedUnauthorizedCamp);
+  assert.equal(routedUnauthorizedCamp.statusCode, 401);
+
   const authorizedHealth = responseMock();
   await systemHealthHandler(requestMock({ authorized: true }), authorizedHealth);
   assert.equal(authorizedHealth.statusCode, 200);

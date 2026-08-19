@@ -1,6 +1,42 @@
 {
   "rewrites": [
     {
+      "source": "/api/system/health",
+      "destination": "/api/reservation?ccRoute=system-health"
+    },
+    {
+      "source": "/api/camp/stays",
+      "destination": "/api/reservation?ccRoute=camp-stays"
+    },
+    {
+      "source": "/api/clients/list",
+      "destination": "/api/reservation?ccRoute=clients-list"
+    },
+    {
+      "source": "/api/clients/detail",
+      "destination": "/api/reservation?ccRoute=clients-detail"
+    },
+    {
+      "source": "/api/clients/note",
+      "destination": "/api/reservation?ccRoute=clients-note"
+    },
+    {
+      "source": "/api/inbox/activity",
+      "destination": "/api/reservation?ccRoute=inbox-activity"
+    },
+    {
+      "source": "/api/inbox/save-draft",
+      "destination": "/api/reservation?ccRoute=inbox-save-draft"
+    },
+    {
+      "source": "/api/inbox/send-reply",
+      "destination": "/api/reservation?ccRoute=inbox-send-reply"
+    },
+    {
+      "source": "/api/inbox/thread",
+      "destination": "/api/reservation?ccRoute=inbox-thread"
+    },
+    {
       "source": "/api/stay/panel",
       "destination": "/api/reservation?ccRoute=stay-panel"
     },
