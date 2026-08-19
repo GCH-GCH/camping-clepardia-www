@@ -13,6 +13,7 @@ import inboxSaveDraftHandler from './_handlers/inbox/save-draft.js';
 import inboxSendReplyHandler from './_handlers/inbox/send-reply.js';
 import inboxThreadHandler from './_handlers/inbox/thread.js';
 import reservationInquiryHandler from './_handlers/reservation-inquiry.js';
+import systemHealthHandler from './system/health.js';
 import stayAdminHandler from './_handlers/stay/admin.js';
 import stayPanelHandler from './_handlers/stay/panel.js';
 import weatherHandler from './_handlers/weather.js';
@@ -33,6 +34,7 @@ const handlers = new Map([
   ['inbox/send-reply', inboxSendReplyHandler],
   ['inbox/thread', inboxThreadHandler],
   ['reservation-inquiry', reservationInquiryHandler],
+  ['system/health', systemHealthHandler],
   ['stay/admin', stayAdminHandler],
   ['stay/panel', stayPanelHandler],
   ['weather', weatherHandler],

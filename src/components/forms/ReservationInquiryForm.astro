@@ -12,7 +12,7 @@ const { languageCode } = Astro.props as Props;
 const lang = resolveContentLanguage(languageCode);
 const t = getTranslations(lang);
 const pricingText = t.pricing;
-const apiEndpoint = '/api/reservation-inquiry';
+const apiEndpoint = '/api/reservation';
 const formText = t.form;
 const stayOptions = [
   { id: 'camper', category: 'camping', label: pricingText.stayTypes.camper },
@@ -961,7 +961,9 @@ const formConfig = {
       const contentType = response.headers.get('content-type') || '';
       const data = contentType.includes('application/json') ? await response.json() : null;
       if (!response.ok || !data?.ok) {
-        const backendErrors = data?.errors ? Object.values(data.errors) : [data?.message || formText.networkError];
+        const backendErrors = data?.code === 'VALIDATION_ERROR' && data?.errors
+          ? Object.values(data.errors)
+          : [formText.networkError];
         const error = new Error(backendErrors.join('\n'));
         error.backendResponse = Boolean(data);
         error.status = response.status;
@@ -1020,24 +1022,14 @@ const formConfig = {
         return;
       }
       const payload = collectPayload();
-      const mailBody = buildMailBody(payload);
       setSubmitting(true);
       setErrorBox([]);
       try {
-        const result = await submitToBackend(payload);
-        console.log('Zapytanie Camping Clepardia przyjete przez backend:', result);
-        console.log('Gotowa tresc maila do recepcji Camping Clepardia:\n' + mailBody);
+        await submitToBackend(payload);
         showSuccess();
       } catch (error) {
-        if (error?.backendResponse) {
-          setErrorBox(String(error.message || formText.networkError).split('\n').filter(Boolean));
-          errorBox?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          return;
-        }
-        console.warn('Backend formularza niedostepny lub zwrocil blad. Uruchamiam lokalny fallback mock.', error);
-        console.log('Gotowa tresc maila do recepcji Camping Clepardia:\n' + mailBody);
-        console.log('Dane formularza zapytania Camping Clepardia:', payload);
-        showSuccess();
+        setErrorBox(String(error?.message || formText.networkError).split('\n').filter(Boolean));
+        errorBox?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } finally {
         setSubmitting(false);
       }

@@ -1707,28 +1707,77 @@ const providerFailureSummary = (result, label = '') => {
   ].filter(Boolean).join(' | '), 900);
 };
 
-const acceptedReservationResponse = (req, inquiry, reception = {}, mail = {}, inboxUpdateError = '') => {
+const acceptedReservationResponse = (req, inquiry, storage = {}, reception = {}, mail = {}, inboxUpdateError = '') => {
   const publicPayload = {
     ok: true,
-    inquirySaved: true,
-    inquiryId: inquiry.inquiryId,
+    accepted: true,
     mode: 'accepted',
-    message: 'Dziękujemy. Zapytanie zostało przyjęte przez recepcję Camping Clepardia.',
+    message: 'Dziękujemy! Zapytanie zostało przekazane do recepcji. Odpowiemy możliwie szybko.',
+    ...(storage.saved ? { inquiryId: inquiry.inquiryId } : {}),
     ...(inquiry.myStay?.url ? { stayUrl: inquiry.myStay.url } : {}),
+  };
+  if (!authorizeInboxRequest(req)) return publicPayload;
+  const mailProvider = reception.fallbackFrom ? 'fallback' : (reception.provider || 'none');
+  const deliveryState = storage.saved
+    ? (reception.delivered ? 'storage_saved / mail_delivered' : 'storage_saved / mail_failed')
+    : (reception.delivered ? 'storage_failed / mail_delivered' : 'storage_failed / mail_failed');
+  return {
+    ...publicPayload,
+    inquirySaved: Boolean(storage.saved),
+    mailDelivered: Boolean(reception.delivered),
+    storageProvider: 'supabase',
+    mailProvider,
+    deliveryState,
+    provider: mailProvider,
+    delivered: Boolean(reception.delivered),
+    error: reception.delivered ? null : (reception.errorCode || 'MAIL_NOT_DELIVERED'),
+    reason: [
+      storage.saved ? '' : storage.diagnostic?.error || storage.diagnostic?.code || 'STORAGE_FAILED',
+      reception.delivered ? '' : reception.reason || reception.message || 'MAIL_NOT_DELIVERED',
+      inboxUpdateError,
+    ].filter(Boolean).join(' | ') || null,
+    mail,
+    ccSystemDraft: createCcSystemDraft(inquiry),
+    adminDiagnostics: {
+      ...buildAdminDiagnostics(inquiry, reception),
+      deliveryState,
+      storage: {
+        provider: 'supabase',
+        saved: Boolean(storage.saved),
+        status: storage.diagnostic?.supabaseStatus ?? null,
+        code: storage.diagnostic?.code || null,
+        error: storage.diagnostic?.error || null,
+        details: storage.diagnostic?.details || null,
+      },
+    },
+    clientReplyTemplate: buildClientReplyTemplate(inquiry),
+  };
+};
+
+const failedReservationResponse = (req, inquiry, storage = {}, reception = {}, mail = {}) => {
+  const publicPayload = {
+    ok: false,
+    accepted: false,
+    code: 'RESERVATION_NOT_ACCEPTED',
+    mode: 'error',
+    message: 'Nie udało się teraz wysłać zapytania. Spróbuj ponownie za chwilę lub skontaktuj się z recepcją telefonicznie albo mailowo.',
+    contact: {
+      phone: '+48 795 294 486',
+      email: 'clepardia@gmail.com',
+    },
+    retry: true,
   };
   if (!authorizeInboxRequest(req)) return publicPayload;
   return {
     ...publicPayload,
-    provider: reception.fallbackFrom ? 'fallback' : (reception.provider || 'none'),
-    delivered: Boolean(reception.delivered),
-    error: reception.delivered ? null : (reception.errorCode || 'MAIL_NOT_DELIVERED'),
-    reason: reception.delivered
-      ? (inboxUpdateError || null)
-      : [reception.reason || reception.message || 'Mail body prepared but not sent.', inboxUpdateError].filter(Boolean).join(' | '),
+    inquirySaved: Boolean(storage.saved),
+    mailDelivered: Boolean(reception.delivered),
+    storageProvider: 'supabase',
+    mailProvider: reception.fallbackFrom ? 'fallback' : (reception.provider || 'none'),
+    deliveryState: 'storage_failed / mail_failed',
+    storageError: storage.diagnostic || null,
     mail,
-    ccSystemDraft: createCcSystemDraft(inquiry),
-    adminDiagnostics: buildAdminDiagnostics(inquiry, reception),
-    clientReplyTemplate: buildClientReplyTemplate(inquiry),
+    adminDiagnostics: inquiry ? buildAdminDiagnostics(inquiry, reception) : null,
   };
 };
 
@@ -1750,12 +1799,6 @@ export default async function handler(req, res) {
       res.setHeader('allow', 'POST, OPTIONS');
       return sendJson(res, 200, {
         ok: true,
-        inquirySaved: false,
-        provider: 'none',
-        delivered: false,
-        error: null,
-        reason: 'Preflight response.',
-        inquiryId: null,
       });
     }
 
@@ -1763,14 +1806,8 @@ export default async function handler(req, res) {
       res.setHeader('allow', 'POST, OPTIONS');
       return sendJson(res, 405, {
         ok: false,
-        inquirySaved: false,
-        provider: 'none',
-        delivered: false,
         code: 'METHOD_NOT_ALLOWED',
-        error: 'METHOD_NOT_ALLOWED',
-        reason: 'Method not allowed.',
-        inquiryId: null,
-        message: 'Method not allowed.',
+        message: 'Ta metoda nie jest obsługiwana.',
       });
     }
 
@@ -1780,12 +1817,8 @@ export default async function handler(req, res) {
     if (Object.keys(normalized.errors).length) {
       return sendJson(res, 400, {
         ok: false,
-        inquirySaved: false,
-        provider: 'none',
-        delivered: false,
-        error: 'VALIDATION_ERROR',
-        reason: 'Reservation payload validation failed.',
-        inquiryId: null,
+        code: 'VALIDATION_ERROR',
+        message: 'Uzupełnij wymagane dane formularza.',
         errors: normalized.errors,
       });
     }
@@ -1801,58 +1834,49 @@ export default async function handler(req, res) {
       });
       return sendJson(res, 409, {
         ok: false,
-        inquirySaved: false,
-        inquiryId: null,
-        provider: 'none',
-        delivered: false,
         code: 'SUMMER_CAMPING_BLOCKED',
-        error: 'SUMMER_CAMPING_BLOCKED',
-        reason: blockedSummerCamping.message,
         message: blockedSummerCamping.message,
       });
     }
 
     const inquiry = createInquiry(payload, normalized);
-    let saved;
+    const storage = {
+      saved: false,
+      provider: 'supabase',
+      diagnostic: null,
+    };
     try {
-      saved = await saveReservationInquiry(createSupabaseRecord(inquiry, payload));
+      const saved = await saveReservationInquiry(createSupabaseRecord(inquiry, payload));
+      storage.saved = true;
       inquiry.inquiryId = String(saved.id);
     } catch (error) {
-      logInboxError('reservation-save', error);
       const diagnostic = serializeInboxError(error);
-      return sendJson(res, diagnostic.status, {
-        ok: false,
-        inquirySaved: false,
-        inquiryId: null,
-        provider: 'none',
-        delivered: false,
-        code: diagnostic.payload.code,
-        error: diagnostic.payload.error,
-        reason: diagnostic.payload.error,
-        details: diagnostic.payload.details,
-        ...(diagnostic.payload.missing ? { missing: diagnostic.payload.missing } : {}),
-        ...(diagnostic.payload.valuePreview ? { valuePreview: diagnostic.payload.valuePreview } : {}),
-        ...(diagnostic.payload.supabaseStatus ? { supabaseStatus: diagnostic.payload.supabaseStatus } : {}),
+      storage.diagnostic = diagnostic.payload;
+      logInboxError('reservation-save', error, {
+        endpoint: '/api/reservation',
+        module: 'reservation-storage',
+        table: 'reservation_inquiries',
       });
     }
 
-    if (!inquiry.website) {
+    if (!inquiry.website && storage.saved) {
       try {
         inquiry.myStay = await createStayPanelForInquiry(inquiry.inquiryId, inquiry.contactLanguage);
       } catch (error) {
-        logInboxError('reservation-my-stay-create', error, { inquiryId: inquiry.inquiryId });
+        logInboxError('reservation-my-stay-create', error, {
+          endpoint: '/api/reservation',
+          module: 'my-stay',
+          table: 'stay_panels',
+        });
         inquiry.myStay = null;
       }
     }
 
     if (inquiry.website) {
-      return sendJson(res, 200, {
-        ok: true,
-        inquirySaved: true,
-        inquiryId: inquiry.inquiryId,
-        mode: 'accepted',
-        message: 'Dziękujemy. Zapytanie zostało przyjęte przez recepcję Camping Clepardia.',
-      });
+      return sendJson(res, 200, acceptedReservationResponse(req, inquiry, storage, {
+        provider: 'honeypot',
+        delivered: false,
+      }));
     }
 
     logMailEnv(inquiry.inquiryId);
@@ -1865,16 +1889,22 @@ export default async function handler(req, res) {
           providerFailureSummary(reception, reception.provider || 'provider'),
         ].filter(Boolean).join(' | '), 1200);
     let inboxUpdateError = '';
-    try {
-      await updateReservationMailStatus(inquiry.inquiryId, {
-        mail_provider: reception.fallbackFrom ? 'fallback' : (reception.provider || 'none'),
-        mail_delivered: Boolean(reception.delivered),
-        mail_error: mailError,
-      });
-    } catch (error) {
-      const diagnostic = serializeInboxError(error);
-      inboxUpdateError = diagnostic.payload.error;
-      logInboxError('reservation-mail-status-update', error, { inquiryId: inquiry.inquiryId });
+    if (storage.saved) {
+      try {
+        await updateReservationMailStatus(inquiry.inquiryId, {
+          mail_provider: reception.fallbackFrom ? 'fallback' : (reception.provider || 'none'),
+          mail_delivered: Boolean(reception.delivered),
+          mail_error: mailError,
+        });
+      } catch (error) {
+        const diagnostic = serializeInboxError(error);
+        inboxUpdateError = diagnostic.payload.error;
+        logInboxError('reservation-mail-status-update', error, {
+          endpoint: '/api/reservation',
+          module: 'reservation-mail-status',
+          table: 'reservation_inquiries',
+        });
+      }
     }
     const mail = {
       reception,
@@ -1887,10 +1917,6 @@ export default async function handler(req, res) {
       },
     };
 
-    if (!reception.delivered && reception.provider === 'formsubmit' && reception.activationNotice) {
-      return sendJson(res, 200, acceptedReservationResponse(req, inquiry, reception, mail, inboxUpdateError));
-    }
-
     if (!reception.delivered && reception.provider !== 'mock') {
       console.error('[reservation-api] mail-error', {
         inquiryId: inquiry.inquiryId,
@@ -1899,7 +1925,6 @@ export default async function handler(req, res) {
         errorCode: reception.errorCode || 'MAIL_ERROR',
         message: reception.message || reception.reason || 'Mail delivery failed.',
       });
-      return sendJson(res, 200, acceptedReservationResponse(req, inquiry, reception, mail, inboxUpdateError));
     }
 
     if (reception.delivered && inquiry.email && customerConfirmationEnabled()) {
@@ -1922,23 +1947,33 @@ export default async function handler(req, res) {
       };
     }
 
-    return sendJson(res, 200, acceptedReservationResponse(req, inquiry, reception, mail, inboxUpdateError));
+    const accepted = storage.saved || reception.delivered;
+    console.info('[reservation-api] reception-channel-result', {
+      timestamp: new Date().toISOString(),
+      endpoint: '/api/reservation',
+      storageSaved: storage.saved,
+      mailDelivered: Boolean(reception.delivered),
+      mailProvider: reception.fallbackFrom ? 'fallback' : (reception.provider || 'none'),
+      state: storage.saved
+        ? (reception.delivered ? 'storage_saved / mail_delivered' : 'storage_saved / mail_failed')
+        : (reception.delivered ? 'storage_failed / mail_delivered' : 'storage_failed / mail_failed'),
+    });
+    if (!accepted) {
+      return sendJson(res, 503, failedReservationResponse(req, inquiry, storage, reception, mail));
+    }
+    return sendJson(res, 200, acceptedReservationResponse(req, inquiry, storage, reception, mail, inboxUpdateError));
   } catch (error) {
     console.error('[reservation-api-unhandled]', {
       code: error?.code || 'RESERVATION_ENDPOINT_FAILED',
       error: error instanceof Error ? error.message : String(error),
     });
-    return sendJson(res, 500, {
-      ok: false,
-      inquirySaved: false,
-      provider: 'none',
-      delivered: false,
-      code: 'RESERVATION_ENDPOINT_FAILED',
-      error: error instanceof Error ? error.message : 'Unknown reservation endpoint error.',
-      inquiryId: null,
-      mode: 'error',
-      message: 'Reservation endpoint failed before accepting the enquiry.',
-      reason: error instanceof Error ? error.message : 'Unknown reservation endpoint error.',
+    const response = failedReservationResponse(req, null, {
+      saved: false,
+      diagnostic: authorizeInboxRequest(req) ? {
+        code: error?.code || 'RESERVATION_ENDPOINT_FAILED',
+        error: error instanceof Error ? error.message : String(error),
+      } : null,
     });
+    return sendJson(res, 500, response);
   }
 }

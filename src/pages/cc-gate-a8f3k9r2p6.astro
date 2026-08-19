@@ -349,6 +349,7 @@ const title = 'CC SYSTEM';
         let accessCode = '';
         let inquiries = [];
         let health = null;
+        let systemHealth = null;
         let activeView = 'dashboard';
         let selectedInquiryId = '';
         let campSavedStays = [];
@@ -926,6 +927,16 @@ const title = 'CC SYSTEM';
           const result = await response.json().catch(() => ({}));
           if (!response.ok || !result.ok) {
             const error = new Error(result.reason || result.error || result.details || result.code || 'Błąd panelu.');
+            error.status = response.status;
+            throw error;
+          }
+          return result;
+        };
+        const requestStatus = async (url, options = {}) => {
+          const response = await fetch(url, { ...options, headers:{ 'content-type':'application/json', 'x-cc-inbox-code':accessCode, ...(options.headers || {}) } });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            const error = new Error(result.code || 'Nie udało się sprawdzić stanu systemu.');
             error.status = response.status;
             throw error;
           }
@@ -2908,6 +2919,16 @@ const title = 'CC SYSTEM';
         const renderSettingsView = () => {
           const env = health?.env || {};
           const mailCenter = health?.mailCenter || {};
+          const systemTables = systemHealth?.tables || {};
+          const statusLabel = (ready, problem = 'problem') => systemHealth ? (ready ? 'OK' : problem) : 'sprawdzanie';
+          const systemRows = [
+            ['Supabase', statusLabel(Boolean(systemHealth?.supabase?.connected), 'błąd połączenia')],
+            ['Formularze', statusLabel(Boolean(systemHealth?.forms?.ok), 'problem — sprawdź kanały odbioru')],
+            ['Mail Resend', statusLabel(Boolean(systemHealth?.resend?.configured), 'problem konfiguracji')],
+            ['CAMP baza', statusLabel(Boolean(systemTables.camp_stays?.ok), systemTables.camp_stays?.migrationRequired ? 'wymagana migracja' : 'błąd')],
+            ['Mail Center', statusLabel(Boolean(systemHealth?.modules?.mailCenter?.ok), systemHealth?.modules?.mailCenter?.migrationRequired ? 'wymagana migracja' : 'błąd')],
+            ['Analityka', statusLabel(Boolean(systemHealth?.modules?.analytics?.ok), systemHealth?.modules?.analytics?.migrationRequired ? 'wymagana migracja' : 'błąd')],
+          ];
           const missingMailCenterTables = Object.entries(mailCenter.tables || {})
             .filter(([, table])=>!table?.ok)
             .map(([name])=>name)
@@ -2945,7 +2966,7 @@ const title = 'CC SYSTEM';
             ['Wspólne słowniki', 'cenniki, usługi, kraje, zasoby i statusy'],
             ['Docelowo', 'zmiany online ↔ offline po ręcznej akceptacji konfliktów'],
           ];
-          return `<section class="dashboard-panel settings-offline"><h2>Ustawienia</h2><p><strong>CC SYSTEM ONLINE rozwijany jako wersja online obecnego CC SYSTEM OFFLINE.</strong> Na tym etapie widok jest read-only; edycja ustawień to kolejny moduł CC SYSTEM ONLINE.</p><div class="settings-grid">${rows.map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('')}</div><section class="module-card module-card--wide"><h3>Synchronizacja offline ↔ online</h3><p>Plan bezpiecznego spięcia CC SYSTEM OFFLINE i CC SYSTEM ONLINE: najpierw eksport/import i dziennik zmian, dopiero potem zapis dwukierunkowy.</p><div class="settings-grid">${syncRows.map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('')}</div></section></section>`;
+          return `<section class="dashboard-panel settings-offline"><h2>Ustawienia</h2><p><strong>CC SYSTEM ONLINE rozwijany jako wersja online obecnego CC SYSTEM OFFLINE.</strong> Na tym etapie widok jest read-only; edycja ustawień to kolejny moduł CC SYSTEM ONLINE.</p><section class="module-card module-card--wide"><header class="module-head module-head--compact"><div><span class="eyebrow">Diagnostyka administratora</span><h3>System</h3><p>Bezpieczny test API, Supabase i kanału mailowego — bez ujawniania sekretów.</p></div><button type="button" data-system-health-refresh>Sprawdź ponownie</button></header><div class="settings-grid">${systemRows.map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('')}</div></section><div class="settings-grid">${rows.map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('')}</div><section class="module-card module-card--wide"><h3>Synchronizacja offline ↔ online</h3><p>Plan bezpiecznego spięcia CC SYSTEM OFFLINE i CC SYSTEM ONLINE: najpierw eksport/import i dziennik zmian, dopiero potem zapis dwukierunkowy.</p><div class="settings-grid">${syncRows.map(([label,value])=>`<article><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join('')}</div></section></section>`;
         };
         const detailsBody = (item) => {
           const v = vehicle(item);
@@ -3105,9 +3126,10 @@ const title = 'CC SYSTEM';
           if (!silent && appStatus) appStatus.textContent = 'Ładowanie…';
           if (connectionStatus) connectionStatus.textContent = silent ? 'API sync' : 'API ...';
           try {
-            const [result, healthResult, campResult, analyticsResult, clientsResult] = await Promise.all([
+            const [result, healthResult, systemHealthResult, campResult, analyticsResult, clientsResult] = await Promise.all([
               request('/api/inbox/list'),
               request('/api/inbox/health').catch((error)=>({ ok:false, env:{}, tableCheck:{ ok:false, error:error.message } })),
+              requestStatus('/api/system/health').catch((error)=>({ ok:false, code:error.message || 'SYSTEM_HEALTH_UNAVAILABLE', tables:{}, modules:{} })),
               request('/api/camp/stays').catch((error)=>({ ok:false, stays:[], migrationRequired:true, error:error.message || 'CAMP_STAYS_UNAVAILABLE' })),
               request('/api/analytics/status').catch((error)=>({ ok:false, migrationRequired:true, eventCount:0, recentEvents:[], error:error.message || 'SITE_EVENTS_UNAVAILABLE' })),
               request('/api/clients/list?filter=everything&limit=1000').catch((error)=>({ ok:false, clients:[], stats:{}, migrationRequired:true, error:error.message || 'CLIENTS_UNAVAILABLE' })),
@@ -3118,6 +3140,7 @@ const title = 'CC SYSTEM';
               : [];
             inquiries = nextInquiries;
             health = healthResult;
+            systemHealth = systemHealthResult;
             campStorageStatus = { ok:Boolean(campResult?.ok), loaded:true, migrationRequired:Boolean(campResult?.migrationRequired), error:campResult?.error || campResult?.reason || campResult?.code || '' };
             if (campResult?.ok && Array.isArray(campResult.stays)) campSavedStays = campResult.stays;
             clientsOnline = {
@@ -3151,7 +3174,7 @@ const title = 'CC SYSTEM';
             setOptions('country',inquiries.map((item)=>item.country));
             setOptions('language',inquiries.map((item)=>item.language));
             if (appStatus) appStatus.textContent = '';
-            if (connectionStatus) connectionStatus.textContent = 'API OK';
+            if (connectionStatus) connectionStatus.textContent = systemHealthResult?.ok ? 'API OK' : 'API częściowe';
             if (lastRefresh) lastRefresh.textContent = `Ostatnie odświeżenie: ${new Intl.DateTimeFormat('pl-PL', { timeStyle:'short' }).format(new Date())}`;
             render();
             restoreExpandedCards();
@@ -3649,6 +3672,10 @@ const title = 'CC SYSTEM';
           }
           if (target.closest('[data-analytics-refresh]')) {
             void loadAnalyticsIntelligence({ announce:true });
+            return;
+          }
+          if (target.closest('[data-system-health-refresh]')) {
+            void load({ silent:false, reason:'manual' });
             return;
           }
           const analyticsCopyButton = target.closest('[data-analytics-copy]');

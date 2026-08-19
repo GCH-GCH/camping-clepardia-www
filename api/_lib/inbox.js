@@ -1,6 +1,35 @@
 import { timingSafeEqual } from 'node:crypto';
 
 const TABLE = 'reservation_inquiries';
+const RESERVATION_INQUIRY_COLUMNS = [
+  'id',
+  'created_at',
+  'status',
+  'source',
+  'stay_type',
+  'language',
+  'country',
+  'full_name',
+  'email',
+  'phone',
+  'arrival_date',
+  'departure_date',
+  'nights',
+  'services_json',
+  'estimated_total_pln',
+  'estimated_currency_json',
+  'vehicle_registration',
+  'vehicle_details_json',
+  'special_needs',
+  'trips_interest_json',
+  'consents_json',
+  'message',
+  'notes',
+  'mail_provider',
+  'mail_delivered',
+  'mail_error',
+  'raw_payload_json',
+];
 const envValue = (name) => String(process.env[name] || '').trim();
 const preview = (value) => {
   const text = String(value || '').trim();
@@ -31,9 +60,13 @@ export const getInboxEnvHealth = () => {
   } catch {}
   return {
     supabaseUrlPresent: Boolean(url),
+    supabaseUrlLength: url.length,
     serviceRolePresent: Boolean(key),
+    serviceRoleLength: key.length,
     inboxCodePresent: Boolean(inboxCode),
+    inboxCodeLength: inboxCode.length,
     supabaseHost: parsedUrl?.hostname || '',
+    environment: envValue('VERCEL_ENV') || envValue('NODE_ENV') || 'unknown',
     resendKeyPresent: Boolean(envValue('RESEND_API_KEY')),
     resendKeyLength: envValue('RESEND_API_KEY').length,
     reservationFromPresent: Boolean(envValue('RESERVATION_FROM_EMAIL') || envValue('MAIL_FROM')),
@@ -102,6 +135,7 @@ export const supabaseRequest = async (path, options = {}) => {
   try {
     response = await fetch(`${url}/rest/v1/${path}`, {
       ...options,
+      signal: options.signal || AbortSignal.timeout(10_000),
       headers: {
         apikey: key,
         authorization: `Bearer ${key}`,
@@ -158,9 +192,25 @@ export const listReservationInquiries = async () => {
 };
 
 export const checkReservationInquiriesTable = async () => {
-  const { status } = await supabaseRequest(`${TABLE}?select=id&limit=1`, {
+  const { status } = await supabaseRequest(`${TABLE}?select=${RESERVATION_INQUIRY_COLUMNS.join(',')}&limit=0`, {
     method: 'GET',
     headers: { prefer: 'count=exact' },
+  });
+  return { ok: true, status, error: null };
+};
+
+export const checkSupabaseTable = async (table, columns = ['id']) => {
+  const safeTable = String(table || '').trim();
+  const safeColumns = (Array.isArray(columns) ? columns : [columns])
+    .map((column) => String(column || '').trim())
+    .filter((column) => /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(column));
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(safeTable) || !safeColumns.length) {
+    throw new InboxApiError('HEALTH_CHECK_INVALID', 'Nieprawidłowa konfiguracja testu tabeli.', {
+      httpStatus: 500,
+    });
+  }
+  const { status } = await supabaseRequest(`${safeTable}?select=${safeColumns.join(',')}&limit=0`, {
+    method: 'GET',
   });
   return { ok: true, status, error: null };
 };
@@ -213,11 +263,15 @@ export const serializeInboxError = (error) => {
 export const logInboxError = (scope, error, extra = {}) => {
   const serialized = serializeInboxError(error);
   console.error(`[${scope}]`, {
+    timestamp: new Date().toISOString(),
+    endpoint: extra.endpoint || scope,
+    module: extra.module || scope,
+    table: extra.table || null,
     code: serialized.payload.code,
     status: serialized.status,
     supabaseStatus: serialized.payload.supabaseStatus ?? null,
     error: serialized.payload.error,
     details: serialized.payload.details,
-    ...extra,
+    ...Object.fromEntries(Object.entries(extra).filter(([key]) => !['endpoint', 'module', 'table'].includes(key))),
   });
 };

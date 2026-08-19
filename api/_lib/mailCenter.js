@@ -540,16 +540,21 @@ const applyThreadFilters = (threads, query = {}) => {
 
 export const listMailCenterThreads = async (query = {}) => {
   const tableResult = await safeSupabase(`${MAIL_THREADS_TABLE}?select=*&order=last_message_at.desc.nullslast,created_at.desc&limit=500`, { method: 'GET' });
-  if (tableResult.ok) {
-    const threads = applyThreadFilters(Array.isArray(tableResult.body) ? tableResult.body : [], query);
+  const storedThreads = tableResult.ok && Array.isArray(tableResult.body) ? tableResult.body : [];
+  if (storedThreads.length) {
+    const threads = applyThreadFilters(storedThreads, query);
     return { tablesReady: true, source: MAIL_THREADS_TABLE, fallbackReason: null, threads };
   }
   const inquiries = await listReservationInquiries();
   const threads = applyThreadFilters(inquiries.map(threadFromInquiry), query);
   return {
-    tablesReady: false,
+    tablesReady: Boolean(tableResult.ok),
     source: RESERVATION_TABLE,
-    fallbackReason: tableResult.tableMissing ? 'MAIL_CENTER_TABLES_MISSING' : tableResult.error?.message || 'MAIL_CENTER_TABLES_UNAVAILABLE',
+    fallbackReason: tableResult.ok
+      ? 'MAIL_CENTER_EMPTY_FALLBACK'
+      : tableResult.tableMissing
+        ? 'MAIL_CENTER_TABLES_MISSING'
+        : tableResult.error?.message || 'MAIL_CENTER_TABLES_UNAVAILABLE',
     threads,
   };
 };
@@ -1090,6 +1095,7 @@ export const checkMailCenterTables = async () => {
   const requiredTables = [
     MAIL_THREADS_TABLE,
     MAIL_MESSAGES_TABLE,
+    MAIL_EVENTS_TABLE,
     REPLY_DRAFTS_TABLE,
     MAIL_ACTIVITY_TABLE,
   ];
@@ -1103,7 +1109,7 @@ export const checkMailCenterTables = async () => {
       error: result.ok ? null : oneLine(result.error?.message || result.error?.code || 'TABLE_CHECK_FAILED', 240),
     };
   }
-  const historyActive = Boolean(tables[MAIL_THREADS_TABLE]?.ok && tables[MAIL_MESSAGES_TABLE]?.ok && tables[MAIL_ACTIVITY_TABLE]?.ok);
+  const historyActive = Boolean(tables[MAIL_THREADS_TABLE]?.ok && tables[MAIL_MESSAGES_TABLE]?.ok && tables[MAIL_EVENTS_TABLE]?.ok && tables[MAIL_ACTIVITY_TABLE]?.ok);
   const draftsActive = Boolean(tables[REPLY_DRAFTS_TABLE]?.ok);
   const ok = requiredTables.every((table) => tables[table]?.ok);
   return {

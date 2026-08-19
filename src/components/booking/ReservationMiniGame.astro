@@ -4333,13 +4333,7 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
           body: JSON.stringify(payload()),
         });
         const result = await response.json().catch(() => ({}));
-        if (response.status === 404 && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname)) {
-          state.inquiryId = `LOCAL-${Date.now().toString(36).toUpperCase()}`;
-          state.inquirySaved = true;
-          state.success = true;
-          return;
-        }
-        state.inquirySaved = Boolean(result?.inquirySaved);
+        state.inquirySaved = Boolean(response.ok && result?.ok && (result?.accepted ?? true));
         state.stayUrl = String(result?.stayUrl || '');
         if (!response.ok || !result?.ok) {
           const errors = result?.errors ? Object.values(result.errors).join(' ') : '';
@@ -4350,7 +4344,12 @@ const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
             showViewportToast(config.clientSuccess.badge, 'success');
             return;
           }
-          state.submitError = result?.reason || result?.message || errors || config.clientSuccess.errorText;
+          const clientSafeApiMessage = result?.code === 'SUMMER_CAMPING_BLOCKED'
+            ? String(result?.message || '')
+            : result?.code === 'VALIDATION_ERROR'
+              ? errors
+              : '';
+          state.submitError = clientSafeApiMessage || config.clientSuccess.errorText;
           state.hint = state.submitError;
           trackAnalytics('booking_field_error', { category: result?.code || 'submit_api', step: currentStepKey() });
           showViewportToast(state.submitError, 'error');
