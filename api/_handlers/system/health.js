@@ -5,7 +5,7 @@ import {
   getInboxEnvHealth,
   logInboxError,
   serializeInboxError,
-} from '../_lib/inbox.js';
+} from '../../_lib/inbox.js';
 
 const TABLES = {
   camp_stays: ['id'],

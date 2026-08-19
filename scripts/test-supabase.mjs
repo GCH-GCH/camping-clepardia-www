@@ -12,7 +12,7 @@ delete process.env.SEND_CUSTOMER_CONFIRMATION;
 
 const { supabaseRequest } = await import('../api/_lib/inbox.js');
 const { default: reservationHandler } = await import('../api/reservation.js');
-const { default: systemHealthHandler } = await import('../api/system/health.js');
+const { default: systemHealthHandler } = await import('../api/_handlers/system/health.js');
 
 const originalFetch = globalThis.fetch;
 const originalError = console.error;
